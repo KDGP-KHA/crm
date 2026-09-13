@@ -57,6 +57,7 @@
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
+        row-gap: 0.85rem !important;
         padding-top: 0.5rem;
         padding-bottom: 0.75rem !important;
         border-bottom: 1px solid #e1e6eb;
@@ -75,15 +76,15 @@
         margin: 0 16px;
     }
 
-    /* Màn hình lớn (>= 1360px): Cùng hàng, title cắt nhẹ nếu quá dài */
-    @@media (min-width: 1360px) {
+    /* Màn hình siêu lớn (>= 1600px): Cùng hàng, title cắt nhẹ nếu quá dài */
+    @media (min-width: 1600px) {
         #PageTitle .page-title {
             flex: 1 1 auto;
             min-width: 0;
             margin-right: 1.5rem;
         }
         .ds-header-title-text {
-            max-width: 550px;
+            max-width: 650px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -93,8 +94,8 @@
         }
     }
 
-    /* Màn hình laptop vừa & tablet ngang (< 1360px xuống 768px, bao gồm 1034px) */
-    @@media (max-width: 1359.98px) {
+    /* Màn hình laptop, desktop thường & tablet (< 1600px xuống 768px): Tách 2 hàng rõ ràng, thoáng đãng */
+    @media (max-width: 1599.98px) {
         #PageTitle.page-header {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -112,9 +113,9 @@
         #PageAction.page-tools {
             width: 100% !important;
             display: flex !important;
-            padding-top: 0.65rem !important;
+            padding-top: 0.75rem !important;
             border-top: 1px dashed #e2e8f0 !important;
-            margin-top: 0.25rem !important;
+            margin-top: 0.35rem !important;
         }
         .ds-header-action-bar {
             width: 100% !important;
@@ -130,7 +131,7 @@
     }
 
     /* Màn hình tablet đứng & mobile (< 768px) */
-    @@media (max-width: 767.98px) {
+    @media (max-width: 767.98px) {
         .ds-header-action-bar {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -155,7 +156,7 @@
     }
 
     /* Màn hình điện thoại nhỏ (< 500px) */
-    @@media (max-width: 499.98px) {
+    @media (max-width: 499.98px) {
         .ds-header-title-container {
             flex-direction: column !important;
             align-items: flex-start !important;
@@ -195,14 +196,14 @@
         flex-shrink: 0 !important;
         white-space: nowrap !important;
     }
-    @@media (max-width: 1199.98px) {
+    @media (max-width: 1199.98px) {
         .card-header .nav-tabs-simple .nav-link {
             padding-left: 0.85rem !important;
             padding-right: 0.85rem !important;
             font-size: 0.9rem !important;
         }
     }
-    @@media (max-width: 767.98px) {
+    @media (max-width: 767.98px) {
         .card-header .nav-tabs-simple .nav-link {
             padding: 0.65rem 0.75rem !important;
             font-size: 0.85rem !important;
