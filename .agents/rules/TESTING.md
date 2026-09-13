@@ -1,4 +1,4 @@
-﻿---
+---
 trigger: always_on
 ---
 
@@ -73,7 +73,9 @@ Mỗi module trước khi bàn giao PHẢI vượt qua bộ kiểm thử 5 tần
    - 100% tệp Razor `.cshtml` phải có tiền tố `UTF-8 with BOM` (`0xEF, 0xBB, 0xBF`) để máy chủ IIS không lỗi font tiếng Việt.
 3. **Tầng 3 (DOM ID Collision Scanner):** Quét phân tích HTML của view cha (`Index`, `_Search`) và các partial view modal (`_Add`, `_Edit`, `_ChangeStatusModal`...) để khẳng định không trùng bất kỳ ID input/select/textarea nào.
 4. **Tầng 4 (Sys_Messages DB Coverage):** Quét toàn bộ các chuỗi `LabelKey` được gọi trong Controller/Model, đối chiếu trực tiếp với CSDL SQL Server bảng `Sys_Messages` để khẳng định 100% key đều tồn tại và trả về message tiếng Việt hợp lệ.
-5. **Tầng 5 (Clean Code & No Hardcoded UI Text):** Quét mã nguồn `.cs` đảm bảo không có chuỗi tiếng Việt hardcoded trực tiếp cho thông báo, tiêu đề, hoặc lỗi validation.
+5. **Tầng 5 (Clean Code, No Inline Styles & No Hardcoded UI Text):**
+   - Quét mã nguồn `.cs` đảm bảo không có chuỗi tiếng Việt hardcoded trực tiếp cho thông báo, tiêu đề, hoặc lỗi validation.
+   - Quét toàn bộ tệp Razor `.cshtml` đảm bảo **100% KHÔNG có thẻ `<style>` nội tuyến**, mọi style phải được tách riêng thành tệp `.css` đặt cùng thư mục với view tương ứng và nhúng kèm timestamp `?v=@DateTime.Now.Ticks`.
 
 ---
 

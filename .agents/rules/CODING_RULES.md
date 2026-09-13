@@ -1,4 +1,4 @@
-﻿# Coding Rules
+# Coding Rules
 
 Version: 1.0
 
@@ -122,6 +122,20 @@ Không log:
 
 ---
 
+# Quy chuẩn Tách Biệt Style (.css) Khỏi Razor View (.cshtml)
+
+- **CẤM TUYỆT ĐỐI viết thẻ `<style>` nội tuyến** trực tiếp trong các file Razor View (`.cshtml`).
+- **Tách riêng CSS ra file độc lập:** Mỗi file `.cshtml` nếu có định nghĩa CSS riêng BẮT BUỘC phải tách ra một file `.css` riêng biệt.
+- **Đưa file style vào CHUNG THƯ MỤC với View (Co-located View & Style):**
+  - File `.css` đặt ngay tại thư mục chứa file view tương ứng (ví dụ: `Areas/Cate/Views/DigitalSales/_DetailDiscussions.css` đặt cùng thư mục với `_DetailDiscussions.cshtml`).
+  - Nhúng CSS vào view kèm cache-busting timestamp:
+    `<link rel="stylesheet" href="~/Areas/[Area]/Views/[Folder]/[ViewName].css?v=@DateTime.Now.Ticks" />`
+    + View cha có Layout: Đặt trong `@section HeadCss { ... }`.
+    + Partial View nạp AJAX / Modal: Đặt thẻ `<link rel="stylesheet" ... />` trực tiếp ở đầu partial view.
+- **Tuân thủ Triple Mirroring:** Toàn bộ file `.css` mới phải được sao chép và đồng bộ MD5 trên cả 3 cây thư mục (`Modules.*`, `publish_source`, `WebApp`).
+
+---
+
 # Checklist trước khi Commit
 
 - Build thành công.
@@ -131,4 +145,5 @@ Không log:
 - Không còn dữ liệu test.
 - Không lỗi Unicode.
 - Không lỗi Encoding.
+- Không còn thẻ `<style>` nội tuyến trong file `.cshtml` (100% tách ra file `.css` cùng thư mục).
 - Không sửa file ngoài phạm vi.
