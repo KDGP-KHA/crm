@@ -297,47 +297,43 @@
                     </div>
 
                     <!-- THANH THÔNG BÁO PHẲNG (NOTIFICATION LABEL DẠNG THÔNG BÁO, KHÔNG LÀM CARD) -->
-                    <div class="ds-status-notice flex-grow-1 d-flex align-items-center justify-content-between px-3 py-2 radius-2 shadow-none"
-                         style="background-color: #fbfcfe; border: 1px solid #e2e8f0; border-left: 4px solid @statusInfo.BorderColor; min-height: 40px;">
-                        <div class="d-flex align-items-center flex-wrap flex-grow-1 mr-2" style="gap: 6px; font-size: 13px;">
-                            <span class="font-weight-bold text-dark-m1 text-90">
-                                @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
-                            </span>
-                            @if (!string.IsNullOrEmpty(act.ActionByDepartment))
-                            {
-                                <span class="text-secondary text-80 font-normal">(@act.ActionByDepartment)</span>
-                            }
-                            
-                            @if (statusInfo.IsConversion)
-                            {
-                                <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
-                                    <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
-                                </span>
-                                <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
-                            }
-                            else
-                            {
-                                <span class="text-secondary font-italic text-85">@statusInfo.ActionText</span>
-                            }
-
-                            <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none" 
-                                  style="background-color: @statusInfo.BgColor; color: @statusInfo.TextColor; border: 1px solid @statusInfo.BorderColor;">
-                                @statusInfo.StatusName
-                            </span>
-
-                            @if (!string.IsNullOrEmpty(statusInfo.Note))
-                            {
-                                <span class="text-secondary text-80 font-italic bgc-white px-2 py-05 radius-1 border-1 brc-grey-l3 ml-1" title="Ghi chú chuyển trạng thái">
-                                    <i class="fa fa-comment-dots text-muted mr-1"></i>@statusInfo.Note
-                                </span>
-                            }
-                        </div>
+                    <div class="ds-status-notice radius-2 shadow-none"
+                         style="border-left: 4px solid @statusInfo.BorderColor;">
+                        <span class="font-weight-bold text-dark-m1 text-90">
+                            @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
+                        </span>
+                        @if (!string.IsNullOrEmpty(act.ActionByDepartment))
+                        {
+                            <span class="text-secondary text-80 font-normal">(@act.ActionByDepartment)</span>
+                        }
                         
-                        <div class="d-flex align-items-center flex-shrink-0">
-                            <span class="text-muted text-75" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
-                                <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        @if (statusInfo.IsConversion)
+                        {
+                            <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
+                                <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
                             </span>
-                        </div>
+                            <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
+                        }
+                        else
+                        {
+                            <span class="text-secondary font-italic text-85">@statusInfo.ActionText</span>
+                        }
+
+                        <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none" 
+                              style="background-color: @statusInfo.BgColor; color: @statusInfo.TextColor; border: 1px solid @statusInfo.BorderColor;">
+                            @statusInfo.StatusName
+                        </span>
+
+                        @if (!string.IsNullOrEmpty(statusInfo.Note))
+                        {
+                            <span class="text-secondary text-80 font-italic bgc-white px-2 py-05 radius-1 border-1 brc-grey-l3" title="Ghi chú chuyển trạng thái">
+                                <i class="fa fa-comment-dots text-muted mr-1"></i>@statusInfo.Note
+                            </span>
+                        }
+
+                        <span class="ds-status-date" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                            <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
                     </div>
                 </div>
             }
