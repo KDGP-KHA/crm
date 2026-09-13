@@ -6,58 +6,107 @@
 
 @section PageTitle { @ViewBag.Title }
 
+@section HeadCss {
+    <link href="@Url.Content("~/Areas/Cate/Views/ContactPersons/ContactPersons.css?v=" + DateTime.Now.Ticks)" rel="stylesheet" />
+}
+
 @section PageAction {
     @Html.Button(true, "AddContactPersons", Url.Action("Add", new { area = "Cate" }),
-                        "<i class='fa fa-plus'></i>",
+                        "<i class='fa fa-plus mr-1'></i>",
                         AppProcessor.Messagor.GetMessage("Button_Add"),
                         new
                         {
-                            @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right mr-1",
+                            @class = "btn btn-primary radius-3 px-3 py-2 text-600 text-90 shadow-sm pull-right mr-1",
                             data_width = "900px"
                         })
 
     @Html.Button(true, "ImportContactPersons", Url.Action("Import", new { area = "Cate" }),
-                        "<i class='fa fa-upload'></i>",
+                        "<i class='fa fa-upload mr-1'></i>",
                         AppProcessor.Messagor.GetMessage("Button_Import_ContactPersons"),
                         new
                         {
-                            @class = "btn btn-light-green btn-h-green btn-a-green border-0 radius-3 py-2 text-600 text-90 pull-right mr-1",
+                            @class = "btn btn-outline-success bgc-white btn-h-success btn-a-success radius-3 px-3 py-2 text-600 text-90 shadow-sm pull-right mr-2",
                             data_width = "900px"
                         })
 }
 
-<div class="mt-3">
-    @Html.Partial("_Search", Model)
-</div>
+<!-- KPI Summary Metric Cards -->
+<div class="row cp-metrics-wrapper">
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="cp-metric-card card-blue" id="kpi_card_total" onclick="ContactPersons_FilterByMetric('all')" title="@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Total")">
+            <div class="cp-metric-icon icon-blue">
+                <i class="fa fa-address-book"></i>
+            </div>
+            <div class="cp-metric-info">
+                <div class="cp-metric-value" id="kpi_total_contacts">0</div>
+                <div class="cp-metric-label">@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Total")</div>
+            </div>
+        </div>
+    </div>
 
-<div class="mt-3">
-    <div class="card dcard">
-        <div class="col-sm-12 table-responsive-md">
-            <table id="DSContactPersons"
-                   class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
-                   width="100%">
-                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
-                    <tr>
-                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
-                        <th>Mã NLH</th>
-                        <th>@AppProcessor.Messagor.GetMessage("ContactPersonal_FullName_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("ContactPersonal_Email_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("ContactPersonal_Address_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("Label_Contact")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("Label_Status")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
-                    </tr>
-                </thead>
-            </table>
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="cp-metric-card card-green" id="kpi_card_active" onclick="ContactPersons_FilterByMetric('active')" title="@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Active")">
+            <div class="cp-metric-icon icon-green">
+                <i class="fa fa-user-check"></i>
+            </div>
+            <div class="cp-metric-info">
+                <div class="cp-metric-value" id="kpi_active_contacts">0</div>
+                <div class="cp-metric-label">@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Active")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="cp-metric-card card-gray" id="kpi_card_inactive" onclick="ContactPersons_FilterByMetric('inactive')" title="@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Inactive")">
+            <div class="cp-metric-icon icon-gray">
+                <i class="fa fa-user-slash"></i>
+            </div>
+            <div class="cp-metric-info">
+                <div class="cp-metric-value" id="kpi_inactive_contacts">0</div>
+                <div class="cp-metric-label">@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Inactive")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="cp-metric-card card-purple" id="kpi_card_customers" onclick="ContactPersons_FilterByMetric('customers')" title="@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Customers")">
+            <div class="cp-metric-icon icon-purple">
+                <i class="fa fa-building"></i>
+            </div>
+            <div class="cp-metric-info">
+                <div class="cp-metric-value" id="kpi_total_customers">0</div>
+                <div class="cp-metric-label">@AppProcessor.Messagor.GetMessage("ContactPersons_KPI_Customers")</div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- Search Filter Card -->
+@Html.Partial("_Search", Model)
+
+<!-- Data Table Card Container -->
+<div class="card dcard cp-table-card shadow-sm border-0 mt-2">
+    <div class="table-responsive">
+        <table id="DSContactPersons" class="table text-dark-m1 w-100" width="100%">
+            <thead>
+                <tr>
+                    <th class="text-center col-stt">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                    <th class="col-code">@AppProcessor.Messagor.GetMessage("ContactPersonal_CodePerson_Label")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("ContactPersonal_FullName_Label")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("ContactPersonal_Email_Label")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("ContactPersonal_Address_Label")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("Label_Contact")</th>
+                    <th class="text-center col-status">@AppProcessor.Messagor.GetMessage("Label_Status")</th>
+                    <th class="text-center col-action">@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows rendered via server-side DataTable AJAX -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
 @section BottomScript {
-    <style>
-        #DSContactPersons td:first-child {
-            border-left: none !important;
-        }
-    </style>
-    <script src="@Url.Content("~/Areas/Cate/Views/ContactPersons/ContactPersons.js")"></script>
+    <script src="@Url.Content("~/Areas/Cate/Views/ContactPersons/ContactPersons.js?v=" + DateTime.Now.Ticks)"></script>
 }
