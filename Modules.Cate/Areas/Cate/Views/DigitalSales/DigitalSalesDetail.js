@@ -1058,10 +1058,26 @@ function renderDiscussionSelectedFiles() {
         var sizeText = file.size > 1048576 
             ? (file.size / 1048576).toFixed(1) + " MB" 
             : (file.size / 1024).toFixed(0) + " KB";
+        var fileName = file.name || "";
+        var ext = fileName.lastIndexOf('.') >= 0 ? fileName.substring(fileName.lastIndexOf('.')).toLowerCase() : "";
+        var iconClass = "fa-file text-secondary";
+        if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"].indexOf(ext) >= 0) {
+            iconClass = "fa-file-image text-info";
+        } else if (ext === ".pdf") {
+            iconClass = "fa-file-pdf text-danger";
+        } else if (ext === ".doc" || ext === ".docx") {
+            iconClass = "fa-file-word text-primary";
+        } else if (ext === ".xls" || ext === ".xlsx" || ext === ".csv") {
+            iconClass = "fa-file-excel text-success";
+        } else if (ext === ".ppt" || ext === ".pptx") {
+            iconClass = "fa-file-powerpoint text-warning";
+        } else if (ext === ".zip" || ext === ".rar" || ext === ".7z") {
+            iconClass = "fa-file-archive text-warning";
+        }
 
         var $chip = $('<div class="ds-file-tag">' +
-            '<i class="fa fa-file text-primary"></i>' +
-            '<span class="text-truncate" style="max-width: 180px;" title="' + file.name + '">' + file.name + ' (' + sizeText + ')</span>' +
+            '<i class="fa ' + iconClass + ' mr-1"></i>' +
+            '<span class="text-truncate" style="max-width: 220px;" title="' + fileName + '">' + fileName + ' (' + sizeText + ')</span>' +
             '<i class="fa fa-times text-danger ml-1" title="Bỏ tệp này" onclick="removeDiscussionSelectedFile(' + index + ');"></i>' +
             '</div>');
         $list.append($chip);

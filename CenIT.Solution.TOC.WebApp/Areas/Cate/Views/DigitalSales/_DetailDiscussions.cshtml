@@ -232,65 +232,94 @@
                     @if (act.AttachmentList != null && act.AttachmentList.Count > 0)
                     {
                         <div class="ds-activity-attachments mt-2 pt-2 border-t-1 brc-grey-l3">
-                            <div class="text-80 font-weight-bold text-secondary mb-1">
-                                <i class="fa fa-paperclip mr-1 text-primary"></i> Tệp đính kèm (@act.AttachmentList.Count):
+                            <div class="text-80 font-weight-bold text-secondary mb-15 d-flex align-items-center">
+                                <i class="fa fa-paperclip mr-15 text-primary"></i> 
+                                <span>Tệp đính kèm (@act.AttachmentList.Count):</span>
                             </div>
-                            <div class="row" style="margin-left: -4px; margin-right: -4px;">
+                            <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
                                 @foreach (var file in act.AttachmentList)
                                 {
-                                    var ext = file.Extension?.ToLowerInvariant() ?? "";
+                                    var ext = (file.Extension ?? "").ToLowerInvariant().Trim();
+                                    if (string.IsNullOrEmpty(ext) && !string.IsNullOrEmpty(file.FileName))
+                                    {
+                                        ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
+                                    }
                                     var downloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = file.FilePath });
+                                    var extLabel = ext.TrimStart('.').ToUpper();
+                                    if (string.IsNullOrEmpty(extLabel)) { extLabel = "FILE"; }
 
-                                    <div class="col-sm-6 col-md-4 col-lg-3 p-1">
-                                        <div class="card h-100 border-1 brc-grey-l2 radius-1 p-2 bgc-grey-l5 d-flex flex-column justify-content-between ds-attach-chip shadow-none">
-                                            <div class="d-flex align-items-center mb-1 min-width-0">
-                                                <div class="mr-2 flex-shrink-0">
-                                                    @if (file.IsImage)
-                                                    {
-                                                        <i class="fa fa-file-image fa-2x text-info"></i>
-                                                    }
-                                                    else if (ext == ".pdf")
-                                                    {
-                                                        <i class="fa fa-file-pdf fa-2x text-danger"></i>
-                                                    }
-                                                    else if (ext == ".doc" || ext == ".docx")
-                                                    {
-                                                        <i class="fa fa-file-word fa-2x text-primary"></i>
-                                                    }
-                                                    else if (ext == ".xls" || ext == ".xlsx")
-                                                    {
-                                                        <i class="fa fa-file-excel fa-2x text-success"></i>
-                                                    }
-                                                    else if (ext == ".zip" || ext == ".rar" || ext == ".7z")
-                                                    {
-                                                        <i class="fa fa-file-archive fa-2x text-warning"></i>
-                                                    }
-                                                    else
-                                                    {
-                                                        <i class="fa fa-file-alt fa-2x text-secondary"></i>
-                                                    }
-                                                </div>
-                                                <div class="min-width-0 flex-grow-1">
-                                                    <div class="font-weight-bold text-truncate text-85 text-dark" title="@file.FileName">
-                                                        @file.FileName
-                                                    </div>
-                                                    <div class="text-75 text-muted">
-                                                        @(string.IsNullOrEmpty(file.FileSizeFormatted) ? "Đính kèm" : file.FileSizeFormatted)
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    string iconClass = "fa-file-alt";
+                                    string iconBg = "#f1f5f9";
+                                    string iconColor = "#475569";
+                                    string typeDesc = "Tệp đính kèm";
 
-                                            <div class="d-flex align-items-center justify-content-end mt-1" style="gap: 4px;">
-                                                @if (file.IsImage)
-                                                {
-                                                    <button type="button" class="btn btn-xs btn-white border-1 brc-info text-info radius-1 px-15 py-0" onclick="previewImageDirect('@Url.Content(file.FilePath)', '@file.FileName');" title="Xem ảnh">
-                                                        <i class="fa fa-eye"></i>
-                                                    </button>
-                                                }
-                                                <a href="@downloadUrl" class="btn btn-xs btn-primary radius-1 px-2 py-0 text-80" title="Tải xuống tệp">
-                                                    <i class="fa fa-download mr-1"></i> Tải
-                                                </a>
+                                    if (file.IsImage || new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext))
+                                    {
+                                        iconClass = "fa-file-image";
+                                        iconBg = "#e0f7fa";
+                                        iconColor = "#00838f";
+                                        typeDesc = "Hình ảnh";
+                                    }
+                                    else if (ext == ".pdf")
+                                    {
+                                        iconClass = "fa-file-pdf";
+                                        iconBg = "#ffebee";
+                                        iconColor = "#c62828";
+                                        typeDesc = "Tài liệu PDF";
+                                    }
+                                    else if (ext == ".doc" || ext == ".docx")
+                                    {
+                                        iconClass = "fa-file-word";
+                                        iconBg = "#e3f2fd";
+                                        iconColor = "#1565c0";
+                                        typeDesc = "Tài liệu Word";
+                                    }
+                                    else if (ext == ".xls" || ext == ".xlsx" || ext == ".csv")
+                                    {
+                                        iconClass = "fa-file-excel";
+                                        iconBg = "#e8f5e9";
+                                        iconColor = "#2e7d32";
+                                        typeDesc = "Bảng tính Excel";
+                                    }
+                                    else if (ext == ".ppt" || ext == ".pptx")
+                                    {
+                                        iconClass = "fa-file-powerpoint";
+                                        iconBg = "#fff3e0";
+                                        iconColor = "#e65100";
+                                        typeDesc = "Bản trình chiếu";
+                                    }
+                                    else if (ext == ".zip" || ext == ".rar" || ext == ".7z" || ext == ".tar" || ext == ".gz")
+                                    {
+                                        iconClass = "fa-file-archive";
+                                        iconBg = "#fef3c7";
+                                        iconColor = "#d97706";
+                                        typeDesc = "Tệp nén";
+                                    }
+
+                                    <div class="ds-attachment-chip d-inline-flex align-items-center" style="max-width: 440px; min-width: 260px;">
+                                        <div class="ds-attachment-icon-box mr-2" style="background-color: @iconBg;">
+                                            <i class="fa @iconClass fa-lg" style="color: @iconColor;"></i>
+                                        </div>
+                                        <div class="min-width-0 flex-grow-1 mr-2">
+                                            <a href="@downloadUrl" class="font-weight-bold text-dark-m2 text-85 text-truncate d-block hover-text-primary text-decoration-none" title="@file.FileName">
+                                                @file.FileName
+                                            </a>
+                                            <div class="text-75 text-secondary d-flex align-items-center mt-05">
+                                                <span>@(string.IsNullOrEmpty(file.FileSizeFormatted) ? typeDesc : file.FileSizeFormatted)</span>
+                                                <span class="mx-1 opacity-50">•</span>
+                                                <span class="ds-ext-badge" style="background-color: @iconBg; color: @iconColor;">@extLabel</span>
                                             </div>
+                                        </div>
+                                        <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                            @if (file.IsImage || new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext))
+                                            {
+                                                <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(file.FilePath)', '@file.FileName');" title="Xem trước">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            }
+                                            <a href="@downloadUrl" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-primary-m3 text-primary radius-1 p-1 px-2 font-bold" title="Tải xuống tệp">
+                                                <i class="fa fa-download mr-1"></i> Tải về
+                                            </a>
                                         </div>
                                     </div>
                                 }
@@ -301,12 +330,83 @@
                     {
                         var singleFile = act.Attachments.Trim();
                         var fileName = System.IO.Path.GetFileName(singleFile);
+                        var ext = System.IO.Path.GetExtension(singleFile)?.ToLowerInvariant() ?? "";
                         var downloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = singleFile });
+                        var extLabel = ext.TrimStart('.').ToUpper();
+                        if (string.IsNullOrEmpty(extLabel)) { extLabel = "FILE"; }
+
+                        string iconClass = "fa-file-alt";
+                        string iconBg = "#f1f5f9";
+                        string iconColor = "#475569";
+                        string typeDesc = "Tệp đính kèm";
+
+                        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext))
+                        {
+                            iconClass = "fa-file-image";
+                            iconBg = "#e0f7fa";
+                            iconColor = "#00838f";
+                            typeDesc = "Hình ảnh";
+                        }
+                        else if (ext == ".pdf")
+                        {
+                            iconClass = "fa-file-pdf";
+                            iconBg = "#ffebee";
+                            iconColor = "#c62828";
+                            typeDesc = "Tài liệu PDF";
+                        }
+                        else if (ext == ".doc" || ext == ".docx")
+                        {
+                            iconClass = "fa-file-word";
+                            iconBg = "#e3f2fd";
+                            iconColor = "#1565c0";
+                            typeDesc = "Tài liệu Word";
+                        }
+                        else if (ext == ".xls" || ext == ".xlsx" || ext == ".csv")
+                        {
+                            iconClass = "fa-file-excel";
+                            iconBg = "#e8f5e9";
+                            iconColor = "#2e7d32";
+                            typeDesc = "Bảng tính Excel";
+                        }
+                        else if (ext == ".zip" || ext == ".rar" || ext == ".7z")
+                        {
+                            iconClass = "fa-file-archive";
+                            iconBg = "#fef3c7";
+                            iconColor = "#d97706";
+                            typeDesc = "Tệp nén";
+                        }
 
                         <div class="ds-activity-attachments mt-2 pt-2 border-t-1 brc-grey-l3">
-                            <a href="@downloadUrl" class="btn btn-xs btn-white border-1 brc-primary text-primary radius-1 px-2 py-1 font-bold">
-                                <i class="fa fa-paperclip mr-1"></i> Tải file: @fileName
-                            </a>
+                            <div class="text-80 font-weight-bold text-secondary mb-15 d-flex align-items-center">
+                                <i class="fa fa-paperclip mr-15 text-primary"></i> 
+                                <span>Tệp đính kèm:</span>
+                            </div>
+                            <div class="ds-attachment-chip d-inline-flex align-items-center" style="max-width: 440px; min-width: 260px;">
+                                <div class="ds-attachment-icon-box mr-2" style="background-color: @iconBg;">
+                                    <i class="fa @iconClass fa-lg" style="color: @iconColor;"></i>
+                                </div>
+                                <div class="min-width-0 flex-grow-1 mr-2">
+                                    <a href="@downloadUrl" class="font-weight-bold text-dark-m2 text-85 text-truncate d-block hover-text-primary text-decoration-none" title="@fileName">
+                                        @fileName
+                                    </a>
+                                    <div class="text-75 text-secondary d-flex align-items-center mt-05">
+                                        <span>@typeDesc</span>
+                                        <span class="mx-1 opacity-50">•</span>
+                                        <span class="ds-ext-badge" style="background-color: @iconBg; color: @iconColor;">@extLabel</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                    @if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext))
+                                    {
+                                        <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(singleFile)', '@fileName');" title="Xem trước">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    }
+                                    <a href="@downloadUrl" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-primary radius-1 p-1 px-2 font-bold" title="Tải xuống tệp">
+                                        <i class="fa fa-download mr-1"></i> Tải về
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
@@ -446,9 +546,41 @@ else
     .ds-activity-card:hover {
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
     }
-    .ds-attach-chip {
+    .ds-attachment-chip {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6px 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none !important;
+    }
+    .ds-attachment-chip:hover {
+        border-color: #93c5fd !important;
+        background-color: #fbfdff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08) !important;
+        transform: translateY(-1px);
+    }
+    .ds-attachment-icon-box {
+        width: 38px;
+        height: 38px;
         border-radius: 6px;
-        border: 1px solid #e2e8f0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .ds-ext-badge {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 1px 5px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    .hover-text-primary:hover {
+        color: #1d4ed8 !important;
     }
     .ds-file-tag {
         background-color: #f1f5f9;
