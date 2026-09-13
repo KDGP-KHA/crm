@@ -142,6 +142,57 @@
         margin-left: 8px;
         white-space: nowrap;
     }
+    .ds-am-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1.4;
+        transition: all 0.15s ease;
+    }
+    .ds-am-badge:hover {
+        background-color: #dbeafe;
+        border-color: #93c5fd;
+    }
+    .ds-am-badge i {
+        color: #2563eb;
+        margin-right: 5px;
+        font-size: 11.5px;
+    }
+    .ds-am-badge strong {
+        color: #0f172a;
+        font-weight: 600;
+    }
+    .ds-status-note {
+        display: inline-flex;
+        align-items: center;
+        background-color: #f8fafc;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 12px;
+        line-height: 1.4;
+        transition: all 0.15s ease;
+        max-width: 450px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .ds-status-note:hover {
+        background-color: #f1f5f9;
+        border-color: #94a3b8;
+    }
+    .ds-status-note i {
+        color: #64748b;
+        margin-right: 5px;
+        font-size: 11.5px;
+    }
     .ds-activity-header {
         display: flex;
         align-items: center;

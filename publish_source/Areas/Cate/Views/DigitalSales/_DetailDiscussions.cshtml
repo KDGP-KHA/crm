@@ -326,9 +326,26 @@
 
                         @if (!string.IsNullOrEmpty(statusInfo.Note))
                         {
-                            <span class="text-secondary text-80 font-italic bgc-white px-2 py-05 radius-1 border-1 brc-grey-l3" title="Ghi chú chuyển trạng thái">
-                                <i class="fa fa-comment-dots text-muted mr-1"></i>@statusInfo.Note
-                            </span>
+                            if (statusInfo.Note.StartsWith("AM", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string amLabel = "AM chủ trì:";
+                                string amValue = statusInfo.Note;
+                                int colonIdx = statusInfo.Note.IndexOf(':');
+                                if (colonIdx >= 0)
+                                {
+                                    amLabel = statusInfo.Note.Substring(0, colonIdx + 1).Trim();
+                                    amValue = statusInfo.Note.Substring(colonIdx + 1).Trim();
+                                }
+                                <span class="ds-am-badge radius-2" title="Cán bộ AM chủ trì hồ sơ">
+                                    <i class="fa fa-user-tie text-primary mr-1"></i>@amLabel <strong class="text-dark-m1 ml-1">@amValue</strong>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="ds-status-note radius-2" title="Ghi chú: @statusInfo.Note">
+                                    <i class="far fa-comment-dots text-secondary-m1 mr-1"></i>@statusInfo.Note
+                                </span>
+                            }
                         }
 
                         <span class="ds-status-date" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
