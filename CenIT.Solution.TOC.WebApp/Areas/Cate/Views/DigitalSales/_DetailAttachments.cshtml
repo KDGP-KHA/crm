@@ -37,7 +37,7 @@
                     <div class="card border-1 brc-grey-l2 radius-1 h-100 shadow-sm overflow-hidden attach-card">
                         @if (isImage)
                         {
-                            <div class="position-relative bgc-grey-l5 text-center d-flex align-items-center justify-content-center attach-thumb-box" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@fileName');" title="Bấm để xem ảnh lớn">
+                            <div class="position-relative bgc-grey-l5 text-center d-flex align-items-center justify-content-center attach-thumb-box" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@HttpUtility.JavaScriptStringEncode(fileName)');" title="Bấm để xem ảnh lớn">
                                 <img src="@Url.Content(trimmedFile)" alt="@fileName" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/Contents/assets/images/image-placeholder.png';" />
                                 <div class="position-absolute bgc-black-tp6 text-white text-70 px-1 radius-1" style="bottom: 3px; right: 3px;">
                                     <i class="fa fa-search-plus"></i>
@@ -77,7 +77,7 @@
                                 <div class="d-inline-flex align-items-center" style="gap: 3px;">
                                     @if (isImage)
                                     {
-                                        <button type="button" class="btn btn-xs btn-outline-info radius-1 px-1 py-0" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@fileName');" title="Xem ảnh">
+                                        <button type="button" class="btn btn-xs btn-outline-info radius-1 px-1 py-0" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@HttpUtility.JavaScriptStringEncode(fileName)');" title="Xem ảnh">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     }

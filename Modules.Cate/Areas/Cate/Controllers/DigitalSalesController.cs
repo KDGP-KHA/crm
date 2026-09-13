@@ -616,7 +616,25 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var physicalPath = HostingEnvironment.MapPath(cleanPath);
             if (string.IsNullOrEmpty(physicalPath) || !System.IO.File.Exists(physicalPath))
             {
-                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_FileNotFound") }, JsonRequestBehavior.AllowGet);
+                var fileNameOnly = Path.GetFileName(cleanPath);
+                var subFolder = DateTime.Now.ToString("yyyyMM");
+                var fallbackPath = HostingEnvironment.MapPath($"{_folderUpload}/{subFolder}/{fileNameOnly}");
+                if (System.IO.File.Exists(fallbackPath))
+                {
+                    physicalPath = fallbackPath;
+                }
+                else
+                {
+                    var fallbackPathRoot = HostingEnvironment.MapPath($"{_folderUpload}/{fileNameOnly}");
+                    if (System.IO.File.Exists(fallbackPathRoot))
+                    {
+                        physicalPath = fallbackPathRoot;
+                    }
+                    else
+                    {
+                        return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_FileNotFound") }, JsonRequestBehavior.AllowGet);
+                    }
+                }
             }
 
             var fileName = Path.GetFileName(physicalPath);
@@ -627,6 +645,53 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             return File(physicalPath, mimeType, fileName);
+        }
+
+        [HttpGet]
+        public ActionResult ViewAttachment(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                return HttpNotFound();
+            }
+
+            var cleanPath = filePath.Trim().Replace("~", "");
+            if (!cleanPath.StartsWith("/Contents/", StringComparison.OrdinalIgnoreCase))
+            {
+                return HttpNotFound();
+            }
+
+            var physicalPath = HostingEnvironment.MapPath(cleanPath);
+            if (string.IsNullOrEmpty(physicalPath) || !System.IO.File.Exists(physicalPath))
+            {
+                var fileNameOnly = Path.GetFileName(cleanPath);
+                var subFolder = DateTime.Now.ToString("yyyyMM");
+                var fallbackPath = HostingEnvironment.MapPath($"{_folderUpload}/{subFolder}/{fileNameOnly}");
+                if (System.IO.File.Exists(fallbackPath))
+                {
+                    physicalPath = fallbackPath;
+                }
+                else
+                {
+                    var fallbackPathRoot = HostingEnvironment.MapPath($"{_folderUpload}/{fileNameOnly}");
+                    if (System.IO.File.Exists(fallbackPathRoot))
+                    {
+                        physicalPath = fallbackPathRoot;
+                    }
+                    else
+                    {
+                        return HttpNotFound();
+                    }
+                }
+            }
+
+            var mimeType = MimeMapping.GetMimeMapping(physicalPath);
+            if (Path.GetExtension(physicalPath).Equals(".webp", StringComparison.OrdinalIgnoreCase))
+            {
+                mimeType = "image/webp";
+            }
+
+            return File(physicalPath, mimeType);
         }
 
         [AjaxOnly]
@@ -994,44 +1059,43 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var uploadedFiles = new List<ActivityAttachmentItem>();
             if (Request.Files.Count > 0)
             {
-                var folderRel = $"/Contents/Uploads/DigitalSales/Discussions/{digitalSalesId}/";
-                var folderPhys = HostingEnvironment.MapPath(folderRel);
-                if (!Directory.Exists(folderPhys))
-                {
-                    Directory.CreateDirectory(folderPhys);
-                }
-
-                var blackList = new[] { ".exe", ".bat", ".cmd", ".sh", ".php", ".asp", ".aspx", ".dll", ".vbs", ".js" };
+                var forbiddenExts = new[] { 
+                    ".exe", ".dll", ".bat", ".cmd", ".vbs", ".ps1", 
+                    ".sh", ".com", ".msi", ".vbe", ".jse", ".wsf", 
+                    ".wsh", ".scr", ".pif", ".jar", ".app", ".gadget" 
+                };
 
                 for (int i = 0; i < Request.Files.Count; i++)
                 {
                     var file = Request.Files[i];
                     if (file != null && file.ContentLength > 0)
                     {
-                        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-                        if (blackList.Contains(ext))
+                        var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+                        if (forbiddenExts.Contains(ext))
                         {
                             return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidFileFormat") });
                         }
 
-                        var rawName = Path.GetFileNameWithoutExtension(file.FileName);
-                        var safeName = Regex.Replace(rawName, @"[^\w\s-]", "");
-                        var newFileName = $"{safeName}_{DateTime.Now.Ticks}_{i}{ext}";
-                        var fullPhysPath = Path.Combine(folderPhys, newFileName);
-                        file.SaveAs(fullPhysPath);
-
-                        var relPath = folderRel + newFileName;
-                        uploadedFiles.Add(new ActivityAttachmentItem
+                        if (file.ContentLength > 52428800) // 50MB
                         {
-                            FileName = Path.GetFileName(file.FileName),
-                            FilePath = relPath,
-                            FileSize = file.ContentLength,
-                            FileSizeFormatted = file.ContentLength > 1048576 
-                                ? $"{(file.ContentLength / 1048576.0):0.0} MB" 
-                                : $"{(file.ContentLength / 1024.0):0.0} KB",
-                            Extension = ext,
-                            IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)
-                        });
+                            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_FileSizeExceeded", "Dung lượng tệp đính kèm không được vượt quá 50MB!") });
+                        }
+
+                        var relPath = SaveUploadedFile(file, i);
+                        if (!string.IsNullOrEmpty(relPath))
+                        {
+                            uploadedFiles.Add(new ActivityAttachmentItem
+                            {
+                                FileName = Path.GetFileName(file.FileName),
+                                FilePath = relPath,
+                                FileSize = file.ContentLength,
+                                FileSizeFormatted = file.ContentLength > 1048576 
+                                    ? $"{(file.ContentLength / 1048576.0):0.0} MB" 
+                                    : $"{(file.ContentLength / 1024.0):0.0} KB",
+                                Extension = ext,
+                                IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)
+                            });
+                        }
                     }
                 }
             }
@@ -2713,14 +2777,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }).ToList() ?? new List<SelectListItem>();
         }
 
-        private string SaveUploadedFile(HttpPostedFileBase file)
+        private string SaveUploadedFile(HttpPostedFileBase file, int index = 0)
         {
             try
             {
                 if (file == null || file.ContentLength <= 0) return null;
 
+                // Giới hạn 50MB theo FILE_STORAGE_RULES
+                if (file.ContentLength > 52428800)
+                {
+                    return null;
+                }
+
                 var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
-                var forbiddenExts = new[] { ".exe", ".dll", ".bat", ".cmd", ".vbs", ".ps1", ".sh", ".com", ".msi", ".vbe", ".jse", ".wsf", ".wsh", ".scr", ".pif" };
+                var forbiddenExts = new[] { 
+                    ".exe", ".dll", ".bat", ".cmd", ".vbs", ".ps1", 
+                    ".sh", ".com", ".msi", ".vbe", ".jse", ".wsf", 
+                    ".wsh", ".scr", ".pif", ".jar", ".app", ".gadget" 
+                };
                 if (!string.IsNullOrEmpty(ext) && forbiddenExts.Contains(ext))
                 {
                     return null;
@@ -2729,7 +2803,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 var subFolder = DateTime.Now.ToString("yyyyMM");
                 var folderPath = $"{_folderUpload}/{subFolder}";
                 var originalName = Path.GetFileNameWithoutExtension(file.FileName);
-                var safeName = UtilString.ConvertToUnSign(originalName) + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ext;
+                var suffix = index > 0 ? $"_{index}" : "";
+                var safeName = UtilString.ConvertToUnSign(originalName) + "_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + suffix + ext;
                 var relativePath = folderPath + "/" + safeName;
                 var physicalPath = HostingEnvironment.MapPath(relativePath);
 

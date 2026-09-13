@@ -754,19 +754,34 @@ function previewImageDirect(src, title) {
     if ($modal.length === 0) {
         var modalHtml = '<div class="modal fade" id="modalImagePreview" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;">' +
             '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">' +
-            '<div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">' +
-            '<div class="modal-header bgc-dark text-white py-2 px-3">' +
+            '<div class="modal-content border-0 shadow-lg radius-2 overflow-hidden bg-dark">' +
+            '<div class="modal-header bgc-dark text-white py-2 px-3 border-b-1 brc-grey-d1">' +
             '<h6 class="modal-title font-bold text-white mb-0 text-truncate" id="imgPreviewTitle"><i class="fa fa-image mr-1"></i> Xem ảnh</h6>' +
-            '<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+            '<button type="button" class="close text-white opacity-75 btn-h-opacity-1" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
             '</div>' +
-            '<div class="modal-body p-2 text-center bgc-black-tp9 d-flex align-items-center justify-content-center" style="min-height: 300px; max-height: 80vh; overflow: auto;">' +
-            '<img id="imgPreviewSource" src="" class="img-fluid radius-1 shadow" style="max-height: 75vh; object-fit: contain;" alt="Xem ảnh" />' +
+            '<div class="modal-body p-2 text-center bgc-black-tp9 d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 320px; max-height: 80vh; overflow: auto;">' +
+            '<div id="imgPreviewLoading" class="text-center py-5">' +
+            '<i class="fa fa-spinner fa-spin fa-2x text-white mb-2"></i>' +
+            '<div class="text-white-tp2 text-85 font-italic">Đang tải hình ảnh...</div>' +
             '</div>' +
-            '<div class="modal-footer py-2 bgc-grey-l4 d-flex justify-content-between">' +
-            '<span class="text-secondary text-85 font-italic" id="imgPreviewFileName"></span>' +
+            '<div id="imgPreviewError" class="text-center py-4 px-3" style="display: none;">' +
+            '<div class="w-6 h-6 radius-round bgc-danger-l3 text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; border-radius: 50%;">' +
+            '<i class="fa fa-exclamation-triangle fa-2x"></i>' +
+            '</div>' +
+            '<h6 class="text-white font-weight-bold mb-2">Không thể tải hình ảnh</h6>' +
+            '<p class="text-white-tp3 text-85 mb-3">Tệp tin không tồn tại hoặc đã bị xóa trên máy chủ.</p>' +
+            '<div class="d-flex justify-content-center" style="gap: 8px;">' +
+            '<a id="btnErrorDownload" href="#" class="btn btn-sm btn-primary radius-1 px-3 font-bold"><i class="fa fa-download mr-1"></i> Tải về tệp</a>' +
+            '<button type="button" class="btn btn-sm btn-outline-light radius-1 px-3" data-dismiss="modal">Đóng</button>' +
+            '</div>' +
+            '</div>' +
+            '<img id="imgPreviewSource" src="" class="img-fluid radius-1 shadow" style="max-height: 75vh; object-fit: contain; display: none;" alt="" />' +
+            '</div>' +
+            '<div class="modal-footer py-2 bgc-dark border-t-1 brc-grey-d1 d-flex justify-content-between">' +
+            '<span class="text-white-tp2 text-85 font-italic text-truncate mr-2" id="imgPreviewFileName" style="max-width: 50%;"></span>' +
             '<div>' +
-            '<a id="btnDownloadPreviewImage" href="#" class="btn btn-sm btn-primary radius-1 px-3"><i class="fa fa-download mr-1"></i> Tải về</a>' +
-            '<button type="button" class="btn btn-sm btn-outline-secondary radius-1 px-3 ml-2" data-dismiss="modal">Đóng</button>' +
+            '<a id="btnDownloadPreviewImage" href="#" class="btn btn-sm btn-primary radius-1 px-3 font-bold"><i class="fa fa-download mr-1"></i> Tải về</a>' +
+            '<button type="button" class="btn btn-sm btn-secondary radius-1 px-3 ml-2" data-dismiss="modal">Đóng</button>' +
             '</div>' +
             '</div>' +
             '</div></div></div>';
@@ -774,10 +789,42 @@ function previewImageDirect(src, title) {
         $modal = $('#modalImagePreview');
     }
 
+    var cleanSrc = (src || '').trim();
+    var viewUrl = cleanSrc;
+    var downloadUrl = cleanSrc;
+
+    if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
+        viewUrl = '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    }
+    if (cleanSrc.indexOf('/Cate/DigitalSales/DownloadAttachment') !== 0) {
+        downloadUrl = '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    }
+
     $modal.find('#imgPreviewTitle').html('<i class="fa fa-image mr-1"></i> ' + (title || 'Xem ảnh'));
     $modal.find('#imgPreviewFileName').text(title || '');
-    $modal.find('#imgPreviewSource').attr('src', src);
-    $modal.find('#btnDownloadPreviewImage').attr('href', '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(src));
+    $modal.find('#btnDownloadPreviewImage').attr('href', downloadUrl);
+    $modal.find('#btnErrorDownload').attr('href', downloadUrl);
+
+    $modal.find('#imgPreviewLoading').show();
+    $modal.find('#imgPreviewError').hide();
+
+    var $img = $modal.find('#imgPreviewSource');
+    $img.hide().removeAttr('src');
+    $img.off('load.preview error.preview');
+
+    $img.on('load.preview', function () {
+        $modal.find('#imgPreviewLoading').hide();
+        $modal.find('#imgPreviewError').hide();
+        $img.fadeIn(150);
+    });
+
+    $img.on('error.preview', function () {
+        $modal.find('#imgPreviewLoading').hide();
+        $img.hide();
+        $modal.find('#imgPreviewError').fadeIn(150);
+    });
+
+    $img.attr('src', viewUrl);
     $modal.modal('show');
 }
 
