@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -78,7 +78,9 @@ namespace Plugable.SQLProcedureProcessor
                         Params = g.Select(p => new ProcedureParamModel
                         {
                             Name = p.Field<string>("ParameterName"),
-                            DataType = ProcProvider.GetDbType(p.Field<string>("DataType")),
+                            DataType = string.Equals(p.Field<string>("DataType"), "date", StringComparison.OrdinalIgnoreCase)
+                                ? DbType.Date
+                                : ProcProvider.GetDbType(p.Field<string>("DataType")),
                             NumberPrecision = p.Field<byte?>("NumberPrecision"),
                             NumberScale = p.Field<int?>("NumberScale")
                         }).ToList()
