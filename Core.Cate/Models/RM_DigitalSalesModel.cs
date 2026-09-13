@@ -144,6 +144,7 @@ namespace Core.Cate.Models
         [CustomDisplayName("DigitalSales_NewStatus_Label")]
         public int NewStatusID { get; set; }
 
+        [CustomRequired]
         [CustomDisplayName("DigitalSales_ChangeStatusNote_Label")]
         public string Note { get; set; }
 

@@ -480,6 +480,20 @@ function openChangeStatusModal(id) {
 
         $("#frmChangeStatus").on("submit", function (e) {
             e.preventDefault();
+            var $form = $(this);
+            var $noteInput = $form.find("textarea[name='Note']");
+            var noteVal = $noteInput.val();
+            if (!noteVal || !noteVal.trim()) {
+                var reqMsg = "Vui lòng nhập lý do chuyển trạng thái!";
+                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_ChangeStatusNoteRequired) {
+                    reqMsg = App_Message.DigitalSales_Msg_ChangeStatusNoteRequired;
+                }
+                executeResponseMessage(reqMsg, "Thông tin bắt buộc!", false);
+                $noteInput.focus().addClass("border-danger");
+                return false;
+            }
+            $noteInput.removeClass("border-danger");
+
             var formData = new FormData(this);
             $.ajax({
                 url: _digitalSalesUrls.changeStatus,

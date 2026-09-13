@@ -1164,6 +1164,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 });
             }
 
+            if (string.IsNullOrWhiteSpace(note))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_ChangeStatusNoteRequired")
+                });
+            }
+
             var currentSales = _salesCache.GetByID(digitalSalesId);
             if (currentSales != null && currentSales.StatusID == newStatusId)
             {
