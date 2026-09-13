@@ -8,6 +8,150 @@
     string currentUserName = User.Identity?.Name ?? "";
 }
 
+@functions {
+    public class ParsedStatusInfo
+    {
+        public string ActionText { get; set; }
+        public string StatusName { get; set; }
+        public string Note { get; set; }
+        public string BgColor { get; set; }
+        public string TextColor { get; set; }
+        public string BorderColor { get; set; }
+        public string IconClass { get; set; }
+        public bool IsConversion { get; set; }
+    }
+
+    public ParsedStatusInfo ParseStatusInfo(string rawContent)
+    {
+        var info = new ParsedStatusInfo
+        {
+            ActionText = "đã chuyển trạng thái sang",
+            StatusName = "",
+            Note = "",
+            BgColor = "#f1f5f9",
+            TextColor = "#475569",
+            BorderColor = "#cbd5e1",
+            IconClass = "fa-exchange-alt",
+            IsConversion = false
+        };
+
+        if (string.IsNullOrWhiteSpace(rawContent)) return info;
+
+        var content = rawContent.Trim();
+
+        int noteIdx = content.IndexOf("| Ghi chú:", StringComparison.OrdinalIgnoreCase);
+        if (noteIdx >= 0)
+        {
+            info.Note = content.Substring(noteIdx + 9).Trim().TrimStart(':').Trim();
+            content = content.Substring(0, noteIdx).Trim();
+        }
+
+        if (content.IndexOf("Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            info.IsConversion = true;
+            info.ActionText = "đã chuyển đổi Cơ hội thành Dự án";
+            int smIdx = content.IndexOf("Trạng thái mới:", StringComparison.OrdinalIgnoreCase);
+            if (smIdx >= 0)
+            {
+                info.StatusName = content.Substring(smIdx + 15).Trim();
+            }
+            else
+            {
+                info.StatusName = "Dự án mới";
+            }
+        }
+        else if (content.StartsWith("Chuyển trạng thái sang:", StringComparison.OrdinalIgnoreCase))
+        {
+            info.ActionText = "đã chuyển trạng thái sang";
+            info.StatusName = content.Substring(23).Trim();
+        }
+        else if (content.IndexOf("Dự án trọng điểm", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            info.ActionText = "đã cập nhật";
+            info.StatusName = content;
+            info.IconClass = "fa-star";
+            info.BgColor = "#fef3c7";
+            info.TextColor = "#b45309";
+            info.BorderColor = "#fcd34d";
+            return info;
+        }
+        else if (content.StartsWith("Khởi tạo", StringComparison.OrdinalIgnoreCase))
+        {
+            info.ActionText = "đã tạo mới";
+            info.StatusName = content;
+            info.IconClass = "fa-plus-circle";
+            info.BgColor = "#e0e7ff";
+            info.TextColor = "#3730a3";
+            info.BorderColor = "#a5b4fc";
+            return info;
+        }
+        else
+        {
+            info.StatusName = content;
+        }
+
+        var sUpper = (info.StatusName ?? "").ToUpperInvariant();
+        if (sUpper.Contains("CHƯA NẮM BẮT") || sUpper.Contains("CHUA NAM BAT") || sUpper.Contains("UNCAPTURED"))
+        {
+            info.BgColor = "#f1f5f9";
+            info.TextColor = "#475569";
+            info.BorderColor = "#94a3b8";
+            info.IconClass = "fa-question-circle";
+        }
+        else if (sUpper.Contains("TIẾP CẬN") || sUpper.Contains("TIEP CAN") || sUpper.Contains("APPROACHING"))
+        {
+            info.BgColor = "#e0f2fe";
+            info.TextColor = "#0284c7";
+            info.BorderColor = "#38bdf8";
+            info.IconClass = "fa-paper-plane";
+        }
+        else if (sUpper.Contains("HÌNH THÀNH") || sUpper.Contains("HINH THANH") || sUpper.Contains("FORMATION"))
+        {
+            info.BgColor = "#f3e8ff";
+            info.TextColor = "#7c3aed";
+            info.BorderColor = "#c084fc";
+            info.IconClass = "fa-drafting-compass";
+        }
+        else if (sUpper.Contains("TRIỂN KHAI") || sUpper.Contains("TRIEN KHAI") || sUpper.Contains("IMPLEMENTING"))
+        {
+            info.BgColor = "#dbeafe";
+            info.TextColor = "#1d4ed8";
+            info.BorderColor = "#60a5fa";
+            info.IconClass = "fa-cogs";
+        }
+        else if (sUpper.Contains("HỢP ĐỒNG") || sUpper.Contains("HOP DONG") || sUpper.Contains("CONTRACTED") || sUpper.Contains("KÝ HỢP"))
+        {
+            info.BgColor = "#ccfbf1";
+            info.TextColor = "#0d9488";
+            info.BorderColor = "#2dd4bf";
+            info.IconClass = "fa-file-signature";
+        }
+        else if (sUpper.Contains("HOÀN THÀNH") || sUpper.Contains("HOAN THANH") || sUpper.Contains("COMPLETED"))
+        {
+            info.BgColor = "#dcfce7";
+            info.TextColor = "#15803d";
+            info.BorderColor = "#4ade80";
+            info.IconClass = "fa-check-circle";
+        }
+        else if (sUpper.Contains("MẤT") || sUpper.Contains("BỎ") || sUpper.Contains("BO MAT") || sUpper.Contains("LOST") || sUpper.Contains("THAT BAI"))
+        {
+            info.BgColor = "#fee2e2";
+            info.TextColor = "#dc2626";
+            info.BorderColor = "#f87171";
+            info.IconClass = "fa-times-circle";
+        }
+        else
+        {
+            info.BgColor = "#ede9fe";
+            info.TextColor = "#6d28d9";
+            info.BorderColor = "#a78bfa";
+            info.IconClass = "fa-exchange-alt";
+        }
+
+        return info;
+    }
+}
+
 <span id="partialDiscussionsCount" class="d-none" data-count="@activities.Count"></span>
 
 <!-- 1. FORM SOẠN THẢO TRAO ĐỔI (DISCUSSION COMPOSER) -->
@@ -70,6 +214,9 @@
                 </div>
 
                 <div class="d-inline-flex align-items-center" style="gap: 8px;">
+                    <span id="discussionWordCountBadge" class="badge bgc-grey-l4 text-secondary-d1 border-1 brc-grey-l2 font-normal text-80 px-2 py-1 radius-1" title="Giới hạn tối đa 500 từ cho mỗi nội dung trao đổi">
+                        <i class="fa fa-file-word mr-1 opacity-75"></i><span id="discussionCurrentWords">0</span>/500 từ
+                    </span>
                     <span class="text-muted text-75 font-italic d-none d-lg-inline">Nhấn Ctrl + Enter để gửi</span>
                     <button type="submit" id="btnSubmitDiscussion" class="btn btn-sm btn-primary px-3 font-bolder radius-1 shadow-sm">
                         <i class="fa fa-paper-plane mr-1"></i> Gửi trao đổi
@@ -132,6 +279,64 @@
                                isProcessComplete ? "Hoàn thành Quy trình" :
                                "Cập nhật Checklist";
 
+            if (isStatusChange)
+            {
+                var statusInfo = ParseStatusInfo(act.Content);
+                <div class="ds-activity-item ds-status-item d-flex align-items-center mb-25 position-relative" id="activity-item-@act.ActivityID">
+                    <!-- ICON TRÁI ĐỒNG BỘ THEO MÀU TRẠNG THÁI -->
+                    <div class="ds-activity-icon-wrapper mr-25 mr-sm-3 flex-shrink-0">
+                        <div class="ds-activity-icon-circle shadow-none" style="background-color: @statusInfo.BgColor; border: 1px solid @statusInfo.BorderColor; color: @statusInfo.TextColor; width: 34px; height: 34px; font-size: 13px;">
+                            <i class="fa @statusInfo.IconClass"></i>
+                        </div>
+                    </div>
+
+                    <!-- THANH THÔNG BÁO PHẲNG (NOTIFICATION LABEL DẠNG THÔNG BÁO, KHÔNG LÀM CARD) -->
+                    <div class="ds-status-notice flex-grow-1 d-flex align-items-center justify-content-between px-3 py-2 radius-2 shadow-none"
+                         style="background-color: #fbfcfe; border: 1px solid #e2e8f0; border-left: 4px solid @statusInfo.BorderColor; min-height: 40px;">
+                        <div class="d-flex align-items-center flex-wrap flex-grow-1 mr-2" style="gap: 6px; font-size: 13px;">
+                            <span class="font-weight-bold text-dark-m1 text-90">
+                                @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
+                            </span>
+                            @if (!string.IsNullOrEmpty(act.ActionByDepartment))
+                            {
+                                <span class="text-secondary text-80 font-normal">(@act.ActionByDepartment)</span>
+                            }
+                            
+                            @if (statusInfo.IsConversion)
+                            {
+                                <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
+                                    <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                                </span>
+                                <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
+                            }
+                            else
+                            {
+                                <span class="text-secondary font-italic text-85">@statusInfo.ActionText</span>
+                            }
+
+                            <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none" 
+                                  style="background-color: @statusInfo.BgColor; color: @statusInfo.TextColor; border: 1px solid @statusInfo.BorderColor;">
+                                @statusInfo.StatusName
+                            </span>
+
+                            @if (!string.IsNullOrEmpty(statusInfo.Note))
+                            {
+                                <span class="text-secondary text-80 font-italic bgc-white px-2 py-05 radius-1 border-1 brc-grey-l3 ml-1" title="Ghi chú chuyển trạng thái">
+                                    <i class="fa fa-comment-dots text-muted mr-1"></i>@statusInfo.Note
+                                </span>
+                            }
+                        </div>
+                        
+                        <div class="d-flex align-items-center flex-shrink-0">
+                            <span class="text-muted text-75" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                                <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
             <div class="ds-activity-item d-flex mb-3 position-relative" id="activity-item-@act.ActivityID">
                 <!-- ICON TRÁI CỦA DÒNG THỜI GIAN -->
                 <div class="ds-activity-icon-wrapper mr-25 mr-sm-3 flex-shrink-0">
@@ -411,6 +616,7 @@
                     }
                 </div>
             </div>
+            }
         }
     </div>
 }
@@ -545,6 +751,18 @@ else
     }
     .ds-activity-card:hover {
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+    }
+    .ds-status-notice {
+        background-color: #fbfcfe;
+        border-radius: 6px;
+        transition: all 0.15s ease;
+    }
+    .ds-status-notice:hover {
+        background-color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+    }
+    .ds-status-item {
+        min-height: 40px;
     }
     .ds-attachment-chip {
         background-color: #ffffff;

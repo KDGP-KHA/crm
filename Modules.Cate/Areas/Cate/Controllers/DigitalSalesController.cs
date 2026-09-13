@@ -981,6 +981,16 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Discussion_ContentRequired") });
             }
 
+            var plainTextContent = Regex.Replace(content ?? string.Empty, "<.*?>", " ");
+            plainTextContent = System.Web.HttpUtility.HtmlDecode(plainTextContent).Trim();
+            var words = string.IsNullOrWhiteSpace(plainTextContent)
+                ? new string[0]
+                : plainTextContent.Split(new[] { ' ', '\t', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            if (words.Length > 500)
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Discussion_WordLimitExceeded", "Nội dung trao đổi không được vượt quá 500 từ!") });
+            }
+
             var uploadedFiles = new List<ActivityAttachmentItem>();
             if (Request.Files.Count > 0)
             {

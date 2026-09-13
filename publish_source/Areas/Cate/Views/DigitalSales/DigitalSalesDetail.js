@@ -1142,7 +1142,19 @@ function initDiscussionCKEditor() {
     });
 
     editor.on('instanceReady', function () {
+        updateDiscussionWordCount();
+
+        editor.on('change', function () {
+            updateDiscussionWordCount();
+        });
+
+        editor.on('paste', function () {
+            setTimeout(updateDiscussionWordCount, 100);
+        });
+
         editor.on('key', function (evt) {
+            setTimeout(updateDiscussionWordCount, 50);
+
             // Ctrl + Enter to submit form
             if (evt.data.domEvent.$.ctrlKey && (evt.data.domEvent.$.keyCode === 13 || evt.data.domEvent.$.which === 13)) {
                 evt.cancel();
@@ -1302,11 +1314,56 @@ function selectMentionUser(user) {
     hideMentionDropdown();
 }
 
+function getDiscussionPlainText() {
+    var content = "";
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+        content = CKEDITOR.instances['txtDiscussionContent'].getData();
+    } else {
+        content = $("#txtDiscussionContent").val() || "";
+    }
+    return $("<div>").html(content).text().trim();
+}
+
+function countWordsInText(text) {
+    if (!text) return 0;
+    var trimmed = text.trim();
+    if (!trimmed) return 0;
+    var words = trimmed.split(/\s+/).filter(function (w) { return w.length > 0; });
+    return words.length;
+}
+
+function updateDiscussionWordCount() {
+    var plainText = getDiscussionPlainText();
+    var wordCount = countWordsInText(plainText);
+    var $badge = $("#discussionWordCountBadge");
+    var $countSpan = $("#discussionCurrentWords");
+
+    if ($countSpan.length > 0) {
+        $countSpan.text(wordCount);
+    }
+
+    if ($badge.length > 0) {
+        if (wordCount > 500) {
+            $badge.removeClass("bgc-grey-l4 text-secondary-d1 brc-grey-l2 font-normal")
+                  .addClass("bgc-danger-l3 text-danger-d2 brc-danger-m2 font-bold");
+        } else {
+            $badge.removeClass("bgc-danger-l3 text-danger-d2 brc-danger-m2 font-bold")
+                  .addClass("bgc-grey-l4 text-secondary-d1 brc-grey-l2 font-normal");
+        }
+    }
+    return wordCount;
+}
+
 function initDiscussionEvents() {
     $(document).off("click.dsMention").on("click.dsMention", function (e) {
         if (!$(e.target).closest("#dsMentionDropdown, #txtDiscussionContent, .ds-mention-item, button[onclick*='triggerMentionDropdown']").length) {
             hideMentionDropdown();
         }
+    });
+
+    $(document).off("input.dsWordCount propertychange.dsWordCount paste.dsWordCount", "#txtDiscussionContent")
+               .on("input.dsWordCount propertychange.dsWordCount paste.dsWordCount", "#txtDiscussionContent", function () {
+        updateDiscussionWordCount();
     });
 }
 
@@ -1326,6 +1383,19 @@ function submitDiscussionForm(e, salesId) {
     if (!content || !plainText) {
         if (typeof toastr !== "undefined") {
             toastr.warning("Vui lòng nhập nội dung trao đổi!");
+        }
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+            CKEDITOR.instances['txtDiscussionContent'].focus();
+        } else {
+            $("#txtDiscussionContent").focus();
+        }
+        return;
+    }
+
+    var wordCount = countWordsInText(plainText);
+    if (wordCount > 500) {
+        if (typeof toastr !== "undefined") {
+            toastr.warning("Nội dung trao đổi không được vượt quá 500 từ (hiện tại: " + wordCount + " từ)!");
         }
         if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
             CKEDITOR.instances['txtDiscussionContent'].focus();
@@ -1371,6 +1441,7 @@ function submitDiscussionForm(e, salesId) {
                 $("#txtDiscussionContent").val('');
                 $("#hdnMentionedUserIds").val('');
                 $("#hdnMentionedNames").val('');
+                updateDiscussionWordCount();
                 _discussionSelectedFiles = [];
                 renderDiscussionSelectedFiles();
                 reloadDiscussionsSection(salesId);
