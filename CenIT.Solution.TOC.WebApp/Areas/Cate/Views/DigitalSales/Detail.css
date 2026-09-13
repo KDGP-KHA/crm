@@ -210,6 +210,12 @@
         }
     }
 
+    /* 4. Custom Badges */
+    .badge-purple {
+        background-color: #8e24aa !important;
+        color: #ffffff !important;
+    }
+
     .ds-metric-card {
         border-radius: 8px;
         border: none;

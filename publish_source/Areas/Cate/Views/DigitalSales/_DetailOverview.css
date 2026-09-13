@@ -152,3 +152,8 @@
         border-top: 1px solid #f1f5f9;
         padding-top: 4px;
     }
+
+    .badge-purple {
+        background-color: #8e24aa !important;
+        color: #ffffff !important;
+    }
