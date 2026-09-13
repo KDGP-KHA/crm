@@ -350,7 +350,7 @@
                 <!-- NỘI DUNG CARD SỰ KIỆN -->
                 <div class="card ds-activity-card flex-grow-1 border-1 brc-grey-l2 radius-2 p-3 shadow-sm bgc-white">
                     <!-- HEADER CARD -->
-                    <div class="d-flex align-items-center mb-2 flex-wrap" style="gap: 8px;">
+                    <div class="ds-activity-header d-flex align-items-center mb-2 flex-wrap" style="gap: 8px;">
                         <span class="font-weight-bold text-dark-m1 text-95">
                             @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
                         </span>
@@ -363,7 +363,7 @@
                         <span class="badge @badgeBg text-75 font-bold px-2 py-05 radius-1">
                             @typeTitle
                         </span>
-                        <span class="text-muted text-80 ml-1" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                        <span class="ds-activity-date text-muted text-80 ml-1" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
                             <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
                         </span>
                     </div>
