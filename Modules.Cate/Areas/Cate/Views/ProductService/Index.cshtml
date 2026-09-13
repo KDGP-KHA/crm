@@ -17,7 +17,7 @@
 
 @section PageAction
 {
-    @Html.Button(true, "AddProductService", Url.Action("Add", new { area = "Cate" }), "<i class='fa fa-plus mr-1'></i>" + AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-primary radius-3 px-3 py-2 text-600 text-90 shadow-sm" }, 1024)
+    @Html.Button(true, "AddProductService", Url.Action("Add", new { area = "Cate" }), "<i class='fa fa-plus mr-1'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-primary radius-3 px-3 py-2 text-600 text-90 shadow-sm", data_width = 1024 })
 }
 
 <!-- KPI Summary Metrics Cards -->
