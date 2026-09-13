@@ -388,17 +388,17 @@
                                     formattedContent = formattedContent.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("\n", "<br />");
                                 }
 
-                                // Làm sạch ký tự @ đứng trước tag mention đã có sẵn từ CKEditor
+                                // Làm sạch ký tự @ hoặc @&nbsp; đứng trước tag mention đã có sẵn từ CKEditor
                                 formattedContent = System.Text.RegularExpressions.Regex.Replace(
                                     formattedContent,
-                                    @"@\s*(<span\s+class=[""']ds-mention-badge[""'])",
+                                    @"@(?:\s|&nbsp;|<[^>]+>)*(<span\s+class=[""']ds-mention-badge[""'])",
                                     "$1"
                                 );
                                 formattedContent = formattedContent.Replace("<i class=\"fa fa-at mr-1\"></i>", "")
                                                                    .Replace("<i class=\"fa fa-at\"></i>", "");
                                 formattedContent = System.Text.RegularExpressions.Regex.Replace(
                                     formattedContent,
-                                    @"(<span\s+class=[""']ds-mention-badge[""'][^>]*>)\s*@\s*",
+                                    @"(<span\s+class=[""']ds-mention-badge[""'][^>]*>)(?:\s|&nbsp;)*@(?:\s|&nbsp;)*",
                                     "$1"
                                 );
 
@@ -409,7 +409,7 @@
                                                                .OrderByDescending(m => m.FullName.Length);
                                     foreach (var m in sortedMembers)
                                     {
-                                        var pat = @"(?<![\w@/""'=])@(" + System.Text.RegularExpressions.Regex.Escape(m.FullName) + @")(?=\s|<|$|[.,;!?])";
+                                        var pat = @"(?<![\w@/""'=])@(" + System.Text.RegularExpressions.Regex.Escape(m.FullName) + @")(?=\s|<|$|[.,;!?]|&nbsp;)";
                                         formattedContent = System.Text.RegularExpressions.Regex.Replace(
                                             formattedContent,
                                             pat,
@@ -421,7 +421,7 @@
                                 {
                                     formattedContent = System.Text.RegularExpressions.Regex.Replace(
                                         formattedContent,
-                                        @"(?<![\w@/""'=])@([\p{L}\p{M}\w.-]+)(?=\s|<|$|[.,;!?])",
+                                        @"(?<![\w@/""'=])@([\p{L}\p{M}\w.-]+)(?=\s|<|$|[.,;!?]|&nbsp;)",
                                         "<span class=\"ds-mention-badge\">$1</span>"
                                     );
                                 }

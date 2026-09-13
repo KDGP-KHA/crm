@@ -1364,6 +1364,15 @@ function initDiscussionCKEditor() {
             // '@' key to trigger mention
             var key = evt.data.domEvent.$.key;
             if (key === '@' || (evt.data.domEvent.$.shiftKey && (evt.data.domEvent.$.keyCode === 50 || evt.data.domEvent.$.which === 50))) {
+                if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+                    var ed = CKEDITOR.instances['txtDiscussionContent'];
+                    var sel = ed.getSelection();
+                    if (sel) {
+                        try {
+                            window._mentionBookmarks = sel.createBookmarks(true);
+                        } catch (e) { }
+                    }
+                }
                 setTimeout(function () {
                     showMentionDropdown("");
                 }, 100);
@@ -1489,6 +1498,13 @@ function selectMentionUser(user) {
         var editor = CKEDITOR.instances['txtDiscussionContent'];
         editor.focus();
 
+        if (window._mentionBookmarks) {
+            try {
+                editor.getSelection().selectBookmarks(window._mentionBookmarks);
+                window._mentionBookmarks = null;
+            } catch (e) { }
+        }
+
         // 1. Tự động xóa ký tự '@' người dùng đã gõ trước đó để kích hoạt dropdown
         try {
             var selection = editor.getSelection();
@@ -1515,7 +1531,7 @@ function selectMentionUser(user) {
         }
 
         // 2. Chèn tag hiển thị sạch, không dư thừa ký tự/icon @ vì bản thân badge đã là tag hiển thị
-        var mentionHtml = '&nbsp;<span class="ds-mention-badge" data-user-id="' + user.userId + '">' + user.fullName + '</span>&nbsp;';
+        var mentionHtml = '<span class="ds-mention-badge" data-user-id="' + user.userId + '">' + user.fullName + '</span>&nbsp;';
         editor.insertHtml(mentionHtml);
     } else {
         var $textarea = $("#txtDiscussionContent");
@@ -1609,6 +1625,13 @@ function submitDiscussionForm(e, salesId) {
         content = CKEDITOR.instances['txtDiscussionContent'].getData();
     } else {
         content = $("#txtDiscussionContent").val();
+    }
+
+    // Làm sạch hoàn toàn ký tự @ đứng trước hoặc trong thẻ tag mention trước khi gửi
+    if (content) {
+        content = content.replace(/@(?:\s|&nbsp;|<[^>]+>)*(<span\s+class=["']ds-mention-badge["'])/gi, '$1');
+        content = content.replace(/(<span\s+class=["']ds-mention-badge["'][^>]*>)(?:\s|&nbsp;)*@(?:\s|&nbsp;)*/gi, '$1');
+        content = content.replace(/<i\s+class=["']fa\s+fa-at[^'"]*["']\s*><\/i>/gi, '');
     }
 
     var plainText = $("<div>").html(content).text().trim();
