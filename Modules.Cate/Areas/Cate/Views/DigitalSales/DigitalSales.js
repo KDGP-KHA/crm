@@ -478,21 +478,74 @@ function openChangeStatusModal(id) {
         }
         $modal.modal("show");
 
-        $("#frmChangeStatus").on("submit", function (e) {
+        var $form = $("#frmChangeStatus");
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.unobtrusive.parse($form);
+        }
+
+        // Xóa lỗi validation khi người dùng chọn/nhập
+        $form.find("#cboNewStatusID").on("change", function () {
+            if ($(this).val() && $(this).val() !== "0") {
+                var $valMsg = $form.find("[data-valmsg-for='NewStatusID']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.find("#txtChangeStatusNote").on("input propertychange", function () {
+            if (($(this).val() || "").trim()) {
+                var $valMsg = $form.find("[data-valmsg-for='Note']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
-            var $form = $(this);
+
+            // 1. Kiểm tra qua jQuery Unobtrusive Validation nếu có
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            // 2. Fallback kiểm tra hiển thị lỗi trực tiếp vào ValidationMessageFor
+            var hasError = false;
+            var $statusInput = $form.find("select[name='NewStatusID']");
+            var statusVal = $statusInput.val();
+            if (!statusVal || statusVal === "0") {
+                var $valMsgStatus = $form.find("[data-valmsg-for='NewStatusID']");
+                $valMsgStatus.html('<span id="NewStatusID-error">Dữ liệu [Trạng thái mới] bắt buộc nhập</span>')
+                             .removeClass("field-validation-valid")
+                             .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $statusInput.addClass("input-validation-error border-danger");
+                hasError = true;
+            }
+
             var $noteInput = $form.find("textarea[name='Note']");
-            var noteVal = $noteInput.val();
-            if (!noteVal || !noteVal.trim()) {
-                var reqMsg = "Vui lòng nhập lý do chuyển trạng thái!";
+            var noteVal = ($noteInput.val() || "").trim();
+            if (!noteVal) {
+                var reqMsg = "Dữ liệu [Ghi chú / Lý do chuyển] bắt buộc nhập";
                 if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_ChangeStatusNoteRequired) {
                     reqMsg = App_Message.DigitalSales_Msg_ChangeStatusNoteRequired;
                 }
-                executeResponseMessage(reqMsg, "Thông tin bắt buộc!", false);
-                $noteInput.focus().addClass("border-danger");
+                var $valMsgNote = $form.find("[data-valmsg-for='Note']");
+                $valMsgNote.html('<span id="Note-error">' + reqMsg + '</span>')
+                           .removeClass("field-validation-valid")
+                           .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $noteInput.addClass("input-validation-error border-danger");
+                if (!hasError) {
+                    $noteInput.focus();
+                }
+                hasError = true;
+            }
+
+            if (hasError) {
                 return false;
             }
-            $noteInput.removeClass("border-danger");
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
 
             var formData = new FormData(this);
             $.ajax({
@@ -502,6 +555,7 @@ function openChangeStatusModal(id) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
                         $modal.modal("hide");
@@ -513,6 +567,7 @@ function openChangeStatusModal(id) {
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });

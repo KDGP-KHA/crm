@@ -350,27 +350,22 @@
                 <!-- NỘI DUNG CARD SỰ KIỆN -->
                 <div class="card ds-activity-card flex-grow-1 border-1 brc-grey-l2 radius-2 p-3 shadow-sm bgc-white">
                     <!-- HEADER CARD -->
-                    <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap" style="gap: 4px;">
-                        <div class="d-flex align-items-center min-width-0 flex-wrap" style="gap: 6px;">
-                            <span class="font-weight-bold text-dark-m1 text-95">
-                                @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
+                    <div class="d-flex align-items-center mb-2 flex-wrap" style="gap: 8px;">
+                        <span class="font-weight-bold text-dark-m1 text-95">
+                            @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
+                        </span>
+                        @if (!string.IsNullOrEmpty(act.ActionByDepartment))
+                        {
+                            <span class="badge bgc-grey-l3 text-secondary-d2 font-normal text-75 radius-1">
+                                @act.ActionByDepartment
                             </span>
-                            @if (!string.IsNullOrEmpty(act.ActionByDepartment))
-                            {
-                                <span class="badge bgc-grey-l3 text-secondary-d2 font-normal text-75 radius-1">
-                                    @act.ActionByDepartment
-                                </span>
-                            }
-                            <span class="badge @badgeBg text-75 font-bold px-2 py-05 radius-1">
-                                @typeTitle
-                            </span>
-                        </div>
-
-                        <div class="d-flex align-items-center">
-                            <span class="text-muted text-80" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
-                                <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
-                            </span>
-                        </div>
+                        }
+                        <span class="badge @badgeBg text-75 font-bold px-2 py-05 radius-1">
+                            @typeTitle
+                        </span>
+                        <span class="text-muted text-80 ml-1" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                            <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
                     </div>
 
                     <!-- BODY NỘI DUNG -->
@@ -393,18 +388,32 @@
                                     formattedContent = formattedContent.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("\n", "<br />");
                                 }
 
-                                // Định dạng nổi bật @Nhắc tên thành viên
+                                // Làm sạch ký tự @ đứng trước tag mention đã có sẵn từ CKEditor
+                                formattedContent = System.Text.RegularExpressions.Regex.Replace(
+                                    formattedContent,
+                                    @"@\s*(<span\s+class=[""']ds-mention-badge[""'])",
+                                    "$1"
+                                );
+                                formattedContent = formattedContent.Replace("<i class=\"fa fa-at mr-1\"></i>", "")
+                                                                   .Replace("<i class=\"fa fa-at\"></i>", "");
+                                formattedContent = System.Text.RegularExpressions.Regex.Replace(
+                                    formattedContent,
+                                    @"(<span\s+class=[""']ds-mention-badge[""'][^>]*>)\s*@\s*",
+                                    "$1"
+                                );
+
+                                // Định dạng nổi bật @Nhắc tên thành viên (loại bỏ @ vì đã dùng tag hiển thị)
                                 if (members != null && members.Count > 0)
                                 {
                                     var sortedMembers = members.Where(m => !string.IsNullOrWhiteSpace(m.FullName))
                                                                .OrderByDescending(m => m.FullName.Length);
                                     foreach (var m in sortedMembers)
                                     {
-                                        var pat = "(?<![\\w@/\"'=])(@" + System.Text.RegularExpressions.Regex.Escape(m.FullName) + ")(?=\\s|<|$|[.,;!?])";
+                                        var pat = @"(?<![\w@/""'=])@(" + System.Text.RegularExpressions.Regex.Escape(m.FullName) + @")(?=\s|<|$|[.,;!?])";
                                         formattedContent = System.Text.RegularExpressions.Regex.Replace(
                                             formattedContent,
                                             pat,
-                                            "<span class=\"ds-mention-badge\"><i class=\"fa fa-at mr-1\"></i>$1</span>"
+                                            "<span class=\"ds-mention-badge\">$1</span>"
                                         );
                                     }
                                 }
@@ -412,8 +421,8 @@
                                 {
                                     formattedContent = System.Text.RegularExpressions.Regex.Replace(
                                         formattedContent,
-                                        @"(?<![\w@/""'=])(@[\p{L}\p{M}\w.-]+)(?=\s|<|$|[.,;!?])",
-                                        "<span class=\"ds-mention-badge\"><i class=\"fa fa-at mr-1\"></i>$1</span>"
+                                        @"(?<![\w@/""'=])@([\p{L}\p{M}\w.-]+)(?=\s|<|$|[.,;!?])",
+                                        "<span class=\"ds-mention-badge\">$1</span>"
                                     );
                                 }
 

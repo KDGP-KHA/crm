@@ -467,7 +467,8 @@ namespace Core.Cate.Biz
                                 var parts = item.Attachments.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
                                 foreach (var p in parts)
                                 {
-                                    var trimmed = p.Trim();
+                                    var trimmed = p?.Trim();
+                                    if (string.IsNullOrEmpty(trimmed)) continue;
                                     var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
                                     item.AttachmentList.Add(new ActivityAttachmentItem
                                     {

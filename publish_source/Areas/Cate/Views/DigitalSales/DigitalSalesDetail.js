@@ -402,26 +402,84 @@ function openChangeStatusModal(id) {
     $.get(_detailUrls.changeStatusModal + "/" + id, function (html) {
         $("#modalContainer").html(html);
         var $modal = $("#modalChangeStatus");
+        var $form = $("#frmChangeStatus");
+
         if ($.fn.select2) {
             $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
         }
+
+        // Kích hoạt jQuery Unobtrusive Validation cho form nạp động
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData("validator");
+            $form.removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse($form);
+        }
+
         $modal.modal("show");
 
-        $("#frmChangeStatus").on("submit", function (e) {
+        // Tự động xóa thông báo lỗi khi người dùng tương tác
+        $form.find("textarea[name='Note']").on("input propertychange", function () {
+            var val = $(this).val().trim();
+            if (val) {
+                $(this).removeClass("input-validation-error border-danger");
+                $form.find("[data-valmsg-for='Note']").empty().removeClass("field-validation-error").addClass("field-validation-valid");
+            }
+        });
+
+        $form.find("select[name='NewStatusID']").on("change", function () {
+            var val = $(this).val();
+            if (val && val !== "0") {
+                $(this).removeClass("input-validation-error border-danger");
+                $form.find("[data-valmsg-for='NewStatusID']").empty().removeClass("field-validation-error").addClass("field-validation-valid");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
-            var $form = $(this);
+
+            // 1. Kiểm tra qua jQuery Unobtrusive Validation nếu có
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            // 2. Fallback kiểm tra hiển thị lỗi trực tiếp vào ValidationMessageFor
+            var hasError = false;
+            var $statusInput = $form.find("select[name='NewStatusID']");
+            var statusVal = $statusInput.val();
+            if (!statusVal || statusVal === "0") {
+                var $valMsgStatus = $form.find("[data-valmsg-for='NewStatusID']");
+                $valMsgStatus.html('<span id="NewStatusID-error">Dữ liệu [Trạng thái mới] bắt buộc nhập</span>')
+                             .removeClass("field-validation-valid")
+                             .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $statusInput.addClass("input-validation-error border-danger");
+                hasError = true;
+            }
+
             var $noteInput = $form.find("textarea[name='Note']");
-            var noteVal = $noteInput.val();
-            if (!noteVal || !noteVal.trim()) {
-                var reqMsg = "Vui lòng nhập lý do chuyển trạng thái!";
+            var noteVal = ($noteInput.val() || "").trim();
+            if (!noteVal) {
+                var reqMsg = "Dữ liệu [Ghi chú / Lý do chuyển] bắt buộc nhập";
                 if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_ChangeStatusNoteRequired) {
                     reqMsg = App_Message.DigitalSales_Msg_ChangeStatusNoteRequired;
                 }
-                executeResponseMessage(reqMsg, "Thông tin bắt buộc!", false);
-                $noteInput.focus().addClass("border-danger");
+                var $valMsgNote = $form.find("[data-valmsg-for='Note']");
+                $valMsgNote.html('<span id="Note-error">' + reqMsg + '</span>')
+                           .removeClass("field-validation-valid")
+                           .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $noteInput.addClass("input-validation-error border-danger");
+                if (!hasError) {
+                    $noteInput.focus();
+                }
+                hasError = true;
+            }
+
+            if (hasError) {
                 return false;
             }
-            $noteInput.removeClass("border-danger");
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
 
             var formData = new FormData(this);
             $.ajax({
@@ -431,6 +489,7 @@ function openChangeStatusModal(id) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
@@ -445,6 +504,7 @@ function openChangeStatusModal(id) {
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });
@@ -624,8 +684,45 @@ function openAddTrackingModal(salesId) {
         }
         $modal.modal("show");
 
-        $("#frmTrackingModal").on("submit", function (e) {
+        var $form = $("#frmTrackingModal");
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.unobtrusive.parse($form);
+        }
+
+        $form.find("#txtTrackingTaskName").on("input propertychange", function () {
+            if (($(this).val() || "").trim()) {
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
+
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            var $taskInput = $form.find("input[name='TaskName']");
+            var taskVal = ($taskInput.val() || "").trim();
+            if (!taskVal) {
+                var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
+                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
+                    reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
+                }
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
+                       .removeClass("field-validation-valid")
+                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $taskInput.addClass("input-validation-error border-danger").focus();
+                return false;
+            }
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
             var formData = new FormData(this);
             $.ajax({
                 url: _detailUrls.saveTracking,
@@ -634,6 +731,7 @@ function openAddTrackingModal(salesId) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Lưu tiến trình thành công!", true);
@@ -643,6 +741,7 @@ function openAddTrackingModal(salesId) {
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });
@@ -659,8 +758,45 @@ function openEditTrackingModal(id, salesId) {
         }
         $modal.modal("show");
 
-        $("#frmTrackingModal").on("submit", function (e) {
+        var $form = $("#frmTrackingModal");
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.unobtrusive.parse($form);
+        }
+
+        $form.find("#txtTrackingTaskName").on("input propertychange", function () {
+            if (($(this).val() || "").trim()) {
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
+
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            var $taskInput = $form.find("input[name='TaskName']");
+            var taskVal = ($taskInput.val() || "").trim();
+            if (!taskVal) {
+                var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
+                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
+                    reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
+                }
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
+                       .removeClass("field-validation-valid")
+                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $taskInput.addClass("input-validation-error border-danger").focus();
+                return false;
+            }
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
             var formData = new FormData(this);
             $.ajax({
                 url: _detailUrls.saveTracking,
@@ -669,6 +805,7 @@ function openEditTrackingModal(id, salesId) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Cập nhật tiến trình thành công!", true);
@@ -678,6 +815,7 @@ function openEditTrackingModal(id, salesId) {
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });
@@ -1350,12 +1488,45 @@ function selectMentionUser(user) {
     if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
         var editor = CKEDITOR.instances['txtDiscussionContent'];
         editor.focus();
-        var mentionHtml = '&nbsp;<span class="ds-mention-badge" data-user-id="' + user.userId + '"><i class="fa fa-at mr-1"></i>' + user.fullName + '</span>&nbsp;';
+
+        // 1. Tự động xóa ký tự '@' người dùng đã gõ trước đó để kích hoạt dropdown
+        try {
+            var selection = editor.getSelection();
+            if (selection) {
+                var ranges = selection.getRanges();
+                if (ranges && ranges.length > 0) {
+                    var range = ranges[0];
+                    var startNode = range.startContainer;
+                    if (startNode && startNode.type === CKEDITOR.NODE_TEXT) {
+                        var textVal = startNode.getText();
+                        var offset = range.startOffset;
+                        if (offset > 0 && textVal.charAt(offset - 1) === '@') {
+                            var updatedText = textVal.substring(0, offset - 1) + textVal.substring(offset);
+                            startNode.setText(updatedText);
+                            range.setStart(startNode, offset - 1);
+                            range.setEnd(startNode, offset - 1);
+                            selection.selectRanges([range]);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Error removing @ before mention:", err);
+        }
+
+        // 2. Chèn tag hiển thị sạch, không dư thừa ký tự/icon @ vì bản thân badge đã là tag hiển thị
+        var mentionHtml = '&nbsp;<span class="ds-mention-badge" data-user-id="' + user.userId + '">' + user.fullName + '</span>&nbsp;';
         editor.insertHtml(mentionHtml);
     } else {
         var $textarea = $("#txtDiscussionContent");
         if ($textarea.length > 0) {
-            $textarea.val($textarea.val() + " @" + user.fullName + " ");
+            var val = $textarea.val() || "";
+            // Xóa ký tự '@' cuối cùng nếu vừa gõ
+            if (val.trimEnd().endsWith('@')) {
+                var lastAt = val.lastIndexOf('@');
+                val = val.substring(0, lastAt);
+            }
+            $textarea.val(val + " " + user.fullName + " ");
         }
     }
 

@@ -13,7 +13,7 @@
                 </button>
             </div>
 
-            <form id="frmChangeStatus" method="post" enctype="multipart/form-data">
+            <form id="frmChangeStatus" method="post" enctype="multipart/form-data" novalidate="novalidate">
                 <div class="modal-body" id="bodyForm">
                     @Html.AntiForgeryToken()
                     @Html.HiddenFor(m => m.DigitalSalesID)
@@ -51,8 +51,8 @@
 
                     <div class="form-group mb-3">
                         @Html.TitleFor(m => m.NewStatusID, new { @class = "text-85 text-600 mb-1 d-block font-bold" })
-                        @Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, "-- Chọn trạng thái mới --", new { @class = "form-control form-control-sm select2", required = "required", id = "cboNewStatusID" })
-                        @Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger text-85" })
+                        @Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, "-- Chọn trạng thái mới --", new { @class = "form-control form-control-sm select2", id = "cboNewStatusID" })
+                        @Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
                     </div>
 
                     <div class="form-group mb-3">
@@ -63,8 +63,8 @@
 
                     <div class="form-group mb-2">
                         @Html.TitleFor(m => m.Note, new { @class = "text-85 text-600 mb-1 d-block font-bold" })
-                        @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control form-control-sm", required = "required", id = "txtChangeStatusNote", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })
-                        @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger text-85 d-block mt-1" })
+                        @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control form-control-sm", id = "txtChangeStatusNote", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })
+                        @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
                         <small class="text-muted text-80 d-block mt-1">
                             <i class="fa fa-info-circle mr-1 text-primary"></i> Ghi nhận vào Dòng thời gian (Timeline) của hồ sơ; không thay đổi Mô tả chi tiết nhu cầu / Ghi chú dịch vụ số.
                         </small>
