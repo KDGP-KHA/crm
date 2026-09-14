@@ -55,7 +55,9 @@
 
         // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
         if (typeof serializeProgressItemsToJson === 'function') {
-            serializeProgressItemsToJson();
+            if (!serializeProgressItemsToJson()) {
+                return false;
+            }
         }
 
         var $button = $form.find('button[type=submit]').prop('disabled', true);
@@ -80,6 +82,7 @@
                 if (typeof reloadStatusAndTimelineSection === 'function') reloadStatusAndTimelineSection(@Model.DigitalSalesID);
                 if (typeof reloadOverviewAndMetrics === 'function') reloadOverviewAndMetrics(@Model.DigitalSalesID);
                 if (typeof reloadTrackingSection === 'function') reloadTrackingSection(@Model.DigitalSalesID);
+                if (typeof reloadDiscussionsSection === 'function') reloadDiscussionsSection(@Model.DigitalSalesID);
             } else {
                 executeResponseMessage(response.message, '', false);
             }

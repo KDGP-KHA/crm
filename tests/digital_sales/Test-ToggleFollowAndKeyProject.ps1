@@ -68,9 +68,9 @@ $conn.Close()
 # 4. Check XML sync across all 3 targets
 Write-Host "`n[STEP 4] Verifying Cate_StoredProcedures.xml has ToggleFollow in all 3 targets..." -ForegroundColor Yellow
 $xmlFiles = @(
-    "d:\SVN\crm\Modules.Cate\App_Data\Modules\Cate_StoredProcedures.xml",
-    "d:\SVN\crm\publish_source\App_Data\Modules\Cate_StoredProcedures.xml",
-    "d:\SVN\crm\CenIT.Solution.TOC.WebApp\App_Data\Modules\Cate_StoredProcedures.xml"
+    "d:\MyProject\crm\Modules.Cate\App_Data\Modules\Cate_StoredProcedures.xml",
+    "d:\MyProject\crm\publish_source\App_Data\Modules\Cate_StoredProcedures.xml",
+    "d:\MyProject\crm\CenIT.Solution.TOC.WebApp\App_Data\Modules\Cate_StoredProcedures.xml"
 )
 foreach ($xf in $xmlFiles) {
     if (-not (Test-Path $xf)) {
@@ -87,13 +87,13 @@ foreach ($xf in $xmlFiles) {
     }
 }
 
-# 5. Check Detail.cshtml and DigitalSalesDetail.js sync
-Write-Host "`n[STEP 5] Verifying Triple Mirroring for Detail.cshtml and DigitalSalesDetail.js..." -ForegroundColor Yellow
-$uiFiles = @("Detail.cshtml", "DigitalSalesDetail.js")
+# 5. Check Detail.cshtml, Detail.css and DigitalSalesDetail.js sync
+Write-Host "`n[STEP 5] Verifying Triple Mirroring for Detail.cshtml, Detail.css and DigitalSalesDetail.js..." -ForegroundColor Yellow
+$uiFiles = @("Detail.cshtml", "Detail.css", "DigitalSalesDetail.js")
 foreach ($uf in $uiFiles) {
-    $f1 = "d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\$uf"
-    $f2 = "d:\SVN\crm\publish_source\Areas\Cate\Views\DigitalSales\$uf"
-    $f3 = "d:\SVN\crm\CenIT.Solution.TOC.WebApp\Areas\Cate\Views\DigitalSales\$uf"
+    $f1 = "d:\MyProject\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\$uf"
+    $f2 = "d:\MyProject\crm\publish_source\Areas\Cate\Views\DigitalSales\$uf"
+    $f3 = "d:\MyProject\crm\CenIT.Solution.TOC.WebApp\Areas\Cate\Views\DigitalSales\$uf"
     
     $h1 = (Get-FileHash $f1 -Algorithm MD5).Hash
     $h2 = (Get-FileHash $f2 -Algorithm MD5).Hash

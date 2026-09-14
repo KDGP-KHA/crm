@@ -49,11 +49,24 @@
             </div>
         </div>
 
-        <!-- 3. TỆP ĐÍNH KÈM -->
+        <!-- 3. TỆP ĐÍNH KÈM (MULTI-FILE UPLOAD) -->
         <div class="form-group mb-3">
-            @Html.TitleFor(m => m.AttachmentPath, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
-            <input type="file" name="attachmentFile" class="form-control form-control-sm bgc-white py-1" />
-            <small class="text-muted d-block mt-05">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small>
+            <label class="text-85 font-weight-bold text-dark mb-1 d-block">
+                <i class="fa fa-paperclip text-primary mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_AttachmentFile_Label", "Tệp đính kèm")
+            </label>
+            <div class="ds-file-upload-wrapper">
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <button type="button" class="btn btn-sm btn-white btn-h-light-primary border-1 brc-primary-m3 text-primary-d1 font-bold radius-1 px-3 py-1 shadow-sm" onclick="$('#changeStatusFileInput').click();">
+                        <i class="fa fa-cloud-upload-alt mr-1 text-110"></i> Chọn tệp đính kèm (Cho phép chọn nhiều file)
+                    </button>
+                    <span class="text-secondary text-80 font-italic" id="changeStatusFileCountText">Chưa có tệp nào được chọn</span>
+                </div>
+                <input type="file" id="changeStatusFileInput" name="attachmentFiles" multiple class="d-none" onchange="handleChangeStatusFileSelect(this);" />
+                <div id="changeStatusFileList" class="ds-file-chips-container mt-2 d-none">
+                    <!-- Chips files render qua JS -->
+                </div>
+            </div>
+            <small class="text-muted d-block mt-1">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small>
         </div>
 
         <!-- 4. GHI CHÚ / LÝ DO CHUYỂN -->
@@ -104,6 +117,135 @@
         progressItems: []
     };
 
+    var changeStatusSelectedFiles = [];
+
+    function handleChangeStatusFileSelect(input) {
+        if (!input.files || input.files.length === 0) return;
+
+        var forbiddenExts = ['.exe', '.bat', '.cmd', '.sh', '.msi', '.dll', '.com', '.vbs', '.ps1'];
+        var maxFileSize = 52428800; // 50MB
+
+        for (var i = 0; i < input.files.length; i++) {
+            var file = input.files[i];
+            var ext = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (forbiddenExts.indexOf(ext) !== -1) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Tệp "' + file.name + '" có định dạng không được phép!');
+                } else {
+                    alert('Tệp "' + file.name + '" có định dạng không được phép!');
+                }
+                continue;
+            }
+
+            if (file.size > maxFileSize) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Tệp "' + file.name + '" vượt quá dung lượng tối đa 50MB!');
+                } else {
+                    alert('Tệp "' + file.name + '" vượt quá dung lượng tối đa 50MB!');
+                }
+                continue;
+            }
+
+            // Kiểm tra trùng lặp theo tên và dung lượng
+            var isDuplicate = changeStatusSelectedFiles.some(function (f) {
+                return f.name === file.name && f.size === file.size;
+            });
+
+            if (!isDuplicate) {
+                changeStatusSelectedFiles.push(file);
+            }
+        }
+
+        syncChangeStatusFilesToInput();
+        renderChangeStatusFileChips();
+    }
+
+    function removeChangeStatusFile(index) {
+        if (index >= 0 && index < changeStatusSelectedFiles.length) {
+            changeStatusSelectedFiles.splice(index, 1);
+            syncChangeStatusFilesToInput();
+            renderChangeStatusFileChips();
+        }
+    }
+
+    function syncChangeStatusFilesToInput() {
+        try {
+            if (typeof DataTransfer !== 'undefined') {
+                var dt = new DataTransfer();
+                for (var i = 0; i < changeStatusSelectedFiles.length; i++) {
+                    dt.items.add(changeStatusSelectedFiles[i]);
+                }
+                var fileInput = document.getElementById('changeStatusFileInput');
+                if (fileInput) {
+                    fileInput.files = dt.files;
+                }
+            }
+        } catch (e) {
+            console.error("DataTransfer error: ", e);
+        }
+    }
+
+    function renderChangeStatusFileChips() {
+        var $container = $('#changeStatusFileList');
+        var $countText = $('#changeStatusFileCountText');
+        $container.empty();
+
+        if (changeStatusSelectedFiles.length === 0) {
+            $container.addClass('d-none');
+            $countText.text('Chưa có tệp nào được chọn').removeClass('text-primary font-bold').addClass('text-secondary font-italic');
+            return;
+        }
+
+        $container.removeClass('d-none');
+        $countText.text('Đã chọn ' + changeStatusSelectedFiles.length + ' tệp đính kèm').removeClass('text-secondary font-italic').addClass('text-primary font-bold');
+
+        $.each(changeStatusSelectedFiles, function (idx, f) {
+            var ext = f.name.split('.').pop().toLowerCase();
+            var iconClass = getFileIconClass(ext);
+            var sizeFormatted = formatFileSize(f.size);
+
+            var $chip = $('<div class="ds-file-chip">' +
+                '<i class="' + iconClass + ' ds-file-chip-icon"></i>' +
+                '<span class="ds-file-chip-name" title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</span>' +
+                '<span class="ds-file-chip-size">(' + sizeFormatted + ')</span>' +
+                '<button type="button" class="ds-file-chip-remove" onclick="removeChangeStatusFile(' + idx + ');" title="Xóa tệp này">&times;</button>' +
+            '</div>');
+
+            $container.append($chip);
+        });
+    }
+
+    function getFileIconClass(ext) {
+        switch (ext) {
+            case 'pdf': return 'fa fa-file-pdf text-danger';
+            case 'doc':
+            case 'docx': return 'fa fa-file-word text-primary';
+            case 'xls':
+            case 'xlsx': return 'fa fa-file-excel text-success';
+            case 'ppt':
+            case 'pptx': return 'fa fa-file-powerpoint text-warning-d2';
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'webp':
+            case 'svg': return 'fa fa-file-image text-purple';
+            case 'zip':
+            case 'rar':
+            case '7z': return 'fa fa-file-archive text-orange';
+            default: return 'fa fa-file-alt text-secondary';
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        var k = 1024;
+        var sizes = ['B', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+    }
+
     function handleNewStatusChange(statusId) {
         var $modal = $('#modalChangeStatus');
         var $boxProcess = $('#boxProcessSelect');
@@ -116,7 +258,7 @@
             $modal.removeClass('has-progress-box');
             $boxProcess.addClass('d-none');
             $colProgress.addClass('d-none');
-            $colInfo.removeClass('col-lg-5').addClass('col-12');
+            $colInfo.removeClass('col-lg-5 col-xl-5').addClass('col-12');
             $radioContainer.empty();
             $progressContainer.empty();
             $('#SelectedProcessID').val('');
@@ -191,7 +333,6 @@
                 '<div class="flex-1">' +
                     '<div class="d-flex align-items-center justify-content-between">' +
                         '<span class="font-weight-bold text-dark text-90">' + escapeHtml(p.processName) + '</span>' +
-                        '<span class="badge badge-light border-1 brc-grey-l1 text-75">' + p.progressCount + ' tiến trình</span>' +
                     '</div>' +
                     (p.description ? '<small class="text-secondary d-block mt-05 text-80">' + escapeHtml(p.description) + '</small>' : '') +
                 '</div>' +
@@ -282,41 +423,117 @@
         var progressId = item.progressId || 0;
         var processId = item.processId || dsStatusWorkflowState.selectedProcessId || 0;
         var taskName = item.taskName || '';
-        var deadline = item.deadline || '';
+        var sortOrder = item.sortOrder || index;
+        var durationDays = item.durationDays || item.defaultDurationDays || 3;
         var assignedUserId = item.assignedUserId || '';
         var isCustom = item.isCustomTask === true;
 
-        // Xây dựng options người thực hiện
+        // Ngày bắt đầu: mặc định hôm nay nếu không có
+        var startDate = item.startDate;
+        if (!startDate) {
+            startDate = new Date().toISOString().split('T')[0];
+        }
+
+        // Hạn chót
+        var deadline = item.deadline;
+        if (!deadline && startDate) {
+            var parts = startDate.split('-');
+            var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            d.setDate(d.getDate() + parseInt(durationDays));
+            var year = d.getFullYear();
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var day = ('0' + d.getDate()).slice(-2);
+            deadline = year + '-' + month + '-' + day;
+        }
+
+        // Xây dựng options người thực hiện (chỉ thành viên trong hồ sơ kinh doanh số)
         var memberOptionsHtml = '<option value="">-- Chọn người thực hiện --</option>';
         $.each(dsStatusWorkflowState.members, function (_, m) {
             var selectedAttr = (assignedUserId && parseInt(assignedUserId) === parseInt(m.userId)) ? 'selected' : '';
-            var label = m.isProjectMember ? ('[Thành viên] ' + m.fullName) : m.fullName;
+            var roleInfo = m.roleTitle ? (' (' + m.roleTitle + ')') : '';
+            var label = m.fullName + roleInfo;
             memberOptionsHtml += '<option value="' + m.userId + '" ' + selectedAttr + '>' + escapeHtml(label) + '</option>';
         });
 
         var $row = $('<div class="ds-progress-row-item ' + (isCustom ? 'is-custom-task' : '') + '" data-progress-id="' + progressId + '" data-process-id="' + processId + '" data-is-custom="' + isCustom + '">' +
-            '<div class="d-flex align-items-center mb-2">' +
-                '<span class="ds-progress-row-index mr-2 row-idx">' + index + '</span>' +
-                '<input type="text" class="form-control form-control-sm font-weight-bold text-dark txt-task-name flex-grow-1" value="' + escapeHtml(taskName) + '" placeholder="Nhập tên tiến trình / công việc (*)" />' +
-                '<button type="button" class="btn btn-delete-progress ml-2" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
-                    '<i class="fa fa-trash-alt"></i>' +
-                '</button>' +
+            '<!-- HÀNG 1: STT + TÊN TIẾN TRÌNH + NÚT XÓA -->' +
+            '<div class="d-flex align-items-start mb-2" style="gap: 8px;">' +
+                '<div style="width: 70px; flex-shrink: 0;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block">STT <span class="text-danger">*</span></label>' +
+                    '<input type="number" class="form-control form-control-sm txt-sort-order text-center font-bold" min="1" value="' + sortOrder + '" required />' +
+                '</div>' +
+                '<div class="flex-grow-1">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block">Tên tiến trình <span class="text-danger">*</span></label>' +
+                    '<textarea class="form-control form-control-sm txt-task-name font-weight-bold text-dark" rows="2" placeholder="Nhập tên tiến trình / đầu việc (*)" required style="resize: vertical;">' + escapeHtml(taskName) + '</textarea>' +
+                '</div>' +
+                '<div class="align-self-end mb-1">' +
+                    '<button type="button" class="btn btn-delete-progress" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
+                        '<i class="fa fa-trash-alt"></i>' +
+                    '</button>' +
+                '</div>' +
             '</div>' +
-            '<div class="d-flex align-items-center flex-wrap" style="gap: 12px;">' +
-                '<div class="flex-grow-1" style="min-width: 200px;">' +
+            '<!-- HÀNG 2: NGƯỜI THỰC HIỆN + NGÀY BẮT ĐẦU + SỐ NGÀY + HẠN CHÓT -->' +
+            '<div class="d-flex align-items-center flex-wrap" style="gap: 10px;">' +
+                '<div class="flex-grow-1" style="min-width: 170px;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-user text-primary mr-1"></i> Người thực hiện:</label>' +
                     '<select class="form-control form-control-sm cbo-assigned-user">' +
                         memberOptionsHtml +
                     '</select>' +
                 '</div>' +
-                '<div style="width: 170px;">' +
-                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-calendar-alt text-primary mr-1"></i> Hạn hoàn thành:</label>' +
-                    '<input type="date" class="form-control form-control-sm txt-deadline" value="' + deadline + '" />' +
+                '<div style="width: 145px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-calendar-alt text-primary mr-1"></i> Ngày bắt đầu <span class="text-danger">*</span>:</label>' +
+                    '<input type="date" class="form-control form-control-sm txt-start-date" value="' + startDate + '" onchange="calculateRowDeadline(this);" required />' +
+                '</div>' +
+                '<div style="width: 95px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-clock text-primary mr-1"></i> Số ngày <span class="text-danger">*</span>:</label>' +
+                    '<input type="number" class="form-control form-control-sm txt-duration-days text-center font-bold" min="1" value="' + durationDays + '" onchange="calculateRowDeadline(this);" onkeyup="calculateRowDeadline(this);" required />' +
+                '</div>' +
+                '<div style="width: 125px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-hourglass-half text-warning-d2 mr-1"></i> Hạn chót:</label>' +
+                    '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m3 py-1 px-2 font-bold d-block text-center text-85 badge-calculated-deadline">' + formatDisplayDate(deadline) + '</span>' +
+                    '<input type="hidden" class="txt-deadline" value="' + deadline + '" />' +
                 '</div>' +
             '</div>' +
         '</div>');
 
         $container.append($row);
+    }
+
+    function calculateRowDeadline(element) {
+        var $row = $(element).closest('.ds-progress-row-item');
+        var startDateStr = $row.find('.txt-start-date').val();
+        var durationDays = parseInt($row.find('.txt-duration-days').val()) || 0;
+
+        if (!startDateStr) {
+            $row.find('.badge-calculated-deadline').text('--/--/----');
+            $row.find('.txt-deadline').val('');
+            return;
+        }
+
+        var parts = startDateStr.split('-');
+        if (parts.length === 3) {
+            var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            if (!isNaN(d.getTime())) {
+                d.setDate(d.getDate() + durationDays);
+                var year = d.getFullYear();
+                var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                var day = ('0' + d.getDate()).slice(-2);
+                var deadlineIso = year + '-' + month + '-' + day;
+                var deadlineDisplay = day + '/' + month + '/' + year;
+
+                $row.find('.badge-calculated-deadline').text(deadlineDisplay);
+                $row.find('.txt-deadline').val(deadlineIso);
+            }
+        }
+    }
+
+    function formatDisplayDate(isoDateStr) {
+        if (!isoDateStr) return '--/--/----';
+        var parts = isoDateStr.split('T')[0].split('-');
+        if (parts.length === 3) {
+            return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+        return isoDateStr;
     }
 
     function addCustomProgressRow() {
@@ -325,23 +542,22 @@
 
         $('#emptyProgressAlert').addClass('d-none');
 
-        // Tính ngày hạn chót mặc định: hôm nay + 3 ngày
-        var d = new Date();
-        d.setDate(d.getDate() + 3);
-        var defDeadline = d.toISOString().split('T')[0];
+        var todayIso = new Date().toISOString().split('T')[0];
 
         appendProgressRowElement({
             progressId: 0,
             processId: dsStatusWorkflowState.selectedProcessId || 0,
-            taskName: 'Công việc mới #' + newIdx,
-            deadline: defDeadline,
+            taskName: 'Tiến trình mới #' + newIdx,
+            sortOrder: newIdx,
+            startDate: todayIso,
+            durationDays: 3,
             assignedUserId: '',
             isCustomTask: true
         }, newIdx);
 
         updateProgressBadge();
 
-        // Cuộn xuống cuối container và focus vào input tên
+        // Cuộn xuống cuối container và focus vào textarea tên tiến trình
         $container.scrollTop($container[0].scrollHeight);
         $container.find('.ds-progress-row-item:last-child .txt-task-name').focus().select();
     }
@@ -359,7 +575,7 @@
 
     function reindexProgressRows() {
         $('#progressItemsContainer .ds-progress-row-item').each(function (idx) {
-            $(this).find('.row-idx').text(idx + 1);
+            $(this).find('.txt-sort-order').val(idx + 1);
         });
     }
 
@@ -370,29 +586,82 @@
 
     function serializeProgressItemsToJson() {
         var items = [];
-        $('#progressItemsContainer .ds-progress-row-item').each(function (idx) {
-            var $row = $(this);
-            var taskName = $.trim($row.find('.txt-task-name').val());
-            if (!taskName) return;
+        var isValid = true;
+        var $rows = $('#progressItemsContainer .ds-progress-row-item');
 
+        $rows.each(function (idx) {
+            var $row = $(this);
+            var $taskNameInput = $row.find('.txt-task-name');
+            var taskName = $.trim($taskNameInput.val());
+            var $sortOrderInput = $row.find('.txt-sort-order');
+            var sortOrderVal = parseInt($sortOrderInput.val());
+            var $startDateInput = $row.find('.txt-start-date');
+            var startDateVal = $.trim($startDateInput.val());
+            var $durationDaysInput = $row.find('.txt-duration-days');
+            var durationDaysVal = parseInt($durationDaysInput.val());
             var assignedUserIdVal = $row.find('.cbo-assigned-user').val();
             var deadlineVal = $row.find('.txt-deadline').val();
             var progressId = parseInt($row.attr('data-progress-id')) || 0;
             var processId = parseInt($row.attr('data-process-id')) || parseInt($('#SelectedProcessID').val()) || null;
             var isCustom = $row.attr('data-is-custom') === 'true';
 
+            if (!taskName) {
+                $taskNameInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng nhập tên tiến trình cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $taskNameInput.removeClass('is-invalid');
+
+            if (isNaN(sortOrderVal) || sortOrderVal < 1) {
+                $sortOrderInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng nhập số thứ tự hợp lệ cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $sortOrderInput.removeClass('is-invalid');
+
+            if (!startDateVal) {
+                $startDateInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng chọn ngày bắt đầu cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $startDateInput.removeClass('is-invalid');
+
+            if (isNaN(durationDaysVal) || durationDaysVal < 1) {
+                $durationDaysInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng nhập số ngày thực hiện hợp lệ cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $durationDaysInput.removeClass('is-invalid');
+
             items.push({
                 ProcessID: processId,
                 ProgressID: progressId > 0 ? progressId : null,
                 TaskName: taskName,
                 AssignedUserID: (assignedUserIdVal && parseInt(assignedUserIdVal) > 0) ? parseInt(assignedUserIdVal) : null,
+                StartDate: startDateVal,
+                DurationDays: durationDaysVal,
                 Deadline: deadlineVal ? deadlineVal : null,
-                SortOrder: idx + 1,
+                SortOrder: sortOrderVal,
                 IsCustomTask: isCustom
             });
         });
 
+        if (!isValid) return false;
+
         $('#TrackingItemsJson').val(items.length > 0 ? JSON.stringify(items) : '');
+        return true;
     }
 
     function escapeHtml(text) {

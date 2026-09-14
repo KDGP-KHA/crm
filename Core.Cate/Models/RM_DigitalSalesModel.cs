@@ -162,6 +162,8 @@ namespace Core.Cate.Models
         public int? ProgressID { get; set; }
         public string TaskName { get; set; }
         public int? AssignedUserID { get; set; }
+        public DateTime? StartDate { get; set; }
+        public int? DurationDays { get; set; }
         public DateTime? Deadline { get; set; }
         public int SortOrder { get; set; }
         public bool IsCustomTask { get; set; }

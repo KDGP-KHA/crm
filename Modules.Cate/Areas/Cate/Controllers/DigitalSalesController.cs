@@ -1251,7 +1251,55 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             string attachmentPath = null;
-            if (attachmentFile != null && attachmentFile.ContentLength > 0)
+            var uploadedFiles = new List<ActivityAttachmentItem>();
+
+            if (Request.Files != null && Request.Files.Count > 0)
+            {
+                var forbiddenExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ".exe", ".bat", ".cmd", ".sh", ".msi", ".dll", ".com", ".vbs", ".ps1"
+                };
+
+                for (int i = 0; i < Request.Files.Count; i++)
+                {
+                    var file = Request.Files[i];
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+                        if (forbiddenExts.Contains(ext))
+                        {
+                            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidFileFormat") });
+                        }
+
+                        if (file.ContentLength > 52428800) // 50MB
+                        {
+                            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_FileSizeExceeded", "Dung lượng tệp đính kèm không được vượt quá 50MB!") });
+                        }
+
+                        var relPath = SaveUploadedFile(file, i);
+                        if (!string.IsNullOrEmpty(relPath))
+                        {
+                            if (attachmentPath == null)
+                            {
+                                attachmentPath = relPath;
+                            }
+
+                            uploadedFiles.Add(new ActivityAttachmentItem
+                            {
+                                FileName = Path.GetFileName(file.FileName),
+                                FilePath = relPath,
+                                FileSize = file.ContentLength,
+                                FileSizeFormatted = file.ContentLength > 1048576 
+                                    ? $"{(file.ContentLength / 1048576.0):0.0} MB" 
+                                    : $"{(file.ContentLength / 1024.0):0.0} KB",
+                                Extension = ext,
+                                IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)
+                            });
+                        }
+                    }
+                }
+            }
+            else if (attachmentFile != null && attachmentFile.ContentLength > 0)
             {
                 attachmentPath = SaveUploadedFile(attachmentFile);
             }
@@ -1260,7 +1308,31 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             if (code == 1)
             {
-                // Lưu danh sách tiến trình vào Checklist (RM_DigitalSalesTracking) nếu có
+                // 1. Tự động lưu file vào mục Nội dung trao đổi (ActivityType = 1) nếu có tệp đính kèm
+                if (uploadedFiles.Count > 0)
+                {
+                    try
+                    {
+                        var discussionContent = !string.IsNullOrWhiteSpace(model.Note)
+                            ? model.Note.Trim()
+                            : $"Đính kèm {uploadedFiles.Count} tệp khi chuyển trạng thái sang: {newStatus?.StatusName ?? ""}";
+
+                        var discussionActivity = new RM_DigitalSalesActivityModel
+                        {
+                            DigitalSalesID = model.DigitalSalesID,
+                            ActivityType = 1, // Trao đổi / Thảo luận
+                            Content = discussionContent,
+                            Attachments = Newtonsoft.Json.JsonConvert.SerializeObject(uploadedFiles)
+                        };
+                        _salesCache.AddActivity(discussionActivity, User.UserName);
+                    }
+                    catch (Exception ex)
+                    {
+                        AppProcessor.Logger.Error(ex);
+                    }
+                }
+
+                // 2. Lưu danh sách tiến trình vào Checklist (RM_DigitalSalesTracking) nếu có
                 if (!string.IsNullOrWhiteSpace(model.TrackingItemsJson))
                 {
                     try
@@ -1268,10 +1340,25 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         var items = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChangeStatusTrackingItemDTO>>(model.TrackingItemsJson);
                         if (items != null && items.Count > 0)
                         {
+                            // Xóa các task mặc định vừa được tạo tự động bởi SP cho trạng thái mới để tránh trùng lặp
+                            var currentTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID);
+                            var oldTasks = currentTasks?.Where(t => t.StatusID == model.NewStatusID && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && t.Status == 1).ToList();
+                            if (oldTasks != null)
+                            {
+                                foreach (var ot in oldTasks)
+                                {
+                                    _salesCache.DeleteTracking(ot.TrackingID, User.UserName);
+                                }
+                            }
+
                             int sort = 1;
                             foreach (var it in items)
                             {
                                 if (string.IsNullOrWhiteSpace(it.TaskName)) continue;
+
+                                var duration = it.DurationDays.HasValue && it.DurationDays.Value > 0 ? it.DurationDays.Value : 3;
+                                var startDate = it.StartDate ?? DateTime.Today;
+                                var deadline = it.Deadline ?? startDate.AddDays(duration);
 
                                 var trackingModel = new RM_DigitalSalesTrackingModel
                                 {
@@ -1281,8 +1368,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                     ProgressID = it.ProgressID,
                                     TaskName = it.TaskName.Trim(),
                                     AssignedUserID = it.AssignedUserID,
-                                    StartDate = DateTime.Now,
-                                    Deadline = it.Deadline,
+                                    StartDate = startDate,
+                                    DurationDays = duration,
+                                    Deadline = deadline,
                                     Status = 1, // Chưa thực hiện
                                     IsCustomTask = it.IsCustomTask,
                                     SortOrder = it.SortOrder > 0 ? it.SortOrder : sort++,
@@ -1294,9 +1382,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // Fallback safe
+                        AppProcessor.Logger.Error(ex);
                     }
                 }
 
@@ -1437,12 +1525,27 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     ? processes.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList()
                     : new List<RM_DigitalSalesProcessModel>();
 
-                // 2. Lấy danh sách nhân sự (ưu tiên thành viên dự án)
+                // 2. Lấy danh sách nhân sự (CHỈ gồm thành viên thuộc hồ sơ kinh doanh số và AM phụ trách)
                 var membersList = new List<object>();
                 var existingUserIds = new HashSet<int>();
 
                 if (digitalSalesId > 0)
                 {
+                    var sales = _salesCache.GetByID(digitalSalesId);
+                    if (sales != null && sales.AssignedEmployeeID.HasValue && sales.AssignedEmployeeID.Value > 0 && !existingUserIds.Contains(sales.AssignedEmployeeID.Value))
+                    {
+                        var amUserId = sales.AssignedEmployeeID.Value;
+                        existingUserIds.Add(amUserId);
+                        membersList.Add(new
+                        {
+                            userId = amUserId,
+                            fullName = !string.IsNullOrWhiteSpace(sales.AssignedEmployeeName) ? sales.AssignedEmployeeName : ("ID " + amUserId),
+                            userName = "",
+                            roleTitle = "AM chủ trì",
+                            isProjectMember = true
+                        });
+                    }
+
                     var salesMembers = _salesCache.GetMembersBySalesID(digitalSalesId);
                     if (salesMembers != null)
                     {
@@ -1456,28 +1559,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                     userId = m.UserID,
                                     fullName = m.FullName,
                                     userName = m.UserName,
+                                    roleTitle = m.RoleTitle,
                                     isProjectMember = true
                                 });
                             }
-                        }
-                    }
-                }
-
-                var allUsers = _userCache.GetAll();
-                if (allUsers != null)
-                {
-                    foreach (var u in allUsers.OrderBy(x => x.FullName))
-                    {
-                        if (u.UserId.HasValue && u.UserId.Value > 0 && !existingUserIds.Contains(u.UserId.Value))
-                        {
-                            existingUserIds.Add(u.UserId.Value);
-                            membersList.Add(new
-                            {
-                                userId = u.UserId.Value,
-                                fullName = u.FullName,
-                                userName = u.UserName,
-                                isProjectMember = false
-                            });
                         }
                     }
                 }
@@ -1508,15 +1593,20 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                         if (p.ProcessID == firstProcess.ProcessID)
                         {
+                            int progSort = 1;
+                            var today = DateTime.Today;
                             foreach (var pr in activeProgs)
                             {
                                 var defaultDays = pr.DefaultDurationDays > 0 ? pr.DefaultDurationDays : 3;
-                                var defaultDeadline = DateTime.Today.AddDays(defaultDays);
+                                var defaultDeadline = today.AddDays(defaultDays);
                                 defaultProgressList.Add(new
                                 {
                                     progressId = pr.ProgressID,
                                     processId = p.ProcessID,
                                     taskName = pr.ProgressName,
+                                    sortOrder = pr.SortOrder > 0 ? pr.SortOrder : progSort++,
+                                    startDate = today.ToString("yyyy-MM-dd"),
+                                    durationDays = defaultDays,
                                     defaultDurationDays = defaultDays,
                                     deadline = defaultDeadline.ToString("yyyy-MM-dd"),
                                     assignedUserId = (int?)null
@@ -1558,15 +1648,20 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 var activeProgs = progs != null ? progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder).ToList() : new List<RM_DigitalSalesProgressModel>();
 
                 var progressList = new List<object>();
+                int progSort = 1;
+                var today = DateTime.Today;
                 foreach (var pr in activeProgs)
                 {
                     var defaultDays = pr.DefaultDurationDays > 0 ? pr.DefaultDurationDays : 3;
-                    var defaultDeadline = DateTime.Today.AddDays(defaultDays);
+                    var defaultDeadline = today.AddDays(defaultDays);
                     progressList.Add(new
                     {
                         progressId = pr.ProgressID,
                         processId = processId,
                         taskName = pr.ProgressName,
+                        sortOrder = pr.SortOrder > 0 ? pr.SortOrder : progSort++,
+                        startDate = today.ToString("yyyy-MM-dd"),
+                        durationDays = defaultDays,
                         defaultDurationDays = defaultDays,
                         deadline = defaultDeadline.ToString("yyyy-MM-dd"),
                         assignedUserId = (int?)null

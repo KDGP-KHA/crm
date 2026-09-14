@@ -315,3 +315,114 @@
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
     outline: none;
 }
+
+/* 7. Multi-file upload chips styling */
+.ds-file-upload-wrapper {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+}
+
+.ds-file-upload-wrapper:hover {
+    border-color: #94a3b8;
+    background-color: #f1f5f9;
+}
+
+.ds-file-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ds-file-chip {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 4px 10px 4px 12px;
+    font-size: 12.5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    max-width: 100%;
+}
+
+.ds-file-chip:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.12);
+}
+
+.ds-file-chip-icon {
+    margin-right: 6px;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.ds-file-chip-name {
+    font-weight: 600;
+    color: #1e293b;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ds-file-chip-size {
+    color: #64748b;
+    font-size: 11.5px;
+    margin-left: 6px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.ds-file-chip-remove {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background-color 0.15s;
+    width: 18px;
+    height: 18px;
+}
+
+.ds-file-chip-remove:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+/* 8. Checklist controls enhancement */
+.ds-progress-row-item .txt-sort-order,
+.ds-progress-row-item .txt-start-date,
+.ds-progress-row-item .txt-duration-days {
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    height: 34px;
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-progress-row-item .txt-sort-order:focus,
+.ds-progress-row-item .txt-start-date:focus,
+.ds-progress-row-item .txt-duration-days:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    outline: none;
+}
+
+.ds-progress-row-item .badge-calculated-deadline {
+    height: 34px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+}

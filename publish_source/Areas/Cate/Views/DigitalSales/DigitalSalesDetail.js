@@ -1,4 +1,4 @@
-window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -233,8 +233,8 @@ function updateHeaderInfo(businessType, statusName, title, code) {
                     .html('<i class="fa fa-lightbulb mr-1"></i>Cơ hội kinh doanh');
             }
         }
-        $("#lblKeyProject").text(isProject ? "Dự án trọng điểm" : "Cơ hội trọng điểm");
-        $("#lblFollowSales").text(isProject ? "Quan tâm dự án" : "Quan tâm cơ hội");
+        $("#lblKeyProject").text("Trọng điểm");
+        $("#lblFollowSales").text("Đang quan tâm");
     }
 
     if (statusName) {
