@@ -182,6 +182,8 @@ VALUES
     ('DigitalSales_Msg_ChangeStatusNoteRequired', N'Vui lòng nhập ghi chú / lý do chuyển trạng thái!'),
     ('DigitalSales_Msg_SaveMemberFail', N'Không thể lưu thành viên!'),
     ('DigitalSales_Msg_SaveMembersMultiSuccess', N'Đã lưu thành công {0} nhân sự tham gia!'),
+    ('DigitalSales_Discussion_MentionNotificationTitle', N'{0} đã nhắc đến bạn trong trao đổi'),
+    ('DigitalSales_Discussion_MentionNotificationContent', N'{0}: {1}'),
     ('DigitalSales_Role_Member', N'Thành viên'),
     ('Button_Cancel', N'Hủy'),
     ('Button_Close', N'Đóng'),

@@ -2,6 +2,7 @@
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
+using Core.Cate.Services;
 using Core.Sys.BaseApp;
 using Core.Sys.Caches.Sys;
 using Core.Sys.Models.Sys;
@@ -34,6 +35,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_RolesCache _rolesCache;
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
+        private readonly NotificationService _notificationService;
+        private readonly RM_ReviewBatchItemCache _reviewBatchItemCache;
+        private readonly RM_ReviewBatchItemBiz _reviewBatchItemBiz;
 
         private string _title => AppProcessor.Messagor.GetMessage("DigitalSales_Title");
         private readonly string _folderUpload = "/Contents/Uploads/DigitalSales";
@@ -67,6 +71,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _rolesCache = new RM_RolesCache();
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
+            _notificationService = new NotificationService();
+            _reviewBatchItemCache = new RM_ReviewBatchItemCache();
+            _reviewBatchItemBiz = new RM_ReviewBatchItemBiz();
         }
 
         #region 1. List & Search
@@ -829,7 +836,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         #region 3. Detail 360
         [ActionType(Type = EnumActionType.View)]
         [HttpGet]
-        public ActionResult Detail(int id)
+        public ActionResult Detail(int id, int? reviewBatchID)
         {
             try
             {
@@ -840,6 +847,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
 
                 model.Note = FormatHtmlContent(model.Note);
+                model.ReviewHistory = BuildDigitalSalesReviewHistory(id);
 
                 if (string.IsNullOrEmpty(model.CreatedByName) && !string.IsNullOrEmpty(model.CreatedBy))
                 {
@@ -847,6 +855,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
 
                 ViewBag.Title = $"{AppProcessor.Messagor.GetMessage("DigitalSales_RecordPrefix")}: {model.Code} - {model.Title}";
+                ViewBag.ReviewBatchID = reviewBatchID.GetValueOrDefault(0);
                 try
                 {
                     ViewBag.CanEdit = HasDetailPermission(model, User.UserName);
@@ -863,6 +872,27 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 AppProcessor.Logger.Error(ex);
                 return RedirectToAction("Index");
             }
+        }
+
+        [HttpGet]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetReviewHistoryPartial(int? id)
+        {
+            return PartialView(
+                "~/Areas/Cate/Views/ReviewBatchItem/_ReviewHistory.cshtml",
+                BuildDigitalSalesReviewHistory(id.GetValueOrDefault()));
+        }
+
+        private List<RM_ReviewHistoryModel> BuildDigitalSalesReviewHistory(int digitalSalesID)
+        {
+            var histories = _reviewBatchItemCache.GetDigitalSalesHistory(digitalSalesID) ?? new List<RM_ReviewHistoryModel>();
+            foreach (var item in histories)
+            {
+                item.ExistingFiles = _reviewBatchItemBiz.GetFilePaths(item.ReviewHistoryID) ?? new List<RM_ReviewBatchFilePathModel>();
+                item.CanEdit = string.Equals(item.CreatedBy, User.UserName, StringComparison.OrdinalIgnoreCase);
+            }
+            return histories;
         }
 
         [HttpPost]
@@ -1043,6 +1073,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = CreateMessage(_title, EnumProcessType.DataNotExist, EnumMsgIcon.Error) });
             }
 
+            var digitalSales = _salesCache.GetByID(digitalSalesId, User.UserName);
+            if (digitalSales == null)
+            {
+                return Json(new { status = false, message = CreateMessage(_title, EnumProcessType.DataNotExist, EnumMsgIcon.Error) });
+            }
+
             if (string.IsNullOrWhiteSpace(content))
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Discussion_ContentRequired") });
@@ -1102,19 +1138,90 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            var requestedMentionUserIds = new HashSet<int>();
+            foreach (var userIdValue in (mentionedUserIds ?? string.Empty).Split(','))
+            {
+                int userId;
+                if (int.TryParse(userIdValue.Trim(), out userId) && userId > 0)
+                {
+                    requestedMentionUserIds.Add(userId);
+                }
+            }
+
+            var contentMentionUserIds = new HashSet<int>();
+            var mentionMatches = Regex.Matches(
+                content,
+                @"data-user-id\s*=\s*[""'](?<userId>\d+)[""']",
+                RegexOptions.IgnoreCase);
+            foreach (Match mentionMatch in mentionMatches)
+            {
+                int userId;
+                if (int.TryParse(mentionMatch.Groups["userId"].Value, out userId) && userId > 0)
+                {
+                    contentMentionUserIds.Add(userId);
+                }
+            }
+            requestedMentionUserIds.IntersectWith(contentMentionUserIds);
+
+            var mentionedMembers = (_salesCache.GetMembersBySalesID(digitalSalesId)
+                ?? new List<RM_DigitalSalesMemberModel>())
+                .Where(member => requestedMentionUserIds.Contains(member.UserID)
+                    && !string.IsNullOrWhiteSpace(member.UserName))
+                .GroupBy(member => member.UserID)
+                .Select(group => group.First())
+                .ToList();
+
             var activity = new RM_DigitalSalesActivityModel
             {
                 DigitalSalesID = digitalSalesId,
                 ActivityType = 1,
                 Content = content.Trim(),
                 Attachments = uploadedFiles.Count > 0 ? Newtonsoft.Json.JsonConvert.SerializeObject(uploadedFiles) : null,
-                MentionedUserIDs = string.IsNullOrWhiteSpace(mentionedUserIds) ? null : mentionedUserIds.Trim(),
-                MentionedNames = string.IsNullOrWhiteSpace(mentionedNames) ? null : mentionedNames.Trim()
+                MentionedUserIDs = mentionedMembers.Count > 0
+                    ? string.Join(",", mentionedMembers.Select(member => member.UserID))
+                    : null,
+                MentionedNames = mentionedMembers.Count > 0
+                    ? string.Join(",", mentionedMembers.Select(member => member.FullName))
+                    : null
             };
 
             var saveRes = _salesCache.AddActivity(activity, User.UserName);
             if (saveRes > 0)
             {
+                var notificationReceivers = mentionedMembers
+                    .Select(member => member.UserName)
+                    .Where(userName => !userName.Equals(User.UserName, StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (notificationReceivers.Count > 0)
+                {
+                    var currentUser = _userCache.GetByUserName(User.UserName);
+                    var actionByFullName = currentUser != null && !string.IsNullOrWhiteSpace(currentUser.FullName)
+                        ? currentUser.FullName
+                        : User.UserName;
+                    var notificationTitle = string.Format(
+                        GetAppMessage(
+                            "DigitalSales_Discussion_MentionNotificationTitle",
+                            "{0} đã nhắc đến bạn trong trao đổi"),
+                        actionByFullName);
+                    var notificationContent = string.Format(
+                        GetAppMessage(
+                            "DigitalSales_Discussion_MentionNotificationContent",
+                            "{0}: {1}"),
+                        digitalSales.Title,
+                        plainTextContent);
+
+                    _notificationService.PushDigitalSalesNotification(
+                        digitalSalesId,
+                        notificationTitle,
+                        notificationContent,
+                        notificationReceivers,
+                        "DIGITAL_SALES_DISCUSSION_MENTION",
+                        User.UserName,
+                        actionByFullName);
+                }
+
                 return Json(new
                 {
                     status = true,

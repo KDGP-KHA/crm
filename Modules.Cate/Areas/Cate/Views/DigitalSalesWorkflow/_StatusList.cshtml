@@ -28,7 +28,7 @@
                  data-id="@item.StatusID"
                  data-name="@item.StatusName"
                  data-type="@item.BusinessType"
-                 onclick="DigitalSalesWorkflow.selectStatus(@item.StatusID, this)">
+                 onclick="return DigitalSalesWorkflow.selectStatus(@item.StatusID, this, event)">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center text-truncate mr-2">
                         <span class="badge badge-sm badge-pill mr-2 text-white @bgcClass">

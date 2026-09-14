@@ -1,4 +1,4 @@
----
+﻿---
 
 # 2026-09-09 Vấn đề: GitHub Actions deploy FTP Demo thất bại
 
@@ -246,3 +246,187 @@ Cập nhật `CenIT.Solution.TOC.WebApp/Controllers/AccountController.cs`: site 
 - `App_HostUrl` là cấu hình do từng server sở hữu và tiếp tục bị loại khỏi danh sách file upload FTP.
 - Bộ test tự động `tests/account-login/Run-HostPolicyTests.ps1` build WebApp và gọi trực tiếp hàm policy đã biên dịch; kết quả 10/10 PASS.
 - Không thay đổi `Configs/AppSettings.config`; Demo và Production tiếp tục dùng cấu hình server riêng.
+
+---
+
+# 2026-09-14 Vấn đề: Clone Rà soát định kỳ cho DigitalSales
+
+## 1. Mô tả vấn đề
+Clone chức năng Rà soát định kỳ hiện tại thành chức năng rà soát `DigitalSales`. Danh sách mới chỉ có một tab DigitalSales; khi chọn rà soát sẽ chuyển tới `DigitalSales/Detail`. Tại trang chi tiết hiển thị panel rà soát bên phải, có thể thu hẹp và hỗ trợ hai lựa chọn “Lưu” hoặc “Lưu và tiếp tục”, tương tự luồng rà soát Cơ hội/Dự án hiện có.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: Luồng cũ nằm tại `ReviewBatchItemController`, `Views/ReviewBatchItem`, sử dụng hai danh sách Dự án/Cơ hội và mở `ProjectOverview` hoặc `BusinessOpportunityOverview` kèm `reviewBatchID`.
+- Cơ chế hiện tại: `RM_ReviewBatchItem` và `RM_ReviewHistory` lưu theo cặp `ObjectType`/`ObjectID`; hiện `ObjectType=1` là Cơ hội và `ObjectType=2` là Dự án. Stored procedure lưu/lấy lịch sử có thể nhận loại mới, nhưng cần quy ước `ObjectType=3` cho DigitalSales và bổ sung stored procedure danh sách.
+- Giao diện chi tiết cũ: `_ReviewBatch.cshtml` tạo panel neo bên phải, hỗ trợ thu gọn, không chặn nội dung nền, có “Lưu” và “Lưu và tiếp tục”. Khi tiếp tục, controller tìm đối tượng chưa rà soát kế tiếp rồi chuyển URL.
+- Hiện trạng DigitalSales: `DigitalSalesController.Detail(int id)` và `Views/DigitalSales/Detail.cshtml` chưa nhận `reviewBatchID`, chưa có `reviewSplitView`, `reviewFormPane`, nút tự mở form hoặc vùng lịch sử rà soát.
+- Mục tiêu đề xuất: Tạo màn hình rà soát DigitalSales độc lập nhưng tái sử dụng đợt rà soát, bảng lịch sử, form/panel và nghiệp vụ phân cấp hiện có; bổ sung URL `DigitalSales/Detail/{id}?reviewBatchID=...`.
+- Phạm vi dự kiến: Model tìm kiếm/kết quả, Cache/Biz, controller và view danh sách một tab, stored procedure danh sách, tích hợp panel vào Detail, lưu với `ObjectType=3`, tìm bản ghi kế tiếp, App_Message/menu/quyền nếu cần.
+- Ngoài phạm vi dự kiến: Không sửa luồng Cơ hội/Dự án cũ; không đổi cấu trúc bảng nếu `ObjectType=3` dùng được với schema hiện tại; không thay cơ chế `ReviewLevel`.
+- Ràng buộc: Tuân thủ MVC_RULES, App_Message, anti-forgery, UTF-8 BOM; giữ panel thu gọn và hai chế độ lưu; danh sách cần paging/filter/quyền như luồng cũ.
+- Rủi ro / giả định: “Clone” chưa xác định là tạo mới song song hay thay thế màn hình cũ; chưa rõ dùng chung đợt rà soát, tiêu chí chọn DigitalSales và vị trí lịch sử.
+- Phương án khuyến nghị: Tạo chức năng mới song song `DigitalSalesReview`, dùng chung `RM_ReviewBatch` và lịch sử, quy ước `ObjectType=3`, tái sử dụng partial form/panel cũ.
+
+## 3. Câu hỏi làm rõ
+1. Chức năng mới sẽ chạy song song và giữ nguyên Rà soát định kỳ Cơ hội/Dự án cũ, đúng không? Khuyến nghị tạo route/controller riêng `Cate/DigitalSalesReview`.
+2. DigitalSales có dùng chung danh mục “Đợt rà soát” (`RM_ReviewBatch`) hiện tại hay cần danh mục đợt riêng? Khuyến nghị dùng chung.
+3. Có thống nhất dùng `ObjectType = 3` trong `RM_ReviewBatchItem`/`RM_ReviewHistory` cho DigitalSales và giữ nguyên form, file đính kèm, xác nhận, lịch sử không? Khuyến nghị có.
+4. Danh sách một tab cần các bộ lọc nào? Khuyến nghị: từ khóa, đợt rà soát, loại hình DigitalSales, trạng thái, phòng ban, nhân sự phụ trách và Đã/Chưa rà soát.
+5. Phạm vi dữ liệu có áp dụng quyền phòng ban và `ReviewLevel` như chức năng cũ, đồng thời chỉ hiển thị DigitalSales người dùng được quyền xem không? Khuyến nghị có cả hai lớp quyền.
+6. Trên `DigitalSales/Detail`, ngoài panel tự mở khi có `reviewBatchID`, có cần hiển thị lịch sử rà soát trong tab “Trao đổi chung & Hoạt động” không? Khuyến nghị có.
+7. Sau khi hoàn thiện có cần cập nhật stored procedure và App_Message trực tiếp trên DB Demo, đồng thời build kiểm tra nhưng chưa publish/deploy không? Khuyến nghị có.
+
+## 4. Câu trả lời & cập nhật phạm vi
+1. Không tạo chức năng rà soát DigitalSales chạy song song. Thay thế hoàn toàn màn hình rà soát Cơ hội/Dự án cũ bằng màn hình rà soát DigitalSales một tab.
+2. Bổ sung một tab riêng “Lịch sử rà soát” tại `DigitalSales/Detail`, không ghép lịch sử vào tab “Trao đổi chung & Hoạt động”.
+3. Các nội dung còn cần xác nhận: cách xử lý dữ liệu lịch sử cũ, danh mục đợt rà soát, bộ lọc, quyền và phạm vi cập nhật DB/build.
+
+## 5. Câu hỏi làm rõ bổ sung
+1. Dữ liệu rà soát Cơ hội/Dự án cũ có giữ nguyên trong DB để tra cứu/báo cáo về sau, chỉ loại khỏi giao diện mới không? Khuyến nghị giữ dữ liệu cũ và dùng `ObjectType=3` cho DigitalSales.
+2. Có tiếp tục dùng chung danh mục “Đợt rà soát” và cơ chế cấp rà soát `ReviewLevel` hiện tại không? Khuyến nghị có.
+3. Danh sách DigitalSales dùng các bộ lọc: từ khóa, đợt rà soát, loại hình, trạng thái, phòng ban, nhân sự phụ trách và Đã/Chưa rà soát, đúng không? Khuyến nghị có.
+4. Có áp dụng quyền phòng ban/cấp rà soát như cũ và cập nhật stored procedure/App_Message trực tiếp trên DB Demo, sau đó build kiểm tra nhưng chưa publish/deploy không? Khuyến nghị có.
+
+## 6. Câu trả lời & Quyết định cuối
+1. Chức năng rà soát mới mặc định chỉ làm việc với DigitalSales, không sử dụng `ObjectType` trong model, bộ lọc hoặc luồng nghiệp vụ.
+2. Tiếp tục dùng chung danh mục “Đợt rà soát” và cơ chế `ReviewLevel` hiện tại.
+3. Danh sách sử dụng các bộ lọc: từ khóa, đợt rà soát, loại hình, trạng thái, phòng ban, nhân sự phụ trách và Đã/Chưa rà soát.
+4. Giữ cơ chế phân quyền phòng ban/cấp rà soát; cập nhật stored procedure và App_Message trên DB Demo; build kiểm tra nhưng không publish/deploy.
+5. Thay thế hoàn toàn giao diện rà soát Cơ hội/Dự án cũ bằng một danh sách DigitalSales; trang `DigitalSales/Detail` có tab “Lịch sử rà soát” riêng.
+
+## 7. Checklist: Thay thế Rà soát định kỳ bằng Rà soát DigitalSales
+
+### Chuẩn bị
+- [x] Kiểm tra cấu trúc Controller, Model, Biz/Cache, View, JavaScript và stored procedure của chức năng rà soát hiện tại.
+- [x] Đối chiếu `MVC_RULES.md` và các quy tắc form/AJAX liên quan.
+
+### Thực hiện
+- [x] Cập nhật model tìm kiếm/kết quả rà soát để chỉ biểu diễn DigitalSales và không lộ `ObjectType`.
+- [x] Cập nhật Biz/Cache và stored procedure lấy danh sách DigitalSales theo đầy đủ bộ lọc, quyền phòng ban và `ReviewLevel`.
+- [x] Thay màn hình hai tab Cơ hội/Dự án bằng một danh sách DigitalSales tại chức năng rà soát hiện tại.
+- [x] Cập nhật hành động “Rà soát” chuyển tới `DigitalSales/Detail` kèm đợt rà soát.
+- [x] Tích hợp panel rà soát bên phải tại trang chi tiết, hỗ trợ thu gọn, “Lưu” và “Lưu và tiếp tục”.
+- [x] Bổ sung tab “Lịch sử rà soát” riêng trong `DigitalSales/Detail` và tải lịch sử của DigitalSales hiện tại.
+- [x] Bổ sung/cập nhật App_Message và stored procedure trên DB Demo.
+- [x] Đồng bộ View/JavaScript theo quy tắc Triple Mirroring và chuẩn hóa UTF-8 with BOM.
+
+### Kiểm tra / Nghiệm thu
+- [x] Kiểm tra danh sách, bộ lọc, phân quyền và trạng thái Đã/Chưa rà soát.
+- [x] Kiểm tra panel mở/thu gọn và hai luồng lưu trên DigitalSales hiện tại/tiếp theo.
+- [x] Kiểm tra tab lịch sử chỉ hiển thị dữ liệu của DigitalSales đang xem.
+- [x] Chạy kiểm tra stored procedure/service liên quan trên DB Demo.
+- [x] Build các project liên quan thành công, không publish/deploy.
+
+### Ghi chú
+- Phạm vi không gồm publish source, upload FTP hoặc deploy Demo.
+- DB Demo đã có 3 stored procedure `RM_DigitalSalesReview_*` và 27 App_Message; kiểm tra lưu/lịch sử được chạy trong transaction rồi rollback.
+- Kết quả kiểm thử: DigitalSales Management 44/44 PASS; DigitalSales Review 32/32 PASS; build chuẩn WebApp không có lỗi biên dịch.
+- Kiểm tra biên dịch toàn bộ Razor bằng `MvcBuildViews` còn dừng tại các view `Sys/User` ngoài phạm vi do `SysUserSearchModel` thiếu các thuộc tính đang được view sử dụng.
+- Cấu trúc DB cũ chỉ được giữ ở mức cần thiết để tương thích; nghiệp vụ mới không yêu cầu người dùng chọn loại đối tượng rà soát.
+
+---
+
+# 2026-09-14 Vấn đề: Sửa UI và hành vi mở rà soát DigitalSales
+
+## 1. Mô tả vấn đề
+- Giao diện panel rà soát đang lỗi và báo JavaScript `CKFinder is not defined`.
+- Cần bỏ nút tắt modal rà soát.
+- Khi bấm tên DigitalSales trong danh sách rà soát cũng phải chuyển vào luồng rà soát, thay vì chỉ nút “Rà soát” thực hiện hành vi này.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: lỗi nằm trong luồng từ danh sách `ReviewBatchItem` sang `DigitalSales/Detail` và panel rà soát bên phải.
+- Nguyên nhân JavaScript: trang chi tiết đang nạp `ckeditor.js`, nhưng cấu hình CKEditor gọi `CKFinder.setupCKEditor(...)` khi global `CKFinder` chưa được nạp; lỗi làm trình soạn thảo nội dung không khởi tạo hoàn chỉnh.
+- Nguyên nhân điều hướng: renderer cột tên chỉ tạo URL `/Cate/DigitalSales/Detail/{id}`; renderer nút hành động mới bổ sung `reviewBatchID` cho bản ghi chưa rà soát.
+- Nút đóng: layout `_Form.cshtml` dùng chung tự sinh nút đóng ở header và nút Hủy ở footer; cần ẩn theo phạm vi `ReviewBatch` thay vì sửa layout dùng chung.
+- Rủi ro: nếu bỏ mọi đường đóng panel, người dùng có thể bị giữ ở màn hình khi không muốn lưu; nếu tên luôn truyền đợt rà soát cho cả bản ghi đã rà soát, hành vi có thể trở thành rà soát lại thay vì chỉ xem chi tiết.
+- Phương án sơ bộ: nạp CKFinder trước CKEditor hoặc chặn cấu hình CKFinder khi thư viện không tồn tại; ẩn nút đóng bằng selector riêng của modal rà soát; dùng chung một hàm sinh URL cho cột tên và nút hành động.
+
+## 3. Câu hỏi làm rõ
+1. “Bỏ nút tắt modal rà soát” là chỉ bỏ dấu `X` trên tiêu đề, hay bỏ cả dấu `X` và nút “Hủy” ở footer?
+2. Khi bấm tên một bản ghi chưa rà soát và đã chọn đợt, có đúng là mở `DigitalSales/Detail` kèm panel rà soát như nút “Rà soát” không?
+3. Với bản ghi đã rà soát, bấm tên chỉ mở chi tiết/lịch sử hay vẫn mở panel để rà soát lại trong cùng đợt?
+4. Với CKFinder, có dùng đầy đủ chức năng duyệt/chèn ảnh trong nội dung rà soát không? Phương án đề xuất là nạp đúng `ckfinder.js` trước CKEditor để giữ nguyên trình soạn thảo đầy đủ.
+
+## 4. Câu trả lời & Quyết định
+- Bỏ cả dấu `X` trên header và nút “Hủy” ở footer của riêng panel rà soát; không thay đổi layout modal dùng chung.
+- Bấm tên bản ghi chưa rà soát sẽ mở `DigitalSales/Detail` kèm đợt rà soát, giống nút “Rà soát”.
+- Bấm tên bản ghi đã rà soát chỉ mở chi tiết để xem lịch sử, không tự mở panel rà soát lại.
+- Giữ đầy đủ CKFinder và nạp thư viện trước CKEditor.
+
+## 5. Checklist
+
+### Chuẩn bị
+- [x] Kiểm tra đường dẫn và thứ tự nạp CKFinder/CKEditor hiện có.
+- [x] Kiểm tra renderer liên kết tên và nút hành động trong danh sách rà soát.
+
+### Thực hiện
+- [x] Nạp CKFinder trước CKEditor tại trang chi tiết DigitalSales.
+- [x] Loại bỏ dấu `X` và nút “Hủy” trong riêng modal `ReviewBatch`.
+- [x] Dùng chung quy tắc tạo URL cho tên bản ghi và nút hành động.
+- [x] Giữ bản ghi đã rà soát ở chế độ xem chi tiết/lịch sử, không mở panel tự động.
+- [x] Đồng bộ View/JavaScript theo Triple Mirroring và UTF-8 BOM.
+
+### Kiểm tra / Nghiệm thu
+- [x] Kiểm tra cú pháp JavaScript và thứ tự nạp thư viện.
+- [x] Kiểm tra URL của tên bản ghi cho cả trạng thái đã/chưa rà soát.
+- [x] Chạy bộ test DigitalSales Review.
+- [x] Build các project liên quan, không publish/deploy.
+
+### Ghi chú
+- Không sửa `_Form.cshtml` dùng chung để tránh ảnh hưởng các modal khác.
+- Kết quả: DigitalSales Review 35/35 PASS; WebApp build thành công.
+- Không publish source và không deploy.
+
+---
+
+# 2026-09-14 Vấn đề: Đồng bộ giao diện search rà soát DigitalSales theo search cũ
+
+## 1. Mô tả vấn đề
+- Cập nhật ô search của rà soát DigitalSales có style và nội dung tương tự phần search rà soát cũ theo ảnh tham chiếu.
+- Bỏ bộ lọc “Loại hình”.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: partial `_SearchDigitalSales.cshtml` hiện dùng grid Bootstrap bốn cột, có bộ lọc Loại hình và có hai nút Tìm kiếm/Đặt lại.
+- Search cũ dùng card header xanh, body `p-2`, hai hàng flex: hàng đầu gồm Từ khóa/Đợt rà soát/Trạng thái; hàng sau gồm Phòng ban/Nhân viên/Trạng thái rà soát/nút Tìm kiếm.
+- Mục tiêu: giữ nguyên nghiệp vụ lọc DigitalSales nhưng đưa bố cục, kích thước và nhãn về cùng chuẩn giao diện cũ; loại bỏ Loại hình khỏi giao diện và state JavaScript.
+- Ràng buộc: trạng thái DigitalSales hiện được tải lại theo Loại hình; khi bỏ bộ lọc này phải xác định cách biểu diễn đồng thời trạng thái Cơ hội và Dự án.
+- Rủi ro: các trạng thái của hai loại có thể trùng tên hoặc khác mã; danh sách gộp không có nhãn nhóm có thể gây khó hiểu.
+- Phương án sơ bộ: hiển thị toàn bộ trạng thái trong một dropdown, có thể gắn tiền tố/nhóm Cơ hội và Dự án; giữ cơ chế tự tìm khi đổi dropdown/radio như search cũ.
+
+## 3. Câu hỏi làm rõ
+1. Dropdown “Trạng thái” sau khi bỏ Loại hình sẽ hiển thị toàn bộ trạng thái Cơ hội và Dự án; có cần ghi tiền tố `Cơ hội - ...` và `Dự án - ...` để phân biệt không?
+2. Có bỏ nút “Đặt lại” và chỉ giữ một nút “Tìm kiếm” bên phải đúng như ảnh không?
+3. Có giữ hành vi tự động tìm khi đổi Đợt rà soát, Trạng thái, Phòng ban, Nhân viên hoặc Đã/Chưa rà soát như chức năng cũ không?
+4. Bố cục desktop áp dụng đúng hai hàng `3 ô` và `3 bộ lọc + nút`; trên màn hình nhỏ cho phép tự xuống hàng, đúng không?
+
+## 4. Câu trả lời & Quyết định
+- Giữ giao diện tổng thể tương tự màn rà soát cũ trong ảnh: card tìm kiếm hai hàng và bảng dữ liệu ngay bên dưới.
+- Chỉ hiển thị một nội dung DigitalSales, không hiển thị hai tab Cơ hội/Dự án.
+- Bỏ bộ lọc Loại hình; dùng một dropdown trạng thái chung của DigitalSales.
+- Chỉ giữ nút “Tìm kiếm” ở cuối hàng thứ hai; giữ hành vi lọc khi đổi điều kiện như chức năng cũ.
+- Cho phép các ô tự xuống hàng trên màn hình nhỏ.
+
+## 5. Checklist
+
+### Chuẩn bị
+- [x] Đối chiếu cấu trúc `_SearchProject.cshtml` cũ và `_SearchDigitalSales.cshtml` hiện tại.
+- [x] Kiểm tra nguồn dữ liệu trạng thái chung của DigitalSales.
+
+### Thực hiện
+- [x] Chuyển search DigitalSales sang card hai hàng flex theo giao diện rà soát cũ.
+- [x] Bố trí hàng đầu gồm Từ khóa, Đợt rà soát và Trạng thái.
+- [x] Bố trí hàng sau gồm Phòng ban, Nhân viên, Trạng thái rà soát và nút Tìm kiếm.
+- [x] Loại bỏ bộ lọc Loại hình và nút Đặt lại khỏi View/JavaScript/state request.
+- [x] Giữ màn hình một nội dung DigitalSales, không bổ sung tab Cơ hội/Dự án.
+- [x] Đồng bộ Triple Mirroring và chuẩn hóa UTF-8 BOM.
+
+### Kiểm tra / Nghiệm thu
+- [x] Kiểm tra cú pháp JavaScript và cấu trúc responsive.
+- [x] Kiểm tra request danh sách không còn gửi `BusinessType`.
+- [x] Chạy bộ test DigitalSales Review.
+- [x] Build các project liên quan, không publish/deploy.
+
+### Ghi chú
+- Thay đổi chỉ áp dụng cho search rà soát DigitalSales; không khôi phục hai tab cũ.
+- Kết quả: DigitalSales Review 38/38 PASS; Core.Cate, Modules.Cate và WebApp build thành công.
+- Đã xác thực cấu trúc/style theo code và ảnh tham chiếu bằng `ui-visual-validator`; chưa chụp ảnh runtime sau sửa vì URL local chuyển tới trang đăng nhập khi không có phiên xác thực.
+- Không publish source và không deploy.

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 
 <Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<StoredProcedures ProviderName="CenIT.Provider.Major">
@@ -353,6 +353,9 @@
 		<!--ReviewBatchItem-->
 		<Procedure Name="RM_ReviewBatchItem_Save"		Value="RM_ReviewBatchItem_Save" />
 		<Procedure Name="RM_ReviewBatch_GetHistory"		Value="RM_ReviewBatch_GetHistory" />
+		<Procedure Name="RM_DigitalSalesReview_GetList" Value="RM_DigitalSalesReview_GetList" />
+		<Procedure Name="RM_DigitalSalesReview_Save" Value="RM_DigitalSalesReview_Save" />
+		<Procedure Name="RM_DigitalSalesReview_GetHistory" Value="RM_DigitalSalesReview_GetHistory" />
 		<Procedure Name="RM_ReviewHistory_Save"			Value="RM_ReviewHistory_Save" />
 		<Procedure Name="RM_ReviewHistory_GetByID"			Value="RM_ReviewHistory_GetByID" />
 

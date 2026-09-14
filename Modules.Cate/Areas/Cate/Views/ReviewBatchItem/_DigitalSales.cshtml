@@ -1,0 +1,24 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewDigitalSalesSearchModel
+
+<div class="container-fluid px-0">
+    @Html.Partial("_SearchDigitalSales", Model)
+    <div class="card dcard mt-3">
+        <div class="card-body p-0 table-responsive-md">
+            <table id="DSDigitalSalesReview" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Column_Record")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_BusinessType_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("DigitalSales_Customer_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Status_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("DigitalSales_AssignedEmployee_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Column_ReviewInfo")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,422 +1,179 @@
-﻿var _ProjectActionURLs = {
-    Project_GetData: "/Cate/ReviewBatchItem/GetProject"
-};
+﻿var _tableReviewDigitalSales;
+var _reviewDigitalSalesStateKey = "review_digital_sales_table_state";
+var _reviewDigitalSalesFilterKey = "review_digital_sales_filter";
 
-var _BusinessOpportunityActionURLs = {
-    BusinessOpportunity_GetData: "/Cate/ReviewBatchItem/GetBusinessOpportunity"
-};
-
-var _tableProject;
-var _tableBusinessOpportunity;
-
-/**
- * Cột "Thông tin rà soát trong đợt": thời gian, người thực hiện, nội dung
- * của lượt rà soát mới nhất; kèm tổng số lượt nếu có nhiều hơn 1.
- */
-function renderReviewInfo(row) {
-    if (!row || !row.LastReviewDate) {
-        return '<span class="text-secondary-l1 font-italic">Chưa rà soát</span>';
-    }
-
-    var m = moment(row.LastReviewDate);
-    var dateStr = m.format("HH:mm") === "00:00"
-        ? m.format("DD/MM/YYYY")
-        : m.format("DD/MM/YYYY HH:mm");
-
-    var comment = row.LastReviewComment || "";
-    if (comment.length > 120) {
-        comment = comment.substring(0, 120) + "...";
-    }
-
-    var moreBadge = row.ReviewCount > 1
-        ? ' <span class="badge badge-secondary">' + row.ReviewCount + ' lượt</span>'
-        : '';
-
-    return '<div class="small text-muted"><i class="far fa-clock mr-1"></i>' + dateStr + moreBadge + '</div>'
-        + '<div class="small text-primary font-weight-bold"><i class="fa fa-user mr-1"></i>' + (row.LastReviewerName || "") + '</div>'
-        + (comment ? '<div class="small mt-1">' + $("<div/>").text(comment).html() + '</div>' : '');
+function encodeReviewDigitalSales(value) {
+    return $("<div>").text(value || "").html();
 }
 
-$(document).ready(function () {
+function getReviewDigitalSalesMessages() {
+    return window.reviewDigitalSalesMessages || {};
+}
 
-    restoreProjectTableState();
-    restoreBusinessTableState();
+function buildReviewDigitalSalesUrl(row) {
+    var url = "/Cate/DigitalSales/Detail/" + row.DigitalSalesID;
+    var batchID = parseInt($("#ReviewDigitalSalesBatchID").val() || 0, 10);
+    if (!row.IsReviewed && batchID > 0) {
+        url += "?reviewBatchID=" + batchID;
+    }
+    return url;
+}
 
-    initTableProject();
-    initTableBusinessOpportunity();
+function renderReviewDigitalSalesInfo(row) {
+    var messages = getReviewDigitalSalesMessages();
+    if (!row || !row.LastReviewDate) {
+        return '<span class="text-secondary-l1 font-italic">' + encodeReviewDigitalSales(messages.notReviewed) + '</span>';
+    }
+
+    var date = moment(row.LastReviewDate);
+    var dateText = date.format("HH:mm") === "00:00" ? date.format("DD/MM/YYYY") : date.format("DD/MM/YYYY HH:mm");
+    var comment = row.LastReviewComment || "";
+    if (comment.length > 120) comment = comment.substring(0, 120) + "...";
+
+    var countText = (messages.reviewCount || "{0}").replace("{0}", row.ReviewCount || 0);
+    var countBadge = row.ReviewCount > 1
+        ? ' <span class="badge badge-secondary">' + encodeReviewDigitalSales(countText) + '</span>'
+        : "";
+
+    return '<div class="small text-muted"><i class="far fa-clock mr-1"></i>' + dateText + countBadge + '</div>'
+        + '<div class="small text-primary font-weight-bold"><i class="fa fa-user mr-1"></i>' + encodeReviewDigitalSales(row.LastReviewerName) + '</div>'
+        + (comment ? '<div class="small mt-1">' + encodeReviewDigitalSales(comment) + '</div>' : '');
+}
+
+function saveReviewDigitalSalesState() {
+    if (!_tableReviewDigitalSales) return;
+    var order = _tableReviewDigitalSales.order();
+    var state = {
+        start: _tableReviewDigitalSales.page.info().start,
+        length: _tableReviewDigitalSales.page.len(),
+        orderColumn: order.length ? order[0][0] : 1,
+        orderDir: order.length ? order[0][1] : "asc"
+    };
+    localStorage.setItem(_reviewDigitalSalesStateKey, JSON.stringify(state));
+}
+
+function getReviewDigitalSalesState() {
+    try {
+        return JSON.parse(localStorage.getItem(_reviewDigitalSalesStateKey)) || {};
+    } catch (error) {
+        localStorage.removeItem(_reviewDigitalSalesStateKey);
+        return {};
+    }
+}
+
+function saveReviewDigitalSalesFilter() {
+    var filter = {
+        Keyword: $("#ReviewDigitalSalesKeyword").val(),
+        ReviewBatchID: $("#ReviewDigitalSalesBatchID").val(),
+        StatusID: $("#ReviewDigitalSalesStatusID").val(),
+        DepartmentID: $("#ReviewDigitalSalesDepartmentID").val(),
+        EmployeeID: $("#ReviewDigitalSalesEmployeeID").val(),
+        IsReviewed: $('input[name="IsReviewed"]:checked').val()
+    };
+    localStorage.setItem(_reviewDigitalSalesFilterKey, JSON.stringify(filter));
+}
+
+function restoreReviewDigitalSalesFilter() {
+    var initialBatchID = $("#ReviewDigitalSalesBatchID").val();
+    if (initialBatchID && initialBatchID !== "0") return null;
+
+    var filter;
+    try {
+        filter = JSON.parse(localStorage.getItem(_reviewDigitalSalesFilterKey));
+    } catch (error) {
+        localStorage.removeItem(_reviewDigitalSalesFilterKey);
+    }
+    if (!filter) return null;
+
+    $("#ReviewDigitalSalesKeyword").val(filter.Keyword || "");
+    $("#ReviewDigitalSalesBatchID").val(filter.ReviewBatchID || "");
+    $("#ReviewDigitalSalesStatusID").val(filter.StatusID || "");
+    $("#ReviewDigitalSalesDepartmentID").val(filter.DepartmentID || "");
+    $('input[name="IsReviewed"][value="' + (filter.IsReviewed || "false") + '"]').prop("checked", true);
+    return filter.EmployeeID || null;
+}
+
+function searchReviewDigitalSales() {
+    saveReviewDigitalSalesFilter();
+    // Reset về trang đầu khi đổi giá trị tìm kiếm, đồng bộ hành vi với _SearchProject / _SearchBusinessOpportunity
+    if (_tableReviewDigitalSales) _tableReviewDigitalSales.ajax.reload();
+}
+
+function initReviewDigitalSalesTable() {
+    var state = getReviewDigitalSalesState();
+    _tableReviewDigitalSales = $("#DSDigitalSalesReview").DataTable({
+        responsive: true,
+        lengthChange: true,
+        processing: true,
+        serverSide: true,
+        ordering: true,
+        displayStart: state.start || 0,
+        pageLength: state.length || 10,
+        order: [[parseInt(state.orderColumn || 1, 10), state.orderDir || "asc"]],
+        ajax: {
+            url: "/Cate/ReviewBatchItem/GetDigitalSales",
+            type: "POST",
+            dataType: "JSON",
+            data: function (data) {
+                data.Keyword = $("#ReviewDigitalSalesKeyword").val();
+                data.ReviewBatchID = $("#ReviewDigitalSalesBatchID").val() || 0;
+                data.StatusID = $("#ReviewDigitalSalesStatusID").val() || 0;
+                data.DepartmentID = $("#ReviewDigitalSalesDepartmentID").val() || 0;
+                data.EmployeeID = $("#ReviewDigitalSalesEmployeeID").val() || 0;
+                data.IsReviewed = $('input[name="IsReviewed"]:checked').val() === "true";
+                return data;
+            }
+        },
+        columns: [
+            {
+                data: null,
+                orderable: false,
+                render: function (_, __, ___, meta) { return meta.settings._iDisplayStart + meta.row + 1; }
+            },
+            {
+                data: "Title",
+                className: "text-left",
+                render: function (_, __, row) {
+                    var url = buildReviewDigitalSalesUrl(row);
+                    return '<a class="font-weight-bold text-primary" href="' + url + '">' + encodeReviewDigitalSales(row.Title) + '</a>'
+                        + '<div class="small text-secondary">' + encodeReviewDigitalSales(row.Code) + '</div>';
+                }
+            },
+            { data: "BusinessTypeName", className: "text-left", defaultContent: "" },
+            { data: "CustomerName", className: "text-left", defaultContent: "" },
+            { data: "StatusName", className: "text-left", defaultContent: "" },
+            {
+                data: "AssignedEmployeeName",
+                className: "text-left",
+                render: function (value, _, row) {
+                    return '<strong>' + encodeReviewDigitalSales(value) + '</strong>'
+                        + (row.DepartmentName ? '<div class="small text-secondary">' + encodeReviewDigitalSales(row.DepartmentName) + '</div>' : '');
+                }
+            },
+            { data: null, orderable: false, className: "text-left", render: function (_, __, row) { return renderReviewDigitalSalesInfo(row); } },
+            {
+                data: "DigitalSalesID",
+                orderable: false,
+                render: function (digitalSalesID, _, row) {
+                    var messages = getReviewDigitalSalesMessages();
+                    var batchID = $("#ReviewDigitalSalesBatchID").val() || 0;
+                    var label = row.IsReviewed ? messages.viewDetail : messages.review;
+                    var url = buildReviewDigitalSalesUrl(row);
+                    var icon = row.IsReviewed ? "far fa-eye" : "fa fa-clipboard-check";
+                    var disabled = !row.IsReviewed && parseInt(batchID, 10) <= 0 ? " disabled" : "";
+                    return '<a class="btn btn-sm btn-lighter-secondary btn-a-outline-secondary' + disabled + '" href="' + (disabled ? '#' : url) + '">'
+                        + '<i class="' + icon + ' text-secondary mr-1"></i>' + encodeReviewDigitalSales(label) + '</a>';
+                }
+            }
+        ]
+    });
+    _tableReviewDigitalSales.on("draw.dt order.dt length.dt page.dt", saveReviewDigitalSalesState);
+}
+
+$(function () {
+    var restoredEmployeeID = restoreReviewDigitalSalesFilter();
+    if (typeof window.loadReviewEmployees === "function") window.loadReviewEmployees(restoredEmployeeID);
+    initReviewDigitalSalesTable();
 });
 
-/* =========================================================
-   PROJECT
-========================================================= */
-
-function saveProjectTableState() {
-
-    if (!_tableProject) return;
-
-    const order = _tableProject.order();
-
-    const state = {
-        start: _tableProject.page.info().start,
-        length: _tableProject.page.len(),
-        orderColumn: order[0][0],
-        orderDir: order[0][1]
-    };
-
-    localStorage.setItem(
-        "review_project_table_state",
-        JSON.stringify(state)
-    );
-}
-
-function restoreProjectTableState() {
-
-    const state = JSON.parse(
-        localStorage.getItem("review_project_table_state")
-    );
-
-    if (!state) return;
-
-    _projectReviewStart = state.start || 0;
-    _projectReviewLength = state.length || 10;
-    _projectReviewOrder = state.orderColumn || 1;
-    _projectReviewOrderDir = state.orderDir || "desc";
-}
-
-function SearchProject() {
-
-    saveProjectFilter();
-
-    if (_tableProject) {
-        _tableProject.ajax.reload(null, false);
-    }
-}
-
-function initTableProject() {
-
-    _tableProject = $("#DSProject").DataTable({
-
-        "responsive": true,
-        "lengthChange": true,
-        "processing": true,
-        "serverSide": true,
-        "ordering": true,
-
-        // restore paging
-        "displayStart": _projectReviewStart || 0,
-
-        // restore page size
-        "pageLength": _projectReviewLength || 10,
-
-        // restore sort
-        "order": [[
-            parseInt(_projectReviewOrder || 1),
-            _projectReviewOrderDir || "desc"
-        ]],
-
-        "ajax": {
-            "url": _ProjectActionURLs.Project_GetData,
-            "type": "POST",
-            "dataType": "JSON",
-            "data": function (d) {
-                d.Keyword = $("#ProjectKeyword").val();
-                d.ReviewBatchID = $("#ProjectReviewBatchID").val();
-                d.Status = $("#ProjectStatus").val();
-                d.BoPhanID = $("#ProjectBoPhanID").val();
-                d.EmployeeID = $("#ProjectEmployeeID").val();
-                d.IsReviewed = $('input[name="ProjectIsReviewed"]:checked').val();
-                return d;
-            }
-        },
-
-        "columns": [
-            {
-                "data": "",
-                "defaultContent": "1",
-                "orderable": false,
-                "render": function (data, type, row, meta) {
-                    return meta.settings._iDisplayStart
-                        + meta.row + 1;
-                }
-            },
-            {
-                "data": "ProjectName",
-                "defaultContent": "",
-                "className": "text-left",
-                "render": function (data, type, row) {
-                    let reviewBatchID = $("#ProjectReviewBatchID").val() || 0;
-                    let isReviewed = $('input[name="ProjectIsReviewed"]:checked').val() === "true";
-
-                    let url = isReviewed
-                        ? `/Cate/ProjectOverview/Index/${row.ProjectID}`
-                        : `/Cate/ProjectOverview/Index/${row.ProjectID}?reviewBatchID=${reviewBatchID}`;
-
-                    return `
-                        <div class="font-weight-bold text-primary">
-                            <a href="${url}">
-                                ${row.ProjectName}
-                            </a>
-                        </div>
-                        <div>
-                            <span class="badge ${row.StatusClass} text-white mr-1">
-                                ${row.StatusName}
-                            </span>
-                        </div>
-                    `;
-                }
-            },
-            {
-                "data": "CustomerName",
-                "defaultContent": "",
-                "className": "text-left",
-                "render": function (data) {
-                    return data || "";
-                }
-            },
-            {
-                "data": "StartDate",
-                "defaultContent": "",
-                "render": function (data) {
-                    return data
-                        ? moment(data).format("DD/MM/YYYY")
-                        : "";
-                }
-            },
-            {
-                "data": "AMName",
-                "defaultContent": "",
-                "render": function (data, type, row) {
-                    if (!data) return "";
-                    return "<b>" +
-                        data.split(",").map(x => x.trim()).join("<br/>") +
-                        "</b>";
-                }
-            },
-            {
-                "data": null,
-                "className": "text-left",
-                "orderable": false,
-                "render": function (data, type, row) {
-                    return renderReviewInfo(row);
-                }
-            },
-            {
-                "data": "ProjectID",
-                "style": "width:100px;",
-                "orderable": false,
-
-                "render": function (data, type, row) {
-                    if (type === "display") {
-                        let reviewBatchID = $("#ProjectReviewBatchID").val() || 0;
-                        let isReviewed = $('input[name="ProjectIsReviewed"]:checked').val() === "true";
-
-                        let url = isReviewed
-                            ? `/Cate/ProjectOverview/Index/${data}`
-                            : `/Cate/ProjectOverview/Index/${data}?reviewBatchID=${reviewBatchID}`;
-
-                        return `
-                            <a class="btn btn-sm btn-lighter-secondary btn-a-outline-secondary"
-                               href="${url}">
-                                <i class="far fa-eye text-secondary mr-1"></i>
-                                ${isReviewed ? "Xem chi tiết" : "Rà soát"}
-                            </a>
-                        `;
-                    }
-                    return data;
-                }
-            }
-        ]
-    });
-
-    // save state
-    _tableProject.on("draw.dt order.dt length.dt page.dt", function () {
-        saveProjectTableState();
-    });
-}
-
-/* =========================================================
-   BUSINESS OPPORTUNITY
-========================================================= */
-
-function saveBusinessTableState() {
-
-    if (!_tableBusinessOpportunity) return;
-
-    const order = _tableBusinessOpportunity.order();
-
-    const state = {
-        start: _tableBusinessOpportunity.page.info().start,
-        length: _tableBusinessOpportunity.page.len(),
-        orderColumn: order[0][0],
-        orderDir: order[0][1]
-    };
-
-    localStorage.setItem("review_business_table_state", JSON.stringify(state));
-}
-
-function restoreBusinessTableState() {
-
-    const state = JSON.parse(
-        localStorage.getItem("review_business_table_state")
-    );
-
-    if (!state) return;
-
-    _boReviewStart = state.start || 0;
-    _boReviewLength = state.length || 10;
-    _boReviewOrder = state.orderColumn || 1;
-    _boReviewOrderDir = state.orderDir || "desc";
-}
-
-function SearchBusinessOpportunity() {
-
-    saveBusinessOpportunityFilter();
-
-    if (_tableBusinessOpportunity) {
-        _tableBusinessOpportunity.ajax.reload(null, false);
-    }
-}
-
-function initTableBusinessOpportunity() {
-
-    _tableBusinessOpportunity = $("#DSBusinessOpportunity").DataTable({
-
-        "responsive": true,
-        "lengthChange": true,
-        "processing": true,
-        "serverSide": true,
-        "ordering": true,
-
-        // restore paging
-        "displayStart": _boReviewStart || 0,
-
-        // restore page size
-        "pageLength": _boReviewLength || 10,
-
-        // restore sort
-        "order": [[
-            parseInt(_boReviewOrder || 1),
-            _boReviewOrderDir || "desc"
-        ]],
-
-        "ajax": {
-            "url": _BusinessOpportunityActionURLs.BusinessOpportunity_GetData,
-            "type": "POST",
-            "dataType": "JSON",
-            "data": function (d) {
-                d.Keyword = $("#BusinessOpportunityKeyword").val();
-                d.ReviewBatchID = $("#BusinessOpportunityReviewBatchID").val();
-                d.StatusID = $("#BusinessOpportunityStatusID").val();
-                d.BoPhanID = $("#BusinessOpportunityBoPhanID").val();
-                d.EmployeeID = $("#BusinessOpportunityEmployeeID").val();
-                d.IsReviewed = $('input[name="BusinessOpportunityIsReviewed"]:checked').val();
-                return d;
-            }
-        },
-
-        "columns": [
-
-            {
-                "data": "",
-                "defaultContent": "1",
-                "orderable": false,
-                "render": function (data, type, row, meta) {
-                    return meta.settings._iDisplayStart
-                        + meta.row + 1;
-                }
-            },
-            {
-                "data": "OpportunityName",
-                "defaultContent": "",
-                "className": "text-left",
-                "render": function (data, type, row) {
-                    let reviewBatchID = $("#BusinessOpportunityReviewBatchID").val() || 0;
-                    let isReviewed = $('input[name="BusinessOpportunityIsReviewed"]:checked').val() === "true";
-
-                    let url = isReviewed
-                        ? `/Cate/BusinessOpportunityOverview/Index/${row.BusinessOpportunityID}`
-                        : `/Cate/BusinessOpportunityOverview/Index/${row.BusinessOpportunityID}?reviewBatchID=${reviewBatchID}`;
-
-                    return `
-                        <div class="font-weight-bold text-primary">
-                            <a href="${url}">
-                                ${row.OpportunityName}
-                            </a>
-                        </div>
-                        <div>
-                            <span class="badge ${row.StatusClass} text-white mr-1">
-                                ${row.StatusName}
-                            </span>
-                        </div>
-                    `;
-                }
-            },
-            {
-                "data": "CustomerName",
-                "defaultContent": "",
-                "className": "text-left",
-                "render": function (data) {
-                    return data || "";
-                }
-            },
-            {
-                "data": "ClosingProbability",
-                "defaultContent": "",
-                "render": function (data) {
-                    return data + "%" || "";
-                }
-            },
-            {
-                "data": "AMName",
-                "defaultContent": "",
-                "render": function (data, type, row) {
-
-                    if (!data) return "";
-
-                    return "<b>" +
-                        data.split(",").map(x => x.trim()).join("<br/>") +
-                    "</b>";
-                }
-            },
-            {
-                "data": null,
-                "className": "text-left",
-                "orderable": false,
-                "render": function (data, type, row) {
-                    return renderReviewInfo(row);
-                }
-            },
-            {
-                "data": "BusinessOpportunityID",
-                "style": "width:100px;",
-                "orderable": false,
-                "render": function (data, type, row) {
-                    if (type === "display") {
-                        let reviewBatchID = $("#BusinessOpportunityReviewBatchID").val() || 0;
-                        let isReviewed = $('input[name="BusinessOpportunityIsReviewed"]:checked').val() === "true";
-
-                        let url = isReviewed
-                            ? `/Cate/BusinessOpportunityOverview/Index/${data}`
-                            : `/Cate/BusinessOpportunityOverview/Index/${data}?reviewBatchID=${reviewBatchID}`;
-
-                        return `
-                            <a class="btn btn-sm btn-lighter-secondary btn-a-outline-secondary"
-                               href="${url}">
-                                <i class="far fa-eye text-secondary mr-1"></i>
-                                ${isReviewed ? "Xem chi tiết" : "Rà soát"}
-                            </a>
-                        `;
-                    }
-                    return data;
-                }
-            }
-        ]
-    });
-
-    // save state
-    _tableBusinessOpportunity.on(
-        "draw.dt order.dt length.dt page.dt",
-        function () {
-            saveBusinessTableState();
-        });
-}
+window.searchReviewDigitalSales = searchReviewDigitalSales;

@@ -122,6 +122,9 @@ namespace Core.Cate.Models
         // Dòng trao đổi & hoạt động (Activity & Discussion Stream)
         public List<RM_DigitalSalesActivityModel> Activities { get; set; } = new List<RM_DigitalSalesActivityModel>();
 
+        // Lịch sử rà soát định kỳ của hồ sơ
+        public List<RM_ReviewHistoryModel> ReviewHistory { get; set; } = new List<RM_ReviewHistoryModel>();
+
         // Dropdown sources for UI
         public List<SelectListItem> ListCustomer { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ListProductService { get; set; } = new List<SelectListItem>();

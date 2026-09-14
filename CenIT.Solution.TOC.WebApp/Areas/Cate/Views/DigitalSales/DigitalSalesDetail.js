@@ -39,6 +39,41 @@ var _detailUrls = {
     getMembersForMention: "/Cate/DigitalSales/GetMembersForMention"
 };
 
+function reloadDigitalSalesReviewHistory() {
+    $("#reviewHistoryContainer").load(_urlReloadReviewHistory + "?id=" + _currentDigitalSalesId, function () {
+        var count = $("#reviewHistoryContainer .review-history-timeline .border-l-3.bgc-secondary-l4").length;
+        $("#badgeTabReviewHistory").text(count);
+    });
+}
+
+function ReviewHistory_OnProcessSuccess(response, formId) {
+    var $modal = $("#ModalContent #modal_" + formId);
+    if (response.status === undefined) {
+        $modal.find("#bodyForm").html(response);
+        var $form = $modal.find("form");
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData("validator").removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse($form);
+        }
+        return;
+    }
+
+    if (response.status !== true) {
+        executeResponseMessage(response.message, null, false);
+        response.status = undefined;
+        return;
+    }
+
+    $modal.one("hidden.bs.modal", function () {
+        executeResponseMessage(response.message, null, true);
+        reloadDigitalSalesReviewHistory();
+        response.status = undefined;
+    });
+    $modal.modal("hide");
+}
+
+window.ReviewHistory_OnProcessSuccess = ReviewHistory_OnProcessSuccess;
+
 function executeResponseMessage(message, defaultText, isSuccess) {
     if (!message && defaultText) {
         message = defaultText;

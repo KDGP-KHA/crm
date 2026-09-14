@@ -14,9 +14,11 @@ namespace Core.Cate.Biz
         private const string DATA_PROVIDER_NAME = "CenIT.Provider.Major";
         private readonly string _RM_Review_GetBusinessOpportunity = "RM_Review_GetBusinessOpportunity";
         private readonly string _RM_Review_GetProject = "RM_Review_GetProject";
+        private readonly string _RM_DigitalSalesReview_GetList = "RM_DigitalSalesReview_GetList";
 
-        private readonly string _RM_ReviewBatchItem_Save = "RM_ReviewBatchItem_Save";
+        private readonly string _RM_DigitalSalesReview_Save = "RM_DigitalSalesReview_Save";
         private readonly string _RM_ReviewBatch_GetHistory = "RM_ReviewBatch_GetHistory";
+        private readonly string _RM_DigitalSalesReview_GetHistory = "RM_DigitalSalesReview_GetHistory";
         private readonly string _RM_ReviewHistory_Save = "RM_ReviewHistory_Save";
         private readonly string _RM_ReviewHistory_GetByID = "RM_ReviewHistory_GetByID";
 
@@ -24,6 +26,37 @@ namespace Core.Cate.Biz
         private readonly string _RM_ReviewHistoryFilePath_GetByID = "RM_ReviewHistoryFilePath_GetByID";
         private readonly string _RM_ReviewHistoryFilePath_Save = "RM_ReviewHistoryFilePath_Save";
         private readonly string _RM_ReviewHistoryFilePath_Delete = "RM_ReviewHistoryFilePath_Delete";
+
+        public List<RM_ReviewDigitalSalesModel> LoadDigitalSales(out int total, RM_ReviewDigitalSalesSearchModel model, BaseSearchModel search)
+        {
+            search = search ?? new BaseSearchModel
+            {
+                Search = null,
+                Order = "1",
+                OrderDir = "ASC",
+                StartIndex = 0,
+                PageSize = -1
+            };
+
+            var data = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_ReviewDigitalSalesModel>(
+                _RM_DigitalSalesReview_GetList,
+                DATA_PROVIDER_NAME,
+                model.ReviewBatchID,
+                model.BusinessType,
+                model.DepartmentID,
+                model.EmployeeID,
+                model.StatusID,
+                model.IsReviewed,
+                model.Keyword,
+                search.Order,
+                search.OrderDir,
+                search.StartIndex,
+                search.PageSize,
+                model.UserName) ?? new List<RM_ReviewDigitalSalesModel>();
+
+            total = data.Count > 0 ? Convert.ToInt32(data.First().TotalRow) : 0;
+            return data;
+        }
 
         /// <summary>
         /// Lấy toàn bộ danh sách theo giá trị lọc
@@ -120,10 +153,9 @@ namespace Core.Cate.Biz
         /// </summary>
         public int Save(RM_ReviewFormModel model, string username)
         {
-            var result = AppProcessor.ProcedureProvider.Execute(_RM_ReviewBatchItem_Save, DATA_PROVIDER_NAME,
+            var result = AppProcessor.ProcedureProvider.Execute(_RM_DigitalSalesReview_Save, DATA_PROVIDER_NAME,
                 model.ReviewBatchID,
-                model.ObjectType,
-                model.ObjectID,
+                model.DigitalSalesID,
                 model.ReviewComment,
                 model.IsConfirmed,
                 username);
@@ -142,6 +174,14 @@ namespace Core.Cate.Biz
                 objectType,
                 objectID)
             ?? new List<RM_ReviewHistoryModel>();
+        }
+
+        public List<RM_ReviewHistoryModel> GetDigitalSalesHistory(int digitalSalesID)
+        {
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_ReviewHistoryModel>(
+                _RM_DigitalSalesReview_GetHistory,
+                DATA_PROVIDER_NAME,
+                digitalSalesID) ?? new List<RM_ReviewHistoryModel>();
         }
 
         /// <summary>

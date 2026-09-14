@@ -16,8 +16,61 @@ namespace Core.Cate.Models
 
     public class RM_ReviewBatchItemSearchModel : BaseModel
     {
+        public RM_ReviewDigitalSalesSearchModel DigitalSalesSearch { get; set; }
         public RM_ReviewProjectSearchModel ProjectSearch { get; set; }
         public RM_ReviewBusinessOpportunitySearchModel BusinessOpportunitySearch { get; set; }
+    }
+
+    public class RM_ReviewDigitalSalesSearchModel : BaseModel
+    {
+        [CustomDisplayName("Label_TuKhoa")]
+        public string Keyword { get; set; }
+
+        [CustomDisplayName("ReviewBatch_Title")]
+        public int ReviewBatchID { get; set; }
+
+        [CustomDisplayName("ReviewDigitalSales_BusinessType_Label")]
+        public byte BusinessType { get; set; }
+
+        [CustomDisplayName("ReviewDigitalSales_Status_Label")]
+        public int StatusID { get; set; }
+
+        [CustomDisplayName("Department_Search_Label")]
+        public int DepartmentID { get; set; }
+
+        [CustomDisplayName("Employee_Search_Label")]
+        public int EmployeeID { get; set; }
+
+        [CustomDisplayName("ReviewBatch_IsReviewed_Label")]
+        public bool IsReviewed { get; set; }
+
+        public string UserName { get; set; }
+        public List<RM_ReviewBatchModel> ReviewBatches { get; set; } = new List<RM_ReviewBatchModel>();
+        public List<SelectListItem> StatusOptions { get; set; } = new List<SelectListItem>();
+        public List<MN_BoPhanModel> Departments { get; set; } = new List<MN_BoPhanModel>();
+    }
+
+    public class RM_ReviewDigitalSalesModel : BaseModel
+    {
+        public int DigitalSalesID { get; set; }
+        public string Code { get; set; }
+        public string Title { get; set; }
+        public byte BusinessType { get; set; }
+        public string BusinessTypeName { get; set; }
+        public string StatusName { get; set; }
+        public string CustomerName { get; set; }
+        public string AssignedEmployeeName { get; set; }
+        public string DepartmentName { get; set; }
+        public DateTime? ExpectedDate { get; set; }
+        public decimal? TotalExpectedRevenue { get; set; }
+        public int ReviewBatchItemID { get; set; }
+        public int HighestReviewedLevel { get; set; }
+        public DateTime? LastReviewedDate { get; set; }
+        public bool IsReviewed { get; set; }
+        public DateTime? LastReviewDate { get; set; }
+        public string LastReviewerName { get; set; }
+        public string LastReviewComment { get; set; }
+        public int ReviewCount { get; set; }
     }
 
     public class RM_ReviewProjectSearchModel
@@ -117,9 +170,9 @@ namespace Core.Cate.Models
         public int ReviewHistoryID { get; set; }
         public int ReviewBatchID { get; set; }
         public int ReviewBatchItemID { get; set; }
-        public byte ObjectType { get; set; }
-        public int ObjectID { get; set; }
+        public int DigitalSalesID { get; set; }
         public int UserLevel { get; set; }
+        [AllowHtml]
         [CustomDisplayName("ReviewBatch_ReviewComment_Label")]
         public string ReviewComment { get; set; }
         [CustomDisplayName("ReviewBatch_Confirm_Label")]

@@ -24,7 +24,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_ReviewBatchItemCache _reviewBatchItemCache;
         private readonly RM_ReviewBatchCache _reviewBatchCache;
         private readonly RM_ReviewBatchItemBiz _reviewBatchItemBiz;
-        private readonly RM_StatusCache _statusCache;
+        private readonly RM_DigitalSalesCache _digitalSalesCache;
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
         private readonly string _reviewBatchTitle = AppProcessor.Messagor.GetMessage("ReviewBatch_Title");
@@ -36,38 +36,67 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _reviewBatchItemCache = new RM_ReviewBatchItemCache();
             _reviewBatchCache = new RM_ReviewBatchCache();
             _reviewBatchItemBiz = new RM_ReviewBatchItemBiz();
-            _statusCache = new RM_StatusCache();
+            _digitalSalesCache = new RM_DigitalSalesCache();
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
         }
 
         public ActionResult Index(int? id)
         {
-            var model = new RM_ReviewBatchItemSearchModel();
-
-            var reviewBatch = _reviewBatchCache.GetAll();
-
-            var boPhans = GetAccessibleDepartments();
-
-            model.ProjectSearch = new RM_ReviewProjectSearchModel
+            var model = new RM_ReviewBatchItemSearchModel
             {
-                ReviewBatchID = id ?? 0,
-                IsReviewed = false,
-                ListReviewPatch = reviewBatch,
-                Departments = boPhans,
-                ListStatus = _statusCache.GetStatusBySearchKey("Project")
-            };
-
-            model.BusinessOpportunitySearch = new RM_ReviewBusinessOpportunitySearchModel
-            {
-                ReviewBatchID = id ?? 0,
-                IsReviewed = false,
-                ListReviewPatch = reviewBatch,
-                Departments = boPhans,
-                ListStatus = _statusCache.GetStatusBySearchKey("Opportunity")
+                DigitalSalesSearch = new RM_ReviewDigitalSalesSearchModel
+                {
+                    ReviewBatchID = id.GetValueOrDefault(0),
+                    IsReviewed = false,
+                    ReviewBatches = _reviewBatchCache.GetAll() ?? new List<RM_ReviewBatchModel>(),
+                    Departments = GetAccessibleDepartments(),
+                    StatusOptions = (_digitalSalesCache.GetStatusList(null) ?? new List<RM_DigitalSalesStatusModel>())
+                        .Select(status => new SelectListItem
+                        {
+                            Value = status.StatusID.ToString(),
+                            Text = string.Format("[{0}] {1}",
+                                status.BusinessType == 1
+                                    ? AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity")
+                                    : AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project"),
+                                status.StatusName)
+                        }).ToList()
+                }
             };
 
             return View(model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetDigitalSales(RM_ReviewDigitalSalesSearchModel model)
+        {
+            var draw = Request.Form.GetValues("draw")?[0];
+            var order = Request.Form.GetValues("order[0][column]")?[0];
+            var orderDir = Request.Form.GetValues("order[0][dir]")?[0];
+            var startRec = Convert.ToInt32(Request.Form.GetValues("start")?[0] ?? "0");
+            var pageSize = Convert.ToInt32(Request.Form.GetValues("length")?[0] ?? "10");
+            var search = Request.Form.GetValues("search[value]")?[0];
+
+            model.UserName = User.UserName;
+            var dataSearch = new BaseSearchModel
+            {
+                Search = string.IsNullOrEmpty(search) ? null : search,
+                Order = order,
+                OrderDir = orderDir,
+                StartIndex = startRec,
+                PageSize = pageSize
+            };
+
+            var data = _reviewBatchItemCache.LoadDigitalSales(out var total, model, dataSearch);
+            return Json(new
+            {
+                draw = Convert.ToInt32(draw),
+                recordsTotal = total,
+                recordsFiltered = total,
+                data
+            }, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>
@@ -147,36 +176,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult ReviewBatch(int? reviewBatchID, int? projectID, int? opportunityID)
+        public ActionResult ReviewBatch(int? reviewBatchID, int? digitalSalesID)
         {
-            if (!reviewBatchID.HasValue)
+            if (!reviewBatchID.HasValue || reviewBatchID.Value <= 0 || !digitalSalesID.HasValue || digitalSalesID.Value <= 0)
             {
-                return Json(new {success = false, message = "Dữ liệu không hợp lệ."}, JsonRequestBehavior.AllowGet);
+                return Json(new
+                {
+                    success = false,
+                    message = GetAppMessage("ReviewDigitalSales_InvalidData_Message")
+                }, JsonRequestBehavior.AllowGet);
             }
-            int objectType;
-            int objectID;
-            // PROJECT
-            if (projectID.HasValue)
-            {
-                objectType = 2;
-                objectID = projectID.Value;
-            }
-            // OPPORTUNITY
-            else if (opportunityID.HasValue)
-            {
-                objectType = 1;
-                objectID = opportunityID.Value;
-            }
-            else
-            {
-                return Json(new {success = false, message = "Dữ liệu không hợp lệ."}, JsonRequestBehavior.AllowGet);
-            }
+
             var model = new RM_ReviewFormModel
             {
                 ReviewBatchID = reviewBatchID.Value,
-                ObjectType = (byte)objectType,
-                ObjectID = objectID,
-                // Mặc định tích sẵn xác nhận để giảm thao tác của người rà soát
+                DigitalSalesID = digitalSalesID.Value,
                 IsConfirmed = true
             };
             return PartialView("_ReviewBatch", model);
@@ -190,6 +204,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.Create)]
+        [ValidateAntiForgeryToken]
         [ValidateInput(false)]
         public ActionResult ReviewBatch(RM_ReviewFormModel model, bool continueReview = false)
         {
@@ -207,16 +222,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var nextReviewUrl = result > 0 && continueReview ? GetNextReviewUrl(model) : null;
             return Json(new
             {
-                status = true,
+                status = result > 0,
                 message = response,
-                tab = model.ObjectType,
                 reviewBatchID = model.ReviewBatchID,
                 nextReviewUrl
             }, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>
-        /// Lấy đối tượng chưa rà soát kế tiếp trong cùng đợt và cùng loại đối tượng.
+        /// Lấy DigitalSales chưa rà soát kế tiếp trong cùng đợt.
         /// </summary>
         private string GetNextReviewUrl(RM_ReviewFormModel model)
         {
@@ -229,47 +243,22 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 PageSize = 1
             };
 
-            if (model.ObjectType == 2)
+            var digitalSalesSearch = new RM_ReviewDigitalSalesSearchModel
             {
-                var projectSearch = new RM_ReviewProjectSearchModel
+                ReviewBatchID = model.ReviewBatchID,
+                IsReviewed = false,
+                UserName = User.UserName
+            };
+            var digitalSales = _reviewBatchItemCache.LoadDigitalSales(out _, digitalSalesSearch, search);
+            var nextDigitalSales = digitalSales?.FirstOrDefault();
+            return nextDigitalSales == null
+                ? null
+                : Url.Action("Detail", "DigitalSales", new
                 {
-                    ReviewBatchID = model.ReviewBatchID,
-                    IsReviewed = false,
-                    UserName = User.UserName
-                };
-                var projects = _reviewBatchItemCache.LoadProject(out _, projectSearch, search);
-                var nextProject = projects?.FirstOrDefault();
-                return nextProject == null
-                    ? null
-                    : Url.Action("Index", "ProjectOverview", new
-                    {
-                        area = "Cate",
-                        id = nextProject.ProjectID,
-                        reviewBatchID = model.ReviewBatchID
-                    });
-            }
-
-            if (model.ObjectType == 1)
-            {
-                var opportunitySearch = new RM_ReviewBusinessOpportunitySearchModel
-                {
-                    ReviewBatchID = model.ReviewBatchID,
-                    IsReviewed = false,
-                    UserName = User.UserName
-                };
-                var opportunities = _reviewBatchItemCache.LoadBusinessOpportunity(out _, opportunitySearch, search);
-                var nextOpportunity = opportunities?.FirstOrDefault();
-                return nextOpportunity == null
-                    ? null
-                    : Url.Action("Index", "BusinessOpportunityOverview", new
-                    {
-                        area = "Cate",
-                        id = nextOpportunity.BusinessOpportunityID,
-                        reviewBatchID = model.ReviewBatchID
-                    });
-            }
-
-            return null;
+                    area = "Cate",
+                    id = nextDigitalSales.DigitalSalesID,
+                    reviewBatchID = model.ReviewBatchID
+                });
         }
 
         /// <summary>
@@ -282,6 +271,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
         public ActionResult EditHistory(int id)
         {
             var history = _reviewBatchItemCache.GetHistoryById(id);
+            if (history == null)
+                return Json(new { status = false, message = CreateMessage($"{_reviewHistoryTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error) }, JsonRequestBehavior.AllowGet);
+
             var model = new RM_ReviewFormModel
             {
                 ReviewHistoryID = history.ReviewHistoryID,
@@ -289,8 +281,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ReviewComment = history.ReviewComment,
                 IsConfirmed = history.IsConfirmed
             };
-            if (model == null)
-                return Json(new { status = true, message = CreateMessage($"{_reviewHistoryTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error) });
             model.ExistingFiles = _reviewBatchItemBiz.GetFilePaths(id);
             return PartialView("_EditHistory", model);
         }
@@ -381,8 +371,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
         public ActionResult GetReviewHistory(int objectType, int id)
         {
             var data = _BuildReviewHistoryForm(objectType, id);
-
             return PartialView("_ReviewHistory", data);
+        }
+
+        private List<RM_ReviewHistoryModel> BuildDigitalSalesReviewHistory(int digitalSalesID)
+        {
+            return BuildReviewHistory(_reviewBatchItemCache.GetDigitalSalesHistory(digitalSalesID));
         }
 
         /// <summary>
@@ -391,8 +385,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
         /// <returns>Model lịch sử rà soát phục vụ tab overview.</returns>
         private List<RM_ReviewHistoryModel> _BuildReviewHistoryForm(int objectType, int objectID)
         {
-            // Lấy lịch sử rà soát
-            var histories = _reviewBatchItemCache.GetHistory(objectType, objectID);
+            return BuildReviewHistory(_reviewBatchItemCache.GetHistory(objectType, objectID));
+        }
+
+        private List<RM_ReviewHistoryModel> BuildReviewHistory(List<RM_ReviewHistoryModel> histories)
+        {
 
             var result = new List<RM_ReviewHistoryModel>();
 
@@ -425,6 +422,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
             return result;
+        }
+
+        private string GetAppMessage(string labelKey)
+        {
+            var message = AppProcessor.Messagor.GetMessage(labelKey);
+            return string.IsNullOrWhiteSpace(message) ? labelKey : message;
         }
 
         /// <summary>

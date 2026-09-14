@@ -39,12 +39,12 @@
                 <div class="bgc-grey-l4 px-2 pt-2 border-b-1 brc-grey-l2">
                     <ul class="nav nav-tabs nav-tabs-simple border-0" role="tablist" id="workflowBusinessTypeTabs">
                         <li class="nav-item">
-                            <a class="nav-link active font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="javascript:void(0)" onclick="DigitalSalesWorkflow.switchBusinessType(1, this)">
+                            <a class="nav-link active font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="javascript:void(0)" onclick="return DigitalSalesWorkflow.switchBusinessType(1, this, event)">
                                 <i class="fa fa-lightbulb text-orange-d1 mr-1"></i>Cơ hội
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="javascript:void(0)" onclick="DigitalSalesWorkflow.switchBusinessType(2, this)">
+                            <a class="nav-link font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="javascript:void(0)" onclick="return DigitalSalesWorkflow.switchBusinessType(2, this, event)">
                                 <i class="fa fa-project-diagram text-purple-d1 mr-1"></i>Dự án
                             </a>
                         </li>
@@ -117,5 +117,5 @@
 
 @section BottomScript
 {
-    <script src="@Url.Content("~/Areas/Cate/Views/DigitalSalesWorkflow/DigitalSalesWorkflow.js")"></script>
+    <script src="~/Areas/Cate/Views/DigitalSalesWorkflow/DigitalSalesWorkflow.js?v=@DateTime.Now.Ticks"></script>
 }

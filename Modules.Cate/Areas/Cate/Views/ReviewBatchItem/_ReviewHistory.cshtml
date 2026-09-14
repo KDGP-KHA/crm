@@ -1,23 +1,6 @@
 ﻿@using TSFramework.Libs.Processors
 @model List<Core.Cate.Models.RM_ReviewHistoryModel>
 
-<style>
-    .review-history-timeline {
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        color: rgb(65, 70, 77);
-    }
-
-    .review-content img,
-    .preview-image img {
-        max-width: 100%;
-        height: auto !important;
-        display: block;
-        border-radius: 4px;
-    }
-</style>
-
 <div class="review-history-timeline">
 
     @if (Model != null && Model.Any())
@@ -78,7 +61,7 @@
                                     @if (item.ReviewLevel > 0)
                                     {
                                         <span class="badge badge-info badge-sm">
-                                            Cấp @item.ReviewLevel
+                                            @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Level") @item.ReviewLevel
                                         </span>
                                     }
                                     <!-- tên -->
@@ -87,7 +70,7 @@
                                     </span>
                                     <!-- trạng thái -->
                                     <span class="ml-1 @(item.IsConfirmed ? "text-success" : "text-warning") font-bolder">
-                                        @(item.IsConfirmed ? "Đã xác nhận rà soát" : "Đã cho ý kiến")
+                                        @(item.IsConfirmed ? AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Confirmed") : AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Commented"))
                                     </span>
                                 </div>
 
@@ -128,14 +111,13 @@
                                         @if (plainText.Length > 100)
                                         {
                                             <div class="mt-1">
-                                                <span class="toggle-content text-primary"
-                                                      style="cursor:pointer;">
-                                                    Xem thêm
+                                                <span class="toggle-content review-toggle text-primary">
+                                                    @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowMore")
                                                 </span>
                                             </div>
                                         }
 
-                                        <div class="review-content mt-2" style="display:none;">
+                                        <div class="review-content review-content-collapsed mt-2">
                                             @Html.Raw(item.ReviewComment)
                                         </div>
 
@@ -149,7 +131,7 @@
                                     <div class="mt-2">
 
                                         <span class="font-bolder text-blue-d1">
-                                            Files:
+                                            @AppProcessor.Messagor.GetMessage("FileAttach_Label"):
                                         </span>
 
                                         <div class="mt-1">
@@ -239,13 +221,15 @@
     else
     {
         <div class="text-center text-muted py-3">
-            Chưa có lịch sử rà soát
+            @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_HistoryEmpty")
         </div>
     }
 
 </div>
 
 <script>
+    var reviewHistoryShowMoreText = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowMore")))';
+    var reviewHistoryShowLessText = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowLess")))';
     $(document).on('click', '.toggle-content', function () {
 
         const wrapper = $(this).closest('.review-wrapper');
@@ -259,6 +243,6 @@
         contentDiv.slideToggle(200);
         preview.toggle(!isHidden);
 
-        $(this).text(isHidden ? 'Ẩn bớt' : 'Xem thêm');
+        $(this).text(isHidden ? reviewHistoryShowLessText : reviewHistoryShowMoreText);
     });
 </script>

@@ -1,4 +1,4 @@
-window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -38,6 +38,41 @@ var _detailUrls = {
     deleteDiscussion: "/Cate/DigitalSales/DeleteDiscussion",
     getMembersForMention: "/Cate/DigitalSales/GetMembersForMention"
 };
+
+function reloadDigitalSalesReviewHistory() {
+    $("#reviewHistoryContainer").load(_urlReloadReviewHistory + "?id=" + _currentDigitalSalesId, function () {
+        var count = $("#reviewHistoryContainer .review-history-timeline .border-l-3.bgc-secondary-l4").length;
+        $("#badgeTabReviewHistory").text(count);
+    });
+}
+
+function ReviewHistory_OnProcessSuccess(response, formId) {
+    var $modal = $("#ModalContent #modal_" + formId);
+    if (response.status === undefined) {
+        $modal.find("#bodyForm").html(response);
+        var $form = $modal.find("form");
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData("validator").removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse($form);
+        }
+        return;
+    }
+
+    if (response.status !== true) {
+        executeResponseMessage(response.message, null, false);
+        response.status = undefined;
+        return;
+    }
+
+    $modal.one("hidden.bs.modal", function () {
+        executeResponseMessage(response.message, null, true);
+        reloadDigitalSalesReviewHistory();
+        response.status = undefined;
+    });
+    $modal.modal("hide");
+}
+
+window.ReviewHistory_OnProcessSuccess = ReviewHistory_OnProcessSuccess;
 
 function executeResponseMessage(message, defaultText, isSuccess) {
     if (!message && defaultText) {
@@ -490,6 +525,11 @@ function openChangeStatusModal(id) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesChangeStatusForm === "function") initDigitalSalesChangeStatusForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
@@ -732,6 +772,11 @@ function openAddTrackingModal(salesId) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesTrackingForm === "function") initDigitalSalesTrackingForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Lưu tiến trình thành công!", true);
@@ -806,6 +851,11 @@ function openEditTrackingModal(id, salesId) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesTrackingForm === "function") initDigitalSalesTrackingForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Cập nhật tiến trình thành công!", true);
