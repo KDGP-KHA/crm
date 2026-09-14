@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -34,6 +34,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_RolesCache _rolesCache;
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
+        private readonly SysConfigCache _sysConfigCache;
+        private readonly RM_DigitalSalesWorkflowCache _workflowCache;
 
         private string _title => AppProcessor.Messagor.GetMessage("DigitalSales_Title");
         private readonly string _folderUpload = "/Contents/Uploads/DigitalSales";
@@ -67,6 +69,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _rolesCache = new RM_RolesCache();
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
+            _sysConfigCache = new SysConfigCache();
+            _workflowCache = new RM_DigitalSalesWorkflowCache();
         }
 
         #region 1. List & Search
@@ -1184,6 +1188,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var allStatuses = _salesCache.GetStatusList(null);
+            var excludedCodes = GetExcludedStatusCodes();
             var model = new RM_DigitalSalesChangeStatusViewModel
             {
                 DigitalSalesID = sales.DigitalSalesID,
@@ -1196,7 +1201,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         : sales.BusinessTypeName),
                 CurrentStatusName = sales.StatusName,
                 AvailableStatuses = allStatuses
-                    .Where(s => s.StatusID != sales.StatusID)
+                    .Where(s => s.StatusID != sales.StatusID && !IsStatusExcluded(s, excludedCodes))
                     .Select(s => new SelectListItem
                     {
                         Value = s.StatusID.ToString(),
@@ -1234,7 +1239,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var currentSales = _salesCache.GetByID(model.DigitalSalesID);
-            if (currentSales != null && currentSales.StatusID == model.NewStatusID)
+            var excludedCodes = GetExcludedStatusCodes();
+            var newStatus = _salesCache.GetStatusList(null)?.FirstOrDefault(s => s.StatusID == model.NewStatusID);
+            if (IsStatusExcluded(newStatus, excludedCodes) || (currentSales != null && currentSales.StatusID == model.NewStatusID))
             {
                 return Json(new
                 {
@@ -1253,6 +1260,46 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             if (code == 1)
             {
+                // Lưu danh sách tiến trình vào Checklist (RM_DigitalSalesTracking) nếu có
+                if (!string.IsNullOrWhiteSpace(model.TrackingItemsJson))
+                {
+                    try
+                    {
+                        var items = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChangeStatusTrackingItemDTO>>(model.TrackingItemsJson);
+                        if (items != null && items.Count > 0)
+                        {
+                            int sort = 1;
+                            foreach (var it in items)
+                            {
+                                if (string.IsNullOrWhiteSpace(it.TaskName)) continue;
+
+                                var trackingModel = new RM_DigitalSalesTrackingModel
+                                {
+                                    TrackingID = 0,
+                                    DigitalSalesID = model.DigitalSalesID,
+                                    ProcessID = it.ProcessID ?? model.SelectedProcessID,
+                                    ProgressID = it.ProgressID,
+                                    TaskName = it.TaskName.Trim(),
+                                    AssignedUserID = it.AssignedUserID,
+                                    StartDate = DateTime.Now,
+                                    Deadline = it.Deadline,
+                                    Status = 1, // Chưa thực hiện
+                                    IsCustomTask = it.IsCustomTask,
+                                    SortOrder = it.SortOrder > 0 ? it.SortOrder : sort++,
+                                    ResultNote = null,
+                                    AttachmentFile = null
+                                };
+
+                                _salesCache.SaveTracking(trackingModel, User.UserName);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fallback safe
+                    }
+                }
+
                 var updated = _salesCache.GetByID(model.DigitalSalesID, User.UserName);
                 return Json(new
                 {
@@ -1323,14 +1370,222 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 model.CurrentStatusName = sales.StatusName;
             }
 
+            var excludedCodes = GetExcludedStatusCodes();
             model.AvailableStatuses = (_salesCache.GetStatusList(null) ?? new List<RM_DigitalSalesStatusModel>())
-                .Where(s => sales == null || s.StatusID != sales.StatusID)
+                .Where(s => (sales == null || s.StatusID != sales.StatusID) && !IsStatusExcluded(s, excludedCodes))
                 .Select(s => new SelectListItem
                 {
                     Value = s.StatusID.ToString(),
                     Text = $"[{(s.BusinessType == 1 ? AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity") : AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project"))}] {s.StatusName}"
                 }).ToList();
         }
+
+        private HashSet<string> GetExcludedStatusCodes()
+        {
+            var excluded = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "UNCAPTURED", "1" };
+            try
+            {
+                var cfg = _sysConfigCache.GetViaKey("DIGITAL_SALES_EXCLUDE_CHANGE_STATUS_CODES");
+                if (cfg != null && !string.IsNullOrWhiteSpace(cfg.ConfigValue))
+                {
+                    var parts = cfg.ConfigValue.Split(new[] { ';', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var p in parts)
+                    {
+                        var code = p.Trim();
+                        if (!string.IsNullOrEmpty(code))
+                        {
+                            excluded.Add(code);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback an toàn
+            }
+            return excluded;
+        }
+
+        private bool IsStatusExcluded(RM_DigitalSalesStatusModel status, HashSet<string> excludedCodes)
+        {
+            if (status == null) return false;
+            if (excludedCodes == null || excludedCodes.Count == 0) return false;
+
+            if (!string.IsNullOrEmpty(status.StatusCode) && excludedCodes.Contains(status.StatusCode)) return true;
+            if (excludedCodes.Contains(status.StatusID.ToString())) return true;
+            if (!string.IsNullOrEmpty(status.StatusName) && excludedCodes.Contains(status.StatusName)) return true;
+
+            return false;
+        }
+
+        #region 4.1 Workflow Processes & Progresses for Status Change
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetWorkflowProcessesAndProgresses(int statusId, int digitalSalesId)
+        {
+            try
+            {
+                if (statusId <= 0)
+                {
+                    return Json(new { status = false, message = "StatusID không hợp lệ" }, JsonRequestBehavior.AllowGet);
+                }
+
+                // 1. Lấy danh sách quy trình theo StatusID
+                var processes = _workflowCache.GetProcesses(out _, search: null, businessType: null, statusId: statusId);
+                var activeProcesses = processes != null
+                    ? processes.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList()
+                    : new List<RM_DigitalSalesProcessModel>();
+
+                // 2. Lấy danh sách nhân sự (ưu tiên thành viên dự án)
+                var membersList = new List<object>();
+                var existingUserIds = new HashSet<int>();
+
+                if (digitalSalesId > 0)
+                {
+                    var salesMembers = _salesCache.GetMembersBySalesID(digitalSalesId);
+                    if (salesMembers != null)
+                    {
+                        foreach (var m in salesMembers)
+                        {
+                            if (m.UserID > 0 && !existingUserIds.Contains(m.UserID))
+                            {
+                                existingUserIds.Add(m.UserID);
+                                membersList.Add(new
+                                {
+                                    userId = m.UserID,
+                                    fullName = m.FullName,
+                                    userName = m.UserName,
+                                    isProjectMember = true
+                                });
+                            }
+                        }
+                    }
+                }
+
+                var allUsers = _userCache.GetAll();
+                if (allUsers != null)
+                {
+                    foreach (var u in allUsers.OrderBy(x => x.FullName))
+                    {
+                        if (u.UserId.HasValue && u.UserId.Value > 0 && !existingUserIds.Contains(u.UserId.Value))
+                        {
+                            existingUserIds.Add(u.UserId.Value);
+                            membersList.Add(new
+                            {
+                                userId = u.UserId.Value,
+                                fullName = u.FullName,
+                                userName = u.UserName,
+                                isProjectMember = false
+                            });
+                        }
+                    }
+                }
+
+                // 3. Chuẩn bị thông tin quy trình & tiến trình
+                var processList = new List<object>();
+                int? defaultSelectedProcessId = null;
+                var defaultProgressList = new List<object>();
+
+                if (activeProcesses.Count > 0)
+                {
+                    var firstProcess = activeProcesses[0];
+                    defaultSelectedProcessId = firstProcess.ProcessID;
+
+                    foreach (var p in activeProcesses)
+                    {
+                        var progs = _workflowCache.GetProgressesByProcess(p.ProcessID);
+                        var activeProgs = progs != null ? progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder).ToList() : new List<RM_DigitalSalesProgressModel>();
+
+                        processList.Add(new
+                        {
+                            processId = p.ProcessID,
+                            processCode = p.ProcessCode,
+                            processName = p.ProcessName,
+                            description = p.Description,
+                            progressCount = activeProgs.Count
+                        });
+
+                        if (p.ProcessID == firstProcess.ProcessID)
+                        {
+                            foreach (var pr in activeProgs)
+                            {
+                                var defaultDays = pr.DefaultDurationDays > 0 ? pr.DefaultDurationDays : 3;
+                                var defaultDeadline = DateTime.Today.AddDays(defaultDays);
+                                defaultProgressList.Add(new
+                                {
+                                    progressId = pr.ProgressID,
+                                    processId = p.ProcessID,
+                                    taskName = pr.ProgressName,
+                                    defaultDurationDays = defaultDays,
+                                    deadline = defaultDeadline.ToString("yyyy-MM-dd"),
+                                    assignedUserId = (int?)null
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return Json(new
+                {
+                    status = true,
+                    processCount = activeProcesses.Count,
+                    processes = processList,
+                    selectedProcessId = defaultSelectedProcessId,
+                    progresses = defaultProgressList,
+                    members = membersList
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetProgressesByProcess(int processId, int digitalSalesId)
+        {
+            try
+            {
+                if (processId <= 0)
+                {
+                    return Json(new { status = false, message = "ProcessID không hợp lệ" }, JsonRequestBehavior.AllowGet);
+                }
+
+                var progs = _workflowCache.GetProgressesByProcess(processId);
+                var activeProgs = progs != null ? progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder).ToList() : new List<RM_DigitalSalesProgressModel>();
+
+                var progressList = new List<object>();
+                foreach (var pr in activeProgs)
+                {
+                    var defaultDays = pr.DefaultDurationDays > 0 ? pr.DefaultDurationDays : 3;
+                    var defaultDeadline = DateTime.Today.AddDays(defaultDays);
+                    progressList.Add(new
+                    {
+                        progressId = pr.ProgressID,
+                        processId = processId,
+                        taskName = pr.ProgressName,
+                        defaultDurationDays = defaultDays,
+                        deadline = defaultDeadline.ToString("yyyy-MM-dd"),
+                        assignedUserId = (int?)null
+                    });
+                }
+
+                return Json(new
+                {
+                    status = true,
+                    processId = processId,
+                    progresses = progressList
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+        #endregion
 
         private void PrepareTrackingForm()
         {
@@ -2641,30 +2896,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 if (string.IsNullOrWhiteSpace(userName)) return false;
 
+                // 1. Admin (Được phân nhóm QTHT hoặc tài khoản quản trị mặc định)
+                if (IsUserQTHT(userName)) return true;
+
+                // 2. Chỉ những người được check Cập nhật nội dung (IsAM = true) trong thành viên hồ sơ
                 if (sales != null)
                 {
-                    // 1. Người tạo hồ sơ có toàn quyền ngay lập tức (0ms, không tốn query)
-                    if (!string.IsNullOrEmpty(sales.CreatedBy) && sales.CreatedBy.Equals(userName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-
-                    // 2. Tài khoản quản trị mặc định
-                    if (userName.Equals("admin", StringComparison.OrdinalIgnoreCase) || userName.Equals("quantri", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-
-                    // 3. Nhân sự phụ trách / AM chủ trì
                     var currentUser = _userCache.GetByUserName(userName);
                     var currentUserId = currentUser?.UserId;
 
-                    if (currentUserId.HasValue && currentUserId.Value > 0 && sales.AssignedEmployeeID == currentUserId.Value)
-                    {
-                        return true;
-                    }
-
-                    // 4. Những người được check quyền cập nhật trạng thái (IsAM = true)
                     var members = sales.Members;
                     if ((members == null || members.Count == 0) && sales.DigitalSalesID > 0)
                     {
@@ -2673,18 +2913,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                     if (members != null && members.Count > 0)
                     {
-                        var hasStatusPermission = members.Any(m =>
+                        var hasUpdatePermission = members.Any(m =>
                             m.IsAM && (
                                 (!string.IsNullOrEmpty(m.UserName) && m.UserName.Equals(userName, StringComparison.OrdinalIgnoreCase)) ||
                                 (currentUserId.HasValue && currentUserId.Value > 0 && m.UserID == currentUserId.Value)
                             )
                         );
-                        if (hasStatusPermission) return true;
+                        if (hasUpdatePermission) return true;
                     }
                 }
-
-                // 5. Kiểm tra QTHT qua vai trò (roles) nếu các điều kiện trên chưa khớp
-                if (IsUserQTHT(userName)) return true;
             }
             catch
             {

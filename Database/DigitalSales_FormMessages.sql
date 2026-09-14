@@ -1,4 +1,4 @@
-﻿SET NOCOUNT ON;
+SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
 BEGIN TRANSACTION;
@@ -61,7 +61,7 @@ VALUES
 
     ('DigitalSalesMember_User_Label', N'Nhân sự tham gia'),
     ('DigitalSalesMember_RoleTitle_Label', N'Vai trò / Nhiệm vụ'),
-    ('DigitalSalesMember_IsAM_Label', N'Chủ trì (AM)'),
+    ('DigitalSalesMember_IsAM_Label', N'Được phép cập nhật nội dung'),
     ('DigitalSalesMember_Note_Label', N'Ghi chú nội bộ'),
     ('DigitalSalesMember_SearchEmployee_Placeholder', N'Tìm theo tên nhân sự...'),
     ('DigitalSalesMember_Unit_AllOption', N'-- Tất cả đơn vị quản lý --'),
@@ -161,7 +161,7 @@ VALUES
     ('DigitalSalesMember_Employees_Option', N'-- Chọn một hoặc nhiều nhân sự --'),
     ('DigitalSalesMember_Roles_Section', N'Vai trò / Nhiệm vụ'),
     ('DigitalSalesMember_Roles_Option', N'-- Chọn một hoặc nhiều vai trò --'),
-    ('DigitalSalesMember_IsAM_Help', N'Cho phép nhân sự được chọn cập nhật thông tin, trạng thái và tiến trình của hồ sơ.'),
+    ('DigitalSalesMember_IsAM_Help', N'Cho phép nhân sự được chọn cập nhật tất cả nội dung trên trang chi tiết hồ sơ.'),
     ('DigitalSalesMember_Save_Button', N'Lưu thành viên'),
     ('DigitalSalesTracking_Add_Title', N'Thêm mới công việc tiến trình'),
     ('DigitalSalesTracking_Edit_Title', N'Cập nhật tiến trình / Checklist'),

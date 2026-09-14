@@ -61,7 +61,7 @@
 
 <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_EditMemberModal.css?v=@DateTime.Now.Ticks" />
 
-                    <!-- QUYỀN CẬP NHẬT THÔNG TIN & TRẠNG THÁI -->
+                    <!-- QUYỀN CẬP NHẬT NỘI DUNG -->
                     <div class="form-group mb-3">
                         <label class="font-weight-bold text-secondary text-90 mb-1">Phân quyền thao tác:</label>
                         <div class="edit-perm-card @(Model.IsAM ? "is-checked" : "")" id="editPermCard">
@@ -73,14 +73,14 @@
                             <div class="flex-1">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap">
                                     <span class="font-weight-bold text-dark text-95">
-                                        <i class="fa fa-shield-alt text-primary mr-1"></i> Cho phép cập nhật thông tin & trạng thái
+                                        <i class="fa fa-shield-alt text-primary mr-1"></i> @(TSFramework.Libs.Processors.AppProcessor.Messagor.GetMessage("DigitalSalesMember_IsAM_Label") ?? "Được phép cập nhật nội dung")
                                     </span>
                                     <span class="badge bgc-green-l3 text-green-d3 border-1 brc-green-m3 px-2 py-05 text-75 font-bold">
-                                        <i class="fa fa-check-circle mr-1"></i>Cập nhật TT
+                                        <i class="fa fa-check-circle mr-1"></i>Được phép cập nhật
                                     </span>
                                 </div>
                                 <small class="text-muted d-block mt-1 text-85">
-                                    Nhân sự có quyền này sẽ được chỉnh sửa thông tin hồ sơ, cập nhật tiến trình và chuyển trạng thái kinh doanh số.
+                                    @(TSFramework.Libs.Processors.AppProcessor.Messagor.GetMessage("DigitalSalesMember_IsAM_Help") ?? "Cho phép nhân sự được chọn cập nhật tất cả nội dung trên trang chi tiết hồ sơ.")
                                 </small>
                             </div>
                         </div>

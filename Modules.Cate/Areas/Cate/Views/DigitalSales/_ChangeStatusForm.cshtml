@@ -1,13 +1,392 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesChangeStatusViewModel
+
 @Html.AntiForgeryToken()
 @Html.HiddenFor(m => m.DigitalSalesID)
 @Html.HiddenFor(m => m.Title)
 @Html.HiddenFor(m => m.CurrentBusinessType)
 @Html.HiddenFor(m => m.CurrentBusinessTypeName)
 @Html.HiddenFor(m => m.CurrentStatusName)
-<div class="card bcard border-1 brc-grey-l2 bgc-grey-l4 p-2 mb-3"><div class="text-90"><span class="text-secondary">@AppProcessor.Messagor.GetMessage("DigitalSales_Record_Label"):</span> <strong>@Model.Title</strong></div><div class="text-90"><span class="text-secondary">@AppProcessor.Messagor.GetMessage("DigitalSales_CurrentStatus_Label"):</span> <span class="badge badge-info">@Model.CurrentStatusName</span></div></div>
-<div class="alert alert-warning py-2 px-3 text-85">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_ProjectRequirement")</div>
-<div class="form-group">@Html.TitleFor(m => m.NewStatusID, new { @class = "text-85 text-600 mb-1 d-block" })@Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, AppProcessor.Messagor.GetMessage("DigitalSales_NewStatus_Option"), new { @class = "form-control select2" })@Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger" })</div>
-<div class="form-group">@Html.TitleFor(m => m.AttachmentPath, new { @class = "text-85 text-600 mb-1 d-block" })<input type="file" name="attachmentFile" class="form-control-file border p-1 rounded" /><small class="text-muted">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small></div>
-<div class="form-group mb-0">@Html.TitleFor(m => m.Note, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })@Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })<small class="text-muted">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Help")</small></div>
+@Html.HiddenFor(m => m.SelectedProcessID)
+@Html.HiddenFor(m => m.TrackingItemsJson)
+
+<div class="row" id="changeStatusLayoutRow">
+    <!-- CỘT TRÁI: THÔNG TIN CHUYỂN TRẠNG THÁI -->
+    <div id="colStatusInfo" class="col-12">
+        <div class="card bcard border-1 brc-grey-l2 bgc-grey-l4 p-2 mb-3 radius-1">
+            <div class="text-90 mb-1">
+                <span class="text-secondary font-weight-bold">@AppProcessor.Messagor.GetMessage("DigitalSales_Record_Label"):</span>
+                <strong class="text-primary-d2">@Model.Title</strong>
+            </div>
+            <div class="text-90">
+                <span class="text-secondary font-weight-bold">@AppProcessor.Messagor.GetMessage("DigitalSales_CurrentStatus_Label"):</span>
+                <span class="badge badge-info px-2 py-05 font-bold">@Model.CurrentStatusName</span>
+            </div>
+        </div>
+
+        <div class="alert alert-warning py-2 px-3 text-85 radius-1 mb-3">
+            <i class="fa fa-info-circle mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_ProjectRequirement")
+        </div>
+
+        <!-- 1. CHỌN TRẠNG THÁI MỚI -->
+        <div class="form-group mb-3">
+            @Html.TitleFor(m => m.NewStatusID, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
+            @Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, AppProcessor.Messagor.GetMessage("DigitalSales_NewStatus_Option"), new { @class = "form-control select2", id = "cboNewStatus", onchange = "handleNewStatusChange(this.value);" })
+            @Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger" })
+        </div>
+
+        <!-- 2. KHỐI CHỌN QUY TRÌNH (HIỂN THỊ KHI SỐ QUY TRÌNH > 1) -->
+        <div id="boxProcessSelect" class="card border-1 brc-primary-m3 shadow-sm mb-3 bgc-white radius-1 d-none">
+            <div class="card-header bgc-primary-l4 py-2 px-3 d-flex align-items-center justify-content-between">
+                <span class="font-weight-bold text-primary-d2 text-90">
+                    <i class="fa fa-project-diagram text-primary mr-1"></i> Chọn Quy trình áp dụng <span class="text-danger">*</span>
+                </span>
+                <span class="badge bgc-primary-l3 text-primary-d2 border-1 brc-primary-m3 text-75 font-bold" id="badgeProcessCount">0 quy trình</span>
+            </div>
+            <div class="card-body p-2" id="processRadioContainer">
+                <!-- Danh sách Radio button Quy trình sinh động qua JS -->
+            </div>
+        </div>
+
+        <!-- 3. TỆP ĐÍNH KÈM -->
+        <div class="form-group mb-3">
+            @Html.TitleFor(m => m.AttachmentPath, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
+            <input type="file" name="attachmentFile" class="form-control-file border p-1 rounded bgc-white" />
+            <small class="text-muted d-block mt-05">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small>
+        </div>
+
+        <!-- 4. GHI CHÚ / LÝ DO CHUYỂN -->
+        <div class="form-group mb-0">
+            @Html.TitleFor(m => m.Note, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
+            @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control text-90", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })
+            @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
+            <small class="text-muted d-block mt-05">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Help")</small>
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI: BOX DANH SÁCH TIẾN TRÌNH CHECKLIST -->
+    <div id="colProgressBox" class="col-lg-7 col-12 d-none mt-3 mt-lg-0">
+        <div class="card border-1 brc-success-m2 shadow-sm radius-1 bgc-white ds-progress-card">
+            <div class="card-header bgc-success-l4 py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
+                <div class="d-flex align-items-center">
+                    <span class="font-weight-bold text-success-d2 text-90">
+                        <i class="fa fa-tasks text-success mr-1"></i> Tiến trình công việc (Checklist)
+                    </span>
+                    <span class="badge badge-success badge-pill ml-1 font-bold" id="badgeProgressCount">0</span>
+                </div>
+                <button type="button" class="btn btn-xs btn-success font-bolder px-25 py-1 radius-1 shadow-sm" onclick="addCustomProgressRow();">
+                    <i class="fa fa-plus mr-1"></i> Thêm tiến trình
+                </button>
+            </div>
+            <div class="card-body p-2 p-lg-3 ds-progress-list-body">
+                <div class="text-secondary text-80 mb-2 font-italic border-b-1 brc-grey-l3 pb-2">
+                    <i class="fa fa-info-circle mr-1 text-primary"></i> Các tiến trình dưới đây sẽ được lưu vào tab <strong>Tiến trình & Checklist</strong> của hồ sơ. Bạn có thể thêm, sửa nội dung hoặc xóa trước khi xác nhận.
+                </div>
+                <div id="progressItemsContainer" class="ds-progress-items-container">
+                    <!-- Các item tiến trình nạp động qua JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var dsStatusWorkflowState = {
+        digitalSalesId: @Model.DigitalSalesID,
+        members: [],
+        currentProcesses: [],
+        selectedProcessId: null,
+        progressItems: []
+    };
+
+    function handleNewStatusChange(statusId) {
+        var $modal = $('#modalChangeStatus');
+        var $boxProcess = $('#boxProcessSelect');
+        var $colInfo = $('#colStatusInfo');
+        var $colProgress = $('#colProgressBox');
+        var $radioContainer = $('#processRadioContainer');
+        var $progressContainer = $('#progressItemsContainer');
+
+        if (!statusId || parseInt(statusId) <= 0) {
+            $modal.removeClass('has-progress-box');
+            $boxProcess.addClass('d-none');
+            $colProgress.addClass('d-none');
+            $colInfo.removeClass('col-lg-5').addClass('col-12');
+            $radioContainer.empty();
+            $progressContainer.empty();
+            $('#SelectedProcessID').val('');
+            $('#TrackingItemsJson').val('');
+            return;
+        }
+
+        // Gọi AJAX lấy danh sách quy trình & tiến trình của trạng thái mới
+        $.ajax({
+            url: '/Cate/DigitalSales/GetWorkflowProcessesAndProgresses',
+            type: 'GET',
+            data: { statusId: statusId, digitalSalesId: dsStatusWorkflowState.digitalSalesId },
+            cache: false
+        }).done(function (res) {
+            if (!res || !res.status) {
+                hideWorkflowSections();
+                return;
+            }
+
+            dsStatusWorkflowState.members = res.members || [];
+            dsStatusWorkflowState.currentProcesses = res.processes || [];
+            var processCount = res.processCount || 0;
+
+            if (processCount > 1) {
+                // TRƯỜNG HỢP A: SỐ QUY TRÌNH > 1 -> HIỂN THỊ DẠNG RADIO
+                $boxProcess.removeClass('d-none');
+                $('#badgeProcessCount').text(processCount + ' quy trình');
+                renderProcessRadios(res.processes, res.selectedProcessId);
+
+                // Mặc định chọn quy trình đầu tiên
+                dsStatusWorkflowState.selectedProcessId = res.selectedProcessId;
+                $('#SelectedProcessID').val(res.selectedProcessId);
+
+                // Hiển thị box tiến trình bên phải
+                showProgressSection(res.progresses);
+            }
+            else if (processCount === 1) {
+                // TRƯỜNG HỢP B: CÓ ĐÚNG 1 QUY TRÌNH
+                $boxProcess.addClass('d-none');
+                $radioContainer.empty();
+                var singleProcess = res.processes[0];
+                dsStatusWorkflowState.selectedProcessId = singleProcess.processId;
+                $('#SelectedProcessID').val(singleProcess.processId);
+
+                if (res.progresses && res.progresses.length > 0) {
+                    // Nếu quy trình có tiến trình -> hiển thị box bên phải
+                    showProgressSection(res.progresses);
+                } else {
+                    // Nếu quy trình không có tiến trình nào -> ẩn box bên phải
+                    hideProgressSection();
+                }
+            }
+            else {
+                // KHÔNG CÓ QUY TRÌNH NÀO
+                hideWorkflowSections();
+            }
+        }).fail(function () {
+            hideWorkflowSections();
+        });
+    }
+
+    function renderProcessRadios(processes, selectedProcessId) {
+        var $container = $('#processRadioContainer');
+        $container.empty();
+
+        if (!processes || processes.length === 0) return;
+
+        $.each(processes, function (idx, p) {
+            var isChecked = (p.processId === selectedProcessId || idx === 0);
+            var $item = $('<div class="ds-process-radio-item ' + (isChecked ? 'is-selected' : '') + '" onclick="onSelectProcessRadio(' + p.processId + ', this);">' +
+                '<input type="radio" name="rdProcessSelection" id="rdProcess_' + p.processId + '" value="' + p.processId + '" ' + (isChecked ? 'checked' : '') + ' />' +
+                '<div class="flex-1">' +
+                    '<div class="d-flex align-items-center justify-content-between">' +
+                        '<span class="font-weight-bold text-dark text-90">' + escapeHtml(p.processName) + '</span>' +
+                        '<span class="badge badge-light border-1 brc-grey-l1 text-75">' + p.progressCount + ' tiến trình</span>' +
+                    '</div>' +
+                    (p.description ? '<small class="text-secondary d-block mt-05 text-80">' + escapeHtml(p.description) + '</small>' : '') +
+                '</div>' +
+            '</div>');
+            $container.append($item);
+        });
+    }
+
+    function onSelectProcessRadio(processId, element) {
+        $('.ds-process-radio-item').removeClass('is-selected');
+        $(element).addClass('is-selected');
+        $(element).find('input[type="radio"]').prop('checked', true);
+
+        dsStatusWorkflowState.selectedProcessId = processId;
+        $('#SelectedProcessID').val(processId);
+
+        // Nạp danh sách tiến trình của quy trình đã chọn
+        $.ajax({
+            url: '/Cate/DigitalSales/GetProgressesByProcess',
+            type: 'GET',
+            data: { processId: processId, digitalSalesId: dsStatusWorkflowState.digitalSalesId },
+            cache: false
+        }).done(function (res) {
+            if (res && res.status && res.progresses && res.progresses.length > 0) {
+                showProgressSection(res.progresses);
+            } else {
+                hideProgressSection();
+            }
+        }).fail(function () {
+            hideProgressSection();
+        });
+    }
+
+    function showProgressSection(progresses) {
+        var $modal = $('#modalChangeStatus');
+        var $colInfo = $('#colStatusInfo');
+        var $colProgress = $('#colProgressBox');
+
+        $modal.addClass('has-progress-box');
+        $colInfo.removeClass('col-12').addClass('col-lg-5');
+        $colProgress.removeClass('d-none');
+
+        renderProgressRows(progresses);
+    }
+
+    function hideProgressSection() {
+        var $modal = $('#modalChangeStatus');
+        var $colInfo = $('#colStatusInfo');
+        var $colProgress = $('#colProgressBox');
+        var $progressContainer = $('#progressItemsContainer');
+
+        $modal.removeClass('has-progress-box');
+        $colProgress.addClass('d-none');
+        $colInfo.removeClass('col-lg-5').addClass('col-12');
+        $progressContainer.empty();
+        $('#badgeProgressCount').text('0');
+        $('#TrackingItemsJson').val('');
+    }
+
+    function hideWorkflowSections() {
+        $('#boxProcessSelect').addClass('d-none');
+        $('#processRadioContainer').empty();
+        hideProgressSection();
+        $('#SelectedProcessID').val('');
+    }
+
+    function renderProgressRows(items) {
+        var $container = $('#progressItemsContainer');
+        $container.empty();
+
+        if (!items || items.length === 0) {
+            $('#badgeProgressCount').text('0');
+            return;
+        }
+
+        $.each(items, function (idx, item) {
+            appendProgressRowElement(item, idx + 1);
+        });
+
+        updateProgressBadge();
+    }
+
+    function appendProgressRowElement(item, index) {
+        var $container = $('#progressItemsContainer');
+        var progressId = item.progressId || 0;
+        var processId = item.processId || dsStatusWorkflowState.selectedProcessId || 0;
+        var taskName = item.taskName || '';
+        var deadline = item.deadline || '';
+        var assignedUserId = item.assignedUserId || '';
+        var isCustom = item.isCustomTask === true;
+
+        // Xây dựng options người thực hiện
+        var memberOptionsHtml = '<option value="">-- Chọn người thực hiện --</option>';
+        $.each(dsStatusWorkflowState.members, function (_, m) {
+            var selectedAttr = (assignedUserId && parseInt(assignedUserId) === parseInt(m.userId)) ? 'selected' : '';
+            var label = m.isProjectMember ? ('[Thành viên] ' + m.fullName) : m.fullName;
+            memberOptionsHtml += '<option value="' + m.userId + '" ' + selectedAttr + '>' + escapeHtml(label) + '</option>';
+        });
+
+        var $row = $('<div class="ds-progress-row-item ' + (isCustom ? 'is-custom-task' : '') + '" data-progress-id="' + progressId + '" data-process-id="' + processId + '" data-is-custom="' + isCustom + '">' +
+            '<div class="d-flex align-items-center justify-content-between mb-15 flex-wrap" style="gap: 4px;">' +
+                '<div class="d-flex align-items-center flex-1 min-width-0">' +
+                    '<span class="ds-progress-row-index mr-2 row-idx">' + index + '</span>' +
+                    '<input type="text" class="form-control form-control-sm font-weight-bold text-dark txt-task-name" value="' + escapeHtml(taskName) + '" placeholder="Nhập tên tiến trình / công việc (*)" />' +
+                '</div>' +
+                '<button type="button" class="btn btn-xs btn-outline-danger radius-1 px-2 py-1 ml-2" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
+                    '<i class="fa fa-trash-alt"></i>' +
+                '</button>' +
+            '</div>' +
+            '<div class="d-flex align-items-center flex-wrap" style="gap: 8px;">' +
+                '<div class="flex-1" style="min-width: 160px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-0 d-block">Người thực hiện:</label>' +
+                    '<select class="form-control form-control-sm cbo-assigned-user">' +
+                        memberOptionsHtml +
+                    '</select>' +
+                '</div>' +
+                '<div style="width: 140px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-0 d-block">Hạn hoàn thành:</label>' +
+                    '<input type="date" class="form-control form-control-sm txt-deadline" value="' + deadline + '" />' +
+                '</div>' +
+            '</div>' +
+        '</div>');
+
+        $container.append($row);
+    }
+
+    function addCustomProgressRow() {
+        var $container = $('#progressItemsContainer');
+        var newIdx = $container.find('.ds-progress-row-item').length + 1;
+
+        // Tính ngày hạn chót mặc định: hôm nay + 3 ngày
+        var d = new Date();
+        d.setDate(d.getDate() + 3);
+        var defDeadline = d.toISOString().split('T')[0];
+
+        appendProgressRowElement({
+            progressId: 0,
+            processId: dsStatusWorkflowState.selectedProcessId || 0,
+            taskName: 'Công việc mới #' + newIdx,
+            deadline: defDeadline,
+            assignedUserId: '',
+            isCustomTask: true
+        }, newIdx);
+
+        updateProgressBadge();
+
+        // Cuộn xuống cuối container và focus vào input tên
+        $container.scrollTop($container[0].scrollHeight);
+        $container.find('.ds-progress-row-item:last-child .txt-task-name').focus().select();
+    }
+
+    function removeProgressRow(buttonElement) {
+        $(buttonElement).closest('.ds-progress-row-item').fadeOut(150, function () {
+            $(this).remove();
+            reindexProgressRows();
+            updateProgressBadge();
+        });
+    }
+
+    function reindexProgressRows() {
+        $('#progressItemsContainer .ds-progress-row-item').each(function (idx) {
+            $(this).find('.row-idx').text(idx + 1);
+        });
+    }
+
+    function updateProgressBadge() {
+        var count = $('#progressItemsContainer .ds-progress-row-item').length;
+        $('#badgeProgressCount').text(count);
+    }
+
+    function serializeProgressItemsToJson() {
+        var items = [];
+        $('#progressItemsContainer .ds-progress-row-item').each(function (idx) {
+            var $row = $(this);
+            var taskName = $.trim($row.find('.txt-task-name').val());
+            if (!taskName) return;
+
+            var assignedUserIdVal = $row.find('.cbo-assigned-user').val();
+            var deadlineVal = $row.find('.txt-deadline').val();
+            var progressId = parseInt($row.attr('data-progress-id')) || 0;
+            var processId = parseInt($row.attr('data-process-id')) || parseInt($('#SelectedProcessID').val()) || null;
+            var isCustom = $row.attr('data-is-custom') === 'true';
+
+            items.push({
+                ProcessID: processId,
+                ProgressID: progressId > 0 ? progressId : null,
+                TaskName: taskName,
+                AssignedUserID: (assignedUserIdVal && parseInt(assignedUserIdVal) > 0) ? parseInt(assignedUserIdVal) : null,
+                Deadline: deadlineVal ? deadlineVal : null,
+                SortOrder: idx + 1,
+                IsCustomTask: isCustom
+            });
+        });
+
+        $('#TrackingItemsJson').val(items.length > 0 ? JSON.stringify(items) : '');
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+    }
+</script>

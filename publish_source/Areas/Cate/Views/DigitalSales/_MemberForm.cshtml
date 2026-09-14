@@ -1,0 +1,20 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Models
+@using Core.Sys.Models.Sys
+@model Core.Cate.Models.RM_DigitalSalesMemberFormModel
+@{
+    var employees = ViewBag.Employees as List<MN_EmployeeModel> ?? new List<MN_EmployeeModel>();
+    var roles = ViewBag.Roles as List<RM_RolesModel> ?? new List<RM_RolesModel>();
+    var employeeItems = employees.Where(e => !e.IsSaleMember).Select(e => new SelectListItem { Value = e.Employee_ID.ToString(), Text = string.IsNullOrEmpty(e.TenBoPhan) ? e.FullName : e.FullName + " - " + e.TenBoPhan }).ToList();
+    var roleItems = roles.Select(r => new SelectListItem { Value = r.RoleID.ToString(), Text = r.RoleName }).ToList();
+}
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.DigitalSalesID)
+<div class="card bcard border-1 brc-primary-m3 shadow-sm mb-3"><div class="card-header bgc-primary-l4"><h6 class="card-title mb-0"><i class="fa fa-users mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesMember_Employees_Section")</h6></div><div class="card-body p-3">
+    <div class="form-group mb-0">@Html.TitleFor(m => m.EmployeeIDs, new { @class = "text-85 text-600 mb-1 d-block" })@Html.ListBoxFor(m => m.EmployeeIDs, employeeItems, new { @class = "form-control select2", data_placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesMember_Employees_Option") })@Html.ValidationMessageFor(m => m.EmployeeIDs, "", new { @class = "text-danger" })</div>
+</div></div>
+<div class="card bcard border-1 brc-purple-m3 shadow-sm mb-3"><div class="card-header bgc-purple-l4"><h6 class="card-title mb-0"><i class="fa fa-id-badge mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesMember_Roles_Section")</h6></div><div class="card-body p-3">
+    <div class="form-group">@Html.TitleFor(m => m.RoleIDs, new { @class = "text-85 text-600 mb-1 d-block" })@Html.ListBoxFor(m => m.RoleIDs, roleItems, new { @class = "form-control select2", data_placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesMember_Roles_Option") })@Html.ValidationMessageFor(m => m.RoleIDs, "", new { @class = "text-danger" })</div>
+    <div class="form-group mb-0">@Html.TitleFor(m => m.CustomRole, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextBoxFor(m => m.CustomRole, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesMember_CustomRole_Placeholder") })@Html.ValidationMessageFor(m => m.CustomRole, "", new { @class = "text-danger" })</div>
+</div></div>
+<div class="card bcard border-1 brc-grey-l2 shadow-sm mb-0"><div class="card-body p-3"><div class="form-group">@Html.CheckBoxFor(m => m.IsAM) @Html.TitleFor(m => m.IsAM, new { @class = "font-weight-bold ml-1" })@Html.ValidationMessageFor(m => m.IsAM, "", new { @class = "text-danger" })<small class="form-text text-muted">@AppProcessor.Messagor.GetMessage("DigitalSalesMember_IsAM_Help")</small></div><div class="form-group mb-0">@Html.TitleFor(m => m.Note, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextAreaFor(m => m.Note, new { rows = "2", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesMember_Note_Placeholder") })@Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })</div></div></div>

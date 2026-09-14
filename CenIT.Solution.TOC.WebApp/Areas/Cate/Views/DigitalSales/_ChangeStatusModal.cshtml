@@ -1,24 +1,94 @@
 ﻿@using System.Web
 @using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesChangeStatusViewModel
-<div class="modal fade" id="modalChangeStatus" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static"><div class="modal-dialog modal-md" role="document"><div class="modal-content">
-    <div class="modal-header bgc-warning-d2 text-white"><h5 class="modal-title text-110"><i class="fa fa-exchange-alt mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_Title")</h5><button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
-    @using (Html.BeginForm("ChangeStatus", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmChangeStatus", enctype = "multipart/form-data" }))
-    {
-        <div class="modal-body" id="bodyForm">@Html.Partial("_ChangeStatusForm", Model)</div>
-        <div class="modal-footer"><button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">@AppProcessor.Messagor.GetMessage("Button_Cancel")</button><button type="submit" class="btn btn-sm btn-warning font-weight-bold text-dark"><i class="fa fa-check mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_Confirm_Button")</button></div>
-    }
-</div></div></div>
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_ChangeStatusModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="modalChangeStatus" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-status-custom" role="document">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <div class="modal-header bgc-warning-d2 text-white py-25 px-3">
+                <h5 class="modal-title text-110 font-weight-bold">
+                    <i class="fa fa-exchange-alt mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_Title")
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("ChangeStatus", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmChangeStatus", enctype = "multipart/form-data" }))
+            {
+                <div class="modal-body p-3" id="bodyForm">
+                    @Html.Partial("_ChangeStatusForm", Model)
+                </div>
+                <div class="modal-footer bgc-grey-l5 py-2 px-3">
+                    <button type="button" class="btn btn-sm btn-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Cancel")
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-warning font-weight-bold text-dark px-4 radius-1 shadow-sm">
+                        <i class="fa fa-check mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_Confirm_Button")
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
-    window.initDigitalSalesChangeStatusForm = function () { var $modal = $('#modalChangeStatus'), $form = $('#frmChangeStatus'); if ($.fn.select2) $modal.find('.select2').select2({ width: '100%', dropdownParent: $modal }); if ($.validator && $.validator.unobtrusive) { $form.removeData('validator').removeData('unobtrusiveValidation'); $.validator.unobtrusive.parse($form); } };
+    window.initDigitalSalesChangeStatusForm = function () {
+        var $modal = $('#modalChangeStatus'), $form = $('#frmChangeStatus');
+        if ($.fn.select2) {
+            $modal.find('.select2').select2({ width: '100%', dropdownParent: $modal });
+        }
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData('validator').removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse($form);
+        }
+    };
+
     initDigitalSalesChangeStatusForm();
+
     $('#frmChangeStatus').off('submit.digitalSales').on('submit.digitalSales', function (e) {
-        e.preventDefault(); var $form = $(this); if ($form.valid && !$form.valid()) return false; var $button = $form.find('button[type=submit]').prop('disabled', true), data = new FormData(this);
-        $.ajax({ url: $form.attr('action'), type: 'POST', data: data, contentType: false, processData: false }).done(function (response) {
-            $button.prop('disabled', false); if (typeof response === 'string') { $('#modalChangeStatus #bodyForm').html(response); initDigitalSalesChangeStatusForm(); return; }
-            if (response.status) { $('#modalChangeStatus').modal('hide'); executeResponseMessage(response.message, '', true); if (typeof reloadStatusAndTimelineSection === 'function') reloadStatusAndTimelineSection(@Model.DigitalSalesID); if (typeof reloadOverviewAndMetrics === 'function') reloadOverviewAndMetrics(@Model.DigitalSalesID); if (typeof reloadTrackingSection === 'function') reloadTrackingSection(@Model.DigitalSalesID); } else executeResponseMessage(response.message, '', false);
-        }).fail(function () { $button.prop('disabled', false); executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false); }); return false;
+        e.preventDefault();
+        var $form = $(this);
+        if ($form.valid && !$form.valid()) return false;
+
+        // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+        if (typeof serializeProgressItemsToJson === 'function') {
+            serializeProgressItemsToJson();
+        }
+
+        var $button = $form.find('button[type=submit]').prop('disabled', true);
+        var data = new FormData(this);
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: data,
+            contentType: false,
+            processData: false
+        }).done(function (response) {
+            $button.prop('disabled', false);
+            if (typeof response === 'string') {
+                $('#modalChangeStatus #bodyForm').html(response);
+                initDigitalSalesChangeStatusForm();
+                return;
+            }
+            if (response.status) {
+                $('#modalChangeStatus').modal('hide');
+                executeResponseMessage(response.message, '', true);
+                if (typeof reloadStatusAndTimelineSection === 'function') reloadStatusAndTimelineSection(@Model.DigitalSalesID);
+                if (typeof reloadOverviewAndMetrics === 'function') reloadOverviewAndMetrics(@Model.DigitalSalesID);
+                if (typeof reloadTrackingSection === 'function') reloadTrackingSection(@Model.DigitalSalesID);
+            } else {
+                executeResponseMessage(response.message, '', false);
+            }
+        }).fail(function () {
+            $button.prop('disabled', false);
+            executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false);
+        });
+
+        return false;
     });
 })();
 </script>
