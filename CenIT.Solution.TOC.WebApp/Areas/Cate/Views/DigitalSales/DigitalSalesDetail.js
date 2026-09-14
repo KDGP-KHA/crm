@@ -1,4 +1,5 @@
-﻿var _detailUrls = {
+window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
     changeStatus: "/Cate/DigitalSales/ChangeStatus",
@@ -196,6 +197,48 @@ function reloadTrackingSection(salesId) {
     });
 }
 
+function updateHeaderFromInfo($info) {
+    if (!$info || !$info.length) return;
+    var title = $info.data("title");
+    var code = $info.data("code");
+    var statusName = $info.data("status");
+    var businessType = $info.data("business-type");
+    updateHeaderInfo(businessType, statusName, title, code);
+}
+
+function updateHeaderInfo(businessType, statusName, title, code) {
+    if (businessType !== undefined && businessType !== null && businessType !== "") {
+        var bType = parseInt(businessType, 10);
+        var isProject = bType === 2;
+        var $bTypeBadge = $("#headerBusinessType");
+        if ($bTypeBadge.length) {
+            if (isProject) {
+                $bTypeBadge
+                    .removeClass("bgc-blue-l2 text-blue-d2 brc-blue-m3")
+                    .addClass("bgc-purple-l2 text-purple-d2 border-1 brc-purple-m3")
+                    .html('<i class="fa fa-project-diagram mr-1"></i>Dự án');
+            } else {
+                $bTypeBadge
+                    .removeClass("bgc-purple-l2 text-purple-d2 brc-purple-m3")
+                    .addClass("bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3")
+                    .html('<i class="fa fa-lightbulb mr-1"></i>Cơ hội kinh doanh');
+            }
+        }
+        $("#lblKeyProject").text(isProject ? "Dự án trọng điểm" : "Cơ hội trọng điểm");
+        $("#lblFollowSales").text(isProject ? "Quan tâm dự án" : "Quan tâm cơ hội");
+    }
+
+    if (statusName) {
+        $("#headerStatusName").html('<i class="fa fa-check-circle mr-1"></i>' + statusName);
+    }
+    if (title) {
+        $("#headerTitle").text(title).attr("title", title);
+    }
+    if (code) {
+        $("#headerCode").html('<i class="fa fa-hashtag mr-1 opacity-75"></i>' + code);
+    }
+}
+
 function reloadStatusAndTimelineSection(salesId) {
     salesId = getEffectiveSalesId(salesId);
     if (!salesId) return;
@@ -222,10 +265,7 @@ function reloadStatusAndTimelineSection(salesId) {
         hideSectionLoading($overview);
         var $info = $overview.find("#partialOverviewHeaderInfo");
         if ($info.length) {
-            var statusName = $info.data("status");
-            if (statusName) {
-                $("#headerStatusName").html('<i class="fa fa-check-circle mr-1"></i>' + statusName);
-            }
+            updateHeaderFromInfo($info);
         }
     }).fail(function () {
         hideSectionLoading($overview);
@@ -244,12 +284,7 @@ function reloadOverviewAndMetrics(salesId) {
         hideSectionLoading($overview);
         var $info = $overview.find("#partialOverviewHeaderInfo");
         if ($info.length) {
-            var title = $info.data("title");
-            var code = $info.data("code");
-            var statusName = $info.data("status");
-            if (title) $("#headerTitle").text(title).attr("title", title);
-            if (code) $("#headerCode").html('<i class="fa fa-hashtag mr-1 opacity-75"></i>' + code);
-            if (statusName) $("#headerStatusName").html('<i class="fa fa-check-circle mr-1"></i>' + statusName);
+            updateHeaderFromInfo($info);
         }
     }).fail(function () {
         hideSectionLoading($overview);
@@ -279,8 +314,12 @@ $(document).ready(function () {
     }
     $('.nav-tabs a').on('shown.bs.tab', function (e) {
         window.location.hash = e.target.hash;
+        if (e.target.hash === '#tab-discussions') {
+            initDiscussionCKEditor();
+        }
     });
 
+    initDiscussionCKEditor();
     initDiscussionEvents();
 });
 
@@ -363,13 +402,85 @@ function openChangeStatusModal(id) {
     $.get(_detailUrls.changeStatusModal + "/" + id, function (html) {
         $("#modalContainer").html(html);
         var $modal = $("#modalChangeStatus");
+        var $form = $("#frmChangeStatus");
+
         if ($.fn.select2) {
             $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
         }
+
+        // Kích hoạt jQuery Unobtrusive Validation cho form nạp động
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData("validator");
+            $form.removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse($form);
+        }
+
         $modal.modal("show");
 
-        $("#frmChangeStatus").on("submit", function (e) {
+        // Tự động xóa thông báo lỗi khi người dùng tương tác
+        $form.find("textarea[name='Note']").on("input propertychange", function () {
+            var val = $(this).val().trim();
+            if (val) {
+                $(this).removeClass("input-validation-error border-danger");
+                $form.find("[data-valmsg-for='Note']").empty().removeClass("field-validation-error").addClass("field-validation-valid");
+            }
+        });
+
+        $form.find("select[name='NewStatusID']").on("change", function () {
+            var val = $(this).val();
+            if (val && val !== "0") {
+                $(this).removeClass("input-validation-error border-danger");
+                $form.find("[data-valmsg-for='NewStatusID']").empty().removeClass("field-validation-error").addClass("field-validation-valid");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
+
+            // 1. Kiểm tra qua jQuery Unobtrusive Validation nếu có
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            // 2. Fallback kiểm tra hiển thị lỗi trực tiếp vào ValidationMessageFor
+            var hasError = false;
+            var $statusInput = $form.find("select[name='NewStatusID']");
+            var statusVal = $statusInput.val();
+            if (!statusVal || statusVal === "0") {
+                var $valMsgStatus = $form.find("[data-valmsg-for='NewStatusID']");
+                $valMsgStatus.html('<span id="NewStatusID-error">Dữ liệu [Trạng thái mới] bắt buộc nhập</span>')
+                             .removeClass("field-validation-valid")
+                             .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $statusInput.addClass("input-validation-error border-danger");
+                hasError = true;
+            }
+
+            var $noteInput = $form.find("textarea[name='Note']");
+            var noteVal = ($noteInput.val() || "").trim();
+            if (!noteVal) {
+                var reqMsg = "Dữ liệu [Ghi chú / Lý do chuyển] bắt buộc nhập";
+                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_ChangeStatusNoteRequired) {
+                    reqMsg = App_Message.DigitalSales_Msg_ChangeStatusNoteRequired;
+                }
+                var $valMsgNote = $form.find("[data-valmsg-for='Note']");
+                $valMsgNote.html('<span id="Note-error">' + reqMsg + '</span>')
+                           .removeClass("field-validation-valid")
+                           .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $noteInput.addClass("input-validation-error border-danger");
+                if (!hasError) {
+                    $noteInput.focus();
+                }
+                hasError = true;
+            }
+
+            if (hasError) {
+                return false;
+            }
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
+
             var formData = new FormData(this);
             $.ajax({
                 url: _detailUrls.changeStatus,
@@ -378,15 +489,22 @@ function openChangeStatusModal(id) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
+                        if (res.businessType !== undefined) {
+                            updateHeaderInfo(res.businessType, res.statusName);
+                        }
                         reloadStatusAndTimelineSection(id);
+                        reloadOverviewAndMetrics(id);
+                        reloadTrackingSection(id);
                     } else {
                         executeResponseMessage(res.message, "Không thể chuyển trạng thái!", false);
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });
@@ -566,8 +684,45 @@ function openAddTrackingModal(salesId) {
         }
         $modal.modal("show");
 
-        $("#frmTrackingModal").on("submit", function (e) {
+        var $form = $("#frmTrackingModal");
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.unobtrusive.parse($form);
+        }
+
+        $form.find("#txtTrackingTaskName").on("input propertychange", function () {
+            if (($(this).val() || "").trim()) {
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
+
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            var $taskInput = $form.find("input[name='TaskName']");
+            var taskVal = ($taskInput.val() || "").trim();
+            if (!taskVal) {
+                var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
+                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
+                    reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
+                }
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
+                       .removeClass("field-validation-valid")
+                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $taskInput.addClass("input-validation-error border-danger").focus();
+                return false;
+            }
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
             var formData = new FormData(this);
             $.ajax({
                 url: _detailUrls.saveTracking,
@@ -576,6 +731,7 @@ function openAddTrackingModal(salesId) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Lưu tiến trình thành công!", true);
@@ -585,6 +741,7 @@ function openAddTrackingModal(salesId) {
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });
@@ -601,8 +758,45 @@ function openEditTrackingModal(id, salesId) {
         }
         $modal.modal("show");
 
-        $("#frmTrackingModal").on("submit", function (e) {
+        var $form = $("#frmTrackingModal");
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.unobtrusive.parse($form);
+        }
+
+        $form.find("#txtTrackingTaskName").on("input propertychange", function () {
+            if (($(this).val() || "").trim()) {
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
+
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
+            var $taskInput = $form.find("input[name='TaskName']");
+            var taskVal = ($taskInput.val() || "").trim();
+            if (!taskVal) {
+                var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
+                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
+                    reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
+                }
+                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+                $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
+                       .removeClass("field-validation-valid")
+                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $taskInput.addClass("input-validation-error border-danger").focus();
+                return false;
+            }
+
+            var $btnSubmit = $form.find("button[type='submit']");
+            var origBtnHtml = $btnSubmit.html();
+            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
             var formData = new FormData(this);
             $.ajax({
                 url: _detailUrls.saveTracking,
@@ -611,6 +805,7 @@ function openEditTrackingModal(id, salesId) {
                 contentType: false,
                 processData: false,
                 success: function (res) {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Cập nhật tiến trình thành công!", true);
@@ -620,6 +815,7 @@ function openEditTrackingModal(id, salesId) {
                     }
                 },
                 error: function () {
+                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
                     executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
                 }
             });
@@ -696,19 +892,34 @@ function previewImageDirect(src, title) {
     if ($modal.length === 0) {
         var modalHtml = '<div class="modal fade" id="modalImagePreview" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;">' +
             '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">' +
-            '<div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">' +
-            '<div class="modal-header bgc-dark text-white py-2 px-3">' +
+            '<div class="modal-content border-0 shadow-lg radius-2 overflow-hidden bg-dark">' +
+            '<div class="modal-header bgc-dark text-white py-2 px-3 border-b-1 brc-grey-d1">' +
             '<h6 class="modal-title font-bold text-white mb-0 text-truncate" id="imgPreviewTitle"><i class="fa fa-image mr-1"></i> Xem ảnh</h6>' +
-            '<button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
+            '<button type="button" class="close text-white opacity-75 btn-h-opacity-1" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
             '</div>' +
-            '<div class="modal-body p-2 text-center bgc-black-tp9 d-flex align-items-center justify-content-center" style="min-height: 300px; max-height: 80vh; overflow: auto;">' +
-            '<img id="imgPreviewSource" src="" class="img-fluid radius-1 shadow" style="max-height: 75vh; object-fit: contain;" alt="Xem ảnh" />' +
+            '<div class="modal-body p-2 text-center bgc-black-tp9 d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 320px; max-height: 80vh; overflow: auto;">' +
+            '<div id="imgPreviewLoading" class="text-center py-5">' +
+            '<i class="fa fa-spinner fa-spin fa-2x text-white mb-2"></i>' +
+            '<div class="text-white-tp2 text-85 font-italic">Đang tải hình ảnh...</div>' +
             '</div>' +
-            '<div class="modal-footer py-2 bgc-grey-l4 d-flex justify-content-between">' +
-            '<span class="text-secondary text-85 font-italic" id="imgPreviewFileName"></span>' +
+            '<div id="imgPreviewError" class="text-center py-4 px-3" style="display: none;">' +
+            '<div class="w-6 h-6 radius-round bgc-danger-l3 text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; border-radius: 50%;">' +
+            '<i class="fa fa-exclamation-triangle fa-2x"></i>' +
+            '</div>' +
+            '<h6 class="text-white font-weight-bold mb-2">Không thể tải hình ảnh</h6>' +
+            '<p class="text-white-tp3 text-85 mb-3">Tệp tin không tồn tại hoặc đã bị xóa trên máy chủ.</p>' +
+            '<div class="d-flex justify-content-center" style="gap: 8px;">' +
+            '<a id="btnErrorDownload" href="#" class="btn btn-sm btn-primary radius-1 px-3 font-bold"><i class="fa fa-download mr-1"></i> Tải về tệp</a>' +
+            '<button type="button" class="btn btn-sm btn-outline-light radius-1 px-3" data-dismiss="modal">Đóng</button>' +
+            '</div>' +
+            '</div>' +
+            '<img id="imgPreviewSource" src="" class="img-fluid radius-1 shadow" style="max-height: 75vh; object-fit: contain; display: none;" alt="" />' +
+            '</div>' +
+            '<div class="modal-footer py-2 bgc-dark border-t-1 brc-grey-d1 d-flex justify-content-between">' +
+            '<span class="text-white-tp2 text-85 font-italic text-truncate mr-2" id="imgPreviewFileName" style="max-width: 50%;"></span>' +
             '<div>' +
-            '<a id="btnDownloadPreviewImage" href="#" class="btn btn-sm btn-primary radius-1 px-3"><i class="fa fa-download mr-1"></i> Tải về</a>' +
-            '<button type="button" class="btn btn-sm btn-outline-secondary radius-1 px-3 ml-2" data-dismiss="modal">Đóng</button>' +
+            '<a id="btnDownloadPreviewImage" href="#" class="btn btn-sm btn-primary radius-1 px-3 font-bold"><i class="fa fa-download mr-1"></i> Tải về</a>' +
+            '<button type="button" class="btn btn-sm btn-secondary radius-1 px-3 ml-2" data-dismiss="modal">Đóng</button>' +
             '</div>' +
             '</div>' +
             '</div></div></div>';
@@ -716,10 +927,42 @@ function previewImageDirect(src, title) {
         $modal = $('#modalImagePreview');
     }
 
+    var cleanSrc = (src || '').trim();
+    var viewUrl = cleanSrc;
+    var downloadUrl = cleanSrc;
+
+    if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
+        viewUrl = '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    }
+    if (cleanSrc.indexOf('/Cate/DigitalSales/DownloadAttachment') !== 0) {
+        downloadUrl = '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    }
+
     $modal.find('#imgPreviewTitle').html('<i class="fa fa-image mr-1"></i> ' + (title || 'Xem ảnh'));
     $modal.find('#imgPreviewFileName').text(title || '');
-    $modal.find('#imgPreviewSource').attr('src', src);
-    $modal.find('#btnDownloadPreviewImage').attr('href', '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(src));
+    $modal.find('#btnDownloadPreviewImage').attr('href', downloadUrl);
+    $modal.find('#btnErrorDownload').attr('href', downloadUrl);
+
+    $modal.find('#imgPreviewLoading').show();
+    $modal.find('#imgPreviewError').hide();
+
+    var $img = $modal.find('#imgPreviewSource');
+    $img.hide().removeAttr('src');
+    $img.off('load.preview error.preview');
+
+    $img.on('load.preview', function () {
+        $modal.find('#imgPreviewLoading').hide();
+        $modal.find('#imgPreviewError').hide();
+        $img.fadeIn(150);
+    });
+
+    $img.on('error.preview', function () {
+        $modal.find('#imgPreviewLoading').hide();
+        $img.hide();
+        $modal.find('#imgPreviewError').fadeIn(150);
+    });
+
+    $img.attr('src', viewUrl);
     $modal.modal('show');
 }
 
@@ -958,6 +1201,13 @@ function reloadDiscussionsSection(salesId, filterType) {
         params.activityType = filterType;
     }
 
+    // Cleanly destroy CKEditor before re-rendering HTML
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+        try {
+            CKEDITOR.instances['txtDiscussionContent'].destroy(true);
+        } catch (e) { }
+    }
+
     $.get(_detailUrls.getDiscussionsPartial, params, function (html) {
         $discussions.html(html);
         hideSectionLoading($discussions);
@@ -965,6 +1215,7 @@ function reloadDiscussionsSection(salesId, filterType) {
         if (newCount !== undefined) {
             $("#badgeTabDiscussions").text(newCount);
         }
+        initDiscussionCKEditor();
         initDiscussionEvents();
     }).fail(function () {
         hideSectionLoading($discussions);
@@ -1006,10 +1257,26 @@ function renderDiscussionSelectedFiles() {
         var sizeText = file.size > 1048576 
             ? (file.size / 1048576).toFixed(1) + " MB" 
             : (file.size / 1024).toFixed(0) + " KB";
+        var fileName = file.name || "";
+        var ext = fileName.lastIndexOf('.') >= 0 ? fileName.substring(fileName.lastIndexOf('.')).toLowerCase() : "";
+        var iconClass = "fa-file text-secondary";
+        if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"].indexOf(ext) >= 0) {
+            iconClass = "fa-file-image text-info";
+        } else if (ext === ".pdf") {
+            iconClass = "fa-file-pdf text-danger";
+        } else if (ext === ".doc" || ext === ".docx") {
+            iconClass = "fa-file-word text-primary";
+        } else if (ext === ".xls" || ext === ".xlsx" || ext === ".csv") {
+            iconClass = "fa-file-excel text-success";
+        } else if (ext === ".ppt" || ext === ".pptx") {
+            iconClass = "fa-file-powerpoint text-warning";
+        } else if (ext === ".zip" || ext === ".rar" || ext === ".7z") {
+            iconClass = "fa-file-archive text-warning";
+        }
 
         var $chip = $('<div class="ds-file-tag">' +
-            '<i class="fa fa-file text-primary"></i>' +
-            '<span class="text-truncate" style="max-width: 180px;" title="' + file.name + '">' + file.name + ' (' + sizeText + ')</span>' +
+            '<i class="fa ' + iconClass + ' mr-1"></i>' +
+            '<span class="text-truncate" style="max-width: 220px;" title="' + fileName + '">' + fileName + ' (' + sizeText + ')</span>' +
             '<i class="fa fa-times text-danger ml-1" title="Bỏ tệp này" onclick="removeDiscussionSelectedFile(' + index + ');"></i>' +
             '</div>');
         $list.append($chip);
@@ -1038,14 +1305,83 @@ function loadProjectMembersForMention(salesId, callback) {
     });
 }
 
-function triggerMentionDropdown() {
-    var $textarea = $("#txtDiscussionContent");
-    if ($textarea.length === 0) return;
-    var currentVal = $textarea.val();
-    if (!currentVal.endsWith("@")) {
-        $textarea.val(currentVal + (currentVal.length > 0 && !currentVal.endsWith(" ") ? " @" : "@"));
+function initDiscussionCKEditor() {
+    if (typeof CKEDITOR === "undefined") return;
+    if ($("#txtDiscussionContent").length === 0) return;
+
+    if (CKEDITOR.instances['txtDiscussionContent']) {
+        try {
+            CKEDITOR.instances['txtDiscussionContent'].destroy(true);
+        } catch (e) { }
     }
-    $textarea.focus();
+
+    window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+
+    var editor = CKEDITOR.replace('txtDiscussionContent', {
+        customConfig: '',
+        height: 120,
+        allowedContent: true,
+        extraAllowedContent: 'span(*)[*]; img[*]; table[*]; tr[*]; td[*]; th[*]; p[*]; a[*]; b[*]; strong[*]; i[*]; u[*]; s[*]',
+        autoParagraph: true,
+        enterMode: 1, // CKEDITOR.ENTER_P
+        shiftEnterMode: 2, // CKEDITOR.ENTER_BR
+        entities: false,
+        basicEntities: false,
+        entities_latin: false,
+        entities_greek: false,
+        entities_processNumerical: false,
+        fillEmptyBlocks: false,
+        toolbar: [
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+            { name: 'insert', items: ['Table', 'Link', 'Unlink'] },
+            { name: 'styles', items: ['Format'] },
+            { name: 'tools', items: ['Maximize', 'RemoveFormat'] }
+        ]
+    });
+
+    editor.on('instanceReady', function () {
+        updateDiscussionWordCount();
+
+        editor.on('change', function () {
+            updateDiscussionWordCount();
+        });
+
+        editor.on('paste', function () {
+            setTimeout(updateDiscussionWordCount, 100);
+        });
+
+        editor.on('key', function (evt) {
+            setTimeout(updateDiscussionWordCount, 50);
+
+            // Ctrl + Enter to submit form
+            if (evt.data.domEvent.$.ctrlKey && (evt.data.domEvent.$.keyCode === 13 || evt.data.domEvent.$.which === 13)) {
+                evt.cancel();
+                $("#frmPostDiscussion").submit();
+                return;
+            }
+
+            // '@' key to trigger mention
+            var key = evt.data.domEvent.$.key;
+            if (key === '@' || (evt.data.domEvent.$.shiftKey && (evt.data.domEvent.$.keyCode === 50 || evt.data.domEvent.$.which === 50))) {
+                if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+                    var ed = CKEDITOR.instances['txtDiscussionContent'];
+                    var sel = ed.getSelection();
+                    if (sel) {
+                        try {
+                            window._mentionBookmarks = sel.createBookmarks(true);
+                        } catch (e) { }
+                    }
+                }
+                setTimeout(function () {
+                    showMentionDropdown("");
+                }, 100);
+            }
+        });
+    });
+}
+
+function triggerMentionDropdown() {
     showMentionDropdown("");
 }
 
@@ -1092,23 +1428,123 @@ function showMentionDropdown(query) {
         }
 
         $dropdown.show();
+        setTimeout(function () {
+            $("#txtMentionSearch").focus();
+        }, 50);
     });
 }
 
 function hideMentionDropdown() {
     $("#dsMentionDropdown").hide();
+    $("#txtMentionSearch").val('');
+}
+
+function handleMentionSearchInput(val) {
+    showMentionDropdown(val);
+}
+
+function handleMentionSearchKeydown(e) {
+    var $dropdown = $("#dsMentionDropdown");
+    if (!$dropdown.is(":visible")) return;
+
+    var $items = $("#dsMentionList .ds-mention-item");
+    if ($items.length > 0) {
+        var $current = $items.filter(".active");
+        var currentIndex = $items.index($current);
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            var nextIndex = currentIndex < $items.length - 1 ? currentIndex + 1 : 0;
+            $items.removeClass("active");
+            var $next = $items.eq(nextIndex).addClass("active");
+            if ($next.length && $next[0].scrollIntoView) {
+                $next[0].scrollIntoView({ block: "nearest" });
+            }
+            return;
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            var prevIndex = currentIndex > 0 ? currentIndex - 1 : $items.length - 1;
+            $items.removeClass("active");
+            var $prev = $items.eq(prevIndex).addClass("active");
+            if ($prev.length && $prev[0].scrollIntoView) {
+                $prev[0].scrollIntoView({ block: "nearest" });
+            }
+            return;
+        } else if (e.key === "Enter") {
+            e.preventDefault();
+            if ($current.length > 0) {
+                var user = $current.data("user");
+                if (user) {
+                    selectMentionUser(user);
+                    return;
+                }
+            }
+        }
+    }
+
+    if (e.key === "Escape") {
+        e.preventDefault();
+        hideMentionDropdown();
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+            CKEDITOR.instances['txtDiscussionContent'].focus();
+        }
+    }
 }
 
 function selectMentionUser(user) {
-    var $textarea = $("#txtDiscussionContent");
-    var text = $textarea.val();
-    var lastAtIndex = text.lastIndexOf("@");
-    if (lastAtIndex !== -1) {
-        text = text.substring(0, lastAtIndex) + "@" + user.fullName + " ";
+    if (!user) return;
+
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+        var editor = CKEDITOR.instances['txtDiscussionContent'];
+        editor.focus();
+
+        if (window._mentionBookmarks) {
+            try {
+                editor.getSelection().selectBookmarks(window._mentionBookmarks);
+                window._mentionBookmarks = null;
+            } catch (e) { }
+        }
+
+        // 1. Tự động xóa ký tự '@' người dùng đã gõ trước đó để kích hoạt dropdown
+        try {
+            var selection = editor.getSelection();
+            if (selection) {
+                var ranges = selection.getRanges();
+                if (ranges && ranges.length > 0) {
+                    var range = ranges[0];
+                    var startNode = range.startContainer;
+                    if (startNode && startNode.type === CKEDITOR.NODE_TEXT) {
+                        var textVal = startNode.getText();
+                        var offset = range.startOffset;
+                        if (offset > 0 && textVal.charAt(offset - 1) === '@') {
+                            var updatedText = textVal.substring(0, offset - 1) + textVal.substring(offset);
+                            startNode.setText(updatedText);
+                            range.setStart(startNode, offset - 1);
+                            range.setEnd(startNode, offset - 1);
+                            selection.selectRanges([range]);
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Error removing @ before mention:", err);
+        }
+
+        // 2. Chèn tag hiển thị sạch, không dư thừa ký tự/icon @ vì bản thân badge đã là tag hiển thị
+        var mentionHtml = '<span class="ds-mention-badge" data-user-id="' + user.userId + '">' + user.fullName + '</span>&nbsp;';
+        editor.insertHtml(mentionHtml);
     } else {
-        text = text + " @" + user.fullName + " ";
+        var $textarea = $("#txtDiscussionContent");
+        if ($textarea.length > 0) {
+            var val = $textarea.val() || "";
+            // Xóa ký tự '@' cuối cùng nếu vừa gõ
+            if (val.trimEnd().endsWith('@')) {
+                var lastAt = val.lastIndexOf('@');
+                val = val.substring(0, lastAt);
+            }
+            $textarea.val(val + " " + user.fullName + " ");
+        }
     }
-    $textarea.val(text);
 
     // Track mentioned user IDs
     var $ids = $("#hdnMentionedUserIds");
@@ -1124,80 +1560,58 @@ function selectMentionUser(user) {
     $names.val(currentNames.join(","));
 
     hideMentionDropdown();
-    $textarea.focus();
+}
+
+function getDiscussionPlainText() {
+    var content = "";
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+        content = CKEDITOR.instances['txtDiscussionContent'].getData();
+    } else {
+        content = $("#txtDiscussionContent").val() || "";
+    }
+    return $("<div>").html(content).text().trim();
+}
+
+function countWordsInText(text) {
+    if (!text) return 0;
+    var trimmed = text.trim();
+    if (!trimmed) return 0;
+    var words = trimmed.split(/\s+/).filter(function (w) { return w.length > 0; });
+    return words.length;
+}
+
+function updateDiscussionWordCount() {
+    var plainText = getDiscussionPlainText();
+    var wordCount = countWordsInText(plainText);
+    var $badge = $("#discussionWordCountBadge");
+    var $countSpan = $("#discussionCurrentWords");
+
+    if ($countSpan.length > 0) {
+        $countSpan.text(wordCount);
+    }
+
+    if ($badge.length > 0) {
+        if (wordCount > 500) {
+            $badge.removeClass("bgc-grey-l4 text-secondary-d1 brc-grey-l2 font-normal")
+                  .addClass("bgc-danger-l3 text-danger-d2 brc-danger-m2 font-bold");
+        } else {
+            $badge.removeClass("bgc-danger-l3 text-danger-d2 brc-danger-m2 font-bold")
+                  .addClass("bgc-grey-l4 text-secondary-d1 brc-grey-l2 font-normal");
+        }
+    }
+    return wordCount;
 }
 
 function initDiscussionEvents() {
-    var $textarea = $("#txtDiscussionContent");
-    if ($textarea.length === 0) return;
-
-    $textarea.off("input.ds keydown.ds").on("input.ds", function (e) {
-        var val = $(this).val();
-        var cursorPos = this.selectionStart;
-        var textBeforeCursor = val.substring(0, cursorPos);
-        var match = textBeforeCursor.match(/@([a-zA-Z0-9À-ỹ\s.-]*)$/);
-
-        if (match) {
-            var query = match[1];
-            if (query.length <= 30) {
-                showMentionDropdown(query);
-            } else {
-                hideMentionDropdown();
-            }
-        } else {
+    $(document).off("click.dsMention").on("click.dsMention", function (e) {
+        if (!$(e.target).closest("#dsMentionDropdown, #txtDiscussionContent, .ds-mention-item, button[onclick*='triggerMentionDropdown']").length) {
             hideMentionDropdown();
-        }
-    }).on("keydown.ds", function (e) {
-        var $dropdown = $("#dsMentionDropdown");
-        if ($dropdown.is(":visible")) {
-            var $items = $("#dsMentionList .ds-mention-item");
-            if ($items.length > 0) {
-                var $current = $items.filter(".active");
-                var currentIndex = $items.index($current);
-
-                if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    var nextIndex = currentIndex < $items.length - 1 ? currentIndex + 1 : 0;
-                    $items.removeClass("active");
-                    var $next = $items.eq(nextIndex).addClass("active");
-                    if ($next.length && $next[0].scrollIntoView) {
-                        $next[0].scrollIntoView({ block: "nearest" });
-                    }
-                    return;
-                } else if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    var prevIndex = currentIndex > 0 ? currentIndex - 1 : $items.length - 1;
-                    $items.removeClass("active");
-                    var $prev = $items.eq(prevIndex).addClass("active");
-                    if ($prev.length && $prev[0].scrollIntoView) {
-                        $prev[0].scrollIntoView({ block: "nearest" });
-                    }
-                    return;
-                } else if (e.key === "Enter" || e.key === "Tab") {
-                    if ($current.length > 0) {
-                        e.preventDefault();
-                        var user = $current.data("user");
-                        if (user) {
-                            selectMentionUser(user);
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (e.key === "Escape") {
-            hideMentionDropdown();
-        } else if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-            e.preventDefault();
-            $("#frmPostDiscussion").submit();
         }
     });
 
-    $(document).off("click.dsMention").on("click.dsMention", function (e) {
-        if (!$(e.target).closest("#dsMentionDropdown, #txtDiscussionContent").length) {
-            hideMentionDropdown();
-        }
+    $(document).off("input.dsWordCount propertychange.dsWordCount paste.dsWordCount", "#txtDiscussionContent")
+               .on("input.dsWordCount propertychange.dsWordCount paste.dsWordCount", "#txtDiscussionContent", function () {
+        updateDiscussionWordCount();
     });
 }
 
@@ -1206,12 +1620,43 @@ function submitDiscussionForm(e, salesId) {
     if (e && e.preventDefault) e.preventDefault();
     if (_isSubmittingDiscussion) return;
 
-    var content = $("#txtDiscussionContent").val();
-    if (!content || !content.trim()) {
+    var content = "";
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+        content = CKEDITOR.instances['txtDiscussionContent'].getData();
+    } else {
+        content = $("#txtDiscussionContent").val();
+    }
+
+    // Làm sạch hoàn toàn ký tự @ đứng trước hoặc trong thẻ tag mention trước khi gửi
+    if (content) {
+        content = content.replace(/@(?:\s|&nbsp;|<[^>]+>)*(<span\s+class=["']ds-mention-badge["'])/gi, '$1');
+        content = content.replace(/(<span\s+class=["']ds-mention-badge["'][^>]*>)(?:\s|&nbsp;)*@(?:\s|&nbsp;)*/gi, '$1');
+        content = content.replace(/<i\s+class=["']fa\s+fa-at[^'"]*["']\s*><\/i>/gi, '');
+    }
+
+    var plainText = $("<div>").html(content).text().trim();
+    if (!content || !plainText) {
         if (typeof toastr !== "undefined") {
             toastr.warning("Vui lòng nhập nội dung trao đổi!");
         }
-        $("#txtDiscussionContent").focus();
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+            CKEDITOR.instances['txtDiscussionContent'].focus();
+        } else {
+            $("#txtDiscussionContent").focus();
+        }
+        return;
+    }
+
+    var wordCount = countWordsInText(plainText);
+    if (wordCount > 500) {
+        if (typeof toastr !== "undefined") {
+            toastr.warning("Nội dung trao đổi không được vượt quá 500 từ (hiện tại: " + wordCount + " từ)!");
+        }
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+            CKEDITOR.instances['txtDiscussionContent'].focus();
+        } else {
+            $("#txtDiscussionContent").focus();
+        }
         return;
     }
 
@@ -1245,7 +1690,15 @@ function submitDiscussionForm(e, salesId) {
 
             if (res && res.status) {
                 executeResponseMessage(res.message, "Đã gửi trao đổi thành công!", true);
+                if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+                    CKEDITOR.instances['txtDiscussionContent'].setData('');
+                }
+                $("#txtDiscussionContent").val('');
+                $("#hdnMentionedUserIds").val('');
+                $("#hdnMentionedNames").val('');
+                updateDiscussionWordCount();
                 _discussionSelectedFiles = [];
+                renderDiscussionSelectedFiles();
                 reloadDiscussionsSection(salesId);
             } else {
                 executeResponseMessage(res ? res.message : "Gửi trao đổi không thành công!", null, false);

@@ -1,4 +1,4 @@
-﻿using Core.Cate.Models;
+using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +33,9 @@ namespace Core.Cate.Biz
                 PageSize = -1
             };
 
+            int pageNumber = (search.PageSize <= 0) ? 1 : (search.StartIndex / search.PageSize) + 1;
+            int pageSize = (search.PageSize <= 0) ? -1 : search.PageSize;
+
             var data = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_ContactPersonsModel>(
                  _RM_ContactPersons_Get,
                  DATA_PROVIDER_NAME,
@@ -40,8 +43,8 @@ namespace Core.Cate.Biz
                  filter?.Gender,
                  filter?.Status,
                  filter?.CustomerID,
-                 (search.StartIndex / search.PageSize) + 1,
-                 search.PageSize <= 0 ? 10 : search.PageSize
+                 pageNumber,
+                 pageSize
              );
             total = 0;
             if (data != null && data.Count > 0)

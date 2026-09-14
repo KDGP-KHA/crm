@@ -33,7 +33,7 @@
                     </div>
                     <div class="text-90 text-dark mb-1 bgc-grey-l5 p-2 radius-1 border-1 brc-grey-l3">
                         <span class="text-secondary font-weight-bold text-85"><i class="fa fa-comment-dots text-warning-d2 mr-1"></i>Lý do / Ghi chú chuyển:</span>
-                        <span class="text-dark">@tl.Note</span>
+                        <span class="text-dark">@(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(tl.Note))</span>
                     </div>
                     <div class="d-flex justify-content-between text-80 text-secondary">
                         <span><i class="fa fa-user mr-1"></i> Thực hiện bởi: <strong>@tl.ActionBy</strong></span>

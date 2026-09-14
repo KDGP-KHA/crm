@@ -17,7 +17,7 @@
                 </button>
             </div>
 
-            <form id="frmProductModal" method="post" action="/Cate/DigitalSales/SaveProduct">
+            <form id="frmProductModal" method="post" action="/Cate/DigitalSales/SaveProduct" novalidate="novalidate">
                 <div class="modal-body px-4 py-3 bgc-grey-l5">
                     @Html.AntiForgeryToken()
                     @Html.HiddenFor(m => m.SalesProductID)
@@ -35,7 +35,8 @@
                             <label class="font-bold text-secondary-d2 mb-1 d-block text-90" for="ProductServiceID">
                                 @AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ProductService_Label") <span class="text-danger font-bold">*</span>
                             </label>
-                            @Html.DropDownListFor(m => m.ProductServiceID, (List<SelectListItem>)ViewBag.ProductList, AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ProductService_Option"), new { @class = "form-control select2", required = "required" })
+                            @Html.DropDownListFor(m => m.ProductServiceID, (List<SelectListItem>)ViewBag.ProductList, AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ProductService_Option"), new { @class = "form-control select2", id = "cboProductServiceID" })
+                            @Html.ValidationMessageFor(m => m.ProductServiceID, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
                         </div>
 
                         <!-- Gói cước & Số lượng -->
@@ -56,11 +57,12 @@
                                     <div class="input-group-prepend">
                                         <button type="button" class="btn btn-outline-secondary px-2" id="btnDecreaseQty"><i class="fa fa-minus text-75"></i></button>
                                     </div>
-                                    @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control form-control-sm text-center font-bold text-primary", type = "number", min = "1", id = "prodQtyInput", required = "required" })
+                                    @Html.TextBoxFor(m => m.Quantity, new { @class = "form-control form-control-sm text-center font-bold text-primary", type = "number", min = "1", id = "prodQtyInput" })
                                     <div class="input-group-append">
                                         <button type="button" class="btn btn-outline-secondary px-2" id="btnIncreaseQty"><i class="fa fa-plus text-75"></i></button>
                                     </div>
                                 </div>
+                                @Html.ValidationMessageFor(m => m.Quantity, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
                             </div>
                         </div>
                     </div>
@@ -173,24 +175,7 @@
     </div>
 </div>
 
-<style>
-    #modalProduct .select2-container--default .select2-selection--single {
-        height: 38px !important;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-    }
-    #modalProduct .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 36px !important;
-        font-size: 0.9rem;
-        padding-left: 0.75rem;
-    }
-    #modalProduct .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px !important;
-    }
-    #modalProduct .select2-container {
-        width: 100% !important;
-    }
-</style>
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_ProductModal.css?v=@DateTime.Now.Ticks" />
 
 <script>
     (function () {
@@ -244,18 +229,54 @@
         formatMoneyInput($modal.find("#ExpectedRevenue_Display"), $modal.find("#ExpectedRevenue"));
         formatMoneyInput($modal.find("#ActualRevenue_Display"), $modal.find("#ActualRevenue"));
 
-        // 4. Xử lý submit form AJAX an toàn
-        $("#frmProductModal").off("submit").on("submit", function (e) {
+        // 4. Xử lý Unobtrusive Validation và submit form AJAX an toàn
+        var $form = $("#frmProductModal");
+        if ($.validator && $.validator.unobtrusive) {
+            $.validator.unobtrusive.parse($form);
+        }
+
+        $form.find("#cboProductServiceID").on("change", function () {
+            if ($(this).val() && $(this).val() !== "0") {
+                var $valMsg = $form.find("[data-valmsg-for='ProductServiceID']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.find("#prodQtyInput").on("input propertychange", function () {
+            var val = parseInt($(this).val(), 10);
+            if (val && val > 0) {
+                var $valMsg = $form.find("[data-valmsg-for='Quantity']");
+                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+                $(this).removeClass("input-validation-error border-danger");
+            }
+        });
+
+        $form.off("submit").on("submit", function (e) {
             e.preventDefault();
-            var $form = $(this);
+
+            if (typeof $form.valid === "function" && !$form.valid()) {
+                return false;
+            }
+
             var prodId = $form.find("[name='ProductServiceID']").val();
             if (!prodId || prodId === "" || prodId === "0") {
-                var msgRequired = "@Html.Raw(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ProductRequired"))";
-                if (typeof toastr !== "undefined") {
-                    toastr.warning(msgRequired || "Vui lòng chọn sản phẩm / dịch vụ số!");
-                } else {
-                    alert(msgRequired || "Vui lòng chọn sản phẩm / dịch vụ số!");
-                }
+                var msgRequired = "@Html.Raw(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ProductRequired"))" || "Vui lòng chọn sản phẩm / dịch vụ số!";
+                var $valMsg = $form.find("[data-valmsg-for='ProductServiceID']");
+                $valMsg.html('<span id="ProductServiceID-error">' + msgRequired + '</span>')
+                       .removeClass("field-validation-valid")
+                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $form.find("#cboProductServiceID").addClass("input-validation-error border-danger");
+                return false;
+            }
+
+            var qtyVal = parseInt($form.find("#prodQtyInput").val(), 10);
+            if (!qtyVal || qtyVal < 1) {
+                var $valMsgQty = $form.find("[data-valmsg-for='Quantity']");
+                $valMsgQty.html('<span id="Quantity-error">Số lượng tối thiểu là 1</span>')
+                          .removeClass("field-validation-valid")
+                          .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+                $form.find("#prodQtyInput").addClass("input-validation-error border-danger").focus();
                 return false;
             }
 

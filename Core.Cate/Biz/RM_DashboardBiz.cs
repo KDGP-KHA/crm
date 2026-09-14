@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Cate.Models;
@@ -32,11 +32,19 @@ namespace Core.Cate.Biz
         /// </summary>
         public List<RM_StaleUpdateModel> GetStaleUpdates(string employeeIds)
         {
-            return AppProcessor.ProcedureProvider
-                .ExecuteTypedList<RM_StaleUpdateModel>(
-                    SP_GET_STALE_UPDATES, DATA_PROVIDER_NAME,
-                    DateTime.Today, employeeIds)
-                ?? new List<RM_StaleUpdateModel>();
+            try
+            {
+                return AppProcessor.ProcedureProvider
+                    .ExecuteTypedList<RM_StaleUpdateModel>(
+                        SP_GET_STALE_UPDATES, DATA_PROVIDER_NAME,
+                        DateTime.Today, employeeIds)
+                    ?? new List<RM_StaleUpdateModel>();
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return new List<RM_StaleUpdateModel>();
+            }
         }
 
         public RM_OverviewDashboardModel GetOverview(DashboardSearchModel search)

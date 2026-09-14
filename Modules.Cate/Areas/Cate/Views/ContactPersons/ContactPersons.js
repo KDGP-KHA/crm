@@ -13,6 +13,7 @@ function htmlEncode(str) {
 $(document).ready(function () {
     initTableContactPersons();
     initExportContactPersons();
+    ContactPersons_LoadSummary();
 });
 
 function getIntOrNull(val) {
@@ -22,7 +23,56 @@ function getIntOrNull(val) {
 }
 
 function SearchContactPersons() {
-    _tableContactPersons.ajax.reload();
+    if (_tableContactPersons) {
+        _tableContactPersons.ajax.reload();
+    }
+}
+
+function ResetContactPersons() {
+    $("#cpKeyword").val("");
+    $("#cpCustomerID").val("");
+    $("#cpGender").val("");
+    $("#cpStatus").val("");
+    $(".cp-metric-card").removeClass("active");
+    SearchContactPersons();
+}
+
+function ContactPersons_LoadSummary() {
+    $.ajax({
+        url: "/Cate/ContactPersons/GetSummary",
+        type: "POST",
+        dataType: "json",
+        success: function (res) {
+            if (res) {
+                $("#kpi_total_contacts").text(res.total || 0);
+                $("#kpi_active_contacts").text(res.active || 0);
+                $("#kpi_inactive_contacts").text(res.inactive || 0);
+                $("#kpi_total_customers").text(res.totalCustomers || 0);
+            }
+        },
+        error: function () {
+            // Fallback gracefully
+        }
+    });
+}
+
+function ContactPersons_FilterByMetric(type) {
+    $(".cp-metric-card").removeClass("active");
+    if (type === "all") {
+        $("#kpi_card_total").addClass("active");
+        $("#cpStatus").val("");
+    } else if (type === "active") {
+        $("#kpi_card_active").addClass("active");
+        $("#cpStatus").val("1");
+    } else if (type === "inactive") {
+        $("#kpi_card_inactive").addClass("active");
+        $("#cpStatus").val("0");
+    } else if (type === "customers") {
+        $("#kpi_card_customers").addClass("active");
+        $("#cpCustomerID").focus();
+        return;
+    }
+    SearchContactPersons();
 }
 
 function initTableContactPersons() {
@@ -39,115 +89,157 @@ function initTableContactPersons() {
             dataType: "JSON",
             data: function (d) {
                 d.Keyword = $("#cpKeyword").val();
+                d.CustomerID = getIntOrNull($("#cpCustomerID").val());
                 d.Gender = getIntOrNull($("#cpGender").val());
                 d.Status = getIntOrNull($("#cpStatus").val());
             }
         },
         columns: [
             {
-                // Cột STT — tự tính theo vị trí dòng
+                // Cột STT
                 data: null,
                 orderable: false,
+                className: "text-center text-secondary font-weight-bold",
                 render: function (data, type, row, meta) {
                     return meta.settings._iDisplayStart + meta.row + 1;
                 }
             },
             {
+                // Mã NLH
                 data: "CodePerson",
-                defaultContent: ""
+                className: "text-center",
+                render: function (data) {
+                    if (!data) return '<span class="text-muted">—</span>';
+                    return '<span class="cp-code-badge">' + htmlEncode(data) + '</span>';
+                }
             },
             {
+                // Họ tên & Đơn vị & Khách hàng
                 data: "FullName",
                 render: function (data, type, row) {
-                    var html = '<strong class="text-dark">' + htmlEncode(data) + '</strong>';
+                    var name = data ? htmlEncode(data) : "";
+                    var initial = name.length > 0 ? name.trim().charAt(0).toUpperCase() : "C";
+                    var avatarClasses = ["cp-avatar-blue", "cp-avatar-green", "cp-avatar-amber", "cp-avatar-purple", "cp-avatar-rose"];
+                    var colorIndex = (name.charCodeAt(0) || 0) % avatarClasses.length;
+                    var avatarClass = avatarClasses[colorIndex];
+
+                    var html = '<div class="cp-user-info">';
+                    html += '<div class="cp-avatar ' + avatarClass + '">' + initial + '</div>';
+                    html += '<div class="cp-user-details">';
+                    html += '<div class="cp-fullname">' + name + '</div>';
+
+                    var workParts = [];
+                    if (row.Position) workParts.push(htmlEncode(row.Position));
+                    if (row.WorkUnit) workParts.push(htmlEncode(row.WorkUnit));
+                    if (workParts.length > 0) {
+                        html += '<div class="cp-work-info"><i class="fa fa-briefcase text-muted mr-1"></i>' + workParts.join(' - ') + '</div>';
+                    }
+
+                    // Khách hàng liên kết
                     var customerName = row.CustomerName;
                     if (customerName && typeof customerName === 'string' && customerName.trim().length > 0) {
                         var entries = customerName.trim().split(' | ');
-                        var innerHtml = '';
-                        var maxShow = 3;
+                        var chipsHtml = '';
+                        var maxShow = 2;
                         entries.forEach(function (item, index) {
                             item = item.trim();
                             if (!item) return;
                             var parts = item.split('::');
                             var company = htmlEncode((parts[0] || '').trim());
                             var position = htmlEncode((parts[1] || '').trim());
-                            var email = htmlEncode((parts[2] || '').trim());
                             if (!company) return;
                             var isHidden = index >= maxShow ? ' style="display:none;" class="extra-item"' : '';
-                            innerHtml += '<div' + isHidden + '>';
-                            innerHtml += '<small>';
-                            innerHtml += '<span class="text-primary font-weight-bold">' + company + '</span>';
-                            if (position) {
-                                innerHtml += ' <span class="text-muted">(' + position + ')</span>';
-                            }
-                            innerHtml += '</small>';
-                            if (email) {
-                                innerHtml += '<br><small class="text-muted"><i class="fa fa-envelope mr-1"></i>' + email + '</small>';
-                            }
-                            innerHtml += '</div>';
+                            chipsHtml += '<span class="cp-customer-chip"' + isHidden + ' title="' + (position ? position + ' tại ' + company : company) + '">';
+                            chipsHtml += '<i class="fa fa-building"></i> ' + company;
+                            chipsHtml += '</span>';
                         });
-                        if (innerHtml) {
-                            html += '<div class="mt-1">' + innerHtml;
+                        if (chipsHtml) {
+                            html += '<div class="mt-1 d-flex flex-wrap align-items-center">' + chipsHtml;
                             if (entries.length > maxShow) {
-                                html += '<div>';
-                                html += '<a href="javascript:void(0);" class="text-primary btn-show-more" onclick="';
-                                html += 'var p=this.parentNode.parentNode;';
+                                html += '<a href="javascript:void(0);" class="text-primary font-weight-bold ml-1 text-85" onclick="';
+                                html += 'var p=this.parentNode;';
                                 html += 'var items=p.getElementsByClassName(\'extra-item\');';
-                                html += 'for(var i=0;i<items.length;i++){items[i].style.display=\'block\';}';
+                                html += 'for(var i=0;i<items.length;i++){items[i].style.display=\'inline-flex\';}';
                                 html += 'this.style.display=\'none\';';
                                 html += '">';
-                                html += '+ Xem thêm (' + (entries.length - maxShow) + ')';
+                                html += '+' + (entries.length - maxShow) + ' nữa';
                                 html += '</a>';
-                                html += '</div>';
                             }
                             html += '</div>';
                         }
                     }
+
+                    html += '</div></div>';
                     return html;
                 }
             },
-            { data: "Email", defaultContent: "" },
-            { data: "Address", defaultContent: "" },
             {
+                // Email
+                data: "Email",
+                render: function (data) {
+                    if (!data) return '<span class="text-muted">—</span>';
+                    return '<a href="mailto:' + htmlEncode(data) + '" class="cp-contact-link cp-email-link"><i class="fa fa-envelope mr-1"></i>' + htmlEncode(data) + '</a>';
+                }
+            },
+            {
+                // Địa chỉ
+                data: "Address",
+                render: function (data) {
+                    if (!data) return '<span class="text-muted">—</span>';
+                    return '<div class="text-secondary text-90"><i class="fa fa-map-marker-alt text-danger mr-1"></i>' + htmlEncode(data) + '</div>';
+                }
+            },
+            {
+                // Thông tin liên hệ (Phone, Mobile, Zalo)
                 data: null,
                 render: function (data, type, row) {
-                    var html = '';
-                    if (row.Phone) html += '<div><i class="fa fa-phone text-success mr-1"></i>' + htmlEncode(row.Phone) + '</div>';
-                    if (row.Mobile) html += '<div><i class="fa fa-mobile text-info mr-1"></i>' + htmlEncode(row.Mobile) + '</div>';
-                    if (row.Zalo) html += '<div><i class="fa fa-comment text-primary mr-1"></i>' + htmlEncode(row.Zalo) + '</div>';
-                    return html || '<span class="text-muted">—</span>';
+                    var html = '<div class="cp-contact-links">';
+                    if (row.Phone) {
+                        html += '<a href="tel:' + htmlEncode(row.Phone) + '" class="cp-contact-link cp-phone-link" title="Gọi điện thoại"><i class="fa fa-phone-alt mr-1"></i>' + htmlEncode(row.Phone) + '</a>';
+                    }
+                    if (row.Mobile) {
+                        html += '<a href="tel:' + htmlEncode(row.Mobile) + '" class="cp-contact-link cp-phone-link" title="Gọi di động"><i class="fa fa-mobile-alt mr-1"></i>' + htmlEncode(row.Mobile) + '</a>';
+                    }
+                    if (row.Zalo) {
+                        html += '<span class="cp-contact-link cp-zalo-link" title="Zalo"><i class="fa fa-comment mr-1"></i>' + htmlEncode(row.Zalo) + '</span>';
+                    }
+                    html += '</div>';
+                    return (row.Phone || row.Mobile || row.Zalo) ? html : '<span class="text-muted">—</span>';
                 }
             },
             {
+                // Trạng thái
                 data: "Status",
+                className: "text-center",
                 render: function (data) {
-                    return data == 1
-                        ? '<span class="badge badge-success">Đang hoạt động</span>'
-                        : '<span class="badge badge-secondary">Ngừng hoạt động</span>';
+                    if (data == 1) {
+                        return '<span class="cp-badge-status cp-status-active"><span class="cp-pulse-dot dot-active"></span>Đang hoạt động</span>';
+                    } else {
+                        return '<span class="cp-badge-status cp-status-inactive"><span class="cp-pulse-dot dot-inactive"></span>Ngừng hoạt động</span>';
+                    }
                 }
             },
             {
+                // Thao tác trực tiếp
                 data: "ContactPerson_ID",
                 orderable: false,
-                render: function (data, type, row, meta) {
-                    var html = '<span class="">';
-                    if (type === "display") {
-                        html += '<div class="dropdown d-inline-block"><button class="btn btn-lighter-primary mr-1 dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h text-120"></i></button><div class="dropdown-menu dropdown-menu-right">';
-                        html += _renderButton(true,
-                            "EditContactPersons",
-                            "btn btn-lighter-primary mr-1 btn-a-outline-primary dropdown-item",
-                            "/Cate/ContactPersons/Edit/" + data,
-                            '<i class="far fa-edit text-primary text-120 mr-1"></i> Cập nhật',
-                            "Cập nhật");
-                        html += _renderButton(true,
-                            "DeleteContactPersons",
-                            "btn btn-lighter-danger mr-1 btn-a-outline-danger dropdown-item",
-                            "/Cate/ContactPersons/Delete/" + data,
-                            '<i class="far fa-trash-alt text-danger text-120 mr-1"></i> Xoá',
-                            "Xoá");
-                        html += '</div></div>';
-                    }
-                    html += "</span>";
+                className: "text-center",
+                render: function (data, type, row) {
+                    var id = data || row.ContactPerson_ID;
+                    var html = '<div class="cp-action-group justify-content-center">';
+                    html += _renderButton(true,
+                        "EditContactPersons",
+                        "cp-btn-action cp-btn-edit",
+                        "/Cate/ContactPersons/Edit/" + id,
+                        '<i class="far fa-edit"></i>',
+                        "Cập nhật", 900);
+                    html += _renderButton(true,
+                        "DeleteContactPersons",
+                        "cp-btn-action cp-btn-delete",
+                        "/Cate/ContactPersons/Delete/" + id,
+                        '<i class="far fa-trash-alt"></i>',
+                        "Xóa");
+                    html += '</div>';
                     return html;
                 }
             }
@@ -160,6 +252,7 @@ function initExportContactPersons() {
         var url = "/Cate/ContactPersons/Export";
         var params = {
             keyword: $("#cpKeyword").val(),
+            customerID: getIntOrNull($("#cpCustomerID").val()),
             gender: getIntOrNull($("#cpGender").val()),
             status: getIntOrNull($("#cpStatus").val())
         };
@@ -172,9 +265,9 @@ function ContactPersons_OnProcessSuccess(response, formId) {
         if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
             if (response.status != undefined) {
                 _tableContactPersons.ajax.reload(null, false);
+                ContactPersons_LoadSummary();
                 eval(response.message);
                 response.status = undefined;
-                //$("#ModalContent #modal_" + formId + " form")[0].reset();
                 var urlAction = $("#ModalContent #modal_" + formId + " form").attr("action");
                 $("#ModalContent #modal_" + formId + " #modal-content").load(urlAction, function (data, textStatus, xhr) {
                     _initElement();
@@ -186,6 +279,7 @@ function ContactPersons_OnProcessSuccess(response, formId) {
                 function () {
                     if (response.status != undefined) {
                         _tableContactPersons.ajax.reload(null, false);
+                        ContactPersons_LoadSummary();
                         eval(response.message);
                         response.status = undefined;
                     }
@@ -267,6 +361,7 @@ function initContactPersonsImport() {
                 if (res.successCount > 0) {
                     toastr.success("Nhập thành công " + res.successCount + " người liên hệ!");
                     _tableContactPersons.ajax.reload(null, false);
+                    ContactPersons_LoadSummary();
                 }
 
                 if (res.failCount > 0 && res.duplicateRows && res.duplicateRows.length > 0) {

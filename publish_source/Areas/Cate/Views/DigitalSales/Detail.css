@@ -1,0 +1,306 @@
+/* 1. Custom Switches */
+    .ds-custom-switch {
+        padding-left: 2.6rem !important;
+        margin-right: 18px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        cursor: pointer;
+    }
+    .ds-custom-switch:last-child {
+        margin-right: 0 !important;
+    }
+    .ds-custom-switch .custom-control-label {
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        line-height: 22px !important;
+        white-space: nowrap !important;
+        user-select: none;
+        cursor: pointer;
+        padding-left: 6px !important;
+        color: #212529 !important;
+    }
+    .ds-custom-switch .custom-control-label::before {
+        left: -2.6rem !important;
+        width: 2.1rem !important;
+        height: 1.25rem !important;
+        border-radius: 1rem !important;
+        top: calc(50% - 0.625rem) !important;
+    }
+    .ds-custom-switch .custom-control-label::after {
+        left: calc(-2.6rem + 2px) !important;
+        width: calc(1.25rem - 4px) !important;
+        height: calc(1.25rem - 4px) !important;
+        border-radius: 50% !important;
+        top: calc(50% - 0.625rem + 2px) !important;
+        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+    }
+    .ds-custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateX(0.85rem) !important;
+        background-color: #fff !important;
+    }
+    .ds-custom-switch .custom-control-input:disabled ~ .custom-control-label {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+    #chkIsKeyProject:checked ~ .custom-control-label::before {
+        background-color: #f59f00 !important;
+        border-color: #f59f00 !important;
+    }
+    #chkIsFollowed:checked ~ .custom-control-label::before {
+        background-color: #e03131 !important;
+        border-color: #e03131 !important;
+    }
+
+    /* 2. Header Responsive Layout */
+    #PageTitle.page-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        row-gap: 0.85rem !important;
+        padding-top: 0.5rem;
+        padding-bottom: 0.75rem !important;
+        border-bottom: 1px solid #e1e6eb;
+        margin-bottom: 0.75rem;
+    }
+    .ds-header-title-text {
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+    .ds-header-divider {
+        width: 1px;
+        height: 24px;
+        background-color: #cbd5e1;
+        margin: 0 16px;
+    }
+
+    /* Màn hình siêu lớn (>= 1600px): Cùng hàng, title cắt nhẹ nếu quá dài */
+    @media (min-width: 1600px) {
+        #PageTitle .page-title {
+            flex: 1 1 auto;
+            min-width: 0;
+            margin-right: 1.5rem;
+        }
+        .ds-header-title-text {
+            max-width: 650px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #PageAction.page-tools {
+            flex-shrink: 0;
+        }
+    }
+
+    /* Màn hình laptop, desktop thường & tablet (< 1600px xuống 768px): Tách 2 hàng rõ ràng, thoáng đãng */
+    @media (max-width: 1599.98px) {
+        #PageTitle.page-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding-bottom: 0.85rem !important;
+        }
+        #PageTitle .page-title {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 0.35rem !important;
+        }
+        .ds-header-title-text {
+            max-width: 100% !important;
+            white-space: normal !important;
+        }
+        #PageAction.page-tools {
+            width: 100% !important;
+            display: flex !important;
+            padding-top: 0.75rem !important;
+            border-top: 1px dashed #e2e8f0 !important;
+            margin-top: 0.35rem !important;
+        }
+        .ds-header-action-bar {
+            width: 100% !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem;
+        }
+        .ds-header-divider {
+            display: none !important;
+        }
+    }
+
+    /* Màn hình tablet đứng & mobile (< 768px) */
+    @media (max-width: 767.98px) {
+        .ds-header-action-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.75rem !important;
+        }
+        .ds-header-switches-group {
+            width: 100% !important;
+            justify-content: space-between !important;
+        }
+        .ds-header-buttons-group {
+            width: 100% !important;
+            justify-content: space-between !important;
+            flex-wrap: wrap !important;
+            gap: 0.4rem;
+        }
+        .ds-header-buttons-group .btn {
+            flex: 1 1 auto;
+            text-align: center;
+            justify-content: center;
+            margin-left: 0 !important;
+        }
+    }
+
+    /* Màn hình điện thoại nhỏ (< 500px) */
+    @media (max-width: 499.98px) {
+        .ds-header-title-container {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+        }
+        .ds-back-btn {
+            margin-bottom: 0.5rem !important;
+            margin-right: 0 !important;
+        }
+        .ds-header-switches-group {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.4rem !important;
+        }
+        .ds-custom-switch {
+            margin-right: 0 !important;
+        }
+    }
+
+    /* 3. Tabs Navigation Responsive - Chống rớt dòng & tràn màn hình */
+    .card-header .nav-tabs-simple {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        margin-bottom: -1px;
+    }
+    .card-header .nav-tabs-simple::-webkit-scrollbar {
+        height: 3px;
+    }
+    .card-header .nav-tabs-simple::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+    .card-header .nav-tabs-simple .nav-item {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
+    @media (max-width: 1199.98px) {
+        .card-header .nav-tabs-simple .nav-link {
+            padding-left: 0.85rem !important;
+            padding-right: 0.85rem !important;
+            font-size: 0.9rem !important;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .card-header .nav-tabs-simple .nav-link {
+            padding: 0.65rem 0.75rem !important;
+            font-size: 0.85rem !important;
+        }
+    }
+
+    /* 4. Custom Badges */
+    .badge-purple {
+        background-color: #8e24aa !important;
+        color: #ffffff !important;
+    }
+
+    .ds-metric-card {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        padding: 1.1rem 1.25rem;
+        min-height: 90px;
+    }
+    .ds-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+    }
+    .ds-metric-blue {
+        background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+    }
+    .ds-metric-green {
+        background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    }
+    .ds-metric-purple {
+        background: linear-gradient(135deg, #8e24aa 0%, #5c148c 100%);
+    }
+    .ds-metric-orange {
+        background: linear-gradient(135deg, #fb8c00 0%, #e65100 100%);
+    }
+    .ds-metric-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .ds-metric-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
+    .ds-metric-value {
+        color: #ffffff;
+        font-size: 1.45rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .ds-metric-unit {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-left: 0.2rem;
+    }
+    .ds-metric-progress-track {
+        background: rgba(255, 255, 255, 0.28);
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    .ds-metric-progress-bar {
+        background-color: #ffffff !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+    .ds-section-overlay-container {
+        position: relative;
+        min-height: 80px;
+    }
+    .ds-section-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(1.5px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        border-radius: inherit;
+        transition: opacity 0.2s ease;
+    }

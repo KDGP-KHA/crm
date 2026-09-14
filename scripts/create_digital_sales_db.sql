@@ -1,4 +1,4 @@
-﻿-- ========================================================
+-- ========================================================
 -- KỊCH BẢN KHỞI TẠO CƠ SỞ DỮ LIỆU ĐẦY ĐỦ
 -- PHÂN HỆ: KINH DOANH SẢN PHẨM DỊCH VỤ SỐ (RM_DigitalSales)
 -- ========================================================
@@ -941,7 +941,7 @@ BEGIN
         DECLARE @ActionDesc NVARCHAR(MAX);
         IF @CurrentBusinessType = 1 AND @NewBusinessType = 2
         BEGIN
-            SET @ActionDesc = N'Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái: ' + @NewStatusName;
+            SET @ActionDesc = N'Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới: ' + @NewStatusName;
         END
         ELSE
         BEGIN
@@ -960,6 +960,22 @@ BEGIN
         VALUES
         (
             @DigitalSalesID, @CurrentStatusID, @NewStatusID, @CurrentBusinessType, @NewBusinessType, GETDATE(), @UserName, @ActionDesc, @AttachmentPath
+        );
+
+        DECLARE @NewTimelineID INT = SCOPE_IDENTITY();
+
+        -- Tự động ghi nhận Activity Stream (ActivityType = 2: Chuyển trạng thái)
+        DECLARE @ActionByName NVARCHAR(250);
+        SELECT TOP 1 @ActionByName = FullName FROM dbo.Sys_Users WHERE UserName = @UserName;
+        IF @ActionByName IS NULL SET @ActionByName = @UserName;
+
+        INSERT INTO dbo.RM_DigitalSalesActivity
+        (
+            DigitalSalesID, ActivityType, Content, Attachments, ReferenceID, ActionDate, ActionBy, ActionByName, IsDeleted
+        )
+        VALUES
+        (
+            @DigitalSalesID, 2, @ActionDesc, @AttachmentPath, @NewTimelineID, GETDATE(), @UserName, @ActionByName, 0
         );
 
         -- Tự động sinh các tiến trình theo quy trình của trạng thái mới nếu chưa có
@@ -1134,6 +1150,25 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @DigitalSalesID INT;
+    DECLARE @TaskName NVARCHAR(500);
+    DECLARE @OldStatus TINYINT;
+    DECLARE @ProcessID INT;
+
+    SELECT 
+        @DigitalSalesID = DigitalSalesID,
+        @TaskName = TaskName,
+        @OldStatus = Status,
+        @ProcessID = ProcessID
+    FROM dbo.RM_DigitalSalesTracking
+    WHERE TrackingID = @TrackingID;
+
+    IF @DigitalSalesID IS NULL
+    BEGIN
+        SELECT 0;
+        RETURN 0;
+    END
+
     UPDATE dbo.RM_DigitalSalesTracking
     SET
         Status = @Status,
@@ -1146,8 +1181,65 @@ BEGIN
         LastModifiedBy = @UserName
     WHERE TrackingID = @TrackingID;
 
-    SELECT @@ROWCOUNT;
-    RETURN @@ROWCOUNT;
+    DECLARE @ActionByName NVARCHAR(250);
+    SELECT TOP 1 @ActionByName = FullName FROM dbo.Sys_Users WHERE UserName = @UserName;
+    IF @ActionByName IS NULL SET @ActionByName = @UserName;
+
+    -- Ghi Activity Log nếu có sự kiện đáng chú ý
+    IF @Status = 3 AND @OldStatus <> 3
+    BEGIN
+        -- ActivityType = 3: Hoàn thành checklist
+        DECLARE @CompleteContent NVARCHAR(MAX) = N'Đã hoàn thành công việc checklist: ' + @TaskName;
+        IF @ResultNote IS NOT NULL AND LTRIM(RTRIM(@ResultNote)) <> ''
+        BEGIN
+            SET @CompleteContent = @CompleteContent + N' | Kết quả: ' + @ResultNote;
+        END
+
+        INSERT INTO dbo.RM_DigitalSalesActivity
+        (
+            DigitalSalesID, ActivityType, Content, Attachments, ReferenceID, ActionDate, ActionBy, ActionByName, IsDeleted
+        )
+        VALUES
+        (
+            @DigitalSalesID, 3, @CompleteContent, @AttachmentFile, @TrackingID, GETDATE(), @UserName, @ActionByName, 0
+        );
+
+        -- Kiểm tra nếu toàn bộ task trong ProcessID này đã hoàn thành thì ghi log ActivityType = 4 (Hoàn thành quy trình)
+        IF @ProcessID IS NOT NULL AND NOT EXISTS (
+            SELECT 1 FROM dbo.RM_DigitalSalesTracking 
+            WHERE DigitalSalesID = @DigitalSalesID AND ProcessID = @ProcessID AND Status <> 3
+        )
+        BEGIN
+            DECLARE @ProcName NVARCHAR(250);
+            SELECT @ProcName = ProcessName FROM dbo.RM_DigitalSalesProcess WHERE ProcessID = @ProcessID;
+            IF @ProcName IS NOT NULL
+            BEGIN
+                INSERT INTO dbo.RM_DigitalSalesActivity
+                (
+                    DigitalSalesID, ActivityType, Content, ReferenceID, ActionDate, ActionBy, ActionByName, IsDeleted
+                )
+                VALUES
+                (
+                    @DigitalSalesID, 4, N'Đã hoàn thành 100% các công việc trong quy trình: ' + @ProcName, @ProcessID, GETDATE(), @UserName, @ActionByName, 0
+                );
+            END
+        END
+    END
+    ELSE IF @ResultNote IS NOT NULL AND LTRIM(RTRIM(@ResultNote)) <> '' AND (@OldStatus = @Status OR @Status = 2)
+    BEGIN
+        -- ActivityType = 5: Cập nhật tiến độ / ghi chú trong checklist
+        INSERT INTO dbo.RM_DigitalSalesActivity
+        (
+            DigitalSalesID, ActivityType, Content, Attachments, ReferenceID, ActionDate, ActionBy, ActionByName, IsDeleted
+        )
+        VALUES
+        (
+            @DigitalSalesID, 5, N'Cập nhật tiến độ công việc [' + @TaskName + N']: ' + @ResultNote, @AttachmentFile, @TrackingID, GETDATE(), @UserName, @ActionByName, 0
+        );
+    END
+
+    SELECT 1;
+    RETURN 1;
 END
 GO
 
@@ -1256,3 +1348,51 @@ BEGIN
     ORDER BY BusinessType ASC, SortOrder ASC, StatusID ASC;
 END
 GO
+
+-- ========================================================
+-- 19. STORED PROCEDURE: RM_DigitalSales_ToggleKeyProject
+-- ========================================================
+IF OBJECT_ID('dbo.RM_DigitalSales_ToggleKeyProject', 'P') IS NOT NULL DROP PROCEDURE dbo.RM_DigitalSales_ToggleKeyProject;
+GO
+
+CREATE PROCEDURE dbo.RM_DigitalSales_ToggleKeyProject
+    @DigitalSalesID INT,
+    @IsKeyProject BIT,
+    @UserName VARCHAR(150)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    IF NOT EXISTS (SELECT 1 FROM dbo.RM_DigitalSales WHERE DigitalSalesID = @DigitalSalesID AND IsDeleted = 0)
+    BEGIN
+        SELECT 0 AS Result;
+        RETURN 0;
+    END
+
+    UPDATE dbo.RM_DigitalSales
+    SET IsKeyProject = @IsKeyProject,
+        LastModifiedDate = GETDATE(),
+        LastModifiedBy = @UserName
+    WHERE DigitalSalesID = @DigitalSalesID;
+
+    DECLARE @ActionText NVARCHAR(500);
+    IF @IsKeyProject = 1
+        SET @ActionText = N'Đánh dấu là Dự án trọng điểm';
+    ELSE
+        SET @ActionText = N'Bỏ đánh dấu Dự án trọng điểm';
+
+    INSERT INTO dbo.RM_DigitalSalesTimeline
+    (
+        DigitalSalesID, FromStatusID, ToStatusID, FromBusinessType, ToBusinessType, ActionDate, ActionBy, Note
+    )
+    SELECT
+        @DigitalSalesID, ds.StatusID, ds.StatusID, ds.BusinessType, ds.BusinessType, GETDATE(), @UserName,
+        @ActionText
+    FROM dbo.RM_DigitalSales ds
+    WHERE ds.DigitalSalesID = @DigitalSalesID;
+
+    SELECT 1 AS Result;
+    RETURN 1;
+END
+GO
+

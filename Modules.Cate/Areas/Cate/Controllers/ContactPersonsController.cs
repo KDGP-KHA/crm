@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Sys.BaseApp;
@@ -70,8 +70,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ListGender = GetListGender(),
                 ListStatus = new List<SelectListItem>
                 {
-                    new SelectListItem { Value = "1", Text = "Đang hoạt động" },
-                    new SelectListItem { Value = "0", Text = "Ngừng hoạt động" }
+                    new SelectListItem { Value = "1", Text = _activeStatusText },
+                    new SelectListItem { Value = "0", Text = _inactiveStatusText }
                 },
                 ListCustomer = _customerCache.GetAll()
                     .Select(x => new SelectListItem
@@ -81,6 +81,30 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     }).ToList()
             };
             return View(model);
+        }
+
+        /// <summary>
+        /// Thống kê chỉ số KPI người liên hệ: Tổng số, Đang hoạt động, Ngừng hoạt động, Khách hàng liên kết.
+        /// </summary>
+        /// <returns>Dữ liệu JSON thống kê KPI.</returns>
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetSummary()
+        {
+            var all = _contactPersonsCache.GetAll();
+            int total = all?.Count ?? 0;
+            int active = all?.Count(x => x.Status == 1) ?? 0;
+            int inactive = total - active;
+            int totalCustomers = _customerCache.GetAll()?.Count ?? 0;
+
+            return Json(new
+            {
+                total,
+                active,
+                inactive,
+                totalCustomers
+            }, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>
@@ -273,9 +297,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
         /// Không dùng [AjaxOnly] vì gọi qua window.location.href.
         /// </summary>
         [HttpGet]
-        public ActionResult Export(string keyword, int? gender, int? status, string cookieName = null)
+        public ActionResult Export(string keyword, int? gender, int? status, int? customerID = null, string cookieName = null)
         {
-            List<RM_ContactPersonsModel> data = GetExportData(keyword, gender, status);
+            List<RM_ContactPersonsModel> data = GetExportData(keyword, gender, status, customerID);
             byte[] fileBytes = BuildExportWorkbook(data);
 
             return SendExcelFile(fileBytes, cookieName);
@@ -284,13 +308,14 @@ namespace Modules.Cate.Areas.Cate.Controllers
         /// <summary>
         /// Bước 1: Truy vấn dữ liệu theo điều kiện lọc.
         /// </summary>
-        private List<RM_ContactPersonsModel> GetExportData(string keyword, int? gender, int? status)
+        private List<RM_ContactPersonsModel> GetExportData(string keyword, int? gender, int? status, int? customerID = null)
         {
             RM_ContactPersonsSearchModel search = new RM_ContactPersonsSearchModel
             {
                 Keyword = keyword,
                 Gender = gender,
                 Status = status,
+                CustomerID = customerID,
                 Search = keyword,
                 Order = "0",
                 OrderDir = "ASC",

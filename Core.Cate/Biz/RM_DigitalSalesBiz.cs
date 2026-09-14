@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using TSFramework.Libs.Processors;
 
 namespace Core.Cate.Biz
@@ -375,6 +376,13 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
+            if (list != null && list.Count > 0)
+            {
+                foreach (var item in list)
+                {
+                    item.Note = FixVietnameseMojibake(item.Note);
+                }
+            }
             return list ?? new List<RM_DigitalSalesTimelineModel>();
         }
 
@@ -443,6 +451,9 @@ namespace Core.Cate.Biz
             {
                 foreach (var item in list)
                 {
+                    item.Content = FixVietnameseMojibake(item.Content);
+                    item.ActionByName = FixVietnameseMojibake(item.ActionByName);
+
                     if (!string.IsNullOrWhiteSpace(item.Attachments))
                     {
                         try
@@ -456,7 +467,8 @@ namespace Core.Cate.Biz
                                 var parts = item.Attachments.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
                                 foreach (var p in parts)
                                 {
-                                    var trimmed = p.Trim();
+                                    var trimmed = p?.Trim();
+                                    if (string.IsNullOrEmpty(trimmed)) continue;
                                     var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
                                     item.AttachmentList.Add(new ActivityAttachmentItem
                                     {
@@ -507,6 +519,100 @@ namespace Core.Cate.Biz
                 username
             );
             return result.GetValueOrDefault(0);
+        }
+
+        private static readonly Dictionary<char, byte> _win1252Map = new Dictionary<char, byte>()
+        {
+            { '\u20AC', 0x80 }, { '\u201A', 0x82 }, { '\u0192', 0x83 }, { '\u201E', 0x84 },
+            { '\u2026', 0x85 }, { '\u2020', 0x86 }, { '\u2021', 0x87 }, { '\u02C6', 0x88 },
+            { '\u2030', 0x89 }, { '\u0160', 0x8A }, { '\u2039', 0x8B }, { '\u0152', 0x8C },
+            { '\u017D', 0x8E }, { '\u2018', 0x91 }, { '\u2019', 0x92 }, { '\u201C', 0x93 },
+            { '\u201D', 0x94 }, { '\u2022', 0x95 }, { '\u2013', 0x96 }, { '\u2014', 0x97 },
+            { '\u02DC', 0x98 }, { '\u2122', 0x99 }, { '\u0161', 0x9A }, { '\u203A', 0x9B },
+            { '\u0153', 0x9C }, { '\u017E', 0x9E }, { '\u0178', 0x9F }
+        };
+
+        public static string FixVietnameseMojibake(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            if (input.Contains("Chuyá»") || input.Contains("Ä‘á»") || input.Contains("CÆ") || input.Contains("Dá»±") ||
+                input.Contains("Tráº¡ng") || input.Contains("Ä Ã¡nh") || input.Contains("ÄÃ¡nh") || input.Contains("Bá» "))
+            {
+                input = input
+                    .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
+                    .Replace("Chuyá»ƒn Ä'á»•i thÃ nh cÃ´ng tá»« CÆ  Há»™i sang Dá»± Ã¡N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
+                    .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Trạng thái mới:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
+                    .Replace("Chuyá»ƒn tráº¡ng thÃ¡i sang:", "Chuyển trạng thái sang:")
+                    .Replace("Chuyá»ƒn tráº¡ng thÃ¡i", "Chuyển trạng thái")
+                    .Replace("Ghi chÃº:", "Ghi chú:")
+                    .Replace("Ä Ã¡nh dáº¥u lÃ  Dá»± Ã¡n trá» ng Ä‘iá»ƒm", "Đánh dấu là Dự án trọng điểm")
+                    .Replace("ÄÃ¡nh dáº¥u lÃ  Dá»± Ã¡n trá»ng Ä'iá»ƒm", "Đánh dấu là Dự án trọng điểm")
+                    .Replace("Ä Ã¡nh dáº¥u lÃ  Dá»± Ã¡n", "Đánh dấu là Dự án")
+                    .Replace("Bá»  Ä‘Ã¡nh dáº¥u Dá»± Ã¡n trá» ng Ä‘iá»ƒm", "Bỏ đánh dấu Dự án trọng điểm")
+                    .Replace("Bá»  Ä‘Ã¡nh dáº¥u", "Bỏ đánh dấu")
+                    .Replace("Ä Ã£ hoÃ n thÃ nh cÃ´ng viá»‡c checklist:", "Đã hoàn thành công việc checklist:")
+                    .Replace("Ä Ã£ hoÃ n thÃ nh 100% cÃ¡c cÃ´ng viá»‡c trong quy trÃ¬nh:", "Đã hoàn thành 100% các công việc trong quy trình:")
+                    .Replace("Cáº­p nháº­t tiáº¿n Ä‘á»™ cÃ´ng viá»‡c", "Cập nhật tiến độ công việc")
+                    .Replace("Káº¿t quáº£:", "Kết quả:");
+            }
+
+            if (!input.Contains("\u00C2") && !input.Contains("\u00C3") && !input.Contains("\u00C4") &&
+                !input.Contains("\u00C5") && !input.Contains("\u00C6") && !input.Contains("\u00E1\u00BA") &&
+                !input.Contains("\u00E1\u00BB") && !input.Contains("Ä") && !input.Contains("á»") && !input.Contains("Ã"))
+            {
+                return input;
+            }
+
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+                List<byte> byteBuffer = new List<byte>();
+
+                Action flushBytes = () =>
+                {
+                    if (byteBuffer.Count > 0)
+                    {
+                        try
+                        {
+                            string decoded = Encoding.UTF8.GetString(byteBuffer.ToArray());
+                            sb.Append(decoded);
+                        }
+                        catch
+                        {
+                            foreach (byte bVal in byteBuffer) sb.Append((char)bVal);
+                        }
+                        byteBuffer.Clear();
+                    }
+                };
+
+                for (int i = 0; i < input.Length; i++)
+                {
+                    char c = input[i];
+                    byte b;
+                    if (c <= 0xFF)
+                    {
+                        byteBuffer.Add((byte)c);
+                    }
+                    else if (_win1252Map.TryGetValue(c, out b))
+                    {
+                        byteBuffer.Add(b);
+                    }
+                    else
+                    {
+                        flushBytes();
+                        sb.Append(c);
+                    }
+                }
+                flushBytes();
+
+                var result = sb.ToString();
+                return string.IsNullOrEmpty(result) ? input : result;
+            }
+            catch
+            {
+                return input;
+            }
         }
     }
 }

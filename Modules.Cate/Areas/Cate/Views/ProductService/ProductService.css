@@ -1,0 +1,510 @@
+/* ==========================================================================
+   Product & Service Catalog Modern Design System
+   Path: Areas/Cate/Views/ProductService/ProductService.css
+   ========================================================================== */
+
+/* --- KPI Summary Metric Cards --- */
+.ps-metrics-wrapper {
+    margin-bottom: 1rem;
+}
+
+.ps-metric-card {
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.ps-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.ps-metric-card.active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.ps-metric-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+.ps-metric-card.card-blue::before { background: #3b82f6; }
+.ps-metric-card.card-amber::before { background: #f59e0b; }
+.ps-metric-card.card-green::before { background: #10b981; }
+.ps-metric-card.card-gray::before { background: #94a3b8; }
+
+.ps-metric-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-right: 14px;
+    flex-shrink: 0;
+}
+
+.ps-metric-icon.icon-blue { background: #eff6ff; color: #2563eb; }
+.ps-metric-icon.icon-amber { background: #fffbeb; color: #d97706; }
+.ps-metric-icon.icon-green { background: #ecfdf5; color: #059669; }
+.ps-metric-icon.icon-gray { background: #f1f5f9; color: #64748b; }
+
+.ps-metric-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.ps-metric-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.ps-metric-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* --- Search Filter Box Upgrades --- */
+.ps-search-card {
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    margin-bottom: 1rem;
+}
+
+.ps-search-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    font-weight: 600;
+    color: #334155;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ps-search-body {
+    padding: 16px;
+}
+
+.ps-search-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.ps-search-input {
+    font-size: 13.5px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    height: 38px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.ps-search-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* --- Table Toolbar & Controls --- */
+.ps-table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.ps-view-modes .btn {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+}
+
+.ps-view-modes .btn.active {
+    background-color: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+}
+
+.ps-tree-tools .btn {
+    font-size: 12.5px;
+    padding: 5px 12px;
+    border-radius: 6px;
+}
+
+/* --- Product Service Table --- */
+#DSProductService {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#DSProductService thead th {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+    font-size: 13px;
+    border-bottom: 2px solid #e2e8f0;
+    border-top: none;
+    padding: 10px 14px;
+    white-space: nowrap;
+}
+
+#DSProductService tbody td {
+    padding: 9px 14px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+    font-size: 13.5px;
+    color: #334155;
+    background-color: #ffffff;
+}
+
+#DSProductService tbody tr:hover td {
+    background-color: #f8fafc;
+}
+
+/* Group Row Styling */
+#DSProductService tr.product-service-group-row td {
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+#DSProductService tr.product-service-group-row:hover td {
+    background-color: #f1f5f9;
+}
+
+.ps-group-title {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ps-group-icon {
+    color: #f59e0b;
+    margin-right: 8px;
+    font-size: 15px;
+}
+
+.ps-group-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+
+/* Item Row Styling */
+.ps-item-icon {
+    color: #3b82f6;
+    margin-right: 6px;
+    font-size: 13px;
+}
+
+.ps-item-title {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.ps-sub-item-icon {
+    color: #8b5cf6;
+    margin-right: 6px;
+    font-size: 12px;
+}
+
+/* Tree Toggle Button */
+.ps-tree-toggle {
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 10px;
+    cursor: pointer;
+    margin-right: 6px;
+    transition: all 0.15s ease-in-out;
+    vertical-align: middle;
+    text-decoration: none !important;
+}
+
+.ps-tree-toggle:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-color: #94a3b8;
+}
+
+.ps-tree-toggle i {
+    transition: transform 0.2s ease-in-out;
+}
+
+.ps-tree-toggle.collapsed i {
+    transform: rotate(0deg);
+}
+
+.ps-tree-toggle.expanded i {
+    transform: rotate(90deg);
+}
+
+.ps-tree-spacer {
+    display: inline-block;
+    width: 22px;
+    margin-right: 6px;
+}
+
+/* Badges */
+.ps-badge-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 20px;
+}
+
+.ps-badge-active {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.ps-badge-inactive {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.ps-badge-group-tag {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Action Buttons */
+.ps-action-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ps-btn-action {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border: 1px solid transparent;
+    transition: all 0.15s ease-in-out;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+
+.ps-btn-view {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #bbf7d0;
+}
+.ps-btn-view:hover {
+    background: #15803d;
+    color: #ffffff;
+}
+
+.ps-btn-file {
+    background: #ecfeff;
+    color: #0891b2;
+    border-color: #a5f3fc;
+}
+.ps-btn-file:hover {
+    background: #0891b2;
+    color: #ffffff;
+}
+
+.ps-btn-edit {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+.ps-btn-edit:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.ps-btn-delete {
+    background: #fff1f2;
+    color: #e11d48;
+    border-color: #fecdd3;
+}
+.ps-btn-delete:hover {
+    background: #e11d48;
+    color: #ffffff;
+}
+
+/* --- Pagination Controls --- */
+.ps-pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.ps-pagination-info {
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ps-page-size-select {
+    width: auto;
+    display: inline-block;
+    height: 32px;
+    padding: 2px 24px 2px 8px;
+    font-size: 12.5px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+}
+
+.ps-pagination-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ps-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    text-decoration: none !important;
+}
+
+.ps-page-btn:hover:not(.disabled):not(.active) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.ps-page-btn.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.ps-page-btn.disabled {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.ps-page-ellipsis {
+    padding: 0 4px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+/* Empty State */
+.ps-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+}
+
+.ps-empty-state i {
+    font-size: 42px;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.ps-empty-state-text {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* Detail Modal Styles */
+.modal-md {
+    max-width: 70%;
+}
+
+@media (max-width: 576px) {
+    .modal-md {
+        max-width: 100%;
+    }
+}
+
+.note-scrollbar::-webkit-scrollbar {
+    display: block;
+    width: 7px;
+}
+
+.note-scrollbar::-webkit-scrollbar-thumb {
+    background: #aaa;
+    border-radius: 5px;
+}
+
