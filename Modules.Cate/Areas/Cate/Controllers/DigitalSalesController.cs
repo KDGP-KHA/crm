@@ -2904,6 +2904,37 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            // Xử lý file đính kèm (multiple upload)
+            try
+            {
+                var uploadedPaths = new List<string>();
+                if (Request.Files.Count > 0)
+                {
+                    for (int i = 0; i < Request.Files.Count; i++)
+                    {
+                        var file = Request.Files[i];
+                        if (file != null && file.ContentLength > 0)
+                        {
+                            var path = SaveUploadedFile(file, i);
+                            if (!string.IsNullOrEmpty(path))
+                            {
+                                uploadedPaths.Add(path);
+                            }
+                        }
+                    }
+                }
+                if (uploadedPaths.Count > 0)
+                {
+                    // Nối với file cũ nếu có
+                    var existingFiles = string.IsNullOrEmpty(model.AttachmentFile)
+                        ? new List<string>()
+                        : model.AttachmentFile.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+                    existingFiles.AddRange(uploadedPaths);
+                    model.AttachmentFile = string.Join(";", existingFiles.Distinct());
+                }
+            }
+            catch { /* Ignore file upload errors, proceed with save */ }
+
             var id = _salesCache.SaveTracking(model, User.UserName);
             if (id > 0)
             {
