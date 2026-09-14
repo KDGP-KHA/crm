@@ -1325,6 +1325,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ChangeStatus(RM_DigitalSalesChangeStatusViewModel model, HttpPostedFileBase attachmentFile)
         {
+            try
+            {
             if (model.DigitalSalesID <= 0)
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") });
@@ -1620,6 +1622,18 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 code = 0,
                 message = GetAppMessage("DigitalSales_Msg_ChangeStatusFail")
             });
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new
+                {
+                    status = false,
+                    code = -999,
+                    message = "Lỗi hệ thống: " + ex.Message,
+                    detail = ex.StackTrace
+                });
+            }
         }
         #endregion
 
