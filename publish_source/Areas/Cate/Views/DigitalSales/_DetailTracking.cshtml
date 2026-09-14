@@ -6,7 +6,7 @@
     var parentTasks = allTasks.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
     var allTodoTasks = allTasks.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
     
-    // TÃ­nh tá»•ng sá»‘ lÆ°á»£ng vÃ  hoÃ n thÃ nh (tÃ­nh theo Todo list náº¿u cÃ³, hoáº·c tÃ­nh theo toÃ n bá»™ task)
+    // Tính tổng số lượng và hoàn thành (tính theo Todo list nếu có, hoặc tính theo toàn bộ task)
     int totalCount = allTasks.Count;
     int completedCount = allTasks.Count(t => t.Status == 3);
 }
@@ -15,7 +15,7 @@
 
 <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_DetailTracking.css?v=@DateTime.Now.Ticks" />
 
-<!-- HEADER Cá»¦A TAB CHECKLIST -->
+<!-- HEADER CỦA TAB CHECKLIST -->
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap" style="gap: 10px;">
     <div class="d-flex align-items-center">
         <h6 class="text-orange font-weight-bold mb-0 text-110">
@@ -25,35 +25,35 @@
     </div>
     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
         <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d1 radius-1 px-2 py-1 shadow-sm font-bold" id="btnExpandAllChecklist" onclick="toggleAllChecklistTree(true);">
-            <i class="fa fa-expand-alt mr-1 text-primary"></i> Má»Ÿ rá»™ng táº¥t cáº£
+            <i class="fa fa-expand-alt mr-1 text-primary"></i> Mở rộng tất cả
         </button>
         <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d1 radius-1 px-2 py-1 shadow-sm font-bold" id="btnCollapseAllChecklist" onclick="toggleAllChecklistTree(false);">
-            <i class="fa fa-compress-alt mr-1 text-orange"></i> Thu gá»n táº¥t cáº£
+            <i class="fa fa-compress-alt mr-1 text-orange"></i> Thu gọn tất cả
         </button>
         @if (canEdit)
         {
             <button type="button" class="btn btn-sm btn-orange px-3 radius-1 shadow-sm font-bold ml-1" onclick="openAddTrackingModal(@Model.DigitalSalesID);">
-                <i class="fa fa-plus mr-1"></i> ThÃªm cÃ´ng viá»‡c tÃ¹y biáº¿n
+                <i class="fa fa-plus mr-1"></i> Thêm công việc tùy biến
             </button>
         }
     </div>
 </div>
 
-<!-- Báº¢NG TREE GRID PHÃ‚N Cáº¤P 4 Táº¦NG: TRáº NG THÃI -> QUY TRÃŒNH -> TIáº¾N TRÃŒNH -> TODO LIST -->
+<!-- BẢNG TREE GRID PHÂN CẤP 4 TẦNG: TRẠNG THÁI -> QUY TRÌNH -> TIẾN TRÌNH -> TODO LIST -->
 <div class="table-responsive">
     <table class="table table-bordered text-90 tree-table" id="tblTracking">
         <thead class="bgc-secondary-l1 text-secondary-d2">
             <tr>
-                <th style="min-width: 440px;">TÃªn cÃ´ng viá»‡c / Äáº§u má»¥c tiáº¿n trÃ¬nh</th>
-                <th style="width: 150px;">NgÆ°á»i thá»±c hiá»‡n</th>
-                <th style="width: 105px;" class="text-center">Báº¯t Ä‘áº§u</th>
-                <th style="width: 115px;" class="text-center">Háº¡n chÃ³t</th>
-                <th style="width: 95px;" class="text-center">Tá»•ng ngÃ y</th>
-                <th style="width: 115px;" class="text-center">Tráº¡ng thÃ¡i</th>
-                <th style="width: 100px;">Káº¿t quáº£ / File</th>
+                <th style="min-width: 440px;">Tên công việc / Đầu mục tiến trình</th>
+                <th style="width: 150px;">Người thực hiện</th>
+                <th style="width: 105px;" class="text-center">Bắt đầu</th>
+                <th style="width: 115px;" class="text-center">Hạn chót</th>
+                <th style="width: 95px;" class="text-center">Tổng ngày</th>
+                <th style="width: 115px;" class="text-center">Trạng thái</th>
+                <th style="width: 100px;">Kết quả / File</th>
                 @if (canEdit)
                 {
-                    <th style="width: 80px;" class="text-center">Thao tÃ¡c</th>
+                    <th style="width: 80px;" class="text-center">Thao tác</th>
                 }
             </tr>
         </thead>
@@ -63,7 +63,7 @@
                 var statusGroups = parentTasks.GroupBy(t => new
                 {
                     StatusID = t.StatusID ?? 0,
-                    StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Tráº¡ng thÃ¡i",
+                    StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Trạng thái",
                     ProcessCountOfStatus = t.ProcessCountOfStatus
                 }).OrderBy(g => g.Key.StatusID).ToList();
 
@@ -75,7 +75,7 @@
                     int statusTodoCount = stGroup.Sum(p => p.TodoList?.Count ?? 0);
 
                     <!-- ========================================================================= -->
-                    <!-- Cáº¤P 1: TRáº NG THÃI (BOLD Äáº¬M, FONT CHá»® TO)                                 -->
+                    <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
                     <!-- ========================================================================= -->
                     <tr class="tree-row tree-status-row" data-node="@statusNodeId" data-level="1" data-expanded="true">
                         <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
@@ -83,10 +83,10 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
                                     <span class="tree-status-title">@stGroup.Key.StatusName</span>
-                                    <span class="badge badge-primary badge-pill ml-2 text-80 font-bold">@statusTaskCount tiáº¿n trÃ¬nh@(statusTodoCount > 0 ? $", {statusTodoCount} viá»‡c nhá»" : "")</span>
+                                    <span class="badge badge-primary badge-pill ml-2 text-80 font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
                                 </div>
                                 <span class="text-secondary-m1 text-80 font-italic mr-2">
-                                    <i class="fa fa-info-circle mr-1"></i>Báº¥m Ä‘á»ƒ thu gá»n/má»Ÿ rá»™ng
+                                    <i class="fa fa-info-circle mr-1"></i>Bấm để thu gọn/mở rộng
                                 </span>
                             </div>
                         </td>
@@ -95,7 +95,7 @@
                     var procGroups = stGroup.GroupBy(t => new
                     {
                         ProcessID = t.ProcessID ?? 0,
-                        ProcessName = !string.IsNullOrEmpty(t.ProcessName) ? t.ProcessName : "Quy trÃ¬nh thá»±c hiá»‡n"
+                        ProcessName = !string.IsNullOrEmpty(t.ProcessName) ? t.ProcessName : "Quy trình thực hiện"
                     }).OrderBy(g => g.Key.ProcessID).ToList();
 
                     int procIdx = 1;
@@ -104,26 +104,26 @@
                         string procNodeId = $"{statusNodeId}_proc_{prGroup.Key.ProcessID}";
 
                         <!-- ========================================================================= -->
-                        <!-- Cáº¤P 2: QUY TRÃŒNH (TIÃŠU Äá»€: QUY TRÃŒNH ... CÃ“ CÃ‚Y BÃšT CHÃŒ Náº¾U Sá» QT >= 2)  -->
+                        <!-- CẤP 2: QUY TRÌNH (TIÊU ĐỀ: QUY TRÌNH ... CÓ CÂY BÚT CHÌ NẾU SỐ QT >= 2)  -->
                         <!-- ========================================================================= -->
                         <tr class="tree-row tree-process-row" data-node="@procNodeId" data-parent="@statusNodeId" data-level="2" data-expanded="true">
                             <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
                                         <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_@procNodeId"></i>
-                                        <span class="tree-process-title">QUY TRÃŒNH: @(prGroup.Key.ProcessName.ToUpper())</span>
+                                        <span class="tree-process-title">QUY TRÌNH: @(prGroup.Key.ProcessName.ToUpper())</span>
                                         @if (stGroup.Key.ProcessCountOfStatus >= 2 && canEdit)
                                         {
-                                            <a href="javascript:void(0);" class="btn-edit-process ml-2" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Äá»•i quy trÃ¬nh thá»±c hiá»‡n cho tráº¡ng thÃ¡i nÃ y (@stGroup.Key.ProcessCountOfStatus quy trÃ¬nh)">
+                                            <a href="javascript:void(0);" class="btn-edit-process ml-2" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
                                                 <i class="fa fa-pencil-alt"></i>
                                             </a>
                                         }
-                                        <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">@prGroup.Count() tiáº¿n trÃ¬nh</span>
+                                        <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">@prGroup.Count() tiến trình</span>
                                     </div>
                                     @if (stGroup.Key.ProcessCountOfStatus >= 2)
                                     {
                                         <span class="badge badge-light-secondary text-secondary-d3 border-1 text-75">
-                                            <i class="fa fa-exchange-alt mr-1"></i>CÃ³ thá»ƒ Ä‘á»•i quy trÃ¬nh
+                                            <i class="fa fa-exchange-alt mr-1"></i>Có thể đổi quy trình
                                         </span>
                                     }
                                 </div>
@@ -137,7 +137,7 @@
                             bool isOverdue = task.IsOverdue == 1;
 
                             <!-- ========================================================================= -->
-                            <!-- Cáº¤P 3: TIáº¾N TRÃŒNH (CÃ“ NGÃ€Y Báº®T Äáº¦U, Tá»”NG NGÃ€Y VÃ€ Dáº¤U (+) SAU TÃŠN)        -->
+                            <!-- CẤP 3: TIẾN TRÌNH (CÓ NGÀY BẮT ĐẦU, TỔNG NGÀY VÀ DẤU (+) SAU TÊN)        -->
                             <!-- ========================================================================= -->
                             <tr class="tree-row tree-progress-row" data-node="@taskNodeId" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3" data-expanded="true">
                                 <td class="pl-4">
@@ -145,13 +145,13 @@
                                         <input type="checkbox" class="tree-checkbox chk-task mr-2" id="chk_task_@task.TrackingID"
                                                @(task.Status == 3 ? "checked" : "")
                                                onchange="actionConfirmTracking(@task.TrackingID, @Model.DigitalSalesID);"
-                                               title="ÄÃ¡nh dáº¥u hoÃ n thÃ nh tiáº¿n trÃ¬nh" />
+                                               title="Đánh dấu hoàn thành tiến trình" />
                                         <span class="tree-progress-title">@taskIdx. @task.TaskName</span>
 
                                         @if (canEdit)
                                         {
-                                            <!-- Dáº¤U (+) PHÃA SAU TÃŠN TIáº¾N TRÃŒNH: THÃŠM TODO LIST -->
-                                            <a href="javascript:void(0);" class="btn-add-todo" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="ThÃªm cÃ´ng viá»‡c con (Todo list)">
+                                            <!-- DẤU (+) PHÍA SAU TÊN TIẾN TRÌNH: THÊM TODO LIST -->
+                                            <a href="javascript:void(0);" class="btn-add-todo" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con (Todo list)">
                                                 <i class="fa fa-plus"></i>
                                             </a>
                                         }
@@ -159,38 +159,38 @@
                                         @if (task.TodoList != null && task.TodoList.Count > 0)
                                         {
                                             <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@taskNodeId');">
-                                                <i class="fa fa-list-ul mr-1"></i>@task.TodoList.Count viá»‡c
+                                                <i class="fa fa-list-ul mr-1"></i>@task.TodoList.Count việc
                                             </span>
                                         }
                                     </div>
                                 </td>
-                                <td><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "â€”" : task.AssignedUserName)</span></td>
+                                <td><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : task.AssignedUserName)</span></td>
                                 <td class="text-center">@task.StartDate.ToString("dd/MM/yyyy")</td>
                                 <td class="text-center"><span class="@(isOverdue ? "text-danger font-bold" : "text-dark")">@task.MaxDeadline.ToString("dd/MM/yyyy")</span></td>
-                                <td class="text-center"><span class="badge badge-light-secondary font-bold">@task.EffectiveDurationDays ngÃ y</span></td>
+                                <td class="text-center"><span class="badge badge-light-secondary font-bold">@task.EffectiveDurationDays ngày</span></td>
                                 <td class="text-center">
                                     @if (task.Status == 3)
                                     {
-                                        <span class="badge badge-success px-2 font-bold">HoÃ n thÃ nh</span>
+                                        <span class="badge badge-success px-2 font-bold">Hoàn thành</span>
                                     }
                                     else if (task.Status == 2)
                                     {
-                                        <span class="badge badge-warning px-2 font-bold">Äang lÃ m</span>
+                                        <span class="badge badge-warning px-2 font-bold">Đang làm</span>
                                     }
                                     else if (isOverdue)
                                     {
-                                        <span class="badge badge-danger px-2 font-bold">QuÃ¡ háº¡n</span>
+                                        <span class="badge badge-danger px-2 font-bold">Quá hạn</span>
                                     }
                                     else
                                     {
-                                        <span class="badge badge-secondary px-2">ChÆ°a lÃ m</span>
+                                        <span class="badge badge-secondary px-2">Chưa làm</span>
                                     }
                                 </td>
                                 <td>
                                     @if (!string.IsNullOrWhiteSpace(task.AttachmentFile))
                                     {
-                                        <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = task.AttachmentFile })" target="_blank" class="text-primary font-bold" title="Táº£i file káº¿t quáº£">
-                                            <i class="fa fa-file-download mr-1"></i>Táº£i file
+                                        <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = task.AttachmentFile })" target="_blank" class="text-primary font-bold" title="Tải file kết quả">
+                                            <i class="fa fa-file-download mr-1"></i>Tải file
                                         </a>
                                     }
                                     else if (!string.IsNullOrWhiteSpace(task.ResultNote))
@@ -201,20 +201,20 @@
                                     }
                                     else
                                     {
-                                        <span>â€”</span>
+                                        <span>—</span>
                                     }
                                 </td>
                                 @if (canEdit)
                                 {
                                     <td class="text-center">
-                                        <a href="javascript:void(0);" class="text-primary mr-2" onclick="openEditTrackingModal(@task.TrackingID, @Model.DigitalSalesID);" title="Chá»‰nh sá»­a tiáº¿n trÃ¬nh"><i class="fa fa-edit"></i></a>
-                                        <a href="javascript:void(0);" class="text-danger" onclick="actionDeleteTracking(@task.TrackingID, @Model.DigitalSalesID);" title="XÃ³a tiáº¿n trÃ¬nh"><i class="fa fa-trash-alt"></i></a>
+                                        <a href="javascript:void(0);" class="text-primary mr-2" onclick="openEditTrackingModal(@task.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa tiến trình"><i class="fa fa-edit"></i></a>
+                                        <a href="javascript:void(0);" class="text-danger" onclick="actionDeleteTracking(@task.TrackingID, @Model.DigitalSalesID);" title="Xóa tiến trình"><i class="fa fa-trash-alt"></i></a>
                                     </td>
                                 }
                             </tr>
 
                             <!-- ========================================================================= -->
-                            <!-- Cáº¤P 4: TODO LIST TRONG TIáº¾N TRÃŒNH (CÃ”NG VIá»†C NHá»Ž, DEADLINE <= START + Tá»”NG)-->
+                            <!-- CẤP 4: TODO LIST TRONG TIẾN TRÌNH (CÔNG VIỆC NHỎ, DEADLINE <= START + TỔNG)-->
                             <!-- ========================================================================= -->
                             if (task.TodoList != null && task.TodoList.Count > 0)
                             {
@@ -224,58 +224,58 @@
                                     <tr class="tree-row tree-todo-row" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4">
                                         <td style="padding-left: 48px;">
                                             <div class="d-flex align-items-center flex-wrap">
-                                                <span class="tree-todo-branch">â””â”€</span>
+                                                <span class="tree-todo-branch">└─</span>
                                                 <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@todo.TrackingID"
                                                        @(todo.Status == 3 ? "checked" : "")
                                                        onchange="actionConfirmTracking(@todo.TrackingID, @Model.DigitalSalesID);"
-                                                       title="ÄÃ¡nh dáº¥u hoÃ n thÃ nh viá»‡c nhá»" />
+                                                       title="Đánh dấu hoàn thành việc nhỏ" />
                                                 <span class="tree-todo-title mr-2">@todo.TaskName</span>
                                                 <span class="ds-tree-sep">-</span>
                                                 <div class="ds-tree-actions">
-                                                    <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="openTrackingReportModal(@todo.TrackingID, @Model.DigitalSalesID);" title="BÃ¡o cÃ¡o tiáº¿n Ä‘á»™/káº¿t quáº£ thá»±c hiá»‡n">
-                                                        <i class="fa fa-file-alt mr-1"></i>BÃ¡o cÃ¡o
+                                                    <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="openTrackingReportModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Báo cáo tiến độ/kết quả thực hiện">
+                                                        <i class="fa fa-file-alt mr-1"></i>Báo cáo
                                                     </a>
                                                     <span class="ds-tree-sep">|</span>
-                                                    <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionConfirmTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="XÃ¡c nháº­n hoÃ n thÃ nh háº¡ng má»¥c">
-                                                        <i class="fa fa-check mr-1"></i>XÃ¡c nháº­n
+                                                    <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionConfirmTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xác nhận hoàn thành hạng mục">
+                                                        <i class="fa fa-check mr-1"></i>Xác nhận
                                                     </a>
                                                     <span class="ds-tree-sep">|</span>
-                                                    <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionUnlockTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Má»Ÿ khÃ³a Ä‘á»ƒ chá»‰nh sá»­a/lÃ m láº¡i">
-                                                        <i class="fa fa-unlock-alt mr-1"></i>Má»Ÿ khÃ³a
+                                                    <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionUnlockTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Mở khóa để chỉnh sửa/làm lại">
+                                                        <i class="fa fa-unlock-alt mr-1"></i>Mở khóa
                                                     </a>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "â€”" : todo.AssignedUserName)</span></td>
+                                        <td><span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : todo.AssignedUserName)</span></td>
                                         <td class="text-center text-85">@todo.StartDate.ToString("dd/MM/yyyy")</td>
                                         <td class="text-center">
                                             <span class="@(todoOverdue ? "text-danger font-bold" : "text-dark") text-85">
-                                                @(todo.Deadline.HasValue ? todo.Deadline.Value.ToString("dd/MM/yyyy") : "â€”")
+                                                @(todo.Deadline.HasValue ? todo.Deadline.Value.ToString("dd/MM/yyyy") : "—")
                                             </span>
                                         </td>
-                                        <td class="text-center text-secondary">â€”</td>
+                                        <td class="text-center text-secondary">—</td>
                                         <td class="text-center">
                                             @if (todo.Status == 3)
                                             {
-                                                <span class="badge badge-success text-75 px-2">HoÃ n thÃ nh</span>
+                                                <span class="badge badge-success text-75 px-2">Hoàn thành</span>
                                             }
                                             else if (todo.Status == 2)
                                             {
-                                                <span class="badge badge-warning text-75 px-2">Äang lÃ m</span>
+                                                <span class="badge badge-warning text-75 px-2">Đang làm</span>
                                             }
                                             else if (todoOverdue)
                                             {
-                                                <span class="badge badge-danger text-75 px-2">QuÃ¡ háº¡n</span>
+                                                <span class="badge badge-danger text-75 px-2">Quá hạn</span>
                                             }
                                             else
                                             {
-                                                <span class="badge badge-secondary text-75 px-2">ChÆ°a lÃ m</span>
+                                                <span class="badge badge-secondary text-75 px-2">Chưa làm</span>
                                             }
                                         </td>
                                         <td>
                                             @if (!string.IsNullOrWhiteSpace(todo.AttachmentFile))
                                             {
-                                                <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = todo.AttachmentFile })" target="_blank" class="text-primary font-bold text-80" title="Táº£i file Ä‘Ã­nh kÃ¨m">
+                                                <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = todo.AttachmentFile })" target="_blank" class="text-primary font-bold text-80" title="Tải file đính kèm">
                                                     <i class="fa fa-paperclip mr-1"></i>File
                                                 </a>
                                             }
@@ -287,14 +287,14 @@
                                             }
                                             else
                                             {
-                                                <span>â€”</span>
+                                                <span>—</span>
                                             }
                                         </td>
                                         @if (canEdit)
                                         {
                                             <td class="text-center">
-                                                <a href="javascript:void(0);" class="text-primary mr-2" onclick="openEditTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Chá»‰nh sá»­a viá»‡c nhá»"><i class="fa fa-edit"></i></a>
-                                                <a href="javascript:void(0);" class="text-danger" onclick="actionDeleteTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="XÃ³a viá»‡c nhá»"><i class="fa fa-trash-alt"></i></a>
+                                                <a href="javascript:void(0);" class="text-primary mr-2" onclick="openEditTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa việc nhỏ"><i class="fa fa-edit"></i></a>
+                                                <a href="javascript:void(0);" class="text-danger" onclick="actionDeleteTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xóa việc nhỏ"><i class="fa fa-trash-alt"></i></a>
                                             </td>
                                         }
                                     </tr>
@@ -312,12 +312,12 @@
                 <tr>
                     <td colspan="@(canEdit ? 8 : 7)" class="text-center py-4 text-secondary-m1">
                         <i class="fa fa-clipboard-list text-180 text-secondary-l1 mb-2 d-block"></i>
-                        <span>ChÆ°a cÃ³ tiáº¿n trÃ¬nh / checklist nÃ o Ä‘Æ°á»£c khá»Ÿi táº¡o cho há»“ sÆ¡ nÃ y.</span>
+                        <span>Chưa có tiến trình / checklist nào được khởi tạo cho hồ sơ này.</span>
                         @if (canEdit)
                         {
                             <div class="mt-2">
                                 <button type="button" class="btn btn-xs btn-orange px-3 radius-1 font-bold" onclick="openAddTrackingModal(@Model.DigitalSalesID);">
-                                    <i class="fa fa-plus mr-1"></i> ThÃªm cÃ´ng viá»‡c Ä‘áº§u tiÃªn
+                                    <i class="fa fa-plus mr-1"></i> Thêm công việc đầu tiên
                                 </button>
                             </div>
                         }
@@ -329,7 +329,7 @@
 </div>
 
 <script>
-    // Logic tÆ°Æ¡ng tÃ¡c ÄÃ³ng/Má»Ÿ cÃ¢y Checklist (Tree Fold/Unfold)
+    // Logic tương tác Đóng/Mở cây Checklist (Tree Fold/Unfold)
     function toggleTreeNode(nodeId) {
         var $row = $('tr[data-node="' + nodeId + '"]');
         if ($row.length === 0) return;
@@ -344,7 +344,7 @@
             $icon.addClass('collapsed');
         }
 
-        // Táº§ng 1: ÄÃ³ng/má»Ÿ toÃ n bá»™ con thuá»™c nhÃ¡nh Status
+        // Tầng 1: Đóng/mở toàn bộ con thuộc nhánh Status
         if ($row.hasClass('tree-status-row')) {
             var $descendants = $('#treeTrackingBody tr[data-parent="' + nodeId + '"], #treeTrackingBody tr[data-root="' + nodeId + '"]');
             if (newExpanded) {
@@ -360,7 +360,7 @@
                 $descendants.hide();
             }
         }
-        // Táº§ng 2: ÄÃ³ng/má»Ÿ cÃ¡c tiáº¿n trÃ¬nh con cá»§a quy trÃ¬nh
+        // Tầng 2: Đóng/mở các tiến trình con của quy trình
         else if ($row.hasClass('tree-process-row')) {
             var $children = $('#treeTrackingBody tr[data-parent="' + nodeId + '"], #treeTrackingBody tr[data-subparent="' + nodeId + '"]');
             if (newExpanded) {
@@ -376,7 +376,7 @@
                 $children.hide();
             }
         }
-        // Táº§ng 3: ÄÃ³ng/má»Ÿ cÃ¡c Todo list con cá»§a tiáº¿n trÃ¬nh
+        // Tầng 3: Đóng/mở các Todo list con của tiến trình
         else if ($row.hasClass('tree-progress-row')) {
             var $items = $('#treeTrackingBody tr[data-parent="' + nodeId + '"]');
             if (newExpanded) {
@@ -387,7 +387,7 @@
         }
     }
 
-    // NÃºt má»Ÿ rá»™ng táº¥t cáº£ / thu gá»n táº¥t cáº£
+    // Nút mở rộng tất cả / thu gọn tất cả
     function toggleAllChecklistTree(expandAll) {
         var $body = $('#treeTrackingBody');
         if (expandAll) {
@@ -395,7 +395,7 @@
             $body.find('.tree-toggle-icon').removeClass('collapsed');
             $body.find('tr[data-node]').attr('data-expanded', 'true');
         } else {
-            // Chá»‰ giá»¯ láº¡i táº§ng 1 (Tráº¡ng thÃ¡i)
+            // Chỉ giữ lại tầng 1 (Trạng thái)
             $body.find('tr.tree-process-row, tr.tree-progress-row, tr.tree-todo-row').hide();
             $body.find('.tree-toggle-icon').addClass('collapsed');
             $body.find('tr[data-node]').attr('data-expanded', 'false');
