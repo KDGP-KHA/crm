@@ -245,9 +245,6 @@
         <button type="button" class="btn btn-xs btn-white btn-h-light-primary font-bold @(currentFilter == 2 ? "active text-purple border-purple" : "text-secondary border-grey-l1") px-3 py-1 radius-1 ml-1" onclick="filterDiscussions(@Model.DigitalSalesID, 2);">
             <i class="fa fa-exchange-alt text-purple mr-1"></i> Trạng thái
         </button>
-        <button type="button" class="btn btn-xs btn-white btn-h-light-primary font-bold @(currentFilter == 99 ? "active text-orange border-orange" : "text-secondary border-grey-l1") px-3 py-1 radius-1 ml-1" onclick="filterDiscussions(@Model.DigitalSalesID, 99);">
-            <i class="fa fa-tasks text-orange mr-1"></i> Tiến trình & Checklist
-        </button>
     </div>
 
     <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d2 px-25 py-1 radius-1" onclick="reloadDiscussionsSection(@Model.DigitalSalesID);" title="Làm mới dòng hoạt động">
