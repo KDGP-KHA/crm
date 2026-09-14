@@ -1,0 +1,86 @@
+﻿﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerAnniversaryModel
+
+<div id="AnniversaryFormBody">
+    @Html.HiddenFor(model => model.CustomerAnniversaryId)
+    @Html.HiddenFor(model => model.CustomerID)
+
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Customer_Title")</label>
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.CustomerName,
+                     new { @class = "form-control", @readonly = "readonly" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">
+            @AppProcessor.Messagor.GetMessage("Anniversary_AnniversaryType_Label") <span class="text-danger">*</span>
+        </label>
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.AnniversaryTypeId,
+                     new SelectList(Model.ListAnniversaryType, "Value", "Text"),
+                     AppProcessor.Messagor.GetMessage("Anniversary_SelectType_Label"),
+                     new { @class = "form-control", id = "AnniversaryTypeId" })
+            @Html.ValidationMessageFor(model => model.AnniversaryTypeId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">
+            @AppProcessor.Messagor.GetMessage("Anniversary_AnniversaryDate_Label") <span class="text-danger">*</span>
+        </label>
+        <div class="col-md-5">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.AnniversaryDate,
+                         "{0:dd/MM/yyyy}",
+                         new { id = "AnniversaryDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                <div class="input-group-append">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.AnniversaryDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Anniversary_IsLunar_Label")</label>
+        <div class="col-md-8" style="padding-top:8px;">
+            <label style="margin-right:20px; font-weight:normal; cursor:pointer;">
+                <input type="radio" name="IsLunar" id="IsLunarFalse" value="false"
+                       @(Model.IsLunar == false ? "checked" : "")
+                       style="width:16px; height:16px; margin-right:6px; vertical-align:middle; accent-color:#555;" />
+                @AppProcessor.Messagor.GetMessage("Anniversary_Solar_Label")
+            </label>
+            <label style="font-weight:normal; cursor:pointer;">
+                <input type="radio" name="IsLunar" id="IsLunarTrue" value="true"
+                       @(Model.IsLunar == true ? "checked" : "")
+                       style="width:16px; height:16px; margin-right:6px; vertical-align:middle; accent-color:#555;" />
+                @AppProcessor.Messagor.GetMessage("Anniversary_Lunar_Label")
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Anniversary_Note_Label")</label>
+        <div class="col-md-8">
+            @Html.TextAreaFor(model => model.Note,
+                     new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Anniversary_Note_Label"), rows = 3 })
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#AnniversaryDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+
+        $("#AnniversaryTypeId").select2({ width: "100%", allowClear: true });
+    });
+</script>

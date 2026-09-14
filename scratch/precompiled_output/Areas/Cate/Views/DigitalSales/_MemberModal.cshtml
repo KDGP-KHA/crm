@@ -1,0 +1,477 @@
+﻿@using Core.Cate.Models
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesMemberModel
+
+@{
+    var employees = ViewBag.Employees as List<MN_EmployeeModel> ?? new List<MN_EmployeeModel>();
+    var departments = ViewBag.Departments as List<MN_BoPhanModel> ?? new List<MN_BoPhanModel>();
+    var roles = ViewBag.Roles as List<RM_RolesModel> ?? new List<RM_RolesModel>();
+    var existingRoles = ViewBag.ExistingRoles as Dictionary<int, string> ?? new Dictionary<int, string>();
+}
+
+@functions {
+    public string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "NV";
+        try
+        {
+            var parts = fullName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+            return (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
+        }
+        catch
+        {
+            return "NV";
+        }
+    }
+
+    public string GetAvatarBg(string name)
+    {
+        string[] colors = new[] { "#2563eb", "#059669", "#7c3aed", "#d97706", "#db2777", "#0891b2", "#4f46e5", "#0d9488", "#e11d48", "#475569" };
+        if (string.IsNullOrEmpty(name)) return colors[0];
+        try
+        {
+            uint hash = (uint)name.GetHashCode();
+            return colors[hash % (uint)colors.Length];
+        }
+        catch
+        {
+            return colors[0];
+        }
+    }
+
+    public string GetRoleIcon(string roleName)
+    {
+        if (string.IsNullOrEmpty(roleName)) return "fa-user-tag";
+        var r = roleName.ToLower();
+        if (r.Contains("account manager") || r.Contains("(am)")) return "fa-user-tie";
+        if (r.Contains("business analyst") || r.Contains("(ba)")) return "fa-chart-pie";
+        if (r.Contains("developer") || r.Contains("(dev)")) return "fa-laptop-code";
+        if (r.Contains("security") || r.Contains("attt")) return "fa-shield-alt";
+        if (r.Contains("opportunity") || r.Contains("(om)")) return "fa-briefcase";
+        if (r.Contains("project manager") || r.Contains("(pm)")) return "fa-tasks";
+        if (r.Contains("qa") || r.Contains("qc")) return "fa-check-circle";
+        if (r.Contains("tester") || r.Contains("test")) return "fa-bug";
+        if (r.Contains("tech") || r.Contains("support") || r.Contains("techlead")) return "fa-tools";
+        if (r.Contains("đấu thầu") || r.Contains("tender")) return "fa-file-signature";
+        return "fa-user-tag";
+    }
+}
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_MemberModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="modalMember" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg" style="max-width: 1040px; width: 95%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-user-plus mr-1"></i> Thêm Nhân sự tham gia Dự án
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="frmMemberModal" method="post" action="/Cate/DigitalSales/SaveMember">
+                <div class="modal-body p-3">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.MemberID)
+                    @Html.HiddenFor(m => m.DigitalSalesID)
+                    <input type="hidden" id="UserID" name="UserID" value="0" />
+                    <input type="hidden" id="EmployeeIDs" name="EmployeeIDs" value="" />
+                    <input type="hidden" id="RoleIDs" name="RoleIDs" value="" />
+
+                    <!-- CARD 1: THÀNH VIÊN THAM GIA -->
+                    <div class="member-sec-card">
+                        <div class="member-sec-header">
+                            <div>
+                                <i class="fa fa-users text-primary mr-1"></i> Thành viên tham gia
+                                <span id="searchResultCount" class="text-muted text-85 font-normal ml-2">(@(employees.Count) nhân sự)</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span id="selectedSummary" class="mr-2" style="display: none;">
+                                    <span class="badge badge-pill badge-primary px-2 py-1 font-bold">
+                                        <i class="fa fa-check mr-1"></i>Đã chọn <span id="selectedCount">0</span>
+                                    </span>
+                                    <a href="javascript:void(0);" id="btnClearAll" class="ml-2 text-danger text-85 font-bold" title="Bỏ chọn tất cả">
+                                        <i class="fa fa-times mr-1"></i> Bỏ chọn
+                                    </a>
+                                </span>
+                                <a href="javascript:void(0);" id="btnSelectAllVisible" class="text-primary text-85 font-bold ml-2" title="Chọn tất cả nhân sự đang hiển thị">
+                                    <i class="fa fa-check-double mr-1"></i> Chọn hiển thị
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-3">
+                            <!-- Bộ lọc tìm kiếm -->
+                            <div class="row mb-3">
+                                <div class="col-md-5 mb-2 mb-md-0">
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-white border-right-0 text-muted"><i class="fa fa-search"></i></span>
+                                        </div>
+                                        <input type="text" id="searchEmployeeName" class="form-control toolbar-search-input border-left-0" placeholder="@AppProcessor.Messagor.GetMessage("DigitalSalesMember_SearchEmployee_Placeholder")">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5 mb-2 mb-md-0">
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-secondary font-bold mr-2 text-nowrap text-85">Đơn vị:</span>
+                                        <select id="searchEmployeeUnit" class="form-control select2" data-placeholder="@AppProcessor.Messagor.GetMessage("DigitalSalesMember_Unit_AllOption")">
+                                            <option value="">-- Tất cả đơn vị quản lý --</option>
+                                            @if (departments != null)
+                                            {
+                                                foreach (var d in departments)
+                                                {
+                                                    <option value="@d.BoPhan_ID">@(!string.IsNullOrEmpty(d.TenBoPhanView) ? d.TenBoPhanView : d.TenBoPhan)</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button type="button" id="btnSearchEmployee" class="btn btn-primary btn-block radius-1">
+                                        <i class="fa fa-search mr-1"></i> Tìm
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Danh sách nhân sự dạng lưới thẻ hiện đại -->
+                            <div id="employeeListWrapper" class="emp-list-container">
+                                <div class="row" id="employeeList">
+                                    @if (employees != null && employees.Count > 0)
+                                    {
+                                        foreach (var emp in employees)
+                                        {
+                                            var tenBoPhan = emp.TenBoPhan ?? "";
+                                            var initials = GetInitials(emp.FullName);
+                                            var bgCol = GetAvatarBg(emp.FullName);
+                                            var hasRoles = existingRoles.ContainsKey(emp.Employee_ID);
+                                            <div class="col-xl-3 col-lg-4 col-sm-6 mb-2 employee-item"
+                                                 data-name="@(emp.FullName?.ToLower() ?? "")"
+                                                 data-unit="@emp.BoPhan_ID">
+                                                <div class="emp-card" data-emp-id="@emp.Employee_ID">
+                                                    <div class="emp-check-box">
+                                                        <i class="fa fa-check"></i>
+                                                    </div>
+                                                    <input class="d-none employee-checkbox"
+                                                           value="@emp.Employee_ID"
+                                                           type="checkbox"
+                                                           id="emp-@emp.Employee_ID">
+                                                    <div class="emp-avatar" style="background-color: @bgCol;" title="@emp.FullName">
+                                                        @initials
+                                                    </div>
+                                                    <div class="emp-info">
+                                                        <div class="emp-name text-truncate" title="@emp.FullName">
+                                                            @emp.FullName
+                                                        </div>
+                                                        @if (hasRoles)
+                                                        {
+                                                            <div class="text-truncate text-80 text-purple font-weight-bold" title="Đã có vai trò: @existingRoles[emp.Employee_ID]">
+                                                                <i class="fa fa-id-badge mr-1"></i>@existingRoles[emp.Employee_ID]
+                                                            </div>
+                                                        }
+                                                        else if (!string.IsNullOrEmpty(tenBoPhan))
+                                                        {
+                                                            <div class="emp-unit text-truncate" title="@tenBoPhan">
+                                                                <i class="fa fa-building text-secondary-l1 mr-1"></i>@tenBoPhan
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    <div id="noResultMsg" class="text-muted text-center py-4 col-12" style="display:none;">
+                                        <i class="fa fa-search fa-2x mb-2 d-block text-secondary-l1"></i>
+                                        Không tìm thấy nhân sự phù hợp với tiêu chí tìm kiếm.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: VAI TRÒ / NHIỆM VỤ -->
+                    <div class="member-sec-card">
+                        <div class="member-sec-header">
+                            <div>
+                                <i class="fa fa-id-badge text-purple mr-1"></i> Vai trò / Nhiệm vụ
+                                <span class="text-muted text-80 font-normal ml-1">(Có thể chọn nhiều vai trò)</span>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <div class="row" id="roleList">
+                                @if (roles != null && roles.Count > 0)
+                                {
+                                    foreach (var role in roles)
+                                    {
+                                        var roleIcon = GetRoleIcon(role.RoleName);
+                                        <div class="col-xl-3 col-lg-4 col-sm-6 mb-2">
+                                            <div class="role-pill-card" data-role-id="@role.RoleID">
+                                                <div class="role-check-box">
+                                                    <i class="fa fa-check"></i>
+                                                </div>
+                                                <input class="d-none role-checkbox"
+                                                       value="@role.RoleID"
+                                                       data-name="@role.RoleName"
+                                                       type="checkbox"
+                                                       id="role-@role.RoleID">
+                                                <i class="fa @roleIcon role-icon"></i>
+                                                <span class="role-text text-truncate" title="@role.RoleName">
+                                                    @role.RoleName
+                                                </span>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                            <div class="mt-2">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white text-muted"><i class="fa fa-pen"></i></span>
+                                    </div>
+                                    <input type="text" name="CustomRole" id="CustomRole" class="form-control form-control-sm" placeholder="@AppProcessor.Messagor.GetMessage("DigitalSalesMember_CustomRole_Placeholder")">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: THIẾT LẬP QUYỀN CẬP NHẬT TRẠNG THÁI & GHI CHÚ -->
+                    <div class="member-sec-card mb-0">
+                        <div class="p-3">
+                            <!-- Quyền cập nhật trạng thái Highlight Card -->
+                            <div class="status-perm-card mb-3" id="statusPermCard">
+                                <div class="status-perm-check-box">
+                                    <i class="fa fa-check"></i>
+                                </div>
+                                <input type="checkbox" class="d-none" id="chkIsAM" name="IsAM" value="true" />
+                                <input type="hidden" name="IsAM" value="false" />
+                                <div class="flex-1">
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <span class="font-bold text-dark-m1 text-95 mr-2">
+                                            <i class="fa fa-shield-alt text-primary mr-1"></i> Nhân sự được quyền cập nhật thông tin & trạng thái
+                                        </span>
+                                        <span class="badge badge-primary text-white font-normal px-2 py-0" style="font-size: 11px;">
+                                            Toàn quyền thao tác
+                                        </span>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        Nhân sự được tích chọn sẽ có quyền thao tác toàn bộ các chức năng (chuyển trạng thái, cập nhật tiến trình, chỉnh sửa thông tin, thêm/xóa thành viên và sản phẩm) bên trong chi tiết sản phẩm dịch vụ số.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div>
+                                @Html.TitleFor(m => m.Note, new { @class = "text-85 text-600 mb-1 text-secondary font-weight-bold" })
+                                @Html.TextAreaFor(m => m.Note, new { id = "Note", rows = "2", @class = "form-control form-control-sm radius-1", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesMember_Note_Placeholder") })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bgc-grey-l5 border-t-1 brc-grey-l2 py-2">
+                    <button type="button" class="btn btn-sm btn-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> Đóng
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-primary px-4 font-weight-bold radius-1 shadow-sm">
+                        <i class="fa fa-save mr-1"></i> Lưu thành viên
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var employeeSelected = [];
+        var roleSelected = [];
+
+        // Realtime Search & Click Search
+        $("#btnSearchEmployee").on("click", function () {
+            doSearch();
+        });
+
+        $("#searchEmployeeName").on("input keyup", function (e) {
+            doSearch();
+        });
+
+        $("#searchEmployeeUnit").on("change select2:select select2:clear", function () {
+            doSearch();
+        });
+
+        function doSearch() {
+            var keyword = $("#searchEmployeeName").val().trim().toLowerCase();
+            var unit = $("#searchEmployeeUnit").val();
+
+            var visibleCount = 0;
+            var totalCount = $(".employee-item").length;
+
+            $(".employee-item").each(function () {
+                var matchName = !keyword || $(this).data("name").indexOf(keyword) >= 0;
+                var matchUnit = !unit || $(this).data("unit") == unit;
+
+                if (matchName && matchUnit) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $("#noResultMsg").toggle(visibleCount === 0);
+            if (keyword || unit) {
+                $("#searchResultCount").text("(Hiển thị " + visibleCount + "/" + totalCount + " nhân sự)");
+            } else {
+                $("#searchResultCount").text("(" + totalCount + " nhân sự)");
+            }
+        }
+
+        // Employee Card click toggle
+        $(document).on("click", ".emp-card", function (e) {
+            var $chk = $(this).find(".employee-checkbox");
+            var isChecked = !$chk.prop("checked");
+            $chk.prop("checked", isChecked).trigger("change");
+        });
+
+        // Employee Checkbox change
+        $(document).on("change", ".employee-checkbox", function () {
+            var value = $(this).val();
+            var isChecked = $(this).is(":checked");
+            var $card = $(this).closest(".emp-card");
+
+            if (isChecked) {
+                $card.addClass("is-checked");
+                if (!employeeSelected.includes(value)) employeeSelected.push(value);
+            } else {
+                $card.removeClass("is-checked");
+                employeeSelected = employeeSelected.filter(function (v) { return v != value; });
+            }
+
+            $("#EmployeeIDs").val(employeeSelected.join(";"));
+
+            if (employeeSelected.length > 0) {
+                $("#selectedCount").text(employeeSelected.length);
+                $("#selectedSummary").show();
+            } else {
+                $("#selectedSummary").hide();
+            }
+        });
+
+        // Select all visible employees
+        $("#btnSelectAllVisible").on("click", function (e) {
+            e.preventDefault();
+            $(".employee-item:visible").each(function () {
+                var $chk = $(this).find(".employee-checkbox");
+                if (!$chk.prop("checked")) {
+                    $chk.prop("checked", true).trigger("change");
+                }
+            });
+        });
+
+        // Clear All selected employees
+        $("#btnClearAll").on("click", function (e) {
+            e.preventDefault();
+            employeeSelected = [];
+            $(".employee-checkbox").prop("checked", false);
+            $(".emp-card").removeClass("is-checked");
+            $("#EmployeeIDs").val("");
+            $("#selectedSummary").hide();
+        });
+
+        // Role Card click toggle
+        $(document).on("click", ".role-pill-card", function (e) {
+            var $chk = $(this).find(".role-checkbox");
+            var isChecked = !$chk.prop("checked");
+            $chk.prop("checked", isChecked).trigger("change");
+        });
+
+        // Role Checkbox change
+        $(document).on("change", ".role-checkbox", function () {
+            var value = $(this).val();
+            var isChecked = $(this).is(":checked");
+            var $card = $(this).closest(".role-pill-card");
+
+            if (isChecked) {
+                $card.addClass("is-checked");
+                if (!roleSelected.includes(value)) roleSelected.push(value);
+            } else {
+                $card.removeClass("is-checked");
+                roleSelected = roleSelected.filter(function (v) { return v != value; });
+            }
+
+            $("#RoleIDs").val(roleSelected.join(";"));
+        });
+
+        // Status Permission Card click toggle
+        $("#statusPermCard").on("click", function () {
+            var $chk = $("#chkIsAM");
+            var isChecked = !$chk.prop("checked");
+            $chk.prop("checked", isChecked).trigger("change");
+        });
+
+        $("#chkIsAM").on("change", function () {
+            var isChecked = $(this).is(":checked");
+            $("#statusPermCard").toggleClass("is-checked", isChecked);
+        });
+
+        // Validation & AJAX submit
+        $("#frmMemberModal").on("submit", function (e) {
+            e.preventDefault();
+            if (employeeSelected.length === 0) {
+                if (typeof toastr !== "undefined") {
+                    toastr.warning("Vui lòng chọn ít nhất một nhân sự tham gia!");
+                } else {
+                    alert("Vui lòng chọn ít nhất một nhân sự tham gia!");
+                }
+                return false;
+            }
+
+            var $form = $(this);
+            var $btn = $form.find("button[type='submit']");
+            var originalBtnHtml = $btn.html();
+            $btn.prop("disabled", true).html("<i class='fa fa-spinner fa-spin mr-1'></i> Đang lưu...");
+
+            $.ajax({
+                url: $form.attr("action") || "/Cate/DigitalSales/SaveMember",
+                type: "POST",
+                data: $form.serialize(),
+                success: function (res) {
+                    $btn.prop("disabled", false).html(originalBtnHtml);
+                    if (res && res.status) {
+                        $("#modalMember").modal("hide");
+                        $(".modal-backdrop").remove();
+                        $("body").removeClass("modal-open").css("padding-right", "");
+                        if (typeof toastr !== "undefined") {
+                            toastr.success(res.message || "Lưu thành viên thành công!");
+                        }
+                        if (typeof reloadMembersSection === "function") {
+                            reloadMembersSection(@Model.DigitalSalesID);
+                        } else {
+                            setTimeout(function () { location.reload(); }, 600);
+                        }
+                    } else {
+                        var errMsg = (res && res.message) ? res.message : "Không thể lưu thành viên!";
+                        if (typeof toastr !== "undefined") {
+                            toastr.error(errMsg);
+                        } else {
+                            alert(errMsg);
+                        }
+                    }
+                },
+                error: function () {
+                    $btn.prop("disabled", false).html(originalBtnHtml);
+                    if (typeof toastr !== "undefined") {
+                        toastr.error("Có lỗi xảy ra khi kết nối máy chủ!");
+                    } else {
+                        alert("Có lỗi xảy ra khi kết nối máy chủ!");
+                    }
+                }
+            });
+
+            return false;
+        });
+    })();
+</script>

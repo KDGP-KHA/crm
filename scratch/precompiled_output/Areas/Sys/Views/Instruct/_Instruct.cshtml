@@ -1,0 +1,147 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysInstructModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.InstructID)
+
+    <!-- InstructName -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.InstructName, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.InstructName,
+                                              new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Instruct_Label_Name") })
+        @Html.ValidationMessageFor(model => model.InstructName, "", new { @class = "text-danger" })
+    </div>
+
+    <!-- InstructParent -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.InstructParentID, new { @class = "font-bold" })
+        @Html.DropDownListFor(
+                m => m.InstructParentID,
+                ViewBag.ParentList as List<SelectListItem>,
+                "-- Chọn nhóm cha --",
+                new { @class = "form-control" }
+            )
+    </div>
+
+    <!-- InstructPosition & display-->
+    <div class="form-group row">
+        <div class="form-group col-sm-6">
+            @Html.TitleFor(model => model.PositionShow, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.PositionShow,
+                                                new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Instruct_Label_Name") })
+            @Html.ValidationMessageFor(model => model.PositionShow, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group d-flex align-items-end" style="padding-bottom: 9px; padding-left: 35px">
+            @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" })
+
+            @Html.LabelFor(model => model.IsActive,
+                    new { @class = "form-check-label font-bold ml-1" })
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.Content, new { @class = "font-bold" })
+        @Html.TextAreaFor(model => model.Content,
+                        new
+                        {
+                            @class = "form-control",
+                            placeholder = AppProcessor.Messagor.GetMessage("Instruct_Label_Content"),
+                            id = "ContentInstructEditor"
+                        })
+        @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    (function () {
+        // ── CKEditor ──────────────────────────────────────────
+        function initLogCKEditor() {
+            if (typeof CKEDITOR === 'undefined') return;
+            var ex = CKEDITOR.instances['ContentInstructEditor'];
+            if (ex) ex.destroy(true);
+            CKEDITOR.replace('ContentInstructEditor', {
+                height: 400,
+
+                // Cho phép chỉnh width/height ảnh
+                allowedContent: true,
+                extraAllowedContent: 'img[width,height,style]',
+
+                // Toolbar gọn, dễ dùng cho CRM
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                    { name: 'insert', items: ['Image', 'Table', 'Link'] },
+                    { name: 'styles', items: ['Format'] },
+                    { name: 'tools', items: ['Maximize'] }
+                ]
+            });
+        }
+
+        function loadCKEditorThenInit() {
+            if (typeof CKEDITOR !== 'undefined') { initLogCKEditor(); return; }
+            var s = document.createElement('script');
+            s.src = '/Contents/Modules/Major/ckeditor4/ckeditor.js';
+            s.onload = function () {
+                var s2 = document.createElement('script');
+                s2.src = '/Contents/Modules/Major/ckfinder/ckfinder.js';
+                s2.onload = function () { initLogCKEditor(); };
+                s2.onerror = function () { initLogCKEditor(); };
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        }
+
+        function onSuccess(response) {
+            if (response.status != undefined) {
+                try { eval(response.message); } catch (e) { console.warn('eval error:', e); }
+                $('#_FormConfirm').html(response.page);
+                $('#LogList').html(response.list);
+                setTimeout(function () {
+                    initLogCKEditor();
+                    if ($('#LogDate').length) {
+                        $('#LogDate').datetimepicker({ format: 'DD/MM/YYYY HH:mm' });
+                    }
+                }, 50);
+            } else {
+                $('#_FormConfirm').html(response);
+                setTimeout(function () { initLogCKEditor(); }, 50);
+            }
+        }
+
+        $('form#EditLogTask').ajaxForm({ success: onSuccess });
+
+        document.getElementById('btnSave').addEventListener('click', function () {
+            var btn = this;
+            if (btn.disabled) return;
+            btn.disabled = true;
+            setTimeout(function () { btn.disabled = false; }, 2000);
+            var logDateInput = document.getElementById('LogDate');
+            if (logDateInput && (!logDateInput.value || logDateInput.value === '01/01/0001 00:00')) {
+                var now = new Date();
+                var pad = function (n) { return n < 10 ? '0' + n : n; };
+                logDateInput.value = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear()
+                    + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+            }
+            if (typeof CKEDITOR !== 'undefined') {
+                for (var inst in CKEDITOR.instances) {
+                    CKEDITOR.instances[inst].updateElement();
+                }
+            }
+            $('form#EditLogTask').trigger('submit');
+        });
+
+        $('#modal_EditLogTask').addClass('modal-fs').removeClass('modal-xl');
+        $('#modal_EditLogTask .modal-footer').hide();
+
+        $(document).off('click.logtoggle').on('click.logtoggle', '.btn-toggle-log', function (e) {
+            e.preventDefault();
+            $(this).closest('.col-12').next('.content-detail-log').slideToggle();
+        });
+
+        loadCKEditorThenInit();
+    })();
+</script>

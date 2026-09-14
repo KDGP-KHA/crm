@@ -1,0 +1,129 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysMenuModel
+
+@Html.AntiForgeryToken()
+
+@Html.HiddenFor(model => model.MenuId)
+@Html.HiddenFor(model => model.Depth)
+@Html.HiddenFor(model => model.LevelMenu)
+<div class="form-group row">
+    @Html.TitleFor(model => model.Name, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-md-9">
+        @Html.TextBoxFor(model => model.Name, new { @class = "form-control col-md-7", placeholder = AppProcessor.Messagor.GetMessage("Menu_Label_Name") })
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_Parent")</label>
+    <div class="col-md-9">
+        @Html.DropDownListFor(model => model.ParentId, new SelectList(Model.ParentMenus, "Value", "Text"), "", new { @class = "form-control col-md-8" })
+        @Html.ValidationMessageFor(model => model.ParentId, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_Position")</label>
+    <div class="col-md-9">
+        @Html.TextBoxFor(model => model.Position, new { @class = "form-control col-md-2", type = "number", placeholder = AppProcessor.Messagor.GetMessage("Menu_Label_Position") })
+        @Html.ValidationMessageFor(model => model.Position, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_Link")</label>
+    <div class="col-md-9">
+        @Html.TextBoxFor(model => model.Link, new { @class = "form-control col-md-7", placeholder = AppProcessor.Messagor.GetMessage("Menu_Label_Link") })
+        @Html.ValidationMessageFor(model => model.Link, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_Icon")</label>
+    <div class="col-md-9">
+        @*<button type="button" class="btn btn-default fa-2x iconpicker" data-iconset="fontawesome5" role="iconpicker" id="iconpicker" data-icon="@Model.Icon"></button>
+            @Html.HiddenFor(model => model.Icon, new { @class = "form-control", Value = Model.Icon })*@
+
+        @*<div class="input-group">
+                <div class="input-group-prepend">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle iconpicker-component" data-selected="fa-car" data-toggle="dropdown" id="iconpicker">
+                        <i class="@Model.Icon"></i>
+                    </button>
+                    <div class="dropdown-menu"></div>
+                </div>
+                @Html.TextBoxFor(model => model.Icon, new { @class = "form-control form-control-lg col-sm-8 iconpicker-component", Value = Model.Icon, @readonly = true })
+            </div>
+            @Html.ValidationMessageFor(model => model.Icon, "", new { @class = "text-danger" })*@
+
+        <button type="button" name="Icon" class="btn btn-default btn-lg fa-2x" data-search-text="Tìm kiếm" data-cols="6" data-align="center" data-placement="right" data-iconset="fontawesome5" data-icon="@Model.Icon" role="iconpicker"></button>
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_LinkFunction")</label>
+    <div class="col-md-9">
+        @Html.DropDownListFor(model => model.FunctionActionId, new SelectList(Model.FunctionActions, "Value", "Text"), AppProcessor.Messagor.GetMessage("Menu_Label_LinkFunction"), new { @class = "form-control col-md-8" })
+        @Html.ValidationMessageFor(model => model.FunctionActionId, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold"></label>
+    <div class="col-md-4">
+        <label class="">
+            @Html.CheckBoxFor(model => model.IsShow)
+            @Html.LabelFor(model => model.IsShow, new { @class = "col-form-label pr-0 font-bold" })
+        </label>
+    </div>
+    <div class="col-md-4">
+        <label class="">
+            @Html.CheckBoxFor(model => model.UseModal, new { onchange = "_onUseModal(this)" })
+            @Html.LabelFor(model => model.UseModal, new { @class = "col-form-label pr-0 font-bold" })
+        </label>
+    </div>
+</div>
+@{
+    var hidden = Model.UseModal ? "" : "d-none";
+}
+<div class="form-group row @hidden" id="formModalId">
+    <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_ModalId")</label>
+    <div class="col-md-9">
+        @Html.TextBoxFor(model => model.ModalId, new { @class = "form-control col-md-7", placeholder = AppProcessor.Messagor.GetMessage("Menu_Label_ModalId") })
+        @Html.ValidationMessageFor(model => model.ModalId, "", new { @class = "text-danger" })
+    </div>
+</div>
+<script type="text/javascript">
+
+    //$(function() {
+    //    $('#iconpicker').iconpicker({ placement: 'top', defaultValue: true, hideOnSelect: false, selectedCustomClass: "fa-2x" });
+    //    $(".iconpicker-items a").on('click',
+    //        function(e) {
+    //            e.preventDefault();
+    //            return false;
+    //        });
+    //    $('#iconpicker').on('iconpickerSelected',
+    //        function(e) {
+    //            $("#Icon").val(e.iconpickerValue);
+    //            $(this).children('i').get(0).className = 'fa-2x ' + e.iconpickerValue;
+    //        });
+    //    $('#ParentId option').each(function(idx, opt) {
+    //        opt.innerHTML = opt.text;
+    //    });
+    //});
+    
+    function _onUseModal(chbk) {
+        if ($(chbk).is(":checked")) {
+            $("#formModalId").removeClass("d-none");
+        }
+        else {
+            $("#formModalId").addClass("d-none");
+        }
+    }
+
+    $(function () {
+        $('button[role="iconpicker"]').iconpicker()
+            .iconpicker('setAlign', 'center') // Only in div tag
+            .iconpicker('setArrowClass', 'btn-success')
+            .iconpicker('setSearchText', 'Tìm kiếm')
+            .iconpicker('setSelectedClass', 'btn-danger')
+            .iconpicker('setUnselectedClass', 'btn-primary');
+        //.on('change', function (e) {
+        //    $(this).children('i').addClass('fa-2x');
+        //});
+    });
+
+</script>

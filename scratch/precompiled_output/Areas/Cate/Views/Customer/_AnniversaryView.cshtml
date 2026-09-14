@@ -1,0 +1,12 @@
+﻿﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerAnniversarySearchModel
+@{
+    ViewBag.Title = Html.Raw(AppProcessor.Messagor.GetMessage("Anniversary_Title") + " <b>" + Model.CustomerName + "</b>");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType{ warning }
+@section FormIcon{ <i class="fas fa-birthday-cake"></i> }
+@section FormBody{
+    @Html.Partial("IndexAnniversary")
+}
+@section SubmitControl{}

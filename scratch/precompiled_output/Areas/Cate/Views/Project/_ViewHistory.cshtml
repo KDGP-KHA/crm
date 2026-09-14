@@ -1,0 +1,35 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("ExchangeLog_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-history"></i>
+}
+
+@section FormBody{
+    <div id="data_traodoi"></div>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '/Cate/ProjectOverview/GetTaskManagementsByProjectID/@Model.ProjectID',
+                type: 'GET',                         // The HTTP method
+                dataType: 'html',                    // Expected data format
+                success: function (response) {
+                    $('#data_traodoi').html(response);
+                },
+                error: function (xhr, status, error) {
+                    $('#data_traodoi').html('');
+                }
+            });
+        });
+    </script>
+}
+
+@section SubmitControl{}

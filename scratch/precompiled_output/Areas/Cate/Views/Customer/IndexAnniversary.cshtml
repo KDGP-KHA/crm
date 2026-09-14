@@ -1,0 +1,174 @@
+﻿﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerAnniversarySearchModel
+
+<div style="text-align: right; margin-bottom: 4px;">
+    @Html.Button(
+            true,
+            "AddCustomerAnniversary",
+            Url.Action("AddAnniversary", new { area = "Cate", CustomerID = Model.CustomerID }),
+            "<i class='fa fa-plus'></i>",
+            AppProcessor.Messagor.GetMessage("Button_Add"),
+            new
+            {
+                @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90",
+                data_width = "600px"
+            }
+        )
+</div>
+
+<div class="mt-3">
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="DSCustomerAnniversary"
+                   class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                   width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Anniversary_AnniversaryType_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Anniversary_AnniversaryDate_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Anniversary_IsLunar_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Anniversary_IsReminder_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Anniversary_Note_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var _AnniversaryLang = {
+        reminderOn:  "@AppProcessor.Messagor.GetMessage("Anniversary_ReminderOn_Label")",
+        reminderOff: "@AppProcessor.Messagor.GetMessage("Anniversary_ReminderOff_Label")",
+        lunar:       "@AppProcessor.Messagor.GetMessage("Anniversary_Lunar_Label")",
+        solar:       "@AppProcessor.Messagor.GetMessage("Anniversary_Solar_Label")"
+    };
+    var _AnniversaryActionURLs = {
+        Anniversary_GetData: "/Cate/Customer/GetAnniversary"
+    };
+    var _tableAnniversary;
+
+    $(document).ready(function () {
+        initTableAnniversary();
+    });
+
+ function initTableAnniversary() {
+    _tableAnniversary = $("#DSCustomerAnniversary").DataTable({
+        "responsive": true,
+        "lengthChange": true,
+        "processing": true,
+        "serverSide": false,          
+        "ajax": {
+            "url": _AnniversaryActionURLs.Anniversary_GetData,
+            "type": "POST",
+            "dataType": "JSON",
+            "data": { "CustomerID": '@Model.CustomerID' },
+            "dataSrc": function (json) {
+                return json.data;     
+            }
+        },
+            "columns": [
+                {
+                    "data": "",
+                    "defaultContent": "1",
+                    "render": function (data, type, row, meta) {
+                        return meta.settings._iDisplayStart + meta.row + 1;
+                    }
+                },
+                {
+                    "data": "NameAnniversaryType",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) { return data || ''; }
+                },
+                {
+                    "data": "AnniversaryDate",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data != null ? moment(data).format("DD/MM/YYYY") : "";
+                    }
+                },
+                {
+                    "data": "IsLunar",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data
+                            ? '<span class="badge badge-info text-white">' + _AnniversaryLang.lunar + '</span>'
+                            : '<span class="badge badge-secondary text-white">' + _AnniversaryLang.solar + '</span>';
+                    }
+                },
+                {
+                    "data": "IsReminder",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data
+                            ? '<i class="fas fa-bell text-warning" title="' + _AnniversaryLang.reminderOn + '"></i>'
+                            : '<i class="fas fa-bell-slash text-muted" title="' + _AnniversaryLang.reminderOff + '"></i>';
+                    }
+                },
+                {
+                    "data": "Note",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) { return data || ''; }
+                },
+                {
+                    "data": "CustomerAnniversaryId",
+                    "orderable": false,
+                    "render": function (data, type, row, meta) {
+                        var html = '<span class="">';
+                        if (type === "display") {
+                            html += '<div class="dropdown d-inline-block">'
+                                + '<button class="btn btn-lighter-primary mr-1 dropdown-toggle" type="button"'
+                                + ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
+                                + '<i class="fa fa-ellipsis-h text-120"></i></button>'
+                                + '<div class="dropdown-menu dropdown-menu-right">';
+                            html += _renderButton(true,
+                                "EditCustomerAnniversary",
+                                "btn btn-lighter-primary mr-1 btn-a-outline-primary dropdown-item",
+                                "/Cate/Customer/EditAnniversary/" + data,
+                                '<i class="far fa-edit text-primary text-120 mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Edit")',
+                                "@AppProcessor.Messagor.GetMessage("Button_Edit")", 600);
+                            html += _renderButton(true,
+                                "DeleteCustomerAnniversary",
+                                "btn btn-lighter-danger mr-1 btn-a-outline-danger dropdown-item",
+                                "/Cate/Customer/DeleteAnniversary/" + data,
+                                '<i class="far fa-trash-alt text-danger text-120 mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Delete")',
+                                "@AppProcessor.Messagor.GetMessage("Button_Delete")");
+                            html += '</div></div>';
+                        }
+                        html += "</span>";
+                        return html;
+                    }
+                }
+            ]
+        });
+    }
+
+    function Anniversary_OnProcessSuccess(response, formId) {
+        if (response.status != undefined) {
+            if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    _tableAnniversary.ajax.reload(null, false);
+                    response.status = undefined;
+                    var urlAction = $("#ModalContent #modal_" + formId + " form").attr("action");
+                    $("#ModalContent #modal_" + formId + " #modal-content").load(urlAction, function (data, textStatus, xhr) {
+                        _initElement();
+                    });
+                }
+            } else {
+                $("#ModalContent #modal_" + formId).modal("hide");
+                $("#ModalContent #modal_" + formId).on("hidden.bs.modal", function () {
+                    if (response.status != undefined) {
+                        eval(response.message);
+                        _tableAnniversary.ajax.reload(null, false);
+                        response.status = undefined;
+                    }
+                });
+            }
+        } else {
+            $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+        }
+    }
+</script>

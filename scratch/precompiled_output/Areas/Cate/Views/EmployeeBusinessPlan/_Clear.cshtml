@@ -1,0 +1,24 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Import_Employee_BusinessPlanModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("EmployeeBusinessPlan_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Clear", "EmployeeBusinessPlan", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ImportEmployeeBusinessPlan_OnProcessSuccess(data, 'Clear')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Key)
+        <h5>@AppProcessor.Messagor.GetMessage("Message_Confirm_ClearDataImport")</h5>
+    }
+}

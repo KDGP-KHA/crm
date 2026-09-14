@@ -1,0 +1,90 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysPermissionModuleModel
+
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(model => model.ModuleId)
+@Html.HiddenFor(model => model.ModuleName)
+
+<link rel="stylesheet" href="~/Contents/Modules/Sys/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
+
+<div id="PermissionModule">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ModuleName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.ModuleName, new { @class = "form-control col-md-8", disabled = true, placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_ModuleName") })
+            @Html.ValidationMessageFor(model => model.ModuleName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Description, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Description, new { rows = "3", @class = "form-control col-md-10", disabled = true, placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_Description") })
+            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Users, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownList("SelectedUsers", new SelectList(Model.Users, "Value", "Text"),
+                new { @class = "form-control col-md-10 none-select2", multiple = "multiple", placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select_User") })
+        </div>
+        @Html.HiddenFor(model => model.PermissionUserIDs)
+    </div>
+</div>
+
+<script type="text/javascript" src="~/Contents/Modules/Sys/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#PermissionModule select#SelectedUsers').multiselect({
+            maxHeight: 400,
+            numberDisplayed: 1,
+            includeSelectAllOption: true,
+            selectAllNumber: true,
+            selectAllText: 'Chọn tất cả!',
+            nonSelectedText: 'Chọn người dùng',
+            //resetText: "Bỏ chọn tất cả",
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            includeResetOption: true,
+            includeResetDivider: true,
+            filterPlaceholder: 'Tìm kiếm người dùng',
+            allSelectedText: 'Chọn tất cả',
+            nSelectedText: 'người dùng đã được chọn',
+            enableClickableOptGroups: true,
+            enableCollapsibleOptGroups: true,
+            onChange: function(option, checked, select) {
+                var selectedValues = $('#PermissionModule input[type="hidden"][id$="PermissionUserIDs"]').val();
+                var arrSelectedValues = selectedValues != undefined && selectedValues.length > 0
+                    ? selectedValues.split(',')
+                    : [];
+                var idxOpt = arrSelectedValues.indexOf($(option).val());
+
+                if (checked) {
+                    if (idxOpt < 0) {
+                        arrSelectedValues.push($(option).val());
+                        $('#PermissionModule input[type="hidden"][id$="PermissionUserIDs"]').val(arrSelectedValues);
+                    }
+                } else {
+                    if (idxOpt > -1) {
+                        arrSelectedValues.splice(idxOpt, 1);
+                        $('#PermissionModule input[type="hidden"][id$="PermissionUserIDs"]').val(arrSelectedValues);
+                    }
+                }
+            },
+            onSelectAll: function() {
+                var arrSelectedValues = $('#PermissionModule select#SelectedUsers option:selected').map(function(a, item) { return item.value; });
+                $('#PermissionModule input[type="hidden"][id$="PermissionUserIDs"]').val(arrSelectedValues.toArray());
+            },
+            onDeselectAll: function () {
+                $('#PermissionModule input[type="hidden"][id$="PermissionUserIDs"]').val('');
+            }
+        });
+    });
+
+    $(function() {
+        var selectedValues = $('#PermissionModule input[type="hidden"][id$="PermissionUserIDs"]').val();
+        $('#PermissionModule select#SelectedUsers').multiselect('select', selectedValues.split(","));
+    });
+</script>

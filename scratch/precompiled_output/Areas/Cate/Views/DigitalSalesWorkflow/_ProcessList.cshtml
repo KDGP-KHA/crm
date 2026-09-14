@@ -1,0 +1,64 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_DigitalSalesProcessModel>
+
+@{
+    var status = ViewBag.Status as Core.Cate.Models.RM_DigitalSalesStatusModel;
+    var statusId = ViewBag.StatusID ?? 0;
+}
+
+<div class="list-group list-group-flush process-list-wrapper" id="processListItems" data-status-id="@statusId">
+    @if (Model != null && Model.Count > 0)
+    {
+        foreach (var item in Model)
+        {
+            var activeClass = item.IsActive ? "" : "opacity-65";
+
+            <div class="list-group-item list-group-item-action process-item px-3 py-2 cursor-pointer border-1 brc-grey-l2 border-l-4 brc-blue-tp1 mb-2 radius-1 bgc-h-blue-l4 @activeClass"
+                 data-id="@item.ProcessID"
+                 data-name="@item.ProcessName"
+                 data-status-id="@item.StatusID"
+                 onclick="DigitalSalesWorkflow.selectProcess(@item.ProcessID, this)">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center text-truncate mr-2">
+                        <span class="badge badge-sm badge-pill mr-2 bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3">
+                            <i class="fa fa-project-diagram"></i>
+                        </span>
+                        <div class="text-truncate">
+                            <span class="font-bold text-dark-m1 process-name text-95">@item.ProcessName</span>
+                            <div class="text-secondary-m2 text-85 text-truncate">
+                                <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1">#@item.SortOrder</span>
+                                <code>@item.ProcessCode</code>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <span class="text-muted ml-1" title="@item.Description">- @item.Description</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="process-actions action-buttons d-flex align-items-center" onclick="event.stopPropagation();">
+                        <a href="/Cate/DigitalSalesWorkflow/EditProcess/@item.ProcessID"
+                           data-modal="" data-modal-id="editProcess" data-width="700"
+                           class="btn btn-xs btn-outline-primary btn-h-primary btn-a-primary border-0 mr-1 p-1"
+                           title="Sửa quy trình" data-rel="tooltip">
+                            <i class="fa fa-pencil-alt text-90"></i>
+                        </a>
+                        <a href="/Cate/DigitalSalesWorkflow/DeleteProcess/@item.ProcessID"
+                           data-modal="" data-modal-id="deleteProcess" data-width="500"
+                           class="btn btn-xs btn-outline-danger btn-h-danger btn-a-danger border-0 p-1"
+                           title="Xóa quy trình" data-rel="tooltip">
+                            <i class="fa fa-trash-alt text-90"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5 text-secondary-m2">
+            <i class="fa fa-clipboard-list text-180 mb-2 opacity-50"></i>
+            <p class="mb-0 text-90">Trạng thái này chưa có quy trình công việc nào.</p>
+            <small>Nhấn <strong>+ Thêm mới</strong> ở trên để khai báo quy trình.</small>
+        </div>
+    }
+</div>

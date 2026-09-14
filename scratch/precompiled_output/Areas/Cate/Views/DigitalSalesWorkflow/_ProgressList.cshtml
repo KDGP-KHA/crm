@@ -1,0 +1,66 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_DigitalSalesProgressModel>
+
+@{
+    var process = ViewBag.Process as Core.Cate.Models.RM_DigitalSalesProcessModel;
+    var processId = ViewBag.ProcessID ?? 0;
+}
+
+<div class="list-group list-group-flush progress-list-wrapper" id="progressListItems" data-process-id="@processId">
+    @if (Model != null && Model.Count > 0)
+    {
+        foreach (var item in Model)
+        {
+            var activeClass = item.IsActive ? "" : "opacity-65";
+
+            <div class="list-group-item progress-item px-3 py-2 border-1 brc-grey-l2 border-l-4 brc-success-tp1 mb-2 radius-1 bgc-h-green-l4 @activeClass"
+                 data-id="@item.ProgressID"
+                 data-name="@item.ProgressName"
+                 data-process-id="@item.ProcessID">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center text-truncate mr-2">
+                        <span class="badge badge-sm badge-pill mr-2 bgc-green-l2 text-green-d2 border-1 brc-green-m3">
+                            <i class="fa fa-tasks"></i>
+                        </span>
+                        <div class="text-truncate">
+                            <span class="font-bold text-dark-m1 progress-name text-95">@item.ProgressName</span>
+                            <span class="badge bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3 ml-1 px-2 text-85" title="Thời hạn tiêu chuẩn thực hiện">
+                                <i class="fa fa-stopwatch mr-1 text-blue"></i>@(item.DefaultDurationDays > 0 ? item.DefaultDurationDays : 3) ngày
+                            </span>
+                            <div class="text-secondary-m2 text-85 text-truncate">
+                                <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1">#@item.SortOrder</span>
+                                <code>@item.ProgressCode</code>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <span class="text-muted ml-1" title="@item.Description">- @item.Description</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-actions action-buttons d-flex align-items-center">
+                        <a href="/Cate/DigitalSalesWorkflow/EditProgress/@item.ProgressID"
+                           data-modal="" data-modal-id="editProgress" data-width="700"
+                           class="btn btn-xs btn-outline-primary btn-h-primary btn-a-primary border-0 mr-1 p-1"
+                           title="Sửa tiến trình" data-rel="tooltip">
+                            <i class="fa fa-pencil-alt text-90"></i>
+                        </a>
+                        <a href="/Cate/DigitalSalesWorkflow/DeleteProgress/@item.ProgressID"
+                           data-modal="" data-modal-id="deleteProgress" data-width="500"
+                           class="btn btn-xs btn-outline-danger btn-h-danger btn-a-danger border-0 p-1"
+                           title="Xóa tiến trình" data-rel="tooltip">
+                            <i class="fa fa-trash-alt text-90"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5 text-secondary-m2">
+            <i class="fa fa-tasks text-180 mb-2 opacity-50"></i>
+            <p class="mb-0 text-90">Quy trình này chưa có tiến trình công việc nào.</p>
+            <small>Nhấn <strong>+ Thêm mới</strong> ở trên để khai báo tiến trình.</small>
+        </div>
+    }
+</div>

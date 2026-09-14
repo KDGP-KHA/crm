@@ -1,0 +1,101 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = "Log Hệ Thống";
+}
+
+@section PluginCss{
+}
+
+@section PageTitle
+{
+    @ViewBag.Title
+}
+
+@section PageAction
+{
+    @Html.Button(true, "DeleteOldFile", Url.Action("DeleteOldFile", new { area = "Sys" }), "<i class='fa fa-trash'></i>", AppProcessor.Messagor.GetMessage("Button_Delete"), new { @class = "btn px-4 btn-outline-danger mb-1 pull-right", data_rel = "tooltip", title = "Xoá" })
+}
+
+<div class="mt-3">
+    @Html.Partial("_Search")
+</div>
+
+<div class="mt-3">
+    <div class="card bcard bgc-transparent shadow-none">
+        <div class="card-body p-0" id="CardLogs">
+            <ul class="nav nav-tabs nav-justified nav-tabs-shadow" role="tablist">
+                <li class="nav-item brc-danger-d1">
+                    <a class="nav-link active text-left" id="LogErr-tab-btn" data-toggle="tab" href="#LogErr" role="tab" aria-controls="LogErr" aria-selected="true">
+                        Log hệ thống
+                    </a>
+                </li>
+	            <li class="nav-item brc-green-d1">
+		            <a class="nav-link text-left" id="LogJob-tab-btn" data-toggle="tab" href="#LogJob" role="tab" aria-controls="LogJob" aria-selected="false">
+			            Log Job
+		            </a>
+	            </li>
+	            <li class="nav-item brc-warning-d1">
+		            <a class="nav-link text-left" id="LogProcedure-tab-btn" data-toggle="tab" href="#LogProcedure" role="tab" aria-controls="LogProcedure" aria-selected="false">
+			            Log Procedure
+		            </a>
+	            </li>
+            </ul>
+
+            <div class="bgc-white shadow-sm tab-content p-35 border-1 brc-grey-l1">
+                <div class="tab-pane fade show active text-95" id="LogErr" role="tabpanel" aria-labelledby="LogErr-tab-btn">
+                    @*@Html.Partial("_ErrFile")*@
+                </div>
+	            <div class="tab-pane fade text-95" id="LogJob" role="tabpanel" aria-labelledby="LogJob-tab-btn">
+		            @*@Html.Partial("_JobLogFile")*@
+	            </div>
+	            <div class="tab-pane fade text-95" id="LogProcedure" role="tabpanel" aria-labelledby="LogProcedure-tab-btn">
+		            @*@Html.Partial("_ProcedureLog")*@
+	            </div>
+            </div>
+
+        </div>
+    </div><!-- /.card -->
+</div>
+
+@section BottomScript
+{
+    <script src="@Url.Content("~/Areas/Sys/Views/SysLog/SysLog.js")"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#FromMonth, #ToMonth").datepicker("remove");
+            $("#FromMonth, #ToMonth").datepicker({
+                format: "mm/yyyy",
+                viewMode: "months",
+                minViewMode: "months",
+                autoclose: true
+            });
+            $("#FromMonth, #ToMonth").datepicker().trigger("update");
+            OnSearchFile();
+        });
+        
+        function OnSearchFile() {
+            var fromMonth = $("#SearchFile #FromMonth").val();
+            var toMonth = $("#SearchFile #ToMonth").val();
+
+            $("#CardLogs #LogErr").load("@Url.Action("ErrFile", "SysLog")?fromMonth=" +
+                moment(fromMonth, "MM/YYYY").format("YYYY-MM-DD") +
+                "&toMonth=" +
+                moment(toMonth, "MM/YYYY").format("YYYY-MM-DD"));
+            //$("#CardLogs #LogInv").load("@Url.Action("InvLogFile", "SysLog")?fromMonth=" +
+            //    moment(fromMonth, "MM/YYYY").format("YYYY-MM-DD") +
+            //    "&toMonth=" +
+            //    moment(toMonth, "MM/YYYY").format("YYYY-MM-DD"));
+            $("#CardLogs #LogJob").load("@Url.Action("JobLogFile", "SysLog")?fromMonth=" +
+                moment(fromMonth, "MM/YYYY").format("YYYY-MM-DD") +
+                "&toMonth=" +
+                moment(toMonth, "MM/YYYY").format("YYYY-MM-DD"));
+
+            $("#CardLogs #LogProcedure").load("@Url.Action("ProcedureLogs", "SysLog")?fromMonth=" +
+                moment(fromMonth, "MM/YYYY").format("YYYY-MM-DD") +
+                "&toMonth=" +
+                moment(toMonth, "MM/YYYY").format("YYYY-MM-DD"));
+        }
+
+    </script>
+}

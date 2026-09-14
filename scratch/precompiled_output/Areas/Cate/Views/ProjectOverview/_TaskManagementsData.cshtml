@@ -1,0 +1,147 @@
+﻿@using TSFramework.Libs.Processors
+@using System.Linq
+@model List<Core.Cate.Models.RM_CommentByProjectModel>
+@{
+    int slTraoDoi = Model == null ? 0 : Model.Count;
+}
+<style>
+    .Comment-Content p img{
+        max-width: 100%;
+        max-height: max-content;
+    }
+</style>
+
+@if (slTraoDoi == 0)
+{
+    <div class="alert alert-info text-center">
+        Chưa có thông tin trao đổi về dịch vụ này.
+    </div>
+}
+else
+{
+    for (int n = 0; n < Model.Count; n++)
+    {
+        <div class="text-grey-m1 text-95">
+            <div class="d-flex">
+                <div class="minh-100 pos-rel">
+                    @if (n != Model.Count - 1)
+                    {
+                        <!-- the vertical line connecting activity icons -->
+                        <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
+                    }
+
+                    <!-- the icon with white border to cover the above line -->
+                    <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-blue text-white">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                </div>
+
+                <div class="mx-2 flex-grow-1">
+                    <div>
+                        <div class="mt-2">
+                            <span class="badge btn-blue badge-lg arrowed mb-1">
+                                @Model[n].Ngay
+                            </span>
+                        </div>
+                        @*<div class="text-600">@Model[i].CreatedDate.GetValueOrDefault().ToString("HH:mm:ss")</div>*@
+                        @*<a href="javascript:void(0);" class="font-bolder btn-text-blue btn-h-text-danger">
+                                @Model[i].TaskName
+                            </a>*@
+                        @*<div class="text-85 text-secondary ml-auto text-nowrap">
+                                3 min ago
+                            </div>*@
+                    </div>
+
+                    @for (int i = 0; i < Model[n].CommentsByTask.Count; i++)
+                    {
+                        var CommentsByTask = Model[n].CommentsByTask;
+                        var Comments = Model[n].CommentsByTask[i].Comments.OrderByDescending(x => x.CreatedDate).ToList();
+                        <div class="mx-2 flex-grow-1">
+                            <div class=" pt-3">
+                                @*<div class="text-600 text-dark text-120 mt-2 mb-1">@Model[i].CreatedDate.GetValueOrDefault().ToString("dd/MM/yyyy")</div>*@
+                                @*<div class="text-600 text-dark">@lstCmt[i].CreatedDate.GetValueOrDefault().ToString("HH:mm:ss")</div>*@
+                                @*<a href="javascript:void(0);" class="font-bolder btn-text-blue btn-h-text-danger text-110">
+                                        @CommentsByTask[i].TaskName
+                                    </a>*@
+
+                                <a href="/Cate/TaskManagement/Detail/@CommentsByTask[i].TaskManagementID" class="font-bolder btn-text-blue btn-h-text-danger text-110">#@CommentsByTask[i].TaskManagementID - @CommentsByTask[i].TaskName</a>
+
+
+                                @if (!string.IsNullOrEmpty(CommentsByTask[i].AssigneeNames))
+                                {
+                                    <span> | <span class="text-success-d1">@CommentsByTask[i].AssigneeNames</span></span>
+                                }
+                                @if (!string.IsNullOrEmpty(Model[n].CommentsByTask[i].PriorityName))
+                                {
+                                    <span> | <span class="text-dark"> @CommentsByTask[i].PriorityName</span></span>
+                                }
+                            </div>
+                            @for (int j = 0; j < Comments.Count; j++)
+                            {
+                                //var Comments = Model[n].CommentsByTask[i].Comments;
+                                <div class="Comment-Content brc-secondary-m4 px-2 py-1 radius-1 border-l-3 border-0 bgc-secondary-l5 text-grey-d3 text-95 mt-15 pos-rel">
+                                    <div>
+                                        <span class="text-600 text-90">@Comments[j].CreatedDate.GetValueOrDefault().ToString("HH:mm:ss")</span> | <span class="btn-text-danger btn-h-text-orange text-100 text-600">@Comments[j].EmployeeName</span>
+                                        @if (Comments[j].CommentID > 0)
+                                        {
+                                            <span>đã bình luận</span>
+                                        }
+                                        else
+                                        {
+                                            <span>đã tạo công việc</span>
+                                        }
+                                    </div>
+                                    @Html.Raw(Comments[j].Content)
+                                    <div class="">
+                                        @{
+                                            List<string> files = Comments[j].ListFilePaths?.Split('|').Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new List<string>();
+                                        }
+
+                                        @foreach (var file in files)
+                                        {
+                                            var ext = System.IO.Path
+                                                .GetExtension(file)?
+                                                .ToLower();
+
+                                            var icon = "fa-file text-secondary";
+
+                                            if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext))
+                                            {
+                                                icon = "fa-file-image text-info";
+                                            }
+                                            else if (ext == ".pdf")
+                                            {
+                                                icon = "fa-file-pdf text-danger";
+                                            }
+                                            else if (new[] { ".doc", ".docx" }.Contains(ext))
+                                            {
+                                                icon = "fa-file-word text-primary";
+                                            }
+                                            else if (new[] { ".xls", ".xlsx" }.Contains(ext))
+                                            {
+                                                icon = "fa-file-excel text-success";
+                                            }
+
+                                            var fileName = System.IO.Path.GetFileName(file);
+
+                                            <a class="badge badge-lg font-normal border-1 brc-grey-m3 mb-1" href="@file"
+                                               target="_blank">
+                                                <i class="fa @icon mr-1"></i>
+                                                @fileName
+                                            </a>
+                                        }
+                                    </div>
+                                    @*<hr class="brc-secondary-l3">*@
+                                </div>
+                            }
+                            @*@if (i != slTraoDoi - 1)
+                                {
+                                    <hr class="brc-secondary-l3">
+                                }*@
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}

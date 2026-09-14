@@ -1,0 +1,27 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = "Chuyển đổi thành dự án";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("ConvertProject", "RM_BusinessOpportunity", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "BusinessOpportunity_OnProcessSuccess(data, 'ConvertToProject')"
+    }, new { @class = "form-horizontal", id = "ConvertToProject" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ConvertProjectForm")
+        </div>
+    }
+}

@@ -1,0 +1,69 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Models
+@model RM_StatusModel
+
+@Html.AntiForgeryToken()
+<div id="">
+    @Html.HiddenFor(model => model.ID)
+    <div class="row form-group">
+        <div class="col-md-8">
+            @Html.TitleFor(model => model.StatusKey, new { @class = "font-bold" })
+            @Html.DropDownListFor(
+                                                                            m => m.StatusKey,
+                                                                            Model.ListStatusKey,
+                                                                            "-- Chọn loại trạng thái --",
+                                                                            new { @class = "form-control", onchange = "ThayDoiLoaiTrangThai()" }
+                                                                        )
+            @Html.ValidationMessageFor(model => model.StatusKey, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-4" id="TileThanhCongDuAn">
+            @Html.TitleFor(model => model.Project_SuccessRate, new { @class = "font-bold" })
+            <div class="">
+                <div class="input-group">
+                    @Html.TextBoxFor(model => model.Project_SuccessRate, new { @type = "number", min = 0, max = 100, @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Project_SuccessRate_Label") })
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            %
+                        </span>
+                    </div>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.Project_SuccessRate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col-md-4">
+            @Html.TitleFor(model => model.StatusCode, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.StatusCode, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Status_Label_Code") })
+            @Html.ValidationMessageFor(model => model.StatusCode, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-8">
+            @Html.TitleFor(model => model.StatusName, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.StatusName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Status_Label_Name") })
+            @Html.ValidationMessageFor(model => model.StatusName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="row form-group">
+        <div class="col-md-4">
+            @Html.TitleFor(model => model.SortOrder, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.SortOrder, new { type = "number", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Status_Label_SortOrder") })
+            @Html.ValidationMessageFor(model => model.SortOrder, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-4">
+            @Html.TitleFor(model => model.StatusClass, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.StatusClass, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Status_Label_StatusClass") })
+            @Html.ValidationMessageFor(model => model.StatusClass, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+</div>
+<script>ThayDoiLoaiTrangThai();
+    function ThayDoiLoaiTrangThai() {
+        if ($("#StatusKey").val() === "Project") {
+            $("#TileThanhCongDuAn").show();
+        } else {
+            $("#TileThanhCongDuAn").hide();
+        }
+    }</script>

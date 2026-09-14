@@ -1,0 +1,25 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("Customer_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "Customer", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Customer_OnProcessSuccess(data, 'DeleteCustomer')"
+    }, new { @class = "form-horizontal", id = "DeleteCustomer" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CustomerID)
+        @Html.HiddenFor(model => model.CustomerName)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

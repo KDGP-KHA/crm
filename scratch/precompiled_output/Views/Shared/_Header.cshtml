@@ -1,0 +1,265 @@
+﻿@using TSFramework.Libs.Processors
+<link href="~/Views/Shared/_Header.css" rel="stylesheet"/>
+<nav class="navbar navbar-expand-lg navbar-darkblue" id="navbar-dark">
+    <div class="navbar-inner">
+        <div class="container">
+
+            <button type="button" class="navbar-toggler btn btn-burger burger-times static collapsed d-flex d-lg-none ml-2" data-toggle="collapse" data-target="#navbarMenu1-dark" aria-controls="navbarMenu1-dark" aria-expanded="false" aria-label="Toggle navbar menu">
+                <span class="bars text-white"></span>
+            </button><!-- mobile navbar toggler button -->
+
+            <div class="navbar-intro justify-content-xl-between bgc-transparent">
+                <a class="navbar-brand text-white text-180 mx-auto" href="/">
+                    <img alt="Logo" height="50" src="/Contents/Base/imgs/app.ico">
+                </a>
+            </div>
+
+            @*<div class="navbar-intro justify-content-xl-between bgc-transparent">
+                    <a class="navbar-brand text-white text-180" href="#">
+                        <img class="w-25" src="/Contents/Base/imgs/app.ico">
+                        <span class="text-90">Wiki</span>
+                        <span class="text-70 text-yellow-l3">DU LỊCH KHÁNH HOÀ</span>
+                    </a>
+                </div>*@
+            @*<style>
+                    .fSysUi {
+                        font-family: system-ui;
+
+                </style>*@
+            <div class="navbar-menu collapse navbar-collapse navbar-backdrop " id="navbarMenu1-dark">
+
+                <div class="navbar-nav">
+                    <ul class="nav nav-compact-3">
+                        <li class="nav-item dropdown mx-1px">
+                            <a class="nav-link" href="/">
+                                @AppProcessor.Messagor.GetMessage("TrangChu_Title")
+                            </a>
+                        </li>
+
+                        <li class="nav-item pos-rel dropdown dropdown-mega dropdown-hover">
+                            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                @AppProcessor.Messagor.GetMessage("LoaiHinh_Title")
+                                <i class="caret fa fa-angle-down d-none d-lg-block"></i>
+                                <i class="caret fa fa-angle-left d-block d-lg-none"></i>
+                            </a>
+                            <div class="p-0 dropdown-menu dropdown-center dropdown-md border-0 shadow radius-2 mt-1 mt-lg-3">
+                                <div class="row mx-0">
+                                    <div class="bgc-white col-lg-6 col-12">
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="pos-rel">
+                                                <i class="bgc-purple-l3 w-4 h-4 radius-round position-r mr-2 mt-25"></i>
+                                                <i class="fas fa-building text-160 text-purple-d1 mr-2 w-6 h-6 radius-round text-center pt-1 pos-rel"></i>
+                                            </div>
+                                            <div class="fSysUi">
+                                                <a href="@Url.Action("Index","Accommodation", new{pageType="list"})" class="d-block py-1px px-1 radius-1 no-underline text-dark-tp3 text-600 bgc-h-primary-l2 text-95">
+                                                    @AppProcessor.Messagor.GetMessage("CSLT_Title")
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="pos-rel">
+                                                <i class="bgc-pink-l3 w-4 h-4 radius-round position-r mr-2 mt-25"></i>
+                                                <i class="fas fa-utensils text-160 text-pink mr-2 w-6 h-6 radius-round text-center pt-1 pos-rel"></i>
+                                            </div>
+                                            <div class="fSysUi">
+                                                <a href="@Url.Action("Index","Restaurant", new{pageType="list"})" class="d-block py-1px px-1 radius-1 no-underline text-dark-tp3 text-600 bgc-h-primary-l2 text-95">
+                                                    @AppProcessor.Messagor.GetMessage("HoSoNH_Title")
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="pos-rel">
+                                                <i class="bgc-purple-l3 w-4 h-4 radius-round position-r mr-2 mt-25"></i>
+                                                <i class="fas fa-synagogue text-160 text-purple-d2 mr-2 w-6 h-6 radius-round text-center pt-1 pos-rel"></i>
+                                            </div>
+                                            <div class="fSysUi">
+                                                <a href="@Url.Action("Index","Entertainment", new{pageType="list"})" class="d-block py-1px px-1 radius-1 no-underline text-dark-tp3 text-600 bgc-h-primary-l2 text-95">
+                                                    @AppProcessor.Messagor.GetMessage("DVC_Title")
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="bgc-white col-lg-6 col-12">
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="pos-rel">
+                                                <i class="bgc-blue-l3 w-4 h-4 radius-round position-r mr-2 mt-25"></i>
+                                                <i class="fas fa-shopping-cart text-160 text-blue mr-2 w-6 h-6 radius-round text-center pt-1 pos-rel"></i>
+                                            </div>
+                                            <div class="fSysUi">
+                                                <a href="@Url.Action("Index","Shopping", new{pageType="list"})" class="d-block py-1px px-1 radius-1 no-underline text-dark-tp3 text-600 bgc-h-primary-l2 text-95">
+                                                    @AppProcessor.Messagor.GetMessage("DMS_Title")
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="pos-rel">
+                                                <i class="bgc-blue-l3 w-4 h-4 radius-round position-r mr-2 mt-25"></i>
+                                                <i class="fas fa-city text-160 text-blue mr-2 w-6 h-6 radius-round text-center pt-1 pos-rel"></i>
+                                            </div>
+                                            <div class="fSysUi">
+                                                <a href="@Url.Action("Index","Tourism", new{pageType="list"})" class="d-block py-1px px-1 radius-1 no-underline text-dark-tp3 text-600 bgc-h-primary-l2 text-95">
+                                                    @AppProcessor.Messagor.GetMessage("DLH_Title")
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center p-2">
+                                            <div class="pos-rel">
+                                                <i class="bgc-orange-l3 w-4 h-4 radius-round position-r mr-2 mt-25"></i>
+                                                <i class="fas fa-user-alt text-160 text-orange mr-2 w-6 h-6 radius-round text-center pt-1 pos-rel"></i>
+                                            </div>
+                                            <div class="fSysUi">
+                                                <a href="@Url.Action("Index","TourGuide", new{pageType="list"})" class="d-block py-1px px-1 radius-1 no-underline text-dark-tp3 text-600 bgc-h-primary-l2 text-95">
+                                                    @AppProcessor.Messagor.GetMessage("HDV_Title")
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="nav-item dropdown mx-1px">
+                            <a class="nav-link" href="@Url.Action("Index","TourismProducts")">
+                                @AppProcessor.Messagor.GetMessage("SanPhamDL_Title")
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown mx-1px">
+                            <a class="nav-link" href="@Url.Action("Index","TourismResources")">
+                                @AppProcessor.Messagor.GetMessage("TaiNguyenDL_Title")
+                            </a>
+                        </li>
+
+                        @*<li class="nav-item dropdown mx-1px">
+                                <a class="nav-link" href="/">
+                                    @AppProcessor.Messagor.GetMessage("SKQuangBaDL_Title")
+                                </a>
+                            </li>*@
+
+                    </ul><!-- /.navbar-nav menu -->
+                </div><!-- /.navbar-nav -->
+
+            </div><!-- /.navbar-menu.navbar-collapse -->
+
+            <button type="button" class="d-style btn btn-burger static collapsed mr-2 px-4 navbar-toggler d-flex d-lg-none" data-toggle="collapse" data-target="#navbarMenu2-dark" aria-controls="navbarMenu2-dark" aria-expanded="false" aria-label="Toggle navbar menu">
+                <i class="fa fa-caret-down d-collapsed text-80"></i>
+                <i class="fa fa-caret-up d-n-collapsed text-80"></i>
+
+                <i class="fa fa-user ml-2"></i>
+            </button><!-- mobile navbar toggler button -->
+
+            <div class="navbar-menu collapse navbar-collapse navbar-backdrop" id="navbarMenu2-dark">
+                <div class="navbar-nav">
+                    <ul class="nav nav-compact-3">
+
+                        <!--
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle px-lg-3" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                <i class="text-140 fa fa-search"></i>
+                                <span class="d-lg-none ml-2">
+                                    Open Search
+                                </span>
+                            </a>
+                            <div style="width: 20rem;" data-display="static" class="dropdown-menu dropdown-menu-right dropdown-animated animated-2 dropdown-caret radius-1 p-2 p-lg-0 border-0 mt-lg-n1 mr-lg-n2 shadow">
+                                <form class="dropdown-clickable text-grey-d2">
+                                    <div class="dropdown-body my-25">
+                                        <div class="px-2 px-md-3">
+                                            <input type="text" class="form-control shadow-none m-0" placeholder="Enter Keywords to Search ..." />
+                                        </div>
+                                    </div>
+
+                                    <div class="dropdown-footer py-2 text-center pos-rel border-t-1 brc-secondary-l2">
+                                        <button type="button" class="btn px-4 btn-sm btn-primary" data-dismiss="dropdown">Find</button>
+                                        <button type="reset" class="btn btn-sm btn-outline-secondary">Clear</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="text-140 far fa-heart text-yellow-l3"></i>
+                                <span class="d-lg-none ml-2 text-yellow-l3">
+                                    Bookmark
+                                </span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item px-3 py-3">
+                            <span class="text-white p-2 border-b-3 brc-white-tp5 bgc-h-white-tp9 radius-t-1">
+                                <i class="fa fa-phone fa-flip-horizontal text-125 text-green-l4 mr-1"></i>
+
+                                <span class="text-90 ml-1 ml-lg-0 d-lg-none d-xl-inline-block">
+                                    CALL NOW
+                                </span>
+
+                                <span class="ml-1 text-600 letter-spacing-1 d-lg-none d-xl-inline-block">
+                                    11-22-33
+                                </span>
+                            </span>
+                        </li>
+                        -->
+
+
+                        <li class="nav-item p-2 d-lg-flex flex-column justify-content-center">
+                            <select translate="no" class="none-select2 radius-round ace-select no-border border-0 caret-double d-lg-block nav-link h-auto py-15 bgc-black-tp8 bgc-h-black-tp7 text-white radius-1" id="languages" onchange="translateLanguage(this.value);"></select>
+                        </li>
+
+                        <li class="nav-item dropdown px-lg-2 d-lg-flex flex-column justify-content-center px-2">
+                            @if (System.Web.HttpContext.Current.Session["FrontEndUser"] != null)
+                            {
+                                <a class="d-none d-lg-flex nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                                    <img id="id-navbar-user-image" class="image d-none d-lg-inline-block radius-round border-2 brc-white-tp1 mr-2 w-6 headerAvatar" src="@((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).Avatar)" alt="@((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).FullName)">
+                                    <span class="d-inline-block d-lg-none d-xl-inline-block content">
+                                        <span class="text-70" id="id-user-welcome">Chào mừng,</span>
+                                        <span class="nav-user-name text-70 font-weight-bold">@((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).FullName)</span>
+                                    </span>
+                                    <i class="caret fa fa-angle-left d-block d-lg-none"></i>
+                                </a>
+                                <a class="d-lg-none d-flex nav-link dropdown-toggle bg-white text-primary m-1 rounded" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                                    <img id="id-navbar-user-image" class="image d-none d-lg-inline-block radius-round border-2 brc-white-tp1 mr-2 w-6 headerAvatar" src="@((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).Avatar)" alt="@((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).FullName)">
+                                    <span class="d-inline-block d-lg-none d-xl-inline-block content">
+                                        <span class="text-80" id="id-user-welcome">Chào mừng,</span>
+                                        <span class="nav-user-name text-80 font-weight-bold">@((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).FullName)</span>
+                                    </span>
+                                    <i class="caret fa fa-angle-left d-block d-lg-none"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-animated brc-primary-m3 box-profile-header">
+                                    <div class="d-none d-lg-block d-xl-none">
+                                        <div class="dropdown-header">
+                                            Chào mừng, @((System.Web.HttpContext.Current.Session["FrontEndUser"] as TSFramework.Libs.Principals.AppPrincipal).FullName)
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                    </div>
+                                    <a class="dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary" href="@Url.Action("Detail","Tourist", new{ area = "" })">
+                                        <i class="fas fa-user text-warning-d1 text-105 mr-1"></i>
+                                        @AppProcessor.Messagor.GetMessage("Account_Info")
+                                    </a>
+                                    <a class="dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary" href="@Url.Action("Logout","Tourist", new{ area = "" })">
+                                        <i class="fa fa-sign-out-alt text-danger-d1 text-105 mr-1"></i>
+                                        @AppProcessor.Messagor.GetMessage("Button_Logout")
+                                    </a>
+                                </div>
+                            }
+                            else
+                            {
+                                <button class="d-none d-lg-block h-auto btn btn-outline-white btn-bold radius-round border-2 px-2 px-xl-3" data-toggle="modal" data-target="#ModalLoginAndRegister">
+                                    @AppProcessor.Messagor.GetMessage("Button_Login")
+                                </button>
+                                <button class="d-lg-none d-flex btn btn-white w-100 text-primary font-bold rounded my-2 py-2 justify-content-center" data-toggle="modal" data-target="#ModalLoginAndRegister">
+                                    @AppProcessor.Messagor.GetMessage("Button_Login")
+                                </button>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- .navbar-menu -->
+
+        </div><!-- /.container -->
+    </div><!-- /.navbar-inner -->
+</nav>

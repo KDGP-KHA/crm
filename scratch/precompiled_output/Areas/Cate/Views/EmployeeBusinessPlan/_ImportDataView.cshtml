@@ -1,0 +1,26 @@
+﻿@using TSFramework.Libs.Processors
+@Html.AntiForgeryToken()
+@model Core.Cate.Models.Import_Employee_BusinessPlanModel
+@Html.HiddenFor(m => m.Key)
+<div class="col-12">
+    @Html.TitleFor(model => model.BusinessPlanID, new { @class = "col-form-label pr-0 font-bold" })
+    @Html.DropDownListFor(model => model.BusinessPlanID, new SelectList(Model.ListBusinessPlan, "Value", "Text"), "", new { @class = "col form-control" })
+</div>
+<div class="col-12">
+    @*<label class="col-md-2 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Common_Message_ChooseAFile")</label>*@
+    <label class="col-form-label text-sm-right pr-0 font-bold">Chọn tệp</label>
+    @*@Html.FileFor(model => model.AttachDocumentFile, ".xlsx, .xls", false, new { @class = "form-control col-sm-12", placeholder = AppProcessor.Messagor.GetMessage("Form_RefDocs") })*@
+    @Html.FileFor(model => model.AttachDocumentFile, ".xlsx, .xls", false, new { @class = "form-control col-sm-12", placeholder = "Chọn tệp" })
+</div>
+<div class="col-12" style="margin-top: 5px">
+    <a href="../../Contents/Files/MauImport/ImportEmployeeBusinessPlan.xlsx" id="download-file" class="pe-none">
+        <span role="button"><u>FileMau.xlsx</u></span>
+    </a>
+    (@AppProcessor.Messagor.GetMessage("Import_Label_Note"))
+</div>
+@Html.RenderScripts(ScriptPosition.BodyInside)
+<style>
+    .fileuploader {
+        border: dotted 1px #808080;
+    }
+</style>

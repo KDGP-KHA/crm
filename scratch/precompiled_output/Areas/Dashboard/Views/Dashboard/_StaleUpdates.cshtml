@@ -1,0 +1,65 @@
+﻿@using System
+@using System.Linq
+@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_StaleUpdateModel>
+
+@{
+    var items = (Model ?? new List<Core.Cate.Models.RM_StaleUpdateModel>())
+        .OrderByDescending(x => x.DaysWithoutUpdate)
+        .ThenBy(x => x.LastUpdateDate)
+        .ToList();
+}
+
+<section id="dashboard-stale-updates" aria-label="Cảnh báo chưa cập nhật trạng thái">
+    <div class="db-section-title mt-2">
+        <i class="fa fa-table mr-1 text-blue"></i>
+        @AppProcessor.Messagor.GetMessage("Project_Opportunity_NonUpdate_Title")
+        <a class="btn btn-sm btn-success float-right" style="margin-top: -10px"
+           href="@Url.Action("ExportStaleUpdates", "Dashboard", new { area = "Dashboard" })">
+            <i class="fa fa-file-excel mr-1"></i>Xuất Excel
+        </a>
+    </div>
+
+    <div class="stale-table table-responsive mt-2">
+        <table class="table table-bordered table-hover table-striped mb-0" id="staleUpdatesTable">
+            <thead class="thead-light">
+                <tr>
+                    <th>@AppProcessor.Messagor.GetMessage("ProjectOpportunity_Title")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("Stale_Update_Member_Label")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("BO_Overview_Label_Status")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("LastUpdate")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("Stale_Update_Time_Label")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (items.Any())
+                {
+                    foreach (var item in items)
+                    {
+                        var detailUrl = item.Type == 1
+                            ? Url.Action("Index", "ProjectOverview", new { area = "Cate", id = item.ObjectID })
+                            : Url.Action("Index", "BusinessOpportunityOverview", new { area = "Cate", id = item.ObjectID });
+                        <tr>
+                            <td>
+                                <a class="font-weight-bold text-primary" href="@detailUrl">
+                                    @item.ObjectName
+                                </a>
+                                <div class="text-muted small">
+                                    <i class="fa fa-building mr-1"></i> @item.CustomerName
+                                </div>
+                                <div class="text-muted small">
+                                    @AppProcessor.Messagor.GetMessage("Managing_Entity_Label") <b>@item.TenBoPhan</b>
+                                </div>
+                            </td>
+                            <td>@(string.IsNullOrWhiteSpace(item.AMNames) ? "Chưa phân công" : item.AMNames)</td>
+                            <td><span class="badge stale-pill @item.StatusClass">@(string.IsNullOrWhiteSpace(item.StatusName) ? "Chưa xác định" : item.StatusName)</span></td>
+                            <td data-order="@item.LastUpdateDate.ToString("yyyyMMddHHmmss")">@item.LastUpdateDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td data-order="@item.DaysWithoutUpdate"><span class="stale-pill stale-age @(item.DaysWithoutUpdate >= 7 ? "is-critical" : "")">@item.DaysWithoutUpdate ngày</span></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+</section>

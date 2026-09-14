@@ -1,0 +1,40 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectTaskBulkAddModel
+
+@{
+    var taskGroups = Model.TaskGroups ?? new List<Core.Cate.Models.RM_TaskGroupModel>();
+    var taskTypes = Model.TaskTypes ?? new List<Core.Cate.Models.RM_TaskTypeModel>();
+}
+
+<div class="bulk-task-toolbar mb-3">
+    <div class="row bulk-task-search-row">
+        <div class="col-lg-3 col-md-6 mb-2">
+            <label for="Keyword">@AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_Keyword_Label")</label>
+            @Html.TextBox("Keyword", Model.Keyword, new
+            {
+                @class = "form-control",
+                placeholder = AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_Keyword_Placeholder")
+            })
+        </div>
+        <div class="col-lg-3 col-md-6 mb-2">
+            <label for="TaskGroupID">@AppProcessor.Messagor.GetMessage("Task_Group_Label")</label>
+            @Html.DropDownList("TaskGroupID",
+                new SelectList(taskGroups, "TaskGroupID", "TaskGroupName", Model.TaskGroupID),
+                AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_SelectTaskGroup"),
+                new { @class = "form-control select2", style = "width:100%" })
+            @Html.ValidationMessage("TaskGroupID", "", new { @class = "text-danger" })
+        </div>
+        @*<div class="col-lg-3 col-md-6 mb-2">
+            <label for="TaskTypeID">@AppProcessor.Messagor.GetMessage("Task_Type_Label")</label>
+            @Html.DropDownList("TaskTypeID",
+                new SelectList(taskTypes, "TaskTypeID", "TaskTypeName", Model.TaskTypeID),
+                AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_SelectTaskType"),
+                new { @class = "form-control select2", style = "width:100%" })
+        </div>*@
+        <div class="col-lg-2 col-md-6 mb-2">
+            <button type="button" id="btnSearchTaskFromGroup" class="btn btn-primary btn-block">
+                <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Search")
+            </button>
+        </div>
+    </div>
+</div>

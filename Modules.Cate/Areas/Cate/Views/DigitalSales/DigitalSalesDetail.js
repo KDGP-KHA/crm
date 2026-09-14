@@ -1,4 +1,4 @@
-﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -486,6 +486,13 @@ function openChangeStatusModal(id) {
                 return false;
             }
 
+            // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+            if (typeof serializeProgressItemsToJson === "function") {
+                if (!serializeProgressItemsToJson()) {
+                    return false;
+                }
+            }
+
             var $btnSubmit = $form.find("button[type='submit']");
             var origBtnHtml = $btnSubmit.html();
             $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
@@ -513,6 +520,7 @@ function openChangeStatusModal(id) {
                         reloadStatusAndTimelineSection(id);
                         reloadOverviewAndMetrics(id);
                         reloadTrackingSection(id);
+                        reloadDiscussionsSection(id);
                     } else {
                         executeResponseMessage(res.message, "Không thể chuyển trạng thái!", false);
                     }

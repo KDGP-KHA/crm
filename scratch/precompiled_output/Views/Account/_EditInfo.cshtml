@@ -1,0 +1,51 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysUserModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), $"{AppProcessor.Messagor.GetMessage("Account_Info")} [{Model.UserName}]");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-key"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("EditInfo", "Account", FormMethod.Post, new { encType = "multipart/form-data", id = "EditInfo", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_UserInfo")
+        </div>
+    }
+    <script src="~/Contents/Base/plugins/jquery.inputmask/jquery.inputmask.min.js"></script>
+    <script type="text/javascript">
+
+        $('form#EditInfo').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined && response.status === true) {
+                    $("#ModalContent #modal_EditInfo").modal("hide");
+                    $("#ModalContent #modal_EditInfo").on("hidden.bs.modal",
+                        function () {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                response.status = undefined;
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 3000);
+                            }
+                        });
+                } else if (response.status != undefined && response.status === false) {
+                    eval(response.message);
+                    response.status = undefined;
+                } else {
+                    $("#ModalContent #modal_EditInfo" + " #bodyForm").html(response);
+                }
+            }
+        });
+
+    </script>
+}

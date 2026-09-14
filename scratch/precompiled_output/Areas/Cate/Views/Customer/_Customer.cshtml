@@ -1,0 +1,259 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerModel
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.CustomerID)
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header font-bold">
+                    @AppProcessor.Messagor.GetMessage("Customer_Infomation_Label")
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        @Html.TitleFor(model => model.CustomerTypeID, new { @class = "font-bold" })
+                        @Html.DropDownListFor(model => model.CustomerTypeID,
+                                      new SelectList(Model.ListCustomerType, "Value", "Text"),
+                                      "-- Chọn loại khách hàng --",
+                                      new { @class = "form-control" })
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.ShortName, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.ShortName, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.ShortName, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.CustomerName, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.CustomerName, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.CustomerName, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.TaxCode, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.TaxCode, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.EstablishmentDate, new { @class = "font-bold" })
+                            <div class="input-group">
+                                @Html.TextBoxFor(model => model.EstablishmentDate,
+                                              "{0:dd/MM/yyyy}",
+                                              new { @class = "form-control", placeholder = "dd/mm/yyyy" })
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.CompanyType, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.CompanyType, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.CharterCapital, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.CharterCapital,
+                                          new { @class = "form-control text-right" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.Phone, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.Phone,
+                                          new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.Email, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.Email,
+                                          new { @class = "form-control", data_format = "email" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.Fax, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.Fax, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-6 form-group">
+                            @Html.TitleFor(model => model.Website, new { @class = "font-bold" })
+                            @Html.TextBoxFor(model => model.Website, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.TitleFor(model => model.AddressCus, new { @class = "font-bold" })
+                        @Html.TextBoxFor(model => model.AddressCus,
+                                      new { @class = "form-control", placeholder = "Địa chỉ" })
+                    </div>
+                    <div class="form-group">
+                        @Html.TitleFor(model => model.CustomerStatusID, new { @class = "font-bold" })
+                        @Html.DropDownListFor(model => model.CustomerStatusID,
+                                      new SelectList(Model.ListStatus, "Value", "Text"),
+                                      new { @class = "form-control" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="CustomerContactForm" class="col-md-6">
+            <div class="card">
+                <div class="card-header font-bold">
+                    @AppProcessor.Messagor.GetMessage("Customer_ContactInformation_Label")
+                    <a data-modal="true"
+                       data-modal-id="AddCustomerContact"
+                       href="@Url.Action("AddCustomerContact", "Customer", new { area = "Cate", CustomerID = Model == null ? 0 : Model.CustomerID })"
+                       class="btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right"
+                       data-width="800px">
+                        <i class='fa fa-plus'></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Add")
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="mt-1">
+                        <div class="card">
+                            <div class="col-sm-12 table-responsive-md">
+                                <table id="tblCustomerContact"
+                                       class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                                       width="100%">
+                                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                                        <tr>
+                                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_FullName_Label")</th>
+                                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Email_Label")</th>
+                                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Contact_Label")</th>
+                                            <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="@Url.Content("~/Areas/Cate/Views/ContactPersons/ContactPersons.js")"></script>
+
+<script>
+    function _runFormUtils() {
+        if (typeof initFormUtils === 'function') {
+            initFormUtils('#Language');
+        } else {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#Language'); };
+            document.head.appendChild(s);
+        }
+    }
+    setTimeout(_runFormUtils, 0);
+
+    var ListCustomerContacts = [];
+    var _tableCustomerContact = null;
+    var _CustomerContactActionURLs = {
+        CustomerContact_GetData: "@Url.Action("Get", "CustomerContact", new { area = "Cate" })"
+    };
+    var currentCustomerId = '@Model.CustomerID';
+
+    $(document).ready(function () {
+        $('#modal_EditCustomer').addClass('modal-fs').removeClass('modal-xl');
+        $('#modal_AddCustomer').addClass('modal-fs').removeClass('modal-xl');
+        $("#EstablishmentDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+        initTableCustomerContact();
+    });
+
+    function initTableCustomerContact() {
+        if ($.fn.DataTable.isDataTable('#tblCustomerContact')) {
+            $('#tblCustomerContact').DataTable().destroy();
+        }
+        _tableCustomerContact = $("#tblCustomerContact").DataTable({
+            responsive: false,
+            lengthChange: true,
+            processing: true,
+            serverSide: true,
+            destroy: true,
+            ajax: {
+                url: _CustomerContactActionURLs.CustomerContact_GetData,
+                type: "POST",
+                dataType: "JSON",
+                data: function (d) {
+                    d.CustomerID = currentCustomerId;
+                    return d;
+                }
+            },
+            columns: [
+                {
+                    data: null, defaultContent: "",
+                    render: function (data, type, row, meta) {
+                        var name = row.FullName || "-";
+                        var position = row.Position || "";
+                        return '<div><div style="font-weight:600;">' + name + '</div>'
+                             + '<div style="font-size:0.85em;color:#555;">' + position + '</div></div>';
+                    }
+                },
+                { data: "Email", className: "text-center", defaultContent: "" },
+                {
+                    data: null, className: "text-center", defaultContent: "",
+                    render: function (data, type, row) {
+                        var html = '';
+                        if (row.Phone)  html += '<div><i class="fa fa-phone text-primary mr-1"></i>' + row.Phone + '</div>';
+                        if (row.Mobile) html += '<div><i class="fa fa-mobile text-success mr-1"></i>' + row.Mobile + '</div>';
+                        if (row.Zalo)   html += '<div><i class="fa fa-comment text-info mr-1"></i>' + row.Zalo + '</div>';
+                        return html;
+                    }
+                },
+                {
+                    data: "CustomerContactID", orderable: false, className: "text-center",
+                    render: function (data, type, row) {
+                        if (type !== "display") return "";
+                        var html = '<div class="dropdown d-inline-block">'
+                            + '<button class="btn btn-lighter-primary dropdown-toggle" type="button" data-toggle="dropdown">'
+                            + '<i class="fa fa-ellipsis-h"></i></button>'
+                            + '<div class="dropdown-menu dropdown-menu-right">';
+                        html += _renderButton(true, "EditCustomerContactDetail", "dropdown-item",
+                            "/Cate/CustomerContact/EditCustomerContactDetail?id=" + data + "&ContactPersonID=" + row.ContactPersonID,
+                            '<i class="far fa-edit text-primary mr-1"></i> Cập nhật', "Cập nhật");
+                        html += _renderButton(true, "DeleteCustomerContactDetail", "dropdown-item text-danger",
+                            "/Cate/CustomerContact/DeleteCustomerContactDetail?id=" + data + "&ContactPersonID=" + row.ContactPersonID,
+                            '<i class="far fa-trash-alt mr-1"></i> Xoá', "Xóa");
+                        html += '</div></div>';
+                        return html;
+                    }
+                }
+            ]
+        });
+    }
+
+    function styleDataTable() {
+        var rowFilter = $("#tblCustomerContact_wrapper .row").first();
+        rowFilter.find(".col-12.col-sm-6").first().removeClass('col-sm-6').addClass('col-sm-4');
+        rowFilter.find(".col-12.col-sm-6").last().removeClass('col-sm-6').addClass('col-sm-8');
+    }
+    $('#tblCustomerContact').on('draw.dt', styleDataTable);
+
+    function CustomerContact_OnProcessSuccess(response, formId) {
+        if (response.status != undefined) {
+            if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    _tableCustomerContact.ajax.reload(null, false);
+                    response.status = undefined;
+                    var urlAction = $("#ModalContent #modal_" + formId + " form").attr("action");
+                    $("#ModalContent #modal_" + formId + " #modal-content").load(urlAction, function () {
+                        _initElement();
+                        initFormUtils("#ModalContent #modal_" + formId);
+                    });
+                }
+            } else {
+                $("#ModalContent #modal_" + formId).modal("hide");
+                $("#ModalContent #modal_" + formId).on("hidden.bs.modal", function () {
+                    if (response.status != undefined) {
+                        eval(response.message);
+                        _tableCustomerContact.ajax.reload(null, false);
+                        response.status = undefined;
+                    }
+                });
+            }
+        } else {
+            $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+            initFormUtils("#ModalContent #modal_" + formId);
+        }
+    }
+</script>

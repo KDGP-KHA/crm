@@ -1,0 +1,73 @@
+﻿@model List<Core.Cate.Models.RM_ProductServiceFilePathModel>
+@{
+    string action = ViewBag.Action.ToString();
+    string ShortenFileName(string fileName, int maxLength = 20)
+    {
+        if (string.IsNullOrEmpty(fileName) || fileName.Length <= maxLength)
+        {
+            return fileName;
+        }
+
+        // Lấy phần mở rộng (ví dụ: .docx, .png)
+        string extension = Path.GetExtension(fileName);
+        // Lấy phần tên không có đuôi
+        string nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
+
+        // Tính toán độ dài còn lại cho phần tên sau khi trừ đi đuôi và dấu "..."
+        int allowedNameLength = maxLength - extension.Length - 3;
+
+        // Nếu tên quá dài, cắt bớt và chèn "..." vào giữa
+        if (allowedNameLength > 0)
+        {
+            return nameWithoutExt.Substring(0, allowedNameLength) + "..." + extension;
+        }
+
+        // Trường hợp bất khả kháng (đuôi file quá dài), cắt thẳng theo độ dài
+        return fileName.Substring(0, maxLength - 3) + "...";
+    }
+}
+
+@if (action == "VIEW")
+{
+    foreach (var file in Model)
+    {
+        var fileName = Path.GetFileName(file.FilePath);
+        fileName = ShortenFileName(fileName, 50);
+        <div class="mb-1 text-blue">
+            <a  data-width="1024" data-modal="" data-modal-id="modalView" data-rel="tooltip" title="" href="/Cate/ProductServiceGroupFilePath/ViewFile?FilePathID=@file.FilePathID" data-original-title="Xem trước" class=" mb-1 text-120 font-normal my-auto text-nowrap">
+                <span>
+                    <i class="fa fa-file text-grey-l4 mr-1"></i>@fileName
+                </span>
+            </a>
+            <span class="action-buttons">
+                <a data-width="1024" data-modal="" data-modal-id="modalView" class="mr-1" data-rel="tooltip" title="" href="/Cate/ProductServiceGroupFilePath/ViewFile?FilePathID=@file.FilePathID" data-original-title="Xem trước">
+                    <i class="fas fa-eye px-1"></i>
+                </a>
+                <a data-rel="tooltip" title="" href="@file.FilePath" download="@Path.GetFileName(file.FilePath)" data-original-title="Tải xuống">
+                    <i class="fas fa-download px-1"></i>
+                </a>
+            </span>
+        </div>
+    }
+}
+else
+{
+    if (Model != null && Model.Any())
+    {
+        <div id="contractOldFileList" class="mt-2">
+            @foreach (var file in Model)
+            {
+                var fileName = Path.GetFileName(file.FilePath);
+                fileName = ShortenFileName(fileName, 50);
+                <div class="d-flex justify-content-between border rounded px-2 py-1 mb-1">
+                    <a href="@file.FilePath" target="_blank" class="text-dark my-auto">
+                        <span>
+                            <i class="fa fa-file text-grey-l4 mr-1"></i>@fileName
+                        </span>
+                    </a>
+                    <button type="button" class="btn-sm p-0 btn px-2 border-0 btn-outline-danger" onclick="fnDeleteFile('@file.FilePathID', '@fileName')"><i class="fa fa-times"></i></button>
+                </div>
+            }
+        </div>
+    }
+}

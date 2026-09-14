@@ -1,0 +1,38 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("Invoices_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("Add", "Invoices", new { area = "Cate" }, FormMethod.Post, new
+    {
+        encType = "multipart/form-data",
+        id = "AddInvoices",
+        @class = "form-horizontal"
+    }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Invoices")
+        </div>
+    }
+    <script type="text/javascript">
+        $('form#AddInvoices').ajaxForm({
+            success: function (response) {
+                Invoices_OnProcessSuccess(response, "AddInvoices");
+            }
+        });
+    </script>
+}
+
+@section ContinueForm{
+
+}

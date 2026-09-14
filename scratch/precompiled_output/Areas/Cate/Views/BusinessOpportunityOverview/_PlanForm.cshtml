@@ -1,0 +1,84 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityPlanModel
+
+@{
+    bool isEdit = Model.Id > 0;
+    ViewBag.Title = isEdit
+        ? AppProcessor.Messagor.GetMessage("OpportunityPlan_Edit_Title")
+        : AppProcessor.Messagor.GetMessage("OpportunityPlan_Add_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-calendar-alt"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("SavePlan", "BusinessOpportunityOverview", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "OpportunityPlan_OnProcessSuccess"
+    }, new { @class = "form-horizontal", id = "frmOpportunityPlan" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.BusinessOpportunityID)
+        @Html.HiddenFor(m => m.Username)
+
+        <div id="bodyForm">
+
+            <div class="form-group">
+                @Html.TitleFor(m => m.PlanName, new { @class = "font-bold" })
+                @Html.TextBoxFor(m => m.PlanName,
+                                   new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("OpportunityPlan_PlanName_Placeholder"), required = "required" })
+                @Html.ValidationMessageFor(m => m.PlanName, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.TitleFor(m => m.WorkingDate, new { @class = "font-bold" })
+                <div class="input-group">
+                    @Html.TextBoxFor(m => m.WorkingDate,
+                                       "{0:dd/MM/yyyy HH:mm}",
+                                       new { @class = "form-control datetimepicker", placeholder = "dd/MM/yyyy HH:mm", required = "required" })
+                    <div class="input-group-append">
+                        <span class="input-group-text">
+                            <i class="fas fa-calendar-alt"></i>
+                        </span>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(m => m.WorkingDate, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.TitleFor(m => m.AddressMeeting, new { @class = "font-bold" })
+                @Html.TextBoxFor(m => m.AddressMeeting,
+                                   new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("OpportunityPlan_AddressMeeting_Placeholder"), required = "required" })
+                @Html.ValidationMessageFor(m => m.AddressMeeting, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.TitleFor(m => m.Content, new { @class = "font-bold" })
+                @Html.TextAreaFor(m => m.Content,
+                                   new { @class = "form-control", rows = "4", placeholder = AppProcessor.Messagor.GetMessage("OpportunityPlan_Content_Placeholder"), required = "required" })
+                @Html.ValidationMessageFor(m => m.Content, "", new { @class = "text-danger" })
+            </div>
+
+        </div>
+    }
+}
+
+@section ContinueForm{
+}
+
+<script>
+    $(document).ready(function () {
+        $(".datetimepicker").datetimepicker({
+            format: "DD/MM/YYYY HH:mm",
+            locale: "vi"
+        });
+    });
+</script>

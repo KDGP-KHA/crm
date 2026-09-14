@@ -1,0 +1,25 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Cate_ProductServiceModel
+
+@{
+    ViewBag.Title = "Xóa sản phẩm dịch vụ";
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "ProductService", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ProductService_OnProcessSuccess(data, 'DeleteProductService')"
+    }, new { @class = "form-horizontal", id = "DeleteProductService" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.ProductServiceID)
+        @Html.HiddenFor(model => model.NameProduct)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

@@ -1,0 +1,18 @@
+﻿@using TSFramework.Libs.Processors
+@model string
+@{
+    Layout = "";
+}
+<div class="modal-header bg-primary">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body form" style="overflow: hidden; position: relative; width: auto;">
+    <div class="table-responsive no-padding" style="height: calc(100vh); height: -moz-calc(100vh); height: -webkit-calc(100vh); white-space: pre-line;">
+        @Html.Raw(Model)
+    </div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-danger" data-dismiss="modal">@AppProcessor.Messagor.GetMessage("Button_Cancel")</button>
+</div>

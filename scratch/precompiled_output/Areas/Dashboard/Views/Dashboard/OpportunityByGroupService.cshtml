@@ -1,0 +1,211 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.DashboardSearchModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title") + " theo nhóm dịch vụ";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-cubes"></i>
+}
+
+@section FormBody{
+    <div class="mt-3">
+        <div class="card dcard">
+            <div class="col-sm-12 table-responsive-md">
+                <table id="DSOpportunityByGroupService" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                        <tr>
+                            <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Info_Public_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ParticipatingMembers_Title")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Form_Desc")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("RecentInformationExchange")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var _tableOppByGroupService;
+        $(document).ready(function () {
+            $('#modal_OpportunityByGroupService').addClass('modal-fs').removeClass('modal-lg');
+            initTableOppByGroupService();
+        });
+
+        function initTableOppByGroupService() {
+            _tableOppByGroupService = $("#DSOpportunityByGroupService").DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "processing": true,
+                "serverSide": false,
+                "ordering": true,
+                "order": [[1, "desc"]],
+                "ajax": {
+                    "url": "/Dashboard/Dashboard/GetOpportunityByGroupService",
+                    "type": "POST",
+                    "dataType": "JSON",
+                    "data": {
+                        FromDate: '@Model.FromDate.ToString("dd/MM/yyyy")',
+                        ToDate: '@Model.ToDate.ToString("dd/MM/yyyy")',
+                        GroupServiceId: '@Model.GroupServiceID'
+                    }
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "orderable": false,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1 + meta.settings._iDisplayStart;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "className": "text-left",
+                        "render": function (data, type, row) {
+                            let services = row.ProductServices
+                                ? row.ProductServices.split(";").map(x => `- ${x}`).join("<br/>")
+                                : "";
+
+                            let closingHtml = '';
+                            if (row.ClosingProbability != null) {
+                                let colorClass =
+                                    row.ClosingProbability > 50 ? 'text-success' :
+                                        row.ClosingProbability <= 20 ? 'text-danger' : 'text-warning';
+
+                                closingHtml = `Xác suất chốt: <strong class="${colorClass}">${row.ClosingProbability} %</strong>`;
+                            }
+
+                            return `
+                                <div>
+                                    <span class="badge ${row.StatusClass}">${row.StatusName}</span>
+                                </div>
+                                <a href="/Cate/BusinessOpportunityOverview/Index/${row.BusinessOpportunityID}" class="font-weight-bold text-primary">
+                                    [${row.CodeOpportunity}] ${row.OpportunityName}
+                                </a>
+                                <div class="text-danger small">
+                                    <i class="fa fa-building mr-1"></i>${row.CustomerName || ""}
+                                </div>
+                                <div class="small mt-1">
+                                    <b>Dịch vụ:</b><br/>${services}
+                                </div>
+                                ${(row.ExpectedValue != null || row.ClosingProbability != null) ? `
+                                    <div class="small">
+                                        ${row.ExpectedValue != null ? `Giá trị dự kiến: <span class="text-success font-weight-bold">${row.ExpectedValue.toLocaleString()} triệu</span>` : ''}
+                                        ${row.ExpectedValue != null && row.ClosingProbability != null ? ' - ' : ''}
+                                        ${closingHtml}
+                                    </div>` : ''}
+                            `;
+                        }
+                    },
+                    {
+                        "data": "Members",
+                        "defaultContent": "",
+                        "orderable": false,
+                        "render": function (data, type, row) {
+                            if (!data) return "";
+
+                            let members = data.split(';')
+                                .map(x => x.trim())
+                                .filter(x => x)
+                                .sort((a, b) => {
+                                    const isAM_a = a.includes("(AM") || a.includes(", AM") || a.endsWith("AM)");
+                                    const isAM_b = b.includes("(AM") || b.includes(", AM") || b.endsWith("AM)");
+                                    return isAM_b - isAM_a;
+                                });
+
+                            const renderMember = (text) => {
+                                const isAM = text.includes("(AM") || text.includes(", AM") || text.endsWith("AM)");
+                                return `
+                                    <div style="font-size:12px; line-height:1.2;">
+                                        - ${isAM ? `<span class="text-danger font-weight-bold">${text}</span>` : text}
+                                    </div>
+                                `;
+                            };
+
+                            if (members.length <= 3) {
+                                return members.map(renderMember).join("");
+                            }
+
+                            const collapseId = `gs_members_${row.BusinessOpportunityID}`;
+                            return `
+                                ${members.slice(0, 3).map(renderMember).join("")}
+                                <div id="${collapseId}" style="display:none;">
+                                    ${members.slice(3).map(renderMember).join("")}
+                                </div>
+                                <a href="javascript:void(0)" class="small" onclick="toggleMembers('${collapseId}', this)">
+                                    Xem thêm (${members.length - 3})
+                                </a>
+                            `;
+                        }
+                    },
+                    {
+                        "data": "Description",
+                        "className": "text-left",
+                        "defaultContent": "",
+                        "render": function (data) {
+                            if (!data) return "";
+                            let decoded = $("<textarea/>").html(data).text();
+                            let desText = decoded.replace(/<.*?>/g, "");
+                            let shortDesText = desText.length > 150
+                                ? desText.substring(0, 150) + "..."
+                                : desText;
+                            return `<div class="small text-secondary">${shortDesText}</div>`;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "className": "text-left",
+                        "render": function (data, type, row) {
+                            let plainText = row.ExchangeContent
+                                ? row.ExchangeContent.replace(/<[^>]*>?/gm, '') : "";
+                            let shortText = plainText.length > 120
+                                ? plainText.substring(0, 120) + "..." : plainText;
+                            let dateStr = "";
+                            if (row.ExchangeDate) {
+                                let m = moment(row.ExchangeDate);
+                                dateStr = m.format("HH:mm") === "00:00"
+                                    ? m.format("DD/MM/YYYY")
+                                    : m.format("DD/MM/YYYY HH:mm");
+                            }
+                            return `
+                                ${row.ExchangeDate ? `
+                                    <div class="small text-muted"><i class="far fa-clock mr-1"></i>${dateStr}</div>
+                                    <div class="small text-primary font-weight-bold">
+                                        <i class="fa fa-user mr-1"></i>${row.FullName || ""}
+                                    </div>` : ''}
+                                ${row.ContactPersonName ? `
+                                    <div class="small text-primary font-weight-bold">
+                                        <i class="fas fa-phone-square mr-1"></i>${row.ContactPersonName}
+                                    </div>` : ''}
+                                ${shortText ? `<div class="small mt-1">Nội dung: ${shortText}</div>` : ''}
+                            `;
+                        }
+                    }
+                ]
+            });
+        }
+
+        window.toggleMembers = window.toggleMembers || function (id, element) {
+            const target = document.getElementById(id);
+            if (!target) return;
+            const remainCount = target.children.length;
+            if (target.style.display === "none") {
+                target.style.display = "block";
+                element.innerText = "Thu gọn";
+            } else {
+                target.style.display = "none";
+                element.innerText = `Xem thêm (${remainCount})`;
+            }
+        };
+    </script>
+}
+
+@section SubmitControl {
+
+}

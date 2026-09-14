@@ -1,0 +1,114 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Employee_BusinessPlanSearchModel
+
+@*<style>
+    .search .card-header {
+        padding: 3px 10px;
+    }
+
+    .search .card-title {
+        font-size: 18px;
+    }
+
+    .search .col-form-label, .search .form-control, .search .select2-selection__rendered, .search .select2-results__option {
+        font-size: 13px;
+    }
+
+    .search .row {
+        margin: 0;
+    }
+
+    .search [class^="col-"] {
+        padding-inline: 5px;
+    }
+
+    .search .form-horizontal .form-control, .search .input-group-text {
+        padding: 0 5px;
+        height: 25px;
+        margin-top: 2px;
+    }
+
+    .search .select2-container .select2-selection--single {
+        height: 25px !important;
+        line-height: 25px;
+    }
+
+    .search .select2-results__option {
+        padding: 5px;
+        margin: 0;
+    }
+
+    .search .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 15px;
+        position: absolute;
+        top: 1px;
+        right: 1px;
+        width: 20px;
+    }
+
+    .search .select2-container--default .select2-selection--single .select2-selection__clear {
+        top: -3px;
+    }
+
+    .search .btn {
+        padding: 2px 0.5rem;
+        font-size: 13px;
+    }
+
+    .search .last-col {
+        margin-top: auto;
+    }
+
+    .search .col-form-label {
+        padding-top: 5px;
+    }
+</style>*@
+
+<div class="Search card mb-2" id="card-1" draggable="false">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+
+    <div class="card-body p-2 d-flex align-items-end">
+        <div class="Search_Box">
+            @Html.TitleFor(model => model.Year, new { @class = "text-sm-right pr-0 font-bold" })
+            @Html.TextBoxFor(model => model.Year, new { @class = "form-control", type = "number", min = "1900", max = "2100", step = "1", oninput = "this.value = this.value.slice(0,4)", placeholder = AppProcessor.Messagor.GetMessage("Year_Label") })
+        </div>
+
+        <div class="Search_Box w-50 dropdownList">
+            @Html.TitleFor(model => model.BoPhanID, new { @class = "text-sm-right pr-0 font-bold" })
+            @Html.DropDownListFor(model => model.BoPhanID, new SelectList(Model.ListBoPhan, "BoPhan_ID", "TenBoPhanDisplay"), "", new { @class = "form-control" })
+        </div>
+
+        <div class="Group Group_button">
+            <div class="Search_button">
+                <button type="button" class="btn btn-primary" onclick="SearchEmployeeBusiness()">
+                    <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                </button>
+            </div>
+            <div class="Search_button">
+                <button type="button" class="btn btn-warning ml-2" id="btnExportEmployeeBusinessPlan" title="Xuất danh sách ra Excel">
+                    <i class="fa fa-download"></i>&nbsp;Tải danh sách
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#Year").datetimepicker({
+            "format": "YYYY",
+        });
+        $('#Year').on('change keyup', function (e) {
+            if (e.key === 'Enter' || e.type === 'change') {
+                SearchEmployeeBusiness();
+            }
+        });
+        $('#BoPhanID').on('change', function () {
+            SearchEmployeeBusiness();
+        });
+    });
+</script>

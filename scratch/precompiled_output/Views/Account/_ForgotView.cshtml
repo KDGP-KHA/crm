@@ -1,0 +1,9 @@
+﻿@using TSFramework.Libs.Processors
+@model CenIT.Solution.TOC.WebApp.Models.LoginModel
+@Html.AntiForgeryToken()
+<h4 class="text-danger">* Vui lòng nhập email liên kết với tài khoản để gửi yêu cầu cấp lại mật khẩu.</h4>
+<div class="form-group has-feedback">
+    @Html.TextBoxFor(model => model.Email, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Authorize_Email") })
+    <span class="fa fa-envelope form-control-feedback"></span>
+    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+</div>

@@ -1,0 +1,26 @@
+﻿@using TSFramework.Libs.Processors
+
+@{
+    ViewBag.Title = "Xác nhận xóa " + ViewBag.TargetType;
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm((string)ViewBag.DeleteAction, "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "DigitalSalesWorkflow.onDeleteSuccess(data, '" + ViewBag.TargetType + "')"
+    }, new { @class = "form-horizontal", id = "FormDelete" + ViewBag.TargetType }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@ViewBag.TargetID" />
+        <input type="hidden" name="parentID" value="@ViewBag.ParentID" />
+        <div class="py-2">
+            <h5 class="text-secondary-d2 font-normal">@Html.Raw(ViewBag.ConfirmMessage)</h5>
+        </div>
+    }
+}

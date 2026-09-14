@@ -1,0 +1,21 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_ProductProjectModel>
+@{
+    var projectId = ViewData["ProjectID"];
+}
+<div id="data_traodoi"></div>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Cate/ProjectOverview/GetTaskManagementsByProjectID/@projectId',
+            type: 'GET',                         // The HTTP method
+            dataType: 'html',                    // Expected data format
+            success: function (response) {
+                $('#data_traodoi').html(response);
+            },
+            error: function (xhr, status, error) {
+                $('#data_traodoi').html('');
+            }
+        });
+    });
+</script>

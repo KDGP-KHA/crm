@@ -1,0 +1,21 @@
+﻿
+button.menu-item-button {
+    font-size: 0.9rem !important;
+    line-height: 1.1rem !important;
+}
+
+/*@media only screen and (min-width: 1200px) and (max-width: 1240px) {
+    button.menu-item-button {
+        font-size: 1rem !important;
+        line-height: 1.2rem !important;
+    }
+}
+*/
+
+
+@media only screen and (min-width: 1200px) and (max-width: 1240px) {
+    button.menu-item-button {
+        font-size: 0.8rem !important;
+        line-height: 1rem !important;
+    }
+}

@@ -1,0 +1,24 @@
+﻿@model Core.Cate.Models.SysMailTemplateModel
+
+@{
+    ViewBag.Title = "Xóa mẫu email";
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "MailTemplate", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "MailTemplate_OnProcessSuccess(data, 'DeleteMailTemplate')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.MailTemplateId)
+        @Html.HiddenFor(model => model.TemplateName)
+        <h5>@Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

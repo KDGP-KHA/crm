@@ -1,0 +1,24 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType{
+    primary
+}
+@section FormIcon{
+    <i class="fa fa-layer-group"></i>
+}
+@section FormBody{
+    @using (Ajax.BeginForm("AddFromTaskGroup", "ProjectTask", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ProjectTask_OnProcessSuccess(data, 'AddProjectTaskFromTaskGroup')"
+    }, new { @class = "form-horizontal", id = "AddProjectTaskFromTaskGroup" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_AddFromTaskGroupForm", (Core.Cate.Models.RM_ProjectTaskBulkAddModel)Model)
+        </div>
+    }
+}
+

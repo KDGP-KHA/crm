@@ -1,0 +1,18 @@
+@using TSFramework.Libs.Processors
+@{
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType { primary }
+@section FormIcon { <i class="fa fa-plus"></i> }
+@section FormBody {
+    @using (Ajax.BeginForm("Add", "Comment", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Comment_OnProcessSuccess(data,'AddComment')"
+    }, new { @class = "form-horizontal", id = "AddComment", enctype = "multipart/form-data" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Comment")
+        </div>
+    }
+}

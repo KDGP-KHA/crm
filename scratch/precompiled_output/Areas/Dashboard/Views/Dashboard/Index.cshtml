@@ -1,0 +1,111 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DashboardModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("Dashboard_Title");
+}
+@section PageTitle {}
+@section PageAction {}
+<style>
+    .container.container-plus {
+        max-width: 100%;
+    }
+
+    .page-content.container-plus {
+        padding: 0px 15px 0px 15px;
+    }
+
+    .dashboard-filter {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 0 16px;
+        border-bottom: 1px solid #e0e4ee;
+        margin-bottom: 16px;
+    }
+
+        .dashboard-filter label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        .dashboard-filter .form-control {
+            height: 34px;
+            font-size: 13px;
+            width: 150px;
+        }
+
+    .db-section-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #333;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 12px;
+    }
+</style>
+<div class="dcard">
+    <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
+        <li class="nav-item mr-2px">
+            <a id="overview-tab-btn" class="d-style active btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#overview" role="tab">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-chart-line text-primary mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("Dashboard_Overview")
+            </a>
+        </li>
+        <li class="nav-item mr-2px">
+            <a id="employee-tab-btn" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#employee" role="tab">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-users text-purple mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("Dashboard_Employee")
+            </a>
+        </li>
+        <li class="nav-item mr-2px">
+            <a id="plan-tab-btn"
+               class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#plan" role="tab">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-calendar-check text-orange mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("Dashboard_Plan")
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content bgc-white p-35 border-0">
+        <div class="tab-pane fade show active text-95" id="overview" role="tabpanel" aria-labelledby="overview-tab-btn">
+            @Html.Partial("_OverviewSearch", Model)
+            <div id="overview-container">
+                @Html.Partial("_Overview", Model.OverviewDashboardModel)
+            </div>
+        </div>
+        <div class="tab-pane fade text-95" id="employee" role="tabpanel" aria-labelledby="employee-tab-btn">
+            @Html.Partial("_EmployeeFilter", Model)
+            <div id="dashboardEmployee">
+                @Html.Partial("_Employee", Model.OpportunityDashboardModel)
+            </div>
+        </div>
+        <div class="tab-pane fade text-95" id="plan" role="tabpanel" aria-labelledby="plan-tab-btn">
+            @Html.Partial("_PlanFilter", Model)
+            <div id="plan-container">
+                @Html.Partial("_PlanList", Model.OverviewDashboardModel.Plans)
+            </div>
+        </div>
+    </div>
+</div>
+@Html.Partial("_RegulationModal")
+@section BottomScript {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.45.2"></script>
+    <script>
+        var _urlGetData = '@Url.Action("GetData", "Dashboard", new { area = "Dashboard" })';
+        var _initialChartRows = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.OpportunityDashboardModel.ChartRows ?? new List<Core.Cate.Models.RM_OpportunityChartRowModel>()));
+        window._currentUsername = '@User.Identity.Name';
+
+    </script>
+    <script src="@Url.Content("~/Areas/Dashboard/Views/Dashboard/Dashboard.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+}

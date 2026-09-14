@@ -1,0 +1,174 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ContractsModel
+@{
+    ViewBag.Title = $"Danh sách hóa đơn thuộc hợp đồng [{Model.ContractCode} - {Model.ContractName}]";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    green
+}
+
+@section FormIcon{
+    <i class="fas fa-file-invoice-dollar"></i>
+}
+
+@section FormBody{
+    @Html.Button(true, "AddInvoices", Url.Action("Add", new { area = "Cate", ContractID = Model.ContractID }), "<i class='fa fa-plus'></i>", "Thêm " + AppProcessor.Messagor.GetMessage("Invoices_Title"), new { @class = "btn btn-light-green btn-h-green btn-a-green border-0 radius-3 py-2 text-600 text-90 pull-right" })
+
+    <div class="card dcard mt-3">
+        <div class="col-sm-12 table-responsive-md p-2">
+            <table id="DSInvoices" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Serial_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Number_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Buyer_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("TotalAmount_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("VAT_Amount_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("TotalPayment_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <script>
+        var _tableInvoices;
+        $(document).ready(function () {
+            initTableInvoices();
+        });
+
+        function initTableInvoices() {
+            if (!$("#DSInvoices").length) return;
+            if ($.fn.DataTable.isDataTable("#DSInvoices")) {
+                _tableInvoices = $("#DSInvoices").DataTable();
+                return;
+            }
+
+            _tableInvoices = $("#DSInvoices").DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "processing": true,
+                "serverSide": true,
+                "paging": false,
+                "ajax": {
+                    "url": "/Cate/Invoices/Get",
+                    "type": "POST",
+                    "dataType": "JSON",
+                    "data": {
+                        "ContractID": function () { return @Model.ContractID; }
+                   }
+                },
+                "columns": [
+                    {
+                        "data": "",
+                        "defaultContent": "1",
+                        "render": function (data, type, row, meta) {
+                            return meta.settings._iDisplayStart + meta.row + 1;
+                        }
+                    },
+                    {
+                        "data": "Serial",
+                        "defaultContent": "",
+                    },
+                    {
+                        "data": "Number",
+                        "defaultContent": "",
+                    },
+                    {
+                        "data": "Buyer",
+                        "className":"text-left",
+                        "defaultContent": "",
+                    },
+                    {
+                        "data": "TotalAmount",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`; ;
+                        },
+                    },
+                    {
+                        "data": "VAT_Amount",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`;;
+                        },
+
+                    },
+                    {
+                        "data": "TotalPayment",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`;;
+                        },
+                    },
+                    {
+                        "data": "InvoiceID",
+                        //"style": "width:100px;",
+                        "className":"text-nowrap",
+                        "orderable": false,
+                        "render": function (data, type, row, meta) {
+                            var html = '<span class="">';
+                            if (type === "display") {
+                                html += _renderButton(true,
+                                    "DetailInvoices",
+                                    "btn btn-lighter-secondary mr-1",
+                                    "/Cate/Invoices/Detail/" + data,
+                                    '<i class="far fa-eye text-secondary text-120"></i>',
+                                    "Xem chi tiết");
+
+                                html += _renderButton(true,
+                                    "EditInvoices",
+                                    "btn btn-lighter-primary mr-1",
+                                    "/Cate/Invoices/Edit/" + data,
+                                    '<i class="far fa-edit text-primary text-120"></i>',
+                                    "Cập nhật");
+
+                                html += _renderButton(true,
+                                    "DeleteInvoices",
+                                    "btn btn-lighter-danger mr-1",
+                                    "/Cate/Invoices/Delete/" + data,
+                                    '<i class="far fa-trash-alt text-danger text-120"></i>',
+                                    "Xoá");
+                            }
+                            html += "</span>";
+                            return html;
+                        }
+                    }
+                ]
+            });
+        }
+
+        function Invoices_OnProcessSuccess(response, formId) {
+            if (response.status != undefined) {
+                if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
+                    if (response.status != undefined) {
+                        eval(response.message);
+                        _tableInvoices.ajax.reload(null, false);
+                        response.status = undefined;
+                        var urlAction = $("#ModalContent #modal_" + formId + " form").attr("action");
+                        $("#ModalContent #modal_" + formId + " #modal-content").load(urlAction, function () {
+                            _initElement();
+                        });
+                    }
+                } else {
+                    $("#ModalContent #modal_" + formId).modal("hide");
+                    $("#ModalContent #modal_" + formId).on("hidden.bs.modal", function () {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableInvoices.ajax.reload(null, false);
+                            response.status = undefined;
+                        }
+                    });
+                }
+            } else {
+                $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+            }
+        }
+    </script>
+}
+@section SubmitControl{
+
+}

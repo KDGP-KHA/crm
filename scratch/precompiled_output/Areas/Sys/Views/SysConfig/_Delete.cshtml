@@ -1,0 +1,25 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysConfigModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("SysConfig_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "SysConfig", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "AppSetting_OnProcessSuccess(data, 'DeleteConfig')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.ConfigId)
+        @Html.HiddenFor(model => model.ConfigKey)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

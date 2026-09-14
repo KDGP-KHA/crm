@@ -1,0 +1,22 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_TaskManagementModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("Task_TaskTitle"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+@section FormType{
+    danger
+}
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "TaskManagement", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "TaskManagement_OnProcessSuccess(data, 'DeleteTaskManagement')"
+    }, new { @class = "form-horizontal", id = "DeleteTaskManagement" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.TaskManagementID)
+        @Html.HiddenFor(m => m.TaskName)
+        <h5>@Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

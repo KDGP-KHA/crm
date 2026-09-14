@@ -1,0 +1,49 @@
+﻿@model List<Core.Sys.Models.Sys.SysProcedureLogModel>
+
+<div class="font-bolder mb-4 text-primary-d1 text-120">
+    Logs
+</div>
+
+<div class="table-responsive-md">
+	<table id="DataLogProcedure" class="mb-0 table table-borderless table-bordered-x brc-secondary-l3 text-dark-m2 radius-1 overflow-hidden">
+		<thead class="text-dark-tp3 bgc-grey-l4 text-90 border-b-1 brc-transparent d-none">
+		<tr>
+            <th>ProcedureName</th>
+			<th>ErrorLine</th>
+			<th>ErrorMessage</th>
+		</tr>
+		</thead>
+		<tbody class="mt-1">
+		@{
+			foreach (var proc in Model)
+			{
+				<tr id="@proc.LogId" class="d-style bgc-h-yellow-l4">
+					<td>
+						<td>
+							<span class="text d-block text-500">@proc.ProcedureName</span>
+							<!-- Emphasis label -->
+							<small class="label text-danger text-500">
+								<i class="fa fa-clock-o"></i> @proc.LogDate.ToString("dd/MM/yyyy HH:mm:ss")
+							</small>
+						</td>
+					</td>
+					<td>
+						@proc.ErrorLine
+					</td>
+					<td>
+						@proc.ErrorMessage
+					</td>
+					<td class="align-middle text-right">
+						<!-- General tools such as edit or delete-->
+						<span class="d-none d-lg-inline">
+							<a data-rel="tooltip" title="Xoá" data-modal="" data-modal-id="DeleteProcLog" href="@Url.Action("DeleteProcLog", new { logId = proc.LogId })" class="btn btn-lighter-danger v-hover">
+								<i class="fa fa-trash text-danger"></i>
+							</a>
+						</span>
+					</td>
+				</tr>
+			}
+		}
+		</tbody>
+	</table>
+</div>

@@ -1,0 +1,57 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysConfigModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("SysConfig_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @*@using (Ajax.BeginForm("Edit", "SysConfig", new { area = "Sys" }, new AjaxOptions
+        {
+            HttpMethod = "POST",
+            OnSuccess = "AppSetting_OnProcessSuccess(data, 'EditConfig')"
+        }, new { @class = "form-horizontal" }))*@
+    @using (Html.BeginForm("Edit", "SysConfig", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditConfig", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_SysConfig", Model)
+        </div>
+    }
+    <script type="text/javascript">
+        $('form#EditConfig').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if ($("#ModalContent #modal_EditConfig #chkNotDismissModal").is(":checked")) {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableAppSetting.ajax.reload(null, false);
+                            response.status = undefined;
+                            $("#ModalContent #modal_EditConfig form")[0].reset();
+                        }
+                    } else {
+                        $("#ModalContent #modal_EditConfig").modal("hide");
+                        $("#ModalContent #modal_EditConfig").on('hidden.bs.modal',
+                            function () {
+                                if (response.status != undefined) {
+                                    eval(response.message);
+                                    _tableAppSetting.ajax.reload(null, false);
+                                    response.status = undefined;
+                                }
+                            });
+                    }
+                } else {
+                    $("#ModalContent #modal_EditConfig" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

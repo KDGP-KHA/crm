@@ -1,0 +1,256 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_Report_BusinessOpportunitySearchModel
+@section PageTitle
+{
+    @ViewBag.Title
+}
+
+@section PageAction
+{
+}
+<style>
+    .w1pc {
+        width: 1% !important;
+    }
+
+    .w200px {
+        width: 200px !important;
+    }
+
+    .w300px {
+        width: 300px !important;
+    }
+
+    #Report_BusinessOpportunity .text-left .font-italic {
+        color: #2971bf !important;
+    }
+
+    .article-content img {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    .article-content {
+        text-align: justify;
+    }
+
+    .article-short-content {
+        /*max-height: 120px;*/
+        max-height: 100px !important;
+        overflow: hidden;
+    }
+
+    .article-short-content {
+        position: relative;
+    }
+
+        .article-short-content::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            /*background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));*/
+        }
+
+    .show-full-article-button {
+        cursor: pointer;
+    }
+
+    /* Bộ lọc nhiều tiêu chí: xếp theo lưới, tự xuống dòng, không tràn ngang màn hình */
+    #RM_Report_BusinessOpportunitySearch .row {
+        /* .Search_Box dùng padding 5px nên gutter của row phải khớp để không lệch mép */
+        margin-left: -5px;
+        margin-right: -5px;
+    }
+
+    #RM_Report_BusinessOpportunitySearch .Search_Box {
+        margin-bottom: 8px;
+    }
+
+    #RM_Report_BusinessOpportunitySearch .form-control {
+        width: 100%;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    /* select2 dùng width theo phần tử gốc nên phải ép bám bề rộng cột,
+       nếu không tên sản phẩm dịch vụ dài sẽ kéo giãn ô lọc ra khỏi màn hình */
+    #RM_Report_BusinessOpportunitySearch .select2-container {
+        width: 100% !important;
+        max-width: 100%;
+    }
+
+    #RM_Report_BusinessOpportunitySearch .select2-selection--single {
+        height: 32px !important;
+        line-height: 30px !important;
+    }
+
+    #RM_Report_BusinessOpportunitySearch .select2-selection__rendered {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    /* Danh sách xổ xuống có thể rộng hơn ô lọc nhưng không vượt khung hình */
+    .select2-container .select2-dropdown {
+        max-width: 92vw;
+    }
+
+    /* Tên dự án/cơ hội bấm được để mở màn hình chi tiết */
+    #Report_BusinessOpportunity a.report-detail-link {
+        color: #1a6db5;
+        font-weight: 600;
+    }
+
+        #Report_BusinessOpportunity a.report-detail-link:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<div class="Search card bcard border-0 shadow-sm radius-0" id="Report">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+    <div class="card-body p-2   " style="">
+        <form id="RM_Report_BusinessOpportunitySearch" method="post">
+            <div class="row">
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 Search_Box">
+                    <label class="font-bold">
+                        @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+                    </label>
+                    @Html.TextBoxFor(model => model.TuKhoa, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Label_TuKhoa") })
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3 Search_Box">
+                    <label class="font-bold">
+                        Loại cơ hội
+                    </label>
+                    @Html.DropDownListFor(model => model.Loai, new SelectList(new List<SelectListItem>
+               {
+                   new SelectListItem { Text = "Tất cả", Value = "" },
+                   new SelectListItem { Text = AppProcessor.Messagor.GetMessage("Project_Title"), Value = "Project" },
+                   new SelectListItem { Text = AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title"), Value = "BusinessOpportunity" },
+               }, "Value", "Text"), "", new { @class = "form-control" })
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-2 Search_Box">
+                    <label class="font-bold">
+                        @AppProcessor.Messagor.GetMessage("Project_Year_Label")
+                    </label>
+                    @Html.TextBoxFor(
+                        model => model.Nam,
+                        new
+                        {
+                            @class = "form-control",
+                            autocomplete = "off"
+                        })
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-4 Search_Box">
+                    <label class="font-bold">
+                        @AppProcessor.Messagor.GetMessage("CustomerType_Title")
+                    </label>
+                    @Html.DropDownListFor(
+                        model => model.CustomerTypeID,
+                        new SelectList(Model.ListCustomerType ?? new List<SelectListItem>(), "Value", "Text"),
+                        "Tất cả",
+                        new { @class = "form-control" })
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-4 Search_Box">
+                    <label class="font-bold">
+                        @AppProcessor.Messagor.GetMessage("ProductService_Title")
+                    </label>
+                    @Html.DropDownListFor(
+                        model => model.ProductServiceID,
+                        new SelectList((Model.ListProductService ?? new List<Core.Cate.Models.Cate_ProductServiceModel>())
+                            .Where(p => p.NodeType == "P").ToList(), "pID", "DisplayName"),
+                        "",
+                        new { @class = "form-control", data_placeholder = "Tìm theo sản phẩm dịch vụ" })
+                </div>
+
+                <div class="col-12 col-md-6 col-lg-4 col-xl-4 Search_Box">
+                    <label class="font-bold">
+                        Trạng thái
+                    </label>
+                    <select id="StatusID" name="StatusID" class="form-control">
+                        <option value="">Tất cả</option>
+                        @if (Model.ListProjectStatus != null && Model.ListProjectStatus.Any())
+                        {
+                            <optgroup label="@AppProcessor.Messagor.GetMessage("Project_Title")">
+                                @foreach (var item in Model.ListProjectStatus)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </optgroup>
+                        }
+                        @if (Model.ListOpportunityStatus != null && Model.ListOpportunityStatus.Any())
+                        {
+                            <optgroup label="@AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title")">
+                                @foreach (var item in Model.ListOpportunityStatus)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 col-xl-4 Search_Box d-flex align-items-end justify-content-start justify-content-xl-end">
+                    <button type="button" class="btn btn-primary" onclick="initTableReport_BusinessOpportunity()">
+                        <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                    </button>
+
+                    <button type="button" onclick="fnExport()" class="btn btn-warning border-0 ml-2">
+                        <i class="fa fa-download"></i>
+                        <span>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Export_Project")</span>
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card dcard mt-3">
+    <div class="col-sm-12 table-responsive-md">
+        <table id="Report_BusinessOpportunity" class="d-style w-100 table table-bordered text-dark-m1 text-95 border-y-1 brc-black-tp11 dtr-table dataTable no-footer dtr-inline collapsed border-1" width="100%">
+            <thead class="sticky-nav text-uppercase text-center text-600 text-85 text-dark-tp3 bgc-white">
+                <tr>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w1pc">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColCustomer")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">@AppProcessor.Messagor.GetMessage("CustomerType_Title")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">@AppProcessor.Messagor.GetMessage("CustomerType_Label_Name")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w200px">@AppProcessor.Messagor.GetMessage("ProductService_Title")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w200px">@AppProcessor.Messagor.GetMessage("Opportunity_Name_Label")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">@AppProcessor.Messagor.GetMessage("LoaiDuAn_Label")</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Trạng thái cơ hội</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w200px">Đầu mối chịu trách nhiệm</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Tổng dự toán (VNĐ)</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Tổng giá trị VNPT (VNĐ) (Chưa VAT)</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Thời gian thực hiện</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w300px">
+                        Kết quả thực hiện đến thời điểm hiện tại
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script src="~/Areas/Cate/Views/Report_BusinessOpportunity/Report_BusinessOpportunity.js?v=3"></script>
+    <script>
+        $('select option').each(function () {
+            var text = $(this).text();
+            $(this).text(text.replace(/&nbsp;/g, "\u00A0"));
+        });
+    </script>
+}

@@ -1,0 +1,30 @@
+﻿@{
+    Layout = "~/Views/Shared/_Main.cshtml";
+}
+
+
+@section PluginCss{
+
+    @RenderSection("PluginCss", false)
+}
+
+@section HeadJs{
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section HeadCss{
+    @RenderSection("HeadCss", false)
+}
+
+@RenderBody()
+
+
+@section PluginJs{
+    
+    @RenderSection("PluginJs", false)
+}
+
+@section BottomScript{
+    @RenderSection("BottomScript", false)
+}

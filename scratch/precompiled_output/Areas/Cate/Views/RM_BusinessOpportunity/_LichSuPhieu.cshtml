@@ -1,0 +1,193 @@
+﻿@model Core.Cate.Models.RM_ExchangeHistoryFormModel
+@using System.Configuration
+@{
+    string filePath = Path.Combine(ConfigurationManager.AppSettings["AppFileConfirmFolder_Path"]);
+}
+<style>
+
+    .title-timeline {
+        border-radius: 16px
+    }
+
+    .exchange-history-timeline {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        color: rgb(65, 70, 77);
+    }
+
+    .exchange-content img,
+    .preview-image img {
+        max-width: 100%;
+        height: auto !important;
+        display: block;
+        width: 100%;
+    }
+</style>
+<div class="exchange-history-timeline">
+    @foreach (var item in Model.RM_ExchangeHistorys)
+    {
+        <div class="text-grey-m1 text-95" style="overflow:hidden;">
+            <div class="d-flex ">
+                <div class="minh-100 pos-rel">
+                    @if (item != Model.RM_ExchangeHistorys.Last())
+                    {
+                        <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
+
+                    }
+                    <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-default text-white">
+                        <i class="far fa-clock"></i>
+                    </div>
+                </div>
+                <div class="mx-2 ml-3 flex-grow-1">
+                    <div>
+                        <div class="">
+                            <div class="row">
+                                <h4 class="badge badge-primary badge-lg arrowed ml-0 mb-1 mt-2">
+                                    @(item.ExchangeDate.Hour == 0 && item.ExchangeDate.Minute == 0
+                                        ? item.ExchangeDate.ToString("dd/MM/yyyy")
+                                        : item.ExchangeDate.ToString("dd/MM/yyyy HH:mm"))
+                                </h4>
+                                <h4 class="badge @item.StatusClass text-white badge-lg ml-1 mb-1 mt-2">
+                                    @item.StatusName
+                                </h4>
+                            </div>
+                            <div class="my-1 text-dark-m3 text-95 border-l-3 brc-blue-m1">
+
+                                <div class="d-flex align-items-start row">
+                                    <div class="mx-2 col-12">
+                                        <span class="font-bolder text-blue-d1">
+                                            Người thực hiện:
+                                        </span>
+                                        @item.FullName
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.ParticipatingMemberNames))
+                                    {
+                                        var members = item.ParticipatingMemberNames.Replace(";", "<br/> - ");
+
+                                        <div class="mx-2 col-12">
+                                            <span class="font-bolder text-blue-d1">
+                                                Thành viên tham gia:
+                                            </span>
+                                            <br />
+                                            <span>
+                                                - @Html.Raw(members)
+                                            </span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.ContactPersonName))
+                                    {
+                                        <div class="mx-2 col-12">
+                                            <span class="font-bolder text-blue-d1">
+                                                Người liên hệ:
+                                            </span>
+                                            <span>
+                                                @item.ContactPersonName
+                                                @if (!string.IsNullOrEmpty(item.ContactPersonPosition))
+                                                {
+                                                    @: - @item.ContactPersonPosition
+                                                }
+                                            </span>
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.ExchangeContent))
+                                    {
+                                        var decoded = System.Web.HttpUtility.HtmlDecode(item.ExchangeContent);
+                                        var plainText = System.Text.RegularExpressions.Regex.Replace(decoded, "<.*?>", "");
+                                        var shortText = plainText.Length > 150 ? plainText.Substring(0, 150) + "..." : plainText;
+                                        var hasImage = decoded.Contains("<img");
+
+                                        <div class="mx-2 col-12 exchange-wrapper">
+                                            <span class="font-bolder text-blue-d1">
+                                                Nội dung:
+                                            </span>
+                                            @if (!string.IsNullOrEmpty(plainText))
+                                            {
+                                                <span class="preview-content ml-2 text-secondary">
+                                                    @shortText
+                                                </span>
+                                            }
+                                            @if (hasImage)
+                                            {
+                                                <div class="preview-image mt-1">
+                                                    @Html.Raw(item.ExchangeContent)
+                                                </div>
+                                            }
+                                            @if (plainText.Length > 100)
+                                            {
+                                                <span class="toggle-content text-primary" style="cursor:pointer;">
+                                                    Xem thêm
+                                                </span>
+                                            }
+                                            <div class="exchange-content mt-1" style="display:none;">
+                                                @Html.Raw(item.ExchangeContent)
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (item.ExchangeHistoryFilePath != null && item.ExchangeHistoryFilePath.Count > 0)
+                                    {
+                                        <div class="mx-2 col-12">
+                                            <span class="font-bolder text-blue-d1">
+                                                Tập tin đính kèm:
+                                            </span>
+                                            @{
+                                                foreach (var fileUrl in item.ExchangeHistoryFilePath)
+                                                {
+                                                    var fileName = fileUrl.FilePath.Split('/').Last();
+                                                    <div>
+                                                        <a class="js-file-preview"
+                                                           style="color: #0000ffc4; font-size: 12px; font-weight: 200"
+                                                           href="@fileUrl.FilePath"
+                                                           data-file-path="@fileUrl.FilePath"
+                                                           data-file-name="@fileName"
+                                                           data-preview-title="Tệp đính kèm"
+                                                           onclick="return openBusinessOpportunityFilePreviewLink(this);">
+                                                            <span class="fas fa-paperclip"> @fileName</span>
+                                                        </a>
+                                                        @if (item.UserName == User.UserName)
+                                                        {
+                                                            <a class="btn border-0 radius-3 text-danger text-90 pull-right p-1" data-modal="true" data-modal-id="DeleteFileBusinessOpportunity" data_width="1024" href="/Cate/RM_BusinessOpportunity/DeleteFile/@fileUrl.FilePathID">
+                                                                <i class="fas fa-trash"></i>
+                                                            </a>
+                                                        }
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+                            <hr class="brc-secondary-l3" />
+                        </div>
+                    </div>
+                </div>
+                @if (item.UserName == User.UserName)
+                {
+                    <div>
+                        <a class="btn btn-white border-0 radius-3 py-2 text-primary text-90 pull-right" data-modal="true" data-modal-id="EditEH-@item.ExchangeHistoryID" data_width="1024" href="/Cate/RM_BusinessOpportunity/EditEH/@item.ExchangeHistoryID">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+@Html.Partial("~/Areas/Cate/Views/RM_BusinessOpportunity/_FilePreviewScripts.cshtml")
+<script>
+    $(document).on('click', '.toggle-content', function () {
+        const wrapper = $(this).closest('.exchange-wrapper');
+        const contentDiv = wrapper.find('.exchange-content');
+        const preview = wrapper.find('.preview-content');
+
+        if (contentDiv.is(':animated')) return;
+
+        const isHidden = contentDiv.is(':hidden');
+
+        contentDiv.slideToggle(200);
+        preview.toggle(!isHidden);
+
+        $(this).text(isHidden ? 'Ẩn bớt' : 'Xem thêm');
+    });
+</script>

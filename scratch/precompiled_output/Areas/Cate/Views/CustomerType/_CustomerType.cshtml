@@ -1,0 +1,38 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerTypeModel
+
+@Html.AntiForgeryToken()
+
+<div id="Language">
+
+    @Html.HiddenFor(model => model.CustomerTypeID)
+
+    <!-- CustomerTypeCode -->
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CustomerTypeCode, new { @class = "col-sm-4 col-form-label text-sm-left pr-0 font-bold" })
+
+        <div class="col-sm-8">
+            @Html.TextBoxFor(model => model.CustomerTypeCode,
+                new
+                {
+                    @class = "form-control",
+                    placeholder = AppProcessor.Messagor.GetMessage("CustomerType_Label_Code")
+                })
+        </div>
+    </div>
+
+    <!-- CustomerTypeName -->
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CustomerTypeName, new { @class = "col-sm-4 col-form-label text-sm-left pr-0 font-bold" })
+
+        <div class="col-sm-8">
+            @Html.TextBoxFor(model => model.CustomerTypeName,
+                new
+                {
+                    @class = "form-control",
+                    placeholder = AppProcessor.Messagor.GetMessage("CustomerType_Label_Code")
+                })
+        </div>
+    </div>
+
+</div>

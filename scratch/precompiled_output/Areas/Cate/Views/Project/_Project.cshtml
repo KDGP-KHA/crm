@@ -1,0 +1,101 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectModel
+
+@Html.AntiForgeryToken()
+<div id="Project">
+    @Html.HiddenFor(model => model.ProjectID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ProjectName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.ProjectName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Project_ProjectName_Label") })
+            @Html.ValidationMessageFor(model => model.ProjectName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CustomerID, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownListFor(model => model.CustomerID, new SelectList(Model.ListCustomer, "Value", "Text"), "", new { @class = "col form-control" })
+            @Html.ValidationMessageFor(model => model.CustomerID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.StartDate, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.StartDate, "{0:dd/MM/yyyy}", new { id = "StartDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Status, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            @Html.DropDownListFor(model => model.Status, new SelectList(Model.ListStatus, "ID", "StatusName"), "", new { @class = "form-control", onchange = "fnChangeStatus()" })
+            @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
+        </div>
+
+        @Html.TitleFor(model => model.SuccessRate, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-3">
+            @Html.TextBoxFor(model => model.SuccessRate, new
+            {
+                @class = "form-control",
+                type = "number",
+                min = "0",
+                max = "100",
+                step = "1",
+                placeholder = "0 – 100",
+                data_format = "percent",
+                style = "max-width:200px"
+            })
+            @Html.ValidationMessageFor(model => model.SuccessRate, "", new { @class = "text-danger" })
+        </div>
+
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Note, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Note, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Project_Note_Label") })
+            @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+
+<script>
+    var dataStatus = JSON.parse('@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.ListStatus))');
+    function fnChangeStatus() {
+        debugger
+        var find = dataStatus.filter(x => x.ID == $('#Project #Status').val())[0];
+        if (find != undefined) {
+            $('#Project #SuccessRate').val(find.Project_SuccessRate);
+        }
+    }
+
+    $(document).ready(function () {
+        $("#StartDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+        reloadCKEditor();
+    });
+
+    //Contructor CKEDITOR
+    function reloadCKEditor() {
+        var editor = CKEDITOR.instances['Note'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('Note', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '350',
+        });
+        editor.on('change', function (e) {
+            $("#Note").val(editor.getData());
+        });
+    }
+</script>

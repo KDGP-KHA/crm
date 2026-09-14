@@ -1,0 +1,49 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("EditCHKD", "Customer", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditBusinessOpportunity", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_AddCHKD_View")
+        </div>
+    }
+
+    <script type="text/javascript">
+
+        $('form#EditBusinessOpportunity').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if (!response.status && response.errorCode == 1) {
+                        eval(response.message);
+                        response.status = undefined;
+                    } else {
+                        $("#ModalContent #modal_EditBusinessOpportunity").modal("hide");
+                        $("#ModalContent #modal_EditBusinessOpportunity").on('hidden.bs.modal',
+                            function () {
+                                if (response.status != undefined) {
+                                    eval(response.message);
+                                    _tableBusinessOpportunity.ajax.reload(null, false);
+                                    response.status = undefined;
+                                }
+                            });
+                    }
+                } else {
+                    $("#ModalContent #modal_EditBusinessOpportunity" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

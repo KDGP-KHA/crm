@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+     <StoredProcedures ProviderName="CenIT.Provider.Sys">
+          <Procedure Name="Sys_User_Token" Value="p_Sys_User_Token" />
+          <Procedure Name="Sys_User_Login" Value="p_Sys_User_Login" />
+          <Procedure Name="Sys_User_LoginViaEmail" Value="p_Sys_User_LoginViaEmail" />
+          <Procedure Name="Sys_User_Save" Value="p_Sys_User_Save" />
+          <Procedure Name="Sys_User_Get" Value="p_Sys_User_Get" />
+          <Procedure Name="Sys_User_GetByUserName" Value="p_Sys_User_GetByUserName" />
+          <Procedure Name="Sys_User_GetByEmail" Value="p_Sys_User_GetByEmail" />
+          <Procedure Name="Sys_User_Delete" Value="p_Sys_User_Delete" />
+          <Procedure Name="Sys_User_ChangePassword" Value="p_Sys_User_ChangePassword" />
+          <Procedure Name="Sys_User_ResetPassword" Value="p_Sys_User_ResetPassword" />
+          <Procedure Name="Sys_User_Active" Value="p_Sys_User_Active" />
+          <Procedure Name="Sys_User_DeActive" Value="p_Sys_User_DeActive" />
+          <Procedure Name="Sys_User_SaveLogin" Value="p_Sys_User_SaveLogin" />
+          <Procedure Name="Sys_User_GetById" Value="p_Sys_User_GetById" />
+          <Procedure Name="Sys_User_GetViaRole" Value="p_Sys_User_GetViaRole" />
+          <Procedure Name="Sys_User_Permit" Value="p_Sys_User_Permit" />
+          <Procedure Name="Sys_User_UpdateInfo" Value="p_Sys_User_UpdateInfo" />
+          <Procedure Name="Sys_User_GetByLichSuPhieuID" Value="p_Sys_User_GetByLichSuPhieuID" />
+          <Procedure Name="Sys_User_GetByBoPhanAndChucVu" Value="p_Sys_User_GetByBoPhanAndChucVu" />
+          <Procedure Name="Sys_User_GetManager" Value="Sys_User_GetManager" />
+          <Procedure Name="Sys_User_MarkRegulation" Value="Sys_User_MarkRegulation" />
+
+		 <Procedure Name="AccessHistories_Save" Value="p_AccessHistory_Save" />
+          <Procedure Name="AccessHistories_Get" Value="p_AccessHistories_Get" />
+
+          <Procedure Name="Sys_Function_Register" Value="p_Sys_Function_Register" />
+          <Procedure Name="Sys_Function_Save" Value="p_Sys_Function_Save" />
+          <Procedure Name="Sys_Function_Get" Value="p_Sys_Function_Get" />
+          <Procedure Name="Sys_Function_GetById" Value="p_Sys_Function_GetById" />
+          <Procedure Name="Sys_Function_Delete" Value="p_Sys_Function_Delete" />
+          <Procedure Name="Sys_Function_GetAction" Value="p_Sys_Function_GetAction" />
+          <Procedure Name="Sys_Role_Save" Value="p_Sys_Role_Save" />
+          <Procedure Name="Sys_Role_Get" Value="p_Sys_Role_Get" />
+          <Procedure Name="Sys_Role_GetById" Value="p_Sys_Role_GetById" />
+          <Procedure Name="Sys_Role_GetByUserId" Value="p_Sys_Role_GetByUserId" />
+          <Procedure Name="Sys_Role_Delete" Value="p_Sys_Role_Delete" />
+          <Procedure Name="Sys_Role_GetAction" Value="p_Sys_Role_GetAction" />
+          <Procedure Name="Sys_Role_AddUser" Value="p_Sys_Role_AddUser" />
+          <Procedure Name="Sys_Role_AddUsers" Value="p_Sys_Role_AddUsers" />
+          <Procedure Name="Sys_Role_RemoveUser" Value="p_Sys_Role_RemoveUser" />
+
+          <Procedure Name="Sys_Permission_Get" Value="p_Sys_Permission_Get" />
+          <Procedure Name="Sys_Permission_GetByRoleId" Value="p_Sys_Permission_GetByRoleId" />
+          <Procedure Name="Sys_Permission_Save" Value="p_Sys_Permission_Save" />
+          <Procedure Name="Sys_Permission_IsAllow" Value="p_Sys_Permission_IsAllow" />
+          <Procedure Name="Sys_Message_Get" Value="p_Sys_Message_Get" />
+          <Procedure Name="Sys_Message_GetByKey" Value="p_Sys_Message_GetByKey" />
+          <Procedure Name="Sys_Message_Save" Value="p_Sys_Message_Save" />
+          <Procedure Name="Sys_Message_GetByLangCode" Value="p_Sys_Message_GetByLangCode" />
+          <Procedure Name="Sys_Message_GetById" Value="p_Sys_Message_GetById" />
+          <Procedure Name="Sys_Message_Delete" Value="p_Sys_Message_Delete" />
+          <Procedure Name="Sys_FunctionAction_GetAll" Value="p_Sys_FunctionAction_GetAll" />
+          <Procedure Name="Sys_Menu_Save" Value="p_Sys_Menu_Save" />
+          <Procedure Name="Sys_Menu_Get" Value="p_Sys_Menu_Get" />
+          <Procedure Name="Sys_Menu_GetById" Value="p_Sys_Menu_GetById" />
+          <Procedure Name="Sys_Menu_Delete" Value="p_Sys_Menu_Delete" />
+          <Procedure Name="Sys_Menu_GetByUserName" Value="p_Sys_Menu_GetByUserName" />
+          <Procedure Name="Sys_Menu_GetByUserAndArea" Value="p_Sys_Menu_GetByUserAndArea" />
+          <Procedure Name="Sys_Menu_GetMenuChilds" Value="p_Sys_Menu_GetMenuChilds" />
+          <Procedure Name="Sys_Menu_GetAll" Value="p_Sys_Menu_GetAll" />
+          <Procedure Name="Sys_Layout_Save" Value="p_Sys_Layout_Save" />
+          <Procedure Name="Sys_Layout_Get" Value="p_Sys_Layout_Get" />
+          <Procedure Name="Sys_Layout_GetById" Value="p_Sys_Layout_GetById" />
+          <Procedure Name="Sys_Layout_Delete" Value="p_Sys_Layout_Delete" />
+          <Procedure Name="Sys_Layout_GetByName" Value="p_Sys_Layout_GetByName" />
+          <Procedure Name="Sys_Layout_GetActivated" Value="p_Sys_Layout_GetActivated" />
+          <Procedure Name="Sys_Layout_Activated" Value="p_Sys_Layout_Activated" />
+          <Procedure Name="Sys_ContentPanel_GetByLayoutName" Value="p_Sys_ContentPanel_GetByLayoutName" />
+          <Procedure Name="Sys_ContentPanel_GetByLayoutId" Value="p_Sys_ContentPanel_GetByLayoutId" />
+          <Procedure Name="Sys_ModuleContentPanel_GetByLayout" Value="p_Sys_ModuleContentPanel_GetByLayout" />
+          <Procedure Name="Sys_ModuleContentPanel_GetByUser" Value="p_Sys_ModuleContentPanel_GetByUser" />
+          <Procedure Name="Sys_ModuleContentPanel_Save" Value="p_Sys_ModuleContentPanel_Save" />
+          <Procedure Name="Sys_ModuleContentPanel_SaveList" Value="p_Sys_ModuleContentPanel_SaveList" />
+          <Procedure Name="Sys_ModuleContentPanel_DeleteModule" Value="p_Sys_ModuleContentPanel_DeleteModule" />
+          <Procedure Name="Sys_Module_Save" Value="p_Sys_Module_Save" />
+          <Procedure Name="Sys_Module_Get" Value="p_Sys_Module_Get" />
+          <Procedure Name="Sys_Module_GetById" Value="p_Sys_Module_GetById" />
+          <Procedure Name="Sys_Module_Delete" Value="p_Sys_Module_Delete" />
+          <Procedure Name="Sys_Module_GetNotInContentPanel" Value="p_Sys_Module_GetNotInContentPanel" />
+          <Procedure Name="Sys_Module_GetByUser" Value="p_Sys_Module_GetByUser" />
+          <Procedure Name="Sys_Module_Permission_Save" Value="p_Sys_Module_Permission_Save" />
+          <Procedure Name="Sys_Module_Permission_GetUsers" Value="p_Sys_Module_GetUserPermission" />
+          <Procedure Name="Sys_IPRequest_GetByIp" Value="p_Sys_IPRequest_GetByIp" />
+          <Procedure Name="Sys_Module_GetViaArea" Value="p_Sys_Module_GetViaArea" />
+
+          <Procedure Name="Sys_Configs_Get" Value="p_Sys_Configs_Get" />
+          <Procedure Name="Sys_Configs_Save" Value="p_Sys_Configs_Save" />
+          <Procedure Name="Sys_Configs_Delete" Value="p_Sys_Configs_Delete" />
+          <Procedure Name="Sys_Configs_GetByID" Value="p_Sys_Configs_GetByID" />
+          <Procedure Name="Sys_Configs_GetViaKey" Value="p_Sys_Configs_GetViaKey" />
+          <Procedure Name="Sys_Configs_SaveRefFiles" Value="p_Sys_Configs_SaveRefFiles" />
+
+          <Procedure Name="Sys_MailTemplate_GetActiveByCode" Value="Sys_MailTemplate_GetActiveByCode" />
+          <Procedure Name="Sys_MailTemplate_Get" Value="Sys_MailTemplate_Get" />
+          <Procedure Name="Sys_MailTemplate_GetByID" Value="Sys_MailTemplate_GetByID" />
+          <Procedure Name="Sys_MailTemplate_Save" Value="Sys_MailTemplate_Save" />
+          <Procedure Name="Sys_MailTemplate_Delete" Value="Sys_MailTemplate_Delete" />
+          <Procedure Name="Sys_MailTemplateParam_GetByTemplateId" Value="Sys_MailTemplateParam_GetByTemplateId" />
+          <Procedure Name="Sys_MailTemplateParam_GetByTemplateCode" Value="Sys_MailTemplateParam_GetByTemplateCode" />
+          <Procedure Name="Sys_MailTemplateParam_Save" Value="Sys_MailTemplateParam_Save" />
+          <Procedure Name="Sys_MailTemplateParam_DeleteByTemplateId" Value="Sys_MailTemplateParam_DeleteByTemplateId" />
+          <Procedure Name="Sys_MailSendLog_Insert" Value="Sys_MailSendLog_Insert" />
+          <Procedure Name="Sys_MailSendLog_UpdateStatus" Value="Sys_MailSendLog_UpdateStatus" />
+
+          <Procedure Name="Sys_Job_Get" Value="p_Sys_Job_Get" />
+          <Procedure Name="Sys_Job_Save" Value="p_Sys_Job_Save" />
+          <Procedure Name="Sys_Job_Delete" Value="p_Sys_Job_Delete" />
+          <Procedure Name="Sys_Job_GetByID" Value="p_Sys_Job_GetByID" />
+          <Procedure Name="Sys_Job_ChangeStatus" Value="p_Sys_Job_ChangeStatus" />
+
+          <Procedure Name="Sys_PhanQuyen_API_GetByUserID" Value="p_Sys_PhanQuyen_API_GetByUserID" />
+          <Procedure Name="Sys_PhanQuyen_API_Save" Value="p_Sys_PhanQuyen_API_Save" />
+
+          <Procedure Name="Sys_ProcedureLog_Get" Value="p_Sys_ProcedureLog_Get" />
+          <Procedure Name="Sys_ProcedureLog_Delete" Value="p_Sys_ProcedureLog_Delete" />
+          <Procedure Name="Sys_ProcedureLog_DeleteAll" Value="p_Sys_ProcedureLog_DeleteAll" />
+          <Procedure Name="Sys_ProcedureLog_GetByID" Value="p_Sys_ProcedureLog_GetByID" />
+
+
+          <!--Quản trị thông báo-->
+          <Procedure Name="Sys_Notifications_Get" Value="p_Sys_Notifications_Get" />
+          <Procedure Name="Sys_Notifications_Delete" Value="p_Sys_Notifications_Delete" />
+          <Procedure Name="Sys_Notifications_Save" Value="p_Sys_Notifications_Save" />
+          <Procedure Name="Sys_Notifications_GetById" Value="p_Sys_Notifications_GetById" />
+
+		 <Procedure Name="Sys_Notifications_GetByUser" Value="Sys_Notifications_GetByUser" />
+		 <Procedure Name="Sys_Notifications_MarkAsRead" Value="Sys_Notifications_MarkAsRead" />
+		 
+	     <!--Lock IP-->
+		 <Procedure Name="Sys_User_IPLock_GetByIP" Value="Sys_User_IPLock_GetByIP" />
+		 <Procedure Name="Sys_User_IPLock_Save" Value="Sys_User_IPLock_Save" />
+
+		 <!-- Phân đơn vị -->
+		 <Procedure Name="Sys_UserBoPhan_Save"       Value="Sys_UserBoPhan_Save" />
+		 <Procedure Name="Sys_UserBoPhan_GetByEmail" Value="Sys_UserBoPhan_GetByEmail" />
+		 <Procedure Name="Sys_UserBoPhan_GetAll"     Value="Sys_UserBoPhan_GetAll" />
+		 <Procedure Name="Sys_UserBoPhan_GetByMaBoPhan" Value="Sys_UserBoPhan_GetByMaBoPhan" />
+		 <Procedure Name="Sys_User_ByManager"        Value="Sys_User_ByManager" />
+		 <Procedure Name="Sys_User_PermitReview"        Value="p_Sys_User_PermitReview" />
+
+		 <!-- phòng ban -->
+		 <Procedure Name="MN_ChucVu_Get"            Value="MN_ChucVu_Get" />
+		 <Procedure Name="MN_ChucVu_Save"           Value="MN_ChucVu_Save" />
+		 <Procedure Name="MN_ChucVu_Delete"         Value="MN_ChucVu_Delete" />
+		 <Procedure Name="MN_ChucVu_GetByID"        Value="MN_ChucVu_GetByID" />
+		 <Procedure Name="MN_ChucVu_Export"         Value="MN_ChucVu_Export" />
+		 <Procedure Name="MN_ChucVu_Sync"           Value="MN_ChucVu_Sync" />
+
+		 <!-- hướng đẫn -->
+		 <Procedure Name="Sys_Instructs_Get"       Value="Sys_Instructs_Get" />
+		 <Procedure Name="Sys_Instructs_GetByID"   Value="Sys_Instructs_GetByID" />
+		 <Procedure Name="Sys_Instructs_Save"      Value="Sys_Instructs_Save" />
+		 <Procedure Name="Sys_Instructs_Delete"    Value="Sys_Instructs_Delete" />
+
+		 <!-- Template SMS -->
+		 <Procedure Name="Sys_SMSTemplate_Get" Value="Sys_SMSTemplate_Get" />
+		 <Procedure Name="Sys_SMSTemplate_Save" Value="Sys_SMSTemplate_Save" />
+		 <Procedure Name="Sys_SMSTemplate_Delete" Value="Sys_SMSTemplate_Delete" />
+		 <Procedure Name="Sys_SMSTemplate_GetByID" Value="Sys_SMSTemplate_GetByID" />
+		 <Procedure Name="Sys_SMSTemplate_GetByCode" Value="Sys_SMSTemplate_GetByCode" />
+		 <Procedure Name="Sys_SMSLogs_Insert" Value="Sys_SMSLogs_Insert" />
+		 
+	 </StoredProcedures>
+</Provider>

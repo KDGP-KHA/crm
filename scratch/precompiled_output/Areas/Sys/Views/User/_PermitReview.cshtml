@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@using EnumHelper = TSFramework.Libs.Helpers.EnumHelper
+@model Core.Sys.Models.Sys.UserPermitReviewModel
+
+@{
+    ViewBag.Title = $"{AppProcessor.Messagor.GetMessage("User_PermitReview_Title")} - {AppProcessor.Messagor.GetMessage("User_Title")} [{Model.FullName}]";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{@Html.Raw(EnumHelper.GetDescription(EnumTypeModal.Primary))}
+
+@section FormIcon{
+    <i class="fas fa-sitemap"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("PermitReview", "User", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "User_OnProcessSuccess(data, 'PermitReviewUser')"
+    }, new { @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_PermitReviewBody")
+        </div>
+    }
+}

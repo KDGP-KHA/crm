@@ -1,0 +1,211 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.MailTemplateRenderModel
+
+@{
+    string taskUrl = Model.GetString("HostUrl")
+        + "/Cate/TaskManagement/Detail/"
+        + Model.GetString("TaskCode");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Thông báo công việc</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #222222;
+            margin-bottom: 24px;
+        }
+
+        .text {
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .task-link {
+            color: #0b67a3;
+            text-decoration: underline;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #d5d5d5;
+            margin: 24px 0;
+        }
+
+        .task-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+
+        .info-table {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-left: 16px;
+        }
+
+        .label {
+            padding: 2px 0;
+            color: #666666;
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .link {
+            color: #0b67a3;
+            text-decoration: underline;
+        }
+
+        .value {
+            padding-left: 6px;
+        }
+
+        .log-box {
+            margin-top: 24px;
+            padding: 18px;
+            background: #f7f9fc;
+            border-left: 4px solid #0b67a3;
+            line-height: 1.9;
+            white-space: pre-line;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <table class="container"
+           cellpadding="0"
+           cellspacing="0"
+           border="0">
+
+        <!-- Header -->
+        <tr>
+            <td>
+
+                <div class="app-title">
+                    VNPT CRM
+                </div>
+
+                <div class="text">
+
+                    Công việc
+
+                    <a class="link" href="@(taskUrl)" target="_blank">
+                        #@Model.GetString("TaskCode")
+                    </a>
+
+                    đã được tạo bởi
+
+                    @Model.GetString("CreatedByFullName").
+
+                </div>
+
+                <hr class="divider" />
+
+            </td>
+        </tr>
+
+        <!-- Task title -->
+        <tr>
+            <td>
+                <div class="task-title">
+                    <a class="link"
+                       href="@(taskUrl)"
+                       target="_blank">
+                        #@Model.GetString("TaskCode") - @Model.GetString("TaskName")
+
+                    </a>
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- Info -->
+        <tr>
+            <td>
+
+                <table class="info-table"
+                       cellpadding="0"
+                       cellspacing="0"
+                       border="0">
+
+                    <tr>
+                        <td class="label">• Dự án:</td>
+                        <td class="value">@Model.GetString("ProjectName")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Người tạo:</td>
+                        <td class="value">@Model.GetString("CreatedByFullName")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Trạng thái:</td>
+                        <td class="value">@Model.GetString("Status")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Độ ưu tiên:</td>
+                        <td class="value">@Model.GetString("Priority")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Người thực hiện:</td>
+                        <td class="value">@Model.GetString("Assignee")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Ngày bắt đầu:</td>
+                        <td class="value">@Model.GetString("StartDate")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Ngày kết thúc:</td>
+                        <td class="value">@Model.GetString("EndDate")</td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+
+        <!-- Description -->
+        <tr>
+            <td>
+                <div class="log-box">
+                    @Model.GetString("Description")
+                </div>
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td>
+                <hr class="divider" />
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

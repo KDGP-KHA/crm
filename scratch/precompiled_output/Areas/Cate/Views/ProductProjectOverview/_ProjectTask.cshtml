@@ -1,0 +1,11 @@
+﻿@using TSFramework.Libs.Processors
+
+@{
+    var productProjectID = ViewData["ProductProjectID"] != null
+        ? (int)ViewData["ProductProjectID"]
+        : (Model != null && Model.Count > 0 ? Model[0].ProductProjectID : 0);
+}
+
+<div class="row mb-2">
+    @Html.Action("Index", "TaskManagement", new { projectId = productProjectID })
+</div>

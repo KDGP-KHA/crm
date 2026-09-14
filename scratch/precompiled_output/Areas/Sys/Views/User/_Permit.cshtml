@@ -1,0 +1,29 @@
+﻿@using TSFramework.Libs.Processors
+@using EnumHelper = TSFramework.Libs.Helpers.EnumHelper
+@model Modules.Sys.Areas.Sys.Data.UserPermitModel
+
+@{
+    ViewBag.Title = $"{AppProcessor.Messagor.GetMessage("Modal_Title_Accessibility")} - {AppProcessor.Messagor.GetMessage("User_Title")} [{Model.FullName}]";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{@Html.Raw(EnumHelper.GetDescription(EnumTypeModal.Primary))}
+
+@section FormIcon{
+    <i class="fa fa-shield-alt"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Permit", "User", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "User_OnProcessSuccess(data, 'PermitUser')"
+    }, new { @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_PermitBody")
+        </div>
+    }
+
+}

@@ -1,0 +1,117 @@
+﻿<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronEverySecond" name="cronSecond">
+            Every second
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronSecondIncrement" name="cronSecond">
+            Every
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronSecondIncrementIncrement" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 60; idx++)
+                {
+                    <option value="@idx">@idx</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="col-form-label"> second(s) starting at second </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronSecondIncrementStart" class="col-md-8">
+            @{
+                for (var idx = 0; idx < 60; idx++)
+                {
+                    <option value="@idx">@(idx.ToString().PadLeft(2, '0'))</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronSecondSpecific" checked="checked" name="cronSecond">
+            Specific second (choose one or many)
+        </label>
+    </div>
+    <div class="col-md-1">
+    </div>
+    @{
+        var isCheckSecond = false;
+        for (var idx = 0; idx < 60; idx++)
+        {
+            if (idx % 10 == 0)
+            {
+                <div class="col-md-1"></div>
+            }
+            var eleId = $"cronSecond{idx}";
+
+            <div class="col-md-1">
+                <label>
+                    @{
+                        if (!isCheckSecond)
+                        {
+                            <input type="checkbox" id="@eleId" name="cronSecondSpecificSpecific" value="@idx"
+                                   checked="checked">
+                            isCheckSecond = true;
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="@eleId" name="cronSecondSpecificSpecific" value="@idx">
+                        }
+                    }
+                    @(idx.ToString().PadLeft(2, '0'))
+                </label>
+            </div>
+            if (idx % 10 != 9)
+            {
+                continue;
+            }
+            <div class="col-md-1"></div>
+        }
+    }
+
+    <div class="col-md-1">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-4">
+        <label>
+            <input type="radio" id="cronSecondRange" name="cronSecond">
+            Every second between second
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronSecondRangeStart" class="col-md-8">
+            @{
+                for (var idx = 0; idx < 60; idx++)
+                {
+                    <option value="@idx">@(idx.ToString().PadLeft(2, '0'))</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="col-form-label"> and second </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronSecondRangeEnd" class="col-md-8">
+            @{
+                for (var idx = 0; idx < 60; idx++)
+                {
+                    <option value="@idx">@(idx.ToString().PadLeft(2, '0'))</option>
+                }
+            }
+        </select>
+    </div>
+</div>

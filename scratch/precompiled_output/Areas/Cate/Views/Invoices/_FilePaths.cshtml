@@ -1,0 +1,20 @@
+﻿@model List<Core.Cate.Models.RM_InvoicesFilePathModel>
+
+
+@if (Model != null && Model.Any())
+{
+    <div id="contractOldFileList" class="mt-2">
+        @foreach (var file in Model)
+        {
+            var fileName = file.URLFile.Split('/').Last();
+            <div class="d-flex justify-content-between border rounded px-2 py-1 mb-1">
+                <a href="@file.URLFile" target="_blank" class="text-dark my-auto">
+                    <span>
+                        <i class="fa fa-file text-grey-l4 mr-1"></i>@fileName
+                    </span>
+                </a>
+                <button type="button" class="btn-sm p-0 btn px-2 border-0 btn-outline-danger" onclick="fnDeleteFile('@file.FileID', '@fileName')"><i class="fa fa-times"></i></button>
+            </div>
+        }
+    </div>
+}

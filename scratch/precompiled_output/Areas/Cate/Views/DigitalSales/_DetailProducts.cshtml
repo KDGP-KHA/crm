@@ -1,0 +1,96 @@
+﻿@model Core.Cate.Models.RM_DigitalSalesModel
+@{
+    bool canEdit = ViewBag.CanEdit == true;
+}
+
+<span id="partialProductsCount" class="d-none" data-count="@(Model.Products?.Count ?? 0)"></span>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="text-purple font-weight-bold mb-0">
+        <i class="fa fa-cubes mr-1"></i> Danh sách Sản phẩm / Dịch vụ số đính kèm
+    </h6>
+    @if (canEdit)
+    {
+        <button type="button" class="btn btn-sm btn-purple px-3" onclick="openAddProductModal(@Model.DigitalSalesID);">
+            <i class="fa fa-plus mr-1"></i> Thêm sản phẩm / DV số
+        </button>
+    }
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped table-hover text-90" id="tblProducts">
+        <thead class="bgc-secondary-l1 text-secondary-d2">
+            <tr>
+                <th style="width: 40px;" class="text-center">STT</th>
+                <th>Sản phẩm / Dịch vụ số</th>
+                <th>Gói cước / Quy mô</th>
+                <th style="width: 80px;" class="text-center">Số lượng</th>
+                <th class="text-right">DT dự kiến (VNĐ)</th>
+                <th class="text-right">DT thực tế (VNĐ)</th>
+                <th>Thời hạn</th>
+                <th>Ghi chú</th>
+                @if (canEdit)
+                {
+                    <th style="width: 100px;" class="text-center">Thao tác</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Products != null && Model.Products.Count > 0)
+            {
+                int idx = 1;
+                foreach (var p in Model.Products)
+                {
+                    <tr>
+                        <td class="text-center">@idx</td>
+                        <td class="font-weight-bold text-dark">
+                            @p.ProductServiceName
+                            @if (!string.IsNullOrWhiteSpace(p.ProductServiceCode))
+                            {
+                                <span class="text-secondary text-85 font-mono ml-1">(@p.ProductServiceCode.Trim())</span>
+                            }
+                        </td>
+                        <td>@(string.IsNullOrEmpty(p.PackageName) ? "—" : p.PackageName)</td>
+                        <td class="text-center">@p.Quantity</td>
+                        <td class="text-right font-weight-bold text-primary">@((p.ExpectedRevenue ?? 0).ToString("N0"))</td>
+                        <td class="text-right font-weight-bold text-success">@((p.ActualRevenue ?? 0).ToString("N0"))</td>
+                        <td>
+                            @(p.StartDate.HasValue ? p.StartDate.Value.ToString("dd/MM/yyyy") : "")
+                            @(p.EndDate.HasValue ? " ➔ " + p.EndDate.Value.ToString("dd/MM/yyyy") : "")
+                        </td>
+                        <td>@(string.IsNullOrEmpty(p.Note) ? "—" : p.Note)</td>
+                        @if (canEdit)
+                        {
+                            <td class="text-center">
+                                <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa" onclick="openEditProductModal(@p.SalesProductID, @Model.DigitalSalesID);">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="text-danger" title="Xóa" onclick="deleteProductItem(@p.SalesProductID, @Model.DigitalSalesID);">
+                                    <i class="fa fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                    idx++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="@(canEdit ? 9 : 8)" class="text-center py-4 text-muted">
+                        <i class="fa fa-inbox fa-2x mb-2 d-block text-secondary-l1"></i>
+                        Chưa có sản phẩm / dịch vụ số nào.@(canEdit ? " Vui lòng bấm \"Thêm sản phẩm / DV số\"." : "")
+                    </td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="bgc-grey-l4 font-weight-bold">
+            <tr>
+                <td colspan="4" class="text-right">TỔNG CỘNG:</td>
+                <td class="text-right text-primary">@((Model.TotalExpectedRevenue ?? 0).ToString("N0")) VNĐ</td>
+                <td class="text-right text-success">@((Model.TotalActualRevenue ?? 0).ToString("N0")) VNĐ</td>
+                <td colspan="@(canEdit ? 3 : 2)"></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

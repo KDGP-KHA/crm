@@ -1,0 +1,139 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_SalesTeamMembersModel>
+
+@{
+    var boId = ViewData["BusinessOpportunityID"];
+}
+
+<style>
+    .bo-members-table-wrapper {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 8px;
+    }
+
+        .bo-members-table-wrapper .dropdown,
+        .bo-members-table-wrapper td,
+        .bo-members-table-wrapper tr {
+            position: static;
+        }
+
+        .bo-members-table-wrapper .dropdown-menu {
+            min-width: 9rem;
+            z-index: 1060;
+            margin-top: 2px;
+        }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0 font-weight-bold text-dark">
+        <i class="fas fa-users text-info mr-2"></i>
+        @AppProcessor.Messagor.GetMessage("BO_Overview_Card_Members")
+    </h6>
+
+    @Html.Button(
+                true,
+                "ListSalesTeamMembers",
+                Url.Action("List", "SalesTeamMembers", new { area = "Cate", id = boId }),
+                "<i class='fa fa-plus'></i>",
+                AppProcessor.Messagor.GetMessage("BO_Overview_Btn_ManageMembers"),
+                new { @class = "btn btn-sm btn-light-blue btn-h-blue border-0 radius-3 py-2 text-600 text-90", data_width = "1024" }
+            )
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <div class="table-responsive bo-members-table-wrapper">
+        <table id="tblMembers" class="table table-hover table-bordered table-sm mb-0">
+            <thead class="bgc-secondary-l1 text-uppercase text-85">
+                <tr>
+                    <th class="text-center" style="width:40px;">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("BO_Overview_Col_FullName")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("BO_Overview_Col_Role")</th>
+                    <th class="text-center" style="width:100px;">@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{int idx = 1;}
+                @foreach (var m in Model)
+                {
+                    bool isAM = m.Roles != null && m.Roles.Any(r => r.RoleName == "AM");
+                    <tr class="@(isAM ? "table-warning" : "")">
+                        <td class="align-middle text-center">@idx</td>
+                        <td class="align-middle @(isAM ? "font-weight-bold text-danger" : "")">
+                            @if (isAM)
+                            {
+                                <i class="fas fa-star text-warning mr-1"></i>
+                            }
+                            @(string.IsNullOrEmpty(m.Employee_Name) ? m.FullName : m.Employee_Name)
+                        </td>
+                        <td class="align-middle">
+                            @if (m.Roles != null)
+                            {
+                                foreach (var r in m.Roles)
+                                {
+                                    <span class="badge badge-primary mr-1">@r.RoleName</span>
+                                }
+                            }
+                        </td>
+                        <td>
+                            <div class="dropdown d-flex justify-content-center">
+                                <button class="btn btn-lighter-primary btn-sm dropdown-toggle"
+                                        type="button"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    <i class="fa fa-ellipsis-h"></i>
+                                </button>
+
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    @Html.Button(
+                                              true,
+                                              "EditSalesTeamMembers",
+                                              Url.Action("Edit", "SalesTeamMembers", new { area = "Cate", id = m.MemberID }),
+                                              "<i class='far fa-edit text-primary text-120 mr-1'></i>",
+                                              "Cập nhật",
+                                              new { @class = "btn btn-lighter-primary mr-1 btn-a-outline-primary dropdown-item", data_width = "1024" }
+                                              )
+
+                                    @Html.Button(
+                                             true,
+                                             "DeleteSalesTeamMembers",
+                                             Url.Action("Delete", "SalesTeamMembers", new { area = "Cate", id = m.MemberID }),
+                                             "<i class='far fa-trash-alt text-danger text-120 mr-1'></i>",
+                                             "Xoá",
+                                             new { @class = "btn btn-lighter-danger mr-1 btn-a-outline-danger dropdown-item", data_width = "1024" }
+                                             )
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    idx++;
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info text-center">
+        <i class="fas fa-users mr-2"></i>
+        @AppProcessor.Messagor.GetMessage("BO_Overview_NoMember")
+    </div>
+}
+
+<script>
+    if (CONVERTED == 1) {
+        $('#tblMembers th:last-child').css({
+            'display': 'none',
+        });
+        $('#tblMembers td:last-child').css({
+            'display': 'none',
+        });
+        $('a[data-modal-id=ListSalesTeamMembers]')
+            .removeAttr('href')
+            .removeAttr('data-modal')
+            .removeAttr('data-modal-id')
+            .attr('onclick',"$('a[data-modal-id=Notification]').click()")
+    }
+</script>

@@ -1,0 +1,25 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("TaskGroup_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType{
+    primary
+}
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "TaskGroup", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "TaskGroup_OnProcessSuccess(data, 'AddTaskGroup')"
+    }, new { @class = "form-horizontal", id = "AddTaskGroup" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_TaskGroup")
+        </div>
+    }
+}
+@section ContinueForm{
+}

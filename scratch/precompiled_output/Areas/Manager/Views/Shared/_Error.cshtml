@@ -1,0 +1,51 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadJs{
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section HeadCss{
+
+    @RenderSection("HeadCss", false)
+}
+
+<body>
+<div class="body-container">
+
+    <div class="main-container bgc-white">
+
+        <div role="main" class="main-content">
+
+            <div class="page-content container container-plus">
+                <div class="py-2 text-center" id="sidebar-header-brand2">
+                    <a class="navbar-brand text-140 text-white" href="#">
+                        <img class="w-50" src="/Contents/Base/imgs/app.ico">
+         
+                        <div class="flex-grow-1">
+                            <div>
+                                <span class="text-70 text-danger-d1 text-upcase font-bold">HỆ THỐNG</span>
+                            </div>
+                            <div class="text-90 text-blue-d1">
+                                <span class="text-upcase font-bold">QUẢN LÝ VÀ ĐIỀU HÀNH KINH DOANH DỊCH VỤ SỐ DOANH NGHIỆP</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <hr class="border-none border-t-3 brc-grey-l2 border-double">
+                <!-- page header and toolbox -->
+                @RenderBody()
+            </div>
+
+            @Html.Partial("_Footer")
+
+        </div>
+        <!-- .modal-aside -->
+    </div>
+</div>
+
+@RenderSection("BottomScript", false)
+
+</body>

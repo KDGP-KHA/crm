@@ -1,0 +1,108 @@
+﻿@model Core.Cate.Models.RM_DigitalSalesModel
+@{
+    bool canEdit = ViewBag.CanEdit == true;
+    var attachedFiles = !string.IsNullOrEmpty(Model.FileAttach)
+        ? Model.FileAttach.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+        : new string[0];
+}
+
+<span id="partialAttachmentsCount" class="d-none" data-count="@attachedFiles.Length"></span>
+
+<div class="card border-1 brc-grey-l2 p-3 p-lg-4 shadow-sm">
+    <div class="d-flex align-items-center justify-content-between border-b-1 brc-grey-l2 pb-2 mb-3">
+        <h6 class="text-primary font-weight-bold mb-0">
+            <i class="fa fa-paperclip mr-1"></i> Tệp đính kèm
+            <span class="badge badge-info badge-pill ml-1" id="badgeAttachmentCount">@attachedFiles.Length</span>
+        </h6>
+        @if (canEdit)
+        {
+            <button type="button" class="btn btn-xs btn-primary font-bolder px-25 py-1 radius-1 shadow-sm" onclick="openUploadAttachmentModal(@Model.DigitalSalesID);">
+                <i class="fa fa-cloud-upload-alt mr-1"></i> Tải lên tệp mới
+            </button>
+        }
+    </div>
+
+    @if (attachedFiles.Length > 0)
+    {
+        <div class="attach-grid-8">
+            @foreach (var file in attachedFiles)
+            {
+                var trimmedFile = file.Trim();
+                var fileName = System.IO.Path.GetFileName(trimmedFile);
+                var ext = System.IO.Path.GetExtension(trimmedFile)?.ToLowerInvariant() ?? "";
+                bool isImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext);
+                var downloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmedFile });
+
+                <div class="attach-col-8">
+                    <div class="card border-1 brc-grey-l2 radius-1 h-100 shadow-sm overflow-hidden attach-card">
+                        @if (isImage)
+                        {
+                            <div class="position-relative bgc-grey-l5 text-center d-flex align-items-center justify-content-center attach-thumb-box" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@HttpUtility.JavaScriptStringEncode(fileName)');" title="Bấm để xem ảnh lớn">
+                                <img src="@Url.Content(trimmedFile)" alt="@fileName" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/Contents/assets/images/image-placeholder.png';" />
+                                <div class="position-absolute bgc-black-tp6 text-white text-70 px-1 radius-1" style="bottom: 3px; right: 3px;">
+                                    <i class="fa fa-search-plus"></i>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="bgc-primary-l4 text-center d-flex align-items-center justify-content-center attach-thumb-box">
+                                @if (ext == ".pdf")
+                                {
+                                    <i class="fa fa-file-pdf fa-2x text-danger"></i>
+                                }
+                                else if (ext == ".doc" || ext == ".docx")
+                                {
+                                    <i class="fa fa-file-word fa-2x text-primary"></i>
+                                }
+                                else if (ext == ".xls" || ext == ".xlsx")
+                                {
+                                    <i class="fa fa-file-excel fa-2x text-success"></i>
+                                }
+                                else if (ext == ".zip" || ext == ".rar" || ext == ".7z")
+                                {
+                                    <i class="fa fa-file-archive fa-2x text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa fa-file-alt fa-2x text-secondary"></i>
+                                }
+                            </div>
+                        }
+                        <div class="card-body p-15 d-flex flex-column justify-content-between">
+                            <div class="attach-file-name" title="@fileName">
+                                @fileName
+                            </div>
+                            <div class="attach-actions">
+                                <div class="d-inline-flex align-items-center" style="gap: 3px;">
+                                    @if (isImage)
+                                    {
+                                        <button type="button" class="btn btn-xs btn-outline-info radius-1 px-1 py-0" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@HttpUtility.JavaScriptStringEncode(fileName)');" title="Xem ảnh">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    }
+                                    <a href="@downloadUrl" class="btn btn-xs btn-primary radius-1 px-1 py-0 text-75" title="Tải xuống tệp">
+                                        <i class="fa fa-download"></i> Tải
+                                    </a>
+                                </div>
+                                @if (canEdit)
+                                {
+                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-1 py-0 ml-auto" onclick="confirmDeleteAttachment(@Model.DigitalSalesID, '@trimmedFile', '@fileName');" title="Xóa tệp khỏi hồ sơ">
+                                        <i class="fa fa-trash-alt"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-4 text-muted">
+            <i class="fa fa-folder-open fa-2x text-secondary-l1 mb-2 d-block"></i>
+            Chưa đính kèm tệp tài liệu nào.@(canEdit ? " Bấm \"Tải lên tệp mới\" để đính kèm tệp cho hồ sơ." : "")
+        </div>
+    }
+</div>

@@ -1,0 +1,121 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_DigitalSalesStatusModel>
+
+@{
+    ViewBag.Title = "Cấu hình Danh mục: Trạng thái - Quy trình - Tiến trình";
+    var businessType = (byte)(ViewBag.BusinessType ?? 1);
+}
+
+@section PageTitle {
+    @ViewBag.Title
+}
+
+@section PageAction {
+    <span class="badge badge-lg bgc-primary-l3 text-primary-d2 border-1 brc-primary-m3">
+        <i class="fa fa-sitemap mr-1"></i> Phân hệ Kinh doanh SPDV Số
+    </span>
+}
+
+@section HeadCss {
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSalesWorkflow/Index.css?v=@DateTime.Now.Ticks" />
+}
+
+<div class="row">
+    <!-- CỘT 1: TRẠNG THÁI (STATUS) -->
+    <div class="col-xl-4 col-lg-4 col-md-12 mb-3">
+        <div class="card bcard h-100 border-1 brc-primary-m3 shadow-sm">
+            <div class="card-header bgc-primary-d1 text-white">
+                <h5 class="card-title text-100 text-white font-bolder mb-0">
+                    <i class="fa fa-tags mr-1"></i> 1. TRẠNG THÁI
+                </h5>
+                <div class="card-toolbar">
+                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary btn-a-light-primary font-bolder border-0" onclick="DigitalSalesWorkflow.openAddStatus()">
+                        <i class="fa fa-plus text-primary mr-1"></i>Thêm trạng thái
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0 d-flex flex-column">
+                <!-- Tab chuyển đổi Cơ hội / Dự án chuẩn Ace Admin -->
+                <div class="bgc-grey-l4 px-2 pt-2 border-b-1 brc-grey-l2">
+                    <ul class="nav nav-tabs nav-tabs-simple border-0" role="tablist" id="workflowBusinessTypeTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="javascript:void(0)" onclick="DigitalSalesWorkflow.switchBusinessType(1, this)">
+                                <i class="fa fa-lightbulb text-orange-d1 mr-1"></i>Cơ hội
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="javascript:void(0)" onclick="DigitalSalesWorkflow.switchBusinessType(2, this)">
+                                <i class="fa fa-project-diagram text-purple-d1 mr-1"></i>Dự án
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="workflow-scroll-container p-2 flex-grow-1" id="statusContainer">
+                    @Html.Partial("_StatusList", Model)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CỘT 2: QUY TRÌNH (PROCESS) -->
+    <div class="col-xl-4 col-lg-4 col-md-12 mb-3">
+        <div class="card bcard h-100 border-1 brc-blue-m3 shadow-sm">
+            <div class="card-header bgc-blue-d1 text-white">
+                <h5 class="card-title text-100 text-white font-bolder mb-0">
+                    <i class="fa fa-project-diagram mr-1"></i> 2. QUY TRÌNH
+                </h5>
+                <div class="card-toolbar">
+                    <button type="button" id="btnAddProcess" class="btn btn-xs btn-white btn-h-light-blue btn-a-light-blue font-bolder border-0 disabled" disabled onclick="DigitalSalesWorkflow.openAddProcess()">
+                        <i class="fa fa-plus text-blue mr-1"></i>Thêm quy trình
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0 d-flex flex-column">
+                <div class="bgc-blue-l4 px-3 py-2 border-b-1 brc-blue-l2 text-secondary-d1 text-85 text-truncate">
+                    Thuộc trạng thái: <strong id="lblSelectedStatus" class="text-blue-d2 font-bold">(Chưa chọn trạng thái)</strong>
+                </div>
+
+                <div class="workflow-scroll-container p-2 flex-grow-1" id="processContainer">
+                    <div class="text-center py-5 text-secondary-m2">
+                        <i class="fa fa-arrow-left text-160 mb-2 opacity-50"></i>
+                        <p class="mb-0 text-90">Vui lòng chọn một Trạng thái ở cột bên trái</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CỘT 3: TIẾN TRÌNH (PROGRESS) -->
+    <div class="col-xl-4 col-lg-4 col-md-12 mb-3">
+        <div class="card bcard h-100 border-1 brc-success-m3 shadow-sm">
+            <div class="card-header bgc-success-d1 text-white">
+                <h5 class="card-title text-100 text-white font-bolder mb-0">
+                    <i class="fa fa-tasks mr-1"></i> 3. TIẾN TRÌNH
+                </h5>
+                <div class="card-toolbar">
+                    <button type="button" id="btnAddProgress" class="btn btn-xs btn-white btn-h-light-success btn-a-light-success font-bolder border-0 disabled" disabled onclick="DigitalSalesWorkflow.openAddProgress()">
+                        <i class="fa fa-plus text-success mr-1"></i>Thêm tiến trình
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0 d-flex flex-column">
+                <div class="bgc-success-l4 px-3 py-2 border-b-1 brc-success-l2 text-secondary-d1 text-85 text-truncate">
+                    Thuộc quy trình: <strong id="lblSelectedProcess" class="text-success-d2 font-bold">(Chưa chọn quy trình)</strong>
+                </div>
+
+                <div class="workflow-scroll-container p-2 flex-grow-1" id="progressContainer">
+                    <div class="text-center py-5 text-secondary-m2">
+                        <i class="fa fa-arrow-left text-160 mb-2 opacity-50"></i>
+                        <p class="mb-0 text-90">Vui lòng chọn một Quy trình ở cột giữa</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script src="@Url.Content("~/Areas/Cate/Views/DigitalSalesWorkflow/DigitalSalesWorkflow.js")"></script>
+}

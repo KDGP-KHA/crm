@@ -1,0 +1,4 @@
+﻿@using (Html.BeginForm("Login", "Account", new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { autocomplete = "off", @class = "form-row mt-4", id = "LoginForm", role = "form" }))
+{
+    @Html.Partial("_LoginBody")
+}

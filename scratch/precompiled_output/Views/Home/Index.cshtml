@@ -1,0 +1,900 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("App_Title");
+}
+@section PluginCss{
+
+}
+<link href="~/Views/Home/Index.css" rel="stylesheet" />
+<!-- the page intro for dark theme -->
+<div id="page-intro-dark" class="page-intro pos-rel">
+    <div class="row container container-plus mx-auto p-0 mw-100">
+        <div class="col-12 order-first order-md-last mb-4 mb-md-0 p-0" data-aos="fade-left">
+            <div>
+                <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
+                    <ol class="carousel-indicators">
+                        <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
+                        @*<li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
+                        <li data-target="#carouselExampleCaptions" data-slide-to="2"></li>*@
+                    </ol>
+
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="~/Contents/imgs/slides/slide1.png" class="d-block w-100" alt="Slide 1" />
+                            @*<img src="~/Contents/FE/images/slider-4-slide-1-1920x678.jpg" class="d-block w-100" alt="Slide 1" />*@
+                            <div class="carousel-caption d-none d-md-block">
+                                @*<h5>
+                                    First slide label
+                                </h5>
+                                <p>
+                                    Nulla vitae elit libero, a pharetra augue mollis interdum.
+                                </p>*@
+                            </div>
+                        </div>
+
+                        @*<div class="carousel-item">
+                            <img src="~/Contents/imgs/slides/slide2.jpg" class="d-block w-100" alt="Slide 1" />
+                            <div class="carousel-caption d-none d-md-block">
+                            </div>
+                        </div>
+
+                        <div class="carousel-item">
+                            <img src="~/Contents/imgs/slides/slide3.jpg" class="d-block w-100" alt="Slide 1" />
+                            <div class="carousel-caption d-none d-md-block text-dark-tp2">
+                            </div>
+                        </div>*@
+                    </div>
+
+                    <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+
+            </div>
+        </div><!-- /.col -->
+    </div><!-- /.row -->
+
+</div><!-- /#page-intro-dark -->
+
+<div class="bgc-white">
+    <!-- or use a different color -->
+
+    <div class="container container-plus pos-rel mt-n5 text-center py-2">
+
+        <div class="row mt-n4 block-card">
+            <div class="col-12 col-lg-12 col-xl-10 mx-auto">
+
+                <div class="row my-4">
+                    <!-- features -->
+                    <a href="@Url.Action("Index","Accommodation", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-right" data-aos-delay="300">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block pos-rel text-center py-2 px-3 text-150">
+                                <i class="fas fa-building fa-2x fa-in-mobile  text-purple-d1 pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("CSLT_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("CSLT_Fe_Description")
+
+                            </p>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index","Tourism", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="450">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block pos-rel text-center p-2 text-150">
+                                <i class="fas fa-city fa-2x fa-in-mobile  text-blue-d1 pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("DLH_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("DNLH_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index","TourGuide", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-down" data-aos-delay="600">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block text-center p-2 text-140 pos-rel">
+                                <i class="fas fa-user-alt fa-2x fa-in-mobile  text-orange pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("HDV_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("HDV_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index","Restaurant", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-left" data-aos-delay="750">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block text-center p-2 text-140 pos-rel">
+                                <i class="fas fa-utensils fa-2x fa-in-mobile  text-pink pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("HoSoNH_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("HoSoNH_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+                <!--</div>--><!-- /.row -->
+                <!--<div class="row my-4">-->
+                    <!-- features -->
+                    <a href="@Url.Action("Index","Entertainment", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-right" data-aos-delay="300">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block pos-rel text-center py-2 px-3 text-150">
+                                <i class="fas fa-synagogue fa-2x fa-in-mobile  text-purple-d1 pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("DVC_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("DVC_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index","TourismResources", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-left" data-aos-delay="450">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block pos-rel text-center p-2 text-150">
+                                <i class="fas fa-globe-asia fa-2x fa-in-mobile  text-blue-d1 pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("TaiNguyenDL_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("TaiNguyenDL_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index","TourismProducts", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="600">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block text-center p-2 text-140 pos-rel">
+                                <i class="fas fa-map-marked-alt fa-2x fa-in-mobile  text-danger pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("SanPhamDL_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("SanPhamDL_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+
+                    <a href="@Url.Action("Index","Shopping", new{pageType="list"})" class="col-6 col-md-3 btn mb-4 mb-md-0" data-aos="fade-left" data-aos-delay="750">
+                        <div class="dh-zoom-1 feature-item radius-2 bgc-white shadow-1 p-3 h-100">
+                            <div class="d-inline-block text-center p-2 text-140 pos-rel">
+                                <i class="fas fa-shopping-cart fa-2x fa-in-mobile  text-blue pos-rel"></i>
+                            </div>
+
+                            <h3 class="text-secondary-d3 LoaiHinh_titleCard text-uppercase">
+                                @AppProcessor.Messagor.GetMessage("DMS_Title")
+                            </h3>
+
+                            <p class="text-dark-m3">
+                                @AppProcessor.Messagor.GetMessage("DMS_Fe_Description")
+                            </p>
+                        </div>
+                    </a>
+
+                </div><!-- /.row -->
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+
+    </div><!-- /.container -->
+</div>
+@*
+            <div class="bgc-white">
+                <!-- or use a different color -->
+
+                <div class="container container-plus py-3 pos-rel">
+                    <!-- the large circle on right the green square on left -->
+                    <div data-aos="zoom-in" class="d-none d-lg-block  position-br bgc-purple-l3 mb-5 mr-5 opacity-1 radius-100" style="width: 180px; max-width: 80vw; height: 180px; max-height: 80vw;"></div>
+                    <div data-aos="zoom-in" class="d-none d-lg-block position-lc bgc-success-l3 opacity-1 ml-5 mt-5 radius-1" style="width: 100px; height: 100px;"></div>
+
+                    <div class="row pt-45 mt-1 mt-lg-5">
+                        <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+                            <div class="d-flex flex-column align-items-center flex-md-row align-items-md-start">
+                                <div class="radius-2 mt-1 mr-md-5 pos-rel" data-aos="fade">
+                                    <!-- the small squares -->
+                                    <div class="position-tl bgc-grey-l3 mt-n45 ml-n45 radius-1" style="width: 100px; height: 100px;"></div>
+                                    <div class="position-br bgc-brown-l3 mb-n45 mr-n45 radius-1" style="width: 110px; height: 110px;"></div>
+
+
+                                    <div class="overflow-hidden radius-1 pos-rel border-1 p-2px brc-secondary-l2 bgc-white">
+                                        <img alt="Do More" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/do-more.jpg" width="220" />
+                                    </div>
+                                </div>
+
+
+                                <div class="flex-grow-1 text-dark-tp3 mt-4 mt-md-0 ml-md-2">
+                                    <h3 class="text-primary-d2 my-4 text-center text-md-left" data-aos="fade-up">
+                                        Increase your productivity with our app
+                                    </h3>
+
+                                    <div data-aos="fade-up">
+                                        <p>
+                                            Justo odio, dapibus ac facilisis in, egestas eget quam.
+                                        </p>
+                                        <p>
+                                            Donec id elit non mi porta gravida at eget metus.
+                                        </p>
+                                        <p>
+                                            Onec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo.
+                                        </p>
+                                    </div>
+
+                                    <p class="mt-md-5" data-aos="fade-left">
+                                        <a href="#" class="mt-3 mt-md-4 btn btn-outline-default btn-bold btn-bgc-white">
+                                            Read More
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div><!-- /.col -->
+                    </div><!-- /.row -->
+                </div><!-- /.container -->
+
+            </div>
+
+            <div class="bgc-white mt-4 mt-lg-5">
+
+                <div class="container container-plus py-2 py-lg-4">
+
+                    <div class="row">
+                        <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+                            <div class="d-flex flex-column align-items-center flex-md-row align-items-md-start">
+
+                                <div class="flex-grow-1 text-dark-tp3 mt-4 mt-md-0">
+                                    <h3 data-aos="fade-up" class="text-primary-d2 my-4 text-center text-md-left">
+                                        Designed with flexibility in mind
+                                    </h3>
+
+                                    <div data-aos="fade-up">
+                                        <p>
+                                            Onec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo.
+                                            Justo odio, dapibus ac facilisis in, egestas eget quam.
+                                        </p>
+                                        <p>
+                                            Justo odio, dapibus ac facilisis in, egestas eget quam.
+                                        </p>
+                                        <p>
+                                            Donec id elit non mi porta gravida at eget metus.
+                                        </p>
+                                    </div>
+
+                                    <p class="mt-md-5" data-aos="fade-right">
+                                        <a href="#" class="md-3 mt-md-4 btn btn-outline-default btn-bold btn-bgc-white">
+                                            Read More
+                                        </a>
+                                    </p>
+                                </div>
+
+
+                                <div class="radius-2 mt-1 ml-md-5 pos-rel order-first order-md-last" data-aos="fade-left">
+                                    <!-- the small circles -->
+                                    <div class="position-tr bgc-primary-l3 mt-n45 mr-n45 radius-100" style="width: 80px; max-width: 80vw; height: 80px; max-height: 80vw;"></div>
+                                    <div class="position-bl bgc-orange-l3 mb-n5 ml-n45 radius-100" style="width: 100px; max-width: 80vw; height: 100px; max-height: 80vw;"></div>
+
+                                    <div class="overflow-hidden radius-1 pos-rel border-1 p-2px brc-secondary-l2 bgc-white">
+                                        <img alt="Be Flexible" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/be-flexible.jpg" width="220" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /.col -->
+                    </div><!-- /.row -->
+                </div><!-- /.container -->
+
+            </div>
+
+            <!-- the 3 tabs ... So why is everybody choosing us? -->
+            <div class="bgc-white">
+                <div class="container container-plus py-35">
+                    <hr class="brc-secondary-l3 my-4 my-lg-5" />
+
+                    <div class="row">
+                        <div class="col-12 col-lg-8 mx-auto text-center">
+                            <h3 class="text-dark-l1 mb-4 mt-2 text-180" data-aos="fade-up">
+                                So why is everybody choosing us?
+                            </h3>
+
+                            <ul class="d-flex flex-column flex-sm-row d-md-inline-flex nav nav-fill nav-tabs nav-tabs-static mx-n3 mx-md-0 py-1 px-1 px-md-0" role="tablist">
+                                <li data-aos="fade-up" data-aos-delay="200" class="nav-item mr-2px mb-1">
+                                    <a data-toggle="tab" href="#reason1" class="active btn border-1 radius-round py-2 px-35 btn-outline-secondary btn-h-light-green btn-a-green" role="tab" aria-selected="true">
+                                        State of the art
+                                    </a>
+                                </li>
+
+                                <li data-aos="fade-up" data-aos-delay="300" class="nav-item mx-2px mb-1">
+                                    <a data-toggle="tab" href="#reason2" class="btn border-1 radius-round py-2 px-35 btn-outline-secondary btn-h-light-orange btn-a-orange" role="tab" aria-selected="false">
+                                        Responsive
+                                    </a>
+                                </li>
+
+                                <li data-aos="fade-up" data-aos-delay="400" class="nav-item mx-2px mb-1">
+                                    <a data-toggle="tab" href="#reason3" class="btn border-1 radius-round py-2 px-35 btn-outline-secondary btn-h-light-blue btn-a-blue" role="tab" aria-selected="false">
+                                        Ease of use
+                                    </a>
+                                </li>
+                            </ul><!-- /.nav-tabs -->
+
+
+                            <div data-aos="fade-up" data-aos-delay="300" class="tab-content tab-sliding text-left border-0 mt-5 px-0">
+
+                                <div class="tab-pane px-3 active show" id="reason1">
+                                    <div class="d-flex flex-column align-items-center flex-md-row align-items-md-start">
+                                        <div class="flex-grow-1 text-dark-tp3 mt-4 mt-md-0">
+                                            <h3 class="text-140 text-secondary-d3 text-center text-md-left mt-md-4">
+                                                Our tech is bleeding edge and reliable!
+                                            </h3>
+
+                                            <ul class="list-unstyled ml-3 mt-4">
+                                                <li class="mb-3">
+                                                    <i class="fa fa-caret-right text-125 text-green mr-1"></i>
+                                                    Onec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo.
+                                                </li>
+                                                <li class="mb-3">
+                                                    <i class="fa fa-caret-right text-125 text-green mr-1"></i>
+                                                    Justo odio, dapibus ac facilisis in, egestas eget quam.
+                                                </li>
+                                                <li>
+                                                    <i class="fa fa-caret-right text-125 text-green mr-1"></i>
+                                                    Donec id elit non mi porta gravida at eget metus.
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="d-flex flex-nowrap order-first order-md-last ml-md-4">
+                                            <!-- the 3 mobile dashboard images -->
+                                            <div class="mx-n2">
+                                                <div class="radius-2 shadow-sm border-1 p-2px brc-default-l2 bgc-white">
+                                                    <div class="overflow-hidden radius-1">
+                                                        <img alt="Product image 1" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/mobile-dash2.png" height="220" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mx-n2 pos-rel mt-n25">
+                                                <div class="radius-2 shadow-sm border-1 p-2px brc-default-l2 bgc-white">
+                                                    <div class="overflow-hidden radius-1">
+                                                        <img alt="Product image 2" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/mobile-dash1.png" height="220" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mx-n2">
+                                                <div class="radius-2 shadow-sm border-1 p-2px brc-default-l2 bgc-white">
+                                                    <div class="overflow-hidden radius-1">
+                                                        <img alt="Product image 3" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/mobile-dash3.png" height="220" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!-- /.tab-pane -->
+
+
+                                <div class="tab-pane px-3" id="reason2">
+                                    <div class="d-flex flex-column align-items-center flex-md-row align-items-md-start">
+                                        <div class=" mr-md-4 ">
+                                            <div class="overflow-hidden radius-1">
+                                                <img alt="Product image 4" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/ipad.png" height="250" />
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-grow-1 text-dark-tp3 mt-4 mt-md-0">
+                                            <h3 class="text-140 text-secondary-d3 text-center text-md-left mt-md-4">Fully responsive!</h3>
+                                            <ul class="list-unstyled ml-3 mt-4">
+                                                <li class="mb-3">
+                                                    <i class="fa fa-caret-right text-125 text-orange mr-1"></i>
+                                                    Donec id elit non mi porta gravida at eget metus.
+                                                </li>
+                                                <li class="mb-3">
+                                                    <i class="fa fa-caret-right text-125 text-orange mr-1"></i>
+                                                    Onec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo.
+                                                </li>
+                                                <li>
+                                                    <i class="fa fa-caret-right text-125 text-orange mr-1"></i>
+                                                    Justo odio, dapibus ac facilisis in, egestas eget quam.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div><!-- /.tab-pane -->
+
+                                <div class="tab-pane px-3" id="reason3">
+                                    <div class="d-flex flex-column align-items-center flex-md-row align-items-md-start">
+                                        <div class="flex-grow-1 text-dark-tp3 mt-4 mt-md-0">
+                                            <h3 class="text-140 text-secondary-d3 text-center text-md-left mt-md-4">
+                                                Very easy to use!
+                                            </h3>
+
+                                            <ul class="list-unstyled ml-3 mt-4">
+                                                <li class="mb-3">
+                                                    <i class="fa fa-caret-right text-125 text-blue mr-1"></i>
+                                                    Onec sed odio dui. Nullam quis risus eget urna mollis ornare vel eu leo.
+                                                </li>
+                                                <li class="mb-3">
+                                                    <i class="fa fa-caret-right text-125 text-blue mr-1"></i>
+                                                    Justo odio, dapibus ac facilisis in, egestas eget quam.
+                                                </li>
+                                                <li>
+                                                    <i class="fa fa-caret-right text-125 text-blue mr-1"></i>
+                                                    Donec id elit non mi porta gravida at eget metus.
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="radius-2 ml-md-4 shadow-sm border-1 p-2px brc-default-l2 bgc-white order-first order-md-last">
+                                            <div class="overflow-hidden radius-1">
+                                                <img alt="Product image 5" src="~/Contents/Base/plugins/ace_v4/assets/image/landing/layout-code.png" width="320" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!-- /.tab-pane -->
+                            </div><!-- /.tab-content -->
+
+                        </div><!-- /.col -->
+                    </div><!-- /.row -->
+                </div><!-- /.container -->
+
+            </div>
+
+            <!-- Other features -->
+            <div class="d-none">
+                <div class="container container-plus pb-45">
+                    <hr class="brc-secondary-l3 mb-4" />
+
+                    <div class="row">
+                        <div class="col-lg-8 mx-auto">
+                            <div class="text-center">
+                                <h2 class="text-grey-d3 text-160 mb-45">And other cool features</h2>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-4 offset-2">
+                                    <ul class="list-unstyled text-120 text-white">
+                                        <li class="mb-2 bgc-info-d2 px-35 py-25">
+                                            <i class="w-5 far fa-clock text-170 align-middle mr-2"></i>
+                                            <span class="align-middle">24/7 Support</span>
+                                        </li>
+
+                                        <li class="mb-2 bgc-info-d2 px-35 py-25">
+                                            <i class="w-5 fa fa-code text-170 align-middle mr-2"></i>
+                                            <span class="align-middle">Fully Documented</span>
+                                        </li>
+
+                                        <li class="mb-2 bgc-info-d2 px-35 py-25">
+                                            <i class="w-5 fa fa-dice-d6 text-170 align-middle mr-2"></i>
+                                            <span class="align-middle">Secure Backups</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+
+                                <div class="col-4">
+                                    <ul class="list-unstyled text-120 text-white">
+                                        <li class="mb-2 bgc-info-d2 text-white px-35 py-25">
+                                            <i class="w-5 fa fa-redo text-170 align-middle mr-2"></i>
+                                            <span class="align-middle">Regular Updates</span>
+                                        </li>
+
+                                        <li class="mb-2 bgc-info-d2 px-35 py-25">
+                                            <i class="w-5 fa fa-eye text-170 align-middle mr-2"></i>
+                                            <span class="align-middle">Maximum Privacy</span>
+                                        </li>
+
+                                        <li class="mb-2  bgc-info-d2 px-35 py-25">
+                                            <i class="w-5 fa fa-rocket text-170 align-middle mr-2"></i>
+                                            <span class="align-middle">Unmatched Speed</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bgc-primary-l3">
+                <div class="container container-plus py-45">
+                    <div class="row">
+                        <div class="col-12 col-lg-9 mx-auto">
+                            <h3 class="text-center text-dark-m3 mb-4 mb-md-5" data-aos="fade-up">
+                                Testimonials
+                            </h3>
+
+                            <div class="row justify-content-center">
+                                <div class="col-12 col-md-4 mb-2 mb-md-0 minh-100" data-aos="fade-up" data-aos-delay="50">
+                                    <div class="text-center bgc-white p-45 radius-1 shadow-md minh-100 d-flex flex-column">
+                                        <div class="mt-md-n2 mb-3">
+                                            <img alt="Customer avatar" src="~/Contents/Base/plugins/ace_v4/assets/image/avatar/avatar1.jpg" class="mt-md-n5 radius-round border-2 brc-default-m1 p-2px shadow-md" />
+                                        </div>
+
+                                        <h4 class="mb-15">
+                                            Perfect timing
+                                        </h4>
+
+                                        <div>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-grey-l3"></i>
+                                        </div>
+
+                                        <p class="mt-2 text-dark-tp3 text-95">
+                                            Lorem ipsum dolor sit amet.
+                                            <br />
+                                            Adipiscing elit nam at lacus at augue aliquet posuere.
+                                            <br />
+                                            Eliquam fringilla elementum varius.
+                                        </p>
+
+                                        <p class="text-600 mb-0 mt-auto">
+                                            Jason Wells
+                                        </p>
+                                    </div>
+                                </div><!-- /.col -->
+
+
+                                <div class="col-12 col-md-4 mb-2 mb-md-0 minh-100" data-aos="fade-up" data-aos-delay="150">
+                                    <div class="text-center bgc-white p-45 radius-1 shadow-md minh-100 d-flex flex-column">
+                                        <div class="mt-md-n2 mb-3">
+                                            <img alt="Customer avatar" src="~/Contents/Base/plugins/ace_v4/assets/image/avatar/avatar2.jpg" class="mt-md-n5 radius-round border-2 brc-default-m1 p-2px shadow-md" />
+                                        </div>
+
+                                        <h4 class="mb-15">
+                                            Cost effective
+                                        </h4>
+
+                                        <div>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                        </div>
+
+                                        <p class="mt-2 text-dark-tp3 text-95">
+                                            Lorem ipsum dolor sit amet.
+                                            <br />
+                                            Eliquam fringilla elementum varius.
+                                        </p>
+
+                                        <p class="text-600 mb-0 mt-auto">
+                                            Alex Wizard
+                                        </p>
+                                    </div>
+                                </div><!-- /.col -->
+
+                                <div class="col-12 col-md-4 mb-2 mb-md-0 minh-100" data-aos="fade-up" data-aos-delay="250">
+                                    <div class="text-center bgc-white p-45 radius-1 shadow-md minh-100 d-flex flex-column">
+                                        <div class="mt-md-n2 mb-3">
+                                            <img alt="Customer avatar" src="~/Contents/Base/plugins/ace_v4/assets/image/avatar/avatar3.jpg" class="mt-md-n5 radius-round border-2 brc-default-m1 p-2px shadow-md" />
+                                        </div>
+
+                                        <h4 class="mb-15">
+                                            Blazingly fast
+                                        </h4>
+
+                                        <div>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-orange"></i>
+                                            <i class="fa fa-star text-grey-l3"></i>
+                                        </div>
+
+                                        <p class="mt-2 text-dark-tp3 text-95">
+                                            Adipiscing elit nam at lacus at augue aliquet posuere.
+                                            <br />
+                                            Eliquam fringilla elementum varius.
+                                        </p>
+
+                                        <p class="text-600 mb-0 mt-auto">
+                                            Alice Summer
+                                        </p>
+                                    </div>
+                                </div><!-- /.col -->
+                            </div><!-- /.row -->
+                        </div><!-- /.col -->
+                    </div><!-- /.row -->
+
+                </div><!-- /.container -->
+            </div>
+
+            <div class="pb-3">
+                <div class="container container-plus py-5">
+                    <h3 class="text-center text-dark-tp3 text-160 mb-2 mb-md-4 mb-lg-5" data-aos="fade-down">
+                        Our Packages
+                    </h3>
+
+                    <div>
+                        <div class="row col-lg-10 d-flex justify-content-center mx-1 mx-lg-auto mt-3">
+
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 px-2 dh-zoom-1">
+                                <!-- Basic -->
+                                <div data-aos="fade-right" data-aos-delay="200" class="d-style btn btn-outline-default btn-h-outline-blue btn-a-outline-blue bgc-white w-100 border-none border-t-3 radius-b-1 my-2 p-0 pt-2 shadow">
+
+                                    <div class="d-flex flex-column align-items-center">
+
+                                        <h4 class="pt-1 pb-15 px-4 radius-4 text-110 bgc-blue-l3 text-blue-d3 my-3 radius-1">
+                                            Basic
+                                        </h4>
+
+                                        <div class="text-secondary-d2 text-130">
+                                            $<span class="text-200">10</span> / month
+                                        </div>
+
+                                        <hr class="w-90 my-4 brc-secondary-l3" />
+
+                                        <div class="text-grey text-90 w-100">
+                                            <ul class="list-unstyled text-left m-0">
+                                                <li class="mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span>
+                                                        <span class="text-110">Donec id elit.</span>
+                                                        Fusce dapibus...
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-3 mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110 ">
+                                                        Placerat duis
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-3 mx-4">
+                                                    <i class="fa fa-times text-danger-m3 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110">
+                                                        Tortor mauris
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-45">
+                                                    <a href="#" class="d-hover btn radius-0 btn-blue py-3 border-0 btn-block px-3 btn-bold text-105">Start Now</a>
+                                                    <a href="#" class="d-n-hover btn radius-0 btn-default py-3 border-0 btn-block px-3 btn-bold text-105">Start Now</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 px-2 dh-zoom-1 mt-lg-n3">
+                                <!-- Pro -->
+                                <div data-aos="fade" data-aos-delay="100" class="d-style active btn btn-outline-default btn-h-outline-green btn-a-outline-green bgc-white w-100 border-none border-t-3 radius-b-1 my-2 p-0 pt-2 shadow">
+
+                                    <div class="d-flex flex-column align-items-center">
+
+                                        <h4 class="pt-1 pb-15 px-4 radius-4 text-110 bgc-green-l2 text-green-d3 my-3 radius-1">
+                                            Pro
+                                        </h4>
+
+                                        <div>
+                                            <div>
+                                                <s class="text-danger-m3">$<span class="text-110">30</span> / month</s>
+                                            </div>
+                                            <div class="text-130">
+                                                <span class="text-green-d2">$<span class="text-200">20</span> / month</span>
+                                            </div>
+                                        </div>
+
+                                        <span class="mt-2 badge badge-lg bgc-orange-d1 text-white brc-orange-d1 arrowed-in arrowed-in-right">Special offer</span>
+
+                                        <hr class="w-90 my-4 brc-secondary-l3" />
+
+                                        <div class="text-grey text-90 w-100">
+                                            <ul class="list-unstyled text-left m-0">
+                                                <li class="mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110 text-1">
+                                                        Everything in Basic...
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-3 mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110">
+                                                        Non diam phasellus
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-3 mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110">
+                                                        Sed adipiscing diam
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-45">
+                                                    <a href="#" class="btn radius-0 btn-green py-3 border-0 btn-block px-3 btn-bold text-105">Start Now</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 px-2 dh-zoom-1">
+                                <!-- Max -->
+                                <div data-aos="fade-left" data-aos-delay="200" class="d-style btn btn-outline-default btn-h-outline-purple btn-a-outline-purple bgc-white w-100 border-none border-t-3 radius-b-1 my-2 p-0 pt-2 shadow">
+
+                                    <div class="d-flex flex-column align-items-center">
+
+                                        <h4 class="pt-1 pb-15 px-4 radius-4 text-110 bgc-purple-l3 text-purple-d3 my-3 radius-1">
+                                            Max
+                                        </h4>
+
+                                        <div class="text-secondary-d2 text-130">
+                                            $<span class="text-200">50</span> / month
+                                        </div>
+
+                                        <hr class="w-90 my-4 brc-secondary-l3" />
+
+                                        <div class="text-grey text-90 w-100">
+                                            <ul class="list-unstyled text-left m-0">
+                                                <li class="mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110">
+                                                        Everything in Pro...
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-3 mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110">
+                                                        In fermentum et
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-3 mx-4">
+                                                    <i class="fa fa-check text-success-m2 text-110 mr-1 mt-1"></i>
+                                                    <span class="text-110">
+                                                        Molestie nunc non
+                                                    </span>
+                                                </li>
+
+                                                <li class="mt-45">
+                                                    <a href="#" class="d-hover btn radius-0 btn-purple py-3 border-0 btn-block px-3 btn-bold text-105">Start Now</a>
+                                                    <a href="#" class="d-n-hover btn radius-0 btn-default py-3 border-0 btn-block px-3 btn-bold text-105">Start Now</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div><!-- ./row -->
+                    </div>
+                </div>
+            </div>
+
+
+        <div class="navbar-darkblue pos-rel">
+            <div class="container container-plus py-5 px-lg-5">
+                <div class="row">
+                    <div class="col-lg-6 col-xl-5 mx-auto" data-aos="fade-up">
+                        <h3 class="text-white text-center text-180 mb-3">
+                            Sign up for our newsletter
+                        </h3>
+
+                        <p class="text-white-tp1 mb-4">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nesciunt voluptate, quibusdam sunt iste dolores consequatur
+                        </p>
+
+                        <div>
+                            <div class="px-0 col-12 col-sm-8 col-lg-10 mx-auto radius-round bgc-white input-group">
+                                <input placeholder="Your email address" type="text" class="form-control form-control-lg radius-round shadow-none border-0 text-dark" />
+                                <a href="#" class="btn radius-round btn-pink text-600 text-110 px-4 m-3px">
+                                    Join
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="footer h-auto">
+        <div class="footer-inner py-45">
+            <div class="container container-plus" data-aos="fade">
+                <div class="row">
+                    <div class="col-12 col-lg-5">
+                        <h2 class="text-dark-m3">
+                            <i class="fa fa-leaf text-85 mr-1 text-success-m1"></i>
+                            ACE
+                            <span class="text-75 text-dark-l2">Application</span>
+                        </h2>
+
+                        <p class="text-90">
+                            Praesent commodo cursus magna!
+                        </p>
+
+                        <div class="text-150 mt-2">
+                            <i class="bgc-blue-m1 p-25 w-6 radius-round fab fa-twitter text-white mx-1"></i>
+                            <i class="bgc-primary-d2 p-25 w-6 radius-round fab fa-facebook-square text-white mx-1"></i>
+                            <i class="bgc-purple p-25 w-6 radius-round fab fa-instagram text-white mx-1"></i>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-7 mt-5 mt-lg-0">
+                        <div class="row text-center text-lg-left">
+                            <div class="col-4 ">
+                                <h6 class="text-dark-tp3 text-95 text-600 mb-3">ABOUT</h6>
+                                <div>
+                                    <a href="#" class="text-dark-tp4">Link 1</a>
+                                    <br />
+                                    <a href="#" class="text-dark-tp4">Link 2</a>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <h6 class="text-dark-tp3 text-95 text-600 mb-3">PRODUCTS</h6>
+                                <div>
+                                    <a href="#" class="text-dark-tp4">Product 1</a>
+                                    <br />
+                                    <a href="#" class="text-dark-tp4">Product 2</a>
+                                    <br />
+                                    <a href="#" class="text-dark-tp4">Product 3</a>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <h6 class="text-dark-tp3 text-95 text-600 mb-3">CONTACT</h6>
+                                <div>
+                                    <a href="#" class="text-dark-tp4">Email</a>
+                                    <br />
+                                    <a href="#" class="text-dark-tp4">Phone</a>
+                                    <br />
+                                    <a href="#" class="text-dark-tp4">Address</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.row -->
+
+            </div><!-- /.container -->
+        </div><!-- /.footer-inner -->
+    </div><!-- /.footer -->
+*@
+
+@section BottomScript{
+    <!-- "Landing Page 1" page script to enable its demo functionality -->
+    <script src="~/Contents/Base/plugins/ace_v4/views/pages/landing-page-1/page-script.js"></script>
+}

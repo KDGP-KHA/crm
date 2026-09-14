@@ -1,0 +1,65 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.MailTemplateRenderModel
+@{
+    string mailTitle = AppProcessor.Messagor.GetMessage("Mail_Title") ?? AppProcessor.Messagor.GetMessage("App_Title") ?? "VNPT CRM";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@mailTitle</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial, Helvetica, sans-serif; background:#f5f7fb; color:#233042;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f7fb; padding:24px 0;">
+        <tr>
+            <td align="center">
+                <table cellpadding="0" cellspacing="0" border="0" width="720" style="max-width:720px; background:#ffffff; border-radius:8px; overflow:hidden;">
+                    <tr>
+                        <td style="background:#dc3545; padding:20px 24px; color:#ffffff;">
+                            <div style="font-size:20px; font-weight:bold;">@mailTitle</div>
+                            <div style="font-size:13px; opacity:0.9; margin-top:6px;">Thông báo thành viên tham gia cơ hội kinh doanh</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:24px;">
+                            <p style="margin:0 0 16px 0;">Kính gửi <strong>@Model.GetString("FullName")</strong>,</p>
+                            <p style="margin:0 0 16px 0;">Bạn vừa bị xóa khỏi danh sách thành viên tham gia cơ hội kinh doanh.</p>
+
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+                                <tr>
+                                    <td style="width:180px; padding:8px 0; color:#5b6778;">Tên cơ hội</td>
+                                    <td style="padding:8px 0; font-weight:bold;">@Model.GetString("OpportunityName")</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">Khách hàng</td>
+                                    <td style="padding:8px 0;">@Model.GetString("CustomerName", "--")</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">Vai trò trước khi xóa</td>
+                                    <td style="padding:8px 0;">@Model.GetString("RoleNames", "--")</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">Người thực hiện</td>
+                                    <td style="padding:8px 0;">@Model.GetString("ActionByFullName", "--")</td>
+                                </tr>
+                            </table>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.GetString("Description")))
+                            {
+                                <div style="margin-top:20px;">
+                                    <div style="font-weight:bold; margin-bottom:8px;">Mô tả cơ hội kinh doanh</div>
+                                    <div style="padding:12px 14px; background:#f7f9fc; border:1px solid #e3e8ef; border-radius:6px; line-height:1.6;">
+                                        @Model.GetString("Description")
+                                    </div>
+                                </div>
+                            }
+
+                            <p style="margin:24px 0 0 0;">Trân trọng.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

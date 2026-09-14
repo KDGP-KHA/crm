@@ -1,0 +1,82 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_Employee_BusinessPlanModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.EmployeeBusinessPlanID)
+    @Html.HiddenFor(model => model.FullName)
+    <div class="col-12">
+        @Html.TitleFor(model => model.BusinessPlanID, new { @class = "col-form-label pr-0 font-bold" })
+        @Html.DropDownListFor(model => model.BusinessPlanID, new SelectList(Model.ListBusinessPlan, "Value", "Text"), "", new { @class = "col form-control" })
+        @Html.ValidationMessageFor(model => model.BusinessPlanID, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-12">
+        @Html.TitleFor(model => model.BoPhan_ID, new { @class = "col-form-label pr-0 font-bold" })
+        @Html.DropDownListFor(model => model.BoPhan_ID, new SelectList(Model.ListBoPhan, "BoPhan_ID", "TenBoPhanDisplay"), "", new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.BoPhan_ID, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-12">
+        @Html.TitleFor(model => model.EmployeeID, new { @class = "col-form-label pr-0 font-bold" })
+        @Html.DropDownListFor(model => model.EmployeeID, new SelectList(Model.ListEmployee, "Value", "Text"), "", new { @class = "col form-control" })
+    </div>
+    <div class="col-12">
+        <div class="row">
+            <div class="col-6">
+                @Html.TitleFor(model => model.RevenueTarget, new { @class = "col-form-label pr-0 font-bold" })
+                @Html.TextBoxFor(model => model.RevenueTarget, "{0:0.##}", new { @class = "form-control text-right", type = "number", step = "0.01", placeholder = AppProcessor.Messagor.GetMessage("BusinessPlan_RevenueTarget_Label") })
+            </div>
+            <div class="col-6">
+                @Html.TitleFor(model => model.ResponsibilityRevenue, new { @class = "col-form-label pr-0 font-bold" })
+                @Html.TextBoxFor(model => model.ResponsibilityRevenue, "{0:0.##}", new { @class = "form-control text-right", type = "number", step = "0.01", placeholder = AppProcessor.Messagor.GetMessage("BusinessPlan_ResponsibilityRevenue_Label") })
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        @Html.TitleFor(model => model.Note, new { @class = "col-form-label pr-0 font-bold" })
+        @Html.TextAreaFor(model => model.Note, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Task_Note_Label") })
+    </div>
+</div>
+
+<script>
+    $(function () {
+        var $employee = $("#EmployeeID");
+        var $boPhan = $("#BoPhan_ID");
+
+        var currentBoPhan = $boPhan.val();
+
+        if (currentBoPhan) {
+            $employee.prop("disabled", false);
+        } else {
+            $employee.prop("disabled", true);
+        }
+
+        $boPhan.on("change", function () {
+            var boPhanId = $(this).val();
+
+            $employee.prop("disabled", !boPhanId);
+
+            $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+            if (!boPhanId) return;
+
+            $.ajax({
+                url: '@Url.Action("GetEmployeeByDepartment", "EmployeeBusinessPlan", new { area = "Cate" })',
+                type: 'GET',
+                data: { boPhanId: boPhanId },
+                success: function (res) {
+
+                    $.each(res, function (i, item) {
+                        $employee.append(
+                            $('<option>', {
+                                value: item.Value,
+                                text: item.Text
+                            })
+                        );
+                    });
+
+                }
+            });
+        });
+
+    });
+</script>

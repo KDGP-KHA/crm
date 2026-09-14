@@ -1,0 +1,46 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectRevenueReportSearchModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Title");
+}
+
+@section PageTitle
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2">
+                    <i class="fa fa-home fa-1x"></i>
+                    <span>@AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_Home")</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager">
+                    Thống kê
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                @ViewBag.Title
+            </li>
+        </ol>
+    </nav>
+}
+
+<style>
+    .breadcrumb-item + .breadcrumb-item::before {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 600;
+        content: "\f101";
+        font-size: 0.875em;
+        margin: 5px 0;
+    }
+</style>
+
+@Html.Partial("_Search", Model)
+
+<div id="ProjectRevenueReportContainer"></div>
+
+@section BottomScript
+{
+    <script src="~/Areas/Cate/Views/ProjectRevenueReport/ProjectRevenueReport.js?v=20260424_01"></script>
+}

@@ -1,0 +1,114 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
+@{
+    var editTypeTitle = (Model != null && Model.BusinessType == 2) ? "Dự án SPDV Số" : "Cơ hội kinh doanh SPDV Số";
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), editTypeTitle);
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType {
+    primary
+}
+@section FormIcon {
+    <i class="far fa-edit"></i>
+}
+@section FormBody {
+    @using (Html.BeginForm("Edit", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditDigitalSales", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_DigitalSales", Model)
+        </div>
+    }
+
+    <script type="text/javascript">
+        (function () {
+            var $form = $('form#EditDigitalSales');
+            var $modal = $form.closest('.modal');
+
+            function syncCKEditorData() {
+                if (typeof CKEDITOR !== 'undefined') {
+                    for (var inst in CKEDITOR.instances) {
+                        try {
+                            var data = CKEDITOR.instances[inst].getData();
+                            $('#' + inst).val(data);
+                            CKEDITOR.instances[inst].updateElement();
+                        } catch (e) { }
+                    }
+                }
+            }
+
+            // Gắn sự kiện click rõ ràng cho nút Lưu ở footer modal
+            $modal.find('#btnSave, .modal-footer #btnSave').off('click.digitalsales').on('click.digitalsales', function (e) {
+                e.preventDefault();
+                syncCKEditorData();
+                $form.submit();
+            });
+
+            $form.ajaxForm({
+                beforeSerialize: function ($f, options) {
+                    syncCKEditorData();
+                },
+                beforeSubmit: function (arr, $f, options) {
+                    syncCKEditorData();
+
+                    if (arr && arr.length) {
+                        var noteVal = $('#DigitalSales_Form_Note').val() || '';
+                        for (var i = 0; i < arr.length; i++) {
+                            if (arr[i].name === 'Note') {
+                                arr[i].value = noteVal;
+                            }
+                        }
+                    }
+
+                    // 1. Kiểm tra validation nhanh ở Client-side
+                    var cusId = parseInt($('#CustomerID_Form').val()) || parseInt($form.find('input[name="CustomerID"]').val()) || 0;
+                    var title = ($form.find('#Title').val() || '').trim();
+
+                    var hasError = false;
+                    var errorMsg = "";
+
+                    if (!title) {
+                        $form.find('[data-valmsg-for="Title"]').text('Vui lòng nhập tên cơ hội / dự án!').show();
+                        hasError = true;
+                        errorMsg = "Vui lòng nhập tên cơ hội / dự án!";
+                    }
+
+                    if (cusId <= 0) {
+                        $form.find('[data-valmsg-for="CustomerID"]').text('Vui lòng chọn khách hàng!').show();
+                        if (!hasError) {
+                            hasError = true;
+                            errorMsg = "Vui lòng chọn khách hàng!";
+                        }
+                    }
+
+                    var amId = parseInt($form.find('select[name="AssignedEmployeeID"]').val()) || 0;
+                    if (amId <= 0) {
+                        $form.find('[data-valmsg-for="AssignedEmployeeID"]').text('Vui lòng chọn nhân sự phụ trách / AM chủ trì!').show();
+                        if (!hasError) {
+                            hasError = true;
+                            errorMsg = "Vui lòng chọn nhân sự phụ trách / AM chủ trì!";
+                        }
+                    }
+
+                    if (hasError) {
+                        // Bắn ngay Toastr cảnh báo rõ ràng
+                        executeResponseMessage(errorMsg, "Vui lòng kiểm tra và điền đầy đủ các trường bắt buộc (*)", false);
+                        return false; // Ngăn chặn submit để người dùng chỉnh sửa ngay
+                    }
+
+                    // 2. Hiển thị trạng thái loading spinner trên nút Lưu
+                    var $btn = $modal.find('#btnSave, .modal-footer #btnSave');
+                    $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+                    return true;
+                },
+                success: function (response) {
+                    DigitalSales_OnProcessSuccess(response, "EditDigitalSales");
+                },
+                error: function () {
+                    var $btn = $modal.find('#btnSave, .modal-footer #btnSave');
+                    $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Lưu');
+                    executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+                }
+            });
+        })();
+    </script>
+}

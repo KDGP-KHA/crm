@@ -1,0 +1,201 @@
+﻿.container.container-plus {
+    max-width: 100%;
+}
+
+.page-content.container-plus {
+    padding: 0.25rem 1.25rem 0.25rem;
+}
+
+.table th {
+    padding: 0.5rem;
+}
+
+.table td {
+    padding: 0.25rem;
+}
+
+.table-responsive-md{
+    padding: 0 !important;
+}
+
+.dataTables_wrapper > .row:first-of-type {
+    padding: 0;
+}
+
+.dataTables_wrapper > .row:first-of-type .col-12 .dataTables_length, .dataTables_filter{
+    padding-top: 12px;
+}
+
+.dataTables_wrapper > .row:last-of-type {
+    padding: 0.25rem 0 0.5rem 0;
+}
+
+.page-content .btn {
+    padding: 0.25rem 0.75rem;
+}
+
+.dataTables_wrapper .dt-bottom {
+    padding: 10px;
+    background-color: #f6f9fb;
+}
+
+.dataTables_wrapper .dt-bottom .dt-right-group{
+    gap: 20px;
+}
+
+.dataTables_wrapper .dt-bottom .dt-right-group .dataTables_length label {
+    margin: 0;
+}
+
+.dataTables_wrapper table thead, tbody {
+    font-size: 11px !important;
+    padding: 0;
+}
+
+.dataTables_wrapper .dataTables_info, .dataTables_length, .dataTables_paginate, .dataTables_filter {
+    font-size: 13px !important;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    display: flex;
+    justify-content: end;
+}
+
+.dataTables_wrapper .dataTables_filter label {
+    margin: 0;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    height: 32px !important
+}
+
+.dataTables_wrapper .dataTables_filter .btn-group .dt-button-collection .dropdown-menu a {
+    font-size: 13px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.dataTables_wrapper .dataTables_filter .btn-group button {
+    height: 32px !important
+}
+
+.dataTables_wrapper .dataTables_length .select2-container .select2-selection--single {
+    height: 32px !important;
+    line-height: 28px !important;
+}
+
+
+.dataTables_wrapper .dataTables_paginate ul li{
+    height: 32px !important;
+}
+
+
+.dataTables_wrapper .dataTables_paginate ul li a{
+    display: flex !important;
+    align-items: center !important;
+}
+.dataTables_wrapper tbody tr td:first-child {
+    padding-left: 15px !important;
+}
+
+body:not(.dt-print-view) .dataTable.dtr-inline:not(.collapsed) tbody tr td:nth-child(2),
+body:not(.dt-print-view) .dataTable.dtr-table:not(.collapsed) tbody tr td:nth-child(2) {
+    padding-left: 15px !important;
+}
+
+.dataTables_wrapper tbody tr td:last-child {
+    padding-right: 15px !important;
+}
+
+/*searchBar css*/
+.Search .card-header {
+    padding: 0.25rem 1.25rem !important;
+}
+.Search_Box {
+    padding: 0 5px;
+}
+
+.Search_Box label{
+    margin: 0;
+    font-size: 13px;
+}
+
+.Search_Box input {
+    font-size: 13px;
+    height: 32px;
+}
+
+.Search_Box .select2-container .select2-selection--single {
+    height: 32px !important;
+    line-height: 28px !important;
+    font-size: 13px !important;
+}
+
+.Search_Box .select2-container .select2-dropdown .select2-results {
+    font-size: 13px !important;
+}
+
+.Search .Group{
+    display: flex;
+}
+
+.Search .Dropdown{
+    width: 25%;
+}
+
+.Search_button {
+    font-size: 13px;
+}
+
+.Search_button button {
+    padding: 2px 8px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.Search_button button i{
+    font-size: 13px;
+}
+
+@media (max-width: 1024px) {
+    .Search .card-body{
+        flex-wrap: wrap;
+    }
+    .Search .Group .keyWord {
+        width: 44vw;
+    }
+}
+
+@media (max-width: 768px) {
+    .Search .keyWord {
+        width: 45% !important;
+    }
+    .Search .Dropdown {
+        width: 100% !important;
+    }
+    .Search .Group .keyWord {
+        width: 58vw;
+    }
+    .Search .Group_button {
+        padding-top: 10px;
+        padding-left: 5px;
+    }
+}
+
+@media (max-width: 450px) {
+    .Search .keyWord {
+        width: 100% !important;
+    }
+    .Search .Group {
+        flex-wrap: wrap;
+    }
+    .Search .Group .Search_Box{
+        width: 100%;
+    }
+    .Search .dropdownList{
+        width: 75% !important;
+    }
+  
+}

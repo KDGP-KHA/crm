@@ -1,0 +1,44 @@
+﻿@using TSFramework.Libs.Processors
+<div class="signin login-box widget-box" id="FogotBox">
+    <div class="logo-img text-center">
+        <img alt="" src="~/Contents/imgs/sodulich-logo.png"/>
+        <h2 class="box-title text-blue" style="font-size: 180%; font-weight: 600">@AppProcessor.Messagor.GetMessage("App_Title").ToUpper() </h2>
+        <hr style="border-color: #0073b7">
+    </div>
+    <div class="login-box-body">
+        @using (Html.BeginForm("ForgotPassword", "Account", new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "", id = "ForgotForm", role = "form" }))
+        {
+            <span class="text-center text-blue" style="font-size: large"><i class="fa fa-key"></i> QUÊN MẬT KHẨU</span>
+            <div id="ContentForgot">
+                @Html.Partial("_ForgotView")
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <button type="submit" class="btn btn-primary btn-block btn-flat">
+                        <i class="fa fa-send"></i>
+                        Gửi
+                    </button>
+                </div>
+            </div>
+
+            <div class="toolbar clearfix">
+                <div class="pull-left">
+                    <a href="#" data-target="#LoginBox">
+                        <i class="fa fa-arrow-left"></i>
+                        Đăng nhập
+                    </a>
+                </div>
+            </div>
+        }
+        <div class="social-auth-links text-center">
+            <hr style="border-color: #0073b7"/>
+            <div class="logo_footer">
+                <a href="https://vnpt.com.vn/">
+                    <img width="75%" src="/Contents/Base/imgs/logo_footer.png">
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>

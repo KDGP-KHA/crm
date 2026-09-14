@@ -1,0 +1,202 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.MailTemplateRenderModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Thông báo công việc</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #333333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #222222;
+            margin-bottom: 28px;
+        }
+
+        .text {
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .task-link {
+            color: #0b67a3;
+            text-decoration: underline;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #d5d5d5;
+            margin: 24px 0;
+        }
+
+        .task-name {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .info-table {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-left: 16px;
+        }
+
+        .label {
+            padding: 2px 0;
+            color: #666666;
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .value {
+            padding-left: 6px;
+        }
+
+        .description {
+            padding-top: 26px;
+            font-size: 16px;
+            line-height: 1.9;
+            color: #333333;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <table class="container"
+           cellpadding="0"
+           cellspacing="0"
+           border="0">
+
+        <!-- Header -->
+        <tr>
+            <td>
+
+                <div class="title">
+                    VNPT CRM
+                </div>
+
+                <div class="text">
+
+                    Công việc
+
+                    <span class="task-link">
+                        #@Model.GetString("TaskCode")
+                    </span>
+
+                    đã được tạo bởi
+
+                    @Model.GetString("CreatedByFullName").
+
+                </div>
+
+                <hr class="divider" />
+
+            </td>
+        </tr>
+
+        <!-- Task title -->
+        <tr>
+            <td>
+
+                <div class="task-name">
+
+                    <span class="task-link">
+                        New #@Model.GetString("TaskCode")
+                    </span>
+
+                    :
+
+                    @Model.GetString("TaskName")
+
+                </div>
+
+            </td>
+        </tr>
+
+        <!-- Info -->
+        <tr>
+            <td>
+
+                <table class="info-table"
+                       cellpadding="0"
+                       cellspacing="0"
+                       border="0">
+
+                    <tr>
+                        <td class="label">• Dự án:</td>
+                        <td class="value">@Model.GetString("ProjectName")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Người tạo:</td>
+                        <td class="value">@Model.GetString("CreatedByFullName")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Trạng thái:</td>
+                        <td class="value">@Model.GetString("Status")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Độ ưu tiên:</td>
+                        <td class="value">@Model.GetString("Priority")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Người thực hiện:</td>
+                        <td class="value">@Model.GetString("Assignee")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Ngày bắt đầu:</td>
+                        <td class="value">@Model.GetString("StartDate")</td>
+                    </tr>
+
+                    <tr>
+                        <td class="label">• Ngày kết thúc:</td>
+                        <td class="value">@Model.GetString("EndDate")</td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+
+        <!-- Description -->
+        <tr>
+            <td class="description">
+
+                @Model.GetString("Description")
+
+            </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+            <td>
+                <hr class="divider" />
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

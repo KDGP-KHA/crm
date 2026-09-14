@@ -1,0 +1,292 @@
+﻿@using System.Linq
+@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.OpportunityDashboardModel>
+
+<style>
+    .exchange-content,
+    .exchange-content *,
+    .preview-image,
+    .preview-image * {
+        font-size: 12px !important;
+        font-family: inherit !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        max-width: 100%;
+        height: auto !important;
+        display: block;
+    }
+</style>
+
+<div class="db-section-title mt-2">
+    <i class="fa fa-table mr-1 text-blue"></i>
+    Danh sách cơ hội kinh doanh
+    <a class="btn btn-sm btn-success float-right dashboard-export" style="margin-top: -5px"
+       href="@Url.Action("ExportOpportunities", "Dashboard", new { area = "Dashboard" })">
+        <i class="fa fa-file-excel mr-1"></i>Xuất Excel
+    </a>
+</div>
+
+<div class="table-responsive mt-2">
+    <table class="table table-bordered table-hover table-striped mb-0" id="opportunitysTable">
+        <thead class="thead-light">
+            <tr>
+                <th width="40">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Info_Public_Label")</th>
+                <th>@AppProcessor.Messagor.GetMessage("ParticipatingMembers_Title")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Form_Desc")</th>
+                <th>@AppProcessor.Messagor.GetMessage("RecentInformationExchange")</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                int index = 1;
+                foreach (var item in Model)
+                {
+                    var members = (item.Members ?? "")
+                        .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim())
+                        .OrderByDescending(x => x.Contains("(AM") || x.Contains(", AM") || x.EndsWith("AM)"))
+                        .ToList();
+                    <tr>
+                        <td>@index</td>
+
+                        <td>
+                            <div>
+                                <span class="badge @item.StatusClass">
+                                    @item.StatusName
+                                </span>
+                            </div>
+
+                            <div class="font-weight-bold text-primary">
+                                <a href="/Cate/BusinessOpportunityOverview/Index/@item.BusinessOpportunityID">
+                                    [@item.CodeOpportunity] @item.OpportunityName
+                                </a>
+                            </div>
+
+                            <div class="text-danger small">
+                                <i class="fa fa-building mr-1"></i> @item.CustomerName
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(item.ProductServices))
+                            {
+                                <div class="small mt-1">
+                                    <b>Dịch vụ:</b><br />
+                                    - @Html.Raw(item.ProductServices.Replace(";", "<br/> -"))
+                                </div>
+                            }
+                            <div class="small">
+                                @if (item.ExpectedValue != 0)
+                                {
+                                    <text>
+                                        Giá trị dự kiến:
+                                        <span class="text-success font-weight-bold">
+                                            @item.ExpectedValue.ToString("N0") triệu
+                                        </span>
+                                    </text>
+                                }
+
+                                @if (item.ExpectedValue != 0 && item.ClosingProbability != 0)
+                                {
+                                    <text> - </text>
+                                }
+
+                                @if (item.ClosingProbability != 0)
+                                {
+                                    var colorClass =
+                                        item.ClosingProbability > 50 ? "text-success" :
+                                        item.ClosingProbability <= 20 ? "text-danger" : "text-warning";
+
+                                    <text>
+                                        Xác suất chốt:
+                                        <strong class="@colorClass">
+                                            @item.ClosingProbability %
+                                        </strong>
+                                    </text>
+                                }
+                            </div>
+                            <div class="text-muted small">
+                                @AppProcessor.Messagor.GetMessage("Managing_Entity_Label") <b>@item.TenBoPhan</b>
+                            </div>
+                        </td>
+                        <td style="font-size: 12px;">
+                            @{
+                                var maxShow = 3;
+                                var total = members.Count();
+                                var displayMembers = members.Take(maxShow).ToList();
+                            }
+
+                            @foreach (var m in displayMembers)
+                            {
+                                var text = m.Trim();
+                                var isAM = text.Contains("(AM") || text.Contains(", AM") || text.EndsWith("AM)");
+                                <div>
+                                    - @Html.Raw(isAM
+                                      ? $"<span class='text-danger font-weight-bold'>{text}</span>"
+                                      : text)
+                                </div>
+                            }
+
+                            @if (total > maxShow)
+                            {
+                                <div style="color:#0d6efd; cursor:pointer;" onclick="this.nextElementSibling.style.display='block'; this.style.display='none';">
+                                    + Xem thêm (@(total - maxShow))
+                                </div>
+
+                                <div style="display:none;">
+                                    @foreach (var m in members.Skip(maxShow))
+                                    {
+                                        var text = m.Trim();
+                                        var isAM = text.Contains("(AM") || text.Contains(", AM") || text.EndsWith("AM)");
+                                        <div>
+                                            - @Html.Raw(isAM
+                                              ? $"<span class='text-danger font-weight-bold'>{text}</span>"
+                                              : text)
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                var decoded = System.Web.HttpUtility.HtmlDecode(item.Description);
+                                var desText = System.Text.RegularExpressions.Regex.Replace(decoded, "<.*?>", "");
+                                var shortDesText = desText.Length > 150 ? desText.Substring(0, 150) + "..." : desText;
+                                var hasImage = decoded.Contains("<img");
+
+                                <div class="col-12 exchange-wrapper" style="font-size:12px;">
+                                    @if (!string.IsNullOrEmpty(desText))
+                                    {
+                                        <span class="preview-content text-secondary">
+                                            @shortDesText
+                                        </span>
+                                    }
+                                    @if (hasImage)
+                                    {
+                                        <div class="preview-image mt-1">
+                                            @Html.Raw(item.Description)
+                                        </div>
+                                    }
+                                    @if (desText.Length > 100)
+                                    {
+                                        <span class="toggle-content text-primary" style="cursor:pointer;" >
+                                            Xem thêm
+                                        </span>
+                                    }
+                                    <div class="exchange-content mt-1" style="display: none; font-size: 12px">
+                                        @Html.Raw(item.Description)
+                                    </div>
+                                </div>
+                            }
+                        </td>
+
+                        <td>
+                            @{
+                                // ===== Format date =====
+                                string dateStr = "";
+
+                                if (item.ExchangeDate.HasValue)
+                                {
+                                    var d = item.ExchangeDate.Value;
+
+                                    dateStr = (d.Hour == 0 && d.Minute == 0)
+                                        ? d.ToString("dd/MM/yyyy")
+                                        : d.ToString("dd/MM/yyyy HH:mm");
+                                }
+                                var decodedContent = HttpUtility.HtmlDecode(item.ExchangeContent ?? "");
+                                // ===== Xử lý nội dung =====
+                                var plainText = System.Text.RegularExpressions.Regex.Replace(decodedContent, "<.*?>", "");
+
+                                var shortText = plainText.Length > 120
+                                                ? plainText.Substring(0, 120) + "..."
+                                                : plainText;
+                            }
+
+                            @if (item.ExchangeDate.HasValue)
+                            {
+                                <div class="small text-muted">
+                                    <i class="far fa-clock mr-1"></i>
+                                    @dateStr
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(item.FullName))
+                            {
+                                <div class="small text-primary font-weight-bold">
+                                    <i class="fa fa-user mr-1"></i>
+                                    @item.FullName
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(item.ContactPersonName))
+                            {
+                                <div class="small text-primary font-weight-bold">
+                                    <i class="fas fa-phone-square mr-1"></i>
+                                    @item.ContactPersonName - @item.ContactPersonPosition
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(item.ExchangeContent))
+                            {
+                                <div class="small mt-1">
+                                    Nội dung:
+                                    <span class="text-secondary">@shortText</span>
+                                </div>
+                            }
+
+                            @if (item.ExchangeDate.HasValue)
+                            {
+                                <div class="text-left">
+                                    @Html.Button(
+                                        true,
+                                        "ViewHistory",
+                                        Url.Action("ViewHistory", "RM_BusinessOpportunity", new { area = "Cate", id = item.BusinessOpportunityID }),
+                                        "<i class='far fa-clock'></i>",
+                                        "Xem lịch sử",
+                                        new { @class = "btn btn-sm btn-primary p-1", style = "font-size:9px;" }
+                                    )
+                                </div>
+                            }
+                        </td>
+                    </tr>
+
+                    index++;
+                }
+            }
+            else
+            {
+                <tr class="dt-empty">
+                    <td colspan="7" class="text-center text-muted dt-no-data">
+                        <div class="alert alert-info text-center">
+                            <i class="fa fa-info-circle mr-1"></i> @AppProcessor.Messagor.GetMessage("Dashboard_NoData")
+                        </div>
+                    </td>
+                    <td style="display:none"></td>
+                    <td style="display:none"></td>
+                    <td style="display:none"></td>
+                    <td style="display:none"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).on('click', '.toggle-content', function () {
+        const wrapper = $(this).closest('.exchange-wrapper');
+        const contentDiv = wrapper.find('.exchange-content');
+        const preview = wrapper.find('.preview-content');
+
+        if (contentDiv.is(':animated')) return;
+
+        const isHidden = contentDiv.is(':hidden');
+
+        contentDiv.slideToggle(200);
+        preview.toggle(!isHidden);
+
+        $(this).text(isHidden ? 'Ẩn bớt' : 'Xem thêm');
+    });
+</script>

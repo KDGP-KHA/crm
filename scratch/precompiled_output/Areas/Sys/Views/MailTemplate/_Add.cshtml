@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Thêm mẫu email";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("Add", "MailTemplate", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "AddMailTemplate", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_MailTemplate")
+        </div>
+    }
+
+    <script type="text/javascript">
+        MailTemplate_BindForm("AddMailTemplate", "AddMailTemplate");
+    </script>
+}

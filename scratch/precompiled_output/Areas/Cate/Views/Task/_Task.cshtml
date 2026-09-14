@@ -1,0 +1,57 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_TaskModel
+@{
+    var taskGroups  = ViewBag.TaskGroups  as List<Core.Cate.Models.RM_TaskGroupModel> ?? new List<Core.Cate.Models.RM_TaskGroupModel>();
+    var parentTasks = ViewBag.ParentTasks as List<Core.Cate.Models.RM_TaskModel>      ?? new List<Core.Cate.Models.RM_TaskModel>();
+}
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.TaskID)
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.TaskGroupID, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.DropDownListFor(m => m.TaskGroupID,
+                 new SelectList(taskGroups, "TaskGroupID", "TaskGroupName", Model?.TaskGroupID),
+                 "-- Chọn nhóm công việc --",
+                 new { @class = "form-control select2", style = "width:100%" })
+        @Html.ValidationMessageFor(m => m.TaskGroupID, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.TaskParentsID, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.DropDownListFor(m => m.TaskParentsID,
+                 new SelectList(parentTasks.Where(t => t.TaskID != Model?.TaskID), "TaskID", "TaskName", Model?.TaskParentsID),
+                 "-- Không có task cha --",
+                 new { @class = "form-control select2", style = "width:100%" })
+        @Html.ValidationMessageFor(m => m.TaskParentsID, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.TaskCode, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextBoxFor(m => m.TaskCode,
+                 new { @class = "form-control", maxlength = "150", placeholder = AppProcessor.Messagor.GetMessage("Task_Code_Label") })
+        @Html.ValidationMessageFor(m => m.TaskCode, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.TaskName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextBoxFor(m => m.TaskName,
+                 new { @class = "form-control", maxlength = "255", placeholder = AppProcessor.Messagor.GetMessage("Task_Name_Label") })
+        @Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.Note, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextAreaFor(m => m.Note,
+                 new { @class = "form-control", rows = "3", placeholder = AppProcessor.Messagor.GetMessage("Task_Note_Label") })
+    </div>
+</div>

@@ -1,0 +1,171 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.ProjectOverviewModel
+
+<!-- Header -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <div>
+                @{
+                    string statusText = Model.ProjectModel.StatusName;
+                    string statusClass = Model.ProjectModel.StatusClass;
+                }
+
+                <span class="@statusClass px-2 py-1 text-100 mb-3">
+                    @statusText
+                </span>
+            </div>
+            <h4 class="text-primary mb-1 font-weight-bold">
+                @Model.ProjectModel.ProjectName
+            </h4>
+            <div class="text-muted">
+                @AppProcessor.Messagor.GetMessage("Customer_Title"): <strong>@Model.ProjectModel.CustomerName</strong>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.ProjectModel.OpportunityName))
+            {
+                <div class="text-muted">
+                    @AppProcessor.Messagor.GetMessage("Project_Opportunity_Label"):
+                    <strong>
+                        <a href="/Cate/BusinessOpportunityOverview/Index/@Model.ProjectModel.BusinessOpportunityID">
+                            @Model.ProjectModel.OpportunityName
+                        </a>
+                    </strong>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<!-- Tổng quan dự án -->
+<div class="row mb-3">
+    <div class="col-xl-6 col-md-12 mb-2">
+        <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card-body">
+                <div class="text-muted mb-1">
+                    @AppProcessor.Messagor.GetMessage("Product_Total_Label")
+                </div>
+                <h3 class="text-primary font-weight-bold">
+                    @Model.TotalProduct
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 col-md-12 mb-2">
+        <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card-body">
+                <div class="text-muted mb-1">
+                    @AppProcessor.Messagor.GetMessage("Dashboard_TotalprojRevenue_label")
+                </div>
+                <h3 class="text-primary font-weight-bold">
+                    @Model.TotalExpectedRevenue.ToString("N0") triệu VNĐ
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 col-md-12 mb-2">
+        <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card-body">
+                <div class="text-muted mb-1">
+                    @AppProcessor.Messagor.GetMessage("TotalRevenue_Label")
+                </div>
+                <h3 class="text-success font-weight-bold">
+                    @Model.TotalRevenue.ToString("N0") triệu VNĐ
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6 col-md-12 mb-2">
+        <div class="card shadow-sm border-0 text-center h-100">
+            <div class="card-body">
+                <div class="text-muted mb-1">
+                    @AppProcessor.Messagor.GetMessage("Cost_Total_Label")
+                </div>
+                <h3 class="text-danger font-weight-bold">
+                    @Model.TotalCost.ToString("N0") triệu VNĐ
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Thông tin chi tiết -->
+<div class="row">
+
+    <!-- Thông tin chính -->
+    <div class="col-xl-6 col-md-12 mb-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-light font-weight-bold">
+                @AppProcessor.Messagor.GetMessage("General_Information_Label")
+            </div>
+            <div class="card-body">
+
+                <p>
+                    <strong>Ngày bắt đầu:</strong>
+                    @(Model.ProjectModel.StartDate?.ToString("dd/MM/yyyy") ?? "")
+                </p>
+
+                <p>
+                    <strong>Mã dự án:</strong>
+                    #@Model.ProjectModel.ProjectID
+                </p>
+
+                <p>
+                    <strong>@AppProcessor.Messagor.GetMessage("SuccessRate_Label"):</strong>
+                    @Model.ProjectModel.SuccessRate.ToString("N0")<span>%</span>
+                </p>
+
+                <p>
+                    <strong>Khách hàng:</strong>
+                    @Model.ProjectModel.CustomerName
+                </p>
+
+                <p class="mb-0">
+                    <strong>Người tạo:</strong>
+                    @Model.ProjectModel.UserCreated
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Ghi chú -->
+    <div class="col-xl-6 col-md-12 mb-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-light font-weight-bold">
+                @AppProcessor.Messagor.GetMessage("Project_Note_Label")
+            </div>
+            <div class="card-body">
+
+                @if (!string.IsNullOrEmpty(Model.ProjectModel.Note))
+                {
+                    <p class="mb-0">@Html.Raw(Model.ProjectModel.Note)</p>
+                }
+                else
+                {
+                    <span class="text-muted">Chưa có ghi chú.</span>
+                }
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Action buttons -->
+<div class="text-right">
+    @Html.Button(
+        true,
+        "EditProject",
+        Url.Action("Edit", "Project", new { area = "Cate", id = Model.ProjectModel.ProjectID }),
+        "<i class='fa fa-edit'></i>",
+        "Chỉnh sửa",
+        new { @class = "btn btn-sm btn-primary mx-1", data_width = "1024px" }
+    )
+
+</div>

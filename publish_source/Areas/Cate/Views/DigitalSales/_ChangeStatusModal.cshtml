@@ -44,6 +44,27 @@
             $form.removeData('validator').removeData('unobtrusiveValidation');
             $.validator.unobtrusive.parse($form);
         }
+        if ($.validator) {
+            var valObj = $form.data('validator');
+            if (valObj) {
+                valObj.settings.ignore = ":hidden:not(#TrackingItemsJson, #SelectedProcessID), #progressItemsContainer *";
+            }
+        }
+
+        // Lắng nghe sự kiện đổi trạng thái từ Select2 và dropdown
+        $('#cboNewStatus').off('change.statusWorkflow').on('change.statusWorkflow', function () {
+            if (typeof handleNewStatusChange === 'function') {
+                handleNewStatusChange($(this).val());
+            }
+        });
+
+        // Nếu đã có trạng thái được chọn sẵn, kích hoạt nạp quy trình
+        var initialStatus = $('#cboNewStatus').val();
+        if (initialStatus && parseInt(initialStatus) > 0) {
+            if (typeof handleNewStatusChange === 'function') {
+                handleNewStatusChange(initialStatus);
+            }
+        }
     };
 
     initDigitalSalesChangeStatusForm();
@@ -51,14 +72,16 @@
     $('#frmChangeStatus').off('submit.digitalSales').on('submit.digitalSales', function (e) {
         e.preventDefault();
         var $form = $(this);
-        if ($form.valid && !$form.valid()) return false;
 
-        // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+        // 1. Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi kiểm tra form
         if (typeof serializeProgressItemsToJson === 'function') {
             if (!serializeProgressItemsToJson()) {
                 return false;
             }
         }
+
+        // 2. Kiểm tra tính hợp lệ của các trường form chính
+        if ($form.valid && !$form.valid()) return false;
 
         var $button = $form.find('button[type=submit]').prop('disabled', true);
         var data = new FormData(this);

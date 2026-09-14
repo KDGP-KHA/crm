@@ -1,0 +1,81 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProductProjectModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.ProductProjectID)
+    @Html.HiddenFor(model => model.ProjectID)
+
+    <div class="col-12">
+        @Html.TitleFor(model => model.ProductServiceID, new { @class = "col-form-label text-sm-right pr-0 font-bold" })
+        @Html.DropDownListFor(model => model.ProductServiceID,
+                 new SelectList(Model.ListProductService.Where(p => p.NodeType == "P").ToList(), "pID", "DisplayName"),
+                 "", new { @class = "form-control col-sm-12" })
+        @Html.ValidationMessageFor(model => model.ProductServiceID, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-12">
+        <div class="row mt-2">
+            <div class="col-md-6">
+                @Html.TitleFor(model => model.StartDate, new { @class = "text-sm-right pr-0 font-bold" })
+                <div class="input-group">
+                    @Html.TextBoxFor(model => model.StartDate, "{0:dd/MM/yyyy}", new { id = "StartDate", @class = "col-sm-6 form-control", placeholder = "dd/mm/yyyy" })
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-6">
+                @Html.TitleFor(model => model.EndDate, new { @class = "text-sm-right pr-0 font-bold" })
+                <div class="input-group">
+                    @Html.TextBoxFor(model => model.EndDate, "{0:dd/MM/yyyy}", new { id = "EndDate", @class = "col-sm-6 form-control", placeholder = "dd/mm/yyyy" })
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-2">
+        @Html.TitleFor(model => model.ExpectedRevenue, new { @class = "col-form-label text-sm-right pr-0 font-bold" })
+        @Html.TextBoxFor(model => model.ExpectedRevenue, "{0:0.##}", new { @class = "col-md-6 form-control text-right", placeholder = "0" })
+        @Html.ValidationMessageFor(model => model.ExpectedRevenue, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<script>
+    function _runFormUtils() {
+        if (typeof initFormUtils === 'function') { initFormUtils('#Language'); }
+        else {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#Language'); };
+            document.head.appendChild(s);
+        }
+    }
+    setTimeout(_runFormUtils, 0);
+    $(document).ready(function () {
+        $("#StartDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+        $("#EndDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+        $('select option').each(function () {
+            $(this).text($(this).text().replace(/&nbsp;/g, "\u00A0"));
+        });
+    });
+</script>

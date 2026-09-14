@@ -1,0 +1,191 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.DashboardSearchModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectByUser_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-Add"></i>
+}
+
+@section FormBody{
+    <div class="mt-3">
+        <div class="card dcard">
+            <div class="col-sm-12 table-responsive-md">
+                <table id="DSProjectByUser" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                        <tr>
+                            <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Info_Project_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Project_Cost_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Project_Revenue_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Members_Title")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var _ProjectActionURLs = {
+            Project_GetData: "/Dashboard/Dashboard/GetProjectByUser"
+        };
+        var _tableProject;
+        $(document).ready(function () {
+            $('#modal_ProjectByUser').addClass('modal-fs').removeClass('modal-lg');
+            initTableProject();
+        });
+
+        function initTableProject() {
+            _tableProject = $("#DSProjectByUser").DataTable({
+                "responsive": false,
+                "lengthChange": true,
+                "processing": true,
+                "serverSide": false,
+                "ordering": false,
+                "autoWidth": false,
+                "order": [[1, "desc"]],
+                "ajax": {
+                    "url": _ProjectActionURLs.Project_GetData,
+                    "type": "POST",
+                    "dataType": "JSON",
+                    "data": {
+                        UserId: '@Model.EmployeeIds',
+                        FromDate: '@Model.FromDate.ToString("dd/MM/yyyy")',
+                        ToDate: '@Model.ToDate.ToString("dd/MM/yyyy")'
+                    }
+                },
+                columnDefs: [
+                    { targets: 0, width: "50px", className: "text-center" },   // STT
+                    { targets: 2, width: "130px" },                            // Chi phí
+                    { targets: 3, width: "130px" },                            // Doanh thu
+                    { targets: 4, width: "200px" }                             // Thành viên
+                    // Không khai báo width cho cột 1 (Info_Project)
+                ],
+                "columns": [
+                    {
+                        "data": null,
+                        "orderable": false,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1 + meta.settings._iDisplayStart;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "className": "text-left",
+                        "render": function (data, type, row) {
+                            let startDate = "";
+                            if (row.StartDate) {
+                                let m = moment(row.StartDate);
+                                startDate = m.format("DD/MM/YYYY");
+                            }
+
+                            return `
+                                <div>
+                                    <span class="badge ${row.StatusClass}">${row.StatusName}</span>
+                                </div>
+
+                                <div class="font-weight-bold text-primary">
+                                    <a href="/Cate/ProjectOverview/Index/${row.ProjectID}">
+                                        ${row.ProjectName}
+                                    </a>
+                                </div>
+
+                                <div class="text-muted small">
+                                    <i class="fa fa-building mr-1"></i> ${row.CustomerName || ""}
+                                </div>
+
+                                <div class="small text-muted">
+                                    <i class="far fa-clock mr-1"></i> ${startDate}
+                                </div>
+                            `;
+                        }
+                    },
+                    {
+                        "data": "TotalCost",
+                        "className": "text-right text-danger font-weight-bold",
+                        "render": function (data) {
+                            return data ? Number(data).toLocaleString() : "0";
+                        }
+                    },
+                    {
+                        "data": "TotalRevenue",
+                        "className": "text-right text-success font-weight-bold",
+                        "render": function (data) {
+                            return data ? Number(data).toLocaleString() : "0";
+                        }
+                    },
+                    {
+                        "data": "Members",
+                        "orderable": false,
+                        "className": "text-left",
+                        "render": function (data, type, row, meta) {
+                            if (!data) return "";
+
+                            let members = data.split(';')
+                                .map(x => x.trim())
+                                .filter(x => x)
+                                .sort((a, b) => {
+                                    const isAM_a = a.includes("(AM") || a.includes(", AM") || a.endsWith("AM)");
+                                    const isAM_b = b.includes("(AM") || b.includes(", AM") || b.endsWith("AM)");
+                                    return isAM_b - isAM_a;
+                                });
+
+                            const renderMember = (text) => {
+                                const isAM = text.includes("(AM") || text.includes(", AM") || text.endsWith("AM)");
+
+                                return `
+                                    <div>
+                                        - ${isAM ? `<span class="text-danger font-weight-bold">${text}</span>` : text}
+                                    </div>
+                                `;
+                            };
+
+                            if (members.length <= 3) {
+                                return members.map(renderMember).join("");
+                            }
+
+                            const id = `member_${meta.row}`;
+                            const remainCount = members.length - 3;
+
+                            return `
+                                ${members.slice(0, 3).map(renderMember).join("")}
+
+                                <div id="${id}" style="display:none">
+                                    ${members.slice(3).map(renderMember).join("")}
+                                </div>
+
+                                <a href="javascript:void(0)"
+                                   data-remain="${remainCount}"
+                                   onclick="toggleMembers('${id}', this)">
+                                    Xem thêm (${remainCount})
+                                </a>
+                            `;
+                        }
+                    }
+                ]
+            });
+        }
+
+        function toggleMembers(id, el) {
+            const div = document.getElementById(id);
+            const remainCount = el.getAttribute("data-remain");
+            if (div.style.display === "none") {
+                div.style.display = "block";
+                el.innerText = "Thu gọn";
+            } else {
+                div.style.display = "none";
+                el.innerText = `Xem thêm (${remainCount})`;
+            }
+        }
+    </script>
+}
+
+@section SubmitControl {
+
+}

@@ -1,0 +1,67 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewBatchModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.ReviewBatchID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.BatchCode, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.BatchCode, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ReviewBatch_ReviewBatchCode_Label") })
+            @Html.ValidationMessageFor(model => model.BatchCode, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.BatchName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.BatchName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ReviewBatch_ReviewBatchName_Label") })
+            @Html.ValidationMessageFor(model => model.BatchName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-6">
+            <div class="row">
+                @Html.TitleFor(model => model.FromDate, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.FromDate, "{0:dd/MM/yyyy}", new { id = "FromDate", @class = "form-control dateinput", placeholder = "dd/mm/yyyy" })
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+            </div>
+            
+        </div>
+        <div class="col-6">
+            <div class="row">
+                @Html.TitleFor(model => model.ToDate, new { @class = "col-sm-4 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.ToDate, "{0:dd/MM/yyyy}", new { id = "ToDate", @class = "form-control dateinput", placeholder = "dd/mm/yyyy" })
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                        </div>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".dateinput").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+    });
+</script>

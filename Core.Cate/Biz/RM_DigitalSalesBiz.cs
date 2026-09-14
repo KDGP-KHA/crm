@@ -34,6 +34,7 @@ namespace Core.Cate.Biz
         private readonly string _spActivityAdd = "RM_DigitalSalesActivity_Add";
         private readonly string _spActivityGetList = "RM_DigitalSalesActivity_GetList";
         private readonly string _spActivityDelete = "RM_DigitalSalesActivity_Delete";
+        private readonly string _spActivityUpdateLatestStatusChange = "RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments";
 
         public List<RM_DigitalSalesModel> LoadList(out int total, RM_DigitalSalesSearchModel model)
         {
@@ -567,6 +568,19 @@ namespace Core.Cate.Biz
                 _spActivityDelete,
                 DATA_PROVIDER_NAME,
                 activityId,
+                username
+            );
+            return result.GetValueOrDefault(0);
+        }
+
+        public int UpdateLatestStatusChangeActivityAttachments(int digitalSalesId, string attachmentsJson, string username)
+        {
+            if (digitalSalesId <= 0 || string.IsNullOrWhiteSpace(attachmentsJson)) return 0;
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spActivityUpdateLatestStatusChange,
+                DATA_PROVIDER_NAME,
+                digitalSalesId,
+                attachmentsJson,
                 username
             );
             return result.GetValueOrDefault(0);

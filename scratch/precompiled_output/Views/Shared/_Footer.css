@@ -1,0 +1,36 @@
+﻿.modcontent fa {
+    float: left;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.modcontent span {
+    padding-left: 10px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 23px;
+}
+
+.modcontent ul {
+    padding: 0;
+    list-style-type: none;
+}
+.menu-loaihinh-ft a {
+    border-bottom: 1px dashed gray;
+}
+.modtitle {
+    padding-top: 5px;
+    /*    font-family: 'ubuntubold','Open Sans', sans-serif;
+*/ line-height: 23px;
+    border-bottom: 3px solid #ff6903;
+    padding-bottom: 0px;
+    width: max-content;
+}
+
+.out-linedata {
+    color: #41464d;
+}
+
+#loader {
+    display: none;
+}

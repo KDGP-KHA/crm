@@ -1,0 +1,28 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysRoleModel
+
+@{
+    ViewBag.Title = Html.Raw(string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Permission"), $"<b>[{Model.Name}]</b>"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-shield-alt"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Permission", "Role", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Role_OnProcessSuccess(data, 'PermissionRole')"
+    }, new { @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_FunctionAction")
+        </div>
+    }
+}

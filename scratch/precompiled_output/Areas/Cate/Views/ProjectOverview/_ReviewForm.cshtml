@@ -1,0 +1,115 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewFormModel
+
+@Html.AntiForgeryToken()
+
+<div id="ReviewForm">
+    @Html.HiddenFor(model => model.ReviewBatchID)
+    @Html.HiddenFor(model => model.ObjectType)
+    @Html.HiddenFor(model => model.ObjectID)
+
+    <div class="col-12">
+        @Html.TitleFor(model => model.ReviewComment, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.TextAreaFor(model => model.ReviewComment, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ReviewBatch_ReviewComment_Label") })
+        @Html.ValidationMessageFor(model => model.ReviewComment, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-12 mt-2">
+        @Html.CheckBoxFor(model => model.IsConfirmed)
+        @Html.LabelFor(model => model.IsConfirmed, new { @class = "col-form-label pr-0 font-bold" })
+    </div>
+
+    <div class="col-12">
+        <label class="col-form-label text-sm-left pr-0 font-bold">
+            @AppProcessor.Messagor.GetMessage("FileAttach_Label")
+        </label>
+        @Html.FileFor(model => model.DinhKemFile, ".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls", true,
+                                     new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+
+        <div id="reviewFileList" class="mt-2"></div>
+
+        @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+        {
+            <div id="reviewOldFileList" class="mt-2">
+                @foreach (var file in Model.ExistingFiles)
+                {
+                    var fileName = file.FilePath.Split('/').Last();
+                    <div class="d-flex align-items-center border rounded px-2 py-1 mb-1">
+                        <a href="@file.FilePath" target="_blank" style="color:#0000ffc4; font-size:13px;">
+                            <i class="fas fa-paperclip mr-1"></i>@fileName
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    // ✅ PATCH: Load FormUtils.js nếu chưa có
+    (function () {
+        if (typeof initFormUtils === 'undefined') {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#CHKD'); };
+            document.head.appendChild(s);
+        } else {
+            $(function () { initFormUtils('#CHKD'); });
+        }
+    })();
+
+    $(document).ready(function () {
+        reloadCKEditor();
+    });
+
+    var reviewFilesList = [];
+    var reviewDataTransfer = new DataTransfer();
+
+    $(document).on("change", "#DinhKemFile", function (e) {
+        var newFiles = Array.from(e.target.files);
+        newFiles.forEach(function (file) {
+            if (!reviewFilesList.some(function (f) { return f.name === file.name && f.size === file.size; })) {
+                reviewFilesList.push(file);
+            }
+        });
+        reviewSyncInputFiles();
+        reviewRenderFileList();
+    });
+
+    function reloadCKEditor() {
+        var editor = CKEDITOR.instances['ReviewComment'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('ReviewComment', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '350',
+        });
+        editor.on('change', function (e) {
+            $("#ReviewComment").val(editor.getData());
+        });
+    }
+
+    function reviewSyncInputFiles() {
+        reviewDataTransfer = new DataTransfer();
+        reviewFilesList.forEach(function (file) { reviewDataTransfer.items.add(file); });
+        var input = document.getElementById("DinhKemFile");
+        if (input) input.files = reviewDataTransfer.files;
+    }
+
+    function reviewRenderFileList() {
+        var html = "";
+        reviewFilesList.forEach(function (file, index) {
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                + '<span><i class="fa fa-file text-primary mr-1"></i>' + file.name + '</span>'
+                + '<button type="button" class="btn btn-sm btn-danger" onclick="reviewRemoveFile(' + index + ')">'
+                + '<i class="fa fa-times"></i></button></div>';
+        });
+        $("#reviewFileList").html(html);
+    }
+
+    function reviewRemoveFile(index) {
+        reviewFilesList.splice(index, 1);
+        reviewSyncInputFiles();
+        reviewRenderFileList();
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

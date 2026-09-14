@@ -1,0 +1,157 @@
+﻿@using TSFramework.Libs.Processors
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        <i class="fa fa-upload text-info"></i> @AppProcessor.Messagor.GetMessage("ContactPersons_Import_Title")
+    </h4>
+    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+</div>
+
+<div class="modal-body">
+    <div id="cpStepUpload">
+        <div class="alert alert-info mb-3">
+            <i class="fa fa-info-circle"></i>
+            @AppProcessor.Messagor.GetMessage("Import_TemplateHint")
+            &nbsp;<a href="@Url.Action("DownloadImportTemplate", "ContactPersons")" class="alert-link font-weight-bold">
+                <i class="fa fa-download"></i> @AppProcessor.Messagor.GetMessage("Import_DownloadTemplate")
+            </a>
+        </div>
+
+        <div class="form-group">
+            <label class="font-weight-bold">@AppProcessor.Messagor.GetMessage("Import_SelectFile") <span class="text-danger">(*)</span></label>
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="cpImportFileInput" accept=".xlsx,.xls">
+                    <label class="custom-file-label" for="cpImportFileInput">@AppProcessor.Messagor.GetMessage("Import_ChooseFile")</label>
+                </div>
+            </div>
+            <small class="form-text text-muted">@AppProcessor.Messagor.GetMessage("Import_FileHint")</small>
+        </div>
+
+        <div id="cpUploadProgress" class="d-none mt-2">
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                     role="progressbar" style="width:100%">
+                    @AppProcessor.Messagor.GetMessage("Import_Reading")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cpStepPreview" class="d-none">
+        <div class="row mb-3" id="cpImportSummary"></div>
+
+        <ul class="nav nav-tabs" id="cpImportTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#cpTabValid" role="tab">
+                    <i class="fa fa-check-circle text-success"></i>
+                    @AppProcessor.Messagor.GetMessage("Import_Valid")
+                    &nbsp;<span class="badge badge-success" id="cpCntValid">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#cpTabError" role="tab">
+                    <i class="fa fa-exclamation-circle text-danger"></i>
+                    @AppProcessor.Messagor.GetMessage("Import_Error")
+                    &nbsp;<span class="badge badge-danger" id="cpCntError">0</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content border border-top-0 rounded-bottom" style="max-height:360px;overflow-y:auto;">
+            <div class="tab-pane fade show active p-1" id="cpTabValid" role="tabpanel">
+                <table class="table table-sm table-hover table-bordered mb-0 small">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="text-center" style="width:45px">@AppProcessor.Messagor.GetMessage("Import_ColRow")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColGender")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColPosition")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColPhone")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColEmail")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColCustomerCode")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColCustomer")</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cpTbodyValid">
+                        <tr><td colspan="8" class="text-center text-muted py-3">@AppProcessor.Messagor.GetMessage("Import_NoData")</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tab-pane fade p-1" id="cpTabError" role="tabpanel">
+                <table class="table table-sm table-hover table-bordered mb-0 small">
+                    <thead style="background:#f8d7da;color:#721c24;">
+                        <tr>
+                            <th class="text-center" style="width:45px">@AppProcessor.Messagor.GetMessage("Import_ColRow")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColError")</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cpTbodyError">
+                        <tr><td colspan="3" class="text-center text-muted py-3">@AppProcessor.Messagor.GetMessage("Import_NoError")</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="cpImportResult" class="d-none mt-3"></div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <div id="cpFooterUpload">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fa fa-times"></i> @AppProcessor.Messagor.GetMessage("Button_Close")
+        </button>
+        <button type="button" class="btn btn-primary" id="cpBtnReadFile">
+            <i class="fa fa-search"></i> @AppProcessor.Messagor.GetMessage("Import_ReadFile")
+        </button>
+    </div>
+
+    <div id="cpFooterPreview" class="d-none">
+        <button type="button" class="btn btn-warning d-none" id="cpBtnExportErrorRows">
+            <i class="fa fa-download"></i> @AppProcessor.Messagor.GetMessage("Import_Error")
+        </button>
+        <button type="button" class="btn btn-secondary" id="cpBtnBack">
+            <i class="fa fa-arrow-left"></i> @AppProcessor.Messagor.GetMessage("Import_Back")
+        </button>
+        <button type="button" class="btn btn-success" id="cpBtnConfirm">
+            <i class="fa fa-check"></i> @AppProcessor.Messagor.GetMessage("Import_Confirm")
+        </button>
+    </div>
+
+    <div id="cpFooterDone" class="d-none">
+        <button type="button" class="btn btn-warning" id="cpBtnExportDuplicateRowsDone">
+            <i class="fa fa-download"></i> Xuất dòng trùng
+        </button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">
+            <i class="fa fa-refresh"></i> Đóng & Làm mới
+        </button>
+    </div>
+</div>
+
+<script>
+window._cpImportMsg = {
+    chooseFile:      '@AppProcessor.Messagor.GetMessage("Import_ChooseFile")',
+    warnSelect:      '@AppProcessor.Messagor.GetMessage("Import_WarnSelectFile")',
+    processing:      '@AppProcessor.Messagor.GetMessage("Import_Processing")',
+    readFile:        '@AppProcessor.Messagor.GetMessage("Import_ReadFile")',
+    errorRead:       '@AppProcessor.Messagor.GetMessage("Import_ErrorRead")',
+    validRows:       '@AppProcessor.Messagor.GetMessage("Import_ValidRows")',
+    errorRows:       '@AppProcessor.Messagor.GetMessage("Import_ErrorRows")',
+    noErrorRows:     '@AppProcessor.Messagor.GetMessage("Import_NoErrorRows")',
+    noData:          '@AppProcessor.Messagor.GetMessage("Import_NoData")',
+    noError:         '@AppProcessor.Messagor.GetMessage("Import_NoError")',
+    noValidData:     '@AppProcessor.Messagor.GetMessage("Import_NoValidData")',
+    importing:       '@AppProcessor.Messagor.GetMessage("Import_Importing")',
+    errorDetail:     '@AppProcessor.Messagor.GetMessage("Import_ErrorDetail")',
+    errorImport:     '@AppProcessor.Messagor.GetMessage("Import_ErrorImport")',
+    confirmBtn:      '@AppProcessor.Messagor.GetMessage("Import_Confirm")',
+    successMsg:      '@AppProcessor.Messagor.GetMessage("ContactPersons_Import_SuccessMsg")',
+    previewUrl:      '@Url.Action("ImportPreview",        "ContactPersons")',
+    confirmUrl:      '@Url.Action("ImportConfirm",        "ContactPersons")',
+    exportErrorUrl:  '@Url.Action("ExportErrorRows",      "ContactPersons")'
+};
+initContactPersonsImport();
+</script>

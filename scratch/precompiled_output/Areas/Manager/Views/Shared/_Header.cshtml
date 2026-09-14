@@ -1,0 +1,67 @@
+﻿@using TSFramework.Libs.Processors
+<nav class="navbar navbar-sm navbar-expand-lg navbar-fixed navbar-white">
+    <div class="navbar-inner shadow-md">
+        <button type="button" class="btn btn-burger align-self-center ml-25 mr-2 d-none d-xl-flex btn-h-lighter-blue" data-toggle="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="true" aria-label="Toggle sidebar">
+            <span class="bars text-default"></span>
+        </button>
+        <!-- sidebar toggler button -->
+        <div class="d-flex h-100 justify-content-xl-between align-items-center">
+            <button type="button" class="btn btn-burger burger-arrowed static collapsed ml-2 d-flex d-xl-none btn-h-lighter-blue" data-toggle-mobile="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle sidebar">
+                <span class="bars text-default"></span>
+            </button>
+            <!-- mobile sidebar toggler button -->
+            <a class="navbar-brand d-xl-none mx-1 text-dark-m3 text-130" href="#">
+                <div class="text-80">
+                    <span class="text-90 text-danger-d1 text-upcase font-bold">HỆ THỐNG</span>
+                    <span class="text-blue-d1 text-upcase font-bold">QUẢN LÝ VÀ ĐIỀU HÀNH KINH DOANH DỊCH VỤ SỐ DOANH NGHIỆP</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- #navbarMenu toggler -->
+        @*<button class="navbar-toggler ml-1 mr-2 px-1" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navbar menu 1">
+            <img class="radius-round border-2 brc-primary-tp3 p-1px" src="@User.Avatar" width="36" alt="@User.FullName">
+        </button>*@
+
+        <div class="ml-auto mr-xl-3 navbar-menu collapse navbar-collapse navbar-backdrop" id="navbarMenu">
+            <div class="navbar-nav">
+                <ul class="nav has-active-border">
+
+                    <li class="d-none d-lg-inline nav-item dd-backdrop">
+                        @*@Html.Button(false, "ClearCache", Url.Action("ClearCache", "SysTool", new { area = "Sys", returnUrl = HttpContext.Current.Request.Url.PathAndQuery }), "<i class='fa fa-sync-alt text-danger-m2'></i>", "", new { @class = "nav-link px-35", data_rel = "tooltip", title = "Xoá Cache" })*@
+                    </li>
+
+                    @*<li class="nav-item dropdown order-first order-lg-last">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                            <img id="id-navbar-user-image" class="d-none d-lg-inline-block radius-round border-2 brc-white-tp1 mr-2 w-6" src="@User.Avatar" alt="@User.FullName">
+                            <span class="d-inline-block d-lg-none d-xl-inline-block">
+                                <span class="text-90" id="id-user-welcome">Chào mừng,</span>
+                                <span class="nav-user-name mw-100">@User.FullName</span>
+                            </span>
+                            <i class="caret fa fa-angle-down d-none d-xl-block"></i>
+                            <i class="caret fa fa-angle-left d-block d-lg-none"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-caret dropdown-menu-right dropdown-animated brc-primary-m3 py-1">
+                            <div class="d-none d-lg-block d-xl-none">
+                                <div class="dropdown-header">
+                                    Chào mừng, @User.FullName
+                                </div>
+                                <div class="dropdown-divider"></div>
+                            </div>*@
+
+                            @*@Html.Button(true, "EditInfo", Url.Action("EditInfo", "Account", new { area = "", userName = User.UserName }), "<i class='fa fa-user text-primary-m1 text-105 mr-1'></i>", "Cập nhật thông tin", new { data_rel = "tooltip", title = "Cập nhật thông tin", @class = "mt-1 dropdown-item btn btn-outline-grey bgc-h-success-l3 btn-h-light-success btn-a-light-success", data_width = "1024" })
+
+                                @Html.Button(true, "ChangePassword", Url.Action("ChangePassword", "Account", new { area = "", userName = User.UserName }), "<i class='fa fa-key text-success-m1 text-105 mr-1'></i>", AppProcessor.Messagor.GetMessage("Button_ChangePassword"), new { data_rel = "tooltip", title = AppProcessor.Messagor.GetMessage("Button_ChangePassword"), @class = "mt-1 dropdown-item btn btn-outline-grey bgc-h-success-l3 btn-h-light-success btn-a-light-success" })*@
+
+                            @*<div class="dropdown-divider brc-primary-l2"></div>
+                            <a class="dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary" href="@Url.Action("Logout", "Account", new { area = "" })">
+                                <i class="fa fa-sign-out-alt text-warning-d1 text-105 mr-1"></i>
+                                @AppProcessor.Messagor.GetMessage("Button_Logout")
+                            </a>
+                        </div>
+                    </li>*@
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

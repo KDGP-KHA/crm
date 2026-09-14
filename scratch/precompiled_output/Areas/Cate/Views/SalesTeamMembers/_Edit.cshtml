@@ -1,0 +1,30 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_SalesTeamMembersModel
+@{
+    ViewBag.Title = "Điều chỉnh " + AppProcessor.Messagor.GetMessage("SalesTeamMembers_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Edit", "SalesTeamMembers", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "SalesTeamMembers_OnProcessSuccess(data, 'EditSalesTeamMembers')"
+    }, new { @class = "form-horizontal", id = "EditSalesTeamMembers" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_SalesTeamMembers")
+        </div>
+
+    }
+}

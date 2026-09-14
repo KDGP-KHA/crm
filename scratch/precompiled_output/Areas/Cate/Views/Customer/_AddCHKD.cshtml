@@ -1,0 +1,57 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    success
+}
+
+@section FormIcon{
+    <i class="fas fa-business-time"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("AddCHKD", "Customer", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "AddBusinessOpportunity", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_AddCHKD_View")
+        </div>
+    }
+
+    <script type="text/javascript">
+
+        $('form#AddBusinessOpportunity').ajaxForm({
+        success: function (response) {
+            if (response.status != undefined) {
+                if ($("#ModalContent #modal_AddBusinessOpportunity #chkNotDismissModal").is(":checked")) {
+                    if (response.status != undefined) {
+                        eval(response.message);
+                        _tableBusinessOpportunity.ajax.reload(null, false);
+                        response.status = undefined;
+                        $("#ModalContent #modal_AddBusinessOpportunity form")[0].reset();
+                    }
+                } else {
+                    if (!response.status && response.errorCode == 1) {
+                        eval(response.message);
+                        response.status = undefined;
+                    } else {
+                        $("#ModalContent #modal_AddBusinessOpportunity").modal("hide");
+                        $("#ModalContent #modal_AddBusinessOpportunity").on('hidden.bs.modal',
+                            function () {
+                                if (response.status != undefined) {
+                                    eval(response.message);
+                                    _tableBusinessOpportunity.ajax.reload(null, false);
+                                    response.status = undefined;
+                                }
+                            });
+                    }
+                }
+            } else {
+                $("#ModalContent #modal_AddBusinessOpportunity" + " #bodyForm").html(response);
+            }
+        }
+    });
+    </script>
+}

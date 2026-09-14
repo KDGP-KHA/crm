@@ -1,0 +1,316 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    Layout = "~/Views/Shared/_Login.cshtml";
+    ViewBag.Title = "Đăng nhập";
+}
+
+@section HeadCss{
+
+}
+
+<style>
+    .dropdown-menu-custom::after {
+        content: "";
+        position: absolute;
+        top: -15px;
+        right: 38px;
+        border-width: 0 18px 18px 18px;
+        border-style: solid;
+        border-color: transparent transparent rgb(253 253 253) transparent;
+        z-index: -1;
+    }
+</style>
+
+<div id="body-container" 
+     style="
+        height: 100vh;
+        background-color: white; 
+        background-image: url(/Contents/Base/plugins/ace_v4/assets/image/bgr.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+        "
+     class="d-flex flex-column"
+     >
+
+    <div class="nav flex-row-reverse p-3" style="background-color: rgba(0, 159, 233, 0.15);">
+        <div class="dropdown-icon pr-5" id="dropdownToggle">
+            <img src="~/Contents/Base/imgs/icons/icon_vuong.png" style="cursor:pointer; width:24px; position:relative;" />
+
+            <div id="dropdownMenu" class="dropdown-menu-custom bgc-white" style="position:absolute; right: 20px; z-index:5; margin-top:15px; display:none;">
+                <div class="item d-flex flex-wrap" id="dropdownList" style="width:400px; padding:20px "></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container container bgc-transparent">
+
+        <div class="main-content minh-100 justify-content-center">
+            <div class="p-2">
+                <div class="row justify-content-center align-items-center flex-column" id="row-1">
+                    <div class="radius-1 overflow-hidden col-12 col-lg-6 col-xl-5">
+                        <div class="row" id="row-2">
+
+                            <div id="id-col-main" class="col-12 px-0">
+                                @*you can also use these tab links*@
+                                <ul class="d-none mt-n4 mb-4 nav nav-tabs nav-tabs-simple justify-content-end bgc-black-tp11" role="tablist">
+                                    <li class="nav-item mx-2">
+                                        <a class="nav-link active px-2" data-toggle="tab" href="#id-tab-login" role="tab" aria-controls="id-tab-login" aria-selected="true">
+                                            @AppProcessor.Messagor.GetMessage("Button_Login")
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content tab-sliding border-0 p-0" data-swipe="right">
+                                    <div class="tab-pane active show px-3 px-lg-0" id="id-tab-login">
+                                        @*show this in desktop*@
+                                        @*show this in mobile device*@
+                                        <div class="text-secondary-m1 text-center">
+                                            <a href="/">
+                                                @*<i class="fa fa-id-card text-success-m2 text-200 mb-4"></i>*@
+                                                <img class="w-100" style="padding-top:90px" src="~/Contents/Base/imgs/bg-vnpt.png">
+                                            </a>
+                                            @*<h1 class="text-170">
+                                                    <span class="text-80 text-danger-d1 text-upcase font-bold">
+                                                        PHẦN MỀM QUẢN LÝ VÀ ĐIỀU HÀNH KINH DOANH
+                                                    </span>
+                                                    <br />
+                                                    <span class="text-80 text-blue-d1 text-upcase font-bolder">DỊCH VỤ SỐ DOANH NGHIỆP</span>
+                                                </h1>*@
+                                            @*@AppProcessor.Messagor.GetMessage("Message_WelcomBack")*@
+                                        </div>
+
+                                        @* Thông báo khi đăng nhập SSO tập đoàn không thành công (site chính) *@
+                                        @if (!string.IsNullOrEmpty(ViewBag.SsoError as string))
+                                        {
+                                            <div class="alert alert-warning text-95 mt-3 mb-0" role="alert">
+                                                <i class="fa fa-exclamation-triangle mr-1"></i>@ViewBag.SsoError
+                                            </div>
+                                        }
+
+                                        @Html.Partial("_Login")
+
+                                        <div class="form-row my-4">
+                                            <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 d-flex flex-column align-items-center justify-content-center">
+                                                <hr class="brc-default-l2 mt-0 mb-2 w-100">
+                                                <div class="p-0 px-md-2 text-dark-tp3 text-center">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="tab-pane px-3 px-lg-0" id="id-tab-forgot" data-swipe-prev="#id-tab-login">
+                                        <div class="position-tl ml-3 mt-2">
+                                            <a href="#" class="btn btn-light-default btn-h-light-default btn-a-light-default btn-bgc-tp" data-toggle="tab" data-target="#id-tab-login">
+                                                <i class="fa fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+
+                                        <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-5 px-0">
+                                            <h4 class="pt-4 pt-md-0 text-dark-tp4 border-b-1 brc-grey-l2 pb-1 text-130">
+                                                <i class="fa fa-key text-brown-m1 mr-1"></i>
+                                                @AppProcessor.Messagor.GetMessage("Authorize_RecoverPassword")
+                                            </h4>
+                                        </div>
+
+                                        @Html.Partial("_ForgotPassword")
+
+                                        <div class="form-row w-100">
+                                            <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 d-flex flex-column align-items-center justify-content-center">
+                                                <hr class="brc-default-l2 mt-0 mb-2 w-100">
+                                                <div class="p-0 px-md-2 text-dark-tp4 my-3">
+                                                    <a class="text-blue-d1 text-600 btn-text-slide-x" data-toggle="tab" data-target="#id-tab-login" href="#">
+                                                        <i class="btn-text-2 fa fa-arrow-left text-110 align-text-bottom mr-2"></i>Đăng nhập
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="tab-pane px-3 px-lg-0" id="id-tab-sent-info" data-swipe-prev="#id-tab-login">
+                                        <div class="position-tl ml-3 mt-2">
+                                            <a href="#" class="btn btn-light-default btn-h-light-default btn-a-light-default btn-bgc-tp" data-toggle="tab" data-target="#id-tab-login">
+                                                <i class="fa fa-arrow-left"></i>
+                                            </a>
+                                        </div>
+
+                                        <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-5 px-0">
+                                            <h4 class="pt-4 pt-md-0 text-dark-tp4 border-b-1 brc-grey-l2 pb-1 text-130">
+                                                <i class="fas fa-exclamation-circle text-success-m1 mr-1"></i>
+                                                @AppProcessor.Messagor.GetMessage("Authorize_RecoverPassword")
+                                            </h4>
+                                        </div>
+
+                                        <div class="form-group col-sm-12 offset-md-1 col-md-10 col-12">
+                                            <label class="text-success-d3 mb-3 text-120">
+                                                Thông tin khôi phục mật khẩu đã được gửi tới hộp thư của bạn. Vui lòng kiểm tra hộp thư và thực hiện theo hướng dẫn
+                                            </label>
+                                        </div>
+
+                                        <div class="form-row w-100">
+                                            <div class="col-12 col-sm-10 offset-sm-1 col-md-8 offset-md-2 d-flex flex-column align-items-center justify-content-center">
+                                                <hr class="brc-default-l2 mt-0 mb-2 w-100">
+                                                <div class="p-0 px-md-2 text-dark-tp4 my-3">
+                                                    <a class="text-blue-d1 text-600 btn-text-slide-x" data-toggle="tab" data-target="#id-tab-login" href="#">
+                                                        <i class="btn-text-2 fa fa-arrow-left text-110 align-text-bottom mr-2"></i>Đăng nhập
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-lg-none my-3 text-white-tp1 text-center">
+                    <i class="fa fa-leaf text-success-l3 mr-1 text-110"></i> <label class="text-light-blue">Trung Tâm Công Nghệ Thông Tin</label> - <a href="http://cenit.vn">Cen<b class="text-danger">IT</b></a> &copy; 2023
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-3 d-flex justify-content-center" style="background-color: #B6E0F0;">
+        <div class="col-xs-12">
+            Số điện thoại Hỗ trợ Email/ Xác thực tập trung là: <span style="color:red;font-size:20px;">18001555 Nhánh 3</span>
+        </div>
+    </div>
+
+</div>
+
+@section BottomScript{
+    <script src="~/Contents/Base/plugins/jquery.inputmask/jquery.inputmask.min.js"></script>
+    <script src="~/Contents/Base/plugins/CryptoJS/rollups/aes.js"></script>
+    <script src="~/Contents/Base/plugins/CryptoJS/components/enc-base64-min.js"></script>
+
+    <script>
+        var keyStr = "24aes08";
+        var ivStr = "24aes08";
+        var keySplit = "24aes08";
+
+        function makeid(length) {
+            var result = '';
+            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for (var i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+
+        function makenumberid(length) {
+            var result = '';
+            var characters = '0123456789';
+            var charactersLength = characters.length;
+            for (var i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            }
+            return result;
+        }
+
+        keyStr = makeid(16);
+        ivStr = makenumberid(16);
+        keySplit = makeid(16);
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#CaptchaInputText").addClass("form-control");
+            $('#Email').inputmask("email");
+        });
+
+        $('form#LoginForm').ajaxForm({
+            beforeSubmit: function (arr, $form, options) {
+                $('form#LoginForm input, form#LoginForm button, form#LoginForm a').attr("disabled", true);
+                return true;
+            },
+            success: function (response) {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    if (response.status) {
+                        window.location = window.location.origin + response.returnUrl;
+                    }
+                    response.status = undefined;
+                } else {
+                    $('form#LoginForm').html(response);
+                    $('form#LoginForm input, form#LoginForm button, form#LoginForm a').removeAttr("disabled");
+                }
+            }
+        });
+
+        function Account_OnProcessSuccess(response, formId) {
+            if (response.status != undefined) {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    response.status = undefined;
+                    $("form#" + formId)[0].reset();
+                    $("#btn-info-sent").click();
+                }
+            } else {
+                //$("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+            }
+        }
+
+    </script>
+
+    <script>
+        const dropdownItems = [
+            {
+                href: "http://www.vnpt.vn/",
+                img: "/Contents/Base/imgs/icons/tin1.png",
+                title: "Tập đoàn VNPT"
+            },
+            {
+                href: "http://www.vnptnet.vn",
+                img: "/Contents/Base/imgs/icons/tin2.png",
+                title: "VNPT Net"
+            },
+            {
+                href: "http://www.vinaphone.com.vn",
+                img: "/Contents/Base/imgs/icons/tin3.png",
+                title: "VNPT Vinaphone"
+            },
+            {
+                href: "http://www.vnptmedia.vn",
+                img: "/Contents/Base/imgs/icons/tin4.png",
+                title: "VNPT Media"
+            },
+            {
+                href: "http://rd.vnpt.vn/",
+                img: "/Contents/Base/imgs/icons/tin5.png",
+                title: "VNPT R&D"
+            },
+            {
+                href: "http://thitruong.vnpt.vn",
+                img: "/Contents/Base/imgs/icons/tin6.png",
+                title: "Thông tin thị trường"
+            }
+        ];
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const container = document.getElementById("dropdownList");
+
+            function renderDropdown() {
+                container.innerHTML = dropdownItems.map(item => `
+            <a href="${item.href}" 
+               class="col-xs-4 d-flex align-items-center flex-column dropdown-item-custom" style="width:118px; padding: 15px 0;">
+                <img src="${item.img}" />
+                <h5 style="font-size:13px">${item.title}</h5>
+            </a>
+        `).join("");
+            }
+
+            renderDropdown();
+        });
+
+        const toggle = document.getElementById("dropdownToggle");
+        const menu = document.getElementById("dropdownMenu");
+
+        toggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        document.addEventListener("click", function () {
+            menu.style.display = "none";
+        });
+    </script>
+}

@@ -1,0 +1,115 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ContactPersonsModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.ContactPerson_ID)
+    @Html.HiddenFor(model => model.IsDeleted, new { @class = "is-deleted" })
+
+    <div class="form-group">
+        @Html.TitleFor(model => model.FullName, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.FullName,
+                      new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Gender, new { @class = "font-bold" })
+            @Html.DropDownListFor(model => model.Gender,
+                          new SelectList(Model.ListGender, "Value", "Text"),
+                          "",
+                          new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.WorkUnit, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.WorkUnit,
+                          new { @class = "form-control" })
+        </div>
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Phone, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Phone,
+                          new { @class = "form-control", data_format = "landline" })
+        </div>
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Mobile, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Mobile,
+                          new { @class = "form-control", data_format = "phone" })
+        </div>
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Email, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Email,
+                          new { @class = "form-control", data_format = "email" })
+        </div>
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Zalo, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Zalo,
+                          new { @class = "form-control", data_format = "phone" })
+        </div>
+
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Birthday, new { @class = "font-bold" })
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.Birthday,
+                              "{0:dd/MM/yyyy}",
+                              new { @class = "form-control" })
+                <div class="input-group-append">
+                    <span class="input-group-text">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="form-group">
+        @Html.TitleFor(model => model.Address, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.Address,
+                      new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        @Html.TitleFor(model => model.Note, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.Note,
+                      new { @class = "form-control" })
+    </div>
+
+    <div class="form-group form-check">
+        @Html.CheckBoxFor(model => model.StatusBool, new { @class = "form-check-input" })
+        @Html.LabelFor(model => model.StatusBool,
+                      AppProcessor.Messagor.GetMessage("RMPS_Label_IsActived"),
+                      new { @class = "form-check-label font-bold ml-1" })
+    </div>
+
+</div>
+
+<script>
+    (function () {
+        if (typeof initFormUtils === 'undefined') {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#Language'); };
+            document.head.appendChild(s);
+        } else {
+            $(function () { initFormUtils('#Language'); });
+        }
+    })();
+
+    $(document).ready(function () {
+        $("#Birthday").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+    });
+</script>

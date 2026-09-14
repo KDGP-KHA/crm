@@ -1,0 +1,23 @@
+﻿.d-inline-flex input[placeholder="dd/mm/yyyy"] {
+    width: 160px !important;
+}
+
+.w1pc {
+    width: 1% !important;
+}
+
+.w100px {
+    width: 100px !important;
+}
+
+.w145px {
+    width: 145px !important;
+}
+
+.w200px {
+    width: 200px !important;
+}
+
+.w30vw {
+    width: 30vw !important;
+}

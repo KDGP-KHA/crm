@@ -1,0 +1,286 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_LogTaskModel
+
+@Html.AntiForgeryToken()
+
+<div id="LogTaskForm" class="p-3">
+
+    @Html.HiddenFor(m => m.LogTaskID)
+    @Html.HiddenFor(m => m.TaskManagementID)
+
+    <!-- Ngày -->
+    <div class="form-group row">
+        @Html.TitleFor(model => model.LogDate, new { @class = "col-md-3 col-form-label text-sm-left pr-0 font-bold" })
+        <div class="col-md-8">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.LogDate, "{0:dd/MM/yyyy}", new { id = "LogDate", @class = "form-control col-md-4", placeholder = "dd/mm/yyyy" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.LogDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <!-- Thời gian -->
+    <div class="form-group row">
+        @Html.TitleFor(model => model.StartTime, new { @class = "col-md-3 col-form-label text-sm-left pr-0 font-bold" })
+        <div class="col-md-3">
+            @Html.TextBoxFor(m => m.StartTime, new
+            {
+                @class = "form-control",
+                type = "time"
+            })
+        </div>
+
+        @Html.TitleFor(model => model.EndTime, new { @class = "col-md-3 col-form-label text-sm-left pr-0 font-bold" })
+        <div class="col-md-3">
+            @Html.TextBoxFor(m => m.EndTime, new
+            {
+                @class = "form-control",
+                type = "time"
+            })
+        </div>
+    </div>
+
+    <!-- Mô tả -->
+    <div class="form-group row">
+        <label class="col-md-3 font-weight-bold">Mô tả</label>
+        <div class="col-md-9">
+            @Html.TextAreaFor(m => m.Description, new
+            {
+                @class = "form-control",
+                placeholder = AppProcessor.Messagor.GetMessage("TaskManagement_Description_Label"),
+                id = "ContentDescriptionLog",
+            })
+        </div>
+    </div>
+
+    <!-- Files -->
+    <div class="form-group row">
+        <label class="col-md-3 font-weight-bold">Files</label>
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="custom-file">
+                    <label class="custom-file-label" for="logTaskFiles">
+                        @AppProcessor.Messagor.GetMessage("FileUpload")
+                    </label>
+                    <input type="file"
+                           class="custom-file-input"
+                           id="logTaskFiles"
+                           name="Files"
+                           multiple
+                           accept=".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls" />
+                </div>
+            </div>
+            <div id="fileList" class="mt-2"></div>
+
+            @if (Model.FilePaths != null && Model.FilePaths.Any())
+            {
+                <div class="mt-3">
+                    <label class="font-weight-bold">File đã tải lên</label>
+                    <div id="dbFileList">
+                        @foreach (var file in Model.FilePaths)
+                        {
+                            var ext = System.IO.Path.GetExtension(file.FilePath)?.ToLower();
+                            var icon = "fa-file text-secondary";
+
+                            if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext))
+                            {
+                                icon = "fa-file-image text-success";
+                            }
+                            else if (ext == ".pdf")
+                            {
+                                icon = "fa-file-pdf text-danger";
+                            }
+                            else if (new[] { ".doc", ".docx" }.Contains(ext))
+                            {
+                                icon = "fa-file-word text-primary";
+                            }
+                            else if (new[] { ".xls", ".xlsx" }.Contains(ext))
+                            {
+                                icon = "fa-file-excel text-success";
+                            }
+
+                            var fileName = System.IO.Path.GetFileName(file.FilePath);
+
+                            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                                <div>
+                                    <i class="fa @icon mr-1"></i>
+                                    <a href="@file.FilePath" target="_blank">@fileName</a>
+                                    <small class="text-muted ml-2">
+                                        @(file.CreatedDate?.ToString("dd/MM/yyyy HH:mm"))
+                                    </small>
+                                </div>
+                                @Html.Button(true, "DeleteFileComment",
+                                    Url.Action("DeleteFile", "Comment", new { area = "Cate", id = file.FilePathID }),
+                                    "<i class='fa fa-trash'></i>",
+                                    "",
+                                    new { @class = "btn btn-sm btn-outline-danger" })
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    // ── FormUtils ─────────────────────────────────────────────────────────────
+    if (typeof initFormUtils === 'undefined') {
+        var s = document.createElement('script');
+        s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+        s.onload = function () { initFormUtils('#LogTaskForm'); };
+        document.head.appendChild(s);
+    } else {
+        $(function () { initFormUtils('#LogTaskForm'); });
+    }
+
+    // ── DateTimePicker ────────────────────────────────────────────────────────
+    $(function () {
+        $("#LogDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next:     "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+    });
+
+    // ── CKEditor ──────────────────────────────────────────────────────────────
+    function initCKEditor() {
+        if (typeof CKEDITOR === 'undefined') return;
+        var existing = CKEDITOR.instances['ContentDescriptionLog'];
+        if (existing) existing.destroy(true);
+        CKEDITOR.replace('ContentDescriptionLog', {
+            height: 200,
+            allowedContent: true,
+            extraAllowedContent: 'img[width,height,style]',
+            toolbar: [
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                { name: 'paragraph',   items: ['NumberedList', 'BulletedList'] },
+                { name: 'insert',      items: ['Image', 'Table', 'Link'] },
+                { name: 'styles',      items: ['Format'] },
+                { name: 'tools',       items: ['Maximize'] }
+            ]
+        });
+    }
+
+    function loadCKEditorThenInit() {
+        if (typeof CKEDITOR !== 'undefined') { initCKEditor(); return; }
+        var s = document.createElement('script');
+        s.src = '/Contents/Modules/Major/ckeditor4/ckeditor.js';
+        s.onload = function () {
+            var s2 = document.createElement('script');
+            s2.src = '/Contents/Modules/Major/ckfinder/ckfinder.js';
+            s2.onload  = function () { initCKEditor(); };
+            s2.onerror = function () { initCKEditor(); };
+            document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+    }
+
+    loadCKEditorThenInit();
+
+    // ── Nút lưu ───────────────────────────────────────────────────────────────
+    $(document).off('click', '#btnSave').on('click', '#btnSave', function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        var btn = this;
+        if (btn.disabled) return;
+        btn.disabled = true;
+        setTimeout(function () { btn.disabled = false; }, 2000);
+
+        if (typeof CKEDITOR !== 'undefined') {
+            for (var inst in CKEDITOR.instances) {
+                CKEDITOR.instances[inst].updateElement();
+            }
+        }
+
+        var form = document.getElementById('AddLogTask');
+        var formData = new FormData(form);
+
+        $.ajax({
+            url: form.action,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                LogTask_OnProcessSuccess(response, 'AddLogTask');
+            },
+            error: function (xhr) {
+                console.error('LogTask save error:', xhr);
+            }
+        });
+    });
+
+    // ── File picker – hỗ trợ chọn nhiều lần, cộng dồn file ──────────────────
+    var logTaskFilesList    = [];
+    var logTaskDataTransfer = new DataTransfer();
+
+    $(document).on('change', '#logTaskFiles', function () {
+        Array.from(this.files).forEach(function (file) {
+            // Tránh trùng theo tên + kích thước
+            if (!logTaskFilesList.some(function (f) {
+                return f.name === file.name && f.size === file.size;
+            })) {
+                logTaskFilesList.push(file);
+            }
+        });
+        syncInputFiles();
+        renderFileList();
+    });
+
+    function syncInputFiles() {
+        logTaskDataTransfer = new DataTransfer();
+        logTaskFilesList.forEach(function (file) {
+            logTaskDataTransfer.items.add(file);
+        });
+
+        var input = document.getElementById('logTaskFiles');
+        if (input) input.files = logTaskDataTransfer.files;
+
+        var names = logTaskFilesList.map(function (f) { return f.name; }).join(', ');
+        $('.custom-file-label[for="logTaskFiles"]').text(names || 'Chọn file...');
+    }
+
+    function renderFileList() {
+        var html = '';
+        logTaskFilesList.forEach(function (file, index) {
+            var ext  = file.name.split('.').pop().toLowerCase();
+            var icon = 'fa-file';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) > -1) icon = 'fa-file-image text-success';
+            else if (ext === 'pdf')                                        icon = 'fa-file-pdf text-danger';
+            else if (['doc', 'docx'].indexOf(ext) > -1)                   icon = 'fa-file-word text-primary';
+            else if (['xls', 'xlsx'].indexOf(ext) > -1)                   icon = 'fa-file-excel text-success';
+
+            var size = file.size > 1024 * 1024
+                ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
+                : (file.size / 1024).toFixed(1) + ' KB';
+
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                  + '<span><i class="fa ' + icon + ' mr-1"></i>' + file.name
+                  + ' <small class="text-muted">(' + size + ')</small></span>'
+                  + '<button type="button" class="btn btn-sm btn-danger" onclick="logTaskRemoveFile(' + index + ')">'
+                  + '<i class="fa fa-times"></i></button>'
+                  + '</div>';
+        });
+        $('#fileList').html(html);
+    }
+
+    // Gắn ra window để onclick inline trong HTML gọi được
+    window.logTaskRemoveFile = function (index) {
+        logTaskFilesList.splice(index, 1);
+        syncInputFiles();
+        renderFileList();
+    };
+})();
+</script>
+
+@Html.RenderScripts(ScriptPosition.BodyInside)

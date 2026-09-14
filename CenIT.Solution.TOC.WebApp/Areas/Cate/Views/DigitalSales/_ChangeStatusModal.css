@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    MODAL CHUYỂN TRẠNG THÁI HỒ SƠ KINH DOANH SỐ (TOC CRM)
    ========================================================================== */
 
@@ -88,12 +88,12 @@
     word-break: break-word;
 }
 
-/* 3. Khắc phục lỗi vỡ chữ Select2 Trạng thái mới */
-#modalChangeStatus .select2-container {
+/* 3. Khắc phục lỗi vỡ chữ Select2 Trạng thái mới (Khoanh vùng riêng cột trái) */
+#modalChangeStatus #colStatusInfo .select2-container:not(.select2-container--open) {
     width: 100% !important;
 }
 
-#modalChangeStatus .select2-container .select2-selection--single {
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single {
     height: auto !important;
     min-height: 42px !important;
     border: 1px solid #cbd5e1 !important;
@@ -107,13 +107,13 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-#modalChangeStatus .select2-container--default.select2-container--focus .select2-selection--single,
-#modalChangeStatus .select2-container--default.select2-container--open .select2-selection--single {
+#modalChangeStatus #colStatusInfo .select2-container--default.select2-container--focus .select2-selection--single,
+#modalChangeStatus #colStatusInfo .select2-container--default.select2-container--open .select2-selection--single {
     border-color: #f59e0b !important;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18) !important;
 }
 
-#modalChangeStatus .select2-container .select2-selection--single .select2-selection__rendered {
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__rendered {
     color: #1e293b !important;
     font-weight: 600 !important;
     font-size: 13.5px !important;
@@ -124,14 +124,14 @@
     display: block !important;
 }
 
-#modalChangeStatus .select2-container .select2-selection--single .select2-selection__arrow {
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__arrow {
     height: 40px !important;
     right: 8px !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
 }
 
-#modalChangeStatus .select2-container .select2-selection--single .select2-selection__clear {
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__clear {
     position: absolute !important;
     right: 28px !important;
     top: 50% !important;
@@ -144,8 +144,13 @@
     line-height: 1 !important;
 }
 
-#modalChangeStatus .select2-container .select2-selection--single .select2-selection__clear:hover {
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__clear:hover {
     color: #ef4444 !important;
+}
+
+/* Chống vỡ độ rộng: Dropdown container khi mở không bị ép 100% tràn modal */
+#modalChangeStatus .select2-container--open {
+    width: auto !important;
 }
 
 /* 4. Khối chọn Quy trình dạng Radio button */
@@ -299,6 +304,102 @@
     background-color: #fee2e2;
     border-color: #f87171;
     color: #b91c1c;
+}
+
+/* 6.1. Select2 & Combobox Người thực hiện trong Checklist tiến trình */
+.ds-progress-row-item .ds-progress-assigned-wrapper {
+    width: 210px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.ds-progress-row-item .select2-container {
+    width: 100% !important;
+    max-width: 210px !important;
+}
+
+.ds-progress-row-item .select2-container--open {
+    width: auto !important;
+    min-width: 210px !important;
+    max-width: 320px !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single {
+    height: 34px !important;
+    min-height: 34px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    padding: 3px 26px 3px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    position: relative !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-progress-row-item .select2-container--default.select2-container--focus .select2-selection--single,
+.ds-progress-row-item .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__rendered {
+    color: #1e293b !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 26px !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 32px !important;
+    right: 6px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__clear {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 14px !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__clear:hover {
+    color: #ef4444 !important;
+}
+
+.ds-progress-row-item .select2-dropdown {
+    min-width: 210px !important;
+    max-width: 320px !important;
+    width: auto !important;
+    border: 1px solid #10b981 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    z-index: 1060 !important;
+}
+
+.ds-progress-row-item .select2-dropdown .select2-results__option {
+    font-size: 13px !important;
+    padding: 6px 10px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+
+.ds-progress-row-item .select2-dropdown .select2-results__option--highlighted {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
 }
 
 .ds-progress-row-item .cbo-assigned-user,

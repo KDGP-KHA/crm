@@ -1,0 +1,272 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadJs{
+    <!-- include common vendor scripts used in demo pages -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/jquery/dist/jquery.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/popperjs/dist/umd/popper.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap/dist/js/bootstrap.js"></script>
+
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section PluginCss{
+
+    <!-- select2.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/select2/dist/css/select2.css">
+
+    <!-- chosen.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/chosen-js/chosen.css">
+
+    <!-- include datepicker3.css -->
+    <link href="~/Contents/Base/plugins/datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
+
+    <!-- include bootstrap-datetimepicker.css -->
+    <link rel="stylesheet" href="~/Contents/Base/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" />
+
+    <!-- include vendor stylesheets used in "DataTables" page. see "/views//pages/partials/table-datatables/vendor-stylesheets.hbs" -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.css">
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.css">
+    <link href="~/Contents/Base/plugins/datatables/extensions/ColVis/css/dataTables.colVis.css" rel="stylesheet" />
+
+    <!-- include toastr.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/toastr/toastr.css">
+
+    @RenderSection("PluginCss", false)
+}
+
+@section HeadCss{
+
+    <!-- "Landing Page 1" page styles, specific to this page for demo only -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/views/pages/landing-page-1/page-style.css">
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/dist/css/ace-themes.css">
+
+
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/preloader/preloader.css" />
+
+    <style type="text/css">
+        .select2-selection--single.select2-selection--clearable {
+            height: 100% !important;
+        }
+
+        .select2-selection__rendered {
+            word-wrap: break-word !important;
+            text-overflow: inherit !important;
+            white-space: normal !important;
+        }
+    </style>
+
+    @RenderSection("HeadCss", false)
+}
+
+<body>
+
+    <div class="preloader">
+        <div class="preloader-body">
+            <div class="cssload-container">
+                <div class="cssload-speeding-wheel"></div>
+            </div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <div class="body-container">
+        <div class="pos-abs" id="scroll-down"></div>
+        <div class="pos-abs" id="scroll-up"></div>
+
+        @Html.Partial("_Header")
+        <div class="main-container bgc-white">
+
+            <div role="main" class="main-content">
+                <div class="page-content p-0">
+                    <div id="google_translate_element" style="display:none;"></div>
+                    @RenderBody()
+                    @Html.Partial("_Footer")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- include vendor scripts used in "Landing Page 1" page. see "/views//pages/partials/landing-page-1/vendor-scripts.hbs" -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/aos/dist/aos.js"></script>
+
+    <!-- include ace.js -->
+    <script src="~/Contents/Base/plugins/ace_v4/dist/js/ace.js"></script>
+
+    <!-- include moment.js -->
+    <script src="~/Contents/Base/plugins/moment/moment.js"></script>
+
+    <!-- include datepicker.js -->
+    <script src="~/Contents/Base/plugins/datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/Contents/Base/plugins/datepicker/locales/bootstrap-datepicker.vi.min.js"></script>
+
+    <!-- include bootstrap-datetimepicker.js -->
+    <script type="text/javascript" src="~/Contents/Base/plugins/bootstrap-datetimepicker/js/moment-with-locales.js"></script>
+    <script type="text/javascript" src="~/Contents/Base/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+
+    <!-- include vendor scripts used in "DataTables" page. see "/views//pages/partials/table-datatables/vendor-scripts.hbs" -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables/media/js/jquery.dataTables.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-colreorder/js/dataTables.colReorder.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-select/js/dataTables.select.js"></script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/dataTables.buttons.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/buttons.html5.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/buttons.print.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/buttons.colVis.js"></script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-responsive/js/dataTables.responsive.js"></script>
+
+    <!-- include dataTables.colVis.js -->
+    <script src="~/Contents/Base/plugins/datatables/extensions/ColVis/js/dataTables.colVis.js"></script>
+
+    <!-- include toastr.js -->
+    <script src="~/Contents/Base/plugins/toastr/toastr.js"></script>
+
+    <!-- select2.js -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/select2/dist/js/select2.js"></script>
+
+    <!-- chosen.js -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/chosen-js/chosen.jquery.js"></script>
+
+    <script type="text/javascript">
+
+        $(function () {
+            var plugins = {
+                preloader: $(".preloader")
+            };
+
+            isNoviBuilder = window.xMode;
+
+            // Page loader & Page transition
+            if (plugins.preloader.length && !isNoviBuilder) {
+                pageTransition({
+                    target: document.querySelector('.main-content'),
+                    delay: 100,
+                    duration: 500,
+                    classIn: 'fadeIn',
+                    classOut: 'fadeOut',
+                    classActive: 'animated',
+                    onTransitionStart: function (options) {
+                        setTimeout(function () {
+                            plugins.preloader.removeClass('loaded');
+                        }, options.duration * .75);
+                    },
+                    onReady: function () {
+                        plugins.preloader.addClass('loaded');
+                        windowReady = true;
+                        setTimeout(function () {
+                            $('select#languages').append($('#google_translate_element select.goog-te-combo option').clone());
+                            //$('select#languages').selectpicker('refresh');
+                        }, 1000);
+                    }
+                });
+            }
+        });
+
+        function pageTransition(t) {
+            t = t || {},
+                t.target = t.target || null,
+                t.delay = t.delay || 500,
+                t.duration = t.duration || 1e3,
+                t.classIn = t.classIn || null,
+                t.classOut = t.classOut || null,
+                t.classActive = t.classActive || null,
+                t.onReady = t.onReady || null,
+                t.onTransitionStart = t.onTransitionStart || null,
+                t.onTransitionEnd = t.onTransitionEnd || null,
+                t.conditions = t.conditions || function (t, n) {
+                    return !/(\#|callto:|tel:|mailto:|:\/\/)/.test(n)
+                }
+                ,
+                t.target && (setTimeout(function () {
+                    t.onReady && t.onReady(t),
+                        t.classIn && t.target.classList.add(t.classIn),
+                        t.classActive && t.target.classList.add(t.classActive),
+                        t.duration && (t.target.style.animationDuration = t.duration + "ms"),
+                        t.target.addEventListener("animationstart", function () {
+                            setTimeout(function () {
+                                t.classIn && t.target.classList.remove(t.classIn),
+                                    t.onTransitionEnd && t.onTransitionEnd(t)
+                            }, t.duration)
+                        })
+                }, t.delay),
+                    $("a").click(function (n) {
+                        var a = n.currentTarget.getAttribute("href");
+                        if (t.conditions(n, a)) {
+                            var s = this.href;
+                            n.preventDefault(),
+                                t.onTransitionStart && t.onTransitionStart(t),
+                                t.classIn && t.target.classList.remove(t.classIn),
+                                t.classOut && t.target.classList.add(t.classOut),
+                                setTimeout(function () {
+                                    window.location = s,
+                                        /firefox/i.test(navigator.userAgent) && setTimeout(function () {
+                                            t.onReady && t.onReady(t),
+                                                t.classOut && t.target.classList.remove(t.classOut)
+                                        }, 1e3),
+                                        /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent) && (t.onReady && t.onReady(t),
+                                            t.classOut && t.target.classList.remove(t.classOut))
+                                }, t.duration)
+                        }
+                    }))
+        }
+
+        function translateLanguage(lang) {
+
+            var selectField = document.querySelector("#google_translate_element select");
+            for (var i = 0; i < selectField.children.length; i++) {
+                var option = selectField.children[i];
+                // find desired langauge and change the former language of the hidden selection-field
+                if (option.value == lang) {
+                    selectField.selectedIndex = i;
+                    // trigger change event afterwards to make google-lib translate this side
+                    selectField.dispatchEvent(new Event('change'));
+                    break;
+                }
+            }
+
+            return false;
+        }
+
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+                { pageLanguage: 'vi', multilanguagePage: true },
+                'google_translate_element'
+            );
+        }
+
+    </script>
+
+    <script type="text/javascript"
+            src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBMTV9BDJN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-GBMTV9BDJN');
+    </script>
+
+
+    @RenderSection("PluginJs", false)
+
+    <!-- include jquery.validate.js -->
+    <script src="~/Contents/Base/plugins/validate/jquery.validate.v1.15.1.js"></script>
+    <script src="~/Contents/Base/plugins/validate/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Contents/Base/plugins/validate/jquery.unobtrusive-ajax.js"></script>
+
+    <!-- include TSFramework.js -->
+    <script src="~/Contents/Base/plugins/TSFramework/jquery.form.js"></script>
+    <script src="~/Contents/Base/plugins/TSFramework/TSFramework.js"></script>
+
+    @RenderSection("BottomScript", false)
+
+</body>

@@ -1,0 +1,60 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessPlanModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("RM_BusinessPlan_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-Add"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Add", "RM_BusinessPlan", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "AddBusinessPlan", @class = "form-horizontal" }))
+    {
+        <div id="bodyFormAdd">
+            @Html.Partial("_BusinessPlan")
+        </div>
+
+    }
+
+    <script type="text/javascript">
+        $('form#AddBusinessPlan').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if ($("#ModalContent #modal_AddBusinessPlan #chkNotDismissModal").is(":checked")) {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableBusinessPlan.ajax.reload(null, false);
+                            response.status = undefined;
+                            $("#ModalContent #modal_AddBusinessPlan form")[0].reset();
+                        }
+                    } else {
+                        if (!response.status && response.errorCode == 1) {
+                            eval(response.message);
+                            response.status = undefined;
+                        } else {
+                            $("#ModalContent #modal_AddBusinessPlan").modal("hide");
+                            $("#ModalContent #modal_AddBusinessPlan").on('hidden.bs.modal',
+                                function () {
+                                    if (response.status != undefined) {
+                                        eval(response.message);
+                                        _tableBusinessPlan.ajax.reload(null, false);
+                                        response.status = undefined;
+                                    }
+                                });
+                        }
+                    }
+                } else {
+                    $("#ModalContent #modal_AddBusinessPlan" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,249 @@
+﻿@using Newtonsoft.Json
+@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysRoleModel
+
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.RoleId)
+@Html.HiddenFor(model => model.Name)
+@Html.HiddenFor(model => model.Permissions)
+
+<div class="row">
+    <div class="col-sm-12 table-responsive-md">
+        <table id="TablePermission" class="table table-bordered table-striped" width="100%">
+            <thead>
+            <tr>
+                <th>
+                    <label>
+                        <input id="chkAll" type="checkbox" class="mr-2" onclick="CheckAll('0')">
+                    </label>
+                </th>
+                <th>@AppProcessor.Messagor.GetMessage("Permission_ModuleName")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Permission_FunctionName")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Permission_Action_View")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Permission_Action_Add")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Permission_Action_Edit")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Permission_Action_Delete")</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var TablePermission = null;
+    $(document).ready(function() {
+        $('#permission input[type=checkbox]').each(function() {
+            var permissions = $('input[type="hidden"][id$="Permissions"]').val().split(',');
+
+            var val = $(this).val();
+            var index = permissions.indexOf(val);
+
+            if (index > -1) {
+                this.checked = true;
+            }
+        });
+
+        TablePermission = $('#TablePermission').DataTable({
+            "columnDefs": [
+                { "className": "text-center custom-middle-align", "targets": [0] },
+                { "orderable": false, "targets": [0, 2, 3, 4, 5] }
+            ],
+            "language": {
+                "processing":
+                    "<div class='overlay'><i class='fas fa-cog fa-spin'></i></div>"
+            },
+            "lengthChange": true,
+            "processing": true,
+            "order": [[1, "asc"]],
+            "data": JSON.parse('@Html.Raw(JsonConvert.SerializeObject(Model.Functions))'),
+            "columns": [
+                {
+                    "data": "FunctionId",
+                    "render": function(data, type, meta) {
+                        var html = "";
+                        var checked = IsChecked(data) ? "checked" : "";
+                        var functionId = "'chkAll" + data + "'";
+                        if (type === 'display') {
+                            html = '<label>' +
+                                '<input id="chkAll' +
+                                data +
+                                '" value="' +
+                                data +
+                                '" type="checkbox" class="mr-2" ' +
+                                checked +
+                                ' onclick="CheckAll(' +
+                                functionId +
+                                ')">' +
+                                '</label>';
+                        }
+                        return html;
+                    }
+                },
+                {
+                    "data": "Area",
+                    "defaultContent": ""
+                },
+                {
+                    "data": "Description",
+                    "defaultContent": ""
+                },
+                {
+                    "data": "FunctionId",
+                    "className": "text-center",
+                    "render": function(data, type, row, meta) {
+                        var html = "";
+                        var checked = IsChecked(data + ".View") ? "checked" : "";
+                        if (type === 'display') {
+                            html = '<label><input id="chkAll' +
+                                data +
+                                '.View" value="' +
+                                data +
+                                '.View" type="checkbox" class="mr-2" ' +
+                                checked +
+                                ' onclick="OnEventPermissionChecked(this)"/>' +
+                                '</label>';
+                        }
+                        return html;
+                    }
+                },
+                {
+                    "data": "FunctionId",
+                    "className": "text-center",
+                    "render": function(data, type, row, meta) {
+                        var html = "";
+                        var checked = IsChecked(data + ".Create") ? "checked" : "";
+                        if (type === 'display') {
+                            html = '<label><input id="chkAll' +
+                                data +
+                                '.Create" value="' +
+                                data +
+                                '.Create" type="checkbox" class="mr-2" ' +
+                                checked +
+                                ' onclick="OnEventPermissionChecked(this)"/>' +
+                                '</label>';
+                        }
+                        return html;
+                    }
+                },
+                {
+                    "data": "FunctionId",
+                    "className": "text-center",
+                    "render": function(data, type, row, meta) {
+                        var html = "";
+                        var checked = IsChecked(data + ".Edit") ? "checked" : "";
+                        if (type === 'display') {
+                            html = '<label><input id="chkAll' +
+                                data +
+                                '.Edit" value="' +
+                                data +
+                                '.Edit" type="checkbox" class="mr-2" ' +
+                                checked +
+                                ' onclick="OnEventPermissionChecked(this)"/>' +
+                                '</label></div>';
+                        }
+                        return html;
+                    }
+                },
+                {
+                    "data": "FunctionId",
+                    "className": "text-center",
+                    "render": function(data, type, row, meta) {
+                        var html = "";
+                        var checked = IsChecked(data + ".Delete") ? "checked" : "";
+                        if (type === 'display') {
+                            html = '<label><input id="chkAll' +
+                                data +
+                                '.Delete" value="' +
+                                data +
+                                '.Delete" type="checkbox" class="mr-2" ' +
+                                checked +
+                                ' onclick="OnEventPermissionChecked(this)"/>' +
+                                '</label>';
+                        }
+                        return html;
+                    }
+                }
+            ]
+        });
+    });
+
+    function IsChecked(value) {
+        var permissions = $('input[type="hidden"][id$="Permissions"]').val().split(',');
+        if ($.isNumeric(value)) {
+            var totalChecked = $.grep(permissions,
+                function(val) {
+                    var arrValue = val.split('.');
+                    return arrValue.indexOf(value.toString()) === 0;
+                });
+            if (totalChecked.length === 4) {
+                return true;
+            }
+            return false;
+        }
+        var index = permissions.indexOf(value);
+        if (index > -1) {
+            return true;
+        }
+        return false;
+    }
+
+    function CheckAll(functionId, checked) {
+        var rows;
+        if (functionId === "0") {
+            $('input[type="hidden"][id$="Permissions"]').val("");
+            checked = $("input[type='checkbox'][id$='chkAll']").prop("checked");
+            rows = TablePermission.rows({ 'search': 'applied' }).nodes();
+            // Check/uncheck checkboxes for all rows in the table
+            $("input[type='checkbox'][id^='chkAll']", rows).each(function(index) {
+                this.checked = checked;
+                var val = this.value;
+                if ($.isNumeric(val)) {
+                    CheckAll(this.id, checked);
+                }
+            });
+        } else {
+            checked = $("input[type='checkbox'][id$='" + functionId + "']").prop("checked");
+            rows = TablePermission.rows({ 'search': 'applied' }).nodes();
+            $("input[type='checkbox'][id^='" + functionId + ".']", rows).each(function(index) {
+                this.checked = checked;
+                var val = this.value;
+                if (!$.isNumeric(val)) {
+                    OnEventPermissionChecked(this);
+                }
+            });
+        }
+    }
+
+    function OnEventPermissionChecked(chk) {
+        var arrPermissions = $('input[type="hidden"][id$="Permissions"]').val().split(",");
+        var valChk = $(chk).val();
+
+        var existIndex = arrPermissions.indexOf(valChk);
+        if (chk.checked) {
+            if (existIndex < 0) {
+                arrPermissions.push(valChk);
+            }
+        } else {
+            if (existIndex > -1) {
+                arrPermissions.splice(existIndex, 1);
+            }
+        }
+
+        $('input[type="hidden"][id$="Permissions"]').val(arrPermissions.toString());
+
+        var functionId = valChk.split('.')[0];
+
+        var numActions = $.grep(arrPermissions,
+            function(val) {
+                return val.indexOf(functionId.toString() + '.') === 0;
+            });
+
+        if (numActions.length < 4) {
+            $("input[type='checkbox'][id$='chkAll" + functionId + "']").prop("checked", false);
+        } else {
+            $("input[type='checkbox'][id$='chkAll" + functionId + "']").prop("checked", true);
+        }
+    }
+
+</script>

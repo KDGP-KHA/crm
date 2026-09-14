@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<StoredProcedures ProviderName="CenIT.Provider.Major">
+
+		<!--Cate_Request_ChangeRegistrationInfo-->
+		<Procedure Name="Cate_Request_ChangeRegistrationInfo_Save" Value="Cate_Request_ChangeRegistrationInfo_Save" />
+		<Procedure Name="Cate_Request_ChangeRegistrationInfo_GetByRequestID" Value="Cate_Request_ChangeRegistrationInfo_GetByRequestID" />
+
+		<!--Cate_ProductService-->
+		<Procedure Name="Cate_ProductService_Get" Value="RM_ProductService_Get" />
+		<Procedure Name="RM_ProductService_GetAll" Value="RM_ProductService_GetAll_v2" />
+		<Procedure Name="Cate_ProductService_GetByID" Value="RM_ProductService_GetByID" />
+		<Procedure Name="Cate_ProductService_Save" Value="RM_ProductService_Save" />
+		<Procedure Name="Cate_ProductService_Delete" Value="RM_ProductService_Delete" />
+		
+		<Procedure Name="RM_ProductServiceFilePath_Get"     Value="RM_ProductServiceFilePath_Get" />
+		<Procedure Name="RM_ProductServiceFilePath_GetByID" Value="RM_ProductServiceFilePath_GetByID" />
+		<!--<Procedure Name="RM_ProductServiceFilePath_Save"    Value="RM_ProductServiceFilePath_Save" />-->
+		<Procedure Name="RM_ProductServiceFilePath_Delete"  Value="RM_ProductServiceFilePath_Delete" />
+
+		<Procedure Name="RM_ProductServiceGroupFilePath_Get"     Value="RM_ProductServiceGroupFilePath_Get" />
+		<Procedure Name="RM_ProductServiceGroupFilePath_GetByID" Value="RM_ProductServiceGroupFilePath_GetByID" />
+		<Procedure Name="RM_ProductServiceGroupFilePath_Save"    Value="RM_ProductServiceGroupFilePath_Save" />
+		<Procedure Name="RM_ProductServiceGroupFilePath_Delete"  Value="RM_ProductServiceGroupFilePath_Delete" />
+		<!--<Procedure Name="RM_ProductServiceFilePath_GetByProductService"  Value="RM_ProductServiceFilePath_GetByProductService" />-->
+
+		<!--RM_Customer-->
+		<Procedure Name="RM_Customer_Get" Value="RM_Customer_Get" />
+		<Procedure Name="RM_Customer_GetByID" Value="RM_Customer_GetByID" />
+		<Procedure Name="RM_Customer_Save" Value="RM_Customer_Save" />
+		<Procedure Name="RM_Customer_Delete" Value="RM_Customer_Delete" />
+		<Procedure Name="RM_Customer_BulkImport" Value="RM_Customer_BulkImport" />
+
+		<!--RM_CustomerContact-->
+		<Procedure Name="RM_CustomerContact_Get" Value="RM_CustomerContact_Get" />
+		<Procedure Name="RM_CustomerContact_GetByID" Value="RM_CustomerContact_GetByID" />
+		<Procedure Name="RM_CustomerContact_Save" Value="RM_CustomerContact_Save" />
+		<Procedure Name="RM_CustomerContact_Delete" Value="RM_CustomerContact_Delete" />
+
+		<!--RM_Project-->
+		<Procedure Name="RM_Project_Get" Value="RM_Project_Get" />
+		<Procedure Name="RM_Project_Get2" Value="RM_Project_Get2" />
+		<Procedure Name="RM_Project_GetByID" Value="RM_Project_GetByID" />
+		<Procedure Name="RM_Project_Save" Value="RM_Project_Save" />
+		<Procedure Name="RM_Project_Convert" Value="RM_Project_Convert" />
+		<Procedure Name="RM_Project_Delete" Value="RM_Project_Delete" />
+		<Procedure Name="RM_ProductProject_GetByProjectID" Value="RM_ProductProject_GetByProjectID" />
+
+		<!--RM_ProductProject-->
+		<Procedure Name="RM_ProductProject_Get" Value="RM_ProductProject_Get" />
+		<Procedure Name="RM_ProductProject_GetByID" Value="RM_ProductProject_GetByID" />
+		<Procedure Name="RM_ProductProject_Save" Value="RM_ProductProject_Save" />
+		<Procedure Name="RM_ProductProject_Convert" Value="RM_ProductProject_Convert" />
+		<Procedure Name="RM_ProductProject_Delete" Value="RM_ProductProject_Delete" />
+
+		<!--RM_CostType-->
+		<Procedure Name="RM_CostType_Get" Value="RM_CostType_Get" />
+		<Procedure Name="RM_CostType_GetByID" Value="RM_CostType_GetByID" />
+		<Procedure Name="RM_CostType_Save" Value="RM_CostType_Save" />
+		<Procedure Name="RM_CostType_Delete" Value="RM_CostType_Delete" />
+
+		<!--RM_ProductCost-->
+		<Procedure Name="RM_ProductCost_Get" Value="RM_ProductCost_Get" />
+		<Procedure Name="RM_ProductCost_GetByID" Value="RM_ProductCost_GetByID" />
+		<Procedure Name="RM_ProductCost_Save" Value="RM_ProductCost_Save" />
+		<Procedure Name="RM_ProductCost_Delete" Value="RM_ProductCost_Delete" />
+		<Procedure Name="RM_ProductCost_GetByProductProjectID" Value="RM_ProductCost_GetByProductProjectID" />
+
+		<!--RM_RevenueReceived-->
+		<Procedure Name="RM_RevenueReceived_Get" Value="RM_RevenueReceived_Get" />
+		<Procedure Name="RM_RevenueReceived_GetByID" Value="RM_RevenueReceived_GetByID" />
+		<Procedure Name="RM_RevenueReceived_Save" Value="RM_RevenueReceived_Save" />
+		<Procedure Name="RM_RevenueReceived_Delete" Value="RM_RevenueReceived_Delete" />
+		<Procedure Name="RM_RevenueReceived_GetByProductProjectID" Value="RM_RevenueReceived_GetByProductProjectID" />
+
+		<!--RM_BusinessOpportunity-->
+    <Procedure Name="RM_BusinessOpportunity_Save" Value="RM_BusinessOpportunity_Save" />
+    <Procedure Name="RM_BusinessOpportunity_Get" Value="RM_BusinessOpportunity_Get" />
+    <Procedure Name="RM_BusinessOpportunity_GetByCustomerId" Value="RM_BusinessOpportunity_GetByCustomerId" />
+    <Procedure Name="RM_BusinessOpportunity_GetById" Value="RM_BusinessOpportunity_GetById" />
+    <Procedure Name="RM_BusinessOpportunity_Delete" Value="RM_BusinessOpportunity_Delete" />
+
+	<!--RM_BusinessOpportunity-->
+	<Procedure Name="RM_BusinessOpportunityFilePath_Save" Value="RM_BusinessOpportunityFilePath_Save" />
+	<Procedure Name="RM_BusinessOpportunityFilePath_Get" Value="RM_BusinessOpportunityFilePath_Get" />
+	<Procedure Name="RM_BusinessOpportunityFilePath_Delete" Value="RM_BusinessOpportunityFilePath_Delete" />
+	<Procedure Name="RM_BusinessOpportunityFilePath_GetByID" Value="RM_BusinessOpportunityFilePath_GetByID" />
+	<Procedure Name="RM_BusinessOpportunityFilePath_GetByBOID" Value="RM_BusinessOpportunityFilePath_GetByBOID" />
+		
+		<!--RM_OpportunityPlan-->
+	<Procedure Name="RM_OpportunityPlan_GetByOpportunityId" Value="RM_OpportunityPlan_GetByOpportunityId" />
+	<Procedure Name="RM_OpportunityPlan_GetById" Value="RM_OpportunityPlan_GetById" />
+	<Procedure Name="RM_OpportunityPlan_Save" Value="RM_OpportunityPlan_Save" />
+	<Procedure Name="RM_OpportunityPlan_Delete" Value="RM_OpportunityPlan_Delete" />
+    
+    <!--RM_Contracts-->
+    <Procedure Name="RM_Contracts_Save" Value="RM_Contracts_Save_v2" />
+    <Procedure Name="RM_Contracts_Get" Value="RM_Contracts_Get" />
+    <Procedure Name="RM_Contracts_GetById" Value="RM_Contracts_GetById" />
+    <Procedure Name="RM_Contracts_GetByCustomerId" Value="RM_Contracts_GetByCustomerId" />
+    <Procedure Name="RM_Contracts_Delete" Value="RM_Contracts_Delete" />
+    <Procedure Name="RM_Contracts_GetByProjectID" Value="RM_Contracts_GetByProjectID" />
+	<Procedure Name="RM_Contracts_GetByProductProjectID" Value="RM_Contracts_GetByProductProjectID" />
+
+		<!--RM_ExchangeHistory-->
+    <Procedure Name="RM_ExchangeHistory_Save" Value="RM_ExchangeHistory_Save" />
+    <Procedure Name="RM_ExchangeHistory_Get" Value="RM_ExchangeHistory_Get" />
+    <Procedure Name="RM_ExchangeHistory_Delete" Value="RM_ExchangeHistory_Delete" />
+    <Procedure Name="RM_ExchangeHistory_GetByID" Value="RM_ExchangeHistory_GetByID" />
+    
+		<!--RM_Employees-->
+		<Procedure Name="MN_Employee_Save" Value="MN_Employee_Save" />
+		<Procedure Name="MN_Employee_Get" Value="MN_Employee_Get" />
+		<Procedure Name="MN_Employee_Delete" Value="MN_Employee_Delete" />
+		<Procedure Name="MN_Employee_GetByID" Value="MN_Employee_GetByID" />
+		<Procedure Name="MN_Employee_GetByBoPhanID" Value="MN_Employee_GetByBoPhanID" />
+		<Procedure Name="MN_Employee_Sync" Value="MN_Employee_Sync" />
+
+		<!--RM_Roles-->
+		<Procedure Name="RM_Roles_Save" Value="RM_Roles_Save" />
+		<Procedure Name="RM_Roles_Get" Value="RM_Roles_Get" />
+		<Procedure Name="RM_Roles_Delete" Value="RM_Roles_Delete" />
+		<Procedure Name="RM_Roles_GetByID" Value="RM_Roles_GetByID" />
+
+		<!--RM_SalesTeamMembers-->
+		<Procedure Name="RM_SalesTeamMembers_Save" Value="RM_SalesTeamMembers_Save" />
+		<Procedure Name="RM_SalesTeamMembers_Get" Value="RM_SalesTeamMembers_Get" />
+		<Procedure Name="RM_SalesTeamMembers_Delete" Value="RM_SalesTeamMembers_Delete" />
+		<Procedure Name="RM_SalesTeamMembers_GetByID" Value="RM_SalesTeamMembers_GetByID" />
+		<Procedure Name="RM_SalesTeamMembers_SaveMulti" Value="RM_SalesTeamMembers_SaveMulti" />
+		<Procedure Name="RM_SalesTeamMembers_GetByBusinessOpportunityID" Value="RM_SalesTeamMembers_GetByBusinessOpportunityID" />
+		<Procedure Name="RM_SalesTeamMembers_GetGetManagementByBOID" Value="RM_SalesTeamMembers_GetGetManagementByBOID" />
+
+		<!--MN_BoPhan-->
+		<Procedure Name="MN_BoPhan_Get" Value="MN_BoPhan_Get" />
+		<Procedure Name="MN_BoPhan_Export" Value="MN_BoPhan_Export" />
+		<Procedure Name="MN_BoPhan_Sync" Value="MN_BoPhan_Sync" />
+
+		<!--RM_ProjectMember-->
+		<Procedure Name="RM_ProjectMember_Save" Value="RM_ProjectMember_Save" />
+		<Procedure Name="RM_ProjectMember_Get" Value="RM_ProjectMember_Get" />
+		<Procedure Name="RM_ProjectMember_Delete" Value="RM_ProjectMember_Delete" />
+		<Procedure Name="RM_ProjectMember_GetByID" Value="RM_ProjectMember_GetByID" />
+		<Procedure Name="RM_ProjectMember_SaveMulti" Value="RM_ProjectMember_SaveMulti" />
+		<Procedure Name="RM_ProjectMember_GetByProductProjectID" Value="RM_ProjectMember_GetByProductProjectID" />
+
+		<Procedure Name="RM_CustomerStatus_Get" Value="RM_CustomerStatus_Get" />
+		<Procedure Name="RM_CustomerStatus_GetByID" Value="RM_CustomerStatus_GetByID" />
+		<Procedure Name="RM_CustomerStatus_Save" Value="RM_CustomerStatus_Save" />
+		<Procedure Name="RM_CustomerStatus_Delete" Value="RM_CustomerStatus_Delete" />
+
+		<Procedure Name="RM_CustomerType_Get" Value="RM_CustomerType_Get" />
+		<Procedure Name="RM_CustomerType_GetByID" Value="RM_CustomerType_GetByID" />
+		<Procedure Name="RM_CustomerType_Save" Value="RM_CustomerType_Save" />
+		<Procedure Name="RM_CustomerType_Delete" Value="RM_CustomerType_Delete" />
+
+		<Procedure Name="RM_ContactPersons_Save" Value="RM_ContactPersons_Save" />
+		<Procedure Name="RM_ContactPersons_Get" Value="RM_ContactPersons_Get" />
+		<Procedure Name="RM_ContactPersons_Delete" Value="RM_ContactPersons_Delete" />
+		<Procedure Name="RM_ContactPersons_GetByID" Value="RM_ContactPersons_GetByID" />
+		<Procedure Name="RM_ContactPersons_GetByCustomerID" Value="RM_ContactPersons_GetByCustomerID" />
+		<Procedure Name="RM_ContactPersons_BulkImport" Value="RM_ContactPersons_BulkImport" />
+
+		<Procedure Name="RM_OpportunityStatus_Get" Value="RM_OpportunityStatus_Get" />
+		<Procedure Name="RM_OpportunityStatus_GetByID" Value="RM_OpportunityStatus_GetByID" />
+		<Procedure Name="RM_OpportunityStatus_Save" Value="RM_OpportunityStatus_Save" />
+		<Procedure Name="RM_OpportunityStatus_Delete" Value="RM_OpportunityStatus_Delete" />
+
+		<Procedure Name="RM_Status_Get" Value="RM_Status_Get" />
+		<Procedure Name="RM_Status_GetByID" Value="RM_Status_GetByID" />
+		<Procedure Name="RM_Status_Save" Value="RM_Status_Save_v2" />
+		<Procedure Name="RM_Status_Delete" Value="RM_Status_Delete" />
+
+		<Procedure Name="RM_GroupService_Get" Value="RM_GroupService_Get" />
+		<Procedure Name="RM_GroupService_GetByID" Value="RM_GroupService_GetByID" />
+		<Procedure Name="RM_GroupService_Save" Value="RM_GroupService_Save" />
+		<Procedure Name="RM_GroupService_Delete" Value="RM_GroupService_Delete" />
+		
+		<Procedure Name="RM_TaskGroup_Get" Value="RM_TaskGroup_Get" />
+		<Procedure Name="RM_TaskGroup_GetByID" Value="RM_TaskGroup_GetByID" />
+		<Procedure Name="RM_TaskGroup_Save" Value="RM_TaskGroup_Save" />
+		<Procedure Name="RM_TaskGroup_Delete" Value="RM_TaskGroup_Delete" />
+
+		<Procedure Name="RM_Task_Get"     Value="RM_Task_Get" />
+		<Procedure Name="RM_Task_GetByID" Value="RM_Task_GetByID" />
+		<Procedure Name="RM_Task_Save"    Value="RM_Task_Save" />
+		<Procedure Name="RM_Task_Delete"  Value="RM_Task_Delete" />
+
+		<Procedure Name="RM_ProjectTask_Get"                    Value="RM_ProjectTask_Get" />
+		<Procedure Name="RM_ProjectTask_GetByID"                Value="RM_ProjectTask_GetByID" />
+		<Procedure Name="RM_ProjectTask_Save"                   Value="RM_ProjectTask_Save" />
+		<Procedure Name="RM_ProjectTask_Delete"                 Value="RM_ProjectTask_Delete" />
+		<Procedure Name="RM_ProjectTask_GetByProductProjectID"  Value="RM_ProjectTask_GetByProductProjectID" />
+		<Procedure Name="RM_ProjectTask_GetByProjectID"  Value="RM_ProjectTask_GetByProjectID" />
+
+		<Procedure Name="RM_TaskStatus_GetAll" Value="RM_TaskStatus_GetAll" />
+
+		<Procedure Name="RM_TaskManagement_Get"     Value="RM_TaskManagement_Get_v2" />
+		<Procedure Name="RM_TaskManagement_GetByID" Value="RM_TaskManagement_GetByID" />
+		<Procedure Name="RM_TaskManagement_Save"    Value="RM_TaskManagement_Save" />
+		<Procedure Name="RM_TaskManagement_Delete"  Value="RM_TaskManagement_Delete" />
+
+		<Procedure Name="RM_TaskType_GetAll"    Value="RM_TaskType_GetAll" />
+
+		<Procedure Name="RM_Priority_GetAll"    Value="RM_Priority_GetAll" />
+
+		<Procedure Name="RM_TaskManagement_GetByProductProjectID"    Value="RM_TaskManagement_GetByProductProjectID" />
+
+		<Procedure Name="RM_TaskAssignee_Save"    Value="RM_TaskAssignee_Save"/>
+		<Procedure Name="RM_TaskAssignee_GetByTaskManagementID"    Value="RM_TaskAssignee_GetByTaskManagementID" />
+		
+		<Procedure Name="RM_TaskActivity_GetByTaskManagementID"    Value="RM_TaskActivity_GetByTaskManagementID" />
+		<Procedure Name="RM_TaskActivity_Save"    Value="RM_TaskActivity_Save" />
+
+		<Procedure Name="RM_Comment_GetByTaskManagementID"    Value="RM_Comment_GetByTaskManagementID" />
+		<Procedure Name="RM_Comment_GetByProjectID"    Value="RM_Comment_GetByProjectID" />
+		<Procedure Name="RM_Comment_Save"    Value="RM_Comment_Save" />
+		<Procedure Name="RM_Comment_Delete"    Value="RM_Comment_Delete" />
+		<Procedure Name="RM_Comment_GetByID"    Value="RM_Comment_GetByID" />
+
+		<Procedure Name="RM_Dashboard_GetPieChart" Value="RM_Dashboard_GetPieChart" />
+		<Procedure Name="RM_Dashboard_GetSummary" Value="RM_Dashboard_GetSummary_v2" />
+		<Procedure Name="RM_Dashboard_GetOpportunityByStatus" Value="RM_Dashboard_GetOpportunityByStatus" />
+		<Procedure Name="RM_Dashboard_GetOpportunityByService" Value="RM_Dashboard_GetOpportunityByService" />
+		<Procedure Name="RM_Dashboard_GetProjectByStatus" Value="RM_Dashboard_GetProjectByStatus" />
+		<Procedure Name="RM_Dashboard_Project_Get" Value="RM_Dashboard_Project_Get" />
+		<Procedure Name="RM_Dashboard_Project_Get_V2" Value="RM_Dashboard_Project_Get_V2" />
+		<Procedure Name="RM_Dashboard_Opportunity_Get" Value="RM_Dashboard_Opportunity_Get" />
+		<Procedure Name="RM_Dashboard_Opportunity_Get_V2" Value="RM_Dashboard_Opportunity_Get_V2" />
+		<Procedure Name="RM_Dashboard_Plan_Get" Value="RM_Dashboard_Plan_Get" />
+		<Procedure Name="RM_Dashboard_Plan_Get_V2" Value="RM_Dashboard_Plan_Get_V2" />
+		<Procedure Name="RM_Dashboard_GetOpportunityByGroupService" Value="RM_Dashboard_GetOpportunityByGroupService" />
+		<Procedure Name="RM_Dashboard_GetProjectByGroupService" Value="RM_Dashboard_GetProjectByGroupService" />
+		<Procedure Name="RM_Dashboard_Opportunity_GetByGroupService" Value="RM_Dashboard_Opportunity_GetByGroupService" />
+		<Procedure Name="RM_Dashboard_Project_GetByGroupService" Value="RM_Dashboard_Project_GetByGroupService" />
+		<Procedure Name="RM_Dashboard_ProjectMember_Get" Value="RM_Dashboard_ProjectMember_Get" />
+		<Procedure Name="RM_OpportunityDashboardChart_Get" Value="RM_OpportunityDashboardChart_Get" />
+		<Procedure Name="RM_OpportunityDashboard_Get" Value="RM_OpportunityDashboard_Get" />
+		<Procedure Name="RM_BusinessOpportunity_WeeklyReport_Get" Value="RM_BusinessOpportunity_WeeklyReport_Get" />
+		<Procedure Name="RM_ProjectRevenueReport_Get" Value="RM_ProjectRevenueReport_Get" />
+		<Procedure Name="RM_ExchangeHistoryFilePath_Save" Value="RM_ExchangeHistoryFilePath_Save" />
+		<Procedure Name="RM_ExchangeHistoryFilePath_Get" Value="RM_ExchangeHistoryFilePath_Get" />
+		<Procedure Name="RM_ExchangeHistoryFilePath_Delete" Value="RM_ExchangeHistoryFilePath_Delete" />
+		<Procedure Name="RM_ExchangeHistoryFilePath_GetByID" Value="RM_ExchangeHistoryFilePath_GetByID" />
+		<Procedure Name="RM_ExchangeHistoryFilePath_GetByEHID" Value="RM_ExchangeHistoryFilePath_GetByEHID" />
+
+		<Procedure Name="RM_RevenueAllocation_Get" Value="RM_RevenueAllocation_Get" />
+		<Procedure Name="RM_RevenueAllocation_GetByID" Value="RM_RevenueAllocation_GetByID" />
+		<Procedure Name="RM_RevenueAllocation_GetByProjectID" Value="RM_RevenueAllocation_GetByProjectID" />
+		<Procedure Name="RM_RevenueAllocation_Save" Value="RM_RevenueAllocation_Save" />
+		<Procedure Name="RM_RevenueAllocation_Delete" Value="RM_RevenueAllocation_Delete" />
+
+		<!--RM_LogTask-->
+		<Procedure Name="RM_LogTask_Get"                  Value="RM_LogTask_Get" />
+		<Procedure Name="RM_LogTask_GetByID"              Value="RM_LogTask_GetByID" />
+		<Procedure Name="RM_LogTask_GetByProjectTaskID"   Value="RM_LogTask_GetByProjectTaskID" />
+		<Procedure Name="RM_LogTask_Save"                 Value="RM_LogTask_Save" />
+		<Procedure Name="RM_LogTask_Delete"               Value="RM_LogTask_Delete" />
+
+		<!--RM_LogTaskFilePath-->
+		<Procedure Name="RM_LogTaskFilePath_Get"          Value="RM_LogTaskFilePath_Get" />
+		<Procedure Name="RM_LogTaskFilePath_GetByID"      Value="RM_LogTaskFilePath_GetByID" />
+		<Procedure Name="RM_LogTaskFilePath_Save"         Value="RM_LogTaskFilePath_Save" />
+		<Procedure Name="RM_LogTaskFilePath_Delete"       Value="RM_LogTaskFilePath_Delete" />
+
+		<!--RM_AnniversaryType-->
+		<Procedure Name="RM_AnniversaryType_Save"          Value="RM_AnniversaryType_Save" />
+		<Procedure Name="RM_AnniversaryType_Get"           Value="RM_AnniversaryType_Get" />
+		<Procedure Name="RM_AnniversaryType_Delete"         Value="RM_AnniversaryType_Delete" />
+		<Procedure Name="RM_AnniversaryType_GetByID"       Value="RM_AnniversaryType_GetByID" />
+
+		<Procedure Name="RM_CustomerAnniversary_Get"    Value="RM_CustomerAnniversary_Get" />
+		<Procedure Name="RM_CustomerAnniversary_GetByID" Value="RM_CustomerAnniversary_GetByID" />
+		<Procedure Name="RM_CustomerAnniversary_Save"   Value="RM_CustomerAnniversary_Save" />
+		<Procedure Name="RM_CustomerAnniversary_Delete"  Value="RM_CustomerAnniversary_Delete" />
+
+		<Procedure Name="RM_ContractFilePath_Get"     Value="RM_ContractFilePath_Get" />
+		<Procedure Name="RM_ContractFilePath_GetByID" Value="RM_ContractFilePath_GetByID" />
+		<Procedure Name="RM_ContractFilePath_Save"    Value="RM_ContractFilePath_Save" />
+		<Procedure Name="RM_ContractFilePath_Delete"  Value="RM_ContractFilePath_Delete" />
+		
+		<Procedure Name="RM_Project_WeeklyTaskReport_Get"  Value="RM_Project_WeeklyTaskReport_Get" />
+		<Procedure Name="RM_Project_TaskReport_Get"  Value="RM_Project_TaskReport_Get" />
+		<Procedure Name="RM_Dashboard_StaleUpdates_Get" Value="RM_Dashboard_StaleUpdates_Get" />
+
+		<!--RM_Project_Export-->
+		<Procedure Name="RM_Project_Export_Projects" Value="RM_Project_Export_Projects" />
+		<Procedure Name="RM_Project_Export_Products" Value="RM_Project_Export_Products" />
+		<Procedure Name="RM_Project_Export_Members"  Value="RM_Project_Export_Members" />
+		<Procedure Name="RM_Project_Export_Tasks"    Value="RM_Project_Export_Tasks" />
+
+		<Procedure Name="RM_BusinessPlan_Save" Value="RM_BusinessPlan_Save" />
+		<Procedure Name="RM_BusinessPlan_Get" Value="RM_BusinessPlan_Get" />
+		<Procedure Name="RM_BusinessPlan_Delete" Value="RM_BusinessPlan_Delete" />
+		<Procedure Name="RM_BusinessPlan_GetByID" Value="RM_BusinessPlan_GetByID" />
+
+		<Procedure Name="RM_BusinessPlanFilePath_Save" Value="RM_BusinessPlanFilePath_Save" />
+		<Procedure Name="RM_BusinessPlanFilePath_Get" Value="RM_BusinessPlanFilePath_Get" />
+		<Procedure Name="RM_BusinessPlanFilePath_Delete" Value="RM_BusinessPlanFilePath_Delete" />
+		<Procedure Name="RM_BusinessPlanFilePath_GetByID" Value="RM_BusinessPlanFilePath_GetByID" />
+		<Procedure Name="RM_BusinessPlanFilePath_GetByBusinessPlanID" Value="RM_BusinessPlanFilePath_GetByBusinessPlanID" />
+
+		<Procedure Name="RM_Employee_BusinessPlan_Delete" Value="RM_Employee_BusinessPlan_Delete" />
+		<Procedure Name="RM_Employee_BusinessPlan_Get" Value="RM_Employee_BusinessPlan_Get" />
+		<Procedure Name="RM_Employee_BusinessPlan_Getv2" Value="RM_Employee_BusinessPlan_Getv2" />
+		<Procedure Name="RM_Employee_BusinessPlan_GetByID" Value="RM_Employee_BusinessPlan_GetByID" />
+		<Procedure Name="RM_Employee_BusinessPlan_Save" Value="RM_Employee_BusinessPlan_Save" />
+		<Procedure Name="Import_RM_Employee_BusinessPlan_ValidData" Value="Import_RM_Employee_BusinessPlan_ValidData" />
+		<Procedure Name="Import_RM_Employee_BusinessPlan_SaveData" Value="Import_RM_Employee_BusinessPlan_SaveData" />
+		<Procedure Name="Import_RM_Employee_BusinessPlan_GetData" Value="Import_RM_Employee_BusinessPlan_GetData" />
+		<Procedure Name="Import_RM_Employee_BusinessPlan_ClearData" Value="Import_RM_Employee_BusinessPlan_ClearData" />
+
+		<Procedure Name="RM_OpportunityPlanRelatedPerson_SaveMulti" Value="RM_OpportunityPlanRelatedPerson_SaveMulti" />
+		<Procedure Name="RM_OpportunityPlanRelatedPerson_GetByOpportunityPlanID" Value="RM_OpportunityPlanRelatedPerson_GetByOpportunityPlanID" />
+		<Procedure Name="RM_OpportunityPlanRelatedPerson_Delete" Value="RM_OpportunityPlanRelatedPerson_Delete" />
+
+		<!--Thông báo trên thanh header-->
+		<Procedure Name="RM_Notification_Save" Value="RM_Notification_Save" />
+		<Procedure Name="RM_Notification_GetByUser" Value="RM_Notification_GetByUser" />
+		<Procedure Name="RM_Notification_MarkAsRead" Value="RM_Notification_MarkAsRead" />
+		<Procedure Name="RM_Notification_MarkAllAsRead" Value="RM_Notification_MarkAllAsRead" />
+
+		<!--RM_OpportunityPlanReminder-->
+		<Procedure Name="RM_OpportunityPlanReminder_GetPending"    Value="RM_OpportunityPlanReminder_GetPending" />
+		<Procedure Name="RM_OpportunityPlanReminder_MarkSent"      Value="RM_OpportunityPlanReminder_MarkSent" />
+		<Procedure Name="RM_OpportunityPlanReminder_Seed"          Value="RM_OpportunityPlanReminder_Seed" />
+		<Procedure Name="RM_OpportunityPlanReminder_Update"        Value="RM_OpportunityPlanReminder_Update" />
+		<Procedure Name="RM_OpportunityPlanReminder_DeleteForPlan" Value="RM_OpportunityPlanReminder_DeleteForPlan" />
+
+		<!--RM_ReviewBatch-->
+		<Procedure Name="RM_ReviewBatch_Get" Value="RM_ReviewBatch_Get" />
+		<Procedure Name="RM_ReviewBatch_GetByID" Value="RM_ReviewBatch_GetByID" />
+		<Procedure Name="RM_ReviewBatch_Save" Value="RM_ReviewBatch_Save" />
+		<Procedure Name="RM_ReviewBatch_Delete" Value="RM_ReviewBatch_Delete" />
+
+		<!--RM_ReviewBatchItem-->
+		<Procedure Name="RM_Review_GetBusinessOpportunity" Value="RM_Review_GetBusinessOpportunity" />
+		<Procedure Name="RM_Review_GetProject" Value="RM_Review_GetProject" />
+
+		<!--RM_Invoices-->
+		<Procedure Name="RM_Invoices_Save"		Value="RM_Invoices_Save" />
+		<Procedure Name="RM_Invoices_Get"		Value="RM_Invoices_Get" />
+		<Procedure Name="RM_Invoices_Delete"	Value="RM_Invoices_Delete" />
+		<Procedure Name="RM_Invoices_GetByID"	Value="RM_Invoices_GetByID" />
+		
+		<!--InvoicesFilePath-->
+		<Procedure Name="RM_InvoicesFilePath_Get"		Value="RM_InvoicesFilePath_Get" />
+		<Procedure Name="RM_InvoicesFilePath_Delete"	Value="RM_InvoicesFilePath_Delete" />
+		<Procedure Name="RM_InvoicesFilePath_GetByID"	Value="RM_InvoicesFilePath_GetByID" />
+
+		<Procedure Name="RM_OpportunityProjectWithoutPGP_Get" Value="RM_OpportunityProjectWithoutPGP_Get" />
+		<!--ReviewBatchItem-->
+		<Procedure Name="RM_ReviewBatchItem_Save"		Value="RM_ReviewBatchItem_Save" />
+		<Procedure Name="RM_ReviewBatch_GetHistory"		Value="RM_ReviewBatch_GetHistory" />
+		<Procedure Name="RM_ReviewHistory_Save"			Value="RM_ReviewHistory_Save" />
+		<Procedure Name="RM_ReviewHistory_GetByID"			Value="RM_ReviewHistory_GetByID" />
+
+		<Procedure Name="RM_Review_Report_Get" Value="RM_Review_Report_Get" />
+
+		<!--ReviewBatchFilePath-->
+		<Procedure Name="RM_ReviewHistoryFilePath_Get"		Value="RM_ReviewHistoryFilePath_Get" />
+		<Procedure Name="RM_ReviewHistoryFilePath_GetByID"	Value="RM_ReviewHistoryFilePath_GetByID" />
+		<Procedure Name="RM_ReviewHistoryFilePath_Save"		Value="RM_ReviewHistoryFilePath_Save" />
+		<Procedure Name="RM_ReviewHistoryFilePath_Delete"	Value="RM_ReviewHistoryFilePath_Delete" />
+
+		<!--Báo cáo cơ hội kinh doanh-->
+		<Procedure Name="RM_Report_BusinessOpportunity"	Value="RM_Report_BusinessOpportunity_v3" />
+
+		<!--BillingCycles-->
+		<Procedure Name="RM_BillingCycles_Save"		Value="RM_BillingCycles_Save" />
+		<Procedure Name="RM_BillingCycles_Get"		Value="RM_BillingCycles_Get" />
+		<Procedure Name="RM_BillingCycles_Delete"	Value="RM_BillingCycles_Delete" />
+		<Procedure Name="RM_BillingCycles_GetByID"	Value="RM_BillingCycles_GetByID" />
+		
+		<!--RM_ContractReminders-->
+		<Procedure Name="RM_ContractReminders_Save"		Value="RM_ContractReminders_Save" />
+		<Procedure Name="RM_ContractReminders_Get"		Value="RM_ContractReminders_Get" />
+		<Procedure Name="RM_ContractReminders_Delete"	Value="RM_ContractReminders_Delete" />
+		<Procedure Name="RM_ContractReminders_GetByID"	Value="RM_ContractReminders_GetByID" />
+		<Procedure Name="Job_ContractPaymentReminder"	Value="Job_ContractPaymentReminder" />
+		
+		<Procedure Name="Project_Opportunity_GetReminder"	Value="Project_Opportunity_GetReminder" />
+		<Procedure Name="Project_Opportunity_GetBotData"	Value="Project_Opportunity_GetBotData" />
+
+		<!-- RM_DigitalSales & Workflow -->
+		<Procedure Name="RM_DigitalSales_GetList" Value="RM_DigitalSales_GetList" />
+		<Procedure Name="RM_DigitalSales_GetByID" Value="RM_DigitalSales_GetByID" />
+		<Procedure Name="RM_DigitalSales_Save" Value="RM_DigitalSales_Save" />
+		<Procedure Name="RM_DigitalSales_Delete" Value="RM_DigitalSales_Delete" />
+		<Procedure Name="RM_DigitalSales_ChangeStatus" Value="RM_DigitalSales_ChangeStatus" />
+		<Procedure Name="RM_DigitalSales_GetTimeline" Value="RM_DigitalSales_GetTimeline" />
+		<Procedure Name="RM_DigitalSales_ToggleKeyProject" Value="RM_DigitalSales_ToggleKeyProject" />
+		<Procedure Name="RM_DigitalSales_ToggleFollow" Value="RM_DigitalSales_ToggleFollow" />
+
+		<!-- RM_DigitalSalesProduct -->
+		<Procedure Name="RM_DigitalSalesProduct_GetBySalesID" Value="RM_DigitalSalesProduct_GetBySalesID" />
+		<Procedure Name="RM_DigitalSalesProduct_Save" Value="RM_DigitalSalesProduct_Save" />
+		<Procedure Name="RM_DigitalSalesProduct_Delete" Value="RM_DigitalSalesProduct_Delete" />
+
+		<!-- RM_DigitalSalesMember -->
+		<Procedure Name="RM_DigitalSalesMember_GetBySalesID" Value="RM_DigitalSalesMember_GetBySalesID" />
+		<Procedure Name="RM_DigitalSalesMember_Save" Value="RM_DigitalSalesMember_Save" />
+		<Procedure Name="RM_DigitalSalesMember_Delete" Value="RM_DigitalSalesMember_Delete" />
+
+		<!-- RM_DigitalSalesTracking -->
+		<Procedure Name="RM_DigitalSalesTracking_GetBySalesID" Value="RM_DigitalSalesTracking_GetBySalesID" />
+		<Procedure Name="RM_DigitalSalesTracking_Save" Value="RM_DigitalSalesTracking_Save" />
+		<Procedure Name="RM_DigitalSalesTracking_Delete" Value="RM_DigitalSalesTracking_Delete" />
+		<Procedure Name="RM_DigitalSalesTracking_UpdateStatus" Value="RM_DigitalSalesTracking_UpdateStatus" />
+
+		<!-- RM_DigitalSalesStatus -->
+		<Procedure Name="RM_DigitalSalesStatus_GetAll" Value="RM_DigitalSalesStatus_GetAll" />
+		<Procedure Name="RM_DigitalSalesStatus_Get" Value="RM_DigitalSalesStatus_Get" />
+		<Procedure Name="RM_DigitalSalesStatus_GetByID" Value="RM_DigitalSalesStatus_GetByID" />
+		<Procedure Name="RM_DigitalSalesStatus_Save" Value="RM_DigitalSalesStatus_Save" />
+		<Procedure Name="RM_DigitalSalesStatus_Delete" Value="RM_DigitalSalesStatus_Delete" />
+
+		<!-- RM_DigitalSalesProcess -->
+		<Procedure Name="RM_DigitalSalesProcess_Get" Value="RM_DigitalSalesProcess_Get" />
+		<Procedure Name="RM_DigitalSalesProcess_GetByID" Value="RM_DigitalSalesProcess_GetByID" />
+		<Procedure Name="RM_DigitalSalesProcess_Save" Value="RM_DigitalSalesProcess_Save" />
+		<Procedure Name="RM_DigitalSalesProcess_Delete" Value="RM_DigitalSalesProcess_Delete" />
+
+		<!-- RM_DigitalSalesProgress -->
+		<Procedure Name="RM_DigitalSalesProgress_GetByProcess" Value="RM_DigitalSalesProgress_GetByProcess" />
+		<Procedure Name="RM_DigitalSalesProgress_GetByID" Value="RM_DigitalSalesProgress_GetByID" />
+		<Procedure Name="RM_DigitalSalesProgress_Save" Value="RM_DigitalSalesProgress_Save" />
+		<Procedure Name="RM_DigitalSalesProgress_Delete" Value="RM_DigitalSalesProgress_Delete" />
+
+		<!-- RM_DigitalSalesActivity -->
+		<Procedure Name="RM_DigitalSalesActivity_GetList" Value="RM_DigitalSalesActivity_GetList" />
+		<Procedure Name="RM_DigitalSalesActivity_Add" Value="RM_DigitalSalesActivity_Add" />
+		<Procedure Name="RM_DigitalSalesActivity_Delete" Value="RM_DigitalSalesActivity_Delete" />
+	</StoredProcedures>
+</Provider>

@@ -1,0 +1,34 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_GroupServiceSearchModel
+
+<div class="Search card dcard" id="SearchGroupService">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+
+    <div class="card-body p-2 d-flex align-items-end">
+        <div class="Search_Box w-50 keyWord">
+            <label class="text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Label_TuKhoa")</label>
+            @Html.TextBoxFor(model => model.Keyword, new { @class = "form-control", placeholder = @AppProcessor.Messagor.GetMessage("GroupService_Keyword") })
+        </div>
+
+        <div class="Group Group_button">
+            <div class="Search_button text-center">
+                <button type="button" class="btn btn-primary" onclick="_tableGroupService.ajax.reload(null, false);"><i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#SearchGroupService').on('keydown', 'input, select', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                _tableGroupService.ajax.reload(null, false);
+            }
+        });
+    });
+</script>

@@ -1,0 +1,275 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityOverviewModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("BO_Overview_Title") + ": " + Model.BusinessOpportunity.OpportunityName;
+}
+
+@section PageTitle
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2">
+                    <i class="fa fa-home fa-1x"></i>
+                    <span>@AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_Home")</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=45">
+                    @AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_DanhMuc")
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Cate/RM_BusinessOpportunity">
+                    @AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title")
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                @Model.BusinessOpportunity.OpportunityName
+            </li>
+        </ol>
+    </nav>
+}
+
+<style>
+    .breadcrumb-item + .breadcrumb-item::before {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 600;
+        content: "\f101";
+        font-size: 0.875em;
+        margin: 5px 0;
+    }
+
+    .bo-header-card {
+        background: #fff;
+        border: 1px solid #e4e4e4;
+        border-radius: 8px;
+        padding: 14px 20px;
+        margin-bottom: 10px;
+    }
+
+    .bo-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 12px;
+    }
+
+    .bo-header-title {
+        font-size: 17px;
+        font-weight: 600;
+        color: #1a6db5;
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .bo-header-sub {
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .bo-stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .bo-stat-item {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .bo-stat-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 14px;
+    }
+
+    .bo-stat-label {
+        font-size: 11px;
+        color: #6c757d;
+        margin-bottom: 1px;
+    }
+
+    .bo-stat-value {
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    /* Khung lịch sử trao đổi nằm cùng tab thông tin: cuộn riêng, không kéo dài trang */
+    .bo-history-scroll {
+        max-height: 850px;
+        overflow-y: auto;
+    }
+</style>
+
+@if (Model.ReviewBatchID > 0)
+{
+    <a id="reviewBatchAutoTrigger"
+       class="d-none"
+       data-modal=""
+       data-modal-id="ReviewBatch"
+       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID = Model.ReviewBatchID, opportunityID = Model.BusinessOpportunity.BusinessOpportunityID })"
+       aria-hidden="true"></a>
+}
+
+<div id="reviewSplitView" class="review-split-view">
+<div class="review-detail-pane">
+<div id="boHeaderContainer">
+    @Html.Partial("~/Areas/Cate/Views/BusinessOpportunityOverview/_BoHeader.cshtml", Model)
+</div>
+
+<div class="dcard">
+    <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
+        <li class="nav-item mr-2px">
+            <a id="bo-tab-btn"
+               class="d-style active btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#bo-info" role="tab" aria-selected="true">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fas fa-info-circle text-primary mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("BO_Overview_Tab_Info")
+            </a>
+        </li>
+        <li class="nav-item mr-2px">
+            <a id="member-tab-btn"
+               class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#bo-members" role="tab" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fas fa-users text-info mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("ParticipatingMembers_Title")
+                <span class="badge badge-info ml-1" id="memberCount">@Model.TotalMember</span>
+            </a>
+        </li>
+        <li class="nav-item mr-2px">
+            <a id="plan-tab-btn"
+               class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#bo-plans" role="tab" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fas fa-calendar-alt text-purple mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("OpportunityPlan_Title")
+                <span class="badge badge-secondary ml-1" id="planCount">@Model.TotalPlan</span>
+            </a>
+        </li>
+
+        <li class="nav-item mr-2px">
+            <a id="history-tab-btn"
+               class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#review-history" role="tab" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fas fa-history text-success mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("ReviewBatch_History_Title")
+                <span class="badge badge-success ml-1">@Model.TotalReviewHistory</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content bgc-white p-35 border-0">
+
+        <div class="tab-pane fade show active text-95" id="bo-info" role="tabpanel">
+            <div class="row">
+                <!-- Thông tin cơ hội -->
+                <div class="col-xl-6 col-md-5">
+                    <div id="boInfoContainer">
+                        @Html.Partial("~/Areas/Cate/Views/BusinessOpportunityOverview/_DetailInfo.cshtml", Model.BusinessOpportunity)
+                    </div>
+                </div>
+
+                <!-- Lịch sử trao đổi hiển thị cùng tab thông tin -->
+                <div class="col-xl-6 col-md-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light font-weight-bold d-flex align-items-center">
+                            <i class="fas fa-history text-success mr-2"></i>
+                            @AppProcessor.Messagor.GetMessage("RM_ExchangeHistory_Title")
+                            <span class="badge badge-success ml-2" id="exchangeHistoryCount">@Model.TotalExchangeHistory</span>
+                        </div>
+                        <div class="card-body p-25 bo-history-scroll">
+                            <div id="boHistoryContainer">
+                                @Html.Partial("~/Areas/Cate/Views/RM_BusinessOpportunity/_LichSuPhieu.cshtml", Model.ExchangeHistoryForm)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade text-95" id="bo-members" role="tabpanel">
+            <div id="boMembersContainer">
+                @Html.Partial("~/Areas/Cate/Views/BusinessOpportunityOverview/_Members.cshtml", Model.Members, new ViewDataDictionary { { "BusinessOpportunityID", Model.BusinessOpportunity.BusinessOpportunityID } })
+            </div>
+        </div>
+
+        <div class="tab-pane fade text-95" id="bo-plans" role="tabpanel">
+            <div id="boPlansContainer"></div>
+        </div>
+
+        <div class="tab-pane fade show text-95" id="review-history" role="tabpanel">
+            <div id="reviewHistoryContainer">
+                @Html.Partial("~/Areas/Cate/Views/ReviewBatchItem/_ReviewHistory.cshtml", Model.ReviewHistory)
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+@if (Model.ReviewBatchID > 0)
+{
+    <aside id="reviewFormPane" class="review-form-pane" aria-label="Form rà soát"></aside>
+}
+</div>
+
+@section BottomScript
+{
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+    <script>
+        var customerName      = null;
+        var _boId             = @Model.BusinessOpportunity.BusinessOpportunityID;
+        var _urlReloadBoHeader  = '@Url.Action("GetBoHeader",    "BusinessOpportunityOverview", new { area = "Cate" })';
+        var _urlReloadBoInfo  = '@Url.Action("GetBoInfo",    "BusinessOpportunityOverview", new { area = "Cate" })';
+        var _urlReloadHistory = '@Url.Action("GetBoHistory", "BusinessOpportunityOverview", new { area = "Cate" })';
+        var _urlReloadMembers = '@Url.Action("GetBoMembers", "BusinessOpportunityOverview", new { area = "Cate" })';
+        var _urlReloadPlans = '@Url.Action("GetBoPlans",   "BusinessOpportunityOverview", new { area = "Cate" })';
+        var _urlReloadReviewHistory = '@Url.Action("GetReviewHistory", "ReviewBatchItem", new { area = "Cate" })';
+    </script>
+    <script src="@Url.Content("~/Areas/Cate/Views/RM_BusinessOpportunity/RM_BusinessOpportunity.js")"></script>
+    <script src="@Url.Content("~/Areas/Cate/Views/SalesTeamMembers/SalesTeamMembers.js")"></script>
+    <script src="@Url.Content("~/Areas/Cate/Views/BusinessOpportunityOverview/BusinessOpportunityOverview.js")"></script>
+    <script>
+        // Bind sau khi JS đã load xong
+        $('#plan-tab-btn').on('shown.bs.tab', function () {
+            if ($('#boPlansContainer').is(':empty')) {
+                reloadBoPlans(_boId);
+            }
+        });
+
+        // Vào từ danh sách rà soát: hiển thị ngay form để có thể rà soát liên tục.
+        $(function () {
+            @if (Model.ReviewBatchID > 0)
+            {
+                <text>
+                var btnReview = document.getElementById('reviewBatchAutoTrigger');
+                if (btnReview) {
+                    setTimeout(function () { btnReview.click(); }, 300);
+                }
+                </text>
+            }
+        });
+    </script>
+}

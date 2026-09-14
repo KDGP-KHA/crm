@@ -1,0 +1,128 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("Dashboard_Title");
+    int menuID = ViewBag.IDMenu == null ? 0: ViewBag.IDMenu;
+}
+
+@section PageTitle
+{
+}
+
+@section PageAction
+{
+}
+<div class="body-container pos-rel">
+    <div class="position-tl w-100 h-100 bgc-white-tp5">
+        <!-- a black dark layer over background image -->
+    </div>
+
+    <div class="main-container bgc-transparent">
+
+        <div role="main" class="main-content px-0" style="background-color: #f2f5f8; border-color: #ccc; border-width: 1px">
+            <div class="d-flex align-items-center pt-2" style="padding-left: 2rem; font-size: 1rem">
+                @*<a id="home-btn" href="/Dashboard/Manager" style="color: #4C8FBD"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>*@
+                <a id="home-btn" href="/Dashboard/Dashboard" style="color: #4C8FBD"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>
+                <p id="home-btn-disabled" style="color: #555"><i class="fa fa-home fa-1x"></i> <span style="margin-left: 2px"> Trang chủ</span></p>
+                <span style="margin-left:5px" class="text-secondary" id="breadcrumb"></span>
+            </div>
+            <div class="d-flex flex-grow-1">
+                <div class="row flex-grow-1">
+                    <div class="col-12 d-flex">
+                        <div class="row flex-grow-1">
+                            <div class="col-12 col-lg-12 px-0">
+                                <div class="h-100 pos-rel">
+                                    <div class="container d-flex flex-column justify-content-center">
+                                        <div class="md-5 text-center">
+                                            <div class="countdown-items d-flex justify-content-start flex-wrap mx-auto mt-lg-3 col-12" id="listMenu">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--modal loading-->
+<div id="loading-modal" class="modal fade bd-example-modal-lg " data-backdrop="static" data-keyboard="false" tabindex="-1">
+    <div class="modal-dialog  modal-dialog-centered" style="width: 100px">
+            <div class="pageload-overlay show pageload-loading d-inherit" data-opening="M 0,0 80,-10 80,60 0,70 0,0" data-closing="M 0,-10 80,-20 80,-10 0,0 0,-10"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 80 60" preserveAspectRatio="none"><path d="M 0,70 80,60 80,80 0,80 0,70" /></svg></div>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#loading-modal').modal('hide');
+            LoadMenu(@menuID);
+        });
+
+        // gọi api lấy dánh sách menu
+        function LoadMenu(id) {
+            // disabled nút redirect trang chủ khi đang ở trang chủ
+            $("#home-btn-disabled").hide();
+            $("#home-btn").hide();
+            if (id === 0) {
+                $("#home-btn-disabled").show();
+            } else {
+                $("#home-btn").show();
+            }
+
+            $.ajax({
+                url: "/Dashboard/Manager/Get",
+                type: 'POST',
+                data: { id: id },
+                success: function (response) {
+                    var data = response.data;
+                    console.log("running...")
+
+                    if (response.leaf == false) {
+                        // hiện modal loading khi chuyển trang
+                        console.log("running...");
+                        $('#loading-modal').modal('show');
+                        window.location.href = response.url
+                    }
+                    // Xóa nội dung cũ của #listMenu trước khi thêm mới
+                    $("#listMenu").empty();
+
+                    // hiển thị menuList
+                    if (data != null) {
+                        // thêm menuList vào div#listMenu
+                        $("#listMenu").append(data);
+
+                        // Xóa nội dung cũ của #breadcrumb trước khi thêm mới
+                        $("#breadcrumb").empty();
+                        if (response.depth != null && response.titleView != null && response.depth != "" && response.titleView != "") {
+                            var id = response.depth.split(',');
+                            var title = response.titleView.split('::');
+                            var i = 0;
+                            // dùng vòng for để lấy split và lấy lần lượt id và tên của menu
+                            for (var i = 0; i < id.length; i++) {
+                                if (i == id.length - 1) {
+                                    var breadcrumb_span = `<span class="text-secondary-d4">${title[i]}</span>`
+                                    $("#breadcrumb").append(breadcrumb_icon + breadcrumb_span);
+                                }
+                                else {
+                                    var breadcrumb_a = `<a class="text-primary-d2" href="javascript:LoadMenu(${id[i]})">${title[i]}</a>`
+                                    $("#breadcrumb").append(breadcrumb_icon + breadcrumb_a);
+                                }
+
+                            }
+                        }
+
+                    }
+
+                },
+                error: function (request, error) {
+                    console.error("Error loading menu:", error);
+                }
+            });
+        }
+    </script>
+
+}

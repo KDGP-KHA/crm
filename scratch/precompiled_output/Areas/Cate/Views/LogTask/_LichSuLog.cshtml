@@ -1,0 +1,418 @@
+@using TSFramework.Libs.Processors
+@using System.Linq
+@using Core.Cate.Models
+@model List<TaskTimelineModel>
+
+@{
+    var data = Model
+        .GroupBy(x => x.Time.Date)
+        .OrderByDescending(x => x.Key);
+    bool isFirstGroup = true;
+    Func<string, string> GetFileIcon = ext =>
+    {
+        switch (ext.ToLower())
+        {
+            case "jpg": case "jpeg": case "png": case "gif": case "webp": return "fa-file-image text-success";
+            case "pdf": return "fa-file-pdf text-danger";
+            case "doc": case "docx": return "fa-file-word text-primary";
+            case "xls": case "xlsx": return "fa-file-excel text-success";
+            case "zip": case "rar": return "fa-file-archive text-warning";
+            default: return "fa-file text-secondary";
+        }
+    };
+}
+
+<div class="d-flex justify-content-end mb-3 w-100 align-items-end">
+    <div class="text-right">
+        @*@Html.Button(true, "AddLogTask",
+            Url.Action("Add", "LogTask", new { area = "Cate", id = ViewBag.taskManagementId }),
+            "<i class='fa fa-plus'></i>",
+            AppProcessor.Messagor.GetMessage("Button_Add_LogTask"),
+            new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 ml-2", data_width = "700px" })*@
+
+        <a href="javascript:void(0)" id="btn-add-comment"
+           class="btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 ml-2"
+           onclick="toggleInlineForm('inline-comment-form-container', '@Url.Action("Add", "Comment", new { area = "Cate", id = ViewBag.taskManagementId })', bindInlineCommentForm)">
+            <i class='fa fa-plus'></i> @AppProcessor.Messagor.GetMessage("Button_Add_Comment")
+        </a>
+    </div>
+</div>
+@if (data != null && data.Any())
+{
+    <div class="exchange-Task-timeline">
+        @foreach (var group in data)
+        {
+            <div class="text-grey-m1 text-95">
+                <div class="d-flex">
+                    <div class="minh-100 pos-rel">
+                        <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
+                        <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-default text-white">
+                            <i class="far fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="mx-2 ml-3 flex-grow-1">
+                        <div class="Time-Block">
+                            <h4 class="badge badge-primary badge-lg arrowed ml-0 mb-1 mt-2">
+                                @group.Key.ToString("dd/MM/yyyy")
+                            </h4>
+
+                            @if (isFirstGroup)
+                            {
+                                <div id="inline-comment-form-container" class="my-2 border-l-3 brc-green-m1 p-2" style="display:none;">
+                                    <div id="inline-comment-form-content"></div>
+                                </div>
+                                isFirstGroup = false;
+                            }
+
+                            @foreach (var item in group)
+                            {
+                                <div class="my-1 text-dark-m3 text-95 border-l-3 brc-blue-m1">
+                                    <div class="Block d-flex align-items-start row">
+
+                                        <div class="block-title mx-2 col-12 d-flex justify-content-between">
+                                            <div class="Title">
+                                                <span class="font-bolder">@item.Time.ToString("HH:mm")</span>
+                                                <span class="px-1">|</span>
+                                                @item.UserName - <span>@AppProcessor.Messagor.GetMessage(item.TypeAction)</span>
+                                            </div>
+                                            <div class="Action">
+                                                @if (item.CanEdit)
+                                                {
+                                                    @*if (item.Type == "LOG")
+                                                    {
+                                                        @Html.Button(true, "EditLogTask",
+                                                            Url.Action("Edit", "LogTask", new { area = "Cate", id = item.Id }),
+                                                            "<i class='fa fa-edit'></i>", "",
+                                                            new { @class = "btn border-0 btn-inline-edit-comment", data_width = "700px" })
+                                                    }
+                                                    else
+                                                    {*@
+                                                        <a href="javascript:void(0)"
+                                                           class="btn border-0 btn-inline-edit-comment"
+                                                           data-id="@item.Id"
+                                                           data-url="@Url.Action("Edit", "Comment", new { area = "Cate", id = item.Id })">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                    //    }
+                                                }
+                                                @if (item.CanDelete)
+                                                {
+                                                    @*if (item.Type == "LOG")
+                                                    {
+                                                        @Html.Button(true, "DeleteLogTask",
+                                                            Url.Action("Delete", "LogTask", new { area = "Cate", id = item.Id }),
+                                                            "<i class='fa fa-trash-alt'></i>", "",
+                                                            new { @class = "btn border-0 btn-inline-edit-comment", data_width = "700px" })
+                                                    }
+                                                    else
+                                                    {*@
+                                                        @Html.Button(true, "DeleteComment",
+                                                            Url.Action("Delete", "Comment", new { area = "Cate", id = item.Id }),
+                                                            "<i class='fa fa-trash-alt'></i>", "",
+                                                            new { @class = "btn border-0 btn-inline-edit-comment", data_width = "700px" })
+                                                    //}
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="block-Content mx-4 col-12" id="comment-view-@item.Id">
+                                            <span class="block-Content-title font-bolder">@item.Extra</span>
+                                            <div class="block-Content-Decription @(item.Type == "SYSTEM" ? "system-description" : "")">@Html.Raw(item.Description)</div>
+                                            @if (item.FilePaths != null && item.FilePaths.Any())
+                                            {
+                                                <div class="mt-2 d-flex flex-wrap" id="file-list-@item.Id">
+                                                    @foreach (var file in item.FilePaths)
+                                                    {
+                                                        var ext = System.IO.Path.GetExtension(file.FilePath ?? "").TrimStart('.').ToLower();
+                                                        var icon = GetFileIcon(ext);
+                                                        var fileName = System.IO.Path.GetFileName(file.FilePath ?? "");
+
+                                                        <div class="d-flex align-items-center border rounded px-2 py-1 mr-2 mb-1"
+                                                             id="file-item-@file.FilePathID">
+                                                            <a href="@file.FilePath"
+                                                               target="_blank"
+                                                               class="text-dark text-decoration-none mr-2"
+                                                               title="@fileName">
+                                                                <i class="fa @icon mr-1"></i>
+                                                                <span class="text-truncate" style="max-width:150px; display:inline-block; vertical-align:middle;">
+                                                                    @fileName
+                                                                </span>
+                                                            </a>
+
+                                                            <a href="@file.FilePath"
+                                                               download="@fileName"
+                                                               class="text-dark"
+                                                               title="Tải xuống @fileName">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                            @if (item.CanDelete)
+                                                                {
+                                                                    @Html.Button(true, "DeleteFile",
+                                                                        Url.Action("DeleteFile", "Comment", new { area = "Cate", id = file.FilePathID }),
+                                                                        "<i class='fa fa-times'></i>", "",
+                                                                        new { @class = "btn btn-sm btn-link text-danger p-0 ml-1" })
+                                                                }
+                                                        </div>
+                                                    }
+                                                </div>
+                                                
+                                            }
+                                        </div>
+                                        </div>
+
+                                        <div class="block-Content mx-4 col-12" id="comment-edit-@item.Id" style="display:none;">
+                                            <div id="comment-edit-form-content-@item.Id"></div>
+                                        </div>
+
+                                    </div>
+                                <hr class="brc-secondary-l3">
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-12">
+            <div id="empty-timeline-comment" style="display:none;">
+                <div class="exchange-Task-timeline">
+                    <div class="text-grey-m1 text-95">
+                        <div class="d-flex">
+                            <div class="minh-100 pos-rel">
+                                <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
+                                <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-default text-white">
+                                    <i class="far fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="mx-2 ml-3 flex-grow-1">
+                                <div class="Time-Block">
+                                    <h4 class="badge badge-primary badge-lg arrowed ml-0 mb-1 mt-2">
+                                        @DateTime.Now.ToString("dd/MM/yyyy")
+                                    </h4>
+                                    <div id="inline-comment-form-container" class="my-2 border-l-3 brc-green-m1 p-2" style="display:none;">
+                                        <div id="inline-comment-form-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="empty-alert" class="alert alert-info text-center">
+                @AppProcessor.Messagor.GetMessage("Log_NoData_label")
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    #logContainer .modal-header {
+        display: none !important;
+    }
+
+    #logContainer .modal-body {
+        padding: 0 !important;
+    }
+
+    #logContainer .modal-footer {
+        justify-content: flex-start !important;
+        background: white !important;
+    }
+
+    .system-description {
+        white-space: pre-line;
+    }
+
+    .block-Content-Decription p img{
+        max-width: 100%;
+        max-height: max-content;
+    }
+</style>
+<script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+<script>
+    $(document).ready(function () {
+        $(".datepicker").datepicker({ format: "DD/MM/YYYY", locale: "vi" });
+    });
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    var taskId = @ViewBag.taskManagementId;
+
+    function reloadTimeline() {
+        window.location.href = '/Cate/TaskManagement/Detail/' + taskId;
+    }
+
+    // Load form vào container, gọi bindFn sau khi load xong
+    function toggleInlineForm(containerId, url, bindFn) {
+        var $container = $("#" + containerId);
+        var $emptyTimeline = $("#empty-timeline-comment");
+        var $emptyAlert = $("#empty-alert");
+
+        if ($container.is(":visible")) {
+            $container.hide();
+            if ($emptyTimeline.length) {
+                $emptyTimeline.hide();
+                $emptyAlert.show();
+            }
+            return;
+        }
+        $.get(url, function (html) {
+            $container.find("> div").first().html(html);
+            if ($emptyTimeline.length) {
+                $emptyAlert.hide();
+                $emptyTimeline.show();
+            }
+            $container.show();
+            bindFn();
+        }).fail(function () {
+            alert("Không thể tải form. Vui lòng thử lại.");
+        });
+    }
+
+    // Bind submit cho bất kỳ form nào, gọi callback khi xong
+    function bindFormSubmit($form, onSuccess) {
+        // Xóa data-ajax để tránh Unobtrusive Ajax submit song song
+        $form.removeAttr("data-ajax data-ajax-success data-ajax-method");
+        $form.off("submit").on("submit", function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: $form.attr("action"),
+                type: $form.attr("method") || "POST",
+                data: $form.serialize(),
+                success: onSuccess
+            });
+        });
+    }
+
+    // ── Add Comment ──────────────────────────────────────────────────────────
+
+    function bindInlineCommentForm() {
+        var $container = $("#inline-comment-form-container");
+        var $form = $("#inline-comment-form-content form");
+        if (!$form.length) return;
+
+        // Bắt nút Thoát → đóng inline form
+        $container.find("[data-dismiss='modal']")
+            .off("click.inline").on("click.inline", function () {
+                $container.hide();
+                $("#inline-comment-form-content").html("");
+            });
+
+        // Bắt nút Lưu → update CKEditor rồi submit
+        $container.find("#btnSave")
+            .off("click.inline").on("click.inline", function () {
+                if (typeof CKEDITOR !== "undefined") {
+                    for (var inst in CKEDITOR.instances) {
+                        CKEDITOR.instances[inst].updateElement();
+                    }
+                }
+                //$form.trigger("submit");
+            });
+
+        bindFormSubmit($form, function (response) {
+            if (response.status != undefined) {
+                $container.hide();
+                $("#inline-comment-form-content").html("");
+                eval(response.message);
+                reloadTimeline();
+            } else {
+                $("#inline-comment-form-content").html(response);
+                bindInlineCommentForm(); // bind lại sau khi re-render lỗi
+            }
+        });
+    }
+
+    // ── Edit Comment ─────────────────────────────────────────────────────────
+
+    $(document).on("click", ".btn-inline-edit-comment", function () {
+        var id = $(this).data("id");
+        var url = $(this).data("url");
+        var $view = $("#comment-view-" + id);
+        var $editWrap = $("#comment-edit-" + id);
+        var $editBox = $("#comment-edit-form-content-" + id);
+        var $action = $(this).closest(".block-title").find(".Action"); // ← thêm
+
+        if ($editWrap.is(":visible")) {
+            $editWrap.hide();
+            $view.show();
+            $action.show(); // ← hiện lại
+            return;
+        }
+
+        $.get(url, function (html) {
+            $editBox.html(html);
+            $view.hide();
+            $action.hide(); // ← ẩn đi
+            $editWrap.show();
+            bindInlineEditCommentForm(id, $action); // ← truyền $action vào
+        }).fail(function () {
+            alert("Không thể tải form chỉnh sửa.");
+        });
+    });
+
+    function bindInlineEditCommentForm(id, $action) {
+        var $form = $("#comment-edit-form-content-" + id + " form");
+        if (!$form.length) return;
+
+        // Bắt nút Thoát (data-dismiss="modal") → đóng inline form
+        $form.closest("#comment-edit-" + id)
+            .find("[data-dismiss='modal']")
+            .off("click.inline").on("click.inline", function () {
+                $("#comment-edit-" + id).hide();
+                $("#comment-view-" + id).show();
+                if ($action) $action.show();
+            });
+
+        // Bắt nút Lưu → submit form thủ công
+        $form.closest("#comment-edit-" + id)
+            .find("#btnSave")
+            .off("click.inline").on("click.inline", function () {
+                if (typeof CKEDITOR !== "undefined") {
+                    for (var inst in CKEDITOR.instances) {
+                        CKEDITOR.instances[inst].updateElement();
+                    }
+                }
+                //$form.trigger("submit");
+            });
+
+        bindFormSubmit($form, function (response) {
+            if (response.status != undefined) {
+                $("#comment-edit-" + id).hide();
+                $("#comment-view-" + id).show();
+                if ($action) $action.show();
+                eval(response.message);
+                reloadTimeline();
+            } else {
+                $("#comment-edit-form-content-" + id).html(response);
+                bindInlineEditCommentForm(id, $action);
+            }
+        });
+    }
+
+    // ── LogTask callback (modal) ──────────────────────────────────────────────
+
+    function LogTask_OnProcessSuccess(response, formId) {
+        if (response.status != undefined) {
+            $("#" + formId).closest(".modal").modal("hide");
+            eval(response.message);
+            reloadTimeline();
+        } else {
+            $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+        }
+    }
+
+    function Comment_OnProcessSuccess(response, formId) {
+        if (response.status != undefined) {
+            $("#" + formId).closest(".modal").modal("hide");
+            eval(response.message);
+            reloadTimeline();
+        }
+        else {
+            $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+        }
+    }
+</script>

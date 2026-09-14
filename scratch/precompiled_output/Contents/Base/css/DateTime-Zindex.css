@@ -1,0 +1,9 @@
+﻿
+.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom {
+    z-index: 1060 !important;
+}
+
+.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-bottom {
+    z-index: 1060 !important;
+}
+

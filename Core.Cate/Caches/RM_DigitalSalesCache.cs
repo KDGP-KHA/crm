@@ -233,5 +233,12 @@ namespace Core.Cate.Caches
             if (result > 0) InvalidateCache();
             return result;
         }
+
+        public int UpdateLatestStatusChangeActivityAttachments(int digitalSalesId, string attachmentsJson, string username)
+        {
+            var result = Api.UpdateLatestStatusChangeActivityAttachments(digitalSalesId, attachmentsJson, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
     }
 }

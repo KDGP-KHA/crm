@@ -460,11 +460,11 @@
             '<div class="d-flex align-items-start mb-2" style="gap: 8px;">' +
                 '<div style="width: 70px; flex-shrink: 0;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block">STT <span class="text-danger">*</span></label>' +
-                    '<input type="number" class="form-control form-control-sm txt-sort-order text-center font-bold" min="1" value="' + sortOrder + '" required />' +
+                    '<input type="number" class="form-control form-control-sm txt-sort-order text-center font-bold ignore-validation" min="1" value="' + sortOrder + '" />' +
                 '</div>' +
                 '<div class="flex-grow-1">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block">Tên tiến trình <span class="text-danger">*</span></label>' +
-                    '<textarea class="form-control form-control-sm txt-task-name font-weight-bold text-dark" rows="2" placeholder="Nhập tên tiến trình / đầu việc (*)" required style="resize: vertical;">' + escapeHtml(taskName) + '</textarea>' +
+                    '<textarea class="form-control form-control-sm txt-task-name font-weight-bold text-dark ignore-validation" rows="2" placeholder="Nhập tên tiến trình / đầu việc (*)" style="resize: vertical;">' + escapeHtml(taskName) + '</textarea>' +
                 '</div>' +
                 '<div class="align-self-end mb-1">' +
                     '<button type="button" class="btn btn-delete-progress" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
@@ -474,29 +474,41 @@
             '</div>' +
             '<!-- HÀNG 2: NGƯỜI THỰC HIỆN + NGÀY BẮT ĐẦU + SỐ NGÀY + HẠN CHÓT -->' +
             '<div class="d-flex align-items-center flex-wrap" style="gap: 10px;">' +
-                '<div class="flex-grow-1" style="min-width: 170px;">' +
+                '<div class="ds-progress-assigned-wrapper position-relative" style="width: 210px; flex-shrink: 0;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-user text-primary mr-1"></i> Người thực hiện:</label>' +
-                    '<select class="form-control form-control-sm cbo-assigned-user">' +
+                    '<select class="form-control form-control-sm cbo-assigned-user ignore-validation">' +
                         memberOptionsHtml +
                     '</select>' +
                 '</div>' +
-                '<div style="width: 145px;">' +
+                '<div style="width: 145px; flex-shrink: 0;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-calendar-alt text-primary mr-1"></i> Ngày bắt đầu <span class="text-danger">*</span>:</label>' +
-                    '<input type="date" class="form-control form-control-sm txt-start-date" value="' + startDate + '" onchange="calculateRowDeadline(this);" required />' +
+                    '<input type="date" class="form-control form-control-sm txt-start-date ignore-validation" value="' + startDate + '" onchange="calculateRowDeadline(this);" />' +
                 '</div>' +
-                '<div style="width: 95px;">' +
+                '<div style="width: 95px; flex-shrink: 0;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-clock text-primary mr-1"></i> Số ngày <span class="text-danger">*</span>:</label>' +
-                    '<input type="number" class="form-control form-control-sm txt-duration-days text-center font-bold" min="1" value="' + durationDays + '" onchange="calculateRowDeadline(this);" onkeyup="calculateRowDeadline(this);" required />' +
+                    '<input type="number" class="form-control form-control-sm txt-duration-days text-center font-bold ignore-validation" min="1" value="' + durationDays + '" onchange="calculateRowDeadline(this);" onkeyup="calculateRowDeadline(this);" />' +
                 '</div>' +
-                '<div style="width: 125px;">' +
+                '<div style="width: 125px; flex-shrink: 0;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-hourglass-half text-warning-d2 mr-1"></i> Hạn chót:</label>' +
                     '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m3 py-1 px-2 font-bold d-block text-center text-85 badge-calculated-deadline">' + formatDisplayDate(deadline) + '</span>' +
-                    '<input type="hidden" class="txt-deadline" value="' + deadline + '" />' +
+                    '<input type="hidden" class="txt-deadline ignore-validation" value="' + deadline + '" />' +
                 '</div>' +
             '</div>' +
         '</div>');
 
         $container.append($row);
+
+        // Khởi tạo Select2 cho Người thực hiện của dòng vừa thêm
+        if ($.fn.select2) {
+            $row.find('.cbo-assigned-user').select2({
+                allowClear: true,
+                placeholder: 'Chọn 1 giá trị',
+                width: '100%',
+                dropdownParent: $row.find('.ds-progress-assigned-wrapper'),
+                dropdownAutoWidth: false,
+                language: 'vi'
+            });
+        }
     }
 
     function calculateRowDeadline(element) {
@@ -602,7 +614,7 @@
             var assignedUserIdVal = $row.find('.cbo-assigned-user').val();
             var deadlineVal = $row.find('.txt-deadline').val();
             var progressId = parseInt($row.attr('data-progress-id')) || 0;
-            var processId = parseInt($row.attr('data-process-id')) || parseInt($('#SelectedProcessID').val()) || null;
+            var processId = parseInt($row.attr('data-process-id')) || parseInt(dsStatusWorkflowState.selectedProcessId) || parseInt($('#SelectedProcessID').val()) || null;
             var isCustom = $row.attr('data-is-custom') === 'true';
 
             if (!taskName) {

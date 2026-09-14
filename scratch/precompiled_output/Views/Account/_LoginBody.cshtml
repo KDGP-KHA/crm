@@ -1,0 +1,135 @@
+﻿@using CaptchaMvc.HtmlHelpers
+@using TSFramework.Libs.Processors
+@model CenIT.Solution.TOC.WebApp.Models.LoginModel
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.URLLink)
+<style>
+    @@font-face {
+        font-family: 'password';
+        src: url(https://jsbin-user-assets.s3.amazonaws.com/rafaelcastrocouto/password.ttf);
+    }
+
+    input.key {
+        font-family: 'password';
+    }
+
+    input.key.show-password {
+        font-family: inherit !important;
+    }
+</style>
+
+
+<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2">
+    <div class="d-flex align-items-center input-floating-label text-blue brc-blue-m2">
+        @Html.TextBoxFor(model => model.UserName, new { @autocomplete = "off", @class = "form-control form-control-lg pr-4 shadow-none", placeholder = AppProcessor.Messagor.GetMessage("Authorize_UserName") })
+        @Html.LabelFor(model => model.UserName, new { @class = "floating-label text-grey-l1 ml-n3" })
+    </div>
+    @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+</div>
+
+<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-2 mt-md-1">
+    <div class="d-flex align-items-center input-floating-label text-blue brc-blue-m2">
+        @Html.TextBoxFor(model => model.Password, new { @autocomplete = "off", @class = "form-control form-control-lg pr-4 shadow-none key", placeholder = AppProcessor.Messagor.GetMessage("Authorize_Password"), @type = "password", @id = "Password" })
+        @Html.LabelFor(model => model.Password, new { @class = "floating-label text-grey-l1 ml-n3" })
+    </div>
+    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+</div>
+
+<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-1">
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="showPasswordCheckbox">
+        <label class="form-check-label" for="showPasswordCheckbox">
+            @AppProcessor.Messagor.GetMessage("Message_ShowPassword")
+        </label>
+    </div>
+</div>
+
+<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2">
+    <button type="button" class="btn btn-primary px-2 btn-bold w-100" id="btnLogin" style="background: linear-gradient(to bottom, #239FF7, #0A6DB4); font-weight: bold; ">
+        @AppProcessor.Messagor.GetMessage("Button_Login")
+    </button>
+</div>
+
+<div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 text-left text-md-left mt-n2 mb-2" style="font-size: smaller;">
+    - Số điện thoại Hỗ trợ Email là: <b style="color: red">1800 1555 Nhánh 3</b>
+    <br>
+    - Địa chỉ Email hỗ trợ: <b style="color: red">hotro.email@vnpt.vn</b>
+    <br>
+    - Đối với quên mật khẩu, hết hạn mật khẩu soạn tin nhắn:<b>MK&lt;khoảng cách&gt;&lt;Tên truy nhập&gt;</b> gửi <b>293</b>
+    <br>
+    - Ví dụ:<b> MK nguyenvana.lcu</b> gửi <b>293</b>
+    <br>
+    - Để đổi mật khẩu, truy cập vào <a href="@Url.Action("ChangePassword", "Account")">
+        đường dẫn đây
+    </a>
+</div>
+
+@if (Model?.IsShowWarning ?? false)
+{
+    <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 text-left text-md-left mt-n2 mb-2">
+        <p class="text-500 text-danger-d2 mb-0">@Html.DisplayTextFor(model => model.MessageLoginFailCount)</p>
+        <p class="text-500 text-danger-d2 mb-0">@Html.DisplayTextFor(model => model.Warning)</p>
+    </div>
+}
+
+<script>
+
+    document.querySelectorAll("#LoginForm input").forEach(input => {
+        input.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                _submitFormLogin();
+            }
+        });
+    });
+
+    $('#btnLogin').click(function () {
+        _submitFormLogin();
+    });
+
+    function _submitFormLogin() {
+        var userName = $("form#LoginForm #UserName").val();
+        var password = $("form#LoginForm #Password").val();
+
+        var key = CryptoJS.enc.Utf8.parse(keyStr);
+        var iv = CryptoJS.enc.Utf8.parse(ivStr);
+
+        var encryptedlogin = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(userName), key,
+            {
+                keySize: 128 / 8,
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+        var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(password), key,
+            {
+                keySize: 128 / 8,
+                iv: iv,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+        if (password == '' || password == 'undefined' || userName == '' || userName == 'undefined') {
+            $("#URLLink").val('');
+        } else {
+            $("form#LoginForm #Password").val('');
+            $("form#LoginForm #UserName").val('');
+            $("form#LoginForm #URLLink").val(keySplit + encryptedlogin + keySplit + encryptedpassword + keySplit + keyStr + keySplit + ivStr);
+        }
+
+        $("form#LoginForm").submit();
+    }
+    
+</script>
+
+<script>
+    $(document).off("change", "#showPasswordCheckbox")
+        .on("change", "#showPasswordCheckbox", function () {
+            const $input = $("#Password");
+            const isChecked = $(this).is(":checked");
+
+            $input.attr("type", isChecked ? "text" : "password");
+            $input.toggleClass("show-password", isChecked);
+        });
+</script>

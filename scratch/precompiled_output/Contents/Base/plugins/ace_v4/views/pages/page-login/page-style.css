@@ -1,0 +1,23 @@
+.body-container {
+    background-attachment: fixed;
+    background-image: linear-gradient(#6baace, #264783);
+    background-repeat: no-repeat;
+}
+
+.carousel-item > div {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+}
+
+/* these rules are used to make sure in mobile devices, tab panes are not all the same height (for example 'forgot' pane is not as tall as 'signup' pane) */
+
+@media (max-width: 1199.98px) {
+    .tab-sliding .tab-pane:not(.active) { max-height: 0 !important; }
+
+    .tab-sliding .tab-pane.active {
+        max-height: none !important;
+        min-height: 80vh;
+    }
+}

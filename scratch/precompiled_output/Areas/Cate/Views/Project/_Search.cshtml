@@ -1,0 +1,343 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectSearchModel
+
+@{
+    var excludedStatusIds = Model.ExcludedStatusIDs ?? new List<int>();
+
+    var checkedCount = Model.Status.Count(x => !excludedStatusIds.Contains(x.ID));
+    var totalCount = Model.Status.Count;
+
+    var defaultText = checkedCount == totalCount
+        ? "Tất cả"
+        : $"{checkedCount} trạng thái được chọn";
+}
+
+<style>
+    #statusDropdownButton {
+        height: 32px;
+    }
+
+    #statusDropdownMenu {
+        display: none;
+        position: absolute;
+        z-index: 999;
+        min-width: 280px;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+
+    .status-label {
+        margin: 0;
+        font-size: 13px;
+    }
+</style>
+
+<div class="Search card bcard border-0 shadow-sm radius-0" id="SearchProject">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+
+    <div class="card-body p-2">
+        <div class="d-flex align-items-end flex-wrap">
+            <div class="Search_Box w-25 keyWord mr-2">
+                <label class="font-bold text-sm-right">
+                    @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+                </label>
+                <div>
+                    <input type="text"
+                           id="Keyword"
+                           class="form-control"
+                           placeholder="@AppProcessor.Messagor.GetMessage("Customer_Keyword")" />
+                </div>
+            </div>
+
+            <div class="Search_Box">
+                <label class="font-bold text-sm-right">
+                    @AppProcessor.Messagor.GetMessage("CustomerType_Title")
+                </label>
+                <div>
+                    @Html.DropDownListFor(
+                        model => model.CustomerTypeID,
+                        new SelectList(Model.CustomerTypes, "CustomerTypeID", "CustomerTypeName"),
+                        "",
+                        new
+                        {
+                            @class = "form-control",
+                            data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")
+                        })
+                </div>
+            </div>
+
+            <div class="position-relative status-filter-wrapper">
+
+                <label class="font-bold text-sm-right status-label">
+                    @AppProcessor.Messagor.GetMessage("Project_Status_Label")
+                </label>
+
+                <!-- BUTTON -->
+                <div id="statusDropdownButton"
+                     class="form-control d-flex justify-content-between align-items-center cursor-pointer">
+
+                    <span id="statusDropdownText">
+                        @defaultText
+                    </span>
+
+                    <i class="fas fa-caret-down ml-2"></i>
+                </div>
+
+                <!-- DROPDOWN -->
+                <div id="statusDropdownMenu"
+                     class="border bg-white shadow-sm rounded p-2">
+
+                    <!-- CHECK ALL -->
+                    <div class="mb-2 border-bottom pb-2">
+                        <label class="mb-0 w-100 cursor-pointer">
+
+                            <input type="checkbox"
+                                   id="checkAllStatus"
+                                   @(checkedCount == totalCount ? "checked" : "") />
+
+                            <span class="ml-1 font-weight-bold">
+                                Tất cả
+                            </span>
+
+                        </label>
+                    </div>
+
+                    <!-- ITEMS -->
+                    @foreach (var item in Model.Status)
+                    {
+                        var isChecked = !excludedStatusIds.Contains(item.ID);
+
+                        <div class="mb-1">
+
+                            <label class="mb-0 w-100 cursor-pointer">
+
+                                <input type="checkbox"
+                                       class="status-item"
+                                       value="@item.ID"
+                                       @(isChecked ? "checked" : "") />
+
+                                <span class="ml-1">
+                                    @item.StatusName
+                                </span>
+
+                            </label>
+
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <div class="Search_Box">
+                <label class="font-bold text-sm-right">
+                    @AppProcessor.Messagor.GetMessage("Project_Year_Label")
+                </label>
+                @Html.TextBoxFor(
+                    model => model.Year,
+                    new
+                    {
+                        @class = "form-control",
+                        id = "Year",
+                        type = "number",
+                        min = "2000",
+                        max = "2100",
+                        autocomplete = "off"
+                    })
+            </div>
+
+            <div class="Search_Box">
+                <label class="font-bold text-sm-right">
+                    @AppProcessor.Messagor.GetMessage("SuccessRate_Label")
+                </label>
+
+                <div class="d-flex align-items-center">
+                    @Html.TextBoxFor(
+                        model => model.SuccessRateFrom,
+                        new
+                        {
+                            @class = "form-control",
+                            type = "number",
+                            min = "0",
+                            max = "100",
+                            step = "1",
+                            placeholder = "Từ"
+                        })
+
+                    <span class="mx-2">-</span>
+
+                    @Html.TextBoxFor(
+                        model => model.SuccessRateTo,
+                        new
+                        {
+                            @class = "form-control",
+                            type = "number",
+                            min = "0",
+                            max = "100",
+                            step = "1",
+                            placeholder = "Đến"
+                        })
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-end flex-wrap">
+            <div class="Search_Box Dropdown mr-2">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("Department_Search_Label")
+                </label>
+                @Html.DropDownListFor(
+                    model => model.BoPhanID,
+                    new SelectList(Model.Departments, "BoPhan_ID", "TenBoPhanView"),
+                    "-- Chọn phòng --",
+                    new { @class = "form-control" })
+            </div>
+
+            <div class="Search_Box Dropdown mr-3">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("Employee_Search_Label")
+                </label>
+                @Html.DropDownListFor(
+                    model => model.EmployeeID,
+                    Enumerable.Empty<SelectListItem>(),
+                    "-- Chọn nhân viên --",
+                    new { @class = "form-control" })
+            </div>
+
+            <div class="Group Group_button">
+                <div class="Search_button">
+                    <button type="button"
+                            class="btn btn-primary"
+                            style="width: max-content"
+                            onclick="Search()">
+                        <i class="fa fa-search-plus"></i>
+                        &nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                    </button>
+                </div>
+                <div class="Search_button ml-2">
+                    <button type="button"
+                            id="btnExportProject"
+                            style="width: max-content"
+                            class="btn btn-warning border-0">
+                        <i class="fa fa-download"></i>
+                        <span>
+                            &nbsp;@AppProcessor.Messagor.GetMessage("Button_Export_Project")
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#SearchProject').on('keydown', 'input, select', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                Search();
+            }
+        });
+        $('#SearchProject').on('change', 'select', function () {
+            Search();
+        });
+        // Load danh sách user theo phòng ban
+        $("#BoPhanID").change(function () {
+            var departmentId = $(this).val();
+            var $employee = $("#EmployeeID");
+
+            $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+            if (!departmentId) return;
+
+            $.get('/Cate/Project/GetEmployeesByDepartment', {
+                departmentId: departmentId
+            }, function (data) {
+                $.each(data, function (i, item) {
+                    $employee.append(
+                        $('<option>').val(item.Value).text(item.Text)
+                    );
+                });
+            });
+        });
+
+        // Toggle dropdown
+        $('#statusDropdownButton').on('click', function (e) {
+
+            e.stopPropagation();
+
+            $('#statusDropdownMenu').toggle();
+        });
+        // Click ngoài -> đóng
+        $(document).on('click', function () {
+            $('#statusDropdownMenu').hide();
+        });
+        // Không đóng khi click trong menu
+        $('#statusDropdownMenu').on('click', function (e) {
+
+            e.stopPropagation();
+        });
+        // Check all
+        $('#checkAllStatus').on('change', function () {
+
+            $('.status-item').prop(
+                'checked',
+                $(this).is(':checked')
+            );
+
+            updateStatusDropdownText();
+        });
+        // Item change
+        $(document).on('change', '.status-item', function () {
+
+            const total = $('.status-item').length;
+            const checked = $('.status-item:checked').length;
+
+            $('#checkAllStatus').prop(
+                'checked',
+                total === checked
+            );
+
+            updateStatusDropdownText();
+        });
+        updateStatusDropdownText();
+    });
+
+    $(document).on('input', '#SuccessRateFrom, #SuccessRateTo', function () {
+        let value = parseFloat($(this).val());
+        if (isNaN(value)) return;
+
+        if (value < 0) {
+            $(this).val(0);
+        }
+
+        if (value > 100) {
+            $(this).val(100);
+        }
+    });
+
+    function updateStatusDropdownText() {
+        const checked = $('.status-item:checked');
+        const total = $('.status-item').length;
+
+        if (checked.length === 0) {
+            $('#statusDropdownText').text(
+                'Chưa chọn trạng thái'
+            );
+            return;
+        }
+
+        if (checked.length === total) {
+            $('#statusDropdownText').text(
+                'Tất cả'
+            );
+            return;
+        }
+        $('#statusDropdownText').text(
+            checked.length + ' trạng thái được chọn'
+        );
+    }
+</script>

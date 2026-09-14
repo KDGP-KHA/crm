@@ -1304,27 +1304,23 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 attachmentPath = SaveUploadedFile(attachmentFile);
             }
 
-            var code = _salesCache.ChangeStatus(model.DigitalSalesID, model.NewStatusID, model.Note, attachmentPath, User.UserName);
+            string attachmentPayload = attachmentPath;
+            if (uploadedFiles.Count > 0)
+            {
+                attachmentPayload = Newtonsoft.Json.JsonConvert.SerializeObject(uploadedFiles);
+            }
+
+            var code = _salesCache.ChangeStatus(model.DigitalSalesID, model.NewStatusID, model.Note, attachmentPayload, User.UserName);
 
             if (code == 1)
             {
-                // 1. Tự động lưu file vào mục Nội dung trao đổi (ActivityType = 1) nếu có tệp đính kèm
+                // 1. Cập nhật tệp đính kèm trực tiếp vào Activity chuyển trạng thái (ActivityType = 2) vừa được tạo bởi SP
                 if (uploadedFiles.Count > 0)
                 {
                     try
                     {
-                        var discussionContent = !string.IsNullOrWhiteSpace(model.Note)
-                            ? model.Note.Trim()
-                            : $"Đính kèm {uploadedFiles.Count} tệp khi chuyển trạng thái sang: {newStatus?.StatusName ?? ""}";
-
-                        var discussionActivity = new RM_DigitalSalesActivityModel
-                        {
-                            DigitalSalesID = model.DigitalSalesID,
-                            ActivityType = 1, // Trao đổi / Thảo luận
-                            Content = discussionContent,
-                            Attachments = Newtonsoft.Json.JsonConvert.SerializeObject(uploadedFiles)
-                        };
-                        _salesCache.AddActivity(discussionActivity, User.UserName);
+                        var attachmentsJson = Newtonsoft.Json.JsonConvert.SerializeObject(uploadedFiles);
+                        _salesCache.UpdateLatestStatusChangeActivityAttachments(model.DigitalSalesID, attachmentsJson, User.UserName);
                     }
                     catch (Exception ex)
                     {
@@ -1332,60 +1328,133 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     }
                 }
 
-                // 2. Lưu danh sách tiến trình vào Checklist (RM_DigitalSalesTracking) nếu có
-                if (!string.IsNullOrWhiteSpace(model.TrackingItemsJson))
+                // 2. Lưu danh sách tiến trình vào Checklist (RM_DigitalSalesTracking)
+                try
                 {
-                    try
+                    List<ChangeStatusTrackingItemDTO> items = null;
+                    if (!string.IsNullOrWhiteSpace(model.TrackingItemsJson))
                     {
-                        var items = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChangeStatusTrackingItemDTO>>(model.TrackingItemsJson);
-                        if (items != null && items.Count > 0)
+                        items = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChangeStatusTrackingItemDTO>>(model.TrackingItemsJson);
+                    }
+
+                    // Fallback 1: Nếu TrackingItemsJson rỗng nhưng người dùng có chọn quy trình (SelectedProcessID)
+                    if ((items == null || items.Count == 0) && model.SelectedProcessID.HasValue && model.SelectedProcessID.Value > 0)
+                    {
+                        var progs = _workflowCache.GetProgressesByProcess(model.SelectedProcessID.Value);
+                        if (progs != null && progs.Count > 0)
                         {
-                            // Xóa các task mặc định vừa được tạo tự động bởi SP cho trạng thái mới để tránh trùng lặp
-                            var currentTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID);
-                            var oldTasks = currentTasks?.Where(t => t.StatusID == model.NewStatusID && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && t.Status == 1).ToList();
-                            if (oldTasks != null)
+                            items = new List<ChangeStatusTrackingItemDTO>();
+                            int sortIdx = 1;
+                            var today = DateTime.Today;
+                            foreach (var p in progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder))
                             {
-                                foreach (var ot in oldTasks)
+                                var days = p.DefaultDurationDays > 0 ? p.DefaultDurationDays : 3;
+                                items.Add(new ChangeStatusTrackingItemDTO
                                 {
-                                    _salesCache.DeleteTracking(ot.TrackingID, User.UserName);
-                                }
-                            }
-
-                            int sort = 1;
-                            foreach (var it in items)
-                            {
-                                if (string.IsNullOrWhiteSpace(it.TaskName)) continue;
-
-                                var duration = it.DurationDays.HasValue && it.DurationDays.Value > 0 ? it.DurationDays.Value : 3;
-                                var startDate = it.StartDate ?? DateTime.Today;
-                                var deadline = it.Deadline ?? startDate.AddDays(duration);
-
-                                var trackingModel = new RM_DigitalSalesTrackingModel
-                                {
-                                    TrackingID = 0,
-                                    DigitalSalesID = model.DigitalSalesID,
-                                    ProcessID = it.ProcessID ?? model.SelectedProcessID,
-                                    ProgressID = it.ProgressID,
-                                    TaskName = it.TaskName.Trim(),
-                                    AssignedUserID = it.AssignedUserID,
-                                    StartDate = startDate,
-                                    DurationDays = duration,
-                                    Deadline = deadline,
-                                    Status = 1, // Chưa thực hiện
-                                    IsCustomTask = it.IsCustomTask,
-                                    SortOrder = it.SortOrder > 0 ? it.SortOrder : sort++,
-                                    ResultNote = null,
-                                    AttachmentFile = null
-                                };
-
-                                _salesCache.SaveTracking(trackingModel, User.UserName);
+                                    ProcessID = model.SelectedProcessID.Value,
+                                    ProgressID = p.ProgressID,
+                                    TaskName = p.ProgressName,
+                                    SortOrder = p.SortOrder > 0 ? p.SortOrder : sortIdx++,
+                                    StartDate = today,
+                                    DurationDays = days,
+                                    Deadline = today.AddDays(days),
+                                    AssignedUserID = null,
+                                    IsCustomTask = false
+                                });
                             }
                         }
                     }
-                    catch (Exception ex)
+
+                    // Fallback 2: Nếu cả TrackingItemsJson và SelectedProcessID đều rỗng, tự động lấy quy trình đầu tiên của NewStatusID
+                    if ((items == null || items.Count == 0) && model.NewStatusID > 0)
                     {
-                        AppProcessor.Logger.Error(ex);
+                        int totalProcCount = 0;
+                        var allProcs = _workflowCache.GetProcesses(out totalProcCount, statusId: model.NewStatusID);
+                        var activeProcs = allProcs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                        if (activeProcs != null && activeProcs.Count > 0)
+                        {
+                            var firstProc = activeProcs[0];
+                            var progs = _workflowCache.GetProgressesByProcess(firstProc.ProcessID);
+                            if (progs != null && progs.Count > 0)
+                            {
+                                items = new List<ChangeStatusTrackingItemDTO>();
+                                int sortIdx = 1;
+                                var today = DateTime.Today;
+                                foreach (var p in progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder))
+                                {
+                                    var days = p.DefaultDurationDays > 0 ? p.DefaultDurationDays : 3;
+                                    items.Add(new ChangeStatusTrackingItemDTO
+                                    {
+                                        ProcessID = firstProc.ProcessID,
+                                        ProgressID = p.ProgressID,
+                                        TaskName = p.ProgressName,
+                                        SortOrder = p.SortOrder > 0 ? p.SortOrder : sortIdx++,
+                                        StartDate = today,
+                                        DurationDays = days,
+                                        Deadline = today.AddDays(days),
+                                        AssignedUserID = null,
+                                        IsCustomTask = false
+                                    });
+                                }
+                            }
+                        }
                     }
+
+                    if (items != null && items.Count > 0)
+                    {
+                        var currentTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID) ?? new List<RM_DigitalSalesTrackingModel>();
+
+                        // Xóa các task cha của trạng thái mới (bất kể trạng thái là chưa làm hay đã hoàn thành trước đó) để thiết lập danh sách mới
+                        var tasksToDelete = currentTasks.Where(t => t.StatusID == model.NewStatusID && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+                        foreach (var ot in tasksToDelete)
+                        {
+                            _salesCache.DeleteTracking(ot.TrackingID, User.UserName);
+                        }
+
+                        // Tìm processId mặc định của trạng thái nếu có task bị thiếu ProcessID
+                        int? defaultProcId = model.SelectedProcessID;
+                        if (!defaultProcId.HasValue || defaultProcId.Value <= 0)
+                        {
+                            int totalDefaultProcs = 0;
+                            var defaultProc = _workflowCache.GetProcesses(out totalDefaultProcs, statusId: model.NewStatusID)?.FirstOrDefault(p => p.IsActive);
+                            if (defaultProc != null) defaultProcId = defaultProc.ProcessID;
+                        }
+
+                        int sort = 1;
+                        foreach (var it in items)
+                        {
+                            if (string.IsNullOrWhiteSpace(it.TaskName)) continue;
+
+                            var duration = it.DurationDays.HasValue && it.DurationDays.Value > 0 ? it.DurationDays.Value : 3;
+                            var startDate = it.StartDate ?? DateTime.Today;
+                            var deadline = it.Deadline ?? startDate.AddDays(duration);
+                            var procId = (it.ProcessID.HasValue && it.ProcessID.Value > 0) ? it.ProcessID : defaultProcId;
+
+                            var trackingModel = new RM_DigitalSalesTrackingModel
+                            {
+                                TrackingID = 0,
+                                DigitalSalesID = model.DigitalSalesID,
+                                ProcessID = procId,
+                                ProgressID = it.ProgressID,
+                                TaskName = it.TaskName.Trim(),
+                                AssignedUserID = it.AssignedUserID,
+                                StartDate = startDate,
+                                DurationDays = duration,
+                                Deadline = deadline,
+                                Status = 1, // Chưa thực hiện
+                                IsCustomTask = it.IsCustomTask,
+                                SortOrder = it.SortOrder > 0 ? it.SortOrder : sort++,
+                                ResultNote = null,
+                                AttachmentFile = null
+                            };
+
+                            _salesCache.SaveTracking(trackingModel, User.UserName);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
                 }
 
                 var updated = _salesCache.GetByID(model.DigitalSalesID, User.UserName);

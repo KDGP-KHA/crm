@@ -1,0 +1,55 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysMessageModel
+
+@Html.AntiForgeryToken()
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@{
+    var id = string.Empty;
+    var isReadonly = string.Empty;
+    if (Model != null)
+    {
+        if (!string.IsNullOrEmpty(Model.LangCode) && !string.IsNullOrEmpty(Model.LabelKey))
+        {
+            isReadonly = "readonly";
+            id = Model.LangCode + Model.LabelKey;
+        }
+    }
+}
+@Html.Hidden("ID", id)
+<div id="Message">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.LangCode, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.LangCode, new { @class = "form-control col-md-3", placeholder = AppProcessor.Messagor.GetMessage("Message_Label_LangCode") })
+            @Html.ValidationMessageFor(model => model.LangCode, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.LabelKey, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.LabelKey, new { @class = "form-control col-md-11", placeholder = AppProcessor.Messagor.GetMessage("Message_Label_LabelKey") })
+            @Html.ValidationMessageFor(model => model.LabelKey, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Message, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Message, new { rows = "3", @class = "form-control col-md-11", placeholder = AppProcessor.Messagor.GetMessage("Message_Label_Message") })
+            @Html.ValidationMessageFor(model => model.Message, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function() {
+        var readonly = "@isReadonly";
+
+        if (readonly.length > 0) {
+            $("input[type='text'][id$='LangCode']").attr(readonly, "readonly");
+            $("input[type='text'][id$='LabelKey']").attr(readonly, "readonly");
+        }
+    });
+</script>

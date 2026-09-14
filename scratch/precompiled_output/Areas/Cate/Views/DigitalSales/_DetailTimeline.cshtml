@@ -1,0 +1,58 @@
+﻿@model Core.Cate.Models.RM_DigitalSalesModel
+
+<span id="partialTimelineCount" class="d-none" data-count="@(Model.Timelines?.Count ?? 0)"></span>
+
+<h6 class="text-green font-weight-bold mb-3">
+    <i class="fa fa-history mr-1"></i> Lịch sử và Dòng thời gian chuyển đổi trạng thái (Audit Trail)
+</h6>
+
+@if (Model.Timelines != null && Model.Timelines.Count > 0)
+{
+    <div class="timeline-container px-3">
+        @foreach (var tl in Model.Timelines)
+        {
+            <div class="timeline-item d-flex mb-3">
+                <div class="timeline-badge mr-3">
+                    <span class="d-inline-block bgc-primary text-white p-2 radius-round text-90">
+                        <i class="fa fa-check"></i>
+                    </span>
+                </div>
+                <div class="timeline-content card border-1 brc-grey-l2 p-3 flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="font-weight-bold text-dark">
+                            @if (!string.IsNullOrEmpty(tl.FromStatusName))
+                            {
+                                <span class="badge badge-secondary">@tl.FromStatusName</span>
+                                <i class="fa fa-arrow-right mx-1 text-secondary"></i>
+                            }
+                            <span class="badge badge-success">@tl.ToStatusName</span>
+                        </span>
+                        <span class="text-secondary text-85">
+                            <i class="fa fa-clock mr-1"></i> @tl.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    </div>
+                    <div class="text-90 text-dark mb-1 bgc-grey-l5 p-2 radius-1 border-1 brc-grey-l3">
+                        <span class="text-secondary font-weight-bold text-85"><i class="fa fa-comment-dots text-warning-d2 mr-1"></i>Lý do / Ghi chú chuyển:</span>
+                        <span class="text-dark">@(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(tl.Note))</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-80 text-secondary">
+                        <span><i class="fa fa-user mr-1"></i> Thực hiện bởi: <strong>@tl.ActionBy</strong></span>
+                        @if (!string.IsNullOrEmpty(tl.AttachmentPath))
+                        {
+                            <a href="@tl.AttachmentPath" target="_blank" class="text-primary font-weight-bold">
+                                <i class="fa fa-paperclip mr-1"></i> File biên bản / minh chứng
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="text-center py-4 text-muted">
+        <i class="fa fa-history fa-2x mb-2 d-block text-secondary-l1"></i>
+        Chưa có lịch sử chuyển trạng thái nào.
+    </div>
+}

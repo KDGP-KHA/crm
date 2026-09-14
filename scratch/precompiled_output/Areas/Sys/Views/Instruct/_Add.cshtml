@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Instruct"), AppProcessor.Messagor.GetMessage("Instruct_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "Instruct", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Instruct_OnProcessSuccess(data, 'AddInstruct')"
+    }, new { @class = "form-horizontal", id = "AddInstruct" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Instruct")
+        </div>
+    }
+}
+

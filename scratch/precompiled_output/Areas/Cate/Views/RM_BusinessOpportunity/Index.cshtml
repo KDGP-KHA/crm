@@ -1,0 +1,60 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunitySearchModel
+@{
+    ViewBag.Title = string.IsNullOrEmpty(Model.CustomerNameTitle) ? AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title") : string.Format(AppProcessor.Messagor.GetMessage("BusinessOpportunityKH_Title"), Model.CustomerNameTitle) ;
+}
+
+@section PageTitle
+{
+    @ViewBag.Title
+}
+
+@section PageAction {
+    @if (Model.CustomerID != 0)
+    {
+        @Html.Button(
+    true,
+    "AddBusinessOpportunity",
+    Url.Action("Add", new { area = "Cate", CustomerID = Model.CustomerID }),
+    "<i class='fa fa-plus'></i>",
+    AppProcessor.Messagor.GetMessage("Button_Add"),
+    new
+        {
+        @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90",
+        data_width = "1024px"
+    }
+)
+    }
+}
+
+<div class="mt-1">
+    @Html.Partial("_Search")
+</div>
+<div class="mt-3">
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="DSBusinessOpportunity" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Info_Public_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ParticipatingMembers_Title")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Form_Desc")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("RecentInformationExchange")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script>
+        var customerName = "@Model.CustomerNameTitle"
+    </script>
+    <script src="~/Areas/Cate/Views/RM_BusinessOpportunity/RM_BusinessOpportunity.js"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+}

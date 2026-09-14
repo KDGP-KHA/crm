@@ -1,0 +1,27 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectMemberFormModel
+@{
+    ViewBag.Title = "Thêm " + AppProcessor.Messagor.GetMessage("ProjectMember_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "ProjectMember", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ProjectMember_OnProcessSuccess(data, 'AddProjectMember')"
+    }, new { @class = "form-horizontal", id = "AddProjectMember" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_AddProjectMember")
+        </div>
+    }
+}

@@ -1,0 +1,85 @@
+﻿@using System.Linq
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityDashboardViewModel
+
+<div class="db-section-title mt-4">
+    <i class="fa fa-project-diagram mr-1 text-blue"></i> @AppProcessor.Messagor.GetMessage("Dashboard_SectionProject")
+</div>
+<div id="projectMemberContainer">
+    @if (Model.ProjectMembers == null || !Model.ProjectMembers.Any())
+    {
+    <div class="alert alert-info text-center">
+        <i class="fa fa-info-circle mr-1"></i> @AppProcessor.Messagor.GetMessage("Dashboard_NoDataProject")
+    </div>
+    }
+    else
+    {
+        var empGroups = Model.ProjectMembers
+        .GroupBy(x => new { x.EmployeeID, x.FullName, x.EmployeeCode, x.TenBoPhan })
+        .OrderByDescending(g => g.First().AllocatedRevenue)
+        .Select(g => new
+        {
+            g.Key.FullName,
+            g.Key.EmployeeID,
+            g.Key.EmployeeCode,
+            g.Key.TenBoPhan,
+            ProjectCount = g.First().ProjectCount,
+            AllocatedRevenue = g.First().AllocatedRevenue
+        })
+        .ToList();
+
+    <table class="table table-bordered table-hover tbl-dashboard tbl-projects mb-0 w-100" id="projectTable">
+        <thead>
+            <tr>
+                <th class="text-center" style="width:40px">@AppProcessor.Messagor.GetMessage("Dashboard_Col_STT")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Dashboard_Col_EmployeeName")</th>
+                <th>@AppProcessor.Messagor.GetMessage("BoPhan_Title")</th>
+                <th class="text-center" style="width:160px">@AppProcessor.Messagor.GetMessage("Dashboard_Col_ProjectCount")</th>
+                <th class="text-center" style="width:180px">@AppProcessor.Messagor.GetMessage("Dashboard_Col_AllocatedRevenue")</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{ int prjStt = 1; }
+            @foreach (var emp in empGroups)
+            {
+            <tr>
+                <td class="text-center text-muted">@(prjStt++)</td>
+                <td>
+                    <span class="font-weight-bold">@emp.FullName</span>
+                    @if (!string.IsNullOrEmpty(emp.EmployeeCode))
+                    {
+                        <span class="text-muted ml-1" style="font-size:12px;">(@emp.EmployeeCode)</span>
+                    }
+                </td>
+                <td>
+                    <span>@emp.TenBoPhan</span>
+                </td>
+                <td class="text-center">
+                    <h6 class="mb-0 text-primary" style="cursor:pointer;" onclick="detailProjectByUser('@emp.EmployeeID')">@emp.ProjectCount</h6>
+                    <div class="d-none">
+                        @Html.Button(
+                            true,
+                            "ProjectByUser",
+                            Url.Action("ProjectByUser", "Dashboard", new { area = "Dashboard" }),
+                            "<i class='far fa-clock'></i>",
+                            "",
+                            new { @class = "btn btn-sm btn-primary" }
+                        )
+                    </div>
+                </td>
+                <td class="text-center">
+                    @if (emp.AllocatedRevenue > 0)
+                    {
+                        <h6 class="mb-0 revenue-val">@emp.AllocatedRevenue.ToString("N0")</h6>
+                    }
+                    else
+                    {
+                        <span class="revenue-zero">--</span>
+                    }
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    }
+</div>

@@ -1,0 +1,129 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.OpportunityProjectWithoutPGSearchPModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("OpportunityProjectWithoutPGP_Title");
+}
+@section PageTitle { @ViewBag.Title }
+@Html.Partial("_Search", Model)
+
+<div class="mt-1">
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="DSOpportunityProjectWithoutPGP"
+                   class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                   width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("OpportunityProjectWithoutPGP_ID_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("OpportunityProjectWithoutPGP_Name_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("OpportunityProjectWithoutPGP_Status_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("OpportunityProjectWithoutPGP_Type_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("OpportunityProjectWithoutPGP_Role_AM_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("NgayTao")</th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var _OpportunityProjectWithoutPGPActionURLs = {
+        OpportunityProjectWithoutPGP_GetData: "/Cate/OpportunityProjectWithoutPGP/Get"
+    };
+    var _tableOpportunityProjectWithoutPGP;
+    $(document).ready(function () {
+        initTableOpportunityProjectWithoutPGP();
+    });
+
+    function initTableOpportunityProjectWithoutPGP() {
+        _tableOpportunityProjectWithoutPGP = $("#DSOpportunityProjectWithoutPGP").DataTable({
+            "Responsive": true,
+            "OpportunityProjectWithoutPGP": {
+                "processing":
+                    "<div class='overlay'><i class='fas fa-cog fa-spin'></i></div>"
+            },
+            "lengthChange": true,
+            "processing": true,
+            "serverSide": true,
+            "ajax":
+            {
+                "url": _OpportunityProjectWithoutPGPActionURLs.OpportunityProjectWithoutPGP_GetData,
+                "type": "POST",
+                "dataType": "JSON",
+                "data": function (d) {
+                    d.Year = $("#Year").val();
+                    return d;
+                }
+            },
+            "columns": [
+                {
+                    "data": "",
+                    "defaultContent": "1",
+                    "render": function (data, type, row, meta) {
+                        return meta.settings._iDisplayStart + meta.row + 1;
+                    }
+                },
+                {
+                    "data": "ReportID",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data;
+                    }
+                },
+                {
+                    "data": "ReportName",
+                    "defaultContent": "",
+                    "className": "text-left",
+                    "render": function (data, type, row) {
+                        let url = "#";
+                        if (row.ReportType == 'Dự án') {
+                            url = "/Cate/ProjectOverview/Index/" + row.ReportID;
+                        }
+                        else if (row.ReportType == 'Cơ hội kinh doanh') {
+                            url = "/Cate/BusinessOpportunityOverview/Index/" + row.ReportID;
+                        }
+                        return `
+                            <div class="font-weight-bold text-primary">
+                                <a href="${url}">
+                                    ${data}
+                                </a>
+                            </div>
+                        `;
+                    }
+                },
+                {
+                    "data": "StatusClass",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return '<span class="badge ' + data + '">' + row.StatusName + '</span>';
+                    }
+                },
+                {
+                    "data": "ReportType",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data;
+                    }
+                },
+                {
+                    "data": "AM",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data;
+                    }
+                },
+                {
+                    "data": "CreatedDate",
+                    "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return data != null ? moment(data).format("DD/MM/YYYY") : "";
+                    }
+                }
+            ]
+        });
+    }
+</script>
