@@ -13,19 +13,20 @@
 <div class="row" id="changeStatusLayoutRow">
     <!-- CỘT TRÁI: THÔNG TIN CHUYỂN TRẠNG THÁI -->
     <div id="colStatusInfo" class="col-12">
-        <div class="card bcard border-1 brc-grey-l2 bgc-grey-l4 p-2 mb-3 radius-1">
-            <div class="text-90 mb-1">
-                <span class="text-secondary font-weight-bold">@AppProcessor.Messagor.GetMessage("DigitalSales_Record_Label"):</span>
-                <strong class="text-primary-d2">@Model.Title</strong>
+        <div class="ds-status-meta-box mb-3">
+            <div class="ds-status-meta-row mb-1">
+                <span class="ds-status-meta-label">@AppProcessor.Messagor.GetMessage("DigitalSales_Record_Label"):</span>
+                <span class="ds-status-meta-value text-primary-d2">@Model.Title</span>
             </div>
-            <div class="text-90">
-                <span class="text-secondary font-weight-bold">@AppProcessor.Messagor.GetMessage("DigitalSales_CurrentStatus_Label"):</span>
-                <span class="badge badge-info px-2 py-05 font-bold">@Model.CurrentStatusName</span>
+            <div class="ds-status-meta-row">
+                <span class="ds-status-meta-label">@AppProcessor.Messagor.GetMessage("DigitalSales_CurrentStatus_Label"):</span>
+                <span class="badge bgc-blue-l3 text-blue-d2 border-1 brc-blue-m3 px-2 py-1 font-bold">@Model.CurrentStatusName</span>
             </div>
         </div>
 
-        <div class="alert alert-warning py-2 px-3 text-85 radius-1 mb-3">
-            <i class="fa fa-info-circle mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_ProjectRequirement")
+        <div class="alert alert-warning py-2 px-3 text-85 radius-1 mb-3 d-flex align-items-center">
+            <i class="fa fa-info-circle text-warning-d2 mr-2 text-110 flex-shrink-0"></i>
+            <div class="lh-13">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_ProjectRequirement")</div>
         </div>
 
         <!-- 1. CHỌN TRẠNG THÁI MỚI -->
@@ -51,36 +52,40 @@
         <!-- 3. TỆP ĐÍNH KÈM -->
         <div class="form-group mb-3">
             @Html.TitleFor(m => m.AttachmentPath, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
-            <input type="file" name="attachmentFile" class="form-control-file border p-1 rounded bgc-white" />
+            <input type="file" name="attachmentFile" class="form-control form-control-sm bgc-white py-1" />
             <small class="text-muted d-block mt-05">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small>
         </div>
 
         <!-- 4. GHI CHÚ / LÝ DO CHUYỂN -->
         <div class="form-group mb-0">
             @Html.TitleFor(m => m.Note, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
-            @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control text-90", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })
+            @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control text-90", id = "txtChangeStatusNote", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder"), style = "resize: vertical; min-height: 75px;" })
             @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
             <small class="text-muted d-block mt-05">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Help")</small>
         </div>
     </div>
 
     <!-- CỘT PHẢI: BOX DANH SÁCH TIẾN TRÌNH CHECKLIST -->
-    <div id="colProgressBox" class="col-lg-7 col-12 d-none mt-3 mt-lg-0">
+    <div id="colProgressBox" class="col-lg-7 col-xl-7 col-12 d-none mt-3 mt-lg-0">
         <div class="card border-1 brc-success-m2 shadow-sm radius-1 bgc-white ds-progress-card">
             <div class="card-header bgc-success-l4 py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
                 <div class="d-flex align-items-center">
                     <span class="font-weight-bold text-success-d2 text-90">
                         <i class="fa fa-tasks text-success mr-1"></i> Tiến trình công việc (Checklist)
                     </span>
-                    <span class="badge badge-success badge-pill ml-1 font-bold" id="badgeProgressCount">0</span>
+                    <span class="badge badge-success badge-pill ml-1 font-bold px-2 py-1" id="badgeProgressCount">0</span>
                 </div>
-                <button type="button" class="btn btn-xs btn-success font-bolder px-25 py-1 radius-1 shadow-sm" onclick="addCustomProgressRow();">
+                <button type="button" class="btn btn-sm btn-success font-weight-bold px-3 py-1 radius-1 shadow-sm" onclick="addCustomProgressRow();">
                     <i class="fa fa-plus mr-1"></i> Thêm tiến trình
                 </button>
             </div>
             <div class="card-body p-2 p-lg-3 ds-progress-list-body">
                 <div class="text-secondary text-80 mb-2 font-italic border-b-1 brc-grey-l3 pb-2">
                     <i class="fa fa-info-circle mr-1 text-primary"></i> Các tiến trình dưới đây sẽ được lưu vào tab <strong>Tiến trình & Checklist</strong> của hồ sơ. Bạn có thể thêm, sửa nội dung hoặc xóa trước khi xác nhận.
+                </div>
+                <div id="emptyProgressAlert" class="alert alert-light border-1 brc-grey-l2 text-center text-muted py-4 mb-0 d-none">
+                    <i class="fa fa-clipboard-list fa-2x text-grey-m2 mb-2 d-block"></i>
+                    Chưa có tiến trình nào. Nhấn <strong>"+ Thêm tiến trình"</strong> để thêm mới.
                 </div>
                 <div id="progressItemsContainer" class="ds-progress-items-container">
                     <!-- Các item tiến trình nạp động qua JS -->
@@ -226,7 +231,7 @@
         var $colProgress = $('#colProgressBox');
 
         $modal.addClass('has-progress-box');
-        $colInfo.removeClass('col-12').addClass('col-lg-5');
+        $colInfo.removeClass('col-12').addClass('col-lg-5 col-xl-5');
         $colProgress.removeClass('d-none');
 
         renderProgressRows(progresses);
@@ -240,9 +245,10 @@
 
         $modal.removeClass('has-progress-box');
         $colProgress.addClass('d-none');
-        $colInfo.removeClass('col-lg-5').addClass('col-12');
+        $colInfo.removeClass('col-lg-5 col-xl-5').addClass('col-12');
         $progressContainer.empty();
         $('#badgeProgressCount').text('0');
+        $('#emptyProgressAlert').addClass('d-none');
         $('#TrackingItemsJson').val('');
     }
 
@@ -259,9 +265,11 @@
 
         if (!items || items.length === 0) {
             $('#badgeProgressCount').text('0');
+            $('#emptyProgressAlert').removeClass('d-none');
             return;
         }
 
+        $('#emptyProgressAlert').addClass('d-none');
         $.each(items, function (idx, item) {
             appendProgressRowElement(item, idx + 1);
         });
@@ -287,24 +295,22 @@
         });
 
         var $row = $('<div class="ds-progress-row-item ' + (isCustom ? 'is-custom-task' : '') + '" data-progress-id="' + progressId + '" data-process-id="' + processId + '" data-is-custom="' + isCustom + '">' +
-            '<div class="d-flex align-items-center justify-content-between mb-15 flex-wrap" style="gap: 4px;">' +
-                '<div class="d-flex align-items-center flex-1 min-width-0">' +
-                    '<span class="ds-progress-row-index mr-2 row-idx">' + index + '</span>' +
-                    '<input type="text" class="form-control form-control-sm font-weight-bold text-dark txt-task-name" value="' + escapeHtml(taskName) + '" placeholder="Nhập tên tiến trình / công việc (*)" />' +
-                '</div>' +
-                '<button type="button" class="btn btn-xs btn-outline-danger radius-1 px-2 py-1 ml-2" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
+            '<div class="d-flex align-items-center mb-2">' +
+                '<span class="ds-progress-row-index mr-2 row-idx">' + index + '</span>' +
+                '<input type="text" class="form-control form-control-sm font-weight-bold text-dark txt-task-name flex-grow-1" value="' + escapeHtml(taskName) + '" placeholder="Nhập tên tiến trình / công việc (*)" />' +
+                '<button type="button" class="btn btn-delete-progress ml-2" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
                     '<i class="fa fa-trash-alt"></i>' +
                 '</button>' +
             '</div>' +
-            '<div class="d-flex align-items-center flex-wrap" style="gap: 8px;">' +
-                '<div class="flex-1" style="min-width: 160px;">' +
-                    '<label class="text-75 text-secondary font-weight-bold mb-0 d-block">Người thực hiện:</label>' +
+            '<div class="d-flex align-items-center flex-wrap" style="gap: 12px;">' +
+                '<div class="flex-grow-1" style="min-width: 200px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-user text-primary mr-1"></i> Người thực hiện:</label>' +
                     '<select class="form-control form-control-sm cbo-assigned-user">' +
                         memberOptionsHtml +
                     '</select>' +
                 '</div>' +
-                '<div style="width: 140px;">' +
-                    '<label class="text-75 text-secondary font-weight-bold mb-0 d-block">Hạn hoàn thành:</label>' +
+                '<div style="width: 170px;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-calendar-alt text-primary mr-1"></i> Hạn hoàn thành:</label>' +
                     '<input type="date" class="form-control form-control-sm txt-deadline" value="' + deadline + '" />' +
                 '</div>' +
             '</div>' +
@@ -316,6 +322,8 @@
     function addCustomProgressRow() {
         var $container = $('#progressItemsContainer');
         var newIdx = $container.find('.ds-progress-row-item').length + 1;
+
+        $('#emptyProgressAlert').addClass('d-none');
 
         // Tính ngày hạn chót mặc định: hôm nay + 3 ngày
         var d = new Date();
@@ -343,6 +351,9 @@
             $(this).remove();
             reindexProgressRows();
             updateProgressBadge();
+            if ($('#progressItemsContainer .ds-progress-row-item').length === 0) {
+                $('#emptyProgressAlert').removeClass('d-none');
+            }
         });
     }
 

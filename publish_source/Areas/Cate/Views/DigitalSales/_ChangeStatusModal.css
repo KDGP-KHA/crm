@@ -1,73 +1,247 @@
-/* Modal Chuyển trạng thái co giãn thông minh */
+/* ==========================================================================
+   MODAL CHUYỂN TRẠNG THÁI HỒ SƠ KINH DOANH SỐ (TOC CRM)
+   ========================================================================== */
+
+/* 1. Kích thước Modal co giãn thông minh và rộng rãi */
 #modalChangeStatus .modal-dialog {
-    max-width: 600px;
-    transition: max-width 0.3s ease-in-out;
+    max-width: 720px;
+    width: 95vw;
+    margin: 1.5rem auto;
+    transition: max-width 0.35s ease-in-out;
 }
 
 #modalChangeStatus.has-progress-box .modal-dialog {
-    max-width: 1100px;
-    width: 95%;
+    max-width: 1280px;
+    width: 95vw;
 }
 
-/* Radio button quy trình */
+#modalChangeStatus .modal-content {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+    border: none;
+}
+
+#modalChangeStatus .modal-header {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    padding: 12px 20px;
+    border-bottom: none;
+}
+
+#modalChangeStatus .modal-header .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+#modalChangeStatus .modal-header .close {
+    font-size: 1.4rem;
+    opacity: 0.85;
+    text-shadow: none;
+    transition: opacity 0.2s;
+    padding: 10px 14px;
+    margin: -10px -14px -10px auto;
+}
+
+#modalChangeStatus .modal-header .close:hover {
+    opacity: 1;
+}
+
+#modalChangeStatus .modal-body {
+    padding: 20px 24px;
+    max-height: calc(88vh - 120px);
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
+#modalChangeStatus .modal-footer {
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 24px;
+}
+
+/* 2. Hộp thông tin Hồ sơ & Trạng thái hiện tại */
+.ds-status-meta-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+.ds-status-meta-row {
+    display: flex;
+    align-items: baseline;
+    font-size: 13.5px;
+}
+
+.ds-status-meta-label {
+    min-width: 120px;
+    color: #64748b;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.ds-status-meta-value {
+    color: #1e293b;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+/* 3. Khắc phục lỗi vỡ chữ Select2 Trạng thái mới */
+#modalChangeStatus .select2-container {
+    width: 100% !important;
+}
+
+#modalChangeStatus .select2-container .select2-selection--single {
+    height: auto !important;
+    min-height: 42px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 7px 38px 7px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    position: relative !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#modalChangeStatus .select2-container--default.select2-container--focus .select2-selection--single,
+#modalChangeStatus .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18) !important;
+}
+
+#modalChangeStatus .select2-container .select2-selection--single .select2-selection__rendered {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: block !important;
+}
+
+#modalChangeStatus .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+#modalChangeStatus .select2-container .select2-selection--single .select2-selection__clear {
+    position: absolute !important;
+    right: 28px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 18px !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+#modalChangeStatus .select2-container .select2-selection--single .select2-selection__clear:hover {
+    color: #ef4444 !important;
+}
+
+/* 4. Khối chọn Quy trình dạng Radio button */
 .ds-process-radio-item {
     border: 1px solid #e2e8f0;
-    border-radius: 4px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
     background-color: #f8fafc;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .ds-process-radio-item:hover {
     border-color: #3b82f6;
     background-color: #eff6ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.08);
 }
 
 .ds-process-radio-item.is-selected {
     border-color: #2563eb;
-    background-color: #dbeafe;
+    background-color: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 .ds-process-radio-item input[type="radio"] {
-    margin-top: 0;
-    margin-right: 8px;
+    margin-top: 3px;
+    margin-right: 10px;
     cursor: pointer;
+    accent-color: #2563eb;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
 }
 
-/* Box Tiến trình Checklist */
+/* 5. Cột phải: Box Tiến trình Checklist */
 .ds-progress-card {
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 280px;
+    min-height: 320px;
+    border: 1px solid #d1fae5;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.ds-progress-card .card-header {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-bottom: 1px solid #a7f3d0;
+    padding: 10px 16px;
 }
 
 .ds-progress-items-container {
-    max-height: 380px;
+    max-height: 480px;
     overflow-y: auto;
-    padding-right: 4px;
+    padding-right: 6px;
 }
 
-/* Item dòng tiến trình */
-.ds-progress-row-item {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-left: 3px solid #10b981;
+/* Scrollbar mượt mà */
+.ds-progress-items-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ds-progress-items-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
     border-radius: 4px;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    transition: all 0.15s ease;
+}
+
+.ds-progress-items-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.ds-progress-items-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 6. Thẻ từng dòng tiến trình công việc */
+.ds-progress-row-item {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #10b981;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
 }
 
 .ds-progress-row-item:hover {
-    background-color: #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     border-color: #cbd5e1;
     border-left-color: #059669;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 .ds-progress-row-item.is-custom-task {
@@ -75,15 +249,69 @@
 }
 
 .ds-progress-row-index {
-    width: 22px;
-    height: 22px;
-    background-color: #e2e8f0;
-    color: #475569;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #334155;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 700;
     flex-shrink: 0;
+}
+
+.ds-progress-row-item .txt-task-name {
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #0f172a;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-progress-row-item .txt-task-name:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.ds-progress-row-item .btn-delete-progress {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    background-color: #fff;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.ds-progress-row-item .btn-delete-progress:hover {
+    background-color: #fee2e2;
+    border-color: #f87171;
+    color: #b91c1c;
+}
+
+.ds-progress-row-item .cbo-assigned-user,
+.ds-progress-row-item .txt-deadline {
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    height: 34px;
+    font-size: 13px;
+}
+
+.ds-progress-row-item .cbo-assigned-user:focus,
+.ds-progress-row-item .txt-deadline:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    outline: none;
 }
