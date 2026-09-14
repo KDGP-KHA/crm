@@ -191,4 +191,12 @@ namespace Core.Cate.Models
         public string ResultNote { get; set; }
         public string AttachmentFile { get; set; }
     }
+
+    public class RM_DigitalSalesUserModel
+    {
+        public int UserId { get; set; }
+        public string UserName { get; set; }
+        public string FullName { get; set; }
+    }
 }
+

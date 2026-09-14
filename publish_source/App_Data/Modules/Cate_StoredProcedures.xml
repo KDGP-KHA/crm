@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<StoredProcedures ProviderName="CenIT.Provider.Major">
@@ -436,5 +436,10 @@
 		<Procedure Name="RM_DigitalSalesActivity_Add" Value="RM_DigitalSalesActivity_Add" />
 		<Procedure Name="RM_DigitalSalesActivity_Delete" Value="RM_DigitalSalesActivity_Delete" />
 		<Procedure Name="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" Value="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" />
+
+		<!-- RM_DigitalSales Helpers -->
+		<Procedure Name="RM_DigitalSales_GetDepartmentByUserID" Value="RM_DigitalSales_GetDepartmentByUserID" />
+		<Procedure Name="RM_DigitalSales_GetAccessibleEmployees" Value="RM_DigitalSales_GetAccessibleEmployees" />
 	</StoredProcedures>
 </Provider>
+

@@ -3263,24 +3263,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (!userId.HasValue || userId.Value <= 0) return null;
             try
             {
-                var connStr = ConfigurationManager.ConnectionStrings["TOC.Conn.Major"]?.ConnectionString;
-                if (!string.IsNullOrEmpty(connStr))
-                {
-                    using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
-                    {
-                        conn.Open();
-                        using (var cmd = conn.CreateCommand())
-                        {
-                            cmd.CommandText = "SELECT TOP 1 bp.BoPhan_ID FROM dbo.Sys_Users u INNER JOIN dbo.MN_BoPhan bp ON u.MaBoPhan = bp.MaBoPhan WHERE u.UserId = @UserId";
-                            cmd.Parameters.AddWithValue("@UserId", userId.Value);
-                            var obj = cmd.ExecuteScalar();
-                            if (obj != null && obj != DBNull.Value)
-                            {
-                                return Convert.ToInt32(obj);
-                            }
-                        }
-                    }
-                }
+                var deptId = _salesCache.GetDepartmentByUserID(userId.Value);
+                if (deptId.HasValue && deptId.Value > 0) return deptId;
 
                 var user = _userCache.GetById(userId.Value);
                 if (user != null && !string.IsNullOrEmpty(user.Email))
@@ -3311,129 +3295,40 @@ namespace Modules.Cate.Areas.Cate.Controllers
         #endregion
         
         #region 9. Helpers & Dropdown Population
-        private List<SysUserModel> GetAccessibleEmployees()
+        private List<RM_DigitalSalesUserModel> GetAccessibleEmployees()
         {
-            var list = new List<SysUserModel>();
             try
             {
-                var connStr = ConfigurationManager.ConnectionStrings["TOC.Conn.Major"]?.ConnectionString 
-                    ?? ConfigurationManager.ConnectionStrings["CenITConnection"]?.ConnectionString;
-                var currentUser = _userCache.GetByUserName(User.UserName);
-                if (currentUser != null && !string.IsNullOrWhiteSpace(currentUser.Email) && !string.IsNullOrEmpty(connStr))
-                {
-                    using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
-                    {
-                        conn.Open();
-                        using (var cmd = conn.CreateCommand())
-                        {
-                            cmd.CommandText = @"
-                                SELECT DISTINCT u.UserId, u.UserName, u.FullName
-                                FROM Sys_Users u
-                                INNER JOIN MN_BoPhan bp ON u.MaBoPhan = bp.MaBoPhan
-                                INNER JOIN Sys_UserBoPhan ub ON bp.MaBoPhan = ub.MaBoPhan
-                                WHERE ub.Email = @Email AND u.IsActive = 1 AND u.IsDeleted = 0
-                                ORDER BY u.FullName";
-                            cmd.Parameters.AddWithValue("@Email", currentUser.Email);
-                            using (var reader = cmd.ExecuteReader())
-                            {
-                                while (reader.Read())
-                                {
-                                    list.Add(new SysUserModel
-                                    {
-                                        UserId = Convert.ToInt32(reader["UserId"]),
-                                        UserName = reader["UserName"]?.ToString(),
-                                        FullName = reader["FullName"]?.ToString()
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (list.Count == 0 && !string.IsNullOrEmpty(connStr))
-                {
-                    var accessibleDepts = GetAccessibleDepartments();
-                    if (accessibleDepts != null && accessibleDepts.Count > 0)
-                    {
-                        var deptIds = string.Join(",", accessibleDepts.Select(d => d.BoPhan_ID));
-                        using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
-                        {
-                            conn.Open();
-                            using (var cmd = conn.CreateCommand())
-                            {
-                                cmd.CommandText = $@"
-                                    SELECT DISTINCT u.UserId, u.UserName, u.FullName
-                                    FROM Sys_Users u
-                                    INNER JOIN MN_BoPhan bp ON u.MaBoPhan = bp.MaBoPhan
-                                    WHERE bp.BoPhan_ID IN ({deptIds}) AND u.IsActive = 1 AND u.IsDeleted = 0
-                                    ORDER BY u.FullName";
-                                using (var reader = cmd.ExecuteReader())
-                                {
-                                    while (reader.Read())
-                                    {
-                                        list.Add(new SysUserModel
-                                        {
-                                            UserId = Convert.ToInt32(reader["UserId"]),
-                                            UserName = reader["UserName"]?.ToString(),
-                                            FullName = reader["FullName"]?.ToString()
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                var list = _salesCache.GetAccessibleEmployees(User.UserName);
+                if (list != null && list.Count > 0) return list;
             }
-            catch
-            {
-                // Fallback safe
-            }
-            return list;
+            catch { }
+            return new List<RM_DigitalSalesUserModel>();
         }
 
         [HttpGet]
         public JsonResult GetEmployeesByDepartment(int departmentId)
         {
-            List<SysUserModel> users;
             if (departmentId > 0)
             {
-                users = _userCache.GetByBoPhanAndChucVu(departmentId, null) ?? new List<SysUserModel>();
+                var users = _userCache.GetByBoPhanAndChucVu(departmentId, null) ?? new List<SysUserModel>();
+                var result = users.Select(x => new
+                {
+                    Value = x.UserId,
+                    Text = $"{x.FullName} ({x.UserName})"
+                }).ToList();
+                return Json(result, JsonRequestBehavior.AllowGet);
             }
             else
             {
-                if (IsUserQTHT(User.UserName))
+                var employees = GetAccessibleEmployees();
+                var result = employees.Select(x => new
                 {
-                    var allActive = _userCache.GetAll();
-                    users = allActive != null ? allActive.Where(u => u.IsActive).OrderBy(u => u.FullName).ToList() : new List<SysUserModel>();
-                }
-                else
-                {
-                    var accessibleDepts = GetAccessibleDepartments();
-                    var deptUsers = new List<SysUserModel>();
-                    if (accessibleDepts != null && accessibleDepts.Count > 0)
-                    {
-                        foreach (var d in accessibleDepts)
-                        {
-                            var uInDept = _userCache.GetByBoPhanAndChucVu(d.BoPhan_ID, null);
-                            if (uInDept != null) deptUsers.AddRange(uInDept);
-                        }
-                    }
-                    var currentUser = _userCache.GetByUserName(User.UserName);
-                    if (currentUser != null && !deptUsers.Any(u => u.UserId == currentUser.UserId))
-                    {
-                        deptUsers.Add(currentUser);
-                    }
-                    users = deptUsers.Where(u => u != null && u.IsActive).GroupBy(u => u.UserId).Select(g => g.First()).OrderBy(u => u.FullName).ToList();
-                }
+                    Value = (int?)x.UserId,
+                    Text = $"{x.FullName} ({x.UserName})"
+                }).ToList();
+                return Json(result, JsonRequestBehavior.AllowGet);
             }
-
-            var result = users.Select(x => new
-            {
-                Value = x.UserId,
-                Text = $"{x.FullName} ({x.UserName})"
-            }).ToList();
-
-            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         private List<MN_BoPhanModel> GetAccessibleDepartments()
@@ -3663,21 +3558,32 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var accessibleUsers = GetAccessibleEmployees();
 
             var currentLoginUser = _userCache.GetByUserName(User.UserName);
-            if (currentLoginUser != null && !accessibleUsers.Any(u => u.UserId == currentLoginUser.UserId))
+            if (currentLoginUser != null && currentLoginUser.UserId.HasValue && !accessibleUsers.Any(u => u.UserId == currentLoginUser.UserId.Value))
             {
-                accessibleUsers.Add(currentLoginUser);
+                accessibleUsers.Add(new RM_DigitalSalesUserModel
+                {
+                    UserId = currentLoginUser.UserId.Value,
+                    UserName = currentLoginUser.UserName,
+                    FullName = currentLoginUser.FullName
+                });
             }
 
             if (model.AssignedEmployeeID.HasValue && model.AssignedEmployeeID.Value > 0 && !accessibleUsers.Any(u => u.UserId == model.AssignedEmployeeID.Value))
             {
                 var assignedUser = _userCache.GetById(model.AssignedEmployeeID.Value);
-                if (assignedUser != null)
+                if (assignedUser != null && assignedUser.UserId.HasValue)
                 {
-                    accessibleUsers.Add(assignedUser);
+                    accessibleUsers.Add(new RM_DigitalSalesUserModel
+                    {
+                        UserId = assignedUser.UserId.Value,
+                        UserName = assignedUser.UserName,
+                        FullName = assignedUser.FullName
+                    });
                 }
             }
 
             model.ListEmployee = accessibleUsers
+                .Where(u => u.UserId > 0)
                 .GroupBy(u => u.UserId)
                 .Select(g => g.First())
                 .OrderBy(u => u.FullName)
