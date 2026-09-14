@@ -1,0 +1,25 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityModel
+@{
+    ViewBag.Title = "Thông báo";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType{
+    primary
+}
+@section FormIcon{
+    <i class="fas fa-info-circle"></i>
+}
+@section FormBody{
+    <div class="m-0 alert fade show bgc-white brc-secondary-l2 rounded" role="alert">
+        <div class="position-tl h-102 border-l-4 brc-danger m-n1px rounded-left"></div><!-- the big red line on left -->
+        Cơ hội kinh doanh <span class="text-600">@Model.OpportunityName</span> đã được chuyển thành dự án, vui lòng xem chi tiết dự án <a href="/Cate/ProjectOverview/Index/@Model.ProjectID" class="alert-link text-danger-m2">tại đây</a>.
+        <p class="mt-3 mb-0">
+            <a class="btn btn-link text-primary font-bolder py-0 px-2" href="/Cate/ProjectOverview/Index/@Model.ProjectID">
+                <i class="far fa-hand-point-right"></i> @Model.ProjectName
+            </a>
+        </p>
+    </div>
+}
+@section SubmitControl{
+}

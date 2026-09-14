@@ -1,0 +1,176 @@
+﻿
+
+<script>
+    (function (window, $) {
+        if (window.openBusinessOpportunityFilePreviewLink) {
+            return;
+        }
+
+        function ensureModal() {
+            if ($("#businessOpportunityFilePreviewModal").length) {
+                return;
+            }
+
+            var modalHtml = ''
+                + '<div class="modal fade" id="businessOpportunityFilePreviewModal" tabindex="-1" role="dialog" aria-hidden="true">'
+                + '  <div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width: 1080px;">'
+                + '    <div class="modal-content">'
+                + '      <div class="modal-header py-2 bgc-primary-tp1 border-0 radius-t-1">'
+                + '        <h5 class="modal-title text-white-tp1 text-110 pl-2 font-bolder my-auto" id="businessOpportunityFilePreviewTitle">'
+                + '          <i class="fas fa-file-alt"></i>&nbsp;Xem tệp đính kèm'
+                + '        </h5>'
+                + '        <button type="button" class="btn btn-outline-white btn-h-danger btn-a-danger mt-1px mr-1px btn-brc-tp" data-dismiss="modal" aria-label="Đóng" title="Đóng">'
+                + '          <i class="fas fa-times"></i>'
+                + '        </button>'
+                + '      </div>'
+                + '      <div class="modal-body p-3">'
+                + '        <div id="businessOpportunityFilePreviewFallback" class="alert alert-warning mb-0 d-none"></div>'
+                + '        <iframe id="businessOpportunityFilePreviewFrame"'
+                + '                style="width:100%; height:72vh; border:1px solid #e3e7ed; border-radius:4px; background:#fff;"'
+                + '                frameborder="0"></iframe>'
+                + '      </div>'
+                + '      <div class="modal-footer">'
+                + '        <button type="button" class="btn px-4 btn-outline-danger mb-1" data-dismiss="modal">'
+                + '          <i class="fas fa-times"></i>&nbsp;Đóng'
+                + '        </button>'
+                + '      </div>'
+                + '    </div>'
+                + '  </div>'
+                + '</div>';
+
+            $("body").append(modalHtml);
+        }
+
+        function getExtension(filePath, fileName) {
+            var source = fileName || filePath || "";
+            var cleanSource = source.split("?")[0].split("#")[0];
+            var dotIndex = cleanSource.lastIndexOf(".");
+
+            return dotIndex < 0 ? "" : cleanSource.substring(dotIndex).toLowerCase();
+        }
+
+        function toAbsoluteUrl(filePath) {
+            if (!filePath) {
+                return "";
+            }
+
+            if (/^https?:\/\//i.test(filePath)) {
+                return filePath;
+            }
+
+            var link = document.createElement("a");
+            link.href = filePath;
+            return link.href;
+        }
+
+        function isOfficeFile(filePath, fileName) {
+            var extension = getExtension(filePath, fileName);
+            var officeExtensions = [".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"];
+
+            return officeExtensions.indexOf(extension) >= 0;
+        }
+
+        function canUseOfficeViewer(filePath) {
+            var absoluteUrl = toAbsoluteUrl(filePath);
+            var link = document.createElement("a");
+            link.href = absoluteUrl;
+
+            if (!/^https?:$/i.test(link.protocol)) {
+                return false;
+            }
+
+            var hostName = (link.hostname || "").toLowerCase();
+            if (!hostName || hostName === "localhost" || hostName === "127.0.0.1") {
+                return false;
+            }
+
+            if (/^\d+\.\d+\.\d+\.\d+$/.test(hostName)) {
+                if (/^(10|127)\./.test(hostName) || /^192\.168\./.test(hostName) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostName)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function buildPreviewUrl(filePath, fileName) {
+            var absoluteUrl = toAbsoluteUrl(filePath);
+
+            if (isOfficeFile(filePath, fileName)) {
+                return "https://view.officeapps.live.com/op/embed.aspx?src=" + encodeURIComponent(absoluteUrl);
+            }
+
+            return absoluteUrl;
+        }
+
+        function showPreview(filePath, fileName, title) {
+            ensureModal();
+
+            var previewUrl = buildPreviewUrl(filePath, fileName);
+            var absoluteUrl = toAbsoluteUrl(filePath);
+            var extension = getExtension(filePath, fileName);
+            var supportedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg", ".txt", ".csv", ".log", ".htm", ".html", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"];
+            var canPreview = supportedExtensions.indexOf(extension) >= 0;
+            var officeFile = isOfficeFile(filePath, fileName);
+            var allowOfficeViewer = canUseOfficeViewer(filePath);
+            var displayTitle = title || fileName || "Xem tệp đính kèm";
+            var $modal = $("#businessOpportunityFilePreviewModal");
+            var $frame = $("#businessOpportunityFilePreviewFrame");
+            var $fallback = $("#businessOpportunityFilePreviewFallback");
+
+            $("#businessOpportunityFilePreviewTitle").html('<i class="fas fa-file-alt"></i>&nbsp;' + displayTitle);
+
+            if (canPreview && (!officeFile || allowOfficeViewer)) {
+                $fallback.addClass("d-none").empty();
+                $frame.removeClass("d-none").attr("src", previewUrl);
+            } else if (officeFile) {
+                $frame.addClass("d-none").attr("src", "about:blank");
+                $fallback
+                    .removeClass("d-none")
+                    .html(
+                        '<div class="font-weight-bold mb-2">Không thể xem trước trực tiếp file Office trong popup.</div>'
+                        + '<div class="small text-muted mb-2">Viewer của Microsoft chỉ hoạt động khi URL file có thể truy cập công khai.</div>'
+                        + '<div class="small text-muted mb-3">' + (fileName || filePath) + '</div>'
+                        + '<a href="' + absoluteUrl + '" target="_blank" class="btn btn-outline-primary">'
+                        + '<i class="fas fa-external-link-alt mr-1"></i>Mở tệp'
+                        + '</a>');
+            } else {
+                $frame.addClass("d-none").attr("src", "about:blank");
+                $fallback
+                    .removeClass("d-none")
+                    .html(
+                        '<div class="font-weight-bold mb-2">Không hỗ trợ xem trước trực tiếp cho định dạng này.</div>'
+                        + '<div class="small text-muted mb-3">' + (fileName || filePath) + '</div>'
+                        + '<a href="' + absoluteUrl + '" target="_blank" class="btn btn-outline-primary">'
+                        + '<i class="fas fa-external-link-alt mr-1"></i>Mở tệp'
+                        + '</a>');
+            }
+
+            $modal.modal("show");
+        }
+
+        window.openBusinessOpportunityFilePreviewLink = function (element) {
+            var $link = $(element);
+            var filePath = $link.data("filePath") || $link.attr("href");
+            var fileName = $link.data("fileName") || $.trim($link.text());
+            var title = $link.data("previewTitle") || "Xem tệp đính kèm";
+
+            showPreview(filePath, fileName, title);
+            return false;
+        };
+
+        $(document)
+            .off("click.businessOpportunityFilePreview", ".js-file-preview")
+            .on("click.businessOpportunityFilePreview", ".js-file-preview", function (e) {
+                e.preventDefault();
+                window.openBusinessOpportunityFilePreviewLink(this);
+            });
+
+        $(document)
+            .off("hidden.bs.modal.businessOpportunityFilePreview", "#businessOpportunityFilePreviewModal")
+            .on("hidden.bs.modal.businessOpportunityFilePreview", "#businessOpportunityFilePreviewModal", function () {
+                $("#businessOpportunityFilePreviewFrame").attr("src", "about:blank").removeClass("d-none");
+                $("#businessOpportunityFilePreviewFallback").addClass("d-none").empty();
+            });
+    })(window, jQuery);
+</script>

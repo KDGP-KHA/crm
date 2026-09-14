@@ -1,0 +1,24 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CommentModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("ContactPersonal_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "Comment", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Comment_OnProcessSuccess(data, 'DeleteComment')"
+    }, new { @class = "form-horizontal", id = "DeleteComment" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CommentID)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

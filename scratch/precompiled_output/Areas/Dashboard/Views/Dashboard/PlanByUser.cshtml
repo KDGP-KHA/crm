@@ -1,0 +1,131 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.DashboardSearchModel
+@{
+    ViewBag.Title = "Kế hoạch kinh doanh";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-calendar-check"></i>
+}
+
+@section FormBody{
+    <div class="mt-3">
+        <div class="card dcard">
+            <div class="col-sm-12 table-responsive-md">
+                <table id="DSPlanByUser"
+                       class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                       width="100%">
+                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                        <tr>
+                            <th>STT</th>
+                            <th>Kế hoạch</th>
+                            <th>Cơ hội kinh doanh</th>
+                            <th>Ngày làm việc</th>
+                            <th>Địa điểm</th>
+                            <th>Nội dung</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#modal_PlanByUser').addClass('modal-fs').removeClass('modal-lg');
+            initTablePlanByUser();
+        });
+
+        function initTablePlanByUser() {
+            $("#DSPlanByUser").DataTable({
+                responsive: true,
+                lengthChange: true,
+                processing: true,
+                serverSide: false,
+                ordering: true,
+                order: [[3, "asc"]],
+                ajax: {
+                    url: "/Dashboard/Dashboard/GetPlanByUser",
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        UserId:   '@Model.EmployeeIds',
+                        FromDate: '@Model.FromDate.ToString("dd/MM/yyyy")',
+                        ToDate:   '@Model.ToDate.ToString("dd/MM/yyyy")'
+                    }
+                },
+                columns: [
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1 + meta.settings._iDisplayStart;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var isPast = row.WorkingDate && new Date(row.WorkingDate) < new Date(new Date().toDateString());
+                            var badge  = isPast
+                                ? '<span class="badge badge-secondary">Đã qua</span>'
+                                : '<span class="badge badge-success">Sắp tới</span>';
+                            return '<div class="font-weight-bold">' + (row.PlanName || '') + '</div>'
+                                 + badge;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var html = '<a href="/Cate/BusinessOpportunityOverview/Index/' + row.BusinessOpportunityID + '" '
+                                     + 'class="font-weight-bold text-primary">'
+                                     + (row.OpportunityName || '') + '</a>';
+                            if (row.CustomerName) {
+                                html += '<div class="small text-muted"><i class="fa fa-building mr-1"></i>'
+                                      + row.CustomerName + '</div>';
+                            }
+                            return html;
+                        }
+                    },
+                    {
+                        data: "WorkingDate",
+                        render: function (data) {
+                            if (!data) return "";
+                            var m = moment(data);
+                            return m.format("DD/MM/YYYY");
+                        }
+                    },
+                    {
+                        data: "AddressMeeting",
+                        defaultContent: ""
+                    },
+                    {
+                        data: "Content",
+                        orderable: false,
+                        render: function (data) {
+                            if (!data) return "";
+                            var plain = data.replace(/<[^>]*>?/gm, '');
+                            var short = plain.length > 120 ? plain.substring(0, 120) + '...' : plain;
+                            return '<span class="small">' + short + '</span>';
+                        }
+                    }
+                ],
+                language: {
+                    lengthMenu: 'Hiển thị _MENU_ dòng',
+                    info: 'Trang _PAGE_ / _PAGES_ &nbsp;|&nbsp; Tổng _TOTAL_ dòng',
+                    infoEmpty: 'Không có dữ liệu',
+                    emptyTable: 'Không có dữ liệu',
+                    paginate: { first: '«', last: '»', next: '›', previous: '‹' },
+                    processing: 'Đang tải...'
+                }
+            });
+        }
+    </script>
+}
+
+@section SubmitControl {
+}

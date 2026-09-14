@@ -1,0 +1,49 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysModuleModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Install"), AppProcessor.Messagor.GetMessage("Module_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    bg-primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Install", "Modules", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "InstallModule", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            <div class="form-group">
+                @Html.TitleFor(model => model.ModuleFileZip, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-9">
+                    @Html.FileFor(model => model.ModuleFileZip, ".zip", true, new { @class = "col-md-8" })
+                    @Html.ValidationMessageFor(model => model.ModuleFileZip, "", new { @class = "text-danger" })
+                    <br/>
+                </div>
+            </div>
+        </div>
+    }
+    <script type="text/javascript">
+        $('form').ajaxForm({
+            success: function(response) {
+                if (response.status != undefined) {
+                    $("#ModalContent #modal_InstallModule").modal("hide");
+                    $("#ModalContent #modal_InstallModule").on('hidden.bs.modal',
+                        function() {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                response.status = undefined;
+                            }
+                        });
+                } else {
+                    $("#ModalContent #modal_InstallModule" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

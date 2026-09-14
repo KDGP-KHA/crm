@@ -1,0 +1,252 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Linq
+@using Core.Cate.Models
+@model List<RM_NotificationModel>
+
+@{
+    var notifications = Model ?? new List<RM_NotificationModel>();
+    var unreadCount = ViewBag.UnreadCount is int ? (int)ViewBag.UnreadCount : 0;
+    var now = DateTime.Now;
+}
+
+<style>
+    .crm-notify-dropdown {
+        width: 380px;
+        max-width: 92vw;
+        padding: 0;
+    }
+
+    .crm-notify-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-bottom: 1px solid #e9ecef;
+        background: #f8f9fa;
+    }
+
+    .crm-notify-title {
+        font-weight: 600;
+        color: #1a6db5;
+        font-size: 13px;
+    }
+
+    .crm-notify-list {
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .crm-notify-item {
+        display: flex;
+        gap: 10px;
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f3f5;
+        text-decoration: none !important;
+        color: #333 !important;
+        white-space: normal;
+    }
+
+        .crm-notify-item:hover {
+            background: #f1f7fd;
+        }
+
+        .crm-notify-item.is-unread {
+            background: #eef6ff;
+        }
+
+    .crm-notify-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 14px;
+    }
+
+    .crm-notify-body {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .crm-notify-item-title {
+        font-weight: 600;
+        font-size: 12.5px;
+        line-height: 1.35;
+        margin-bottom: 2px;
+        word-break: break-word;
+    }
+
+    .crm-notify-item-content {
+        font-size: 12px;
+        color: #6c757d;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .crm-notify-time {
+        font-size: 11px;
+        color: #adb5bd;
+        margin-top: 3px;
+    }
+
+    .crm-notify-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #dc3545;
+        flex-shrink: 0;
+        margin-top: 6px;
+    }
+
+    .crm-notify-empty {
+        padding: 26px 14px;
+        text-align: center;
+        color: #adb5bd;
+        font-size: 12.5px;
+    }
+</style>
+
+<a class="nav-link dropdown-toggle pr-lg-4" data-toggle="dropdown" href="#" role="button"
+   aria-haspopup="true" aria-expanded="false" title="Thông báo">
+    <i class="fa fa-bell text-110 ml-lg-2"></i>
+    <span class="d-inline-block d-lg-none ml-2">Thông báo</span>
+    @if (unreadCount > 0)
+    {
+        <span id="crmNotifyBadge" class="badge badge-danger radius-round text-75">@(unreadCount > 99 ? "99+" : unreadCount.ToString())</span>
+    }
+    else
+    {
+        <span id="crmNotifyBadge" class="badge badge-danger radius-round text-75 d-none">0</span>
+    }
+    <i class="caret fa fa-angle-left d-block d-lg-none text-warning-d2"></i>
+</a>
+
+<div class="dropdown-menu dropdown-menu-right crm-notify-dropdown">
+
+    <div class="crm-notify-header">
+        <span class="crm-notify-title">
+            <i class="fa fa-bell mr-1"></i> Thông báo
+            @if (unreadCount > 0)
+            {
+                <span class="text-danger">(@unreadCount chưa đọc)</span>
+            }
+        </span>
+        @if (unreadCount > 0)
+        {
+            <a href="javascript:void(0)" class="text-90" onclick="crmMarkAllNotificationsAsRead()">
+                <i class="fa fa-check-double mr-1"></i>Đánh dấu đã đọc
+            </a>
+        }
+    </div>
+
+    <div class="crm-notify-list">
+        @if (notifications.Count == 0)
+        {
+            <div class="crm-notify-empty">
+                <i class="fa fa-bell-slash d-block mb-2 text-150"></i>
+                Không có thông báo
+            </div>
+        }
+        else
+        {
+            foreach (var item in notifications)
+            {
+                var url = string.IsNullOrWhiteSpace(item.DetailUrl) ? "javascript:void(0)" : Url.Content("~" + item.DetailUrl);
+                var iconClass = string.IsNullOrWhiteSpace(item.IconClass) ? "fa-bell" : item.IconClass;
+                var iconColor = string.IsNullOrWhiteSpace(item.IconColor) ? "text-primary" : item.IconColor;
+
+                var timeText = string.Empty;
+                if (item.CreatedDate.HasValue)
+                {
+                    var span = now - item.CreatedDate.Value;
+                    if (span.TotalMinutes < 1) { timeText = "Vừa xong"; }
+                    else if (span.TotalMinutes < 60) { timeText = string.Format("{0} phút trước", (int)span.TotalMinutes); }
+                    else if (span.TotalHours < 24) { timeText = string.Format("{0} giờ trước", (int)span.TotalHours); }
+                    else if (span.TotalDays < 7) { timeText = string.Format("{0} ngày trước", (int)span.TotalDays); }
+                    else { timeText = item.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm"); }
+                }
+
+                <a class="crm-notify-item @(item.IsRead ? "" : "is-unread")"
+                   href="@url"
+                   data-notification-id="@item.NotificationID"
+                   onclick="crmOpenNotification(event, this)">
+                    <span class="crm-notify-icon">
+                        <i class="fa @iconClass @iconColor"></i>
+                    </span>
+                    <span class="crm-notify-body">
+                        <span class="crm-notify-item-title d-block">@item.Title</span>
+                        @if (!string.IsNullOrWhiteSpace(item.Content))
+                        {
+                            <span class="crm-notify-item-content d-block">@item.Content</span>
+                        }
+                        <span class="crm-notify-time d-block">
+                            <i class="far fa-clock mr-1"></i>@timeText
+                        </span>
+                    </span>
+                    @if (!item.IsRead)
+                    {
+                        <span class="crm-notify-dot"></span>
+                    }
+                </a>
+            }
+        }
+    </div>
+</div>
+
+<script>
+    // Các URL xử lý thông báo trên header
+    window._crmNotifyUrls = {
+        list: '@Url.Action("HeaderNotifications", "Notification", new { area = "Cate" })',
+        markAsRead: '@Url.Action("MarkAsRead", "Notification", new { area = "Cate" })',
+        markAllAsRead: '@Url.Action("MarkAllAsRead", "Notification", new { area = "Cate" })'
+    };
+
+    // Tải lại danh sách thông báo trên header
+    window.reloadHeaderNotifications = function () {
+        $('#crmHeaderNotification').load(window._crmNotifyUrls.list);
+    };
+
+    // Đánh dấu đã đọc rồi điều hướng tới chi tiết cơ hội/dự án tương ứng
+    window.crmOpenNotification = function (event, element) {
+        event.preventDefault();
+
+        var $el = $(element);
+        var id = $el.data('notification-id');
+        var href = $el.attr('href');
+
+        var navigate = function () {
+            if (href && href !== 'javascript:void(0)') {
+                window.location.href = href;
+            } else {
+                window.reloadHeaderNotifications();
+            }
+        };
+
+        if (!id) {
+            navigate();
+            return;
+        }
+
+        $.ajax({
+            url: window._crmNotifyUrls.markAsRead + '?id=' + id,
+            type: 'POST',
+            dataType: 'json'
+        }).always(navigate);
+    };
+
+    // Đánh dấu toàn bộ thông báo là đã đọc
+    window.crmMarkAllNotificationsAsRead = function () {
+        $.ajax({
+            url: window._crmNotifyUrls.markAllAsRead,
+            type: 'POST',
+            dataType: 'json'
+        }).always(function () {
+            window.reloadHeaderNotifications();
+        });
+    };
+</script>

@@ -1,0 +1,290 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.ConvertProjectViewModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.BusinessOpportunityID)
+
+    <div class="col-sm-4">
+        <b>Thông tin dự án</b>
+    </div>
+    <hr style="border: 1px solid #ccc; margin: 10px 0;">
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ProjectName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.ProjectName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Project_ProjectName_Label") })
+            @Html.ValidationMessageFor(model => model.ProjectName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.StartDate, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-3">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.StartDate, "{0:dd/MM/yyyy}", new { id = "StartDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+        </div>
+
+        @Html.TitleFor(model => model.SuccessRate, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-md-3">
+        @Html.TextBoxFor(model => model.SuccessRate, new
+        {
+        @class = "form-control",
+        type = "number",
+        min = "0",
+        max = "100",
+        step = "1",
+        placeholder = "0 – 100",
+        data_format = "percent",
+        style = "max-width:200px"
+        })
+        @Html.ValidationMessageFor(model => model.SuccessRate, "", new { @class = "text-danger" })
+    </div>
+
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Note, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Note, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Project_Note_Label") })
+            @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <b>Thông tin dịch vụ</b>
+    </div>
+    <hr style="border: 1px solid #ccc; margin: 10px 0;">
+    <div class="form-group col-12">
+        <button type="button" class="btn btn-outline-primary text-600 text-100 mb-2" onclick="addRow()">
+            <i class="fa fa-plus w-3 text-center"></i> Thêm dịch vụ
+        </button>
+
+        <table id="tbl_productProject" class="table table-bordered" width="100%">
+            <thead class="text-center font-bold py-auto">
+                <tr>
+                    <th>Dịch vụ</th>
+                    <th>Doanh thu dự kiến</th>
+                    <th>Ngày bắt đầu</th>
+                    <th>Ngày kết thúc</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+
+            <tbody id="table-body">
+                @for (int i = 0; i < Model.ProductProjects.Count; i++)
+                {
+                    <tr id="row-@i">
+                        <td>
+                            <select class="form-control w-100" name="ProductProjects[@i].ProductServiceID">
+                                @foreach (var item in Model.ProductServices.Where(p => p.NodeType == "P"))
+                                {
+                                    <option value="@item.pID"
+                                            @(item.pID == Model.ProductProjects[i].ProductServiceID ? "selected" : "")>
+                                        @item.DisplayName
+                                    </option>
+                                }
+                            </select>
+                        </td>
+
+                        <!-- EXPECTED REVENUE -->
+                        <td class="text-center" style="width: 200px">
+                            @Html.TextBoxFor(model => model.ProductProjects[i].ExpectedRevenue, "{0:0.##}", new { @class = "form-control", type = "number", min = "0", step = "1" })
+                        </td>
+
+                        <!-- START DATE -->
+                        <td class="text-center" style="width: 180px">
+                            <div class="position-relative">
+                                <input type="text"
+                                       name="ProductProjects[@i].StartDate"
+                                       class="form-control start-date"
+                                       placeholder="DD/MM/YYYY"
+                                       value="@(Model.ProductProjects[i].StartDate?.ToString("dd/MM/yyyy"))" />
+                            </div>
+                        </td>
+
+                        <!-- END DATE -->
+                        <td class="text-center" style="width: 180px">
+                            <div class="position-relative">
+                                <input type="text"
+                                       name="ProductProjects[@i].EndDate"
+                                       class="form-control end-date"
+                                       placeholder="DD/MM/YYYY"
+                                       value="@(Model.ProductProjects[i].EndDate?.ToString("dd/MM/yyyy"))" />
+                            </div>
+                        </td>
+
+                        <!-- ACTION -->
+                        <td class="text-center" style="width: 100px">
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm mt-1"
+                                    onclick="removeRow(this)">
+                                <i class="fa fa-trash"></i> Xóa
+                            </button>
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#StartDate, .start-date, .end-date").datetimepicker({
+            format: "DD/MM/YYYY",
+            locale: "vi",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            }
+        });
+        reloadCKEditor();
+    });
+
+    //Contructor CKEDITOR
+    function reloadCKEditor() {
+        var editor = CKEDITOR.instances['Note'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('Note', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '350',
+        });
+        editor.on('change', function (e) {
+            $("#Note").val(editor.getData());
+        });
+    }
+</script>
+<!-- Script to Add Rows -->
+<script>
+    (function () {
+
+        // Số dòng ban đầu
+        let rowCounter = @Model.SelectedProductServiceIDs.Count;
+
+        // ===== Render option dịch vụ =====
+        function getServiceOptions() {
+            let options = '';
+
+            @foreach (var item in Model.ProductServices)
+            {
+                @:options += `<option value="@item.pID">@item.DisplayName</option>`;
+            }
+
+            return options;
+        }
+
+        // ===== Thêm dòng =====
+        window.addRow = function () {
+
+            let tableBody = document.getElementById('table-body');
+            let newRow = document.createElement('tr');
+            newRow.id = 'row-' + rowCounter;
+
+            // 👉 lấy ngày hôm nay (format yyyy-MM-dd)
+            let today = new Date().toISOString().split('T')[0];
+
+            newRow.innerHTML = `
+                <!-- SERVICE -->
+                <td class="text-center">
+                    <select name="ProductProjects[${rowCounter}].ProductServiceID" class="form-control w-100">
+                        ${getServiceOptions()}
+                    </select>
+                </td>
+
+                <!-- EXPECTED REVENUE -->
+                <td class="text-center" style="width: 200px">
+                    <input type="number"
+                           name="ProductProjects[${rowCounter}].ExpectedRevenue"
+                           class="form-control"
+                           min="0"
+                           step="1"
+                           value="0" />
+                </td>
+
+                <!-- START DATE -->
+                <td class="text-center" style="width: 180px">
+                    <div class="position-relative">
+                        <input type="text"
+                               name="ProductProjects[${rowCounter}].StartDate"
+                               placeholder="DD/MM/YYYY"
+                               class="form-control start-date"/>
+                    </div>
+                </td>
+
+                <!-- END DATE -->
+                <td class="text-center" style="width: 180px">
+                    <div class="position-relative">
+                        <input type="text"
+                               name="ProductProjects[${rowCounter}].EndDate"
+                               placeholder="DD/MM/YYYY"
+                               class="form-control end-date"/>
+                    </div>
+                </td>
+
+                <!-- ACTION -->
+                <td class="text-center" style="width: 100px">
+                    <button type="button"
+                            class="btn btn-outline-danger btn-sm mt-1"
+                            onclick="removeRow(this)">
+                        <i class="fa fa-trash"></i> Xóa
+                    </button>
+                </td>
+            `;
+
+            tableBody.appendChild(newRow);
+            $(newRow).find('select').select2();
+            $(newRow).find(".start-date, .end-date").datetimepicker({
+                format: "DD/MM/YYYY",
+                icons: {
+                    previous: "fa fa-chevron-left",
+                    next: "fa fa-chevron-right"
+                },
+                locale: "vi"
+            });
+            rowCounter++;
+        };
+
+        // ===== Xóa dòng =====
+        window.removeRow = function (btn) {
+
+            // 🔥 lấy row hiện tại
+            let row = btn.closest('tr');
+            if (row) row.remove();
+
+            // ===== RE-INDEX =====
+            let tableBody = document.getElementById('table-body');
+            let rows = tableBody.getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+
+                rows[i].id = 'row-' + i;
+
+                // SELECT
+                let select = rows[i].querySelector('select');
+                if (select) {
+                    select.name = select.name.replace(/\[\d+\]/, `[${i}]`);
+                }
+
+                // INPUTS
+                let inputs = rows[i].querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.name = input.name.replace(/\[\d+\]/, `[${i}]`);
+                });
+
+                // BUTTON
+                let button = rows[i].querySelector('button');
+                if (button) {
+                    button.setAttribute('onclick', `removeRow(this)`);
+                }
+            }
+
+            rowCounter = rows.length;
+        };
+
+    })();
+</script>

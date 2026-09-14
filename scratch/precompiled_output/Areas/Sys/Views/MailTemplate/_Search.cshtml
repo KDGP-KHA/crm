@@ -1,0 +1,22 @@
+﻿@model TSFramework.Libs.Models.Base.BaseSearchModel
+
+<div class="Search card dcard" id="SearchMailTemplate">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;Tìm kiếm
+        </div>
+    </div>
+
+    <div class="card-body p-2 d-flex align-items-end">
+        <div class="Search_Box w-50">
+            <label class="font-bold text-sm-right">Từ khóa</label>
+            @Html.TextBoxFor(model => model.Search, new { @class = "form-control", id = "Keyword", placeholder = "Nhập mã mẫu hoặc tên mẫu email" })
+        </div>
+
+        <div class="Search_button">
+            <button type="button" class="btn btn-primary" onclick="searchMailTemplates();">
+                <i class="fa fa-search-plus"></i>&nbsp;Tìm kiếm
+            </button>
+        </div>
+    </div>
+</div>

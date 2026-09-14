@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
@@ -155,5 +155,40 @@ namespace Core.Cate.Models
         public string AttachmentPath { get; set; }
 
         public List<SelectListItem> AvailableStatuses { get; set; } = new List<SelectListItem>();
+        public int? SelectedProcessID { get; set; }
+        public string TrackingItemsJson { get; set; }
+    }
+
+    public class ChangeStatusTrackingItemDTO
+    {
+        public int? ProcessID { get; set; }
+        public int? ProgressID { get; set; }
+        public string TaskName { get; set; }
+        public int? AssignedUserID { get; set; }
+        public DateTime? StartDate { get; set; }
+        public int? DurationDays { get; set; }
+        public DateTime? Deadline { get; set; }
+        public int SortOrder { get; set; }
+        public bool IsCustomTask { get; set; }
+    }
+
+    public class RM_DigitalSalesChangeProcessViewModel
+    {
+        public int DigitalSalesID { get; set; }
+        public int StatusID { get; set; }
+        public string StatusName { get; set; }
+        public int CurrentProcessID { get; set; }
+        public int SelectedProcessID { get; set; }
+        public List<RM_DigitalSalesProcessModel> AvailableProcesses { get; set; } = new List<RM_DigitalSalesProcessModel>();
+    }
+
+    public class RM_DigitalSalesTrackingReportViewModel
+    {
+        public int TrackingID { get; set; }
+        public int DigitalSalesID { get; set; }
+        public string TaskName { get; set; }
+        public byte Status { get; set; }
+        public string ResultNote { get; set; }
+        public string AttachmentFile { get; set; }
     }
 }

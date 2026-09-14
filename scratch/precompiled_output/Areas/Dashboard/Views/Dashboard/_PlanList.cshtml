@@ -1,0 +1,356 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Globalization
+@using System.Linq
+@using System.Text.RegularExpressions
+@using Core.Cate.Caches
+@using Core.Cate.Models
+@using TSFramework.Libs.Processors
+@model List<PlanDashboardModel>
+
+@{
+    var today = DateTime.Today;
+    var now = DateTime.Now;
+    var viCulture = new CultureInfo("vi-VN");
+    var editRelatedPersonText = AppProcessor.Messagor.GetMessage("OpportunityPlanRelatedPerson_Edit_Button");
+    editRelatedPersonText = string.IsNullOrWhiteSpace(editRelatedPersonText)
+        ? "Chỉnh sửa người liên quan"
+        : editRelatedPersonText;
+
+    var allPlans = (Model ?? new List<PlanDashboardModel>())
+        .Where(x => x.WorkingDate.HasValue)
+        .OrderBy(x => x.WorkingDate.Value)
+        .ThenBy(x => x.PlanName)
+        .ToList();
+
+    DateTime weekStart;
+    if (ViewBag.PlanFromDate is DateTime)
+    {
+        weekStart = ((DateTime)ViewBag.PlanFromDate).Date;
+    }
+    else
+    {
+        var daysFromMonday = ((int)today.DayOfWeek + 6) % 7;
+        weekStart = today.AddDays(-daysFromMonday);
+    }
+
+    var weekEnd = weekStart.AddDays(6);
+    var weekDays = Enumerable.Range(0, 7).Select(i => weekStart.AddDays(i)).ToList();
+    var plansInWeek = allPlans
+        .Where(x => x.WorkingDate.Value.Date >= weekStart && x.WorkingDate.Value.Date <= weekEnd)
+        .ToList();
+    var planCountByDate = plansInWeek
+        .GroupBy(x => x.WorkingDate.Value.Date)
+        .ToDictionary(x => x.Key, x => x.Count());
+    var selectedDay = weekDays.Contains(today) ? today : weekStart;
+
+    // Người liên quan đã được SP RM_Dashboard_Plan_Get_V2 gộp sẵn vào model — view không truy vấn DB
+    var relatedPersonNameMap = plansInWeek
+        .GroupBy(x => x.Id)
+        .ToDictionary(g => g.Key, g => g.First().RelatedPersonNames ?? string.Empty);
+}
+
+<style>
+    .plan-table-board {
+        margin-top: 10px;
+        color: #333;
+        font-weight: normal;
+    }
+
+    .plan-table-board th,
+    .plan-table-board td,
+    .plan-table-board a,
+    .plan-table-board .badge,
+    .plan-table-board .dropdown-item {
+        font-weight: normal !important;
+    }
+
+    .plan-table-board .plan-name {
+        color: #222;
+        font-weight: 500 !important;
+    }
+
+    .plan-table-board #planTable td {
+        font-size: 0.9rem;
+        line-height: 1.45;
+    }
+
+    .plan-table-board #planTable .small {
+        font-size: 0.9rem;
+    }
+
+    .plan-table-board .plan-preview,
+    .plan-table-board .plan-full,
+    .plan-table-board .plan-toggle,
+    .plan-table-board .plan-address {
+        font-size: 0.9rem !important;
+        line-height: 1.45;
+    }
+
+    .plan-week-strip {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 0;
+        border-bottom: 1px solid #d8e2f0;
+        background: #fff;
+    }
+
+    .plan-week-header-cell {
+        padding: 8px !important;
+        background: #fff !important;
+        border-bottom: 0 !important;
+    }
+
+    .plan-week-day {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 38px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: transparent;
+        color: #4b5563;
+        font-size: 0.86rem;
+        cursor: pointer;
+        user-select: none;
+        text-decoration: none;
+    }
+
+    .plan-week-day:last-child {
+        border-right: 0;
+    }
+
+    .plan-week-day:hover,
+    .plan-week-day.is-active {
+        color: #0d6efd;
+        text-decoration: none;
+        border-bottom-color: #0d6efd;
+    }
+
+    .plan-week-day.is-today:not(.is-active) {
+        color: #4b5563;
+        border-bottom-color: transparent;
+    }
+
+    .plan-week-day__count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: #0d6efd;
+        color: #fff;
+        font-size: 0.72rem;
+    }
+
+    .plan-filter-note {
+        margin-top: 8px;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .plan-working-time {
+        font-weight: 600;
+    }
+
+    .plan-empty-row {
+        display: none;
+    }
+
+    @@media (max-width: 768px) {
+        .plan-week-strip {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+</style>
+
+<div class="plan-table-board"
+     data-week-total="@plansInWeek.Count"
+     data-week-start="@weekStart.ToString("dd/MM/yyyy")"
+     data-week-end="@weekEnd.ToString("dd/MM/yyyy")">
+    <div class="db-section-title mt-2">
+        <i class="fa fa-calendar-check mr-1 text-orange"></i>
+        @AppProcessor.Messagor.GetMessage("PlanDashboard_Title")
+    </div>
+
+    <div class="table-responsive mt-2">
+        <table class="table table-bordered table-hover table-striped mb-0" id="planTable">
+            <thead class="thead-light">
+                <tr>
+                    <th colspan="6" class="plan-week-header-cell">
+                        <div class="plan-week-strip" id="planWeekStrip" data-selected-date="@selectedDay.ToString("yyyy-MM-dd")">
+                            @foreach (var day in weekDays)
+                            {
+                                var dayCount = planCountByDate.ContainsKey(day) ? planCountByDate[day] : 0;
+                                <a href="javascript:void(0)"
+                                   class="plan-week-day @(day == today ? "is-today" : "") @(day == selectedDay ? "is-active" : "")"
+                                   data-plan-day-filter="@day.ToString("yyyy-MM-dd")">
+                                    <span>@viCulture.DateTimeFormat.GetDayName(day.DayOfWeek) - @day.ToString("dd/MM")</span>
+                                    @if (dayCount > 0)
+                                    {
+                                        <span class="plan-week-day__count">@dayCount</span>
+                                    }
+                                </a>
+                            }
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    <th width="110">@AppProcessor.Messagor.GetMessage("PlanDashboard_WorkingDate")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("PlanDashboard_Plan")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("PlanDashboard_Opportunity")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("PlanDashboard_Address")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("PlanDashboard_Content")</th>
+                    <th >@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (plansInWeek.Any())
+                {
+                    foreach (var item in plansInWeek)
+                    {
+                        var wd = item.WorkingDate.Value;
+                        var canEdit = now <= wd;
+                        var detailUrl = Url.Action("Index", "BusinessOpportunityOverview", new { area = "Cate", id = item.BusinessOpportunityID });
+                        var relatedPersonUrl = Url.Action("List", "OpportunityPlanRelatedPerson", new { area = "Cate", id = item.Id });
+                        var editUrl = Url.Action("EditPlan", "BusinessOpportunityOverview", new { area = "Cate", id = item.Id });
+                        var deleteUrl = Url.Action("DeletePlan", "BusinessOpportunityOverview", new { area = "Cate", id = item.Id });
+                        var plain = string.IsNullOrEmpty(item.Content) ? string.Empty : Regex.Replace(item.Content, "<.*?>", string.Empty).Trim();
+                        var isLong = plain.Length > 120;
+                        var preview = isLong ? plain.Substring(0, 120) + "..." : plain;
+                        var rowId = "plan-" + item.Id;
+                        var relatedPersonNames = relatedPersonNameMap.ContainsKey(item.Id) ? relatedPersonNameMap[item.Id] : string.Empty;
+                        var searchText = string.Join(" ",
+                            item.PlanName,
+                            item.OpportunityName,
+                            item.CustomerName,
+                            item.AddressMeeting,
+                            item.EmployeeFullName,
+                            relatedPersonNames,
+                            plain).ToLowerInvariant();
+
+                        <tr data-plan-row
+                            data-plan-date="@wd.ToString("yyyy-MM-dd")"
+                            data-username="@item.EmployeeUserName"
+                            data-search="@searchText">
+                            <td class="text-nowrap text-center align-middle">
+                                <div class="plan-working-time">@wd.ToString("HH:mm")</div>
+                            </td>
+                            <td class="align-middle">
+                                <div class="plan-name">@item.PlanName</div>
+                                @if (!string.IsNullOrEmpty(item.EmployeeFullName))
+                                {
+                                    <div class="small text-muted mt-1">
+                                        <i class="fa fa-user mr-1"></i>@item.EmployeeFullName
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(relatedPersonNames))
+                                {
+                                    <div class="small text-muted mt-1">
+                                        <span>Người liên quan: @relatedPersonNames</span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="align-middle">
+                                <a href="@detailUrl" class="text-primary">@item.OpportunityName</a>
+                                @if (!string.IsNullOrEmpty(item.CustomerName))
+                                {
+                                    <div class="small text-muted">
+                                        <i class="fa fa-building mr-1"></i>@item.CustomerName
+                                    </div>
+                                }
+                            </td>
+                            <td class="align-middle">
+                                @if (!string.IsNullOrEmpty(item.AddressMeeting))
+                                {
+                                    <span class="plan-address"><i class="fa fa-map-marker-alt mr-1 text-muted"></i>@item.AddressMeeting</span>
+                                }
+                            </td>
+                            <td class="align-middle">
+                                @if (!string.IsNullOrEmpty(plain))
+                                {
+                                    <span class="plan-preview small">@preview</span>
+                                    if (isLong)
+                                    {
+                                        <span class="plan-full small" id="@(rowId)-full" style="display:none;">@plain</span>
+                                        <a href="javascript:void(0)" class="plan-toggle text-primary small ml-1" data-target="@rowId">Xem thêm</a>
+                                    }
+                                }
+                            </td>
+                            <td class="text-center align-middle">
+                                @if (canEdit)
+                                {
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border"
+                                                type="button"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
+                                                aria-expanded="false">
+                                            <i class="fa fa-ellipsis-h"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            @Html.Button(
+                                                true,
+                                                "OpportunityPlanRelatedPerson",
+                                                relatedPersonUrl,
+                                                "<i class='fa fa-users mr-2 text-info'></i>",
+                                                editRelatedPersonText,
+                                                new
+                                                {
+                                                    @class = "dropdown-item",
+                                                    data_width = "1024",
+                                                    title = editRelatedPersonText
+                                                })
+                                            @Html.Button(
+                                                true,
+                                                "EditOpportunityPlan",
+                                                editUrl,
+                                                "<i class='fa fa-edit mr-2 text-primary'></i>",
+                                                "Chỉnh sửa",
+                                                new
+                                                {
+                                                    @class = "dropdown-item",
+                                                    data_width = "600",
+                                                    title = AppProcessor.Messagor.GetMessage("Button_Edit")
+                                                })
+                                            @Html.Button(
+                                                true,
+                                                "DeleteOpportunityPlan",
+                                                deleteUrl,
+                                                "<i class='fa fa-trash mr-2'></i>",
+                                                "Xóa",
+                                                new
+                                                {
+                                                    @class = "dropdown-item text-danger",
+                                                    title = AppProcessor.Messagor.GetMessage("Button_Delete")
+                                                })
+                                        </div>
+                                    </div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                <tr class="plan-empty-row" id="planTableEmptyRow">
+                    <td colspan="6" class="text-center text-muted">
+                        <i class="fa fa-info-circle mr-1"></i>Không có kế hoạch phù hợp.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="plan-filter-note" id="planFilterNote">
+        Hiển thị kế hoạch trong tuần @weekStart.ToString("dd/MM/yyyy") - @weekEnd.ToString("dd/MM/yyyy").
+    </div>
+</div>
+
+@Html.Partial("~/Areas/Dashboard/Views/Shared/_ContentViewModal.cshtml", null, new ViewDataDictionary
+{
+    { "ModalId", "planContentModal" },
+    { "BodyId", "planContentModalBody" },
+    { "Title", "Nội dung kế hoạch kinh doanh" }
+})

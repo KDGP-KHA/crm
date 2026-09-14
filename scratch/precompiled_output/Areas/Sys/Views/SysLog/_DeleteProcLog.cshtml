@@ -1,0 +1,24 @@
+﻿@model Core.Sys.Models.Sys.SysProcedureLogModel
+
+@{
+    ViewBag.Title = "Xoá Procedure log";
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("DeleteProcLog", "SysLog", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ProcLog_OnProcessSuccess(data, 'DeleteProcLog')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.LogId)
+        @Html.HiddenFor(model => model.ProcedureName)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

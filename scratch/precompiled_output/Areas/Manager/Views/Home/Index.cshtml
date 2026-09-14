@@ -1,0 +1,63 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Title = AppProcessor.Messagor.GetMessage("App_Title");
+}
+@using TSFramework.Libs.Processors
+@model List<Core.Sys.Models.Sys.SysModuleModel>
+
+@section HeadCss{
+    <!-- include TSFramework.css -->
+}
+
+<div class="body-container pos-rel">
+    @*<div class="body-container pos-rel" style="background-image: url('../Contents/Base/plugins/ace_v4/assets/image/body-bg-1.jpg')">*@
+    <div class="position-tl w-100 h-100 bgc-white-tp5">
+        <!-- a black dark layer over background image -->
+    </div>
+
+    <div class="main-container bgc-transparent">
+
+        <div role="main" class="main-content px-0">
+            <div class="d-flex flex-grow-1">
+                <div class="row flex-grow-1">
+                    <div class="col-12 d-flex">
+
+                        <div class="row flex-grow-1">
+
+                            <div class="col-12 col-lg-12 px-0">
+                                <div class="h-100 pos-rel">
+                                    <div class="container d-flex flex-column justify-content-center mt-3">
+                                        <div class="p-4 mx-md-5 text-center">
+                                            <a href="/">
+                                                <img src="/Contents/Base/imgs/app.ico" width="15%">
+                                            </a>
+                                            <h2 class="fa-3x my-2">
+                                                <span class="text-danger-d1">ádas</span>
+                                                <br />
+                                                <span class="text-90 text-600 text-90 text-blue-d1">Công ty MTĐT Nha Trang</span>
+                                            </h2>
+
+                                            <div class="countdown-items d-flex justify-content-center flex-wrap mx-auto mt-3 mt-lg-3 col-12">
+                                                @foreach (var module in Model)
+                                                {
+                                                    <div class="col-2">
+                                                        <a href="@module.DefaultAction" class="btn btn-app btn-outline-primary radius-1">
+                                                            <i class="d-block h-6 @module.Icon text-190"></i>
+                                                            @module.ModuleName
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

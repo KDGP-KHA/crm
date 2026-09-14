@@ -1,0 +1,73 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadJs{
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section HeadCss{
+
+    <!-- "Login" page styles, specific to this page for demo only -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/views/pages/page-login/page-style.css">
+    <!-- include TSFramework.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/TSFramework/TSFramework.css">
+
+    @RenderSection("HeadCss", false)
+}
+
+<body>
+<!-- include common vendor scripts used in demo pages -->
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/jquery/dist/jquery.js"></script>
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/jquery/dist/jquery.form.js"></script>
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/popperjs/dist/umd/popper.js"></script>
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap/dist/js/bootstrap.js"></script>
+
+@RenderBody()
+
+<!-- include vendor scripts used in "Login" page. see "/views//pages/partials/page-login/vendor-scripts.hbs" -->
+<!-- include ace.js -->
+<script src="~/Contents/Base/plugins/ace_v4/dist/js/ace.js"></script>
+
+<!-- demo.js is only for Ace's demo and you shouldn't use it -->
+<script src="~/Contents/Base/plugins/ace_v4/app/browser/demo.js"></script>
+
+<!-- "Login" page script to enable its demo functionality -->
+<script src="~/Contents/Base/plugins/ace_v4/views/pages/page-login/page-script.js"></script>
+
+<!-- include datepicker.js -->
+<script src="~/Contents/Base/plugins/datepicker/js/bootstrap-datepicker.min.js"></script>
+<script src="~/Contents/Base/plugins/datepicker/locales/bootstrap-datepicker.vi.min.js"></script>
+
+<!-- include bootstrap-datetimepicker.js -->
+<script type="text/javascript" src="~/Contents/Base/plugins/bootstrap-datetimepicker/js/moment-with-locales.js"></script>
+<script type="text/javascript" src="~/Contents/Base/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+
+<!-- include vendor scripts used in "DataTables" page. see "/views//pages/partials/table-datatables/vendor-scripts.hbs" -->
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables/media/js/jquery.dataTables.js"></script>
+
+<!-- include toastr.js -->
+<script src="~/Contents/Base/plugins/toastr/toastr.js"></script>
+
+<!-- include jquery.validate.js -->
+<script src="~/Contents/Base/plugins/validate/jquery.validate.js"></script>
+
+<!-- select2.js -->
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/select2/dist/js/select2.js"></script>
+
+<!-- include moment.js -->
+<script src="~/Contents/Base/plugins/moment/moment.js"></script>
+
+<!-- include jquery.validate.js -->
+<script src="~/Contents/Base/plugins/validate/jquery.validate.js"></script>
+<script src="~/Contents/Base/plugins/validate/jquery.validate.unobtrusive.js"></script>
+<script src="~/Contents/Base/plugins/validate/jquery.unobtrusive-ajax.js"></script>
+
+<!-- include TSFramework.js -->
+<script src="~/Contents/Base/plugins/TSFramework/jquery.form.js"></script>
+<script src="~/Contents/Base/plugins/TSFramework/TSFramework.js"></script>
+
+@RenderSection("BottomScript", false)
+
+</body>

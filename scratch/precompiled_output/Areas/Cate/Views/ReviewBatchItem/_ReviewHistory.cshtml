@@ -1,0 +1,264 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_ReviewHistoryModel>
+
+<style>
+    .review-history-timeline {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        color: rgb(65, 70, 77);
+    }
+
+    .review-content img,
+    .preview-image img {
+        max-width: 100%;
+        height: auto !important;
+        display: block;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="review-history-timeline">
+
+    @if (Model != null && Model.Any())
+    {
+        var groupByBatch = Model
+            .GroupBy(x => new
+            {
+                x.ReviewBatchID,
+                x.BatchName
+            })
+            .ToList();
+
+        for (int n = 0; n < groupByBatch.Count; n++)
+        {
+            var batch = groupByBatch[n];
+            var firstItem = batch.First();
+
+            <div class="text-grey-m1 text-95">
+
+                <div class="d-flex">
+
+                    <!-- timeline -->
+                    <div class="minh-100 pos-rel">
+
+                        @if (n != groupByBatch.Count - 1)
+                        {
+                            <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
+                        }
+
+                        <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-primary text-white">
+                            <i class="far fa-calendar-check"></i>
+                        </div>
+
+                    </div>
+
+                    <!-- content -->
+                    <div class="mx-2 flex-grow-1">
+
+                        <!-- batch -->
+                        <div class="pt-2">
+
+                            <span class="badge badge-primary badge-lg arrowed mb-1">
+                                @firstItem.BatchName
+                            </span>
+
+                        </div>
+
+                        @foreach (var item in batch.OrderByDescending(x => x.CreatedDate))
+                        {
+                            <div class="brc-secondary-m4 px-3 py-2 radius-1 border-l-3 border-0 bgc-secondary-l4 text-grey-d3 text-95 mt-2 pos-rel">
+                                <!-- thời gian + reviewer -->
+                                <div class="mb-2">
+                                    <!-- thời gian -->
+                                    <span class="text-600 text-90">
+                                        @item.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                    |
+                                    @if (item.ReviewLevel > 0)
+                                    {
+                                        <span class="badge badge-info badge-sm">
+                                            Cấp @item.ReviewLevel
+                                        </span>
+                                    }
+                                    <!-- tên -->
+                                    <span class="btn-text-primary text-100 text-600 ml-1">
+                                        @item.Reviewer
+                                    </span>
+                                    <!-- trạng thái -->
+                                    <span class="ml-1 @(item.IsConfirmed ? "text-success" : "text-warning") font-bolder">
+                                        @(item.IsConfirmed ? "Đã xác nhận rà soát" : "Đã cho ý kiến")
+                                    </span>
+                                </div>
+
+                                <!-- nội dung -->
+                                @if (!string.IsNullOrWhiteSpace(item.ReviewComment))
+                                {
+                                    var decoded = System.Web.HttpUtility.HtmlDecode(item.ReviewComment);
+
+                                    var plainText =
+                                        System.Text.RegularExpressions.Regex
+                                            .Replace(decoded, "<.*?>", "");
+
+                                    var shortText =
+                                        plainText.Length > 150
+                                            ? plainText.Substring(0, 150) + "..."
+                                            : plainText;
+
+                                    var hasImage = decoded.Contains("<img");
+
+                                    <div class="review-wrapper">
+
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(plainText))
+                                            {
+                                                <span class="preview-content text-secondary">
+                                                    @shortText
+                                                </span>
+                                            }
+                                        </div>
+
+                                        @if (hasImage)
+                                        {
+                                            <div class="preview-image mt-2">
+                                                @Html.Raw(item.ReviewComment)
+                                            </div>
+                                        }
+
+                                        @if (plainText.Length > 100)
+                                        {
+                                            <div class="mt-1">
+                                                <span class="toggle-content text-primary"
+                                                      style="cursor:pointer;">
+                                                    Xem thêm
+                                                </span>
+                                            </div>
+                                        }
+
+                                        <div class="review-content mt-2" style="display:none;">
+                                            @Html.Raw(item.ReviewComment)
+                                        </div>
+
+                                    </div>
+                                }
+
+                                <!-- files -->
+                                @if (item.ExistingFiles != null
+                                     && item.ExistingFiles.Count > 0)
+                                {
+                                    <div class="mt-2">
+
+                                        <span class="font-bolder text-blue-d1">
+                                            Files:
+                                        </span>
+
+                                        <div class="mt-1">
+
+                                            @foreach (var file in item.ExistingFiles)
+                                            {
+                                                var ext = System.IO.Path
+                                                    .GetExtension(file.FilePath)?
+                                                    .ToLower();
+
+                                                var icon = "fa-file text-secondary";
+
+                                                if (new[]
+                                                {
+                                                    ".jpg",
+                                                    ".jpeg",
+                                                    ".png",
+                                                    ".gif",
+                                                    ".webp"
+                                                }.Contains(ext))
+                                                {
+                                                    icon = "fa-file-image text-success";
+                                                }
+                                                else if (ext == ".pdf")
+                                                {
+                                                    icon = "fa-file-pdf text-danger";
+                                                }
+                                                else if (new[]
+                                                {
+                                                    ".doc",
+                                                    ".docx"
+                                                }.Contains(ext))
+                                                {
+                                                    icon = "fa-file-word text-primary";
+                                                }
+                                                else if (new[]
+                                                {
+                                                    ".xls",
+                                                    ".xlsx"
+                                                }.Contains(ext))
+                                                {
+                                                    icon = "fa-file-excel text-success";
+                                                }
+
+                                                var fileName =
+                                                    System.IO.Path.GetFileName(file.FilePath);
+
+                                                <a class="badge badge-lg font-normal border-1 brc-grey-m3 mb-1 mr-1"
+                                                   href="@file.FilePath"
+                                                   target="_blank">
+
+                                                    <i class="fa @icon mr-1"></i>
+
+                                                    @fileName
+
+                                                </a>
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                }
+
+                                <!-- action -->
+                                @if (item.CanEdit)
+                                {
+                                    <div class="position-tr mt-2 mr-2">
+                                        @Html.Button(
+                                            true,
+                                            "EditHistory",
+                                            Url.Action("EditHistory", "ReviewBatchItem", new { area = "Cate", id = item.ReviewHistoryID }),
+                                            "<i class='fa fa-edit'></i>", "",
+                                            new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90" }
+                                        )
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center text-muted py-3">
+            Chưa có lịch sử rà soát
+        </div>
+    }
+
+</div>
+
+<script>
+    $(document).on('click', '.toggle-content', function () {
+
+        const wrapper = $(this).closest('.review-wrapper');
+        const contentDiv = wrapper.find('.review-content');
+        const preview = wrapper.find('.preview-content');
+
+        if (contentDiv.is(':animated')) return;
+
+        const isHidden = contentDiv.is(':hidden');
+
+        contentDiv.slideToggle(200);
+        preview.toggle(!isHidden);
+
+        $(this).text(isHidden ? 'Ẩn bớt' : 'Xem thêm');
+    });
+</script>

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "vn.app.khawassco.cskh",
+      "sha256_cert_fingerprints": [
+        "8C:8E:AE:6C:F6:C1:29:B5:7D:60:98:D9:4F:7C:13:8A:BA:E2:B8:B9:55:E2:0C:CC:FF:0C:73:8B:D8:77:97:18"
+      ]
+    }
+  }
+]

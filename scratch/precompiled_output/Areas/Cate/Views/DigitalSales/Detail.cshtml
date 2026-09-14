@@ -1,0 +1,165 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
+
+@{
+    ViewBag.Title = $"Chi tiết: {Model.Code} - {Model.Title}";
+    var totalTasks = Model.TrackingTasks?.Count ?? 0;
+    var completedTasks = Model.TrackingTasks?.Count(t => t.Status == 3) ?? 0;
+    var progressPercent = totalTasks > 0 ? (int)Math.Round((double)completedTasks * 100 / totalTasks) : 0;
+    bool canEdit = ViewBag.CanEdit == true;
+}
+
+@section PageTitle {
+    <div class="ds-header-title-container d-flex align-items-center">
+        <a href="@Url.Action("Index", "DigitalSales", new { area = "Cate" })" 
+           class="btn btn-sm btn-white btn-h-light-primary btn-a-light-primary border-1 brc-grey-l1 text-secondary-d2 font-600 px-3 py-2 radius-1 shadow-sm mr-3 flex-shrink-0 ds-back-btn" 
+           title="Quay lại danh sách hồ sơ">
+            <i class="fa fa-arrow-left text-primary mr-1"></i> Danh sách
+        </a>
+        <div class="d-flex flex-column justify-content-center flex-grow-1 min-width-0">
+            <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                <span id="headerCode" class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 font-mono text-90 px-2 py-1 mr-2 radius-1 font-bold shadow-sm flex-shrink-0">
+                    <i class="fa fa-hashtag mr-1 opacity-75"></i>@Model.Code
+                </span>
+                <span id="headerTitle" class="text-125 font-bolder text-dark-m1 ds-header-title-text" title="@Model.Title">
+                    @Model.Title
+                </span>
+            </div>
+            <div class="d-flex align-items-center mt-1 flex-wrap" style="gap: 4px;">
+                <span id="headerBusinessType" class="badge badge-lg @(Model.BusinessType == 1 ? "bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3" : "bgc-purple-l2 text-purple-d2 border-1 brc-purple-m3") text-85 font-bold px-25 py-1 radius-1">
+                    <i class="fa @(Model.BusinessType == 1 ? "fa-lightbulb" : "fa-project-diagram") mr-1"></i>@(Model.BusinessType == 1 ? "Cơ hội kinh doanh" : "Dự án")
+                </span>
+                <span id="headerStatusName" class="badge badge-lg bgc-green-l2 text-green-d3 border-1 brc-green-m3 text-85 font-bold px-25 py-1 radius-1">
+                    <i class="fa fa-check-circle mr-1"></i>@Model.StatusName
+                </span>
+                <span id="badgeKeyProject" class="badge badge-lg bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 text-85 font-bold px-25 py-1 radius-1 @(Model.IsKeyProject ? "" : "d-none")" title="Dự án trọng điểm">
+                    <i class="fa fa-star text-warning mr-1"></i>Trọng điểm
+                </span>
+                <span id="badgeFollowed" class="badge badge-lg bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 text-85 font-bold px-25 py-1 radius-1 @(Model.IsFollowed ? "" : "d-none")" title="Bạn đang quan tâm cơ hội/dự án này">
+                    <i class="fa fa-bookmark text-danger mr-1"></i>Đang quan tâm
+                </span>
+            </div>
+        </div>
+    </div>
+}
+
+@section PageAction {
+    <div class="ds-header-action-bar d-flex align-items-center">
+        <!-- 1. Cụm Switches: Trọng điểm & Quan tâm (Luôn đi cùng nhau) -->
+        <div class="ds-header-switches-group d-flex align-items-center flex-nowrap">
+            <div class="custom-control custom-switch custom-control-inline ds-custom-switch" title="Đánh dấu trọng điểm">
+                <input type="checkbox" class="custom-control-input cursor-pointer" id="chkIsKeyProject" @(Model.IsKeyProject ? "checked" : "") @(canEdit ? "" : "disabled") onchange="toggleKeyProject(@Model.DigitalSalesID, this.checked);">
+                <label class="custom-control-label font-bolder text-dark cursor-pointer select-none mb-0" for="chkIsKeyProject" id="lblKeyProject">
+                    @(Model.BusinessType == 2 ? "Dự án trọng điểm" : "Cơ hội trọng điểm")
+                </label>
+            </div>
+
+            <div class="custom-control custom-switch custom-control-inline ds-custom-switch mr-0" title="Quan tâm cơ hội/dự án">
+                <input type="checkbox" class="custom-control-input cursor-pointer" id="chkIsFollowed" @(Model.IsFollowed ? "checked" : "") onchange="toggleFollowSales(@Model.DigitalSalesID, this.checked);">
+                <label class="custom-control-label font-bolder text-dark cursor-pointer select-none mb-0" for="chkIsFollowed" id="lblFollowSales">
+                    @(Model.BusinessType == 2 ? "Quan tâm dự án" : "Quan tâm cơ hội")
+                </label>
+            </div>
+        </div>
+
+        <div class="ds-header-divider d-none d-xl-block"></div>
+
+        <!-- 2. Cụm Action Buttons (Không bao giờ tách rời nhau) -->
+        <div class="ds-header-buttons-group d-flex align-items-center flex-nowrap">
+            @if (canEdit)
+            {
+                <button type="button" class="btn btn-sm btn-warning btn-h-light-warning text-dark-tp1 font-bolder px-3 py-15 radius-1 shadow-sm text-nowrap" onclick="openChangeStatusModal(@Model.DigitalSalesID);" title="Chuyển đổi trạng thái quy trình">
+                    <i class="fa fa-exchange-alt mr-1"></i> Chuyển trạng thái
+                </button>
+                <button type="button" class="btn btn-sm btn-primary font-bolder px-3 py-15 radius-1 shadow-sm text-nowrap ml-2" onclick="openEditSalesModal(@Model.DigitalSalesID);" title="Chỉnh sửa thông tin hồ sơ">
+                    <i class="fa fa-pencil-alt mr-1"></i> Chỉnh sửa
+                </button>
+            }
+            else
+            {
+                <span class="badge badge-lg bgc-secondary-l3 text-secondary-d3 border-1 brc-secondary-m2 px-3 py-2 radius-1 font-bold text-nowrap">
+                    <i class="fa fa-eye mr-1"></i> Chế độ xem (Chỉ đọc)
+                </span>
+            }
+            <button type="button" class="btn btn-sm btn-white btn-h-light-default border-1 brc-grey-l1 text-secondary-d2 px-25 py-15 radius-1 shadow-sm flex-shrink-0 ml-2" onclick="refreshAllSections(@Model.DigitalSalesID);" title="Làm mới dữ liệu">
+                <i class="fa fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+}
+
+@section HeadCss {
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Detail.css?v=@DateTime.Now.Ticks" />
+}
+
+<!-- THẺ CHỈ SỐ NHANH (METRIC TILES) -->
+<div id="containerMetrics" class="ds-section-overlay-container">
+    @Html.Partial("_DetailMetrics", Model)
+</div>
+
+<!-- 4 TABS NỘI DUNG 360 ĐỘ -->
+<div class="card dcard">
+    <div class="card-header p-0 bgc-grey-l4 border-b-1 brc-grey-l1">
+        <ul class="nav nav-tabs nav-tabs-simple border-0" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active px-3 px-xl-4 py-3 font-weight-bold" id="tab-overview-link" data-toggle="tab" href="#tab-overview" role="tab" aria-selected="true">
+                    <i class="fa fa-info-circle mr-1 text-primary"></i> 1. Thông tin tổng quan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-3 px-xl-4 py-3 font-weight-bold" id="tab-products-link" data-toggle="tab" href="#tab-products" role="tab" aria-selected="false">
+                    <i class="fa fa-cubes mr-1 text-purple"></i> 2. Sản phẩm & Doanh thu
+                    <span class="badge badge-pill badge-purple ml-1" id="badgeTabProducts">@(Model.Products?.Count ?? 0)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-3 px-xl-4 py-3 font-weight-bold" id="tab-tracking-link" data-toggle="tab" href="#tab-tracking" role="tab" aria-selected="false">
+                    <i class="fa fa-clipboard-check mr-1 text-orange"></i> 3. Tiến trình & Checklist
+                    <span class="badge badge-pill badge-warning ml-1" id="badgeTabTracking">@completedTasks/@totalTasks</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-3 px-xl-4 py-3 font-weight-bold" id="tab-discussions-link" data-toggle="tab" href="#tab-discussions" role="tab" aria-selected="false">
+                    <i class="fa fa-comments mr-1 text-primary"></i> 4. Trao đổi chung & Hoạt động
+                    <span class="badge badge-pill badge-primary ml-1" id="badgeTabDiscussions">@(Model.Activities?.Count ?? 0)</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card-body p-3 p-lg-4">
+        <div class="tab-content">
+            <!-- TAB 1: THÔNG TIN TỔNG QUAN -->
+            <div class="tab-pane fade show active ds-section-overlay-container" id="tab-overview" role="tabpanel">
+                @Html.Partial("_DetailOverview", Model)
+            </div>
+
+            <!-- TAB 2: SẢN PHẨM & DỊCH VỤ SỐ -->
+            <div class="tab-pane fade ds-section-overlay-container" id="tab-products" role="tabpanel">
+                @Html.Partial("_DetailProducts", Model)
+            </div>
+
+            <!-- TAB 3: TIẾN TRÌNH & CHECKLIST -->
+            <div class="tab-pane fade ds-section-overlay-container" id="tab-tracking" role="tabpanel">
+                @Html.Partial("_DetailTracking", Model)
+            </div>
+
+            <!-- TAB 4: TRAO ĐỔI CHUNG & HOẠT ĐỘNG -->
+            <div class="tab-pane fade ds-section-overlay-container" id="tab-discussions" role="tabpanel">
+                @Html.Partial("_DetailDiscussions", Model)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER LOAD MODALS AJAX -->
+<div id="modalContainer"></div>
+
+@section BottomScript {
+    <script type="text/javascript">
+        window.CKEDITOR_BASEPATH = "@Url.Content("~/Contents/Modules/Major/ckeditor4/")";
+        var _currentDigitalSalesId = @Model.DigitalSalesID;
+    </script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script src="~/Areas/Cate/Views/DigitalSales/DigitalSalesDetail.js?v=@DateTime.Now.Ticks"></script>
+}

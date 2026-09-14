@@ -1,0 +1,30 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityPlanRelatedPersonFormModel
+@{
+    var addTitle = AppProcessor.Messagor.GetMessage("OpportunityPlanRelatedPerson_Add_Title");
+    ViewBag.Title = string.IsNullOrWhiteSpace(addTitle) ? "Th\u00eam ng\u01b0\u1eddi li\u00ean quan" : addTitle;
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-users"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "OpportunityPlanRelatedPerson", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "OpportunityPlanRelatedPerson_OnProcessSuccess(data, 'AddOpportunityPlanRelatedPerson')"
+    }, new { @class = "form-horizontal", id = "AddOpportunityPlanRelatedPerson" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_AddRelatedPerson")
+        </div>
+    }
+
+    <script src="@Url.Content("~/Areas/Cate/Views/OpportunityPlanRelatedPerson/OpportunityPlanRelatedPerson.js")"></script>
+}

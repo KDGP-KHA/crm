@@ -1,0 +1,28 @@
+.body-container {
+    background-attachment: fixed;
+   
+    background-color: #221d2e;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+@media (max-width: 700px) {
+    .body-container { background-size: cover; }
+}
+
+
+@media (max-width: 998px) {
+    .countdown-items { font-size: 0.8em; }
+}
+
+@media (max-width: 400px) {
+    .countdown-items { font-size: 0.75em; }
+}
+
+.countdown-item {
+    display: inline-block;
+    height: 12.5em;
+    margin: 0.5em;
+    width: 12.5em;
+}

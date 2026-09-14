@@ -1,0 +1,161 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessPlanModel
+
+@Html.AntiForgeryToken()
+<div id="BusinessPlan">
+    @Html.HiddenFor(model => model.BusinessPlanID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.BusinessPlanName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.BusinessPlanName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("BusinessPlan_Name_Label") })
+            @Html.ValidationMessageFor(model => model.BusinessPlanName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.PlanYear, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            @Html.TextBoxFor(model => model.PlanYear, new { @class = "form-control", type = "number", min = "1900", max = "2100", step = "1", oninput = "this.value = this.value.slice(0,4)", placeholder = AppProcessor.Messagor.GetMessage("BusinessPlan_PlanYear_Label") })
+            @Html.ValidationMessageFor(model => model.PlanYear, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.DecisionNo, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            @Html.TextBoxFor(model => model.DecisionNo, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("BusinessPlan_DecisionNo_Label") })
+            @Html.ValidationMessageFor(model => model.DecisionNo, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.DecisionDate, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.DecisionDate, "{0:dd/MM/yyyy}", new { id = "DecisionDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.DecisionDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.FileAttach, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            <div id="oldFileList" class="mt-2">
+                @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+                {
+                    foreach (var file in Model.ExistingFiles)
+                    {
+                        var fileName = Path.GetFileName(file.FilePath);
+
+                        <div class="old-file d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                            <span>
+                                <i class="fa fa-file text-success mr-1"></i>
+                                @fileName
+                            </span>
+
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="removeOldFile(this, @file.FilePathID)">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+            <div id="fileList" class="mt-2"></div>
+            <div id="deletedFilesContainer"></div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Note, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.TextAreaFor(model => model.Note, new { rows = 3, @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("BusinessPlan_Note_Label") })
+            @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#PlanYear").datetimepicker({
+            "format": "YYYY",
+        });
+        $("#DecisionDate").datetimepicker({
+            "format": "DD/MM/YYYY",
+        });
+    });
+    var filesList = [];
+    var dataTransfer = new DataTransfer();
+
+    // CHỌN FILE MỚI
+    $(document).on("change", "#DinhKemFile", function (e) {
+        let newFiles = Array.from(e.target.files);
+
+        newFiles.forEach(file => {
+            // check trùng (name + size cho chắc)
+            if (!filesList.some(f => f.name === file.name && f.size === file.size)) {
+                filesList.push(file);
+            }
+        });
+
+        syncInputFiles();
+        renderFileList();
+    });
+
+    // SYNC FILE VÀO INPUT
+    function syncInputFiles() {
+        dataTransfer = new DataTransfer();
+
+        filesList.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+    }
+
+    // RENDER FILE MỚI
+    function renderFileList() {
+        let html = "";
+
+        filesList.forEach((file, index) => {
+            html += `
+            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1 new-file">
+                <span>
+                    <i class="fa fa-file text-primary mr-1"></i>
+                    ${file.name}
+                </span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            `;
+        });
+
+        $("#fileList").html(html);
+    }
+
+    // XÓA FILE MỚI
+    function removeFile(index) {
+        filesList.splice(index, 1);
+        syncInputFiles();
+        renderFileList();
+    }
+
+    // XÓA FILE CŨ (EDIT)
+    function removeOldFile(btn, fileId) {
+        // xóa UI
+        $(btn).closest(".old-file").remove();
+
+        // add hidden để submit
+        $("#deletedFilesContainer").append(
+            `<input type="hidden" name="DeletedFileIds" value="${fileId}" />`
+        );
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

@@ -1,0 +1,24 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_LogTaskFilePathModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("TaskManagement_Files_Label"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("DeleteFile", "Comment", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Comment_OnProcessSuccess(data, 'DeleteFileComment')"
+    }, new { @class = "form-horizontal", id = "DeleteFileComment" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.FilePathID)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

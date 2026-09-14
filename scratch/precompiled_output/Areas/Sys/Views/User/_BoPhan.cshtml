@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@using EnumHelper = TSFramework.Libs.Helpers.EnumHelper
+@model Modules.Sys.Areas.Sys.Data.UserBoPhanModel
+
+@{
+    ViewBag.Title = $"{AppProcessor.Messagor.GetMessage("User_BoPhan_Title")} - {AppProcessor.Messagor.GetMessage("User_Title")} [{Model.FullName}]";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{@Html.Raw(EnumHelper.GetDescription(EnumTypeModal.Primary))}
+
+@section FormIcon{
+    <i class="fas fa-sitemap"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("BoPhan", "User", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "User_OnProcessSuccess(data, 'BoPhanUser')"
+    }, new { @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_BoPhanBody")
+        </div>
+    }
+}

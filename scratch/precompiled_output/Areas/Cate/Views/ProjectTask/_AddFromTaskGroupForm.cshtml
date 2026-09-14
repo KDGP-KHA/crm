@@ -1,0 +1,561 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectTaskBulkAddModel
+
+@{
+    var priorities = Model.Priorities ?? new List<Core.Cate.Models.RM_PriorityModel>();
+    var statuses = Model.ListTaskStatus ?? new List<Core.Cate.Models.RM_StatusModel>();
+    var employees = Model.ListEmployee ?? new List<SelectListItem>();
+    var items = Model.Items ?? new List<Core.Cate.Models.RM_ProjectTaskBulkAddItemModel>();
+}
+
+@Html.AntiForgeryToken()
+@Html.Hidden("ProductProjectID", Model.ProductProjectID)
+@Html.Hidden("ProjectID", Model.ProjectID)
+
+<style>
+    .bulk-task-toolbar label {
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+
+    .bulk-task-toolbar .form-control,
+    .bulk-task-toolbar .select2-container .select2-selection--single,
+    .bulk-task-toolbar .btn {
+        min-height: 40px;
+    }
+
+    .bulk-task-toolbar .form-control {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+    }
+
+    .bulk-task-toolbar .select2-container {
+        width: 100% !important;
+    }
+
+        .bulk-task-toolbar .select2-container .select2-selection--single {
+            display: flex;
+            align-items: center;
+            border-color: #ced4da;
+        }
+
+        .bulk-task-toolbar .select2-container .select2-selection__rendered {
+            line-height: 38px !important;
+            padding-left: 0.75rem;
+            padding-right: 2rem;
+        }
+
+        .bulk-task-toolbar .select2-container .select2-selection__arrow {
+            height: 38px !important;
+        }
+
+    .bulk-task-toolbar .btn {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+    }
+
+    .bulk-task-toolbar .bulk-task-search-row {
+        align-items: end;
+    }
+
+    .bulk-task-table-wrapper {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 8px;
+    }
+
+        .bulk-task-table-wrapper .dropdown,
+        .bulk-task-table-wrapper td,
+        .bulk-task-table-wrapper tr {
+            position: static;
+        }
+
+        .bulk-task-table-wrapper .dropdown-menu {
+            min-width: 9rem;
+            z-index: 1060;
+            margin-top: 2px;
+        }
+
+    .bulk-task-table th,
+    .bulk-task-table td {
+        vertical-align: middle;
+    }
+
+    .bulk-task-row {
+        cursor: pointer;
+    }
+
+        .bulk-task-row.bulk-task-existing {
+            background-color: #f5f7fa;
+            cursor: default;
+        }
+
+        .bulk-task-row.bulk-task-selected {
+            background-color: #eef6ff;
+        }
+
+        .bulk-task-row.bulk-task-removed {
+            display: none !important;
+        }
+
+    .bulk-task-checkbox-cell,
+    .bulk-task-action-cell {
+        cursor: default;
+    }
+
+    .bulk-task-editor-panel {
+        border: 1px solid #dbe5f1;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: #fff;
+    }
+
+    .bulk-task-editor-item label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.45rem;
+    }
+
+    .bulk-task-editor-item .form-control {
+        width: 100%;
+    }
+
+    .bulk-task-editor-item .select2-container {
+        width: 100% !important;
+    }
+
+    .bulk-task-empty {
+        display: none;
+    }
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .bulk-task-added-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 88px;
+        text-align: center;
+    }
+</style>
+
+@Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+
+@Html.Partial("_AddFromTaskGroupSearch", Model)
+
+<div class="alert alert-info py-2 mb-3">
+    <span class="font-weight-bold" id="bulkTaskSelectedCount">0</span>
+    <span>@AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_SelectedCount")</span>
+</div>
+
+<div class="table-responsive bulk-task-table-wrapper">
+    <table class="table table-bordered table-hover bulk-task-table mb-0">
+        <thead class="thead-light">
+            <tr>
+                <th class="text-center" style="width:50px;">
+                    <input type="checkbox" id="bulkTaskCheckAll" />
+                </th>
+                <th>@AppProcessor.Messagor.GetMessage("Task_Code_Label")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Task_ParentsTask_Label")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Task_Name_Label")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Task_Type_Label")</th>
+                <th>@AppProcessor.Messagor.GetMessage("Task_Group_Label")</th>
+                <th style="width:100px;">@AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_Action_Label")</th>
+            </tr>
+        </thead>
+        <tbody id="bulkTaskTableBody">
+            <tr id="bulkTaskSelectGroupMessage" class="bulk-task-empty">
+                <td colspan="7" class="text-center text-muted py-4">
+                    @AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_SelectTaskGroupPrompt")
+                </td>
+            </tr>
+            <tr id="bulkTaskNoDataMessage" class="bulk-task-empty">
+                <td colspan="7" class="text-center text-muted py-4">
+                    @AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_Empty")
+                </td>
+            </tr>
+            @for (var i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                var keywordParts = new List<string>();
+                if (!string.IsNullOrWhiteSpace(item.TaskCode)) { keywordParts.Add(item.TaskCode); }
+                if (!string.IsNullOrWhiteSpace(item.TaskName)) { keywordParts.Add(item.TaskName); }
+                if (!string.IsNullOrWhiteSpace(item.ParentsTask)) { keywordParts.Add(item.ParentsTask); }
+                if (!string.IsNullOrWhiteSpace(item.TaskTypeName)) { keywordParts.Add(item.TaskTypeName); }
+                if (!string.IsNullOrWhiteSpace(item.TaskGroupName)) { keywordParts.Add(item.TaskGroupName); }
+                var keyword = string.Join(" ", keywordParts).ToLowerInvariant();
+                var description = string.IsNullOrWhiteSpace(item.Description) ? item.Note : item.Description;
+
+                <tr class="bulk-task-row @(item.IsExistingProjectTask ? "bulk-task-existing" : string.Empty)"
+                    data-task-group="@item.TaskGroupID"
+                    data-task-type="@item.TaskTypeID"
+                    data-keyword="@keyword"
+                    data-existing="@(item.IsExistingProjectTask ? "1" : "0")"
+                    data-index="@i">
+                    <td class="text-center bulk-task-checkbox-cell">
+                        @Html.Hidden("Items[" + i + "].TaskID", item.TaskID)
+                        @Html.Hidden("Items[" + i + "].TaskCode", item.TaskCode)
+                        @Html.Hidden("Items[" + i + "].TaskName", item.TaskName)
+                        @Html.Hidden("Items[" + i + "].TaskParentsID", item.TaskParentsID)
+                        @Html.Hidden("Items[" + i + "].ParentsTask", item.ParentsTask)
+                        @Html.Hidden("Items[" + i + "].TaskGroupID", item.TaskGroupID)
+                        @Html.Hidden("Items[" + i + "].TaskGroupName", item.TaskGroupName)
+                        @Html.Hidden("Items[" + i + "].TaskTypeID", item.TaskTypeID)
+                        @Html.Hidden("Items[" + i + "].TaskTypeName", item.TaskTypeName)
+                        @Html.Hidden("Items[" + i + "].SortOrder", item.SortOrder)
+                        @Html.Hidden("Items[" + i + "].AssigneeIDs", string.Join(",", item.AssigneeIDList ?? new List<int>()), new { @class = "bulk-task-hidden-assigned-employee" })                        @Html.Hidden("Items[" + i + "].IsExistingProjectTask", item.IsExistingProjectTask)
+                        @Html.Hidden("Items[" + i + "].StatusID", item.StatusID.HasValue ? item.StatusID.Value.ToString() : string.Empty, new { @class = "bulk-task-hidden-status" })
+                        @Html.Hidden("Items[" + i + "].PriorityID", item.PriorityID.HasValue ? item.PriorityID.Value.ToString() : string.Empty, new { @class = "bulk-task-hidden-priority-id" })
+                        @Html.Hidden("Items[" + i + "].StartDate", item.StartDate.HasValue ? item.StartDate.Value.ToString("yyyy-MM-dd") : string.Empty, new { @class = "bulk-task-hidden-start-date" })
+                        @Html.Hidden("Items[" + i + "].EndDate", item.EndDate.HasValue ? item.EndDate.Value.ToString("yyyy-MM-dd") : string.Empty, new { @class = "bulk-task-hidden-completed-date" })
+                        @Html.Hidden("Items[" + i + "].CompletionPercentage", item.CompletionPercentage.HasValue ? item.CompletionPercentage.Value.ToString() : string.Empty, new { @class = "bulk-task-hidden-completion-percentage" })
+                        @Html.Hidden("Items[" + i + "].EstimatedHours", item.EstimatedHours.HasValue ? item.EstimatedHours.Value.ToString() : string.Empty, new { @class = "bulk-task-hidden-estimated-hours" })
+                        @Html.Hidden("Items[" + i + "].ActualHours", item.ActualHours.HasValue ? item.ActualHours.Value.ToString() : string.Empty, new { @class = "bulk-task-hidden-actual-hours" })
+                        @Html.Hidden("Items[" + i + "].Description", description ?? string.Empty, new { @class = "bulk-task-hidden-description" })
+                        @Html.Hidden("Items[" + i + "].Note", description ?? string.Empty, new { @class = "bulk-task-hidden-note" })
+                        @Html.Hidden("Items[" + i + "].FileIndexes", string.Empty, new { @class = "bulk-task-hidden-file-indexes" })
+                        @if (item.IsExistingProjectTask)
+                        {
+                            @Html.CheckBox("Items[" + i + "].IsSelected", item.IsSelected, new
+                            {
+                                @class = "bulk-task-checkbox",
+                                data_index = i,
+                                disabled = "disabled"
+                            })
+                        }
+                        else
+                        {
+                            @Html.CheckBox("Items[" + i + "].IsSelected", item.IsSelected, new
+                            {
+                                @class = "bulk-task-checkbox",
+                                data_index = i
+                            })
+                        }
+                    </td>
+                    <td>@(string.IsNullOrWhiteSpace(item.TaskCode) ? "--" : item.TaskCode)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.ParentsTask) ? "--" : item.ParentsTask)</td>
+                    <td>@item.TaskName</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.TaskTypeName) ? "--" : item.TaskTypeName)</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.TaskGroupName) ? "--" : item.TaskGroupName)</td>
+                    <td class="bulk-task-action-cell">
+                        @if (item.IsExistingProjectTask)
+                        {
+                            <span class="badge badge-success bulk-task-added-badge">
+                                @AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_AlreadyAdded")
+                            </span>
+                        }
+                        else
+                        {
+                            <div class="dropdown d-flex justify-content-center">
+                                <button class="btn btn-lighter-primary btn-sm dropdown-toggle"
+                                        type="button"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    <i class="fa fa-ellipsis-h"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <button type="button" class="dropdown-item bulk-task-action-edit">
+                                        <i class="far fa-edit text-primary text-120 mr-1"></i>
+                                        @AppProcessor.Messagor.GetMessage("Button_Edit")
+                                    </button>
+                                    <button type="button" class="dropdown-item bulk-task-action-delete">
+                                        <i class="far fa-trash-alt text-danger text-120 mr-1"></i>
+                                        @AppProcessor.Messagor.GetMessage("Button_Delete")
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="bulkTaskEditorPanel" class="bulk-task-editor-panel mt-3 py-0 d-none">
+    <div class="row p-3">
+        <div class="col-lg-3 col-md-6 col-12 p-1 bulk-task-editor-item d-flex flex-column">
+            <label class="font-weight-bold text-danger" for="bulkTaskEditorStatus">@AppProcessor.Messagor.GetMessage("ProjectTask_Status_Label") (*)</label>
+            <select id="bulkTaskEditorStatus"
+                    class="form-control select2 bulk-task-editor-field"
+                    data-field-class=".bulk-task-hidden-status"
+                    style="width:100%">
+                <option value="">-- @AppProcessor.Messagor.GetMessage("ProjectTask_Status_Label") --</option>
+                @foreach (var status in statuses)
+                {
+                    <option value="@status.ID">@status.StatusName</option>
+                }
+            </select>
+        </div>
+        <div class="col-lg-3 col-md-6 col-12 p-1 bulk-task-editor-item d-flex flex-column">
+            <label class="font-weight-bold" for="bulkTaskEditorPriorityID">@AppProcessor.Messagor.GetMessage("Priority_Label")</label>
+            <select id="bulkTaskEditorPriorityID"
+                    class="form-control select2 bulk-task-editor-field"
+                    data-field-class=".bulk-task-hidden-priority-id"
+                    style="width:100%">
+                <option value="">-- @AppProcessor.Messagor.GetMessage("Priority_Label") --</option>
+                @foreach (var priority in priorities)
+                {
+                    <option value="@priority.PriorityID">@priority.PriorityName</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-12 p-1 bulk-task-editor-item d-flex flex-column">
+            <label class="font-weight-bold" for="bulkTaskEditorAssignedEmployeeIDs">
+                @AppProcessor.Messagor.GetMessage("ProjectTask_AssignedEmployee_Label")
+            </label>
+            <select id="bulkTaskEditorAssignedEmployeeIDs"
+                    class="form-control select2 bulk-task-editor-field"
+                    data-field-class=".bulk-task-hidden-assigned-employee"
+                    multiple="multiple"
+                    style="width:100%">
+                @foreach (var employee in employees)
+                {
+                    <option value="@employee.Value">@employee.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-12 p-1 bulk-task-editor-item d-flex flex-column">
+            <label class="font-weight-bold" for="bulkTaskEditorStartDate">@AppProcessor.Messagor.GetMessage("ProjectTask_StartDate_Label")</label>
+            <input type="date"
+                   id="bulkTaskEditorStartDate"
+                   class="form-control bulk-task-editor-field"
+                   data-field-class=".bulk-task-hidden-start-date" />
+        </div>
+
+        <div class="col-lg-3 col-md-6 col-12 p-1 bulk-task-editor-item d-flex flex-column">
+            <label class="font-weight-bold" for="bulkTaskEditorCompletedDate">@AppProcessor.Messagor.GetMessage("ProjectTask_CompletedDate_Label")</label>
+            <input type="date"
+                   id="bulkTaskEditorCompletedDate"
+                   class="form-control bulk-task-editor-field"
+                   data-field-class=".bulk-task-hidden-completed-date" />
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-12 px-1 bulk-task-editor-item d-flex">
+            <div class="d-flex flex-column p-1 w-100">
+                <label class="font-weight-bold" for="bulkTaskEditorCompletionPercentage">@AppProcessor.Messagor.GetMessage("ProjectTask_CompletionPercentage_Label")</label>
+                <input type="number"
+                       id="bulkTaskEditorCompletionPercentage"
+                       class="form-control bulk-task-editor-field"
+                       data-field-class=".bulk-task-hidden-completion-percentage"
+                       min="0"
+                       max="100"
+                       placeholder="0 - 100" />
+            </div>
+            <div class="d-flex flex-column p-1 w-100">
+                <label class="font-weight-bold" for="bulkTaskEditorEstimatedHours">@AppProcessor.Messagor.GetMessage("TaskManagement_EstimatedHours_Label")</label>
+                <input type="text"
+                       id="bulkTaskEditorEstimatedHours"
+                       class="form-control bulk-task-editor-field"
+                       data-field-class=".bulk-task-hidden-estimated-hours" />
+            </div>
+        </div>
+
+        <div class="col-12 mb-0 p-1 bulk-task-editor-item">
+            <label class="font-weight-bold" for="bulkTaskEditorDescription">@AppProcessor.Messagor.GetMessage("ProjectTask_Note_Label")</label>
+            <textarea id="bulkTaskEditorDescription"
+                      class="form-control bulk-task-editor-field"
+                      data-field-class=".bulk-task-hidden-description"
+                      rows="3"
+                      placeholder="@AppProcessor.Messagor.GetMessage("ProjectTask_Note_Label")"></textarea>
+        </div>
+        <div class="col-12 mb-0 p-1 bulk-task-editor-item">
+            <label>@AppProcessor.Messagor.GetMessage("TaskManagement_Files_Label")</label>
+            <div class="input-group">
+                <div class="custom-file">
+                    <label class="custom-file-label" for="bulkTaskEditorAttachments">
+                        @AppProcessor.Messagor.GetMessage("FileUpload")
+                    </label>
+                    <input type="file"
+                           class="custom-file-input"
+                           id="bulkTaskEditorAttachments"
+                           name="Files"
+                           multiple
+                           accept=".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls" />
+                </div>
+            </div>
+            <div id="bulkTaskEditorFileList" class="bulk-task-file-list mt-2"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var scriptId = "project-task-js";
+        var scriptUrl = "@Url.Content("~/Areas/Cate/Views/ProjectTask/ProjectTask.js")";
+
+        function initBulkTaskGroupForm() {
+            if (typeof ProjectTask_InitBulkTaskGroupForm === "function") {
+                ProjectTask_InitBulkTaskGroupForm();
+
+                $('#bulkTaskEditorAssignedEmployeeIDs').select2({
+                    placeholder: '-- Người đảm nhận --',
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                return true;
+            }
+
+            return false;
+        }
+
+        if (initBulkTaskGroupForm()) {
+            return;
+        }
+
+        var existingScript = document.getElementById(scriptId);
+        if (!existingScript) {
+            existingScript = document.createElement("script");
+            existingScript.id = scriptId;
+            existingScript.src = scriptUrl;
+            existingScript.onload = initBulkTaskGroupForm;
+            document.head.appendChild(existingScript);
+            return;
+        }
+
+        var retryCount = 0;
+        var retryTimer = window.setInterval(function () {
+            retryCount++;
+
+            if (initBulkTaskGroupForm() || retryCount >= 50) {
+                window.clearInterval(retryTimer);
+            }
+        }, 100);
+    })();
+
+    $('#AddProjectTaskFromTaskGroup').on('submit', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var form = this;
+        var formData = new FormData(form);
+
+        $.ajax({
+            url: form.action,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                ProjectTask_OnProcessSuccess(data, 'AddProjectTaskFromTaskGroup');
+            }
+        });
+    });
+
+    (function () {
+        var allFiles = [];
+        var inputEl = document.getElementById('bulkTaskEditorAttachments');
+        var listEl = document.getElementById('bulkTaskEditorFileList');
+        var labelEl = inputEl ? inputEl.previousElementSibling : null; // .custom-file-label
+
+        if (!inputEl || !listEl) return;
+
+        inputEl.addEventListener('change', function () {
+            var newFiles = Array.from(this.files);
+
+            var selectedRows = document.querySelectorAll('.bulk-task-row.bulk-task-selected');
+            var selectedIndexes = Array.from(selectedRows).map(function (row) {
+                return parseInt(row.getAttribute('data-index'));
+            });
+
+            newFiles.forEach(function (file) {
+                var exists = allFiles.some(function (f) { return f.file.name === file.name; });
+                if (!exists) {
+                    allFiles.push({ file: file, taskIndexes: selectedIndexes.slice() });
+                }
+            });
+
+            syncFileInput();
+            syncHiddenFields();
+            renderFileList();
+            updateLabel();
+        });
+
+        function syncFileInput() {
+            var dt = new DataTransfer();
+            allFiles.forEach(function (f) { dt.items.add(f.file); });
+            inputEl.files = dt.files;
+        }
+
+        function syncHiddenFields() {
+            document.querySelectorAll('.bulk-task-row').forEach(function (row) {
+                var taskIdx = parseInt(row.getAttribute('data-index'));
+                var hidden = row.querySelector('.bulk-task-hidden-file-indexes');
+                if (!hidden) return;
+
+                var fileIndexes = [];
+                allFiles.forEach(function (f, globalIdx) {
+                    if (f.taskIndexes.indexOf(taskIdx) !== -1) {
+                        fileIndexes.push(globalIdx);
+                    }
+                });
+
+                hidden.value = fileIndexes.join(',');
+            });
+        }
+
+        function updateLabel() {
+            if (!labelEl) return;
+            labelEl.textContent = allFiles.length > 0
+                ? allFiles.length + ' file đã chọn'
+                : inputEl.getAttribute('data-placeholder') || 'Chọn file';
+        }
+
+        function renderFileList() {
+            listEl.innerHTML = '';
+
+            allFiles.forEach(function (f, globalIdx) {
+
+                var ext = f.file.name.split('.').pop().toLowerCase();
+                var icon = 'fa-file';
+
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) > -1)
+                    icon = 'fa-file-image text-success';
+                else if (ext === 'pdf')
+                    icon = 'fa-file-pdf text-danger';
+                else if (['doc', 'docx'].indexOf(ext) > -1)
+                    icon = 'fa-file-word text-primary';
+                else if (['xls', 'xlsx'].indexOf(ext) > -1)
+                    icon = 'fa-file-excel text-success';
+
+                var size = f.file.size > 1024 * 1024
+                    ? (f.file.size / 1024 / 1024).toFixed(1) + ' MB'
+                    : (f.file.size / 1024).toFixed(1) + ' KB';
+
+                var div = document.createElement('div');
+
+                div.className =
+                    'd-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1';
+
+                div.innerHTML =
+                    '<span>' +
+                    '<i class="fa ' + icon + ' mr-1"></i>' +
+                    f.file.name +
+                    ' <small class="text-muted">(' + size + ')</small>' +
+                    '</span>' +
+                    '<button type="button" class="btn btn-sm btn-danger remove-file" data-idx="' + globalIdx + '">' +
+                    '<i class="fa fa-times"></i>' +
+                    '</button>';
+
+                div.querySelector('.remove-file')
+                    .addEventListener('click', function () {
+
+                        allFiles.splice(parseInt(this.getAttribute('data-idx')), 1);
+
+                        syncFileInput();
+                        syncHiddenFields();
+                        renderFileList();
+                        updateLabel();
+                    });
+
+                listEl.appendChild(div);
+            });
+        }
+    })();
+</script>

@@ -1,0 +1,44 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ExchangeHistoryFilePathModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), "File");
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("DeleteFile", "RM_BusinessOpportunity", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "BusinessOpportunity_OnDeleteProcessSuccess(data, 'DeleteFileBusinessOpportunity')"
+    }, new { @class = "form-horizontal", id = "DeleteFileBusinessOpportunity" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.FilePathID)
+        @Html.HiddenFor(model => model.FilePath)
+        @Html.HiddenFor(model => model.BusinessOpportunityID)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+    <script>
+        function BusinessOpportunity_OnDeleteProcessSuccess(response, formId) {
+            if (response.status != undefined) {
+                $("#ModalContent #modal_" + formId).modal("hide");
+                $("#ModalContent #modal_" + formId).on("hidden.bs.modal",
+                    function () {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            $("#modal_EditExchangeHistory" + " #LogList").html(response.list);
+                            response.status = undefined;
+                        }
+                    });
+            } else {
+                $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+            }
+        }
+
+    </script>
+}

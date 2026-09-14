@@ -1,0 +1,98 @@
+﻿@using System.Globalization
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronEveryMonth" name="cronMonth" checked="checked">
+            Every month
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronMonthIncrement" name="cronMonth">
+            Every
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronMonthIncrementIncrement" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 12; idx++)
+                {
+                    <option value="@idx">@idx</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="col-form-label"> month(s) starting in </label>
+    </div>
+    <div class="col-md-3">
+        <select id="cronMonthIncrementStart" class="col-md-10">
+            @{
+                for (var idx = 1; idx <= 12; idx++)
+                {
+                    <option value="@idx">@(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(idx))</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronMonthSpecific" name="cronMonth">
+            Specific month (choose one or many)
+        </label>
+    </div>
+    @{
+        for (var idx = 1; idx <= 12; idx++)
+        {
+            if (idx % 5 == 1)
+            {
+                <div class="col-md-2"></div>
+            }
+            var eleId = $"cronMonth{idx}";
+
+            <div class="col-md-2">
+                <div class="checkbox">
+                    @{
+                        <input type="checkbox" id="@eleId" name="cronMonthSpecificSpecific" value="@(CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(idx))">
+                    }
+                    <label for="@eleId">@(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(idx))</label>
+                </div>
+            </div>
+        }
+    }
+</div>
+<div class="form-group row">
+    <div class="col-md-3">
+        <label>
+            <input type="radio" id="cronMonthRange" name="cronMonth">
+            Every month between
+        </label>
+    </div>
+    <div class="col-md-3">
+        <select id="cronMonthRangeStart" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 12; idx++)
+                {
+                    <option value="@idx">@(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(idx))</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-1">
+        <label class="col-form-label col-md-12"> and </label>
+    </div>
+    <div class="col-md-3">
+        <select id="cronMonthRangeEnd" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 12; idx++)
+                {
+                    <option value="@idx">@(CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(idx))</option>
+                }
+            }
+        </select>
+    </div>
+</div>

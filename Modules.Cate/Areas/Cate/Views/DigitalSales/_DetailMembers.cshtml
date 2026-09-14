@@ -59,7 +59,7 @@
                                         </span>
                                         @if (m.IsAM)
                                         {
-                                            <span class="text-success ml-1 flex-shrink-0" title="Có quyền cập nhật thông tin & trạng thái hồ sơ" data-toggle="tooltip">
+                                            <span class="text-success ml-1 flex-shrink-0" title="@(TSFramework.Libs.Processors.AppProcessor.Messagor.GetMessage("DigitalSalesMember_IsAM_Label") ?? "Được phép cập nhật nội dung")" data-toggle="tooltip">
                                                 <i class="fa fa-check-circle text-110"></i>
                                             </span>
                                         }

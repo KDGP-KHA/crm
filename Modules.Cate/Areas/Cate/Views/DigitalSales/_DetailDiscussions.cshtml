@@ -280,12 +280,15 @@
                               "fa-clipboard-check text-blue";
 
             string typeTitle = isDiscussion ? "Thảo luận / Trao đổi" :
-                               isStatusChange ? "Chuyển trạng thái" :
+                               isStatusChange ? "Trạng thái" :
                                isChecklistComplete ? "Hoàn thành Checklist" :
                                isProcessComplete ? "Hoàn thành Quy trình" :
                                "Cập nhật Checklist";
 
-            if (isStatusChange)
+            bool hasAttachments = (act.AttachmentList != null && act.AttachmentList.Count > 0) || 
+                                  (!string.IsNullOrEmpty(act.Attachments) && !act.Attachments.TrimStart().StartsWith("["));
+
+            if (isStatusChange && !hasAttachments)
             {
                 var statusInfo = ParseStatusInfo(act.Content);
                 <div class="ds-activity-item ds-status-item d-flex align-items-center mb-25 position-relative" id="activity-item-@act.ActivityID">
@@ -356,12 +359,22 @@
             }
             else
             {
+                var statusInfoForCard = isStatusChange ? ParseStatusInfo(act.Content) : null;
             <div class="ds-activity-item d-flex mb-3 position-relative" id="activity-item-@act.ActivityID">
                 <!-- ICON TRÁI CỦA DÒNG THỜI GIAN -->
                 <div class="ds-activity-icon-wrapper mr-25 mr-sm-3 flex-shrink-0">
-                    <div class="ds-activity-icon-circle shadow-sm @badgeBg">
-                        <i class="fa @iconClass"></i>
-                    </div>
+                    @if (isStatusChange && statusInfoForCard != null)
+                    {
+                        <div class="ds-activity-icon-circle shadow-sm" style="background-color: @statusInfoForCard.BgColor; border: 1px solid @statusInfoForCard.BorderColor; color: @statusInfoForCard.TextColor; width: 36px; height: 36px; font-size: 14px;">
+                            <i class="fa @statusInfoForCard.IconClass"></i>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ds-activity-icon-circle shadow-sm @badgeBg">
+                            <i class="fa @iconClass"></i>
+                        </div>
+                    }
                 </div>
 
                 <!-- NỘI DUNG CARD SỰ KIỆN -->
@@ -444,6 +457,35 @@
                                 }
 
                                 @Html.Raw(formattedContent)
+                            }
+                        }
+                        else if (isStatusChange && statusInfoForCard != null)
+                        {
+                            <div class="d-flex align-items-center flex-wrap mb-2" style="gap: 6px;">
+                                @if (statusInfoForCard.IsConversion)
+                                {
+                                    <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-85 px-2 py-1 radius-1 font-600">
+                                        <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                                    </span>
+                                    <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary font-italic text-85">@statusInfoForCard.ActionText</span>
+                                }
+
+                                <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none" 
+                                      style="background-color: @statusInfoForCard.BgColor; color: @statusInfoForCard.TextColor; border: 1px solid @statusInfoForCard.BorderColor;">
+                                    @statusInfoForCard.StatusName
+                                </span>
+                            </div>
+
+                            if (!string.IsNullOrEmpty(statusInfoForCard.Note))
+                            {
+                                <div class="bgc-grey-l5 p-2 radius-1 border-1 brc-grey-l3 text-dark-m2 mb-1">
+                                    <i class="far fa-comment-dots text-secondary-m1 mr-1"></i>
+                                    <span class="text-secondary font-weight-bold">Ghi chú:</span> @Html.Raw(System.Web.HttpUtility.HtmlEncode(statusInfoForCard.Note).Replace("\n", "<br />"))
+                                </div>
                             }
                         }
                         else

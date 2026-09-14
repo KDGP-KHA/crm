@@ -1,0 +1,190 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityModel
+@Html.AntiForgeryToken()
+<div id="CHKD">
+    @Html.HiddenFor(model => model.BusinessOpportunityID)
+    @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.FileAttach)
+
+    <div class="form-group row">
+            @Html.TitleFor(model => model.OpportunityName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                @Html.TextBoxFor(model => model.OpportunityName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Opportunity_Name_Label") })
+                @Html.ValidationMessageFor(model => model.OpportunityName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CustomerName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.CustomerName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Customer_CustomerName_Label"), @readonly = true })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ContactPerson_ID, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownListFor(model => model.ContactPerson_ID, new SelectList(Model.ListContactPerson, "Value", "Text"), "", new { @class = "col form-control" })
+            @Html.ValidationMessageFor(model => model.ContactPerson_ID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ExchangeDate, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.ExchangeDate, "{0:dd/MM/yyyy HH:mm}", new { id = "ExchangeDate", @class = "form-control datetimepicker", placeholder = "dd/mm/yyyy hh:mm" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.ExchangeDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ProductServiceIDs, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownListFor(model => model.lst_SP, new SelectList(Model.SPDichVus.Where(p => p.NodeType == "P").ToList(), "pID", "DisplayName"), "", new { @class = "form-control", multiple = true })
+            @Html.ValidationMessageFor(model => model.lst_SP, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                @Html.TitleFor(model => model.ClosingProbability, new { @class = "col-sm-4 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-8">
+                    @Html.TextBoxFor(model => model.ClosingProbability, new
+                    {
+                        @class = "form-control",
+                        type = "number",
+                        min = "0",
+                        max = "100",
+                        step = "1",
+                        placeholder = "0 – 100",
+                        data_format = "percent",
+                        style = "max-width:200px"
+                    })
+                    @Html.ValidationMessageFor(model => model.ClosingProbability, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                @Html.TitleFor(model => model.ExpectedValue, new { @class = "col-sm-4 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.ExpectedValue, new
+                    {
+                        @class = "form-control text-right",
+                        placeholder = "0"
+                    })
+                    @Html.ValidationMessageFor(model => model.ExpectedValue, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Description, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.FileAttach, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            <div id="fileList" class="mt-2"></div>
+        </div>
+    </div>
+</div>
+
+@Html.Partial("~/Areas/Cate/Views/RM_BusinessOpportunity/_FilePreviewScripts.cshtml")
+<script>
+    function _runFormUtils() {
+        if (typeof initFormUtils === 'function') { initFormUtils('#CHKD'); }
+        else {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#CHKD'); };
+            document.head.appendChild(s);
+        }
+    }
+    setTimeout(_runFormUtils, 0);
+
+    $(document).ready(function () {
+        reloadCKEditor();
+    });
+
+    var spDichVu = @Html.Raw(Json.Encode(Model.lst_SP));
+
+    $(function () {
+        $("#lst_SP").select2({ allowClear: true, width: "element" });
+        if (spDichVu && spDichVu.length) {
+            $("#lst_SP").val(spDichVu.join(',').split(",")).trigger('change');
+        }
+    });
+
+    $('select option').each(function () {
+        $(this).text($(this).text().replace(/&nbsp;/g, "\u00A0"));
+    });
+
+    function reloadCKEditor() {
+        var editor = CKEDITOR.instances['Description'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('Description', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '350',
+        });
+        editor.on('change', function (e) {
+            $("#Description").val(editor.getData());
+        });
+    }
+</script>
+<script>
+    var filesList = [];
+    var dataTransfer = new DataTransfer();
+
+    $(document).on("change", "#DinhKemFile", function (e) {
+        let newFiles = Array.from(e.target.files);
+
+        newFiles.forEach(file => {
+            if (!filesList.some(f => f.name === file.name)) {
+                filesList.push(file);
+                dataTransfer.items.add(file);
+            }
+        });
+
+        renderFileList();
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+    });
+
+    function renderFileList() {
+        let html = "";
+
+        filesList.forEach((file, index) => {
+            html += `
+            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                <span><i class="fa fa-file text-primary mr-1"></i>${file.name}</span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        `;
+        });
+
+        $("#fileList").html(html);
+    }
+
+    function removeFile(index) {
+        filesList.splice(index, 1);
+        dataTransfer = new DataTransfer();
+        filesList.forEach(file => dataTransfer.items.add(file));
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+        renderFileList();
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

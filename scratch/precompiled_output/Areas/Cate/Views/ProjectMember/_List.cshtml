@@ -1,0 +1,44 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectMemberSearchModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectMember_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormIcon{
+    <i class="fa fa-list"></i>
+}
+
+@section FormBody
+{
+    <div class="col-md-12 px-0 mb-2">
+        @Html.Button(true, "AddProjectMember", Url.Action("Add", "ProjectMember", new { area = "Cate", id = Model.BusinessOpportunityID }), "<i class='fas fa-plus'></i>", $"{AppProcessor.Messagor.GetMessage("Button_Add")} {AppProcessor.Messagor.GetMessage("ProjectMember_Title")}", new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right", data_width = "1024" })
+    </div>
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="DSProjectMember" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên thành viên</th>
+                        <th>Vai trò</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        var businessOpportunityID = @Model.BusinessOpportunityID;
+    </script>
+    <script src="@Url.Content("~/Areas/Cate/Views/ProjectMember/ProjectMember.js")"></script>
+}
+
+@section SubmitControl{
+
+}

@@ -1,0 +1,53 @@
+﻿@model string
+
+<div id="sidebar" class="sidebar sidebar-backdrop has-open hoverable sidebar-color sidebar-dark collapsed sidebar-hover" data-swipe="true" data-dismiss="true">
+    <div class="sidebar-inner">
+        <div class="ace-scroll flex-grow-1 mt-1px" data-ace-scroll="{}">
+            <!-- all sidebar header is inside scrollable area -->
+            <!-- .navbar-brand inside sidebar, only shown in desktop view -->
+            <div class="d-flex sidebar-section-item fadeable-left fadeable-top">
+                <div class="fadeinable">
+                    <!-- shown when sidebar is collapsed -->
+                    <div class="py-2 mx-1" id="sidebar-header-brand1">
+                        <a href="/" class="navbar-brand text-140">
+                            @*<i class="fas fa-school text-primary-l1"></i>*@
+                            <img class="w-100" src="/Contents/Base/imgs/app.ico">
+                        </a>
+                    </div>
+                </div>
+                <div class="fadeable w-100">
+                    <!-- shown when sidebar is full-width -->
+                    <div class="py-2 text-center" id="sidebar-header-brand2">
+                        <a class="navbar-brand text-140 text-white" href="#">
+                            <img class="w-50" src="/Contents/Base/imgs/app.ico">
+                             
+                            <div class="flex-grow-1">
+                                <div>
+                                    <span class="text-70 text-danger-d1 text-upcase font-bold">HỆ THỐNG</span>
+                                </div>
+                                <div class="text-90 text-blue-d1">
+                                    <span class="text-upcase font-bold">QUẢN LÝ VÀ ĐIỀU HÀNH KINH DOANH DỊCH VỤ SỐ DOANH NGHIỆP</span>
+                                </div>
+                            </div>
+                            @*<i class="fa fa-school mr-1 text-primary-l1"></i>*@ 
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- /.sidebar-section-item  -->
+            <hr class="bgc-blue-d1">
+            <!-- the user avatar and image -->
+            <!-- optional `nav` tag -->
+            <nav aria-label="Main">
+                <ul class="nav flex-column mt-2 has-active-border active-on-top">
+                    <li class="nav-item-caption">
+                        <span class="fadeable pl-3">MENU</span>
+                        <span class="fadeinable mt-n2 text-125">&hellip;</span>
+                    </li>
+                    @Html.Raw(Model)
+                </ul>
+            </nav>
+        </div>
+        
+    </div>
+</div>

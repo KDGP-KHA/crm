@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+	<StoredProcedures ProviderName="CenIT.Provider.Major">
+		<!--Authentication-->
+		<Procedure Name="API_Authentication_GetKeyPrivace" Value="API_Authentication_GetKeyPrivace" />
+		<Procedure Name="API_Authentication_CheckKeyPrivaceAndApplyFor" Value="API_Authentication_CheckKeyPrivaceAndApplyFor" />
+		<Procedure Name="API_Authentication_ValidateBusinessAccount" Value="API_Authentication_ValidateBusinessAccount" />
+		<Procedure Name="API_Authentication_CheckBusinessAccount" Value="API_Authentication_CheckBusinessAccount" />
+
+
+		<!--API Default-->
+		<Procedure Name="API_Languages_Get" Value="API_Languages_Get" />
+		<Procedure Name="API_LabelLanguages_GetByCode" Value="API_LabelLanguages_GetByCode" />
+		<Procedure Name="API_Token_Get" Value="API_Token_Get" />
+		<Procedure Name="API_Token_Save" Value="API_Token_Save" />
+		<Procedure Name="App_Device_Save" Value="App_Device_Save" />
+		<Procedure Name="API_KhachHang_GetContracts" Value="API_KhachHang_GetContracts" />
+
+		<Procedure Name="API_Sys_NoticationsUserSave" Value="API_Sys_NoticationsUserSave" />
+		<Procedure Name="API_Sys_NoticationsUserGet" Value="API_Sys_NoticationsUserGet" />
+
+		
+
+		<!--API Default-->
+
+		<!--Member-->
+		<Procedure Name="API_UserLogin" Value="API_UserLogin" />
+		<Procedure Name="API_UserRegister" Value="API_UserRegister" />
+		<Procedure Name="API_User_SaveInfoDevice" Value="API_User_SaveInfoDevice" />
+		<Procedure Name="API_Member_GetByID" Value="API_Member_GetByID" />
+		<Procedure Name="API_Member_GetByTravelerID" Value="API_Member_GetByTravelerID" />
+		<Procedure Name="API_Member_ChangePass" Value="API_Member_ChangePass" />
+		<Procedure Name="API_Member_UpdateInfo" Value="API_Member_UpdateInfo" />
+		<Procedure Name="API_AccommodationLocationLogin" Value="API_AccommodationLocationLogin" />
+		<Procedure Name="API_RoomOfAccommodationLocation_Get" Value="API_RoomOfAccommodationLocation_Get" />
+		<Procedure Name="API_Device_Save" Value="App_Device_Save" />
+		<Procedure Name="API_GetInfoRoomBooking" Value="API_GetInfoRoomBooking" />
+		<Procedure Name="API_ChannelsOfAccommodationLocation_Get" Value="API_ChannelsOfAccommodationLocation_Get" />
+		<Procedure Name="API_FoodOfAccommodationLocation_Get" Value="API_FoodOfAccommodationLocation_Get" />
+
+		<!--Member-->
+
+		<!--Data-->
+		<Procedure Name="API_ConfigOnTV_GetAll" Value="API_ConfigOnTV_GetAll" />
+		<Procedure Name="API_KhachHang_Login" Value="API_KHACHHANG_LOGIN" />
+		<Procedure Name="API_KhachHang_LoginWithOTP" Value="AIP_KHACHHANG_LOGINWithOTP" />
+		<Procedure Name="API_KhachHang_SaveDeviceToken" Value="API_KhachHang_SaveDeviceToken" />
+		<Procedure Name="API_KhachHang_ChangePassWord" Value="API_KhachHang_ChangePassword" />
+		<Procedure Name="API_KhachHang_GetNewsList" Value="API_KhachHang_GetNewsList" />
+		<Procedure Name="API_WaterOutages_ByContractId" Value="API_WaterOutages_ByContractId" />
+		<Procedure Name="API_KhachHang_GetWaterOutagesByArea" Value="API_KhachHang_GetWaterOutagesByArea" />
+		<Procedure Name="API_ServiceRequests_RelocateMeter" Value="API_ServiceRequests_RelocateMeter" />
+		<Procedure Name="API_KhachHang_CreateWaterComplaint" Value="API_KhachHang_CreateWaterComplaint" />
+		<Procedure Name="API_KhachHang_GetNotifications" Value="API_KhachHang_GetNotifications" />
+		<Procedure Name="API_KhachHang_GetUsageAlert" Value="API_KhachHang_GetUsageAlert" />
+		<Procedure Name="API_KhachHang_GetReadingSchedule" Value="API_KhachHang_GetReadingSchedule" />
+		<Procedure Name="API_KhachHang_GetPaymentHistory" Value="API_KhachHang_GetPaymentHistory" />
+		<Procedure Name="API_KhachHang_GetNotificationsCategories" Value="API_KhachHang_GetNotificationsCategories" />
+		<Procedure Name="API_ServiceRequests_NewConnection" Value="API_ServiceRequests_NewConnection" />
+		<Procedure Name="API_KhachHang_GetBillByMonth" Value="API_KhachHang_GetBillByMonth" />
+		<Procedure Name="PO_QrCode_Transactions_GetResult" Value="p_PO_QrCode_Transactions_GetResult" />
+		
+		<!--- VNPT Money-->
+		<Procedure Name="PO_QrCode_Transactions_Add" Value="p_PO_QrCode_Transactions_Add" />
+		<Procedure Name="PO_QrCode_Transactions_AddResult" Value="p_PO_QrCode_Transactions_AddResult" />
+		<Procedure Name="PO_QrCode_Transactions_Get" Value="p_PO_QrCode_Transactions_Get" />
+		<Procedure Name="PO_QrCode_Transactions_GetById" Value="p_PO_QrCode_Transactions_GetById" />
+		<Procedure Name="PO_QrCode_Transactions_GetByBillNumber" Value="p_PO_QrCode_Transactions_GetByBillNumber" />
+		<Procedure Name="PO_QrCode_Transactions_ValidOrder" Value="p_PO_QrCode_Transactions_ValidOrder_v1" />
+		<Procedure Name="PO_QrCode_CheckOrders_Add" Value="p_PO_QrCode_CheckOrders_Add" />
+		<Procedure Name="PO_QrCode_Transactions_Invalid" Value="p_PO_QrCode_Transactions_Invalid" />
+		<Procedure Name="PO_QrCode_ValidInfoInvoice" Value="p_PO_QrCode_ValidInfoInvoice_v1" />
+		<Procedure Name="PO_Qrcode_GeneratedInvoice_Add" Value="p_PO_Qrcode_GeneratedInvoice_Add" />
+		<Procedure Name="PO_Qrcode_GetQRCodeByBillNumber" Value="p_PO_Qrcode_GetQRCodeByBillNumber" />
+		<Procedure Name="PO_QrCode_CheckQRCodeIsUsed" Value="p_PO_QrCode_CheckQRCodeIsUsed" />
+		<Procedure Name="PO_QrCode_PaidInvoices_Save" Value="p_PO_QrCode_PaidInvoices_Save_v1" />
+		<Procedure Name="PO_QrCode_LogCallAPI_Save" Value="PO_QrCode_LogCallAPI_Save" />
+
+
+	</StoredProcedures> 
+
+</Provider>

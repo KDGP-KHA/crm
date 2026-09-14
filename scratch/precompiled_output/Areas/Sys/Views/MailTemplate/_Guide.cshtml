@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "Hướng dẫn sử dụng mẫu email";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormIcon{
+    <i class="fa fa-book"></i>
+}
+
+@section FormBody{
+    <div class="row">
+        <div class="col-12">
+            <div class="mb-4">
+                <div class="font-size-18 font-weight-bold mb-2">
+                    Mục đích
+                </div>
+                <p class="mb-0">
+                    Dùng để quản lý mẫu email theo mã mẫu, khai báo tham số, chỉnh sửa trực tiếp nội dung file .cshtml và dùng lại khi gửi email từ nghiệp vụ.
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <div class="font-size-18 font-weight-bold mb-2">
+                    1. Quy trình sử dụng
+                </div>
+                <ol class="mb-0 pl-3">
+                    <li>Tạo mới mẫu email bằng nút <strong>Thêm mẫu email</strong>.</li>
+                    <li>Khai báo <strong>Mã mẫu</strong>, <strong>Tên mẫu</strong>, <strong>Tiêu đề email</strong> và trạng thái hoạt động.</li>
+                    <li>Khai báo danh sách <strong>tham số</strong> mà template sẽ sử dụng.</li>
+                    <li>Import file .cshtml hoặc mở khối <strong>Nội dung mẫu email</strong> để chỉnh sửa trực tiếp.</li>
+                    <li>Lưu mẫu email, sau đó dùng <strong>TemplateCode</strong> tương ứng trong luồng gửi mail nghiệp vụ.</li>
+                </ol>
+            </div>
+
+            <div class="mb-4">
+                <div class="font-size-18 font-weight-bold mb-2">
+                    2. Cách khai báo tham số
+                </div>
+                <p>Mỗi dòng tham số gồm các trường:</p>
+                <ul class="mb-3 pl-3">
+                    <li><strong>ParamCode:</strong> Mã tham số dùng trong file template, ví dụ FullName, PlanName.</li>
+                    <li><strong>ParamName:</strong> Tên hiển thị để người quản trị dễ nhận biết.</li>
+                    <li><strong>Bắt buộc:</strong> Nếu bật mà luồng gửi mail không truyền giá trị, hệ thống sẽ chặn gửi.</li>
+                    <li><strong>Giá trị mặc định:</strong> Dùng khi tham số không bắt buộc nhưng luồng gửi mail không truyền dữ liệu.</li>
+                </ul>
+                <p class="mb-0">
+                    <strong>Lưu ý:</strong> ParamCode phải trùng với key được gọi trong file .cshtml.
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <div class="font-size-18 font-weight-bold mb-2">
+                    3. Cách dùng tham số trong file .cshtml
+                </div>
+                <p>Trong file .cshtml, truy cập dữ liệu theo cú pháp:</p>
+<pre class="mb-3">@("@Model.GetString(\"FullName\")")
+@("@Model.GetString(\"PlanName\")")
+@("@Model.GetString(\"AddressMeeting\")")</pre>
+                <p class="mb-0">
+                    Các key truyền vào phải thống nhất với danh sách tham số đã khai báo trên màn hình quản trị.
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <div class="font-size-18 font-weight-bold mb-2">
+                    4. Rule xử lý khi gửi mail
+                </div>
+                <ul class="mb-0 pl-3">
+                    <li>Hệ thống lấy template theo <strong>TemplateCode</strong> và đọc danh sách tham số đã khai báo.</li>
+                    <li>Dữ liệu gửi mail được truyền vào dưới dạng JSON.</li>
+                    <li>Nếu thiếu tham số bắt buộc và không có giá trị mặc định, mail sẽ không được gửi.</li>
+                    <li>Nếu thiếu tham số không bắt buộc, hệ thống dùng giá trị mặc định, nếu không có thì để chuỗi rỗng.</li>
+                </ul>
+            </div>
+
+            <div>
+                <div class="font-size-18 font-weight-bold mb-2">
+                    5. Khuyến nghị
+                </div>
+                <ul class="mb-0 pl-3">
+                    <li>Đặt <strong>TemplateCode</strong> ổn định, không đổi tùy tiện sau khi nghiệp vụ đã dùng.</li>
+                    <li>Chỉ bật <strong>Hoạt động</strong> khi template đã khai báo đủ tham số và kiểm tra nội dung xong.</li>
+                    <li>Ưu tiên tải file hiện tại về, chỉnh sửa lại rồi import lên để tránh sai cú pháp.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+@section SubmitControl{
+}

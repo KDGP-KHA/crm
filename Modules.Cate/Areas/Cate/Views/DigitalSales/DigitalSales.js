@@ -1,4 +1,4 @@
-﻿var _tableDigitalSales;
+var _tableDigitalSales;
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -541,6 +541,13 @@ function openChangeStatusModal(id) {
 
             if (hasError) {
                 return false;
+            }
+
+            // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+            if (typeof serializeProgressItemsToJson === "function") {
+                if (!serializeProgressItemsToJson()) {
+                    return false;
+                }
             }
 
             var $btnSubmit = $form.find("button[type='submit']");

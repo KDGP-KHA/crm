@@ -1,0 +1,27 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("BillingCycles_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Edit", "BillingCycles", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "BillingCycles_OnProcessSuccess(data, 'EditBillingCycles')"
+    }, new { @class = "form-horizontal", id = "EditBillingCycles" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_BillingCycles")
+        </div>
+    }
+}

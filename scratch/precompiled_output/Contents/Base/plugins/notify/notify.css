@@ -1,0 +1,8 @@
+﻿[data-notify="progressbar"] {
+    bottom: 0px;
+    height: 5px;
+    left: 0px;
+    margin-bottom: 0px;
+    position: absolute;
+    width: 100%;
+}

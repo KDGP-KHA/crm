@@ -1,0 +1,169 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProductServiceGroupFilePathModel
+
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.ProductServiceID)
+@Html.HiddenFor(model => model.GroupFilePathID)
+<style>
+    .not-allowed {
+        cursor: not-allowed !important;
+    }
+</style>
+<div class="row form-group">
+    <div class="col-md-12">
+        @Html.TitleFor(model => model.Title, new { @class = "font-bold" })
+        @Html.TextAreaFor(model => model.Title, new { })
+        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-md-10">
+        @Html.TitleFor(model => model.ListFiles, new { @class = "font-bold" })
+        <div class="input-group">
+            <div class="custom-file">
+                <label class="custom-file-label" for="commentFiles">
+                    @AppProcessor.Messagor.GetMessage("FileUpload")
+                </label>
+                <input type="file"
+                       class="custom-file-input"
+                       id="Files"
+                       name="Files"
+                       multiple
+                       accept=".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls" />
+            </div>
+        </div>
+        <div id="fileList" class="mt-2"></div>
+        <div id="lstFileUploaded" class="mt-2"></div>
+        @*@Html.TextBoxFor(model => model.ListFiles, new { @type = "file", @accept = ".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls", multiple = "true", @class = "form-control" })*@
+        @Html.ValidationMessageFor(model => model.ListFiles, "", new { @class = "text-danger" })
+        <div id="contractFileList" class="mt-2"></div>
+        <div id="lstFileUploaded"></div>
+        @*@if (Model.FilePaths != null && Model.FilePaths.Any())
+            {
+                <div id="contractOldFileList" class="mt-2">
+                    @foreach (var file in Model.FilePaths)
+                    {
+                        var fileName = file.URLFile.Split('/').Last();
+                        <div class="d-flex align-items-center border rounded px-2 py-1 mb-1">
+                            <a href="@file.URLFile" target="_blank" style="color:#0000ffc4; font-size:13px;">
+                                <i class="fas fa-paperclip mr-1"></i>@fileName
+                            </a>
+                        </div>
+                    }
+                </div>
+            }*@
+    </div>
+    <div class="col-md-2">
+        @Html.TitleFor(model => model.Position, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.Position, new { @class = "form-control", type = "number", placeholder = AppProcessor.Messagor.GetMessage("Menu_Label_Position") })
+        @Html.ValidationMessageFor(model => model.Position, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="row form-group">
+    <div class="col-md-12">
+        @Html.TitleFor(model => model.Note, new { @class = "font-bold" })
+        @Html.TextAreaFor(model => model.Note, new { })
+        @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+    </div>
+</div>
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/bootbox/bootbox.all.js"></script>
+<script src="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.js"></script>
+<script>
+    var contractFilesList = [];
+    var contractDataTransfer = new DataTransfer();
+
+    reloadCKEditorForProductServiceGroupFilePath(['Note', 'Title']);
+    ReloadListFileUploaded();
+
+    $(document).on("change", "#Files", function (e) {
+        var newFiles = Array.from(e.target.files);
+        newFiles.forEach(function (file) {
+            if (!contractFilesList.some(function (f) { return f.name === file.name && f.size === file.size; })) {
+                contractFilesList.push(file);
+            }
+        });
+        contractSyncInputFiles();
+        contractRenderFileList();
+
+    });
+
+    function contractSyncInputFiles() {
+        contractDataTransfer = new DataTransfer();
+        contractFilesList.forEach(function (file) { contractDataTransfer.items.add(file); });
+        var input = document.getElementById("DinhKemFile");
+        if (input) input.files = contractDataTransfer.files;
+    }
+
+    function contractRenderFileList() {
+        var html = "";
+        contractFilesList.forEach(function (file, index) {
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                + '<span><i class="fa fa-file text-grey-l4 mr-1"></i>' + file.name + '</span>'
+                + '<button type="button" class="btn-sm p-0 btn px-2 border-0 btn-outline-danger" onclick="contractRemoveFile(' + index + ')">'
+                + '<i class="fa fa-times"></i></button></div>';
+        });
+        $("#contractFileList").html(html);
+    }
+
+    function contractRemoveFile(index) {
+        contractFilesList.splice(index, 1);
+        contractSyncInputFiles();
+        contractRenderFileList();
+    }
+
+    function removeNonNumericChars(inputString) {
+        return inputString.replace(/\D/g, ''); // \D khớp với tất cả các ký tự không phải số
+    }
+
+    function ReloadListFileUploaded() {
+        $.ajax({
+            url: "/Cate/ProductServiceGroupFilePath/GetFilePathsByGroupFilePathID/@Model.GroupFilePathID", // The URL to send the request to
+            type: "GET",
+            dataType: "html",
+            // The HTTP method (GET, POST, etc.)
+            success: function (response) {       // Runs if the request is successful
+                $('#lstFileUploaded').html(response);
+            },
+            error: function (xhr, status, error) { // Runs if the request fails
+                $('#lstFileUploaded').html('');
+            }
+        });
+    }
+    function fnDeleteFile(fileId, filename) {
+        bootbox.confirm({
+            message: `Bạn có muốn xóa tập tin <span class="text-danger text-600 text-95">${filename}</span>`,
+            onEscape: true,
+            callback: function (result) {
+                if (result) {
+                    console.log('t')
+                     $.ajax({
+                         url: "/Cate/ProductServiceGroupFilePath/DeleteFilePaths/" + fileId, // The URL to send the request to
+                         type: "GET",
+                         success: function (response) {       // Runs if the request is successful
+                             eval(response.message);
+                             ReloadListFileUploaded()
+
+                             _tableProductServiceGroupFilePath.ajax.reload(null, false);
+
+                             response.status = undefined;
+                         }
+                     });
+                } else { console.log('f') }
+            },
+            buttons: {
+                confirm: {
+                    label: '<i class="fas fa-check"></i> Có',
+                    className: 'btn px-4 btn-outline-danger'
+                }, cancel: {
+                    label: '<i class="fas fa-ban"></i> Không',
+                    className: 'btn px-4 btn-outline-lightgrey'
+                },
+            },
+        })
+
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

@@ -1,0 +1,129 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysNotificationsModel
+
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(model => model.Sys_Notification_ID)
+@Html.HiddenFor(model => model.Notification_Image)
+<style>
+    img#ImageFileBase_Img {
+        cursor: pointer;
+        width: 100%;
+        height: auto;
+        min-height: unset !important;
+    }
+</style>
+<div id="ThongBao">
+    <div class="form-group row mx-2 ">
+        <div class="col-sm-3 d-flex justify-content-center">
+            <div class="ace-file-input ace-file-multiple">
+                <div class="ace-file-container d-flex flex-column border-1 border-dashed brc-primary-m4 brc-h-warning-m1">
+                    <div class="ace-file-placeholder ">
+                        @Html.ImageFor(model => model.ImageFileBase, Model.Notification_Image, AppProcessor.Messagor.GetMessage("HinhAnh_Title"), ".jpeg,.png,.gif,.jpg", new { @class = "col-sm-10 col-md-8 mx-auto my-1" })
+                        @Html.HiddenFor(model => model.Notification_Image)
+                    </div>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.Notification_Image, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-sm-9 ccard px-2 py-3">
+            <div class="form-group row">
+                @Html.TitleFor(model => model.Notification_Title, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-9">
+                    @Html.TextBoxFor(model => model.Notification_Title, new { @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("Notification_Title") })
+                    @Html.ValidationMessageFor(model => model.Notification_Title, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="form-group row">
+                @Html.TitleFor(model => model.Notification_Content, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-9" id="noidung">
+                    @Html.TextAreaFor(model => model.Notification_Content, new { @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("Notification_Content") })
+                    @Html.ValidationMessageFor(model => model.Notification_Content, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            @*Thời gian bắt đầu - kết thúc*@
+            <div class="form-group row">
+                @Html.TitleFor(model => model.FromDate, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(model => model.FromDate, new { @class = "datetimepicker form-control col-md-7 col-sm-7", placeholder = AppProcessor.Messagor.GetMessage("Start_Date") })
+                        @Html.ValidationMessageFor(model => model.FromDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                @Html.TitleFor(model => model.ToDate, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        @Html.TextBoxFor(model => model.ToDate, new { @class = "datetimepicker form-control col-md-7 col-sm-7", placeholder = AppProcessor.Messagor.GetMessage("End_Date") })
+                        @Html.ValidationMessageFor(model => model.ToDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                @Html.TitleFor(model => model.IsBanner, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-1">
+                    <label class="pt-2">
+                        @Html.CheckBoxFor(model => model.IsBanner, new { id = "BannerCheckboxID" })
+                    </label>
+                </div>
+
+                @Html.TitleFor(model => model.IsAlert, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-1">
+                    <label class="pt-2">
+                        @Html.CheckBoxFor(model => model.IsAlert)
+                    </label>
+                </div>
+            </div>
+            <div id="textBoxID">
+                <div class="form-group row">
+                    @Html.TitleFor(model => model.Url_Banner, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                    <div class="col-md-9">
+                        @Html.TextBoxFor(model => model.Url_Banner, new { @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("Url_Banner") })
+                        @Html.ValidationMessageFor(model => model.Url_Banner, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        CheckBanner();
+        reloadCKEditor();
+    });
+    var isBannerCheckbox = document.getElementById('BannerCheckboxID');
+    isBannerCheckbox.onchange = function() {
+        CheckBanner();
+    };
+function CheckBanner(){
+    var isBannerCheckbox = document.getElementById('BannerCheckboxID');
+    if (isBannerCheckbox.checked) {
+       $('#textBoxID').attr("style", "display:block") // Hiển thị textbox
+    } else {
+       $('#textBoxID').attr("style", "display:none") // Ẩn textbox
+    }
+};
+    var img = '@Model.Notification_Image';
+    if (img == '') {
+        $('img[name=ImageFileBase_Img]').attr('src', '/Contents/imgs/background/pic-default.png')
+    }
+    
+</script>
+@*<script>
+    $(document).ready(function () {
+        // Mở cửa sổ chọn File ảnh bài viết
+        reloadCKEditor();
+    })
+</script>*@
+@Html.RenderScripts(ScriptPosition.BodyInside)

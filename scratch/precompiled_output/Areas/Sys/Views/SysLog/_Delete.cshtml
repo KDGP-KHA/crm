@@ -1,0 +1,24 @@
+﻿@model Modules.Sys.Areas.Sys.Data.FileInfoModel
+
+@{
+    ViewBag.Title = "Xoá file log";
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("DeleteFile", "SysLog", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "SysLog_OnProcessSuccess(data, 'DeleteFile')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Name)
+        @Html.HiddenFor(model => model.FullName)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

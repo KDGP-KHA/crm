@@ -1,0 +1,514 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysMailUserModel
+
+<style type="text/css" rel="stylesheet" media="all">
+    /* Base ------------------------------ */
+
+    /*@@import url("https://fonts.googleapis.com/css?family=Nunito+Sans:400,700&display=swap");*/
+
+    body {
+        -webkit-text-size-adjust: none;
+        height: 100%;
+        margin: 0;
+        width: 100% !important;
+    }
+
+    a {
+        color: #3869D4;
+    }
+
+        a img {
+            border: none;
+        }
+
+    td {
+        word-break: break-word;
+    }
+
+    .preheader {
+        display: none !important;
+        font-size: 1px;
+        line-height: 1px;
+        max-height: 0;
+        max-width: 0;
+        mso-hide: all;
+        opacity: 0;
+        overflow: hidden;
+        visibility: hidden;
+    }
+
+    /* Type ------------------------------ */
+
+    body,
+    td,
+    th {
+        font-family: "Nunito Sans", Helvetica, Arial, sans-serif;
+    }
+
+    h1 {
+        color: #333333;
+        font-size: 22px;
+        font-weight: bold;
+        margin-top: 0;
+        text-align: left;
+    }
+
+    h2 {
+        color: #333333;
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 0;
+        text-align: left;
+    }
+
+    h3 {
+        color: #333333;
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 0;
+        text-align: left;
+    }
+
+    td,
+    th {
+        font-size: 16px;
+    }
+
+    p,
+    ul,
+    ol,
+    blockquote {
+        font-size: 16px;
+        line-height: 1.625;
+        margin: .4em 0 1.1875em;
+    }
+
+        p.sub {
+            font-size: 13px;
+        }
+
+    /* Utilities ------------------------------ */
+
+    .align-right {
+        text-align: right;
+    }
+
+    .align-left {
+        text-align: left;
+    }
+
+    .align-center {
+        text-align: center;
+    }
+
+    /* Buttons ------------------------------ */
+
+    .button {
+        -webkit-text-size-adjust: none;
+        background-color: #3869D4;
+        border-bottom: 10px solid #3869D4;
+        border-left: 18px solid #3869D4;
+        border-radius: 3px;
+        border-right: 18px solid #3869D4;
+        border-top: 10px solid #3869D4;
+        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
+        box-sizing: border-box;
+        color: #FFF;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .button--green {
+        background-color: #22BC66;
+        border-bottom: 10px solid #22BC66;
+        border-left: 18px solid #22BC66;
+        border-right: 18px solid #22BC66;
+        border-top: 10px solid #22BC66;
+    }
+
+    .button--red {
+        background-color: #FF6136;
+        border-bottom: 10px solid #FF6136;
+        border-left: 18px solid #FF6136;
+        border-right: 18px solid #FF6136;
+        border-top: 10px solid #FF6136;
+    }
+
+    @@media only screen and (max-width: 500px) {
+        .button {
+            text-align: center !important;
+            width: 100% !important;
+        }
+    }
+
+    /* Attribute list ------------------------------ */
+
+    .attributes {
+        margin: 0 0 21px;
+    }
+
+    .attributes_content {
+        background-color: #F4F4F7;
+        padding: 16px;
+    }
+
+    .attributes_item {
+        padding: 0;
+    }
+
+    /* Related Items ------------------------------ */
+
+    .related {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        margin: 0;
+        padding: 25px 0 0 0;
+        width: 100%;
+    }
+
+    .related_item {
+        color: #CBCCCF;
+        font-size: 15px;
+        line-height: 18px;
+        padding: 10px 0;
+    }
+
+    .related_item-title {
+        display: block;
+        margin: .5em 0 0;
+    }
+
+    .related_item-thumb {
+        display: block;
+        padding-bottom: 10px;
+    }
+
+    .related_heading {
+        border-top: 1px solid #CBCCCF;
+        padding: 25px 0 10px;
+        text-align: center;
+    }
+
+    /* Discount Code ------------------------------ */
+
+    .discount {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        background-color: #F4F4F7;
+        border: 2px dashed #CBCCCF;
+        margin: 0;
+        padding: 24px;
+        width: 100%;
+    }
+
+    .discount_heading {
+        text-align: center;
+    }
+
+    .discount_body {
+        font-size: 15px;
+        text-align: center;
+    }
+
+    /* Social Icons ------------------------------ */
+
+    .social {
+        width: auto;
+    }
+
+        .social td {
+            padding: 0;
+            width: auto;
+        }
+
+    .social_icon {
+        height: 20px;
+        margin: 0 8px 10px 8px;
+        padding: 0;
+    }
+
+    /* Data table ------------------------------ */
+
+    .purchase {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        margin: 0;
+        padding: 35px 0;
+        width: 100%;
+    }
+
+    .purchase_content {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        margin: 0;
+        padding: 25px 0 0 0;
+        width: 100%;
+    }
+
+    .purchase_item {
+        color: #51545E;
+        font-size: 15px;
+        line-height: 18px;
+        padding: 10px 0;
+    }
+
+    .purchase_heading {
+        border-bottom: 1px solid #EAEAEC;
+        padding-bottom: 8px;
+    }
+
+        .purchase_heading p {
+            color: #85878E;
+            font-size: 12px;
+            margin: 0;
+        }
+
+    .purchase_footer {
+        border-top: 1px solid #EAEAEC;
+        padding-top: 15px;
+    }
+
+    .purchase_total {
+        color: #333333;
+        font-weight: bold;
+        margin: 0;
+        text-align: right;
+    }
+
+    .purchase_total--label {
+        padding: 0 15px 0 0;
+    }
+
+    body {
+        background-color: #F4F4F7;
+        color: #51545E;
+    }
+
+    p {
+        color: #51545E;
+    }
+
+        p.sub {
+            color: #6B6E76;
+        }
+
+    .email-wrapper {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        background-color: #F4F4F7;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .email-content {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    /* Masthead ----------------------- */
+
+    .email-masthead {
+        padding: 25px 0;
+        text-align: center;
+    }
+
+    .email-masthead_logo {
+        width: 94px;
+    }
+
+    .email-masthead_name {
+        color: #A8AAAF;
+        font-size: 16px;
+        font-weight: bold;
+        text-decoration: none;
+        text-shadow: 0 1px 0 white;
+    }
+
+    /* Body ------------------------------ */
+
+    .email-body {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        background-color: #FFFFFF;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .email-body_inner {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 570px;
+        background-color: #FFFFFF;
+        margin: 0 auto;
+        padding: 0;
+        width: 570px;
+    }
+
+    .email-footer {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 570px;
+        margin: 0 auto;
+        padding: 0;
+        text-align: center;
+        width: 570px;
+    }
+
+        .email-footer p {
+            color: #6B6E76;
+        }
+
+    .body-action {
+        -premailer-cellpadding: 0;
+        -premailer-cellspacing: 0;
+        -premailer-width: 100%;
+        margin: 30px auto;
+        padding: 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    .body-sub {
+        border-top: 1px solid #EAEAEC;
+        margin-top: 25px;
+        padding-top: 25px;
+    }
+
+    .content-cell {
+        padding: 35px;
+    }
+
+    /*Media Queries ------------------------------ */
+
+    @@media only screen and (max-width: 600px) {
+        .email-body_inner,
+        .email-footer {
+            width: 100% !important;
+        }
+    }
+
+    @@media (prefers-color-scheme: dark) {
+        body,
+        .email-body,
+        .email-body_inner,
+        .email-content,
+        .email-wrapper,
+        .email-masthead,
+        .email-footer {
+            background-color: #333333 !important;
+            color: #FFF !important;
+        }
+
+        p,
+        ul,
+        ol,
+        blockquote,
+        h1,
+        h2,
+        h3,
+        span,
+        .purchase_item {
+            color: #FFF !important;
+        }
+
+        .attributes_content,
+        .discount {
+            background-color: #222 !important;
+        }
+
+        .email-masthead_name {
+            text-shadow: none !important;
+        }
+    }
+
+    :root {
+        color-scheme: light dark;
+        supported-color-schemes: light dark;
+    }
+
+    .text-red {
+        color: #dd4b39 !important;
+    }
+
+    .text-blue {
+        color: #0073b7 !important;
+    }
+</style>
+<!--[if mso]>
+    <style type="text/css">
+        .f-fallback { font-family: Arial, sans-serif; }
+    </style>
+<![endif]-->
+
+<table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+        <td align="center">
+            <table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                    <td class="email-masthead">
+                        <a href="@(Model.HostUrl)" class="f-fallback email-masthead_name">
+                            <img src="cid:LogoApp" />
+                        </a>
+                    </td>
+                </tr>
+                <!-- Email Body -->
+                <tr>
+                    <td class="email-body" width="100%" cellpadding="0" cellspacing="0">
+                        <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+                            <!-- Body content -->
+                            <tr>
+                                <td class="content-cell">
+                                    <div class="f-fallback">
+                                        <span>Xin chào <strong>@Model.FullName</strong>,</span>
+                                        <p>Chúc mừng! Tài khoản người dùng của bạn tại @AppProcessor.Messagor.GetMessage("App_Title").ToUpper() đã được tạo thành công. Chúng tôi rất hân hạnh được chào đón @Model.FullName đăng ký tài khoản qua website của chúng tôi.</p>
+                                        <!-- Action -->
+                                        <br />
+                                        <div>Thông tin tài khoản người dùng của bạn:</div>
+                                        <ul>
+                                            <li>Tên tài khoản: <strong>@Model.UserName</strong></li>
+                                            <li>Mật khẩu: <strong>@Model.Password</strong></li>
+                                        </ul>
+
+                                        <br />
+                                        <div>
+                                            Chúng tôi khuyến nghị bạn đổi mật khẩu và thiết lập mật khẩu mới cho tài khoản của bạn.
+                                        </div>
+                                        <br />
+                                        <div>
+                                            Nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ thêm, vui lòng liên hệ với đội ngũ hỗ trợ người dùng của chúng tôi qua số điện thoại <a href="tel:(@AppProcessor.Messagor.GetMessage("AppFooter_DienThoai"))">@AppProcessor.Messagor.GetMessage("AppFooter_DienThoai")</a> và email <a href="mailto:(@AppProcessor.Messagor.GetMessage("AppFooter_Email"))">@AppProcessor.Messagor.GetMessage("AppFooter_Email")</a>.
+                                        </div>
+                                        <br />
+                                        <div>
+                                            Chúng tôi rất mong được hợp tác và hỗ trợ <strong>@Model.FullName</strong> trong quá trình phát triển của mình.
+                                        </div>
+                                        <br />
+                                        <div>
+                                            Cảm ơn bạn đã đăng ký và chào mừng bạn!
+                                        </div>
+                                        <br /> 
+                                        <br />
+
+                                        <div>
+                                            @AppProcessor.Messagor.GetMessage("App_Title").
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+            </table>
+        </td>
+    </tr>
+</table>

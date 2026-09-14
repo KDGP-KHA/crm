@@ -1,0 +1,19 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("Task_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType { primary }
+@section FormIcon { <i class="fa fa-plus"></i> }
+@section FormBody {
+    @using (Ajax.BeginForm("Add", "TaskManagement", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "TaskManagement_OnProcessSuccess(data)"
+    }, new { @class = "form-horizontal", id = "AddTaskManagement", enctype = "multipart/form-data" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_TaskDetailForm")
+        </div>
+    }
+}

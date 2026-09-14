@@ -1,0 +1,11 @@
+﻿@model Core.Cate.Models.RM_DashboardModel
+@using TSFramework.Libs.Processors
+
+<div class="dashboard-filter" id="overviewFilter">
+    <label><i class="fa fa-calendar-alt mr-1 text-blue"></i> @AppProcessor.Messagor.GetMessage("Dashboard_FromDate")</label>
+    @Html.TextBoxFor(model => model.FromDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker pr-475", placeholder = "dd/mm/yyyy", })
+    <i class="far fa-calendar-alt text-primary text-125 ml-n45"></i>
+    <label>@AppProcessor.Messagor.GetMessage("Dashboard_ToDate")</label>
+    @Html.TextBoxFor(model => model.ToDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker pr-475 ml-2", placeholder = "dd/mm/yyyy", })
+    <i class="far fa-calendar-alt text-primary text-125 ml-n45"></i>
+</div>

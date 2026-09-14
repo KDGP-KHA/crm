@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12px" height="16px" viewBox="0 0 12 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>vector</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="vector" transform="translate(1, 1)" stroke="#FFFFFF" stroke-width="1.5">
+            <g id="Group_2634">
+                <path d="M9.167,4 L0.833,4 C0.37294682,4 0,4.37294682 0,4.833 L0,11.5 C0,12.880712 1.1192881,14 2.5,14 L7.5,14 C8.1630415,14 8.798926,13.7366077 9.267767,13.267767 C9.7366077,12.798926 10,12.1630415 10,11.5 L10,4.833 C10,4.37294682 9.627053,4 9.167,4 Z" id="Vector-7"></path>
+                <path d="M8,2 L7.2759998,0.553 C7.10673644,0.214270592 6.7606658,0.000202218172 6.3819998,0 L3.61800002,0 C3.23933426,0.000202218172 2.89326356,0.214270592 2.72400002,0.553 L2,2 L8,2 Z" id="Vector-8"></path>
+                <path d="M3.333,7.333 L3.333,10.666 M6.667,7.333 L6.667,10.666 M8,2 L10,2 M2,2 L0,2" id="Vector-9"></path>
+            </g>
+        </g>
+    </g>
+</svg>

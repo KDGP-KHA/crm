@@ -1,0 +1,159 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_ProductProjectModel>
+
+@{
+    var projectId = ViewData["ProjectID"];
+}
+
+@Html.Button(true, "AddProductProject", Url.Action("Add", "ProductProject", new { area = "Cate", id = projectId }), "<i class='fa fa-plus'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right mb-3" })
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-sm h-100 border-0">
+
+                    <!-- HEADER -->
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 font-weight-bold text-primary">
+                            @item.NameProduct
+                        </h6>
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="card-body">
+
+                        <!-- Thời gian -->
+                        <div class="mb-3">
+                            <div class="text-muted small">Thời gian</div>
+                            <div>
+                                <i class="fa fa-calendar text-success"></i>
+                                @(item.StartDate?.ToString("dd/MM/yyyy") ?? "--")
+                                -
+                                @(item.EndDate?.ToString("dd/MM/yyyy") ?? "--")
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- Doanh thu -->
+                        <div class="mb-3">
+                            <div class="text-muted small mb-1">Doanh thu</div>
+
+                            <div>
+                                <strong>Dự kiến:</strong>
+                                <span class="text-primary">
+                                    @item.ExpectedRevenue.ToString("N0") triệu VNĐ
+                                </span>
+                            </div>
+
+                            <div>
+                                <strong>Đã nhận:</strong>
+                                <span class="text-success">
+                                    @item.TotalRevenue.ToString("N0") triệu VNĐ
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- Chi phí -->
+                        <div>
+                            <div class="text-muted small mb-1">Chi phí</div>
+
+                            <div>
+                                <strong>Tổng chi phí:</strong>
+                                <span class="text-danger">
+                                    @item.TotalCost.ToString("N0") triệu VNĐ
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <!-- Thành viên -->
+                        <div class="text-muted small">
+                            <div>
+                                <i class="fa fa-users"></i>
+                                Số lượng thành viên:
+                                <strong>@item.TotalMember</strong>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(item.Members))
+                            {
+                                <div class="mt-1">
+                                    @foreach (var member in item.Members.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        var arr = member.Split('|');
+                                        var fullName = arr.Length > 0 ? arr[0] : "";
+                                        var role = arr.Length > 1 ? arr[1] : "";
+
+                                        <div>
+                                            @if (role.ToUpper().Contains("AM"))
+                                            {
+                                                <span class="badge badge-primary">@role</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary">@role</span>
+                                            }
+                                            <b>@fullName</b>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+
+                    <!-- FOOTER -->
+                    <div class="card-footer bg-white text-right">
+
+                        <a href="/Cate/ProductProjectOverview/Index/@item.ProductProjectID"
+                           class="btn btn-sm btn-info">
+                            <i class="fa fa-eye"></i> Chi tiết
+                        </a>
+
+                        @Html.Button(
+                            true,
+                            "EditProductProject",
+                            Url.Action("Edit", "ProductProject", new { area = "Cate", id = item.ProductProjectID }),
+                            "<i class='fa fa-edit'></i>",
+                            "Sửa",
+                            new { @class = "btn btn-sm btn-primary mx-1" }
+                        )
+
+                        @Html.Button(
+                            true,
+                            "DeleteProductProject",
+                            Url.Action("Delete", "ProductProject", new { area = "Cate", id = item.ProductProjectID }),
+                            "<i class='fa fa-trash'></i>",
+                            "Xóa",
+                            new { @class = "btn btn-sm btn-danger" }
+                        )
+
+                        @Html.Button(
+                            true,
+                            "RevenueAllocation",
+                            Url.Action("Allocate", "RevenueAllocation", new { area = "Cate", id = item.ProductProjectID }),
+                            "<i class='fa fa-pie-chart'></i>",
+                            "Phân bổ",
+                            new { @class = "btn btn-sm btn-warning ml-1" })
+
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                Chưa có dịch vụ nào trong dự án.
+            </div>
+        </div>
+    }
+</div>

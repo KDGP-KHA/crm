@@ -1,0 +1,39 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_SalesTeamMembersModel
+
+@Html.AntiForgeryToken()
+<div id="Role">
+    @Html.HiddenFor(model => model.MemberID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.RoleID, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-10">
+            @Html.HiddenFor(model => model.RoleID)
+            @Html.HiddenFor(model => model.BusinessOpportunityID)
+            @Html.HiddenFor(model => model.EmployeeID)
+            @Html.DropDownList("smRole", new SelectList(Model.Roles, "RoleID", "RoleName"), "", new { @class = "form-control col-md-11", multiple = true, data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select") })
+            @Html.ValidationMessageFor(model => model.RoleID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        DefineSelectMultiple("#Role #RoleID", "#Role #smRole");
+    })
+
+    function DefineSelectMultiple(pathIdHidden, pathIdSelect) {
+        eval(`$("${pathIdSelect}").select2({
+                                allowClear: false,
+                                width: "element",
+                            });
+                            var valHidden = $("${pathIdHidden}").val();
+                            if (valHidden != '') {
+                                $("${pathIdSelect}").val(valHidden.split(";"));
+                            }
+                            $("${pathIdSelect}").trigger('change');
+
+                            $("${pathIdSelect}").on('change', function (e) {
+                                var selectedValues = $("${pathIdSelect}").val();
+                                $("${pathIdHidden}").val(selectedValues.join(';'));
+                            });`);
+    }</script>

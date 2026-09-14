@@ -1,0 +1,96 @@
+﻿
+/*navbar Search*/
+
+#navbarSearch span#select2-search-menu-container {
+    border: none;
+    background-color: #fff;
+}
+
+#navbarSearch #select2-search-menu-container {
+    border-radius: 25px;
+}
+
+#navbarSearch .select2-selection.select2-selection--single {
+    border-radius: 25px;
+}
+
+#navbarSearch .form-control {
+    background-color: #fff;
+    border-radius: 0.125rem;
+    color: #5caae2;
+    font-family: inherit;
+    transition-duration: 120ms;
+}
+
+#navbarSearch .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #5caae2;
+}
+
+#navbarSearch .select2-container--default .select2-selection--single {
+    background-color: #fff;
+}
+
+#navbarSearch .select2-container--default .select2-selection--single {
+    border: none;
+}
+
+
+#navbarSearch .select2-container--default .select2-selection__placeholder:before {
+    content: "\f002"; /* Unicode của biểu tượng cần hiển thị, ở đây là biểu tượng tìm kiếm */
+    font-family: "Font Awesome 5 Free"; /* Font chứa biểu tượng */
+    font-weight: 900; /* Trọng số của font chứa biểu tượng */
+    margin-right: 5px; /* Khoảng cách giữa biểu tượng và văn bản */
+}
+
+#navbarSearch .select2-container .select2-selection .select2-selection__rendered {
+    color: #5caae2;
+}
+
+
+#navbarSearch .select2-container .select2-selection--single .select2-selection__clear {
+    display: none
+}
+
+
+#navbarSearch .select2-dropdown.select2-dropdown--below {
+    border-radius: 15px;
+}
+
+#navbarSearch .select2-search__field {
+    border-radius: 15px;
+}
+
+#navbarSearch .select2-container.select2-container--default.select2-container--open {
+    margin-top: 2px;
+}
+
+#navbarSearch #select2-search-menu-container {
+    overflow: hidden;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+
+#navbarSearch .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-top: 0.425rem solid #5caae2 !important;
+}
+
+.dropdownlist_search span.select2.select2-container.select2-container--default {
+    width: 100% !important;
+}
+
+.col-sm-12.table-responsive-md tr {
+    text-align: center;
+}
+
+.col-sm-12.table-responsive-md th {
+    vertical-align: middle;
+}
+
+.datepicker.datepicker-dropdown.dropdown-menu {
+    z-index: 998 !important;
+}
+
+.dp-daterange-picker.visible {
+    z-index: 999 !important;
+}

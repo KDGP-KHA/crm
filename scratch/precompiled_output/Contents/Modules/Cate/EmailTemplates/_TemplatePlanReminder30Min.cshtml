@@ -1,0 +1,70 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.MailTemplateRenderModel
+@{
+    string mailTitle = AppProcessor.Messagor.GetMessage("Mail_Title") ?? AppProcessor.Messagor.GetMessage("App_Title") ?? "VNPT CRM";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@mailTitle</title>
+</head>
+<body style="margin:0; padding:0; font-family:Arial, Helvetica, sans-serif; background:#f5f7fb; color:#233042;">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f7fb; padding:24px 0;">
+        <tr>
+            <td align="center">
+                <table cellpadding="0" cellspacing="0" border="0" width="720" style="max-width:720px; background:#ffffff; border-radius:8px; overflow:hidden;">
+                    <tr>
+                        <td style="background:#dc3545; padding:20px 24px; color:#ffffff;">
+                            <div style="font-size:20px; font-weight:bold;">@mailTitle</div>
+                            <div style="font-size:13px; opacity:0.9; margin-top:6px;">Thông báo nhắc lịch kế hoạch kinh doanh</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:24px;">
+                            <p style="margin:0 0 16px 0;">Kính gửi <strong>@Model.GetString("FullName")</strong>,</p>
+                            <p style="margin:0 0 16px 0;">Kế hoạch dưới đây sẽ bắt đầu sau 30 phút:</p>
+
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+                                <tr>
+                                    <td style="width:180px; padding:8px 0; color:#5b6778;">Tên kế hoạch</td>
+                                    <td style="padding:8px 0; font-weight:bold;">@Model.GetString("PlanName")</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">Thời gian</td>
+                                    <td style="padding:8px 0;">@Model.GetString("WorkingDateText")</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">Địa điểm</td>
+                                    <td style="padding:8px 0;">@Model.GetString("AddressMeeting", "--")</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">Người tạo kế hoạch</td>
+                                    <td style="padding:8px 0;">@Model.GetString("CreatedByFullName", "--")</td>
+                                </tr>
+                            </table>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.GetString("Content")))
+                            {
+                                <div style="margin-top:20px;">
+                                    <div style="font-weight:bold; margin-bottom:8px;">Nội dung kế hoạch</div>
+                                    <div style="padding:12px 14px; background:#f7f9fc; border:1px solid #e3e8ef; border-radius:6px; line-height:1.6;">
+                                        @Model.GetString("Content")
+                                    </div>
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrWhiteSpace(Model.GetString("NoiDung")))
+                            {
+                                <p style="margin:20px 0 0 0;">@Model.GetString("NoiDung")</p>
+                            }
+
+                            <p style="margin:24px 0 0 0;">Trân trọng.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

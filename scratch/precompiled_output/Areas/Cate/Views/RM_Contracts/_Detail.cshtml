@@ -1,0 +1,389 @@
+﻿@using System.IO
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ContractsModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_View"), AppProcessor.Messagor.GetMessage("Contracts_Title"));
+
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormIcon{
+    <i class="fas fa-eye"></i>
+}
+
+@section FormBody{
+    <style>
+        .contract-info-item {
+            display: flex;
+            border-bottom: 1px solid #f1f1f1;
+            padding: 8px 0;
+            align-items: flex-start;
+        }
+
+            .contract-info-item:last-child {
+                border-bottom: none;
+            }
+
+        .contract-info-label {
+            width: 220px;
+            font-weight: 600;
+            color: #6c757d;
+            flex-shrink: 0;
+        }
+
+        .contract-info-value {
+            flex: 1;
+            color: #212529;
+            word-break: break-word;
+        }
+
+        .contract-price {
+            color: #dc3545;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .contract-file-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            transition: all .2s ease;
+            background: #fff;
+        }
+
+            .contract-file-item:hover {
+                background: #f8f9fa;
+                border-color: #0d6efd;
+            }
+
+        .contract-file-link {
+            text-decoration: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #0d6efd;
+            font-weight: 500;
+        }
+
+            .contract-file-link i {
+                font-size: 15px;
+            }
+
+        .empty-file {
+            padding: 16px;
+            border: 1px dashed #ced4da;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+    </style>
+
+
+    <div class="bcard bgc-transparent shadow-none">
+        <ul class="nav nav-tabs nav-tabs-simple" role="tablist">
+            <li class="nav-item mr-1px">
+                <a class="btn btn-brc-tp border-t-1 btn-outline-light btn-h-white btn-a-text-dark btn-a-outline-light btn-a-bgc-white text-600 radius-b-0 radius-t-1 py-2 px-4 text-95 active" id="home6-tab-btn" data-toggle="tab" href="#home6" role="tab" aria-controls="home6" aria-selected="true">
+                    Thông tin hợp đồng
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-brc-tp border-t-1 btn-outline-light btn-h-white btn-a-text-dark btn-a-outline-light btn-a-bgc-white text-600 radius-b-0 radius-t-1 py-2 px-4 text-95" id="more6-tab-btn" data-toggle="tab" href="#more6" role="tab" aria-controls="more6" aria-selected="false">
+                    Danh sách hóa đơn
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content bgc-white p-35 border-1 brc-grey-l1 radius-2px">
+            <div class="tab-pane fade text-95 active show" id="home6" role="tabpanel" aria-labelledby="home6-tab-btn">
+
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.ContractCode)
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.ContractCode ?? "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.ContractName)
+                    </div>
+                    <div class="contract-info-value font-weight-bold">
+                        @(Model.ContractName ?? "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.CustomerName)
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.CustomerName ?? "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.NameProduct)
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.NameProduct ?? "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.SignDate)
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.SignDate.HasValue
+                ? Model.SignDate.Value.ToString("dd/MM/yyyy")
+                : "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.StartDate)
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.StartDate.HasValue
+                ? Model.StartDate.Value.ToString("dd/MM/yyyy")
+                : "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.EndDate)
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.EndDate.HasValue
+                ? Model.EndDate.Value.ToString("dd/MM/yyyy")
+                : "--")
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.BillingCycleID)
+                    </div>
+                    <div class="contract-info-value">
+                        @Model.CycleName
+                    </div>
+                </div>
+
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.ContractValue)
+                    </div>
+                    <div class="contract-info-value">
+                        @Model.ContractValue.ToString("N0") triệu VNĐ
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.VAT)
+                    </div>
+                    <div class="contract-info-value">
+                        @Model.VAT.ToString("N0") %
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.TotalAmount)
+                    </div>
+                    <div class="contract-info-value contract-price">
+                        @Model.TotalAmount.ToString("N0") triệu VNĐ
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        @Html.DisplayNameFor(m => m.StatusContract)
+                    </div>
+                    <div class="contract-info-value">
+                        <span class="badge @(Model.StatusClass ?? "badge-secondary") px-3 py-2">
+                            @(Model.StatusName ?? "--")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="contract-info-item">
+                    <div class="contract-info-label">
+                        Người tạo
+                    </div>
+                    <div class="contract-info-value">
+                        @(Model.UserCreated ?? "--")
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h6 class="font-weight-bold mb-3">
+                        <i class="fas fa-paperclip mr-2 text-primary"></i>
+                        File đính kèm
+                    </h6>
+
+                    @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+                    {
+                        foreach (var file in Model.ExistingFiles)
+                        {
+                            var fileName = Path.GetFileName(file.FilePath);
+
+                            <div class="contract-file-item">
+                                <a href="@file.FilePath"
+                                   target="_blank"
+                                   class="contract-file-link">
+
+                                    <div>
+                                        <i class="far fa-file-alt mr-2"></i>
+                                        @fileName
+                                    </div>
+
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-file">
+                            <i class="far fa-folder-open mr-2"></i>
+                            Không có file đính kèm
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="tab-pane fade text-95" id="more6" role="tabpanel" aria-labelledby="more6-tab-btn">
+                <div class="card dcard">
+                    <div class="col-sm-12 table-responsive-md p-2">
+                        <table id="DSInvoices" class="d-style w-100 table table-bordered text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                            <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                                <tr>
+                                    <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("Serial_Label")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("Number_Label")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("Buyer_Label")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("TotalAmount_Label")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("VAT_Amount_Label")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("TotalPayment_Label")</th>
+                                    <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var _tableInvoices;
+        $(document).ready(function () {
+            initTableInvoices();
+        });
+
+        function initTableInvoices() {
+            if (!$("#DSInvoices").length) return;
+            if ($.fn.DataTable.isDataTable("#DSInvoices")) {
+                _tableInvoices = $("#DSInvoices").DataTable();
+                return;
+            }
+
+            _tableInvoices = $("#DSInvoices").DataTable({
+                "responsive": true,
+                "lengthChange": true,
+                "processing": true,
+                "serverSide": true,
+                "paging": false,
+                "ajax": {
+                    "url": "/Cate/Invoices/Get",
+                    "type": "POST",
+                    "dataType": "JSON",
+                    "data": {
+                        "ContractID": function () { return @Model.ContractID; }
+                   }
+                },
+                "columns": [
+                    {
+                        "data": "",
+                        "defaultContent": "1",
+                        "render": function (data, type, row, meta) {
+                            return meta.settings._iDisplayStart + meta.row + 1;
+                        }
+                    },
+                    {
+                        "data": "Serial",
+                        "defaultContent": "",
+                    },
+                    {
+                        "data": "Number",
+                        "defaultContent": "",
+                    },
+                    {
+                        "data": "Buyer",
+                        "className":"text-left",
+                        "defaultContent": "",
+                    },
+                    {
+                        "data": "TotalAmount",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`; ;
+                        },
+                    },
+                    {
+                        "data": "VAT_Amount",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`;;
+                        },
+
+                    },
+                    {
+                        "data": "TotalPayment",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`;;
+                        },
+                    },
+                    {
+                        "data": "InvoiceID",
+                        //"style": "width:100px;",
+                        "className":"text-nowrap",
+                        "orderable": false,
+                        "render": function (data, type, row, meta) {
+                            var html = '<span class="">';
+                            if (type === "display") {
+                                html += _renderButton(true,
+                                    "DetailInvoices",
+                                    "btn btn-lighter-secondary mr-1",
+                                    "/Cate/Invoices/Detail/" + data,
+                                    '<i class="far fa-eye text-secondary text-120"></i>',
+                                    "Xem chi tiết");
+                            }
+                            html += "</span>";
+                            return html;
+                        }
+                    }
+                ]
+            });
+        }
+    </script>
+}
+
+@section SubmitControl {
+
+}

@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("GroupCustomerType_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "CustomerType", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "CustomerType_OnProcessSuccess(data, 'AddCustomerType')"
+    }, new { @class = "form-horizontal", id = "AddCustomerType" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_CustomerType")
+        </div>
+    }
+}
+

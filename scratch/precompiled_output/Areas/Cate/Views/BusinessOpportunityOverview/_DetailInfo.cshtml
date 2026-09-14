@@ -1,0 +1,166 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityModel
+
+<style>
+    .card-body img {
+        max-width: 100%;
+        height: auto !important;
+        display: block;
+    }
+</style>
+
+<div class="row">
+
+    <!-- Thông tin chung -->
+    <div class="col-xl-6 col-md-12 mb-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-light font-weight-bold">
+                <i class="fas fa-info-circle text-primary mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("BO_Overview_Card_GeneralInfo")
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless table-sm mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="font-weight-bold text-muted" style="width:40%">
+                                @AppProcessor.Messagor.GetMessage("Opportunity_Name_Label"):
+                            </td>
+                            <td class="text-primary font-weight-bold">@Model.OpportunityName</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold text-muted">
+                                @AppProcessor.Messagor.GetMessage("BO_Overview_Label_Customer"):
+                            </td>
+                            <td class="font-weight-bold text-danger">@Model.CustomerName</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold text-muted">
+                                @AppProcessor.Messagor.GetMessage("BO_Overview_Label_Status"):
+                            </td>
+                            <td>
+                                <span class="badge @Model.StatusClass px-2 py-1">@Model.StatusName</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold text-muted">
+                                @AppProcessor.Messagor.GetMessage("ClosingProbability_Label"):
+                            </td>
+                            <td>
+                                @if (Model.ClosingProbability != 0)
+                                {
+                                    var colorClass =
+                                        Model.ClosingProbability > 50 ? "text-success" :
+                                        Model.ClosingProbability < 20 ? "text-danger" : "text-warning";
+
+                                    <strong class="@colorClass">
+                                        @Model.ClosingProbability.ToString("0.##") %
+                                    </strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">--</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold text-muted">
+                                @AppProcessor.Messagor.GetMessage("ExpectedValue_Label"):
+                            </td>
+                            <td>
+                                @if (Model.ExpectedValue > 0)
+                                {
+                                    <span class="text-success font-weight-bold">
+                                        @Model.ExpectedValue.ToString("N0") @AppProcessor.Messagor.GetMessage("BO_Overview_Unit_Million")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">--</span>
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dịch vụ liên quan -->
+    <div class="col-xl-6 col-md-12 mb-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-light font-weight-bold">
+                <i class="fas fa-cogs text-info mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("BO_Overview_Card_Services")
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.ProductServiceNames))
+                {
+                    <ul class="list-unstyled mb-0">
+                        @foreach (var svc in Model.ProductServiceNames.Split(';'))
+                        {
+                            if (!string.IsNullOrWhiteSpace(svc))
+                            {
+                                <li class="mb-1">
+                                    <i class="fas fa-check-circle text-success mr-2"></i>@svc.Trim()
+                                </li>
+                            }
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <span class="text-muted">@AppProcessor.Messagor.GetMessage("BO_Overview_NoService")</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- File đính kèm -->
+    <div class="col-xl-6 col-md-12 mb-4">
+        <div class="card shadow-sm h-100 border-0">
+            <div class="card-header bg-light font-weight-bold">
+                <i class="fas fa-paperclip text-warning mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("FileUpload")
+            </div>
+            <div class="card-body">
+                @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+                {
+                    foreach (var file in Model.ExistingFiles)
+                    {
+                        var fileName = System.IO.Path.GetFileName(file.FilePath);
+
+                        <div class="mb-2">
+                            <a href="@file.FilePath" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="fa fa-download mr-1"></i>
+                                @fileName
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">
+                        @AppProcessor.Messagor.GetMessage("BO_Overview_NoFile")
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Mô tả / Nội dung -->
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-header bg-light font-weight-bold">
+                    <i class="fas fa-align-left text-secondary mr-2"></i>
+                    @AppProcessor.Messagor.GetMessage("BO_Overview_Card_Description")
+                </div>
+                <div class="card-body">
+                    @Html.Raw(Model.Description)
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

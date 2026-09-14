@@ -1,0 +1,34 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("Project_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("ReviewBatch", "ProjectOverview", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "ReviewBatchProject", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ReviewForm")
+        </div>
+    }
+
+    <script type="text/javascript">
+        $('form#ReviewBatchProject').ajaxForm({
+            success: function (response) {
+                ReviewBatch_OnProcessSuccess(response, "ReviewBatchProject");
+            }
+        });
+    </script>
+}
+
+@section ContinueForm{
+
+}

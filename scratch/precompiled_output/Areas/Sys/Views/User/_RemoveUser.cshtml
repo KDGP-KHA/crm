@@ -1,0 +1,25 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysRoleModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("User_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("RemoveUser", "User", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "UsersViaRole_OnProcessSuccess(data, 'RemoveUser')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.RoleId)
+        @Html.HiddenFor(model => model.UserId)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

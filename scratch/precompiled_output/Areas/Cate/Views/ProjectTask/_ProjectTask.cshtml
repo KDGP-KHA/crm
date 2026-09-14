@@ -1,0 +1,93 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectTaskModel
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.ProjectTaskID)
+@Html.HiddenFor(m => m.TaskManagementID)
+@Html.HiddenFor(m => m.IsTaskManagementSource)
+@Html.HiddenFor(m => m.ProductProjectID)
+@Html.HiddenFor(m => m.ProjectID)
+<div id="ProjectTaskForm" class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            @Html.TitleFor(m => m.TaskID, new { @class = "col-form-label font-bold" })
+            @Html.DropDownListFor(m => m.TaskID,
+                               new SelectList(Model.ListTask ?? new List<SelectListItem>(), "Value", "Text", Model.TaskID),
+                               "-- Chọn công việc --",
+                               new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(m => m.TaskID)
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            @Html.TitleFor(m => m.Status, new { @class = "col-form-label font-bold" })
+            @Html.DropDownListFor(m => m.Status,
+                               new SelectList(Model.ListTaskStatus ?? new List<Core.Cate.Models.RM_StatusModel>(),
+                                   "ID", "StatusName", Model.Status),
+                               "-- Chọn trạng thái --",
+                               new { @class = "form-control select2" })
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            @Html.TitleFor(m => m.StartDate, new { @class = "col-form-label font-bold" })
+            @Html.TextBoxFor(m => m.StartDate, "{0:yyyy-MM-dd}",
+                               new { @class = "form-control", type = "date" })
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            @Html.TitleFor(m => m.CompletedDate, new { @class = "col-form-label font-bold" })
+            @Html.TextBoxFor(m => m.CompletedDate, "{0:yyyy-MM-dd}",
+                               new { @class = "form-control", type = "date" })
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-group">
+            @Html.TitleFor(m => m.AssignedEmployeeIDs, new { @class = "col-form-label font-bold" })
+            @Html.DropDownListFor(m => m.AssignedEmployeeIDs,
+                               new SelectList(Model.ListEmployee ?? new List<SelectListItem>(), "Value", "Text", Model.AssignedEmployeeIDs),
+                               "-- Chọn nhân viên --",
+                               new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(m => m.AssignedEmployeeIDs)
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            @Html.TitleFor(m => m.CompletionPercentage, new { @class = "col-form-label font-bold" })
+            <div class="input-group" style="max-width:200px">
+                @Html.TextBoxFor(m => m.CompletionPercentage, new
+                {
+                    @class = "form-control",
+                    type = "number",
+                    min = "0",
+                    max = "100",
+                    placeholder = "0 - 100",
+                    data_format = "percent"
+                })
+                <div class="input-group-append">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-group">
+            @Html.TitleFor(m => m.Note, new { @class = "col-form-label font-bold" })
+            @Html.TextAreaFor(m => m.Note, new { @class = "form-control", rows = "3" })
+        </div>
+    </div>
+</div>
+
+<script>
+    function _runFormUtils() {
+        if (typeof initFormUtils === 'function') {
+            initFormUtils('#ProjectTaskForm');
+        } else {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#ProjectTaskForm'); };
+            document.head.appendChild(s);
+        }
+    }
+    setTimeout(_runFormUtils, 0);
+</script>

@@ -1,0 +1,35 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = Title = AppProcessor.Messagor.GetMessage("Position_Title");
+}
+
+@section PageTitle
+{
+    @Title
+}
+
+@Html.Partial("_Search")
+
+<div class="mt-1">
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="tblPosition"
+                   class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                   width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Position_PositionCode_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Position_PositionName_Label")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script src="@Url.Content("~/Areas/Sys/Views/Position/Position.js")"></script>
+}

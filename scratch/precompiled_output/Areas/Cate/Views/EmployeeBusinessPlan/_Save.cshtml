@@ -1,0 +1,50 @@
+﻿@model Core.Cate.Models.Import_Employee_BusinessPlanModel
+
+@{
+    ViewBag.Title = "Xác nhận dữ liệu";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-save"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Save", "EmployeeBusinessPlan", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "SaveEmployeeBusinessPlan_OnProcessSuccess(data, 'SaveImport')"
+    }, new { @class = "form-horizontal", id = "Save" }))
+    {
+        @Html.HiddenFor(m => m.Key)
+        <h5>@Html.Raw(ViewBag.Message)</h5>
+        <input type="hidden" value="@ViewBag.Err" id="Err" />
+    }
+    <script>
+        // ẩn nút lưu nếu có Err
+        var err = $('input[id=Err]').val();
+        if (err.toLowerCase() == 'err') {
+            $('#modal_SaveImport .modal-footer button[type=submit]').addClass('d-none');
+        }
+        function SaveEmployeeBusinessPlan_OnProcessSuccess(response, formId) {
+            if (response.status != undefined) {
+                $("#ModalContent #modal_" + formId).modal("hide");
+                $("#ModalContent #modal_" + formId).on("hidden.bs.modal",
+                    function () {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableImportEmployeeBusinessPlan.ajax.reload(null, false);
+                            SearchEmployeeBusiness();
+                            response.status = undefined;
+                        }
+                    });
+            } else {
+                $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+            }
+        }
+    </script>
+}

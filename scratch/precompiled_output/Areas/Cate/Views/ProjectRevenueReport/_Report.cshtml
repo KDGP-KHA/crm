@@ -1,0 +1,153 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectRevenueReportResultModel
+
+<style>
+    .project-revenue-report-result-card {
+        max-width: 100%;
+    }
+
+        .project-revenue-report-result-card .card-header {
+            min-height: 40px;
+            padding: 8px 12px;
+        }
+
+        .project-revenue-report-result-card .card-title {
+            font-size: 16px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+    .project-revenue-report-topline {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        font-size: 13px;
+        color: #495057;
+    }
+
+    .project-revenue-report-total-box {
+        min-width: 220px;
+    }
+
+        .project-revenue-report-total-box table {
+            margin-bottom: 0;
+        }
+
+        .project-revenue-report-total-box th,
+        .project-revenue-report-total-box td {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
+
+    .project-revenue-report-table thead th {
+        padding: 8px 10px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .project-revenue-report-table tbody td {
+        padding: 6px 8px;
+        font-size: 13px;
+        vertical-align: top;
+    }
+
+    .project-revenue-report-result-card .table-responsive {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .project-revenue-report-table {
+        width: max-content;
+        min-width: 100%;
+        table-layout: auto;
+        margin-bottom: 0;
+    }
+
+        .project-revenue-report-table th,
+        .project-revenue-report-table td {
+            min-width: 0;
+        }
+
+        .project-revenue-report-table tbody td:nth-child(2),
+        .project-revenue-report-table tbody td:nth-child(3),
+        .project-revenue-report-table tbody td:nth-child(5) {
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+</style>
+
+<div class="card project-revenue-report-result-card">
+    <div class="card-header justify-content-start align-items-center font-bold">
+        <i class="fa fa-table mr-2"></i> @AppProcessor.Messagor.GetMessage("ProjectRevenueReport_ResultSectionTitle")
+    </div>
+
+    <div class="card-body p-0">
+        @if (!Model.IsValid)
+        {
+            <div class="p-3">
+                <div class="alert alert-danger mb-0">@Model.ValidationMessage</div>
+            </div>
+        }
+        else
+        {
+            <div class="p-2 border-bottom">
+                <div class="project-revenue-report-topline">
+                    <div>
+                        <div><strong>@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_ReportPeriod"):</strong> @Model.PeriodDisplayText</div>
+                    </div>
+                    <div class="project-revenue-report-total-box">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Column_TotalRevenue")</th>
+                                <td class="text-right font-bold">@Model.GrandTotalRevenue.ToString("#,##0")</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            if (Model.Items == null || Model.Items.Count == 0)
+            {
+                <div class="p-3 text-muted">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Message_NoData")</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0 project-revenue-report-table">
+                        <thead>
+                            <tr>
+                                <th style="width:70px;" class="text-center">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                                <th style="min-width:280px;">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Column_Project")</th>
+                                <th style="min-width:240px;">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Column_Customer")</th>
+                                <th style="min-width:160px;" class="text-center">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Column_RevenueDate")</th>
+                                <th style="min-width:220px;">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Column_Service")</th>
+                                <th style="min-width:150px;" class="text-right">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Column_TotalRevenue")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="text-center">@item.DisplayOrderText</td>
+                                    <td>@item.DisplayProjectName</td>
+                                    <td>@item.DisplayCustomerName</td>
+                                    <td class="text-center">@item.DisplayRevenueDateText</td>
+                                    <td>@item.ServiceName</td>
+                                    <td class="text-right">@item.TotalRevenue.ToString("#,##0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        }
+    </div>
+</div>

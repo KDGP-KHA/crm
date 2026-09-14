@@ -1,0 +1,19 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("Task_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType { primary }
+@section FormIcon { <i class="far fa-edit"></i> }
+@section FormBody {
+    @using (Ajax.BeginForm("Edit", "Task", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Task_OnProcessSuccess(data, 'EditTask')"
+    }, new { @class = "form-horizontal", id = "EditTask" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Task")
+        </div>
+    }
+}

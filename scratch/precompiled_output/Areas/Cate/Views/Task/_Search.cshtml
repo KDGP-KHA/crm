@@ -1,0 +1,45 @@
+@using TSFramework.Libs.Processors
+@{
+    var taskGroups = ViewBag.TaskGroups as List<Core.Cate.Models.RM_TaskGroupModel> ?? new List<Core.Cate.Models.RM_TaskGroupModel>();
+}
+<div class="Search card dcard" id="SearchTask">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+    <div class="card-body p-2 d-flex align-items-end">
+
+        <div class="Search_Box keyWord">
+            <label class="font-bold text-sm-right">
+                @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+            </label>
+            <div>
+                <input type="text" id="filterKeyword" class="form-control"
+                       placeholder="@AppProcessor.Messagor.GetMessage("Task_Name_Label")" />
+            </div>
+        </div>
+
+        <div class="Search_Box Dropdown">
+            <label class="font-bold text-sm-right">
+                @AppProcessor.Messagor.GetMessage("Task_Group_Label")
+            </label>
+            <div class="">
+                <select id="filterTaskGroup" class="form-control" data-placeholder="@AppProcessor.Messagor.GetMessage("Combobox_Select")">
+                    <option value=""></option>
+                    @foreach (var item in taskGroups)
+                    {
+                        <option value="@item.TaskGroupID">@item.TaskGroupName</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="Group Group_button">
+            <div class="Search_button">
+                <button type="button" class="btn btn-primary" onclick="_tableTask.ajax.reload(null, false);">
+                    <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

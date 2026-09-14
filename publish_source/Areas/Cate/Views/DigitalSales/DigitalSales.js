@@ -543,6 +543,13 @@ function openChangeStatusModal(id) {
                 return false;
             }
 
+            // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+            if (typeof serializeProgressItemsToJson === "function") {
+                if (!serializeProgressItemsToJson()) {
+                    return false;
+                }
+            }
+
             var $btnSubmit = $form.find("button[type='submit']");
             var origBtnHtml = $btnSubmit.html();
             $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
@@ -556,6 +563,11 @@ function openChangeStatusModal(id) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesChangeStatusForm === "function") initDigitalSalesChangeStatusForm();
+                        return;
+                    }
                     if (res.status) {
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
                         $modal.modal("hide");

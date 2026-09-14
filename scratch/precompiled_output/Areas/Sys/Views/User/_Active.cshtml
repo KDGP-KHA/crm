@@ -1,0 +1,24 @@
+﻿@model Core.Sys.Models.Sys.SysUserModel
+
+@{
+    ViewBag.Title = $"Kích hoạt lại người dùng - [{Model.FullName} - {Model.UserName}]";
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Active", "User", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "User_OnProcessSuccess(data, 'ActiveUser')"
+    }, new { @class = "form-horizontal" }))
+    {
+	    <div id="bodyForm">
+		    @Html.Partial("_ActiveBody")
+	    </div>
+    }
+}

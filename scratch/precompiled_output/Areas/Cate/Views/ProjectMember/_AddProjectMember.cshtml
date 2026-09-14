@@ -1,0 +1,216 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectMemberFormModel
+
+<div class="card">
+    @Html.HiddenFor(model => model.ProductProjectID)
+
+    <div class="card-header justify-content-start align-items-center font-bold">
+        <i class="fas fa-users mr-2"></i> Thành viên
+    </div>
+
+    <div class="card-body">
+
+        <!-- Search -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="searchEmployeeName" class="form-control" placeholder="Tìm theo tên...">
+            </div>
+
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-2 mt-2 text-right">
+                        <span>Đơn vị</span>
+                    </div>
+                    <div class="col-md-10">
+                        <select id="searchEmployeeUnit" class="form-control no-select2" data-no-select2="true">
+                            <option value="">-- Tất cả đơn vị --</option>
+                            @if (Model.Departments != null)
+                            {
+                                foreach (var d in Model.Departments)
+                                {
+                                    <option value="@d.BoPhan_ID">@d.TenBoPhanDisplay</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <button type="button" id="btnSearchEmployee" class="btn btn-primary btn-block">
+                    <i class="fas fa-search mr-1"></i> Tìm
+                </button>
+            </div>
+        </div>
+
+        <!-- Selected summary -->
+        <div id="selectedSummary" class="mb-2" style="display:none;">
+            <span class="badge badge-primary" id="selectedCount">0</span> thành viên đã chọn
+            <a href="#" id="btnClearAll" class="ml-2 text-danger small">
+                <i class="fas fa-times"></i> Bỏ chọn tất cả
+            </a>
+        </div>
+
+        <!-- Employee list -->
+        <div id="employeeListWrapper" style="display:none;">
+            <div class="row" id="employeeList">
+                @Html.HiddenFor(model => model.EmployeeIDs)
+
+                @foreach (var employee in Model.Employees)
+                {
+                    if (!employee.IsSaleMember)
+                    {
+                        var tenBoPhan = employee.TenBoPhan ?? "";
+
+                        <div class="col-md-3 mb-1 employee-item"
+                             data-name="@employee.FullName.ToLower()"
+                             data-unit="@employee.BoPhan_ID">
+
+                            <div class="form-check">
+                                <input class="form-check-input employee-checkbox"
+                                       value="@employee.Employee_ID"
+                                       type="checkbox"
+                                       id="employee-@employee.Employee_ID">
+
+                                <label class="form-check-label" for="employee-@employee.Employee_ID">
+                                    @employee.FullName
+
+                                    @if (!string.IsNullOrEmpty(tenBoPhan))
+                                    {
+                                        <small class="text-muted d-block">@tenBoPhan</small>
+                                    }
+                                </label>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <div id="noResultMsg" class="text-muted text-center py-3" style="display:none;">
+                <i class="fas fa-search mr-1"></i> Không tìm thấy thành viên phù hợp.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Roles -->
+<div class="card mt-2">
+    <div class="card-header justify-content-start align-items-center font-bold">
+        <i class="fas fa-user-cog mr-2"></i> Vai trò
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            @Html.HiddenFor(model => model.RoleIDs)
+
+            @foreach (var role in Model.Roles)
+            {
+                <div class="col-md-2 mb-1">
+                    <div class="form-check">
+                        <input class="form-check-input role-checkbox"
+                               value="@role.RoleID"
+                               type="checkbox"
+                               id="role-@role.RoleID">
+
+                        <label class="form-check-label" for="role-@role.RoleID">
+                            @role.RoleName
+                        </label>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @Html.ValidationMessageFor(model => model.RoleIDs, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<script>
+    (function () {
+
+        var employeeSelected = [];
+        var roleSelected = [];
+
+        // Search
+        $("#btnSearchEmployee").on("click", function () {
+            doSearch();
+        });
+
+        $("#searchEmployeeName").on("keypress", function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                doSearch();
+            }
+        });
+
+        function doSearch() {
+            var keyword = $("#searchEmployeeName").val().trim().toLowerCase();
+            var unit = $("#searchEmployeeUnit").val();
+            console.log(unit);
+
+            if (!keyword && !unit) {
+                alert("Vui lòng nhập tên hoặc chọn đơn vị để tìm kiếm.");
+                return;
+            }
+
+            var visibleCount = 0;
+
+            $(".employee-item").each(function () {
+                var matchName = !keyword || $(this).data("name").indexOf(keyword) >= 0;
+                var matchUnit = !unit || $(this).data("unit") == unit;
+
+                if (matchName && matchUnit) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            $("#employeeListWrapper").show();
+            $("#noResultMsg").toggle(visibleCount === 0);
+        }
+
+        // Employee select
+        $(document).on("change", ".employee-checkbox", function () {
+            var value = $(this).val();
+
+            if ($(this).is(":checked")) {
+                if (!employeeSelected.includes(value)) employeeSelected.push(value);
+            } else {
+                employeeSelected = employeeSelected.filter(v => v != value);
+            }
+
+            $("#EmployeeIDs").val(employeeSelected.join(";"));
+
+            if (employeeSelected.length > 0) {
+                $("#selectedCount").text(employeeSelected.length);
+                $("#selectedSummary").show();
+            } else {
+                $("#selectedSummary").hide();
+            }
+        });
+
+        $("#btnClearAll").on("click", function (e) {
+            e.preventDefault();
+            employeeSelected = [];
+            $(".employee-checkbox").prop("checked", false);
+            $("#EmployeeIDs").val("");
+            $("#selectedSummary").hide();
+        });
+
+        // Role select
+        $(".role-checkbox").on("change", function () {
+            var value = $(this).val();
+
+            if ($(this).is(":checked")) {
+                if (!roleSelected.includes(value)) roleSelected.push(value);
+            } else {
+                roleSelected = roleSelected.filter(v => v != value);
+            }
+
+            $("#RoleIDs").val(roleSelected.join(";"));
+        });
+
+    })();
+</script>

@@ -1,0 +1,27 @@
+﻿@model Modules.Sys.Areas.Sys.Data.FileInfoModel
+@{
+	ViewBag.Title = "Xoá file log";
+	Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+	danger
+}
+
+@section FormBody{
+	@using (Ajax.BeginForm("DeleteOldFile", "SysLog", new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "SysLog_OnProcessSuccess(data, 'DeleteOldFile')"
+    }, new { @class = "form-horizontal" }))
+    {
+	    @Html.AntiForgeryToken()
+	    <div class="form-group form-row">
+		    <label class="col-form-label text-sm-right pr-0 font-bold col-md-3">Xoá tất cả file log</label>
+		    <div class="col-md-3">
+                @Html.TextBox("MonthAgo", 0, new { @class = "form-control", placeholder = "Tháng", type = "number", min = "0" })
+		    </div>
+		    <label class="text-left col-form-label col-md-3">tháng về trước</label>
+	    </div>
+	}
+}

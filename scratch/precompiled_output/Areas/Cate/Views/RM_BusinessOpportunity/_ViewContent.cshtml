@@ -1,0 +1,32 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityModel
+@{
+    ViewBag.Title = "Nội dung " +  Model.OpportunityName;
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormIcon{
+    <i class="fas fa-info"></i>
+}
+
+@section FormBody
+{
+    <style>
+        img {
+            max-width: 100%;
+            height: auto !important;
+            display: block;
+        }
+    </style>
+    <div class="p-2">
+        @Html.Raw(Model.Description)
+    </div>
+}
+
+@section SubmitControl{
+
+}

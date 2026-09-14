@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("ContactPersonal_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("EditCustomerContactDetail", "CustomerContact", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "CustomerContact_OnProcessSuccess(data, 'EditCustomerContactDetail')"
+    }, new { @class = "form-horizontal", id = "EditCustomerContactDetail" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_CustomerContactDetail")
+        </div>
+    }
+}

@@ -1,0 +1,315 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadJs{
+    <!-- include common vendor scripts used in demo pages -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/jquery/dist/jquery.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/popperjs/dist/umd/popper.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap/dist/js/bootstrap.js"></script>
+
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section PluginCss{
+
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap-select/dist/css/bootstrap-select.css">
+
+    <!-- select2.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/select2/dist/css/select2.css">
+
+    <!-- chosen.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/chosen-js/chosen.css">
+
+    <!-- include datepicker3.css -->
+    <link href="~/Contents/Base/plugins/datepicker/css/bootstrap-datepicker3.min.css" rel="stylesheet" />
+
+    <!-- include bootstrap-datetimepicker.css -->
+    <link rel="stylesheet" href="~/Contents/Base/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" />
+
+    <!-- include vendor stylesheets used in "DataTables" page. see "/views//pages/partials/table-datatables/vendor-stylesheets.hbs" -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-bs4/css/dataTables.bootstrap4.css">
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons-bs4/css/buttons.bootstrap4.css">
+    <link href="~/Contents/Base/plugins/datatables/extensions/ColVis/css/dataTables.colVis.css" rel="stylesheet" />
+
+    <!-- include toastr.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/toastr/toastr.css">
+
+    @RenderSection("PluginCss", false)
+}
+
+@section HeadCss{
+
+    <!-- include TSFramework.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/TSFramework/TSFramework.css">
+    <style type="text/css">
+        .select2-selection--single.select2-selection--clearable {
+            height: 100% !important;
+        }
+
+        .select2-selection__rendered {
+            word-wrap: break-word !important;
+            text-overflow: inherit !important;
+            white-space: normal !important;
+        }
+    </style>
+    @RenderSection("HeadCss", false)
+}
+
+<body>
+    <div class="body-container">
+        <div class="main-container">
+
+            @{ Html.RenderAction("Render", "Menu", new { area = "Sys" }); }
+
+            <div role="main" class="main-content">
+                @Html.Partial("_Header")
+
+                <div class="page-content container container-plus">
+                    <!-- page header and toolbox -->
+                    @RenderBody()
+                </div>
+
+                @Html.Partial("_Footer")
+
+                @*@Html.Partial("_Setting")*@
+
+            </div>
+
+            <!-- .modal-aside -->
+        </div>
+    </div>
+
+    <!-- include ace.js -->
+    <script src="~/Contents/Base/plugins/ace_v4/dist/js/ace.js"></script>
+
+    <!-- include bootstrap-notify.js -->
+    @*<script src="~/Contents/Base/plugins/notify/dist/bootstrap-notify.js"></script>*@
+
+    <!-- include moment.js -->
+    <script src="~/Contents/Base/plugins/moment/moment.js"></script>
+
+    <!-- include datepicker.js -->
+    <script src="~/Contents/Base/plugins/datepicker/js/bootstrap-datepicker.min.js"></script>
+    <script src="~/Contents/Base/plugins/datepicker/locales/bootstrap-datepicker.vi.min.js"></script>
+
+    <!-- include bootstrap-datetimepicker.js -->
+    <script type="text/javascript" src="~/Contents/Base/plugins/bootstrap-datetimepicker/js/moment-with-locales.js"></script>
+    <script type="text/javascript" src="~/Contents/Base/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+
+    <!-- include vendor scripts used in "DataTables" page. see "/views//pages/partials/table-datatables/vendor-scripts.hbs" -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables/media/js/jquery.dataTables.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-colreorder/js/dataTables.colReorder.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-select/js/dataTables.select.js"></script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/dataTables.buttons.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons-bs4/js/buttons.bootstrap4.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/buttons.html5.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/buttons.print.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-buttons/js/buttons.colVis.js"></script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/datatables.net-responsive/js/dataTables.responsive.js"></script>
+
+    <!-- include dataTables.colVis.js -->
+    <script src="~/Contents/Base/plugins/datatables/extensions/ColVis/js/dataTables.colVis.js"></script>
+
+    <!-- include toastr.js -->
+    <script src="~/Contents/Base/plugins/toastr/toastr.js"></script>
+
+    <!-- select2.js -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/select2/dist/js/select2.js"></script>
+
+    <!-- chosen.js -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/chosen-js/chosen.jquery.js"></script>
+
+    <!-- signalR -->
+    <script src="~/Contents/Base/plugins/signalR/jquery.signalR-2.4.3.js"></script>
+
+    <!--Reference the autogenerated SignalR hub script. -->
+    <script src="~/signalr/hubs"></script>
+
+    <script type="text/javascript">
+        var appSignalRWrapper = function () {
+            var self = this;
+            var hub = null;
+            var isStarted = false;
+
+            var onSendBroadcastCallback = function () { };
+            var onMessageCallback = function () { };
+            var onNotifyCallback = function () { };
+            var onBroadcastMessageCallback = function () { };
+            var onForceLogoutCallback = function () { };
+
+            self.start = function () {
+                hub = $.connection.appSignalRHub;
+                hub.server.onSendBroadcast = onSendBroadcastCallback;
+                hub.client.onMessage = onMessageCallback;
+                hub.client.onNotify = onNotifyCallback;
+                hub.client.onBroadcast = onBroadcastMessageCallback;
+                hub.client.onForceLogout = onForceLogoutCallback;
+
+                return $.connection.hub.start()
+                    .done(function () { isStarted = true; });
+            };
+
+            self.stop = function () {
+                isStarted = false;
+                hub = null;
+                return $.connection.hub.stop();
+            };
+
+            self.onSendBroadcast = function (callback) {
+                onSendBroadcastCallback = callback;
+                if (isStarted) {
+                    hub.client.onSendBroadcast = onSendBroadcastCallback;
+                }
+            };
+
+            self.onMessage = function (callback) {
+                onMessageCallback = callback;
+                if (isStarted) {
+                    hub.client.onMessage = onMessageCallback;
+                }
+            };
+
+            self.onNotify = function (callback) {
+                onNotifyCallback = callback;
+                if (isStarted) {
+                    hub.client.onNotify = onNotifyCallback;
+                }
+            };
+
+            self.onBroadcast = function (callback) {
+                onBroadcastMessageCallback = callback;
+                if (isStarted) {
+                    hub.client.onBroadcast = onBroadcastMessageCallback;
+                }
+            };
+
+            self.onForceLogout = function (callback) {
+                onForceLogoutCallback = callback;
+                if (isStarted) {
+                    hub.client.onForceLogout = onForceLogoutCallback;
+                }
+            };
+        };
+
+        var appSignalR = new appSignalRWrapper();
+
+        $(document).ready(function () {
+            appSignalR.onSendBroadcast(sendBroadcastMessage);
+            appSignalR.onBroadcast(broadcastMessage);
+            appSignalR.onMessage(appendMessage);
+            appSignalR.onNotify(rawMessage);
+            appSignalR.onForceLogout(forceLogout);
+            appSignalR.start().done(function () { });
+        });
+
+        function sendBroadcastMessage(msg) {
+            if (typeof msg == "undefined") {
+                msg = "Test Message";
+            }
+            $.connection.appSignalRHub.server.sendBroadcast(msg);
+        }
+
+        function rawMessage(sender, message) {
+            eval(message);
+            $("#lstMessages").load("@Url.Action("Messages", "Notification", new { area = "" })");
+            $('#soundNotify')[0].play();
+        }
+
+        function broadcastMessage(message, type) {
+            switch (type) {
+                case 1:
+                    toastr.success(message);
+                    return;
+                case -1:
+                    toastr.error(message);
+                    return;
+            }
+            toastr.success(message);
+        }
+
+        function appendMessage(sender, message, type) {
+            switch (type) {
+                case 1:
+                    toastr.success(message);
+                    return;
+                case -1:
+                    toastr.error(message);
+                    return;
+            }
+            toastr.success(message);
+        }
+
+        function appendMessage(sender, message, type, options) {
+            switch (type) {
+                case 1:
+                    toastr.success(message, '', options);
+                    return;
+                case -1:
+                    toastr.error(message, '', options);
+                    return;
+            }
+            toastr.success(message, '', options);
+        }
+
+        function forceLogout(receiver) {
+            if (receiver === "@(User?.UserName)") {
+                setTimeout(function () {
+                    window.location = window.location.origin + '@Url.Action("Logout", "Account", new {area = ""})';
+                }, 3500);
+            }
+        }
+    </script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/interactjs/dist/interact.js"></script>
+
+    @RenderSection("PluginJs", false)
+
+    <!-- include jquery.validate.js -->
+    <script src="~/Contents/Base/plugins/validate/jquery.validate.v1.15.1.js"></script>
+    <script src="~/Contents/Base/plugins/validate/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Contents/Base/plugins/validate/jquery.unobtrusive-ajax.js"></script>
+
+    <!-- include TSFramework.js -->
+    <script src="~/Contents/Base/plugins/TSFramework/jquery.form.js"></script>
+    <script src="~/Contents/Base/plugins/TSFramework/TSFramework.js"></script>
+
+    @RenderSection("BottomScript", false)
+
+    <script type="text/javascript">
+
+        var clicked = false;
+        $("#messages a.msg").on("click", function (event) {
+            if (clicked) {
+                clicked = false;
+            } else {
+                event.preventDefault();
+                var msgId = $(this).attr('msg-id');
+                _maskAsRead(msgId, $(this).attr('href'));
+            }
+        });
+
+        function _maskAsRead(msgId, href) {
+            var urlMaskAsReadMessage = "@Url.Action("MaskAsRead","Notification", new{area=""})/" + msgId;
+
+            $.ajax({
+                type: "GET",
+                url: urlMaskAsReadMessage,
+                async: false,
+                dataType: "JSON",
+                success: function (response) {
+                    if (response != undefined && response.status) {
+                        window.location = href;
+                        clicked = true;
+                    }
+                }
+            });
+        }
+
+    </script>
+
+</body>

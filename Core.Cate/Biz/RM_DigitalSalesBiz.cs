@@ -34,6 +34,7 @@ namespace Core.Cate.Biz
         private readonly string _spActivityAdd = "RM_DigitalSalesActivity_Add";
         private readonly string _spActivityGetList = "RM_DigitalSalesActivity_GetList";
         private readonly string _spActivityDelete = "RM_DigitalSalesActivity_Delete";
+        private readonly string _spActivityUpdateLatestStatusChange = "RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments";
 
         public List<RM_DigitalSalesModel> LoadList(out int total, RM_DigitalSalesSearchModel model)
         {
@@ -277,6 +278,15 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
+            if (list != null && list.Count > 0)
+            {
+                var parents = list.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
+                var children = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
+                foreach (var p in parents)
+                {
+                    p.TodoList = children.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.TrackingID).ToList();
+                }
+            }
             return list ?? new List<RM_DigitalSalesTrackingModel>();
         }
 
@@ -298,6 +308,24 @@ namespace Core.Cate.Biz
 
         public int SaveTracking(RM_DigitalSalesTrackingModel model, string username)
         {
+            // Nếu thêm tiến trình thực tế mới vào quy trình đang có placeholder rỗng, xóa placeholder đi
+            if (model.TrackingID <= 0 && model.ProcessID.HasValue && model.ProcessID.Value > 0 && !string.IsNullOrWhiteSpace(model.TaskName) && (!model.ParentID.HasValue || model.ParentID.Value <= 0))
+            {
+                try
+                {
+                    var existingTasks = GetTrackingTasks(model.DigitalSalesID);
+                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                    foreach (var ep in emptyPlaceholders)
+                    {
+                        DeleteTracking(ep.TrackingID, username);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+            }
+
             var result = AppProcessor.ProcedureProvider.Execute(
                 _spTrackingSave,
                 DATA_PROVIDER_NAME,
@@ -314,9 +342,72 @@ namespace Core.Cate.Biz
                 model.AttachmentFile,
                 model.IsCustomTask,
                 model.SortOrder,
-                username
+                username,
+                model.ParentID.HasValue ? (object)model.ParentID.Value : DBNull.Value,
+                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
+        }
+
+        public int ChangeProcessOfStatus(int digitalSalesId, int statusId, int newProcessId, string username)
+        {
+            if (digitalSalesId <= 0 || statusId <= 0 || newProcessId <= 0) return 0;
+
+            var currentTasks = GetTrackingTasks(digitalSalesId);
+            var oldTasks = currentTasks.Where(t => t.StatusID == statusId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+            foreach (var ot in oldTasks)
+            {
+                DeleteTracking(ot.TrackingID, username);
+            }
+
+            var progressList = new RM_DigitalSalesWorkflowBiz().GetProgressesByProcess(newProcessId);
+            if (progressList != null && progressList.Count > 0)
+            {
+                int sort = 1;
+                foreach (var pg in progressList.OrderBy(p => p.SortOrder))
+                {
+                    int duration = pg.DefaultDurationDays > 0 ? pg.DefaultDurationDays : 3;
+                    var task = new RM_DigitalSalesTrackingModel
+                    {
+                        TrackingID = 0,
+                        DigitalSalesID = digitalSalesId,
+                        ProcessID = newProcessId,
+                        ProgressID = pg.ProgressID,
+                        TaskName = pg.ProgressName,
+                        DurationDays = duration,
+                        DefaultDurationDays = duration,
+                        StartDate = DateTime.Now,
+                        Deadline = DateTime.Now.AddDays(duration),
+                        Status = 1,
+                        IsCustomTask = false,
+                        SortOrder = sort++
+                    };
+                    SaveTracking(task, username);
+                }
+            }
+            else
+            {
+                // Nếu quy trình được chọn chưa có tiến trình mẫu nào, lưu 1 bản ghi tiến trình rỗng
+                // để giữ quy trình hiển thị trên bảng Checklist và cho phép bấm "Thêm tiến trình"
+                var emptyTask = new RM_DigitalSalesTrackingModel
+                {
+                    TrackingID = 0,
+                    DigitalSalesID = digitalSalesId,
+                    ProcessID = newProcessId,
+                    ProgressID = null,
+                    TaskName = string.Empty,
+                    DurationDays = 3,
+                    DefaultDurationDays = 3,
+                    StartDate = DateTime.Now,
+                    Deadline = DateTime.Now.AddDays(3),
+                    Status = 1,
+                    IsCustomTask = true,
+                    SortOrder = 1
+                };
+                SaveTracking(emptyTask, username);
+            }
+
+            return 1;
         }
 
         public int DeleteTracking(int trackingId, string username)
@@ -516,6 +607,19 @@ namespace Core.Cate.Biz
                 _spActivityDelete,
                 DATA_PROVIDER_NAME,
                 activityId,
+                username
+            );
+            return result.GetValueOrDefault(0);
+        }
+
+        public int UpdateLatestStatusChangeActivityAttachments(int digitalSalesId, string attachmentsJson, string username)
+        {
+            if (digitalSalesId <= 0 || string.IsNullOrWhiteSpace(attachmentsJson)) return 0;
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spActivityUpdateLatestStatusChange,
+                DATA_PROVIDER_NAME,
+                digitalSalesId,
+                attachmentsJson,
                 username
             );
             return result.GetValueOrDefault(0);

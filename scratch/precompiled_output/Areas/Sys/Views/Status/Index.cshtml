@@ -1,0 +1,48 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("Status_Title");
+}
+
+@section PageTitle
+{
+    @ViewBag.Title
+}
+
+@section PageAction
+{
+    @Html.Button(true, 
+    "AddStatus", 
+    Url.Action("Add", new { area = "Sys" }), 
+    "<i class='fa fa-plus'></i>", 
+    AppProcessor.Messagor.GetMessage("Button_Add"), 
+    new { 
+        @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right"})
+}
+
+
+@Html.Partial("_Search")
+
+<div class="mt-3">
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="DSStatus" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Status_Label_Key")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Status_Label_Code")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Status_Label_Name")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Status_Label_SortOrder")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Status_Label_StatusClass")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section BottomScript {
+    <script src="@Url.Content("~/Areas/Sys/Views/Status/Status.js")"></script>
+}

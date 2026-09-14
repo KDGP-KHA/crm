@@ -1,0 +1,411 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"),
+        AppProcessor.Messagor.GetMessage("Job_Label_CronExpression"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-calendar-alt"></i>
+}
+
+@section FormBody{
+
+    <div id="bodyForm" class="row">
+        <div class="col-md-12 pb-25">
+            <div id="crontabs" class="card">
+                <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
+                    <li class="nav-item mr-2px">
+                        <a id="btnTabs_Seconds" class="d-style active btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#tabs_Seconds" role="tab" aria-controls="tabs_Seconds" aria-selected="true">
+                            <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                            Seconds
+                        </a>
+                    </li>
+                    <li class="nav-item mr-2px">
+                        <a id="btnTabs_Minutes" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#tabs_Minutes" role="tab" aria-controls="tabs_Minutes" aria-selected="true">
+                            <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                            Minutes
+                        </a>
+                    </li>
+                    <li class="nav-item mr-2px">
+                        <a id="btnTabs_Hours" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#tabs_Hours" role="tab" aria-controls="tabs_Hours" aria-selected="true">
+                            <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                            Hours
+                        </a>
+                    </li>
+                    <li class="nav-item mr-2px">
+                        <a id="btnTabs_Day" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#tabs_Day" role="tab" aria-controls="tabs_Day" aria-selected="true">
+                            <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                            Day
+                        </a>
+                    </li>
+                    <li class="nav-item mr-2px">
+                        <a id="btnTabs_Month" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#tabs_Month" role="tab" aria-controls="tabs_Month" aria-selected="true">
+                            <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                            Month
+                        </a>
+                    </li>
+                    <li class="nav-item mr-2px">
+                        <a id="btnTabs_Year" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#tabs_Year" role="tab" aria-controls="tabs_Year" aria-selected="true">
+                            <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                            Year
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content bgc-white p-35 border-0">
+                    <div class="tab-pane fade show active text-95" id="tabs_Seconds" role="tabpanel" aria-labelledby="btnTabs_Seconds">
+                        @Html.Partial("_TabSecond")
+                    </div>
+                    <div class="tab-pane fade show text-95" id="tabs_Minutes" role="tabpanel" aria-labelledby="btnTabs_Minutes">
+                        @Html.Partial("_TabMinute")
+                    </div>
+                    <div class="tab-pane fade show text-95" id="tabs_Hours" role="tabpanel" aria-labelledby="btnTabs_Hours">
+                        @Html.Partial("_TabHour")
+                    </div>
+                    <div class="tab-pane fade show text-95" id="tabs_Day" role="tabpanel" aria-labelledby="btnTabs_Day">
+                        @Html.Partial("_TabDay")
+                    </div>
+                    <div class="tab-pane fade show text-95" id="tabs_Month" role="tabpanel" aria-labelledby="btnTabs_Month">
+                        @Html.Partial("_TabMonth")
+                    </div>
+                    <div class="tab-pane fade show text-95" id="tabs_Year" role="tabpanel" aria-labelledby="btnTabs_Year">
+                        @Html.Partial("_TabYear")
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 pb-25">
+            <div class="card p-3">
+                <h4>Resulting Cron Expression:</h4>
+                <h4 id="cronResult" class="font-bold text-danger fa-2x">0 0 0 ? * * *</h4>
+            </div>
+        </div>
+        <div class="col-md-12 pb-25">
+            <div class="card p-3">
+                <table class="table table-responsive-md">
+                    <tbody>
+                    <tr>
+                        <td>Seconds</td>
+                        <td>Minutes</td>
+                        <td>Hours</td>
+                        <td>Day Of Month</td>
+                        <td>Month</td>
+                        <td>Day Of Week</td>
+                        <td>Year</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span id="cronResultSecond">0</span>
+                        </td>
+                        <td>
+                            <span id="cronResultMinute">0</span>
+                        </td>
+                        <td>
+                            <span id="cronResultHour">0</span>
+                        </td>
+                        <td>
+                            <span id="cronResultDom">?</span>
+                        </td>
+                        <td>
+                            <span id="cronResultMonth">*</span>
+                        </td>
+                        <td>
+                            <span id="cronResultDow">*</span>
+                        </td>
+                        <td>
+                            <span id="cronResultYear">*</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(function() {
+            var FF = {
+                cron: function() {
+                    $(this).parents('.cron-option').children('input[type="radio"]').attr("checked", "checked");
+                    FF.seconds();
+                    FF.minutes();
+                    FF.hours();
+                    FF.day();
+                    FF.month();
+                    FF.year();
+                    var seconds = $('#cronResultSecond').text();
+                    var minutes = $('#cronResultMinute').text();
+                    var hours = $('#cronResultHour').text();
+                    var dom = $('#cronResultDom').text();
+                    var month = $('#cronResultMonth').text();
+                    var dow = $('#cronResultDow').text();
+                    var year = $('#cronResultYear').text();
+                    $('#cronResult').text(seconds +
+                        ' ' +
+                        minutes +
+                        ' ' +
+                        hours +
+                        ' ' +
+                        dom +
+                        ' ' +
+                        month +
+                        ' ' +
+                        dow +
+                        ' ' +
+                        year);
+                },
+                seconds: function() {
+                    var seconds = '';
+                    if ($('#cronEverySecond:checked').length) {
+                        seconds = '*';
+                    } else if ($('#cronSecondIncrement:checked').length) {
+                        seconds = $('#cronSecondIncrementStart').val();
+                        seconds += '/';
+                        seconds += $('#cronSecondIncrementIncrement').val();
+                    } else if ($('#cronSecondSpecific:checked').length) {
+                        $('[name="cronSecondSpecificSpecific"]:checked').each(function(i, chck) {
+                            seconds += $(chck).val();
+                            seconds += ',';
+                        });
+                        if (seconds === '') {
+                            seconds = '0';
+                        } else {
+                            seconds = seconds.slice(0, -1);
+                        }
+                    } else {
+                        seconds = $('#cronSecondRangeStart').val();
+                        seconds += '-';
+                        seconds += $('#cronSecondRangeEnd').val();
+                    }
+                    $('#cronResultSecond').text(seconds);
+                },
+                minutes: function() {
+                    var minutes = '';
+                    if ($('#cronEveryMinute:checked').length) {
+                        minutes = '*';
+                    } else if ($('#cronMinuteIncrement:checked').length) {
+                        minutes = $('#cronMinuteIncrementStart').val();
+                        minutes += '/';
+                        minutes += $('#cronMinuteIncrementIncrement').val();
+                    } else if ($('#cronMinuteSpecific:checked').length) {
+                        $('[name="cronMinuteSpecificSpecific"]:checked').each(function(i, chck) {
+                            minutes += $(chck).val();
+                            minutes += ',';
+                        });
+                        if (minutes === '') {
+                            minutes = '0';
+                        } else {
+                            minutes = minutes.slice(0, -1);
+                        }
+                    } else {
+                        minutes = $('#cronMinuteRangeStart').val();
+                        minutes += '-';
+                        minutes += $('#cronMinuteRangeEnd').val();
+                    }
+                    $('#cronResultMinute').text(minutes);
+                },
+                hours: function() {
+                    var hours = '';
+                    if ($('#cronEveryHour:checked').length) {
+                        hours = '*';
+                    } else if ($('#cronHourIncrement:checked').length) {
+                        hours = $('#cronHourIncrementStart').val();
+                        hours += '/';
+                        hours += $('#cronHourIncrementIncrement').val();
+                    } else if ($('#cronHourSpecific:checked').length) {
+                        $('[name="cronHourSpecificSpecific"]:checked').each(function(i, chck) {
+                            hours += $(chck).val();
+                            hours += ',';
+                        });
+                        if (hours === '') {
+                            hours = '0';
+                        } else {
+                            hours = hours.slice(0, -1);
+                        }
+                    } else {
+                        hours = $('#cronHourRangeStart').val();
+                        hours += '-';
+                        hours += $('#cronHourRangeEnd').val();
+                    }
+                    $('#cronResultHour').text(hours);
+                },
+                day: function() {
+                    var dow = '';
+                    var dom = '';
+
+                    if ($('#cronEveryDay:checked').length) {
+                        dow = '*';
+                        dom = '?';
+                    } else if ($('#cronDowIncrement:checked').length) {
+                        dow = $('#cronDowIncrementStart').val();
+                        dow += '/';
+                        dow += $('#cronDowIncrementIncrement').val();
+                        dom = '?';
+                    } else if ($('#cronDomIncrement:checked').length) {
+                        dom = $('#cronDomIncrementStart').val();
+                        dom += '/';
+                        dom += $('#cronDomIncrementIncrement').val();
+                        dow = '?';
+                    } else if ($('#cronDowSpecific:checked').length) {
+                        dom = '?';
+                        $('[name="cronDowSpecificSpecific"]:checked').each(function(i, chck) {
+                            dow += $(chck).val();
+                            dow += ',';
+                        });
+                        if (dow === '') {
+                            dow = 'SUN';
+                        } else {
+                            dow = dow.slice(0, -1);
+                        }
+                    } else if ($('#cronDomSpecific:checked').length) {
+                        dow = '?';
+                        $('[name="cronDomSpecificSpecific"]:checked').each(function(i, chck) {
+                            dom += $(chck).val();
+                            dom += ',';
+                        });
+                        if (dom === '') {
+                            dom = '1';
+                        } else {
+                            dom = dom.slice(0, -1);
+                        }
+                    } else if ($('#cronLastDayOfMonth:checked').length) {
+                        dow = '?';
+                        dom = 'L';
+                    } else if ($('#cronLastWeekdayOfMonth:checked').length) {
+                        dow = '?';
+                        dom = 'LW';
+                    } else if ($('#cronLastSpecificDom:checked').length) {
+                        dom = '?';
+                        dow = $('#cronLastSpecificDomDay').val();
+                        dow += 'L';
+                    } else if ($('#cronDaysBeforeEom:checked').length) {
+                        dow = '?';
+                        dom = 'L-';
+                        dom += $('#cronDaysBeforeEomMinus').val();
+                    } else if ($('#cronDaysNearestWeekdayEom:checked').length) {
+                        dow = '?';
+                        dom = $('#cronDaysNearestWeekday').val();
+                        dom += 'W';
+                    } else if ($('#cronNthDay:checked').length) {
+                        dom = '?';
+                        dow = $('#cronNthDayDay').val();
+                        dow += '#';
+                        dow += $('#cronNthDayNth').val();;
+                    }
+                    $('#cronResultDom').text(dom);
+                    $('#cronResultDow').text(dow);
+                },
+                month: function() {
+                    var month = '';
+                    if ($('#cronEveryMonth:checked').length) {
+                        month = '*';
+                    } else if ($('#cronMonthIncrement:checked').length) {
+                        month = $('#cronMonthIncrementStart').val();
+                        month += '/';
+                        month += $('#cronMonthIncrementIncrement').val();
+                    } else if ($('#cronMonthSpecific:checked').length) {
+                        $('[name="cronMonthSpecificSpecific"]:checked').each(function(i, chck) {
+                            month += $(chck).val();
+                            month += ',';
+                        });
+                        if (month === '') {
+                            month = '1';
+                        } else {
+                            month = month.slice(0, -1);
+                        }
+                    } else {
+                        month = $('#cronMonthRangeStart').val();
+                        month += '-';
+                        month += $('#cronMonthRangeEnd').val();
+                    }
+                    $('#cronResultMonth').text(month);
+                },
+                year: function() {
+                    var year = '';
+                    if ($('#cronEveryYear:checked').length) {
+                        year = '*';
+                    } else if ($('#cronYearIncrement:checked').length) {
+                        year = $('#cronYearIncrementStart').val();
+                        year += '/';
+                        year += $('#cronYearIncrementIncrement').val();
+                    } else if ($('#cronYearSpecific:checked').length) {
+                        $('[name="cronYearSpecificSpecific"]:checked').each(function(i, chck) {
+                            year += $(chck).val();
+                            year += ',';
+                        });
+                        if (year === '') {
+                            year = '@DateTime.Now.Year';
+                        } else {
+                            year = year.slice(0, -1);
+                        }
+                    } else {
+                        year = $('#cronYearRangeStart').val();
+                        year += '-';
+                        year += $('#cronYearRangeEnd').val();
+                    }
+                    $('#cronResultYear').text(year);
+                }
+            };
+            $('#crontabs input, #crontabs select').change(FF.cron);
+            FF.cron();
+        });
+
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('a[data-toggle="tab"]').on('shown.bs.tab',
+                function(e) {
+                    if ($($(this).attr('href')).has('select').length > 0) {
+                        $.each($($(this).attr('href')).find('select'),
+                            function(idx, ele) {
+                                if ($(ele).data("select2")) {
+                                    $(ele).select2({
+                                        allowClear: true,
+                                        placeholder: "Chọn 1 giá trị",
+                                        width: "element",
+                                        dropdownParent: $(this).parent(),
+                                        dropdownAutoWidth: true,
+                                        language: "vi"
+                                    });
+                                } else {
+                                    $(ele).select2('destroy').select2({
+                                        allowClear: true,
+                                        placeholder: "Chọn 1 giá trị",
+                                        width: "element",
+                                        dropdownParent: $(this).parent(),
+                                        dropdownAutoWidth: true,
+                                        language: "vi"
+                                    });
+                                }
+                            });
+                    }
+                });
+        });
+
+        function OnSelectCronExpression() {
+            var inputSchedule = $("#JobSchedule #CronExpression");
+            if (inputSchedule.length > 0) {
+                inputSchedule.val($('#cronResult').text());
+            }
+            requirejs(['cronstrue'],
+                function(cronstrue) {
+                    var expression = $('#cronResult').text();
+                    if (expression.length > 0) {
+                        var result = cronstrue.toString(expression, { locale: "fr" });
+                        $("#JobSchedule #ExplainCronExpression").text(result);
+                    }
+                });
+        }
+    </script>
+}
+
+@section SubmitControl{
+    <button type="button" id="btnSave" class="btn btn-primary" onclick="OnSelectCronExpression()" data-dismiss="modal">
+        <i class="fa fa-save"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Save")
+    </button>
+}

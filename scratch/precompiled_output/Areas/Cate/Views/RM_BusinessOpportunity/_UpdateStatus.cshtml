@@ -1,0 +1,117 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ExchangeHistoryFormModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("RM_ExchangeHistory_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+@section FormBody{
+    <style>
+        .exchange-history-log-list {
+            height: auto !important;
+            max-height: calc(100vh - 260px);
+            overflow-y: auto;
+        }
+
+            .exchange-history-log-list .ace-scroll-inner {
+                height: auto !important;
+                max-height: none !important;
+            }
+    </style>
+
+    <div id="bodyForm">
+        <div class="row">
+            <div class="col-md-6 col-sm-12 mb-3" id="FormXacNhan">
+                <div class="card dcard overflow-hidden">
+                    <div class="card-header">
+                        <h5 class="card-title text-110 text-success-d2 pt-1">
+                            <i class="fas fa-check-circle text-success ml-2"></i>
+                            &nbsp;Cập nhật trạng thái
+                        </h5>
+                    </div>
+                    @using (Html.BeginForm("UpdateStatus", "RM_BusinessOpportunity", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditExchangeHistory", @class = "form-horizontal" }))
+                    {
+                        <div class="card-body bg-white py-1 pt-3" id="_FormConfirm">
+                            @Html.Partial("_ExchangeHistory", Model.RM_ExchangeHistory)
+                        </div>
+
+                    }
+                    <div class="card-footer bgc-white px-4 py-3 brc-dark-l3 d-flex justify-content-end">
+                        <button type="submit" id="btnSave" class="float-right btn border-2 btn-lighter-success btn-text-success btn-h-success btn-a-success btn-bgc-tp">
+                            <i class="fas fa-check mr-2"></i> Xác nhận
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12" id="ListQuyTrinh">
+                <div class="card dcard overflow-hidden">
+                    <div class="card-header">
+                        <h5 class="card-title text-110 text-primary-d2 pt-1">
+                            <i class="fas fa-sitemap text-primary ml-2"></i>
+                            &nbsp;Lịch sử trao đổi
+                        </h5>
+                    </div>
+
+                    <div class="card-body bg-white pb-2">
+                        <div id="LogList" class="px-2 exchange-history-log-list">
+                            @Html.Partial("_LichSuPhieu")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#modal_EditExchangeHistory').addClass('modal-fs').removeClass('modal-xl');
+            $("#FormXacNhan #btnSave").click(function () {
+                for (instance in CKEDITOR.instances) {
+                    CKEDITOR.instances[instance].updateElement();
+                }
+                $("form#EditExchangeHistory").submit();
+            });
+        });
+        $('form#EditExchangeHistory').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    var urlAction = $("#ModalContent #modal_EditExchangeHistory form").attr("action");
+                    $("#modal_EditExchangeHistory" + " #modal-content").load(urlAction, function (data, textStatus, xhr) {
+                        _initElement();
+                    });
+
+                    if (_tableBusinessOpportunity) {
+                        _tableBusinessOpportunity.ajax.reload(null, false);
+                    }
+                    response.status = undefined;
+                    if (typeof reloadBOHistory === "function") {
+                        reloadBOHistory();
+                    }
+
+                    if (typeof reloadBoDetail === "function") {
+                        reloadBoDetail();
+                    }
+
+                    if (typeof reloadBoHeader === "function") {
+                        reloadBoHeader();
+                    }
+                } else {
+                    $("#modal_EditExchangeHistory" + " #_FormConfirm").html(response);
+                }
+            }
+        });
+    </script>
+}
+
+@section SubmitControl {
+
+}

@@ -1,0 +1,170 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_Employee_BusinessPlanModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("EmployeeBusinessPlan_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-Add"></i>
+}
+
+<div style="text-align: right; margin-bottom: 4px;">
+    @Html.Button(true, "AddEmployeeBusinessPlan", Url.Action("Add", new { area = "Cate", id = Model.BusinessPlanID }), "<i class='fa fa-plus'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90", data_width = "1024px" } )
+</div>
+
+@section FormBody{
+    <div class="mt-3">
+        <div class="card dcard">
+            <div class="col-sm-12 table-responsive-md">
+                <table id="DSEmployeeBusinessPlan" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                        <tr>
+                            <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Dashboard_Col_EmployeeName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("BusinessPlan_RevenueTarget_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("BusinessPlan_ResponsibilityRevenue_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Task_Note_Label")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var _EmployeeBusinessPlanActionURLs = {
+            EmployeeBusinessPlan_GetData: "/Cate/RM_BusinessPlan/GetEmployeeBusinessPlan"
+        };
+        var _tableEmployeeBusinessPlan;
+        $(document).ready(function () {
+            initTableEmployeeBusinessPlan();
+        });
+
+        function Search() {
+            _tableEmployeeBusinessPlan.ajax.reload(null, false);
+        }
+
+        function initTableEmployeeBusinessPlan() {
+            _tableEmployeeBusinessPlan = $("#DSEmployeeBusinessPlan").DataTable({
+                "Responsive": true,
+                "EmployeeBusinessPlan": {
+                    "processing":
+                        "<div class='overlay'><i class='fas fa-cog fa-spin'></i></div>"
+                },
+                "lengthChange": true,
+                "processing": true,
+                "serverSide": true,
+                "ajax":
+                {
+                    "url": _EmployeeBusinessPlanActionURLs.EmployeeBusinessPlan_GetData,
+                    "type": "POST",
+                    "dataType": "JSON",
+                    "data": {
+                        "businessPlanID": '@Model.BusinessPlanID',
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "",
+                        "defaultContent": "1",
+                        "render": function (data, type, row, meta) {
+                            return meta.settings._iDisplayStart + meta.row + 1;
+                        }
+                    },
+                    {
+                        "data": "FullName",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "RevenueTarget",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "ResponsibilityRevenue",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "Note",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "EmployeeBusinessPlanID",
+                        "defaultContent": "",
+                        "render": function (data, type, row, meta) {
+                            var html = '<span class="">';
+                            if (type === "display") {
+                                html += '<div class="dropdown d-inline-block"><button class="btn btn-lighter-primary mr-1 dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h text-120"></i></button><div class="dropdown-menu dropdown-menu-right">';
+                                html += _renderButton(true,
+                                    "EditEmployeeBusinessPlan",
+                                    "btn btn-lighter-primary mr-1 btn-a-outline-primary dropdown-item",
+                                    "/Cate/Customer/EditCHKD/" + data,
+                                    '<i class="far fa-edit text-primary text-120 mr-1"></i> Cập nhật',
+                                    "Cập nhật", 1024);
+                                html += _renderButton(true,
+                                    "DeleteEmployeeBusinessPlan",
+                                    "btn btn-lighter-danger mr-1 btn-a-outline-danger dropdown-item",
+                                    "/Cate/Customer/DeleteCHKD/" + data,
+                                    '<i class="far fa-trash-alt text-danger text-120 mr-1"></i> Xoá',
+                                    "Xoá");
+                                html += '</div></div>';
+                            }
+                            html += "</span>";
+                            return html;
+                        }
+                    }
+                ]
+            });
+        }
+
+
+        function EmployeeBusinessPlan_OnProcessSuccess(response, formId) {
+            if (response.status != undefined) {
+                if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
+                    if (response.status != undefined) {
+                        eval(response.message);
+                        _tableEmployeeBusinessPlan.ajax.reload(null, false);
+                        response.status = undefined;
+                        //$("#ModalContent #modal_" + formId + " form")[0].reset();
+                        var urlAction = $("#ModalContent #modal_" + formId + " form").attr("action");
+                        $("#ModalContent #modal_" + formId + " #modal-content").load(urlAction, function (data, textStatus, xhr) {
+                            _initElement();
+                        });
+                    }
+                } else {
+                    $("#ModalContent #modal_" + formId).modal("hide");
+                    $("#ModalContent #modal_" + formId).on("hidden.bs.modal",
+                        function () {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                _tableEmployeeBusinessPlan.ajax.reload(null, false);
+                                response.status = undefined;
+                            }
+                        });
+                }
+            } else {
+                $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+            }
+        }
+    </script>
+}
+
+@section SubmitControl {
+
+}

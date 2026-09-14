@@ -153,6 +153,13 @@ namespace Core.Cate.Caches
             return result;
         }
 
+        public int ChangeProcessOfStatus(int digitalSalesId, int statusId, int newProcessId, string username)
+        {
+            var result = Api.ChangeProcessOfStatus(digitalSalesId, statusId, newProcessId, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
         public List<RM_DigitalSalesMemberModel> GetMembersBySalesID(int digitalSalesId)
         {
             if (digitalSalesId <= 0) return new List<RM_DigitalSalesMemberModel>();
@@ -223,6 +230,13 @@ namespace Core.Cate.Caches
         public int DeleteActivity(int activityId, string username)
         {
             var result = Api.DeleteActivity(activityId, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
+        public int UpdateLatestStatusChangeActivityAttachments(int digitalSalesId, string attachmentsJson, string username)
+        {
+            var result = Api.UpdateLatestStatusChangeActivityAttachments(digitalSalesId, attachmentsJson, username);
             if (result > 0) InvalidateCache();
             return result;
         }

@@ -1,0 +1,13 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysRoleModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.RoleId)
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.Name, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-md-9">
+        @Html.TextBoxFor(model => model.Name, new { @class = "form-control col-sm-10 col-md-9", placeholder = AppProcessor.Messagor.GetMessage("Role_Label_Name") })
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+</div>

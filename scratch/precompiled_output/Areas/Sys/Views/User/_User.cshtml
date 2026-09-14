@@ -1,0 +1,177 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysUserModel
+@Html.AntiForgeryToken()
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(model => model.UserId)
+
+<div id="User" class="row">
+
+    <div class="col-12 col-md-9">
+
+        <div class="form-group row">
+            @Html.TitleFor(model => model.FullName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text w-5">
+                            <i class="far fa-user-circle"></i>
+                        </span>
+                    </div>
+                    @Html.TextBoxFor(model => model.FullName, new { @class = "form-control col-sm-10 col-md-8", placeholder = AppProcessor.Messagor.GetMessage("User_Label_FullName") })
+                </div>
+                @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.TitleFor(model => model.Email, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text w-5">
+                            <i class="fa fa-envelope"></i>
+                        </span>
+                    </div>
+                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control col-sm-7", placeholder = AppProcessor.Messagor.GetMessage("User_Label_Email") })
+                </div>
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.TitleFor(model => model.UserName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text w-5">
+                            <i class="fa fa-user"></i>
+                        </span>
+                    </div>
+                    @{
+                        if (Model.UserId > 0)
+                        {
+                            @Html.TextBoxFor(model => model.UserName, new { disabled = "disabled", @class = "form-control col-sm-7 col-md-5", placeholder = AppProcessor.Messagor.GetMessage("User_Label_UserName") })
+                            @Html.HiddenFor(model => model.UserName)
+                        }
+                        else
+                        {
+                            @Html.TextBoxFor(model => model.UserName, new { @class = "form-control col-sm-7 col-md-5", placeholder = AppProcessor.Messagor.GetMessage("User_Label_UserName") })
+                        }
+                    }
+
+                </div>
+                @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group row">
+            @Html.TitleFor(model => model.Phone, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text w-5">
+                            <i class="fas fa-mobile"></i>
+                        </span>
+                    </div>
+                    @Html.TextBoxFor(model => model.Phone, new { @class = "form-control col-sm-7", placeholder = AppProcessor.Messagor.GetMessage("User_Label_Phone") })
+                </div>
+                @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        @*<div class="form-group row">
+            @Html.TitleFor(model => model.BoPhanId, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text w-5">
+                            <i class="fas fa-building"></i>
+                        </span>
+                    </div>
+                    @Html.DropDownListFor(model => model.BoPhanId, new SelectList(Model.ListBoPhans, "Value", "Text"), "", new { @class = "form-control col-md-10" })
+                </div>
+                @Html.ValidationMessageFor(model => model.BoPhanId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group row">
+            @Html.TitleFor(model => model.ChucVuId, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text w-5">
+                            <i class="fas fa-user-tag"></i>
+                        </span>
+                    </div>
+                    @Html.DropDownListFor(model => model.ChucVuId, new SelectList(Model.ListChucVus, "Value", "Text"), "", new { @class = "form-control col-md-10" })
+                </div>
+                @Html.ValidationMessageFor(model => model.ChucVuId, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+    </div>
+
+    <div class="col-12 col-md-3">
+        <div class="ace-file-input ace-file-multiple">
+            <div class="ace-file-container d-flex flex-column border-1 border-dashed brc-primary-m4 brc-h-warning-m1">
+                <div class="ace-file-placeholder h-100">
+                    @Html.ImageFor(model => model.AvatarFileBase, Model.AvatarPath, AppProcessor.Messagor.GetMessage("Employee_Avatar"), ".jpeg,.png,.gif,.jpg", new { @class = "col-sm-10 col-md-8 mx-auto my-1" })
+                    @Html.HiddenFor(model => model.Avatar)
+                </div>
+            </div>
+        </div>
+        @Html.ValidationMessageFor(model => model.Avatar, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+@{
+    if (Model.UserId > 0)
+    {
+        <div class="col-12">
+            <hr />
+            <div class="form-group row">
+                @Html.TitleFor(model => model.Reason, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-9">
+                    @Html.TextAreaFor(model => model.Reason, new { rows = "3", @class = "form-control col-sm-12 col-md-9", placeholder = AppProcessor.Messagor.GetMessage("Reason_Label") })
+                    @Html.ValidationMessageFor(model => model.Reason, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+    }
+}
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Email').inputmask("email");
+        $("#Phone").inputmask({ "mask": "(+84) 999999999" });
+        $('#UserRoles input[type=checkbox]').each(function () {
+            var roleIDs = $('input[type="hidden"][id$="RoleIDs"]').val().split(',');
+
+            var idGroup = $(this).val();
+            var index = roleIDs.indexOf((idGroup));
+
+            if (index > -1) {
+                this.checked = true;
+            }
+        });
+    });
+
+    function OnEventChecked(chk) {
+        var roleIDs = $('input[type="hidden"][id$="RoleIDs"]').val().split(',');
+
+        var index;
+        if ($(chk)[0].checked) {
+            index = roleIDs.indexOf(($(chk).val()));
+            if (index == -1) {
+                roleIDs.push($(chk).val());
+            }
+        } else {
+            index = roleIDs.indexOf(($(chk).val()));
+            roleIDs.splice(index, 1);
+        }
+        $('input[type="hidden"][id$="RoleIDs"]').val(roleIDs);
+    }
+</script>
+
+@Html.RenderScripts(ScriptPosition.BodyInside)

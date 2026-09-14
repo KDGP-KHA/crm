@@ -1,0 +1,81 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_ProductCostModel>
+
+@{
+    var productProjectId = ViewData["ProductProjectID"];
+}
+
+@Html.Button(true, "AddProductCost", Url.Action("Add", "ProductCost", new { area = "Cate", id = productProjectId }), "<i class='fa fa-plus'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right mb-3" })
+
+<div class="row mb-2">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+
+                    <!-- Header -->
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 font-weight-bold text-primary">
+                            @item.CostTypeName
+                        </h6>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <strong>Số tiền:</strong><br />
+                            <span class="text-danger font-weight-bold">
+                                @item.Amount.ToString("N0") triệu VNĐ
+                            </span>
+                        </p>
+
+                        <p class="mb-2">
+                            <strong>Ngày thanh toán:</strong><br />
+                            @(item.PaymentDate?.ToString("dd/MM/yyyy") ?? "--")
+                        </p>
+
+                        <p class="mb-0">
+                            <strong>Ghi chú:</strong><br />
+                            @(string.IsNullOrEmpty(item.Note) ? "--" : item.Note)
+                        </p>
+
+                    </div>
+
+                    <!-- Footer -->
+
+                    <div class="card-footer bg-white text-right">
+                        @Html.Button(
+                            true,
+                            "EditProductCost",
+                            Url.Action("Edit", "ProductCost", new { area = "Cate", id = item.ProductCostID }),
+                            "<i class='fa fa-edit'></i>",
+                            "",
+                            new { @class = "btn btn-sm btn-primary" }
+                        )
+
+                        @Html.Button(
+                            true,
+                            "DeleteProductCost",
+                            Url.Action("Delete", "ProductCost", new { area = "Cate", id = item.ProductCostID }),
+                            "<i class='fa fa-trash'></i>",
+                            "",
+                            new { @class = "btn btn-sm btn-danger" }
+                        )
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                Chưa có chi phí nào.
+            </div>
+        </div>
+    }
+
+</div>

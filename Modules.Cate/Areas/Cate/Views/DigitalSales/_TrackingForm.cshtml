@@ -2,6 +2,12 @@
 @model Core.Cate.Models.RM_DigitalSalesTrackingModel
 @Html.AntiForgeryToken()
 @Html.HiddenFor(m => m.TrackingID)@Html.HiddenFor(m => m.DigitalSalesID)@Html.HiddenFor(m => m.ProcessID)@Html.HiddenFor(m => m.ProgressID)@Html.HiddenFor(m => m.IsCustomTask)
+@if (Model.ProcessID.HasValue && Model.ProcessID.Value > 0 && !string.IsNullOrEmpty(ViewBag.ProcessName as string))
+{
+    <div class="alert alert-info py-2 px-3 mb-3 text-90 radius-1">
+        <i class="fa fa-project-diagram mr-1 text-primary"></i> Quy trình: <strong>@ViewBag.ProcessName</strong>
+    </div>
+}
 <div class="form-group">@Html.TitleFor(m => m.TaskName, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextBoxFor(m => m.TaskName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesTracking_TaskName_Placeholder") })@Html.ValidationMessageFor(m => m.TaskName, "", new { @class = "text-danger" })</div>
 <div class="form-group">@Html.TitleFor(m => m.AssignedUserID, new { @class = "text-85 text-600 mb-1 d-block" })@Html.DropDownListFor(m => m.AssignedUserID, (List<SelectListItem>)ViewBag.UserList, AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AssignedUser_Option"), new { @class = "form-control select2" })@Html.ValidationMessageFor(m => m.AssignedUserID, "", new { @class = "text-danger" })</div>
 <div class="row"><div class="col-md-6 form-group">@Html.TitleFor(m => m.StartDate, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextBoxFor(m => m.StartDate, "{0:dd/MM/yyyy}", new { @class = "form-control date-picker", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Date_Placeholder"), autocomplete = "off" })@Html.ValidationMessageFor(m => m.StartDate, "", new { @class = "text-danger" })</div><div class="col-md-6 form-group">@Html.TitleFor(m => m.Deadline, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextBoxFor(m => m.Deadline, "{0:dd/MM/yyyy}", new { @class = "form-control date-picker", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Date_Placeholder"), autocomplete = "off" })@Html.ValidationMessageFor(m => m.Deadline, "", new { @class = "text-danger" })</div></div>

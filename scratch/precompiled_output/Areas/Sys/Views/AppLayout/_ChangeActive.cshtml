@@ -1,0 +1,28 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysLayoutModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Active"), AppProcessor.Messagor.GetMessage("AppLayout_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("ChangeActive", "AppLayout", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "AppLayout_OnProcessSuccess(data, 'ChangeActiveAppLayout')"
+    }, new { @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.LayoutId)
+            @Html.HiddenFor(model => model.LayoutName)
+            @Html.HiddenFor(model => model.LayoutView)
+            <h4> @Html.Raw(ViewBag.ConfirmActiveMessage)</h4>
+        </div>
+    }
+}

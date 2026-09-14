@@ -435,5 +435,6 @@
 		<Procedure Name="RM_DigitalSalesActivity_GetList" Value="RM_DigitalSalesActivity_GetList" />
 		<Procedure Name="RM_DigitalSalesActivity_Add" Value="RM_DigitalSalesActivity_Add" />
 		<Procedure Name="RM_DigitalSalesActivity_Delete" Value="RM_DigitalSalesActivity_Delete" />
+		<Procedure Name="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" Value="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" />
 	</StoredProcedures>
 </Provider>

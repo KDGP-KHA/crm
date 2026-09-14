@@ -1,0 +1,106 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    Layout = "~/Views/Shared/_Login.cshtml";
+    //ViewBag.Title = "Đăng nhập";
+}
+
+@section HeadCss{
+
+}
+
+<div class="body-container">
+
+    <div class="body-container">
+        <div class="main-container container bgc-transparent">
+            <div class="main-content minh-100 justify-content-center">
+                <div class="p-2 p-md-4">
+                    <div class="row justify-content-center" id="row-1">
+                        <div class="bgc-white shadow radius-1 overflow-hidden col-12 col-lg-6 col-xl-5">
+                            <div class="row" id="row-2">
+
+                                <div style="background-image: url(/Contents/Base/plugins/ace_v4/assets/image/login-bg-1.svg);" id="id-col-main" class="col-12 py-lg-5 bgc-white px-0">
+                                    <!-- you can also use these tab links -->
+                                    <ul class="d-none mt-n4 mb-4 nav nav-tabs nav-tabs-simple justify-content-end bgc-black-tp11" role="tablist">
+                                        <li class="nav-item mx-2">
+                                            <a class="nav-link active px-2" data-toggle="tab" href="#id-tab-login" role="tab" aria-controls="id-tab-login" aria-selected="true">
+                                                @AppProcessor.Messagor.GetMessage("Button_Login")
+                                            </a>
+                                        </li>
+                                        <li class="nav-item mx-2">
+                                            <a class="nav-link px-2" data-toggle="tab" href="#id-tab-signup" role="tab" aria-controls="id-tab-signup" aria-selected="false">
+                                                @AppProcessor.Messagor.GetMessage("Button_Register")
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content tab-sliding border-0 p-0" data-swipe="right">
+                                        <div class="tab-pane active show px-3 px-lg-0" id="id-tab-login">
+                                            <!-- show this in desktop -->
+                                            <!-- show this in mobile device -->
+                                            <div class="text-secondary-m1 my-4 text-center">
+                                                <a href="/">
+                                                    <i class="fa fa-leaf text-success-m2 text-200 mb-4"></i>
+                                                </a>
+                                                <h1 class="text-170">
+                                                    <span class="text-blue-d1">
+                                                        VNPT <span class="text-80 text-dark-tp3">Urenco</span>
+                                                    </span>
+                                                </h1>
+                                                @AppProcessor.Messagor.GetMessage("Message_WelcomBack")
+                                            </div>
+
+                                            @Html.Partial("_Login")
+
+                                            <div class="form-row">
+                                                <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 d-flex flex-column align-items-center justify-content-center">
+                                                    <hr class="brc-default-l2 mt-0 mb-2 w-100">
+                                                    <div class="p-0 px-md-2 text-dark-tp3 my-3">
+                                                        @AppProcessor.Messagor.GetMessage("Message_NotMember")
+                                                        <a class="text-success-m1 text-600 mx-1" data-toggle="tab" data-target="#id-tab-signup" href="#">
+                                                            @AppProcessor.Messagor.GetMessage("Button_Register")
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div><!-- .tab-content -->
+                                </div>
+                            </div><!-- /.row -->
+                        </div><!-- /.col -->
+                    </div><!-- /.row -->
+                    <div class="d-lg-none my-3 text-white-tp1 text-center">
+                        <i class="fa fa-leaf text-success-l3 mr-1 text-110"></i> Ace Company © 2021
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section BottomScript{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#CaptchaInputText").addClass("form-control");
+        });
+
+        $('form#LoginForm').ajaxForm({
+            beforeSubmit: function(arr, $form, options) {
+                $('form#LoginForm input, form#LoginForm button, form#LoginForm a').attr("disabled", true);
+                return true;
+            },
+            success: function(response) {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    if (response.status) {
+                        window.location = window.location.origin + response.returnUrl;
+                    }
+                    response.status = undefined;
+                } else {
+                    $('form#LoginForm').html(response);
+                    $('form#LoginForm input, form#LoginForm button, form#LoginForm a').removeAttr("disabled");
+                }
+            }
+        });
+
+    </script>
+}

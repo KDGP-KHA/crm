@@ -1,0 +1,504 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.DigitalSalesID)
+@Html.HiddenFor(m => m.BusinessType)
+@Html.HiddenFor(m => m.StatusID)
+@Html.HiddenFor(m => m.ClosingProbability)
+@Html.HiddenFor(m => m.StartDate)
+@Html.HiddenFor(m => m.ExpectedDate)
+@Html.HiddenFor(m => m.ContractID)
+@Html.HiddenFor(m => m.ContractNo)
+@Html.HiddenFor(m => m.ContractValue)
+@Html.HiddenFor(m => m.ContractSignDate)
+
+@if (Model.DigitalSalesID <= 0)
+{
+    <div class="alert alert-info py-2 px-3 mb-3 text-90 border-0 radius-1 shadow-sm d-flex align-items-center">
+        <i class="fa fa-info-circle fa-lg text-primary mr-2 flex-shrink-0"></i>
+        <div>
+            Hồ sơ mới mặc định thuộc loại hình <strong>Cơ hội kinh doanh</strong> với trạng thái <strong>Chưa nắm bắt</strong>. Sau khi tiếp cận khách hàng và có thông tin SPDV số, bạn có thể chuyển đổi thành <strong>Dự án</strong>.
+        </div>
+    </div>
+}
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_DigitalSales.css?v=@DateTime.Now.Ticks" />
+
+<div class="row">
+    <!-- 1. TIÊU ĐỀ VÀ MÃ HỒ SƠ -->
+    <div class="col-md-8 mb-3">
+        @Html.TitleFor(m => m.Title, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        @Html.TextBoxFor(m => m.Title, new { @class = "form-control form-control-sm", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Title_Placeholder") })
+        @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger text-85 font-weight-bold" })
+    </div>
+
+    <div class="col-md-4 mb-3">
+        @Html.TitleFor(m => m.Code, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        @Html.TextBoxFor(m => m.Code, new { @class = "form-control form-control-sm bgc-warning-l4 text-warning-d3 border-1 brc-warning-m2 font-mono font-bold", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Code_Placeholder"), @readonly = "readonly" })
+    </div>
+
+    <!-- 2. KHÁCH HÀNG / DOANH NGHIỆP -->
+    <div class="col-md-6 mb-3">
+        @Html.TitleFor(m => m.CustomerID, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        <input type="hidden" id="CustomerID_Form" name="CustomerID" value="@Model.CustomerID" />
+        <input type="hidden" name="ContactPerson_ID" id="ContactPerson_ID_Form" value="@Model.ContactPerson_ID" />
+
+        <div class="input-group">
+            <input type="text" id="CustomerNameDisplay_Form" class="form-control font-bold text-primary-d2 bgc-grey-l5" 
+                   placeholder="@AppProcessor.Messagor.GetMessage("DigitalSales_Customer_Placeholder")" readonly="readonly"
+                   value="@(Model.CustomerID > 0 ? Model.CustomerName : "")" />
+            <div class="input-group-append">
+                <button type="button" class="btn btn-primary font-bold px-3" onclick="openCustomerLookupModal_Form();">
+                    <i class="fa fa-search mr-1"></i> Chọn khách hàng
+                </button>
+                <button type="button" class="btn btn-outline-danger" id="btnClearCustomer_Form" onclick="clearSelectedCustomer_Form();" title="Bỏ chọn" style="@(Model.CustomerID > 0 ? "" : "display:none;")">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        @Html.ValidationMessageFor(m => m.CustomerID, "", new { @class = "text-danger text-85 font-weight-bold" })
+    </div>
+
+    <!-- 3. PHÂN CÔNG AM CHỦ TRÌ -->
+    <div class="col-md-6 mb-3">
+        @Html.TitleFor(m => m.AssignedEmployeeID, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        @Html.DropDownListFor(m => m.AssignedEmployeeID, Model.ListEmployee, AppProcessor.Messagor.GetMessage("DigitalSales_AssignedEmployee_Option"), new { @class = "form-control select2" })
+        @Html.ValidationMessageFor(m => m.AssignedEmployeeID, "", new { @class = "text-danger text-85 font-weight-bold" })
+        <input type="hidden" id="DepartmentID_Form" name="DepartmentID" value="@Model.DepartmentID" />
+    </div>
+
+    <!-- Thẻ tóm tắt thông tin khách hàng được chọn -->
+    <div class="col-md-12">
+        <div id="customerInfoCard_Form" class="card border-1 brc-primary-m3 bgc-primary-l4 radius-1 p-2 mb-3 shadow-sm" style="display: none;"></div>
+    </div>
+
+
+
+    <!-- 5. FILE ĐÍNH KÈM -->
+    <div class="col-md-12 mb-3">
+        @Html.TitleFor(m => m.FileAttach, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        @if (Model.DigitalSalesID > 0 && !string.IsNullOrEmpty(Model.FileAttach))
+        {
+            var attachedFiles = Model.FileAttach.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            <div class="mb-2 p-2 bgc-grey-l4 radius-1 border-1 brc-grey-l2">
+                <div class="text-85 text-secondary font-bold mb-1"><i class="fa fa-folder-open text-primary mr-1"></i>Các tệp đã đính kèm hiện tại:</div>
+                <div class="d-flex flex-wrap">
+                    @foreach (var file in attachedFiles)
+                    {
+                        var trimmedFile = file.Trim();
+                        var fileName = System.IO.Path.GetFileName(trimmedFile);
+                        <div class="badge badge-light border border-secondary text-secondary p-1 mr-2 mb-1 radius-1 d-flex align-items-center">
+                            <i class="fa fa-paperclip mr-1 text-primary"></i>
+                            <a href="@Url.Content(trimmedFile)" target="_blank" class="text-secondary text-truncate" style="max-width: 200px;" title="@fileName">@fileName</a>
+                            <a href="javascript:void(0);" class="text-danger ml-2" onclick="removeAttachedFile_Form(this, '@trimmedFile');" title="Xóa file"><i class="fa fa-times"></i></a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        <input type="hidden" id="ExistingFileAttach_Form" name="FileAttach" value="@Model.FileAttach" />
+        <input type="file" name="fileUpload" multiple="multiple" class="form-control-file border p-1 rounded bgc-grey-l5" />
+        <small class="text-muted text-85 mt-1 d-block">
+            <i class="fa fa-info-circle text-info mr-1"></i>Có thể chọn cùng lúc <strong>nhiều file</strong> (giữ phím <code>Ctrl</code> hoặc <code>Shift</code> khi chọn file).
+        </small>
+    </div>
+
+    <!-- 6. MÔ TẢ QUA CKEDITOR -->
+    <div class="col-md-12 mb-2">
+        @Html.TitleFor(m => m.Note, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        @Html.TextAreaFor(m => m.Note, new { @id = "DigitalSales_Form_Note", @name = "Note", @class = "form-control form-control-sm", rows = "4", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Note_Placeholder") })
+    </div>
+</div>
+
+<!-- MODAL TRA CỨU KHÁCH HÀNG (CUSTOMER LOOKUP MODAL) -->
+<div class="modal fade" id="modalCustomerLookup_Form" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">
+            <div class="modal-header bgc-primary-d2 text-white py-2 px-3">
+                <h6 class="modal-title font-bold text-white mb-0">
+                    <i class="fa fa-search mr-1"></i> Tra cứu và Chọn Khách hàng / Doanh nghiệp
+                </h6>
+                <button type="button" class="close text-white" onclick="closeCustomerLookupModal_Form(event); return false;" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-3">
+                <!-- Thanh tìm kiếm -->
+                <div class="row mb-3">
+                    <div class="col-md-9">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white border-right-0"><i class="fa fa-search text-primary"></i></span>
+                            </div>
+                            <input type="text" id="txtSearchCustomerKeyword_Form" class="form-control border-left-0" 
+                                   placeholder="@AppProcessor.Messagor.GetMessage("DigitalSales_CustomerSearch_Placeholder")" />
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex">
+                        <button type="button" class="btn btn-primary btn-block font-bold" onclick="performCustomerLookup_Form(1);">
+                            <i class="fa fa-search mr-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bảng danh sách kết quả -->
+                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                    <table class="table table-bordered table-hover table-striped text-90 mb-0" id="tblCustomerLookupResults_Form">
+                        <thead class="bgc-secondary-l1 text-secondary-d2">
+                            <tr>
+                                <th style="width: 40px;" class="text-center">STT</th>
+                                <th>Khách hàng / Doanh nghiệp</th>
+                                <th style="width: 140px;">Mã số thuế</th>
+                                <th style="width: 130px;">Số điện thoại</th>
+                                <th>Địa chỉ</th>
+                                <th style="width: 80px;" class="text-center">Chọn</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerLookupTableBody_Form">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fa fa-spinner fa-spin fa-2x text-primary d-block mb-2"></i>
+                                    Đang tải danh sách khách hàng...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Phân trang -->
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-t-1 brc-grey-l2 flex-wrap">
+                    <span class="text-secondary text-85" id="customerLookupTotalText_Form">Đang tải...</span>
+                    <ul class="pagination pagination-sm mb-0 mt-1" id="customerLookupPagination_Form"></ul>
+                </div>
+            </div>
+            <div class="modal-footer bgc-grey-l5 py-2 px-3">
+                <button type="button" class="btn btn-sm btn-secondary radius-1 px-3" onclick="closeCustomerLookupModal_Form(event); return false;">
+                    <i class="fa fa-times mr-1"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var _lookupPage_Form = 1;
+    var _lookupPageSize_Form = 10;
+
+    function openCustomerLookupModal_Form() {
+        var $lookupModal = $('#modalCustomerLookup_Form');
+        // Di chuyển modal con ra trực tiếp dưới body để không bao giờ bị lồng DOM với modal cha
+        if (!$lookupModal.parent().is('body')) {
+            $('body > #modalCustomerLookup_Form').not($lookupModal).remove();
+            $('body').append($lookupModal);
+        }
+
+        $lookupModal.off('show.bs.modal').on('show.bs.modal', function (e) {
+            e.stopPropagation();
+            $(this).css('z-index', 1060);
+            setTimeout(function () {
+                $('.modal-backdrop').not('.modal-stack').css('z-index', 1055).addClass('modal-stack');
+            }, 0);
+        });
+
+        $lookupModal.off('hide.bs.modal hidden.bs.modal')
+            .on('hide.bs.modal', function (e) {
+                e.stopPropagation();
+            })
+            .on('hidden.bs.modal', function (e) {
+                e.stopPropagation();
+                // Duy trì modal cha mở và cuộn bình thường
+                if ($('.modal.show').length > 0 || $('.modal:visible').length > 0) {
+                    $('body').addClass('modal-open');
+                }
+            });
+
+        $lookupModal.modal('show');
+        $('#txtSearchCustomerKeyword_Form').val('');
+        performCustomerLookup_Form(1);
+    }
+
+    function closeCustomerLookupModal_Form(e) {
+        if (e) {
+            if (typeof e.preventDefault === 'function') e.preventDefault();
+            if (typeof e.stopPropagation === 'function') e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+        }
+        $('#modalCustomerLookup_Form').modal('hide');
+        return false;
+    }
+
+    function clearSelectedCustomer_Form() {
+        $('#CustomerID_Form').val('');
+        $('input[name="CustomerID"]').val('');
+        $('#CustomerNameDisplay_Form').val('').attr('placeholder', '@Html.Raw(System.Web.HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Customer_Placeholder")))');
+        $('#btnClearCustomer_Form').hide();
+        $('#customerInfoCard_Form').slideUp(200).empty();
+    }
+
+    function performCustomerLookup_Form(page) {
+        _lookupPage_Form = page || 1;
+        var keyword = $('#txtSearchCustomerKeyword_Form').val() || '';
+        $('#customerLookupTableBody_Form').html(
+            '<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fa fa-spinner fa-spin fa-2x text-primary d-block mb-2"></i>Đang tìm kiếm...</td></tr>'
+        );
+
+        $.get('/Cate/DigitalSales/SearchCustomers', { q: keyword, page: _lookupPage_Form, pageSize: _lookupPageSize_Form }, function (res) {
+            if (!res || !res.data || res.data.length === 0) {
+                $('#customerLookupTableBody_Form').html(
+                    '<tr><td colspan="6" class="text-center py-4 text-muted"><i class="fa fa-building fa-2x text-secondary-l1 d-block mb-2"></i>Không tìm thấy khách hàng nào phù hợp với từ khóa!</td></tr>'
+                );
+                $('#customerLookupTotalText_Form').text('Hiển thị 0 kết quả');
+                $('#customerLookupPagination_Form').empty();
+                return;
+            }
+
+            var rows = '';
+            var startIdx = (_lookupPage_Form - 1) * _lookupPageSize_Form + 1;
+            $.each(res.data, function (idx, c) {
+                var cusDataEscaped = encodeURIComponent(JSON.stringify(c));
+                rows += '<tr>' +
+                    '<td class="text-center">' + (startIdx + idx) + '</td>' +
+                    '<td>' +
+                        '<div class="font-weight-bold text-primary-d2">' + c.text + '</div>' +
+                        (c.shortName ? '<div class="text-80 text-secondary">' + c.shortName + '</div>' : '') +
+                    '</td>' +
+                    '<td>' + (c.taxCode ? '<span class="badge bgc-secondary-l3 text-secondary-d3 font-mono font-bold">' + c.taxCode + '</span>' : '—') + '</td>' +
+                    '<td>' + (c.phone ? '<span class="text-dark font-600">' + c.phone + '</span>' : '—') + '</td>' +
+                    '<td class="text-85 text-muted">' + (c.address || '—') + '</td>' +
+                    '<td class="text-center">' +
+                        '<button type="button" class="btn btn-xs btn-success font-bold px-2 py-1 radius-1" onclick="applySelectedCustomer_Form(\'' + cusDataEscaped + '\');">' +
+                            '<i class="fa fa-check mr-1"></i> Chọn' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+            });
+            $('#customerLookupTableBody_Form').html(rows);
+            $('#customerLookupTotalText_Form').text('Hiển thị ' + res.data.length + ' / ' + res.total + ' khách hàng (Trang ' + res.page + '/' + res.totalPages + ')');
+
+            renderLookupPagination_Form(res.page, res.totalPages);
+        });
+    }
+
+    function renderLookupPagination_Form(current, totalPages) {
+        var $p = $('#customerLookupPagination_Form').empty();
+        if (totalPages <= 1) return;
+
+        $p.append('<li class="page-item ' + (current === 1 ? 'disabled' : '') + '"><a class="page-link" href="javascript:void(0);" onclick="performCustomerLookup_Form(' + (current - 1) + ')">&laquo;</a></li>');
+
+        var start = Math.max(1, current - 2);
+        var end = Math.min(totalPages, current + 2);
+        for (var i = start; i <= end; i++) {
+            $p.append('<li class="page-item ' + (i === current ? 'active font-bold' : '') + '"><a class="page-link" href="javascript:void(0);" onclick="performCustomerLookup_Form(' + i + ')">' + i + '</a></li>');
+        }
+
+        $p.append('<li class="page-item ' + (current === totalPages ? 'disabled' : '') + '"><a class="page-link" href="javascript:void(0);" onclick="performCustomerLookup_Form(' + (current + 1) + ')">&raquo;</a></li>');
+    }
+
+    function applySelectedCustomer_Form(cusDataJson) {
+        try {
+            var c = JSON.parse(decodeURIComponent(cusDataJson));
+            $('#CustomerID_Form').val(c.id);
+            $('input[name="CustomerID"]').val(c.id);
+            $('#CustomerNameDisplay_Form').val(c.text);
+            $('#btnClearCustomer_Form').show();
+
+            $('#customerInfoCard_Form').html(
+                '<div class="d-flex align-items-start">' +
+                    '<div class="bgc-primary-m1 text-white p-2 radius-1 mr-2 flex-shrink-0"><i class="fa fa-building fa-lg"></i></div>' +
+                    '<div class="flex-grow-1 min-width-0">' +
+                        '<div class="font-weight-bold text-primary-d2 text-95">' + c.text + '</div>' +
+                        '<div class="text-85 text-secondary mt-1">' +
+                            (c.taxCode ? '<span class="mr-3"><i class="fa fa-id-card mr-1"></i>MST: <strong>' + c.taxCode + '</strong></span>' : '') +
+                            (c.phone ? '<span><i class="fa fa-phone mr-1"></i>' + c.phone + '</span>' : '') +
+                        '</div>' +
+                        (c.address ? '<div class="text-80 text-muted mt-1 text-truncate"><i class="fa fa-map-marker-alt text-danger mr-1"></i>' + c.address + '</div>' : '') +
+                    '</div>' +
+                '</div>'
+            ).slideDown(200);
+
+            closeCustomerLookupModal_Form();
+        } catch (e) {
+            console.error("Apply customer error:", e);
+        }
+    }
+
+    function removeAttachedFile_Form(el, filePath) {
+        var currentFiles = ($('#ExistingFileAttach_Form').val() || '').split(';');
+        var newFiles = [];
+        for (var i = 0; i < currentFiles.length; i++) {
+            if (currentFiles[i].trim() && currentFiles[i].trim() !== filePath) {
+                newFiles.push(currentFiles[i].trim());
+            }
+        }
+        $('#ExistingFileAttach_Form').val(newFiles.join(';'));
+        $(el).closest('.badge').fadeOut(200, function() { $(this).remove(); });
+    }
+
+    function initDigitalSalesFormPlugins() {
+        var $container = $('#bodyForm');
+
+        // 1. DatePicker
+        if ($.fn.datepicker) {
+            $container.find('.date-picker').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+        }
+
+        // 2. Select2
+        if ($.fn.select2) {
+            $container.find('select.select2').each(function () {
+                var $sel = $(this);
+                var $m = $sel.closest('.modal');
+                $sel.select2({
+                    width: '100%',
+                    dropdownParent: $m.length ? $m : $(document.body)
+                });
+            });
+        }
+
+        // 3. AM change -> load department
+        $container.find('#AssignedEmployeeID').off('change').on('change', function () {
+            var empId = $(this).val();
+            if (empId && parseInt(empId) > 0) {
+                $.get('/Cate/DigitalSales/GetDepartmentByEmployee', { employeeId: empId }, function (res) {
+                    if (res && res.departmentId && parseInt(res.departmentId) > 0) {
+                        $container.find('#DepartmentID_Form').val(res.departmentId);
+                    }
+                });
+            } else {
+                $container.find('#DepartmentID_Form').val('');
+            }
+        });
+
+        // 4. Enter in Customer Search
+        $('#txtSearchCustomerKeyword_Form').off('keypress').on('keypress', function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                performCustomerLookup_Form(1);
+            }
+        });
+
+        // 5. Nested modal hidden
+        $('#modalCustomerLookup_Form').off('hide.bs.modal hidden.bs.modal')
+            .on('hide.bs.modal', function (e) {
+                e.stopPropagation();
+            })
+            .on('hidden.bs.modal', function (e) {
+                e.stopPropagation();
+                if ($('.modal.show').length > 0 || $('.modal:visible').length > 0) {
+                    $('body').addClass('modal-open');
+                }
+            });
+
+        // 6. Hiển thị thẻ tóm tắt khách hàng ban đầu nếu có
+        var initCusId = $('#CustomerID_Form').val();
+        if (initCusId && parseInt(initCusId) > 0) {
+            $.get('/Cate/DigitalSales/GetCustomerDetail', { id: initCusId }, function (c) {
+                if (c && c.id) {
+                    var cusName = c.customerName || c.text || '';
+                    $('#customerInfoCard_Form').html(
+                        '<div class="d-flex align-items-start">' +
+                            '<div class="bgc-primary-m1 text-white p-2 radius-1 mr-2 flex-shrink-0"><i class="fa fa-building fa-lg"></i></div>' +
+                            '<div class="flex-grow-1 min-width-0">' +
+                                '<div class="font-weight-bold text-primary-d2 text-95">' + (c.shortName ? '(' + c.shortName + ') ' : '') + cusName + '</div>' +
+                                '<div class="text-85 text-secondary mt-1">' +
+                                    (c.taxCode ? '<span class="mr-3"><i class="fa fa-id-card mr-1"></i>MST: <strong>' + c.taxCode + '</strong></span>' : '') +
+                                    (c.phone ? '<span><i class="fa fa-phone mr-1"></i>' + c.phone + '</span>' : '') +
+                                '</div>' +
+                                (c.address ? '<div class="text-80 text-muted mt-1 text-truncate"><i class="fa fa-map-marker-alt text-danger mr-1"></i>' + c.address + '</div>' : '') +
+                            '</div>' +
+                        '</div>'
+                    ).show();
+                    $('#btnClearCustomer_Form').show();
+                }
+            });
+        }
+
+        // 7. CKEditor
+        function initCK() {
+            var ckBasePath = '@Url.Content("~/Contents/Modules/Major/ckeditor4/")';
+            window.CKEDITOR_BASEPATH = ckBasePath;
+
+            function createCK() {
+                if (typeof CKEDITOR === 'undefined') return;
+                var editor = CKEDITOR.instances['DigitalSales_Form_Note'];
+                if (editor) {
+                    try { editor.destroy(true); } catch (e) { }
+                }
+                var initContent = $('#DigitalSales_Form_Note').val() || '';
+                if (initContent.indexOf('&lt;') !== -1 && initContent.indexOf('&gt;') !== -1) {
+                    var $d = document.createElement('div');
+                    $d.innerHTML = initContent;
+                    initContent = $d.textContent || $d.innerText || initContent;
+                }
+
+                var newEditor = CKEDITOR.replace('DigitalSales_Form_Note', {
+                    customConfig: '',
+                    height: 180,
+                    autoParagraph: true,
+                    enterMode: 1, // CKEDITOR.ENTER_P
+                    shiftEnterMode: 2, // CKEDITOR.ENTER_BR
+                    entities: false,
+                    basicEntities: false,
+                    entities_latin: false,
+                    entities_greek: false,
+                    entities_processNumerical: false,
+                    fillEmptyBlocks: false,
+                    toolbar: [
+                        { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike'] },
+                        { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote'] },
+                        { name: 'styles', items: ['Format', 'FontSize'] },
+                        { name: 'colors', items: ['TextColor', 'BGColor'] },
+                        { name: 'tools', items: ['Maximize'] }
+                    ]
+                });
+
+                newEditor.on('paste', function (evt) {
+                    var data = evt.data;
+                    if (data && data.dataValue) {
+                        var val = data.dataValue;
+                        if (val.indexOf('<p') === -1 && val.indexOf('<br') === -1 && (val.indexOf('\n') !== -1 || val.indexOf('\r') !== -1)) {
+                            var blocks = val.split(/\r?\n\r?\n/);
+                            var formattedHtml = blocks.map(function (blk) {
+                                return '<p>' + blk.replace(/\r?\n/g, '<br />') + '</p>';
+                            }).join('');
+                            data.dataValue = formattedHtml;
+                            data.type = 'html';
+                        }
+                    }
+                });
+
+                newEditor.on('instanceReady', function () {
+                    if (initContent) {
+                        try {
+                            newEditor.setData(initContent);
+                        } catch (e) { }
+                    }
+                });
+                newEditor.on('change', function () {
+                    try {
+                        $('#DigitalSales_Form_Note').val(newEditor.getData());
+                    } catch (e) { }
+                });
+            }
+
+            if (typeof CKEDITOR === 'undefined') {
+                var ckScript = '@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")';
+                $.getScript(ckScript, function () {
+                    createCK();
+                });
+            } else {
+                createCK();
+            }
+        }
+
+        setTimeout(initCK, 200);
+    }
+
+    initDigitalSalesFormPlugins();
+    $(document).ready(function () {
+        initDigitalSalesFormPlugins();
+    });
+</script>

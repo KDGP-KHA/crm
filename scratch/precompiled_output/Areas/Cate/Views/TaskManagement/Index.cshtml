@@ -1,0 +1,276 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Models
+@model List<RM_TaskManagementModel>
+
+<style>
+    .taskManagement-table-wrapper {
+        overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 8px;
+    }
+
+        .taskManagement-table-wrapper .dropdown,
+        .taskManagement-table-wrapper td,
+        .taskManagement-table-wrapper tr {
+            position: static;
+        }
+
+        .taskManagement-table-wrapper .dropdown-menu {
+            min-width: 9rem;
+            z-Detail: 1060;
+            margin-top: 2px;
+        }
+
+    #DSTaskManagement #selectPageSize .select2-selection--single {
+        background-color: black !important;
+        width: 65px !important;
+    }
+
+    #DSTaskManagement #selectPageSize .select2-selection__clear {
+        background-color: black !important;
+        display: none !important;
+    }
+</style>
+
+@section PageTitle { @ViewBag.Title }
+
+<div class="d-flex justify-content-between mb-3 w-100 align-items-end">
+    @Html.Partial("_Search")
+
+    <div class="text-right">
+        @Html.Button(false, "AddTaskManagement",
+            Url.Action("Add", "TaskManagement", new { area = "Cate", id = ViewBag.ProjectId }),
+            "<i class='fa fa-plus'></i>",
+            AppProcessor.Messagor.GetMessage("Button_Add"),
+            new
+            {
+                @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 ml-2",
+                data_width = "700px",
+            })
+
+        @Html.Button(true, "AddProjectTaskFromTaskGroup",
+            Url.Action("AddFromTaskGroup", "ProjectTask", new { area = "Cate", id = ViewBag.ProjectId }),
+            "<i class='fa fa-layer-group'></i>",
+            AppProcessor.Messagor.GetMessage("ProjectTask_AddFromTaskGroup_Button"),
+            new
+            {
+                @class = "btn btn-light-info btn-h-info btn-a-info border-0 radius-3 py-2 text-600 text-90",
+                data_width = "1280px",
+            })
+    </div>
+</div>
+
+<div class="table-responsive taskManagement-table-wrapper">
+    <table id="DSTaskManagement" class="table table-hover table-bordered table-sm mb-0 w-100" data-project-id="@ViewBag.ProjectId">
+        <thead class="bgc-secondary-l1 text-uppercase text-85">
+            <tr>
+                <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_Code_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_ParentsTask_Label")</th>
+                <th class="align-middle text-left">@AppProcessor.Messagor.GetMessage("Task_Name_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_Assignee_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_Type_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_Status_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_StartDate_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Task_EndDate_Label")</th>
+                <th class="align-middle text-center">@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="d-flex justify-content-between">
+        <div id="pageInfor" class="d-flex mt-2 align-items-center"></div>
+        <div class="d-flex justify-content-end">
+            <div id="pageSize" class="d-flex mt-2 px-25 align-items-baseline" style="height: 36px; width: 200px"></div>
+            <ul id="pagination" class="d-flex mt-2 pagination px-25"></ul>
+        </div>
+    </div>
+</div>
+@*@section BottomScript {
+        <script src="@Url.Content("~/Areas/Cate/Views/Task/Task.js")"></script>
+    }*@
+<script>
+    var _TaskManagementActionURLs = {
+        TaskManagement_GetData: "/Cate/TaskManagement/Get"
+    };
+    var _tableTaskManagementManagement;
+
+    $(document).ready(function () {
+        initTableTaskManagement();
+    });
+
+    function Search() {
+        _tableTaskManagementManagement.ajax.reload(null, false);
+    }
+
+    function initTableTaskManagement() {
+
+        _tableTaskManagementManagement = $('#DSTaskManagement').DataTable({
+            responsive: true,
+            processing: true,
+            serverSide: true,
+            paging: true,
+            searching: false,
+            ordering: true,
+            dom: '<"dt-top">t<"dt-bottom d-flex justify-content-between align-items-center"i<"dt-right-group d-flex align-items-center"l p>>',
+            ajax: {
+                url: _TaskManagementActionURLs.TaskManagement_GetData,
+                type: "POST",
+                dataSrc: "data",
+                data: function (d) {
+                    d.keyword = $("#filterKeyword").val();
+                    d.ProjectID = $("#DSTaskManagement").data("project-id");
+                }
+            },
+            createdRow: function (row, data, dataIndex) {
+
+                if (data.PriorityClass) {
+                    $(row).addClass('table-' + data.PriorityClass);
+                }
+            },
+            columns: [
+                {
+                    "data": "",
+                    "defaultContent": "1",
+                    "orderable": false,
+                    "render": function (data, type, row, meta) {
+                        return meta.settings._iDisplayStart + meta.row + 1;
+                    }
+                },
+                {
+                    "data": "TaskManagementID", "defaultContent": "", "width": 110, className: "text-center",
+                    "render": function (data, type, row, meta) {
+                        return `<a href="/Cate/TaskManagement/Detail/${data}" class="font-weight-bold text-primary">#${data}</a>`;
+                    }
+                },
+                {
+                    "data": "ParentTaskID", "defaultContent": "", "width": 115, className: "text-center",
+                    "render": function (data, type, row, meta) {
+                        return ` <a href="/Cate/TaskManagement/Detail/${row.ParentTaskID}" class="font-weight-bold text-primary">${data ? '#' + data : ''}</a>`;
+                    }
+                },
+                {
+                    "data": "TaskName", "defaultContent": "",
+                    "render": function (data, type, row, meta) {
+                        return ` <a href="/Cate/TaskManagement/Detail/${row.TaskManagementID}" class="font-weight-bold">${data}</a>`;
+                    }
+
+                },
+                {
+                    "data": "AssigneeNames", "defaultContent": "", "width": 180,
+                    "render": function (data, type, row, meta) {
+                        if (!data)
+                            return '';
+                        var html = '';
+                        data.split(',').forEach(function (item) {
+                            html +=
+                                '<span class="badge badge-info text-white mr-1 mb-1">' +
+                                item.trim() +
+                                '</span>';
+                        });
+
+                        return html;
+                    }
+                },
+                { "data": "TaskTypeName", "defaultContent": "", "width": 120, className: "text-center" },
+                {
+                    "data": "StatusName", "defaultContent": "", "width": 115, className: "text-center",
+                    "render": function (data, type, row, meta) {
+                        return '<span class="badge ' + row.StatusClass + ' text-white mr-1"> ' + data + ' </span>';
+                    }
+                },
+                {
+                    "data": "StartDate", "defaultContent": "", "width": 115, className: "text-center",
+                    "render": function (data, type, row, meta) {
+                        return data != null ? moment(data).format("DD/MM/YYYY") : "";
+                    }
+                },
+                {
+                    "data": "EndDate", "defaultContent": "", "width": 115, className: "text-center",
+                    "render": function (data, type, row, meta) {
+                        return data != null ? moment(data).format("DD/MM/YYYY") : "";
+                    }
+                },
+                {
+                    "data": "TaskManagementID", "defaultContent": "", "width": 85, className: "text-center",
+                    "render": function (data, type, row, meta) {
+                        var html = '<span class="">';
+                        if (type === "display") {
+                            html += '<div class="dropdown d-inline-block"><button class="btn btn-lighter-primary mr-1 dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h text-120"></i></button><div class="dropdown-menu dropdown-menu-right">';
+                            html += '<a class="btn btn-lighter-secondary mr-1 btn-a-outline-secondary dropdown-item" href="/Cate/TaskManagement/Detail/' + data + '">';
+                            html += '<i class="far fa-eye text-secondary text-120 mr-1"></i> Xem chi tiết</a>';
+                            html += _renderButton(false,
+                                "EditTaskManagement",
+                                "btn btn-lighter-primary mr-1 btn-a-outline-primary dropdown-item",
+                                "/Cate/TaskManagement/Edit/" + data,
+                                '<i class="far fa-edit text-primary text-120 mr-1"></i> Cập nhật',
+                                "Cập nhật", 1024);
+                            if (row.CanDelete) {
+                                html += _renderButton(true,
+                                    "DeleteTaskManagement",
+                                    "btn btn-lighter-danger mr-1 btn-a-outline-danger dropdown-item",
+                                    "/Cate/TaskManagement/Delete/" + data,
+                                    '<i class="far fa-trash-alt text-danger text-120 mr-1"></i> Xoá',
+                                    "Xoá");
+                            }
+                            html += '</div></div>';
+                        }
+                        html += "</span>";
+                        return html;
+                    }
+                },
+            ]
+        });
+    }
+    function ProjectTask_OnProcessSuccess(response, formId) {
+        const $modal = $("#ModalContent #modal_" + formId);
+        if (response.status === undefined) {
+            $modal.find("#bodyForm").html(response);
+            return;
+        }
+        const processSuccess = () => {
+            eval(response.message);
+            _tableTaskManagementManagement.ajax.reload(null, false);
+            response.status = undefined;
+        };
+        const isKeepOpen = $modal.find("#chkNotDismissModal").is(":checked");
+        if (isKeepOpen) {
+            processSuccess();
+            const urlAction = $modal.find("form").attr("action");
+            $modal.find("#modal-content").load(urlAction, function () {
+                _initElement();
+            });
+        } else {
+            $modal.off("hidden.bs.modal").on("hidden.bs.modal", function () {
+                processSuccess();
+            });
+            $modal.modal("hide");
+        }
+    }
+
+    function TaskManagement_OnProcessSuccess(response, formId) {
+        const $modal = $("#ModalContent #modal_" + formId);
+        if (response.status === undefined) {
+            $modal.find("#bodyForm").html(response);
+            return;
+        }
+        const processSuccess = () => {
+            eval(response.message);
+            _tableTaskManagementManagement.ajax.reload(null, false);
+            response.status = undefined;
+        };
+        const isKeepOpen = $modal.find("#chkNotDismissModal").is(":checked");
+        if (isKeepOpen) {
+            processSuccess();
+            const urlAction = $modal.find("form").attr("action");
+            $modal.find("#modal-content").load(urlAction, function () {
+                _initElement();
+            });
+        } else {
+            $modal.off("hidden.bs.modal").on("hidden.bs.modal", function () {
+                processSuccess();
+            });
+            $modal.modal("hide");
+        }
+    }
+</script>

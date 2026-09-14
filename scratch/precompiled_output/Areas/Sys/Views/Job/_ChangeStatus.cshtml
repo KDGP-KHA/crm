@@ -1,0 +1,34 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysJobModel
+
+@{
+    ViewBag.Title = string.Format(Model.IsActive ? AppProcessor.Messagor.GetMessage("Modal_Title_Deactive") : AppProcessor.Messagor.GetMessage("Modal_Title_ReActive"), AppProcessor.Messagor.GetMessage("SysJob_Title"));
+
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    warning
+}
+
+@section FormBody{
+    <style type="text/css">
+        .bg-info {
+            background-color: #00a7d0 !important;
+            color: #ffffff;
+        }
+    </style>
+    @using (Ajax.BeginForm("ChangeStatus", "Job", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Job_OnProcessSuccess(data, 'ChangeStatusJob')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.JobId)
+        @Html.HiddenFor(model => model.JobName)
+        @Html.HiddenFor(model => model.JobLibrary)
+        @Html.HiddenFor(model => model.IsActive)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

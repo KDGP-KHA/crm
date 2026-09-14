@@ -1,0 +1,217 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.ReviewReportSearchModel
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ReviewReport_Title");
+}
+@section PageTitle { 
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=53">@AppProcessor.Messagor.GetMessage("AppFooter_ThongKe_Title")</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                @AppProcessor.Messagor.GetMessage("ReviewReport_Title")
+            </li>
+        </ol>
+    </nav> 
+    }
+@Html.Partial("_Search", Model)
+
+<div class="mt-1">
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="DSReviewReport"
+                   class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                   width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewReport_ObjectName")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewReport_ObjectType")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewReport_Level4")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewReport_Level3")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ReviewReport_Level2")</th>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    var _ReviewReportActionURLs = {
+        ReviewReport_GetData: "/Cate/ReviewReport/Get"
+    };
+
+    var _tableReviewReport;
+
+    $(document).ready(function () {
+        initTableReviewReport();
+    });
+
+    function ExportReviewReport() {
+
+        const reviewBatchID = $("#ReviewBatchID").val();
+
+        window.location = "/Cate/ReviewReport/ExportExcel?ReviewBatchID=" + reviewBatchID;
+    }
+
+    function buildReviewCell(reviewer, date, comment, status) {
+
+        if (!reviewer && !comment && !date)
+            return "";
+
+        let badge = "";
+
+        if (status === true || status === "true") {
+            badge =
+                `<span class="badge badge-success">
+                    Đã xác nhận
+                 </span>`;
+        }
+        else if (status === false || status === "false") {
+            badge =
+                `<span class="badge badge-warning">
+                    Đã cho ý kiến
+                 </span>`;
+        }
+
+        return `
+            <div class="text-left">
+
+                <!-- dòng 1 -->
+                <div class="mb-1">
+                    <span class="font-bolder text-primary">
+                        ${reviewer || ""}
+                    </span>
+
+                    ${date
+                ? `<span class="text-grey ml-1">
+                                (${moment(date).format("DD/MM/YYYY HH:mm")})
+                           </span>`
+                : ""
+            }
+                </div>
+
+                <!-- dòng 2 -->
+                <div class="mb-1 text-wrap">
+                    ${comment || ""}
+                </div>
+
+                <!-- dòng 3 -->
+                <div>
+                    ${badge}
+                </div>
+
+            </div>
+        `;
+    }
+
+    function initTableReviewReport() {
+
+        _tableReviewReport = $("#DSReviewReport").DataTable({
+            responsive: true,
+            processing: true,
+            serverSide: true,
+            lengthChange: true,
+            ajax:
+            {
+                url: _ReviewReportActionURLs.ReviewReport_GetData,
+                type: "POST",
+                dataType: "JSON",
+                data: function (d) {
+                    d.ReviewBatchID = $("#ReviewBatchID").val();
+                    return d;
+                }
+            },
+
+            columns:
+                [
+                    {
+                        data: null,
+                        defaultContent: "",
+                        render: function (data, type, row, meta) {
+                            return meta.settings._iDisplayStart
+                                + meta.row
+                                + 1;
+                        },
+                        className: "text-center align-middle",
+                        width: "60px"
+                    },
+                    {
+                        "data": "ObjectName",
+                        "defaultContent": "",
+                        "className": "text-left",
+                        "render": function (data, type, row) {
+                            let url = "#";
+                            if (row.ObjectType == 1) {
+                                url = "/Cate/BusinessOpportunityOverview/Index/" + row.ObjectID;
+                            }
+                            else if (row.ObjectType == 2) {
+                                url = "/Cate/ProjectOverview/Index/" + row.ObjectID;
+                            }
+                            return `
+                                <div class="font-weight-bold text-primary">
+                                    <a href="${url}">
+                                        ${data}
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    },
+                    {
+                        "data": "ObjectTypeName",
+                        "defaultContent": "",
+                        "className": "text-left",
+                        "render": function (data) {
+                            return data || "";
+                        }
+                    },
+                    {
+                        data: null,
+                        defaultContent: "",
+                        className: "text-left",
+                        render: function (data, type, row) {
+                            return buildReviewCell(
+                                row.Level4Reviewer,
+                                row.Level4Date,
+                                row.Level4Comment,
+                                row.Level4Status
+                            );
+                        }
+                    },
+                    {
+                        data: null,
+                        defaultContent: "",
+                        className: "text-left",
+                        render: function (data, type, row) {
+                            return buildReviewCell(
+                                row.Level3Reviewer,
+                                row.Level3Date,
+                                row.Level3Comment,
+                                row.Level3Status
+                            );
+                        }
+                    },
+                    {
+                        data: null,
+                        defaultContent: "",
+                        className: "text-left",
+                        render: function (data, type, row) {
+                            return buildReviewCell(
+                                row.Level2Reviewer,
+                                row.Level2Date,
+                                row.Level2Comment,
+                                row.Level2Status
+                            );
+                        }
+                    }
+                ]
+        });
+    }
+</script>

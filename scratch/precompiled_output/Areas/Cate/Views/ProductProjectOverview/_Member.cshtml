@@ -1,0 +1,91 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_ProjectMemberModel>
+
+@{
+    var productProjectId = ViewData["ProductProjectID"];
+}
+
+@Html.Button(
+    true,
+    "AddProjectMember",
+    Url.Action("Add", "ProjectMember", new { area = "Cate", id = productProjectId }),
+    "<i class='fa fa-plus'></i>",
+    AppProcessor.Messagor.GetMessage("Button_Add"),
+    new
+        {
+        @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right mb-3",
+        data_width = "1024px"
+    })
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body py-2 px-3">
+
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <div class="font-weight-bold">
+                                    @item.FullName
+                                    <span class="text-muted text-90 ml-1">
+                                        (@item.Employee_Code)
+                                    </span>
+                                </div>
+
+                                <div class="mt-1">
+                                    @if (item.RoleNames != null)
+                                    {
+                                        foreach (var role in item.RoleNames)
+                                        {
+                                            <span class="badge badge-info mr-1">@role</span>
+                                        }
+                                    }
+                                </div>
+
+                            </div>
+
+                            <div class="text-nowrap">
+
+                                @Html.Button(
+                                    true,
+                                    "EditProjectMember",
+                                    Url.Action("Edit", "ProjectMember", new { area = "Cate", id = item.ProjectMemberID }),
+                                    "<i class='fa fa-edit'></i>",
+                                    "",
+                                    new { @class = "btn btn-xs btn-primary" }
+                                )
+
+                                @Html.Button(
+                                    true,
+                                    "DeleteProjectMember",
+                                    Url.Action("Delete", "ProjectMember", new { area = "Cate", id = item.ProjectMemberID }),
+                                    "<i class='fa fa-trash'></i>",
+                                    "",
+                                    new { @class = "btn btn-xs btn-danger" }
+                                )
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                Chưa có thành viên trong dự án
+            </div>
+        </div>
+    }
+</div>

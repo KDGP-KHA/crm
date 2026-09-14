@@ -1,0 +1,204 @@
+﻿@using Core.Cate.Models
+@model Core.Cate.Models.RM_DigitalSalesMemberModel
+
+@{
+    var roles = ViewBag.Roles as List<RM_RolesModel> ?? new List<RM_RolesModel>();
+    var currentRoleList = (Model.RoleTitle ?? "").Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+        .Select(r => r.Trim())
+        .Where(r => !string.IsNullOrEmpty(r))
+        .ToList();
+    var knownRoleNames = roles.Select(r => r.RoleName).ToList();
+    var customRoles = currentRoleList.Where(cr => !knownRoleNames.Any(kr => string.Equals(kr, cr, StringComparison.OrdinalIgnoreCase))).ToList();
+    var customRoleStr = string.Join(", ", customRoles);
+}
+
+<div class="modal fade" id="modalEditMember" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <div class="modal-header bgc-primary text-white py-25 px-3">
+                <h5 class="modal-title font-weight-bold text-white text-105">
+                    <i class="fa fa-user-edit mr-1"></i> Chỉnh sửa vai trò thành viên
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="frmEditMemberModal" method="post" action="/Cate/DigitalSales/SaveMember">
+                <div class="modal-body p-3 text-95">
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.MemberID)
+                    @Html.HiddenFor(m => m.DigitalSalesID)
+                    @Html.HiddenFor(m => m.UserID)
+
+                    <!-- THÔNG TIN NHÂN SỰ -->
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-secondary text-90 mb-1">Nhân sự:</label>
+                        <div class="d-flex align-items-center p-2 bgc-grey-l4 radius-1 border-1 brc-grey-l2">
+                            <div class="w-4 h-4 radius-round bgc-primary text-white d-flex align-items-center justify-content-center mr-2 font-bold" style="width: 32px; height: 32px; border-radius: 50%;">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="font-weight-bold text-dark">@Model.FullName</div>
+                                <div class="text-secondary text-85 font-mono">@Model.UserName</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VAI TRÒ / NHIỆM VỤ (CHO PHÉP CHỌN NHIỀU VAI TRÒ) -->
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-secondary text-90 mb-1">Vai trò / Nhiệm vụ: <span class="text-danger">*</span></label>
+                        <select id="RoleTitle_Select" multiple="multiple" class="form-control select2" data-placeholder="-- Chọn các vai trò / nhiệm vụ --">
+                            @foreach (var r in roles)
+                            {
+                                bool isSelected = currentRoleList.Any(cr => string.Equals(cr, r.RoleName, StringComparison.OrdinalIgnoreCase));
+                                <option value="@r.RoleName" @(isSelected ? "selected" : "")>@r.RoleName</option>
+                            }
+                        </select>
+                        <input type="text" id="RoleTitle_Custom" value="@customRoleStr" class="form-control mt-2" placeholder="Hoặc nhập thêm vai trò tùy biến..." />
+                        <input type="hidden" id="RoleTitle" name="RoleTitle" value="@Model.RoleTitle" />
+                    </div>
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_EditMemberModal.css?v=@DateTime.Now.Ticks" />
+
+                    <!-- QUYỀN CẬP NHẬT THÔNG TIN & TRẠNG THÁI -->
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-secondary text-90 mb-1">Phân quyền thao tác:</label>
+                        <div class="edit-perm-card @(Model.IsAM ? "is-checked" : "")" id="editPermCard">
+                            <div class="edit-perm-check-box">
+                                <i class="fa fa-check"></i>
+                            </div>
+                            <input type="checkbox" class="d-none" id="IsAM_Edit" name="IsAM" value="true" @(Model.IsAM ? "checked" : "") />
+                            <input type="hidden" name="IsAM" value="false" />
+                            <div class="flex-1">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                    <span class="font-weight-bold text-dark text-95">
+                                        <i class="fa fa-shield-alt text-primary mr-1"></i> Cho phép cập nhật thông tin & trạng thái
+                                    </span>
+                                    <span class="badge bgc-green-l3 text-green-d3 border-1 brc-green-m3 px-2 py-05 text-75 font-bold">
+                                        <i class="fa fa-check-circle mr-1"></i>Cập nhật TT
+                                    </span>
+                                </div>
+                                <small class="text-muted d-block mt-1 text-85">
+                                    Nhân sự có quyền này sẽ được chỉnh sửa thông tin hồ sơ, cập nhật tiến trình và chuyển trạng thái kinh doanh số.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GHI CHÚ -->
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold text-secondary text-90 mb-1">Ghi chú phân công:</label>
+                        <textarea name="Note" id="Note_Edit" class="form-control" rows="3" placeholder="Nhập ghi chú nhiệm vụ...">@Model.Note</textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer bgc-grey-l5 py-2 px-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> Đóng
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-primary px-4 radius-1 font-weight-bold">
+                        <i class="fa fa-save mr-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        // Toggle card quyền cập nhật TT
+        $("#editPermCard").on("click", function () {
+            var $chk = $("#IsAM_Edit");
+            var isChecked = !$chk.prop("checked");
+            $chk.prop("checked", isChecked).trigger("change");
+        });
+
+        $("#IsAM_Edit").on("change", function () {
+            var isChecked = $(this).is(":checked");
+            $("#editPermCard").toggleClass("is-checked", isChecked);
+        });
+
+        if ($.fn.select2) {
+            $("#RoleTitle_Select").select2({
+                dropdownParent: $("#modalEditMember"),
+                width: "100%",
+                placeholder: "-- Chọn các vai trò / nhiệm vụ --"
+            });
+        }
+
+        $("#frmEditMemberModal").on("submit", function (e) {
+            e.preventDefault();
+            var $form = $(this);
+            var selectedRoles = $("#RoleTitle_Select").val() || [];
+            if (typeof selectedRoles === "string") {
+                selectedRoles = [selectedRoles];
+            }
+            var customRole = $("#RoleTitle_Custom").val();
+            if (customRole && customRole.trim()) {
+                var parts = customRole.split(/[,;]+/);
+                for (var i = 0; i < parts.length; i++) {
+                    var p = parts[i].trim();
+                    if (p && selectedRoles.indexOf(p) === -1) {
+                        selectedRoles.push(p);
+                    }
+                }
+            }
+
+            if (selectedRoles.length === 0) {
+                if (typeof toastr !== "undefined") {
+                    toastr.warning("Vui lòng chọn hoặc nhập ít nhất một vai trò cho thành viên!");
+                } else {
+                    alert("Vui lòng chọn hoặc nhập ít nhất một vai trò cho thành viên!");
+                }
+                return false;
+            }
+
+            $("#RoleTitle").val(selectedRoles.join(", "));
+
+            var $btn = $form.find("button[type='submit']");
+            var origHtml = $btn.html();
+            $btn.prop("disabled", true).html("<i class='fa fa-spinner fa-spin mr-1'></i> Đang lưu...");
+
+            $.ajax({
+                url: $form.attr("action") || "/Cate/DigitalSales/SaveMember",
+                type: "POST",
+                data: $form.serialize(),
+                success: function (res) {
+                    $btn.prop("disabled", false).html(origHtml);
+                    if (res && res.status) {
+                        $("#modalEditMember").modal("hide");
+                        $(".modal-backdrop").remove();
+                        $("body").removeClass("modal-open").css("padding-right", "");
+                        if (typeof toastr !== "undefined") {
+                            toastr.success(res.message || "Cập nhật thành viên thành công!");
+                        }
+                        if (typeof reloadMembersSection === "function") {
+                            reloadMembersSection(@Model.DigitalSalesID);
+                        } else {
+                            setTimeout(function () { location.reload(); }, 600);
+                        }
+                    } else {
+                        var errMsg = (res && res.message) ? res.message : "Không thể cập nhật thành viên!";
+                        if (typeof toastr !== "undefined") {
+                            toastr.error(errMsg);
+                        } else {
+                            alert(errMsg);
+                        }
+                    }
+                },
+                error: function () {
+                    $btn.prop("disabled", false).html(origHtml);
+                    if (typeof toastr !== "undefined") {
+                        toastr.error("Có lỗi xảy ra khi kết nối máy chủ!");
+                    } else {
+                        alert("Có lỗi xảy ra khi kết nối máy chủ!");
+                    }
+                }
+            });
+
+            return false;
+        });
+    })();
+</script>

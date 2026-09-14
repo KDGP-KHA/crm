@@ -1,13 +1,684 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesChangeStatusViewModel
+
 @Html.AntiForgeryToken()
 @Html.HiddenFor(m => m.DigitalSalesID)
 @Html.HiddenFor(m => m.Title)
 @Html.HiddenFor(m => m.CurrentBusinessType)
 @Html.HiddenFor(m => m.CurrentBusinessTypeName)
 @Html.HiddenFor(m => m.CurrentStatusName)
-<div class="card bcard border-1 brc-grey-l2 bgc-grey-l4 p-2 mb-3"><div class="text-90"><span class="text-secondary">@AppProcessor.Messagor.GetMessage("DigitalSales_Record_Label"):</span> <strong>@Model.Title</strong></div><div class="text-90"><span class="text-secondary">@AppProcessor.Messagor.GetMessage("DigitalSales_CurrentStatus_Label"):</span> <span class="badge badge-info">@Model.CurrentStatusName</span></div></div>
-<div class="alert alert-warning py-2 px-3 text-85">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_ProjectRequirement")</div>
-<div class="form-group">@Html.TitleFor(m => m.NewStatusID, new { @class = "text-85 text-600 mb-1 d-block" })@Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, AppProcessor.Messagor.GetMessage("DigitalSales_NewStatus_Option"), new { @class = "form-control select2" })@Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger" })</div>
-<div class="form-group">@Html.TitleFor(m => m.AttachmentPath, new { @class = "text-85 text-600 mb-1 d-block" })<input type="file" name="attachmentFile" class="form-control-file border p-1 rounded" /><small class="text-muted">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small></div>
-<div class="form-group mb-0">@Html.TitleFor(m => m.Note, new { @class = "text-85 text-600 mb-1 d-block" })@Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })@Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })<small class="text-muted">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Help")</small></div>
+@Html.HiddenFor(m => m.SelectedProcessID)
+@Html.HiddenFor(m => m.TrackingItemsJson)
+
+<div class="row" id="changeStatusLayoutRow">
+    <!-- CỘT TRÁI: THÔNG TIN CHUYỂN TRẠNG THÁI -->
+    <div id="colStatusInfo" class="col-12">
+        <div class="ds-status-meta-box mb-3">
+            <div class="ds-status-meta-row mb-1">
+                <span class="ds-status-meta-label">@AppProcessor.Messagor.GetMessage("DigitalSales_Record_Label"):</span>
+                <span class="ds-status-meta-value text-primary-d2">@Model.Title</span>
+            </div>
+            <div class="ds-status-meta-row">
+                <span class="ds-status-meta-label">@AppProcessor.Messagor.GetMessage("DigitalSales_CurrentStatus_Label"):</span>
+                <span class="badge bgc-blue-l3 text-blue-d2 border-1 brc-blue-m3 px-2 py-1 font-bold">@Model.CurrentStatusName</span>
+            </div>
+        </div>
+
+        <div class="alert alert-warning py-2 px-3 text-85 radius-1 mb-3 d-flex align-items-center">
+            <i class="fa fa-info-circle text-warning-d2 mr-2 text-110 flex-shrink-0"></i>
+            <div class="lh-13">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_ProjectRequirement")</div>
+        </div>
+
+        <!-- 1. CHỌN TRẠNG THÁI MỚI -->
+        <div class="form-group mb-3">
+            @Html.TitleFor(m => m.NewStatusID, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
+            @Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, AppProcessor.Messagor.GetMessage("DigitalSales_NewStatus_Option"), new { @class = "form-control select2", id = "cboNewStatus", onchange = "handleNewStatusChange(this.value);" })
+            @Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger" })
+        </div>
+
+        <!-- 2. KHỐI CHỌN QUY TRÌNH (HIỂN THỊ KHI SỐ QUY TRÌNH > 1) -->
+        <div id="boxProcessSelect" class="card border-1 brc-primary-m3 shadow-sm mb-3 bgc-white radius-1 d-none">
+            <div class="card-header bgc-primary-l4 py-2 px-3 d-flex align-items-center justify-content-between">
+                <span class="font-weight-bold text-primary-d2 text-90">
+                    <i class="fa fa-project-diagram text-primary mr-1"></i> Chọn Quy trình áp dụng <span class="text-danger">*</span>
+                </span>
+                <span class="badge bgc-primary-l3 text-primary-d2 border-1 brc-primary-m3 text-75 font-bold" id="badgeProcessCount">0 quy trình</span>
+            </div>
+            <div class="card-body p-2" id="processRadioContainer">
+                <!-- Danh sách Radio button Quy trình sinh động qua JS -->
+            </div>
+        </div>
+
+        <!-- 3. TỆP ĐÍNH KÈM (MULTI-FILE UPLOAD) -->
+        <div class="form-group mb-3">
+            <label class="text-85 font-weight-bold text-dark mb-1 d-block">
+                <i class="fa fa-paperclip text-primary mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_AttachmentFile_Label", "Tệp đính kèm")
+            </label>
+            <div class="ds-file-upload-wrapper">
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <button type="button" class="btn btn-sm btn-white btn-h-light-primary border-1 brc-primary-m3 text-primary-d1 font-bold radius-1 px-3 py-1 shadow-sm" onclick="$('#changeStatusFileInput').click();">
+                        <i class="fa fa-cloud-upload-alt mr-1 text-110"></i> Chọn tệp đính kèm (Cho phép chọn nhiều file)
+                    </button>
+                    <span class="text-secondary text-80 font-italic" id="changeStatusFileCountText">Chưa có tệp nào được chọn</span>
+                </div>
+                <input type="file" id="changeStatusFileInput" name="attachmentFiles" multiple class="d-none" onchange="handleChangeStatusFileSelect(this);" />
+                <div id="changeStatusFileList" class="ds-file-chips-container mt-2 d-none">
+                    <!-- Chips files render qua JS -->
+                </div>
+            </div>
+            <small class="text-muted d-block mt-1">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusAttachment_Help")</small>
+        </div>
+
+        <!-- 4. GHI CHÚ / LÝ DO CHUYỂN -->
+        <div class="form-group mb-0">
+            @Html.TitleFor(m => m.Note, new { @class = "text-85 font-weight-bold text-dark mb-1 d-block" })
+            @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control text-90", id = "txtChangeStatusNote", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder"), style = "resize: vertical; min-height: 75px;" })
+            @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
+            <small class="text-muted d-block mt-05">@AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Help")</small>
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI: BOX DANH SÁCH TIẾN TRÌNH CHECKLIST -->
+    <div id="colProgressBox" class="col-lg-7 col-xl-7 col-12 d-none mt-3 mt-lg-0">
+        <div class="card border-1 brc-success-m2 shadow-sm radius-1 bgc-white ds-progress-card">
+            <div class="card-header bgc-success-l4 py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
+                <div class="d-flex align-items-center">
+                    <span class="font-weight-bold text-success-d2 text-90">
+                        <i class="fa fa-tasks text-success mr-1"></i> Tiến trình công việc (Checklist)
+                    </span>
+                    <span class="badge badge-success badge-pill ml-1 font-bold px-2 py-1" id="badgeProgressCount">0</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-success font-weight-bold px-3 py-1 radius-1 shadow-sm" onclick="addCustomProgressRow();">
+                    <i class="fa fa-plus mr-1"></i> Thêm tiến trình
+                </button>
+            </div>
+            <div class="card-body p-2 p-lg-3 ds-progress-list-body">
+                <div class="text-secondary text-80 mb-2 font-italic border-b-1 brc-grey-l3 pb-2">
+                    <i class="fa fa-info-circle mr-1 text-primary"></i> Các tiến trình dưới đây sẽ được lưu vào tab <strong>Tiến trình & Checklist</strong> của hồ sơ. Bạn có thể thêm, sửa nội dung hoặc xóa trước khi xác nhận.
+                </div>
+                <div id="emptyProgressAlert" class="alert alert-light border-1 brc-grey-l2 text-center text-muted py-4 mb-0 d-none">
+                    <i class="fa fa-clipboard-list fa-2x text-grey-m2 mb-2 d-block"></i>
+                    Chưa có tiến trình nào. Nhấn <strong>"+ Thêm tiến trình"</strong> để thêm mới.
+                </div>
+                <div id="progressItemsContainer" class="ds-progress-items-container">
+                    <!-- Các item tiến trình nạp động qua JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var dsStatusWorkflowState = {
+        digitalSalesId: @Model.DigitalSalesID,
+        members: [],
+        currentProcesses: [],
+        selectedProcessId: null,
+        progressItems: []
+    };
+
+    var changeStatusSelectedFiles = [];
+
+    function handleChangeStatusFileSelect(input) {
+        if (!input.files || input.files.length === 0) return;
+
+        var forbiddenExts = ['.exe', '.bat', '.cmd', '.sh', '.msi', '.dll', '.com', '.vbs', '.ps1'];
+        var maxFileSize = 52428800; // 50MB
+
+        for (var i = 0; i < input.files.length; i++) {
+            var file = input.files[i];
+            var ext = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (forbiddenExts.indexOf(ext) !== -1) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Tệp "' + file.name + '" có định dạng không được phép!');
+                } else {
+                    alert('Tệp "' + file.name + '" có định dạng không được phép!');
+                }
+                continue;
+            }
+
+            if (file.size > maxFileSize) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Tệp "' + file.name + '" vượt quá dung lượng tối đa 50MB!');
+                } else {
+                    alert('Tệp "' + file.name + '" vượt quá dung lượng tối đa 50MB!');
+                }
+                continue;
+            }
+
+            // Kiểm tra trùng lặp theo tên và dung lượng
+            var isDuplicate = changeStatusSelectedFiles.some(function (f) {
+                return f.name === file.name && f.size === file.size;
+            });
+
+            if (!isDuplicate) {
+                changeStatusSelectedFiles.push(file);
+            }
+        }
+
+        syncChangeStatusFilesToInput();
+        renderChangeStatusFileChips();
+    }
+
+    function removeChangeStatusFile(index) {
+        if (index >= 0 && index < changeStatusSelectedFiles.length) {
+            changeStatusSelectedFiles.splice(index, 1);
+            syncChangeStatusFilesToInput();
+            renderChangeStatusFileChips();
+        }
+    }
+
+    function syncChangeStatusFilesToInput() {
+        try {
+            if (typeof DataTransfer !== 'undefined') {
+                var dt = new DataTransfer();
+                for (var i = 0; i < changeStatusSelectedFiles.length; i++) {
+                    dt.items.add(changeStatusSelectedFiles[i]);
+                }
+                var fileInput = document.getElementById('changeStatusFileInput');
+                if (fileInput) {
+                    fileInput.files = dt.files;
+                }
+            }
+        } catch (e) {
+            console.error("DataTransfer error: ", e);
+        }
+    }
+
+    function renderChangeStatusFileChips() {
+        var $container = $('#changeStatusFileList');
+        var $countText = $('#changeStatusFileCountText');
+        $container.empty();
+
+        if (changeStatusSelectedFiles.length === 0) {
+            $container.addClass('d-none');
+            $countText.text('Chưa có tệp nào được chọn').removeClass('text-primary font-bold').addClass('text-secondary font-italic');
+            return;
+        }
+
+        $container.removeClass('d-none');
+        $countText.text('Đã chọn ' + changeStatusSelectedFiles.length + ' tệp đính kèm').removeClass('text-secondary font-italic').addClass('text-primary font-bold');
+
+        $.each(changeStatusSelectedFiles, function (idx, f) {
+            var ext = f.name.split('.').pop().toLowerCase();
+            var iconClass = getFileIconClass(ext);
+            var sizeFormatted = formatFileSize(f.size);
+
+            var $chip = $('<div class="ds-file-chip">' +
+                '<i class="' + iconClass + ' ds-file-chip-icon"></i>' +
+                '<span class="ds-file-chip-name" title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</span>' +
+                '<span class="ds-file-chip-size">(' + sizeFormatted + ')</span>' +
+                '<button type="button" class="ds-file-chip-remove" onclick="removeChangeStatusFile(' + idx + ');" title="Xóa tệp này">&times;</button>' +
+            '</div>');
+
+            $container.append($chip);
+        });
+    }
+
+    function getFileIconClass(ext) {
+        switch (ext) {
+            case 'pdf': return 'fa fa-file-pdf text-danger';
+            case 'doc':
+            case 'docx': return 'fa fa-file-word text-primary';
+            case 'xls':
+            case 'xlsx': return 'fa fa-file-excel text-success';
+            case 'ppt':
+            case 'pptx': return 'fa fa-file-powerpoint text-warning-d2';
+            case 'jpg':
+            case 'jpeg':
+            case 'png':
+            case 'gif':
+            case 'webp':
+            case 'svg': return 'fa fa-file-image text-purple';
+            case 'zip':
+            case 'rar':
+            case '7z': return 'fa fa-file-archive text-orange';
+            default: return 'fa fa-file-alt text-secondary';
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        var k = 1024;
+        var sizes = ['B', 'KB', 'MB', 'GB'];
+        var i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+    }
+
+    function handleNewStatusChange(statusId) {
+        var $modal = $('#modalChangeStatus');
+        var $boxProcess = $('#boxProcessSelect');
+        var $colInfo = $('#colStatusInfo');
+        var $colProgress = $('#colProgressBox');
+        var $radioContainer = $('#processRadioContainer');
+        var $progressContainer = $('#progressItemsContainer');
+
+        if (!statusId || parseInt(statusId) <= 0) {
+            $modal.removeClass('has-progress-box');
+            $boxProcess.addClass('d-none');
+            $colProgress.addClass('d-none');
+            $colInfo.removeClass('col-lg-5 col-xl-5').addClass('col-12');
+            $radioContainer.empty();
+            $progressContainer.empty();
+            $('#SelectedProcessID').val('');
+            $('#TrackingItemsJson').val('');
+            return;
+        }
+
+        // Gọi AJAX lấy danh sách quy trình & tiến trình của trạng thái mới
+        $.ajax({
+            url: '/Cate/DigitalSales/GetWorkflowProcessesAndProgresses',
+            type: 'GET',
+            data: { statusId: statusId, digitalSalesId: dsStatusWorkflowState.digitalSalesId },
+            cache: false
+        }).done(function (res) {
+            if (!res || !res.status) {
+                hideWorkflowSections();
+                return;
+            }
+
+            dsStatusWorkflowState.members = res.members || [];
+            dsStatusWorkflowState.currentProcesses = res.processes || [];
+            var processCount = res.processCount || 0;
+
+            if (processCount > 1) {
+                // TRƯỜNG HỢP A: SỐ QUY TRÌNH > 1 -> HIỂN THỊ DẠNG RADIO
+                $boxProcess.removeClass('d-none');
+                $('#badgeProcessCount').text(processCount + ' quy trình');
+                renderProcessRadios(res.processes, res.selectedProcessId);
+
+                // Mặc định chọn quy trình đầu tiên
+                dsStatusWorkflowState.selectedProcessId = res.selectedProcessId;
+                $('#SelectedProcessID').val(res.selectedProcessId);
+
+                // Hiển thị box tiến trình bên phải
+                showProgressSection(res.progresses);
+            }
+            else if (processCount === 1) {
+                // TRƯỜNG HỢP B: CÓ ĐÚNG 1 QUY TRÌNH
+                $boxProcess.addClass('d-none');
+                $radioContainer.empty();
+                var singleProcess = res.processes[0];
+                dsStatusWorkflowState.selectedProcessId = singleProcess.processId;
+                $('#SelectedProcessID').val(singleProcess.processId);
+
+                if (res.progresses && res.progresses.length > 0) {
+                    // Nếu quy trình có tiến trình -> hiển thị box bên phải
+                    showProgressSection(res.progresses);
+                } else {
+                    // Nếu quy trình không có tiến trình nào -> ẩn box bên phải
+                    hideProgressSection();
+                }
+            }
+            else {
+                // KHÔNG CÓ QUY TRÌNH NÀO
+                hideWorkflowSections();
+            }
+        }).fail(function () {
+            hideWorkflowSections();
+        });
+    }
+
+    function renderProcessRadios(processes, selectedProcessId) {
+        var $container = $('#processRadioContainer');
+        $container.empty();
+
+        if (!processes || processes.length === 0) return;
+
+        $.each(processes, function (idx, p) {
+            var isChecked = (p.processId === selectedProcessId || idx === 0);
+            var $item = $('<div class="ds-process-radio-item ' + (isChecked ? 'is-selected' : '') + '" onclick="onSelectProcessRadio(' + p.processId + ', this);">' +
+                '<input type="radio" name="rdProcessSelection" id="rdProcess_' + p.processId + '" value="' + p.processId + '" ' + (isChecked ? 'checked' : '') + ' />' +
+                '<div class="flex-1">' +
+                    '<div class="d-flex align-items-center justify-content-between">' +
+                        '<span class="font-weight-bold text-dark text-90">' + escapeHtml(p.processName) + '</span>' +
+                    '</div>' +
+                    (p.description ? '<small class="text-secondary d-block mt-05 text-80">' + escapeHtml(p.description) + '</small>' : '') +
+                '</div>' +
+            '</div>');
+            $container.append($item);
+        });
+    }
+
+    function onSelectProcessRadio(processId, element) {
+        $('.ds-process-radio-item').removeClass('is-selected');
+        $(element).addClass('is-selected');
+        $(element).find('input[type="radio"]').prop('checked', true);
+
+        dsStatusWorkflowState.selectedProcessId = processId;
+        $('#SelectedProcessID').val(processId);
+
+        // Nạp danh sách tiến trình của quy trình đã chọn
+        $.ajax({
+            url: '/Cate/DigitalSales/GetProgressesByProcess',
+            type: 'GET',
+            data: { processId: processId, digitalSalesId: dsStatusWorkflowState.digitalSalesId },
+            cache: false
+        }).done(function (res) {
+            if (res && res.status && res.progresses && res.progresses.length > 0) {
+                showProgressSection(res.progresses);
+            } else {
+                hideProgressSection();
+            }
+        }).fail(function () {
+            hideProgressSection();
+        });
+    }
+
+    function showProgressSection(progresses) {
+        var $modal = $('#modalChangeStatus');
+        var $colInfo = $('#colStatusInfo');
+        var $colProgress = $('#colProgressBox');
+
+        $modal.addClass('has-progress-box');
+        $colInfo.removeClass('col-12').addClass('col-lg-5 col-xl-5');
+        $colProgress.removeClass('d-none');
+
+        renderProgressRows(progresses);
+    }
+
+    function hideProgressSection() {
+        var $modal = $('#modalChangeStatus');
+        var $colInfo = $('#colStatusInfo');
+        var $colProgress = $('#colProgressBox');
+        var $progressContainer = $('#progressItemsContainer');
+
+        $modal.removeClass('has-progress-box');
+        $colProgress.addClass('d-none');
+        $colInfo.removeClass('col-lg-5 col-xl-5').addClass('col-12');
+        $progressContainer.empty();
+        $('#badgeProgressCount').text('0');
+        $('#emptyProgressAlert').addClass('d-none');
+        $('#TrackingItemsJson').val('');
+    }
+
+    function hideWorkflowSections() {
+        $('#boxProcessSelect').addClass('d-none');
+        $('#processRadioContainer').empty();
+        hideProgressSection();
+        $('#SelectedProcessID').val('');
+    }
+
+    function renderProgressRows(items) {
+        var $container = $('#progressItemsContainer');
+        $container.empty();
+
+        if (!items || items.length === 0) {
+            $('#badgeProgressCount').text('0');
+            $('#emptyProgressAlert').removeClass('d-none');
+            return;
+        }
+
+        $('#emptyProgressAlert').addClass('d-none');
+        $.each(items, function (idx, item) {
+            appendProgressRowElement(item, idx + 1);
+        });
+
+        updateProgressBadge();
+    }
+
+    function appendProgressRowElement(item, index) {
+        var $container = $('#progressItemsContainer');
+        var progressId = item.progressId || 0;
+        var processId = item.processId || dsStatusWorkflowState.selectedProcessId || 0;
+        var taskName = item.taskName || '';
+        var sortOrder = item.sortOrder || index;
+        var durationDays = item.durationDays || item.defaultDurationDays || 3;
+        var assignedUserId = item.assignedUserId || '';
+        var isCustom = item.isCustomTask === true;
+
+        // Ngày bắt đầu: mặc định hôm nay nếu không có
+        var startDate = item.startDate;
+        if (!startDate) {
+            startDate = new Date().toISOString().split('T')[0];
+        }
+
+        // Hạn chót
+        var deadline = item.deadline;
+        if (!deadline && startDate) {
+            var parts = startDate.split('-');
+            var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            d.setDate(d.getDate() + parseInt(durationDays));
+            var year = d.getFullYear();
+            var month = ('0' + (d.getMonth() + 1)).slice(-2);
+            var day = ('0' + d.getDate()).slice(-2);
+            deadline = year + '-' + month + '-' + day;
+        }
+
+        // Xây dựng options người thực hiện (chỉ thành viên trong hồ sơ kinh doanh số)
+        var memberOptionsHtml = '<option value="">-- Chọn người thực hiện --</option>';
+        $.each(dsStatusWorkflowState.members, function (_, m) {
+            var selectedAttr = (assignedUserId && parseInt(assignedUserId) === parseInt(m.userId)) ? 'selected' : '';
+            var roleInfo = m.roleTitle ? (' (' + m.roleTitle + ')') : '';
+            var label = m.fullName + roleInfo;
+            memberOptionsHtml += '<option value="' + m.userId + '" ' + selectedAttr + '>' + escapeHtml(label) + '</option>';
+        });
+
+        var $row = $('<div class="ds-progress-row-item ' + (isCustom ? 'is-custom-task' : '') + '" data-progress-id="' + progressId + '" data-process-id="' + processId + '" data-is-custom="' + isCustom + '">' +
+            '<!-- HÀNG 1: STT + TÊN TIẾN TRÌNH + NÚT XÓA -->' +
+            '<div class="d-flex align-items-start mb-2" style="gap: 8px;">' +
+                '<div style="width: 70px; flex-shrink: 0;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block">STT <span class="text-danger">*</span></label>' +
+                    '<input type="number" class="form-control form-control-sm txt-sort-order text-center font-bold ignore-validation" min="1" value="' + sortOrder + '" />' +
+                '</div>' +
+                '<div class="flex-grow-1">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block">Tên tiến trình <span class="text-danger">*</span></label>' +
+                    '<textarea class="form-control form-control-sm txt-task-name font-weight-bold text-dark ignore-validation" rows="2" placeholder="Nhập tên tiến trình / đầu việc (*)" style="resize: vertical;">' + escapeHtml(taskName) + '</textarea>' +
+                '</div>' +
+                '<div class="align-self-end mb-1">' +
+                    '<button type="button" class="btn btn-delete-progress" onclick="removeProgressRow(this);" title="Xóa tiến trình này">' +
+                        '<i class="fa fa-trash-alt"></i>' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+            '<!-- HÀNG 2: NGƯỜI THỰC HIỆN + NGÀY BẮT ĐẦU + SỐ NGÀY + HẠN CHÓT -->' +
+            '<div class="d-flex align-items-center flex-wrap" style="gap: 10px;">' +
+                '<div class="ds-progress-assigned-wrapper position-relative" style="width: 210px; flex-shrink: 0;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-user text-primary mr-1"></i> Người thực hiện:</label>' +
+                    '<select class="form-control form-control-sm cbo-assigned-user ignore-validation">' +
+                        memberOptionsHtml +
+                    '</select>' +
+                '</div>' +
+                '<div style="width: 145px; flex-shrink: 0;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-calendar-alt text-primary mr-1"></i> Ngày bắt đầu <span class="text-danger">*</span>:</label>' +
+                    '<input type="date" class="form-control form-control-sm txt-start-date ignore-validation" value="' + startDate + '" onchange="calculateRowDeadline(this);" />' +
+                '</div>' +
+                '<div style="width: 95px; flex-shrink: 0;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-clock text-primary mr-1"></i> Số ngày <span class="text-danger">*</span>:</label>' +
+                    '<input type="number" class="form-control form-control-sm txt-duration-days text-center font-bold ignore-validation" min="1" value="' + durationDays + '" onchange="calculateRowDeadline(this);" onkeyup="calculateRowDeadline(this);" />' +
+                '</div>' +
+                '<div style="width: 125px; flex-shrink: 0;">' +
+                    '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-hourglass-half text-warning-d2 mr-1"></i> Hạn chót:</label>' +
+                    '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m3 py-1 px-2 font-bold d-block text-center text-85 badge-calculated-deadline">' + formatDisplayDate(deadline) + '</span>' +
+                    '<input type="hidden" class="txt-deadline ignore-validation" value="' + deadline + '" />' +
+                '</div>' +
+            '</div>' +
+        '</div>');
+
+        $container.append($row);
+
+        // Khởi tạo Select2 cho Người thực hiện của dòng vừa thêm
+        if ($.fn.select2) {
+            $row.find('.cbo-assigned-user').select2({
+                allowClear: true,
+                placeholder: 'Chọn 1 giá trị',
+                width: '100%',
+                dropdownParent: $row.find('.ds-progress-assigned-wrapper'),
+                dropdownAutoWidth: false,
+                language: 'vi'
+            });
+        }
+    }
+
+    function calculateRowDeadline(element) {
+        var $row = $(element).closest('.ds-progress-row-item');
+        var startDateStr = $row.find('.txt-start-date').val();
+        var durationDays = parseInt($row.find('.txt-duration-days').val()) || 0;
+
+        if (!startDateStr) {
+            $row.find('.badge-calculated-deadline').text('--/--/----');
+            $row.find('.txt-deadline').val('');
+            return;
+        }
+
+        var parts = startDateStr.split('-');
+        if (parts.length === 3) {
+            var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            if (!isNaN(d.getTime())) {
+                d.setDate(d.getDate() + durationDays);
+                var year = d.getFullYear();
+                var month = ('0' + (d.getMonth() + 1)).slice(-2);
+                var day = ('0' + d.getDate()).slice(-2);
+                var deadlineIso = year + '-' + month + '-' + day;
+                var deadlineDisplay = day + '/' + month + '/' + year;
+
+                $row.find('.badge-calculated-deadline').text(deadlineDisplay);
+                $row.find('.txt-deadline').val(deadlineIso);
+            }
+        }
+    }
+
+    function formatDisplayDate(isoDateStr) {
+        if (!isoDateStr) return '--/--/----';
+        var parts = isoDateStr.split('T')[0].split('-');
+        if (parts.length === 3) {
+            return parts[2] + '/' + parts[1] + '/' + parts[0];
+        }
+        return isoDateStr;
+    }
+
+    function addCustomProgressRow() {
+        var $container = $('#progressItemsContainer');
+        var newIdx = $container.find('.ds-progress-row-item').length + 1;
+
+        $('#emptyProgressAlert').addClass('d-none');
+
+        var todayIso = new Date().toISOString().split('T')[0];
+
+        appendProgressRowElement({
+            progressId: 0,
+            processId: dsStatusWorkflowState.selectedProcessId || 0,
+            taskName: 'Tiến trình mới #' + newIdx,
+            sortOrder: newIdx,
+            startDate: todayIso,
+            durationDays: 3,
+            assignedUserId: '',
+            isCustomTask: true
+        }, newIdx);
+
+        updateProgressBadge();
+
+        // Cuộn xuống cuối container và focus vào textarea tên tiến trình
+        $container.scrollTop($container[0].scrollHeight);
+        $container.find('.ds-progress-row-item:last-child .txt-task-name').focus().select();
+    }
+
+    function removeProgressRow(buttonElement) {
+        $(buttonElement).closest('.ds-progress-row-item').fadeOut(150, function () {
+            $(this).remove();
+            reindexProgressRows();
+            updateProgressBadge();
+            if ($('#progressItemsContainer .ds-progress-row-item').length === 0) {
+                $('#emptyProgressAlert').removeClass('d-none');
+            }
+        });
+    }
+
+    function reindexProgressRows() {
+        $('#progressItemsContainer .ds-progress-row-item').each(function (idx) {
+            $(this).find('.txt-sort-order').val(idx + 1);
+        });
+    }
+
+    function updateProgressBadge() {
+        var count = $('#progressItemsContainer .ds-progress-row-item').length;
+        $('#badgeProgressCount').text(count);
+    }
+
+    function serializeProgressItemsToJson() {
+        var items = [];
+        var isValid = true;
+        var $rows = $('#progressItemsContainer .ds-progress-row-item');
+
+        $rows.each(function (idx) {
+            var $row = $(this);
+            var $taskNameInput = $row.find('.txt-task-name');
+            var taskName = $.trim($taskNameInput.val());
+            var $sortOrderInput = $row.find('.txt-sort-order');
+            var sortOrderVal = parseInt($sortOrderInput.val());
+            var $startDateInput = $row.find('.txt-start-date');
+            var startDateVal = $.trim($startDateInput.val());
+            var $durationDaysInput = $row.find('.txt-duration-days');
+            var durationDaysVal = parseInt($durationDaysInput.val());
+            var assignedUserIdVal = $row.find('.cbo-assigned-user').val();
+            var deadlineVal = $row.find('.txt-deadline').val();
+            var progressId = parseInt($row.attr('data-progress-id')) || 0;
+            var processId = parseInt($row.attr('data-process-id')) || parseInt(dsStatusWorkflowState.selectedProcessId) || parseInt($('#SelectedProcessID').val()) || null;
+            var isCustom = $row.attr('data-is-custom') === 'true';
+
+            if (!taskName) {
+                $taskNameInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng nhập tên tiến trình cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $taskNameInput.removeClass('is-invalid');
+
+            if (isNaN(sortOrderVal) || sortOrderVal < 1) {
+                $sortOrderInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng nhập số thứ tự hợp lệ cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $sortOrderInput.removeClass('is-invalid');
+
+            if (!startDateVal) {
+                $startDateInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng chọn ngày bắt đầu cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $startDateInput.removeClass('is-invalid');
+
+            if (isNaN(durationDaysVal) || durationDaysVal < 1) {
+                $durationDaysInput.addClass('is-invalid').focus();
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('Vui lòng nhập số ngày thực hiện hợp lệ cho mục #' + (idx + 1));
+                }
+                isValid = false;
+                return false;
+            }
+            $durationDaysInput.removeClass('is-invalid');
+
+            items.push({
+                ProcessID: processId,
+                ProgressID: progressId > 0 ? progressId : null,
+                TaskName: taskName,
+                AssignedUserID: (assignedUserIdVal && parseInt(assignedUserIdVal) > 0) ? parseInt(assignedUserIdVal) : null,
+                StartDate: startDateVal,
+                DurationDays: durationDaysVal,
+                Deadline: deadlineVal ? deadlineVal : null,
+                SortOrder: sortOrderVal,
+                IsCustomTask: isCustom
+            });
+        });
+
+        if (!isValid) return false;
+
+        $('#TrackingItemsJson').val(items.length > 0 ? JSON.stringify(items) : '');
+        return true;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+    }
+</script>

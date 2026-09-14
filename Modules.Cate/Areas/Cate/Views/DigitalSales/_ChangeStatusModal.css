@@ -1,0 +1,529 @@
+﻿/* ==========================================================================
+   MODAL CHUYỂN TRẠNG THÁI HỒ SƠ KINH DOANH SỐ (TOC CRM)
+   ========================================================================== */
+
+/* 1. Kích thước Modal co giãn thông minh và rộng rãi */
+#modalChangeStatus .modal-dialog {
+    max-width: 720px;
+    width: 95vw;
+    margin: 1.5rem auto;
+    transition: max-width 0.35s ease-in-out;
+}
+
+#modalChangeStatus.has-progress-box .modal-dialog {
+    max-width: 1280px;
+    width: 95vw;
+}
+
+#modalChangeStatus .modal-content {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+    border: none;
+}
+
+#modalChangeStatus .modal-header {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+    padding: 12px 20px;
+    border-bottom: none;
+}
+
+#modalChangeStatus .modal-header .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+#modalChangeStatus .modal-header .close {
+    font-size: 1.4rem;
+    opacity: 0.85;
+    text-shadow: none;
+    transition: opacity 0.2s;
+    padding: 10px 14px;
+    margin: -10px -14px -10px auto;
+}
+
+#modalChangeStatus .modal-header .close:hover {
+    opacity: 1;
+}
+
+#modalChangeStatus .modal-body {
+    padding: 20px 24px;
+    max-height: calc(88vh - 120px);
+    overflow-y: auto;
+    background-color: #ffffff;
+}
+
+#modalChangeStatus .modal-footer {
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 24px;
+}
+
+/* 2. Hộp thông tin Hồ sơ & Trạng thái hiện tại */
+.ds-status-meta-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+
+.ds-status-meta-row {
+    display: flex;
+    align-items: baseline;
+    font-size: 13.5px;
+}
+
+.ds-status-meta-label {
+    min-width: 120px;
+    color: #64748b;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.ds-status-meta-value {
+    color: #1e293b;
+    font-weight: 700;
+    word-break: break-word;
+}
+
+/* 3. Khắc phục lỗi vỡ chữ Select2 Trạng thái mới (Khoanh vùng riêng cột trái) */
+#modalChangeStatus #colStatusInfo .select2-container:not(.select2-container--open) {
+    width: 100% !important;
+}
+
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single {
+    height: auto !important;
+    min-height: 42px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    padding: 7px 38px 7px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    position: relative !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#modalChangeStatus #colStatusInfo .select2-container--default.select2-container--focus .select2-selection--single,
+#modalChangeStatus #colStatusInfo .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18) !important;
+}
+
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__rendered {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+    padding: 0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: block !important;
+}
+
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 40px !important;
+    right: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__clear {
+    position: absolute !important;
+    right: 28px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 18px !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+#modalChangeStatus #colStatusInfo .select2-container .select2-selection--single .select2-selection__clear:hover {
+    color: #ef4444 !important;
+}
+
+/* Chống vỡ độ rộng: Dropdown container khi mở không bị ép 100% tràn modal */
+#modalChangeStatus .select2-container--open {
+    width: auto !important;
+}
+
+/* 4. Khối chọn Quy trình dạng Radio button */
+.ds-process-radio-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background-color: #f8fafc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: flex-start;
+}
+
+.ds-process-radio-item:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.08);
+}
+
+.ds-process-radio-item.is-selected {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.ds-process-radio-item input[type="radio"] {
+    margin-top: 3px;
+    margin-right: 10px;
+    cursor: pointer;
+    accent-color: #2563eb;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* 5. Cột phải: Box Tiến trình Checklist */
+.ds-progress-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 320px;
+    border: 1px solid #d1fae5;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.ds-progress-card .card-header {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-bottom: 1px solid #a7f3d0;
+    padding: 10px 16px;
+}
+
+.ds-progress-items-container {
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Scrollbar mượt mà */
+.ds-progress-items-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ds-progress-items-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.ds-progress-items-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.ds-progress-items-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 6. Thẻ từng dòng tiến trình công việc */
+.ds-progress-row-item {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #10b981;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+}
+
+.ds-progress-row-item:hover {
+    border-color: #cbd5e1;
+    border-left-color: #059669;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.ds-progress-row-item.is-custom-task {
+    border-left-color: #3b82f6;
+}
+
+.ds-progress-row-index {
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #334155;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.ds-progress-row-item .txt-task-name {
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #0f172a;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-progress-row-item .txt-task-name:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    outline: none;
+    background-color: #ffffff;
+}
+
+.ds-progress-row-item .btn-delete-progress {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    background-color: #fff;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.ds-progress-row-item .btn-delete-progress:hover {
+    background-color: #fee2e2;
+    border-color: #f87171;
+    color: #b91c1c;
+}
+
+/* 6.1. Select2 & Combobox Người thực hiện trong Checklist tiến trình */
+.ds-progress-row-item .ds-progress-assigned-wrapper {
+    width: 210px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.ds-progress-row-item .select2-container {
+    width: 100% !important;
+    max-width: 210px !important;
+}
+
+.ds-progress-row-item .select2-container--open {
+    width: auto !important;
+    min-width: 210px !important;
+    max-width: 320px !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single {
+    height: 34px !important;
+    min-height: 34px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    padding: 3px 26px 3px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    position: relative !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-progress-row-item .select2-container--default.select2-container--focus .select2-selection--single,
+.ds-progress-row-item .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12) !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__rendered {
+    color: #1e293b !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 26px !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 32px !important;
+    right: 6px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__clear {
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 14px !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+.ds-progress-row-item .select2-container .select2-selection--single .select2-selection__clear:hover {
+    color: #ef4444 !important;
+}
+
+.ds-progress-row-item .select2-dropdown {
+    min-width: 210px !important;
+    max-width: 320px !important;
+    width: auto !important;
+    border: 1px solid #10b981 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    z-index: 1060 !important;
+}
+
+.ds-progress-row-item .select2-dropdown .select2-results__option {
+    font-size: 13px !important;
+    padding: 6px 10px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+
+.ds-progress-row-item .select2-dropdown .select2-results__option--highlighted {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
+.ds-progress-row-item .cbo-assigned-user,
+.ds-progress-row-item .txt-deadline {
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    height: 34px;
+    font-size: 13px;
+}
+
+.ds-progress-row-item .cbo-assigned-user:focus,
+.ds-progress-row-item .txt-deadline:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    outline: none;
+}
+
+/* 7. Multi-file upload chips styling */
+.ds-file-upload-wrapper {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 12px;
+    transition: all 0.2s ease;
+}
+
+.ds-file-upload-wrapper:hover {
+    border-color: #94a3b8;
+    background-color: #f1f5f9;
+}
+
+.ds-file-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ds-file-chip {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 4px 10px 4px 12px;
+    font-size: 12.5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    max-width: 100%;
+}
+
+.ds-file-chip:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 5px rgba(59, 130, 246, 0.12);
+}
+
+.ds-file-chip-icon {
+    margin-right: 6px;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.ds-file-chip-name {
+    font-weight: 600;
+    color: #1e293b;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ds-file-chip-size {
+    color: #64748b;
+    font-size: 11.5px;
+    margin-left: 6px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.ds-file-chip-remove {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, background-color 0.15s;
+    width: 18px;
+    height: 18px;
+}
+
+.ds-file-chip-remove:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+/* 8. Checklist controls enhancement */
+.ds-progress-row-item .txt-sort-order,
+.ds-progress-row-item .txt-start-date,
+.ds-progress-row-item .txt-duration-days {
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    height: 34px;
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ds-progress-row-item .txt-sort-order:focus,
+.ds-progress-row-item .txt-start-date:focus,
+.ds-progress-row-item .txt-duration-days:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+    outline: none;
+}
+
+.ds-progress-row-item .badge-calculated-deadline {
+    height: 34px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+}

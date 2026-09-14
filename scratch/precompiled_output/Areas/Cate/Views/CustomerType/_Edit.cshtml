@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("GroupCustomerType_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-edit"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Edit", "CustomerType", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "CustomerType_OnProcessSuccess(data, 'EditCustomerType')"
+    }, new { @class = "form-horizontal", id = "EditCustomerType" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_CustomerType")
+        </div>
+    }
+}
+

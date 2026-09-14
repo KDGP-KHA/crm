@@ -1,0 +1,193 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunitySearchModel
+
+<div class="Search search-opportunity card mb-3"  id="SearchBusinessOpportunity" >
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+    <div class="card-body p-2 d-flex align-items-end flex-wrap" data-select2-id="select2-data-SearchBusinessOpportunity">
+
+        <div class="Search_Box keyWord w-50">
+            <label class="font-bold text-sm-right">
+                @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+            </label>
+            @Html.TextBoxFor(model => model.Keyword, new { @class = "form-control", placeholder = "Tìm kiếm theo tên và mã cơ hội kinh doanh, tên khách hàng, tên nhân viên" })
+        </div>
+
+        <div class="Search_Box">
+            <label class="font-bold text-sm-right">
+                @AppProcessor.Messagor.GetMessage("Opportunity_Status_Label")
+            </label>
+            <div class="">
+                @Html.DropDownListFor(model => model.StatusID, new SelectList(Model.StatusList, "ID", "StatusName"), "", new { @class = "form-control", data_placeholder = AppProcessor.Messagor.GetMessage("Opportunity_StatusSearch_Label") })
+            </div>
+        </div>
+
+        <div class="Search_Box">
+            <label class="font-bold text-sm-right">
+                @AppProcessor.Messagor.GetMessage("ClosingProbability_Label")
+            </label>
+
+            <div class="d-flex align-items-center">
+                @Html.TextBoxFor(
+                    model => model.SuccessRateFrom,
+                    new
+                    {
+                        @class = "form-control",
+                        type = "number",
+                        min = "0",
+                        max = "100",
+                        step = "1",
+                        placeholder = "Từ"
+                    })
+
+                <span class="mx-2">-</span>
+
+                @Html.TextBoxFor(
+                    model => model.SuccessRateTo,
+                    new
+                    {
+                        @class = "form-control",
+                        type = "number",
+                        min = "0",
+                        max = "100",
+                        step = "1",
+                        placeholder = "Đến"
+                    })
+            </div>
+        </div>
+
+        <div class="Search_Box Dropdown">
+            <label class="font-bold text-sm-right">
+                Sản phẩm dịch vụ
+            </label>
+            @Html.DropDownListFor(model => model.ProductServiceID, new SelectList(Model.ProductServices.Where(p => p.NodeType == "P").ToList(), "pID", "DisplayName"), "", new { @class = "form-control", data_placeholder = "Tìm theo sản phẩm dịch vụ" })
+        </div>
+
+        <div class="Search_Box Dropdown">
+            <label class="font-bold">@AppProcessor.Messagor.GetMessage("Department_Search_Label")</label>
+            @Html.DropDownListFor(model => model.BoPhanID, new SelectList(Model.Departments, "BoPhan_ID", "TenBoPhanView"), "-- Chọn phòng --", new { @class = "form-control" })
+        </div>
+
+        <div class="Search_Box Dropdown">
+            <label class="font-bold">@AppProcessor.Messagor.GetMessage("Employee_Search_Label")</label>
+            @Html.DropDownListFor(model => model.EmployeeID, Enumerable.Empty<SelectListItem>(), "-- Chọn nhân viên --", new { @class = "form-control" })
+        </div>
+
+        <div class="d-flex">
+            <div class="Search_Box">
+                <label class="font-bold text-sm-right">
+                    Từ ngày
+                </label>
+                <div class="input-group date" id="dpFromDate" style="width: 135px">
+                    <input type="text" id="FromDate" name="FromDate" class="form-control" placeholder="dd/mm/yyyy" autocomplete="off" />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="Search_Box">
+                <label class="font-bold text-sm-right">
+                    Đến ngày
+                </label>
+                <div class="input-group date" id="dpToDate" style="width: 135px">
+                    <input type="text" id="ToDate" name="ToDate" class="form-control" placeholder="dd/mm/yyyy" autocomplete="off" />
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="Group Group_button" style=" padding-top: 10px; padding-left: 5px;">
+            <div class="Search_button">
+                <button type="button" class="btn btn-primary" onclick="SearchRM()" style="width: 110px">
+                    <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                </button>
+            </div>
+
+            <div class="Search_button">
+                <button type="button" style="width: 145px" class="btn btn-warning ml-2" id="btnExportBusinessOpportunity" title="Xuất danh sách ra Excel">
+                    <i class="fa fa-download"></i>&nbsp;Tải danh sách
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#dpFromDate').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true,
+            language: 'vi'
+        });
+        $('#dpToDate').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true,
+            language: 'vi'
+        });
+        $('#SearchBusinessOpportunity').on('keydown', 'input, select', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                SearchRM();
+            }
+        });
+        $('#SearchBusinessOpportunity').on('change', 'select', function () {
+            SearchRM();
+        });
+        // Load danh sách user theo phòng ban
+        $("#BoPhanID").change(function () {
+            var departmentId = $(this).val();
+            var $employee = $("#EmployeeID");
+
+            $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+            if (!departmentId) return;
+
+            $.get('/Cate/RM_BusinessOpportunity/GetEmployeesByDepartment', {
+                departmentId: departmentId
+            }, function (data) {
+                $.each(data, function (i, item) {
+                    $employee.append(
+                        $('<option>').val(item.Value).text(item.Text)
+                    );
+                });
+            });
+        });
+    });
+    $(document).on('input', '#SuccessRateFrom, #SuccessRateTo', function () {
+        let value = parseFloat($(this).val());
+        if (isNaN(value)) return;
+
+        if (value < 0) {
+            $(this).val(0);
+        }
+
+        if (value > 100) {
+            $(this).val(100);
+        }
+    });
+</script>
+
+<style>
+    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom {
+        z-index: 1000 !important;
+    }
+
+    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-bottom {
+        z-index: 1000 !important;
+    }
+</style>
+<script>
+    $('select option').each(function () {
+        var text = $(this).text();
+        $(this).text(text.replace(/&nbsp;/g, "\u00A0"));
+    });
+</script>

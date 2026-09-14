@@ -1,0 +1,118 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_RevenueAllocationModel>
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("RevenueAllocation_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+    string formId = "formRevenueAllocation";
+    int projectId = ViewBag.ProjectID != null ? (int)ViewBag.ProjectID : 0;
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-pie-chart"></i>
+}
+
+@section FormBody{
+    <div id="bodyForm">
+        <form id="@formId" class="form-horizontal" data-url="@Url.Action("Allocate", "RevenueAllocation", new { area = "Cate" })">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ProjectID" value="@projectId" />
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="bgc-secondary-l3">
+                        <tr>
+                            <th class="text-center" style="width: 40px;">#</th>
+                            <th>@AppProcessor.Messagor.GetMessage("RevenueAllocation_MemberName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("RevenueAllocation_RoleName")</th>
+                            <th style="width: 180px;">
+                                @AppProcessor.Messagor.GetMessage("RevenueAllocation_Rate")
+                                <small class="d-block text-muted font-weight-normal">
+                                    @AppProcessor.Messagor.GetMessage("RevenueAllocation_Total"):
+                                    <span id="totalRateDisplay">0</span>%
+                                </small>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Count > 0)
+                        {
+                            int idx = 0;
+
+                            foreach (Core.Cate.Models.RM_RevenueAllocationModel item in Model)
+                            {
+                                idx++;
+                                <tr>
+                                    <td class="text-center text-muted">@idx</td>
+                                    <td>
+                                        <input type="hidden" name="models[@(idx - 1)].RevenueAllocationID" value="@item.RevenueAllocationID" />
+                                        <input type="hidden" name="models[@(idx - 1)].ProjectMemberID" value="@item.ProjectMemberID" />
+                                        <input type="hidden" name="models[@(idx - 1)].RevenueReceivedID" value="@item.RevenueReceivedID" />
+                                        <span class="font-weight-600">@item.MemberName</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-info px-2 py-1">@item.RoleName</span>
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number"
+                                                   class="form-control allocation-rate-input text-right"
+                                                   name="models[@(idx - 1)].AllocationRate"
+                                                   value="@item.AllocationRate"
+                                                   min="0"
+                                                   max="100"
+                                                   step="0.01"
+                                                   placeholder="0" />
+                                            <div class="input-group-append">
+                                                <span class="input-group-text">%</span>
+                                            </div>
+                                        </div>
+                                        <div class="invalid-feedback-rate text-danger small" style="display: none;">
+                                            Giá trị phải từ 0 đến 100
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="fa fa-info-circle mr-1"></i>
+                                    @AppProcessor.Messagor.GetMessage("RevenueAllocation_NoMember")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model != null && Model.Count > 0)
+            {
+                <div class="mt-3">
+                    <div id="allocationWarning" class="alert alert-warning py-2 mb-0 d-none">
+                        <i class="fa fa-exclamation-triangle mr-1"></i>
+                        @AppProcessor.Messagor.GetMessage("RevenueAllocation_OverLimit")
+                    </div>
+                </div>
+            }
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        RevenueAllocation_Init();
+    </script>
+}
+
+@section SubmitControl{
+    @if (Model != null && Model.Count > 0)
+    {
+        <button type="button" class="btn px-4 btn-outline-primary mb-1" id="btnSaveAllocation">
+            <i class="fa fa-save"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Save")
+        </button>
+    }
+}

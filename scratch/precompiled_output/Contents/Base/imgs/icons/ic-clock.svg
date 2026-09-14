@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Vector</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Vector" transform="translate(1, 1)" stroke="#FFFFFF" stroke-width="1.5">
+            <path d="M6.99967228,14.0007105 C10.3370106,14.0009191 13.2103872,11.6450931 13.8643879,8.37246268 C14.5183871,5.0998316 12.7711134,1.82061809 9.69001525,0.538171715 C6.60891824,-0.744274592 3.05094852,0.326735225 1.18975514,3.0968957 C-0.671438322,5.86705626 -0.318198485,9.56589794 2.03367194,11.9337108 C3.34765272,13.2565979 5.13511367,14.0007105 6.99967228,14.0007105 Z" id="Vector-20"></path>
+            <polyline id="Vector-21" points="5.910675 5.1636963 5.910675 8.5756963 9.177675 8.5756963"></polyline>
+        </g>
+    </g>
+</svg>

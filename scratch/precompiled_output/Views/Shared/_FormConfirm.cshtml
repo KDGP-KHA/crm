@@ -1,0 +1,31 @@
+﻿@using TSFramework.Libs.Processors
+<div rule="Confirm" class="modal-header py-2 bgc-@(RenderSection("FormType", false).ToHtmlString().ToLower().Replace("\n", "").Replace("\r", "").Trim())-tp1 border-0  radius-t-1">
+    <h5 class="modal-title text-white-tp1 text-110 pl-2 font-bolder my-auto" id="modalTitle">
+        <i class="far fa-question-circle"></i>&nbsp;@Html.Raw(ViewBag.Title)
+    </h5>
+    <button type="button" class="btn btn-outline-white btn-h-danger btn-a-danger mt-1px mr-1px btn-brc-tp" data-dismiss="modal" aria-label="Close" title="Đóng" data-rel="tooltip">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+<div class="modal-body modal-scroll">
+    <div class="content-body">
+        @RenderSection("FormBody", true)
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#soundNotify')[0].play();
+        });
+    </script>
+</div>
+<div class="modal-footer">
+    <button type="submit" id="btnConfirm" class="btn px-4 btn-outline-danger mb-1">
+        <i class="fas fa-check"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Yes")
+    </button>
+    <button type="button" class="btn px-4 btn-outline-lightgrey mb-1" data-dismiss="modal">
+        <i class="fas fa-ban"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_No")
+    </button>
+</div>
+
+@section BottomScript{
+    @RenderSection("BottomScript", true)
+}

@@ -1,0 +1,75 @@
+﻿@model string
+<link href="~/Views/Shared/Manager/_Menu.css" rel="stylesheet" />
+@*<div id="sidebar" class="sidebar sidebar-fixed expandable collapsed sidebar-white sidebar-top sidebar-backdrop" data-swipe="true" data-dismiss="true">*@
+<div id="sidebar" class="sidebar sidebar-backdrop has-open hoverable sidebar-white collapsed sidebar-hover" data-swipe="true" data-dismiss="true">
+    <div class="sidebar-inner position-fixed">
+        <div class="ace-scroll flex-grow-1 mt-1px" data-ace-scroll="{}">
+
+            <!-- all sidebar header is inside scrollable area -->
+            <!-- .navbar-brand inside sidebar, only shown in desktop view -->
+            <div class="d-flex fadeable-left fadeable-top w-100">
+                <div class="fadeinable">
+                    <!-- shown when sidebar is collapsed -->
+                    <div class="py-1 mx-1" id="sidebar-header-brand1">
+                        @*<a href="/Dashboard/Manager/" class="navbar-brand text-140">*@
+                        <a href="/Dashboard/Dashboard/" class="navbar-brand text-140">
+                            @*<i class="fas fa-school text-primary-l1"></i>*@
+                            <img class="w-100" src="/Contents/Base/imgs/app.ico">
+                        </a>
+                    </div>
+                </div>
+                <div class="fadeable w-100">
+                    <div class="py-2 text-center" id="sidebar-header-brand2">
+                        @*<a class="navbar-brand text-140 text-white" href="/Dashboard/Manager/">*@
+                        <a class="navbar-brand text-140 text-white" href="/Dashboard/Dashboard/">
+                            <img class="w-50" src="/Contents/Base/imgs/app.ico">
+                        </a>
+                        @*@{Html.RenderAction("RenderAccountInfo", "Account", new { area = "" }); }*@
+                    </div>
+                </div>
+            </div>
+
+            <!-- .navbar-brand inside sidebar, only shown in desktop view -->
+            @*@{Html.RenderAction("RenderAccountInfo", "Account", new { area = "" }); }*@
+            <!-- /.sidebar-section-item  -->
+            <hr class="bgc-lightgrey-d1">
+            <!-- the user avatar and image -->
+            <!-- optional `nav` tag -->
+            <nav aria-label="Main">
+                <ul class="nav flex-column mt-2 has-active-border active-on-top">
+                    @*<li class="nav-item-caption">
+                            <span class="fadeable pl-3">MENU</span>
+                            <span class="fadeinable mt-n2 text-125">&hellip;</span>
+                        </li>*@
+                    @Html.Raw(Model)
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Kiểm tra trạng thái collapse của sidebar
+        function toggleUserInfo() {
+            console.log(123);
+            if ($('#sidebar').hasClass('collapsed')) {
+                $('#id-user-info').addClass('d-none'); // Thêm d-none khi sidebar bị collapse
+            } else {
+                $('#id-user-info').removeClass('d-none'); // Xóa d-none khi sidebar expand
+            }
+        }
+
+        // Gọi hàm khi trang load lần đầu
+        toggleUserInfo();
+
+        // Lắng nghe sự kiện click vào nút toggle sidebar
+        $('[data-toggle="sidebar"]').on('click', function () {
+            // Thêm một timeout để đảm bảo class 'collapsed' đã được cập nhật
+            setTimeout(function () {
+                toggleUserInfo();
+            }, 100);
+        });
+    });
+</script>

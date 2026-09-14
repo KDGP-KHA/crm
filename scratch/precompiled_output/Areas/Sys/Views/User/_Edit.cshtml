@@ -1,0 +1,53 @@
+﻿@using TSFramework.Libs.Processors
+@using EnumHelper = TSFramework.Libs.Helpers.EnumHelper
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("User_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{@Html.Raw(EnumHelper.GetDescription(EnumTypeModal.Primary))}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @*@using (Ajax.BeginForm("Edit", "User", new { area = "Sys" }, new AjaxOptions
+        {
+            HttpMethod = "POST",
+            OnSuccess = "User_OnProcessSuccess(data, 'EditUser')"
+        }, new { @class = "form-horizontal" }))*@
+    @using (Html.BeginForm("Edit", "User", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditUser", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_User")
+        </div>
+    }
+
+    <script type="text/javascript">
+
+    $('form#EditUser').ajaxForm({
+            success: function(response) {
+                if (response.status != undefined) {
+                    if (!response.status && response.errorCode == 1) {
+                        eval(response.message);
+                        response.status = undefined;
+                    } else {
+                        $("#ModalContent #modal_EditUser").modal("hide");
+                        $("#ModalContent #modal_EditUser").on('hidden.bs.modal',
+                            function() {
+                                if (response.status != undefined) {
+                                    eval(response.message);
+                                    _tableUser.ajax.reload(null, false);
+                                    response.status = undefined;
+                                }
+                            });
+                    }
+                } else {
+                    $("#ModalContent #modal_EditUser" + " #bodyForm").html(response);
+                }
+            }
+        });
+</script>
+}
