@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -216,10 +216,14 @@
     <Content Include="Areas\Cate\Views\DigitalSales\_Add.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_Edit.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_ChangeStatusModal.cshtml" />
+    <Content Include="Areas\Cate\Views\DigitalSales\_ChangeStatusForm.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_ProductModal.cshtml" />
+    <Content Include="Areas\Cate\Views\DigitalSales\_ProductForm.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_MemberModal.cshtml" />
+    <Content Include="Areas\Cate\Views\DigitalSales\_MemberForm.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_EditMemberModal.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_TrackingModal.cshtml" />
+    <Content Include="Areas\Cate\Views\DigitalSales\_TrackingForm.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_DetailAttachments.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_DetailDiscussions.cshtml" />
     <Content Include="Areas\Cate\Views\DigitalSales\_DetailMembers.cshtml" />

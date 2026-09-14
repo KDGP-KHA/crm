@@ -1,4 +1,4 @@
-window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -490,6 +490,11 @@ function openChangeStatusModal(id) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesChangeStatusForm === "function") initDigitalSalesChangeStatusForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
@@ -732,6 +737,11 @@ function openAddTrackingModal(salesId) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesTrackingForm === "function") initDigitalSalesTrackingForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Lưu tiến trình thành công!", true);
@@ -806,6 +816,11 @@ function openEditTrackingModal(id, salesId) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesTrackingForm === "function") initDigitalSalesTrackingForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Cập nhật tiến trình thành công!", true);

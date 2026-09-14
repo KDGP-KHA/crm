@@ -1,4 +1,4 @@
-var _tableDigitalSales;
+﻿var _tableDigitalSales;
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -556,6 +556,11 @@ function openChangeStatusModal(id) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesChangeStatusForm === "function") initDigitalSalesChangeStatusForm();
+                        return;
+                    }
                     if (res.status) {
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
                         $modal.modal("hide");

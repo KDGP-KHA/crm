@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -350,6 +350,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpPost]
         [ActionType(Type = EnumActionType.Create)]
         [ValidateInput(false)]
+        [ValidateAntiForgeryToken]
         public ActionResult Add(RM_DigitalSalesModel model, HttpPostedFileBase fileUpload)
         {
             if (model.CustomerID <= 0)
@@ -465,6 +466,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpPost]
         [ActionType(Type = EnumActionType.Edit)]
         [ValidateInput(false)]
+        [ValidateAntiForgeryToken]
         public ActionResult Edit(RM_DigitalSalesModel model, HttpPostedFileBase fileUpload)
         {
             if (model.DigitalSalesID <= 0)
@@ -1208,9 +1210,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.Edit)]
-        public ActionResult ChangeStatus(int digitalSalesId, int newStatusId, string note, HttpPostedFileBase attachmentFile)
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangeStatus(RM_DigitalSalesChangeStatusViewModel model, HttpPostedFileBase attachmentFile)
         {
-            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            if (model.DigitalSalesID <= 0)
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") });
+            }
+
+            if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
             {
                 return Json(new
                 {
@@ -1219,26 +1227,14 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 });
             }
 
-            if (digitalSalesId <= 0 || newStatusId <= 0)
+            if (!ModelState.IsValid)
             {
-                return Json(new
-                {
-                    status = false,
-                    message = GetAppMessage("DigitalSales_Msg_InvalidData")
-                });
+                PrepareChangeStatusForm(model);
+                return PartialView("_ChangeStatusForm", model);
             }
 
-            if (string.IsNullOrWhiteSpace(note))
-            {
-                return Json(new
-                {
-                    status = false,
-                    message = GetAppMessage("DigitalSales_Msg_ChangeStatusNoteRequired")
-                });
-            }
-
-            var currentSales = _salesCache.GetByID(digitalSalesId);
-            if (currentSales != null && currentSales.StatusID == newStatusId)
+            var currentSales = _salesCache.GetByID(model.DigitalSalesID);
+            if (currentSales != null && currentSales.StatusID == model.NewStatusID)
             {
                 return Json(new
                 {
@@ -1253,11 +1249,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 attachmentPath = SaveUploadedFile(attachmentFile);
             }
 
-            var code = _salesCache.ChangeStatus(digitalSalesId, newStatusId, note, attachmentPath, User.UserName);
+            var code = _salesCache.ChangeStatus(model.DigitalSalesID, model.NewStatusID, model.Note, attachmentPath, User.UserName);
 
             if (code == 1)
             {
-                var updated = _salesCache.GetByID(digitalSalesId, User.UserName);
+                var updated = _salesCache.GetByID(model.DigitalSalesID, User.UserName);
                 return Json(new
                 {
                     status = true,
@@ -1315,6 +1311,47 @@ namespace Modules.Cate.Areas.Cate.Controllers
             });
         }
         #endregion
+
+        private void PrepareChangeStatusForm(RM_DigitalSalesChangeStatusViewModel model)
+        {
+            var sales = _salesCache.GetByID(model.DigitalSalesID);
+            if (sales != null)
+            {
+                model.Title = sales.Title;
+                model.CurrentBusinessType = sales.BusinessType;
+                model.CurrentBusinessTypeName = sales.BusinessTypeName;
+                model.CurrentStatusName = sales.StatusName;
+            }
+
+            model.AvailableStatuses = (_salesCache.GetStatusList(null) ?? new List<RM_DigitalSalesStatusModel>())
+                .Where(s => sales == null || s.StatusID != sales.StatusID)
+                .Select(s => new SelectListItem
+                {
+                    Value = s.StatusID.ToString(),
+                    Text = $"[{(s.BusinessType == 1 ? AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity") : AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project"))}] {s.StatusName}"
+                }).ToList();
+        }
+
+        private void PrepareTrackingForm()
+        {
+            ViewBag.UserList = _userCache.GetAll()?.Select(u => new SelectListItem
+            {
+                Value = u.UserId.ToString(),
+                Text = $"{u.FullName} ({u.UserName})"
+            }).ToList() ?? new List<SelectListItem>();
+        }
+
+        private void PrepareMemberFormData(int digitalSalesId)
+        {
+            var departments = GetAccessibleDepartments() ?? new List<MN_BoPhanModel>();
+            var departmentIds = new HashSet<int>(departments.Select(d => d.BoPhan_ID));
+            var existingUserIds = new HashSet<int>((_salesCache.GetMembersBySalesID(digitalSalesId) ?? new List<RM_DigitalSalesMemberModel>()).Select(m => m.UserID));
+            ViewBag.Employees = (_employeeCache.GetAll() ?? new List<MN_EmployeeModel>())
+                .Where(e => departmentIds.Contains(e.BoPhan_ID) && !existingUserIds.Contains(e.Employee_ID))
+                .OrderBy(e => e.FullName).ToList();
+            ViewBag.Departments = departments;
+            ViewBag.Roles = _rolesCache.GetAll() ?? new List<RM_RolesModel>();
+        }
 
         #region 5. Products & Revenue
         private List<SelectListItem> GetProductSelectList()
@@ -1482,6 +1519,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
         [HttpPost]
         [ActionType(Type = EnumActionType.Create)]
+        [ValidateAntiForgeryToken]
         public ActionResult SaveProduct(RM_DigitalSalesProductModel model, int? ProductServiceID, int? DigitalSalesID)
         {
             if (model == null) model = new RM_DigitalSalesProductModel();
@@ -1523,11 +1561,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             if (model.ProductServiceID <= 0)
             {
-                return Json(new
-                {
-                    status = false,
-                    message = GetAppMessage("DigitalSales_Msg_ProductRequired")
-                });
+                ModelState.AddModelError("ProductServiceID", GetAppMessage("DigitalSales_Msg_ProductRequired"));
             }
 
             if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
@@ -1537,6 +1571,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     status = false,
                     message = GetAppMessage("DigitalSales_Msg_NoPermission")
                 });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ProductList = GetProductSelectList();
+                return PartialView("_ProductForm", model);
             }
 
             var id = _salesCache.SaveProduct(model, User.UserName);
@@ -1605,10 +1645,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     }, JsonRequestBehavior.AllowGet);
                 }
 
-                var model = new RM_DigitalSalesMemberModel
+                var model = new RM_DigitalSalesMemberFormModel
                 {
-                    DigitalSalesID = digitalSalesId,
-                    IsActive = true
+                    DigitalSalesID = digitalSalesId
                 };
 
                 var accessibleDepts = GetAccessibleDepartments() ?? new List<MN_BoPhanModel>();
@@ -1720,6 +1759,52 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
         }
 
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Create)]
+        [ValidateAntiForgeryToken]
+        public ActionResult SaveMembers(RM_DigitalSalesMemberFormModel model)
+        {
+            if (model.DigitalSalesID <= 0)
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidSalesRecord") });
+            }
+
+            if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            if (!ModelState.IsValid || model.EmployeeIDs == null || model.EmployeeIDs.Length == 0)
+            {
+                if (model.EmployeeIDs == null || model.EmployeeIDs.Length == 0)
+                {
+                    ModelState.AddModelError("EmployeeIDs", GetAppMessage("DigitalSales_Msg_MemberRequired"));
+                }
+                PrepareMemberFormData(model.DigitalSalesID);
+                return PartialView("_MemberForm", model);
+            }
+
+            var allRoles = _rolesCache.GetAll() ?? new List<RM_RolesModel>();
+            var selectedRoleIds = new HashSet<int>(model.RoleIDs ?? new int[0]);
+            var roleNames = allRoles.Where(r => selectedRoleIds.Contains(r.RoleID)).Select(r => r.RoleName).ToList();
+            if (!string.IsNullOrWhiteSpace(model.CustomRole)) roleNames.Add(model.CustomRole.Trim());
+            var roleTitle = roleNames.Count > 0 ? string.Join(", ", roleNames.Distinct()) : GetAppMessage("DigitalSales_Role_Member");
+            var savedCount = 0;
+            foreach (var employeeId in model.EmployeeIDs.Distinct().Where(id => id > 0))
+            {
+                var member = new RM_DigitalSalesMemberModel { DigitalSalesID = model.DigitalSalesID, UserID = employeeId, RoleTitle = roleTitle, IsAM = model.IsAM, Note = model.Note, IsActive = true };
+                if (_salesCache.SaveMember(member, User.UserName) > 0) savedCount++;
+            }
+
+            return Json(new
+            {
+                status = savedCount > 0,
+                message = savedCount > 0
+                    ? string.Format(GetAppMessage("DigitalSales_Msg_SaveMembersMultiSuccess"), savedCount)
+                    : GetAppMessage("DigitalSales_Msg_SaveMemberFail")
+            });
+        }
+
         [HttpGet]
         [ActionType(Type = EnumActionType.Edit)]
         public ActionResult EditMemberModal(int id, int digitalSalesId)
@@ -1777,6 +1862,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
         [HttpPost]
         [ActionType(Type = EnumActionType.Create)]
+        [ValidateAntiForgeryToken]
         public ActionResult SaveMember(RM_DigitalSalesMemberModel model, string EmployeeIDs, string RoleIDs, string CustomRole)
         {
             try
@@ -2062,14 +2148,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.Create)]
+        [ValidateAntiForgeryToken]
         public ActionResult SaveTracking(RM_DigitalSalesTrackingModel model, HttpPostedFileBase attachmentFile)
         {
-            if (model.DigitalSalesID <= 0 || string.IsNullOrWhiteSpace(model.TaskName))
+            if (model.DigitalSalesID <= 0)
             {
                 return Json(new
                 {
                     status = false,
-                    message = GetAppMessage("DigitalSales_Msg_TaskNameRequired")
+                    message = GetAppMessage("DigitalSales_Msg_InvalidSalesRecord")
                 });
             }
 
@@ -2080,6 +2167,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     status = false,
                     message = GetAppMessage("DigitalSales_Msg_NoPermission")
                 });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                PrepareTrackingForm();
+                return PartialView("_TrackingForm", model);
             }
 
             if (attachmentFile != null && attachmentFile.ContentLength > 0)
