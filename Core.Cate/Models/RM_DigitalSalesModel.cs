@@ -166,4 +166,24 @@ namespace Core.Cate.Models
         public int SortOrder { get; set; }
         public bool IsCustomTask { get; set; }
     }
+
+    public class RM_DigitalSalesChangeProcessViewModel
+    {
+        public int DigitalSalesID { get; set; }
+        public int StatusID { get; set; }
+        public string StatusName { get; set; }
+        public int CurrentProcessID { get; set; }
+        public int SelectedProcessID { get; set; }
+        public List<RM_DigitalSalesProcessModel> AvailableProcesses { get; set; } = new List<RM_DigitalSalesProcessModel>();
+    }
+
+    public class RM_DigitalSalesTrackingReportViewModel
+    {
+        public int TrackingID { get; set; }
+        public int DigitalSalesID { get; set; }
+        public string TaskName { get; set; }
+        public byte Status { get; set; }
+        public string ResultNote { get; set; }
+        public string AttachmentFile { get; set; }
+    }
 }

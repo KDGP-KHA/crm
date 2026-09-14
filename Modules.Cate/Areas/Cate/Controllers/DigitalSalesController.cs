@@ -2454,6 +2454,284 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult ChangeProcessModal(int digitalSalesId, int statusId, int currentProcessId)
+        {
+            if (digitalSalesId <= 0 || statusId <= 0)
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-exclamation-circle'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_InvalidData")}</div>");
+            }
+
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var status = _salesCache.GetStatusList(null)?.FirstOrDefault(s => s.StatusID == statusId);
+            var processes = _workflowCache.GetProcesses(out _, search: null, businessType: null, statusId: statusId);
+            var activeProcesses = processes != null
+                ? processes.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList()
+                : new List<RM_DigitalSalesProcessModel>();
+
+            var model = new RM_DigitalSalesChangeProcessViewModel
+            {
+                DigitalSalesID = digitalSalesId,
+                StatusID = statusId,
+                StatusName = status?.StatusName ?? "Trạng thái",
+                CurrentProcessID = currentProcessId,
+                SelectedProcessID = currentProcessId,
+                AvailableProcesses = activeProcesses
+            };
+
+            return PartialView("_ChangeProcessModal", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult SaveChangeProcess(int digitalSalesId, int statusId, int newProcessId)
+        {
+            if (digitalSalesId <= 0 || statusId <= 0 || newProcessId <= 0)
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") });
+            }
+
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            var result = _salesCache.ChangeProcessOfStatus(digitalSalesId, statusId, newProcessId, User.UserName);
+            if (result > 0)
+            {
+                return Json(new { status = true, message = GetAppMessage("DigitalSalesTracking_ChangeProcessSuccess") });
+            }
+
+            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_UpdateTaskFail") });
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.Create)]
+        public ActionResult AddTodoModal(int parentTrackingId, int digitalSalesId)
+        {
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var tasks = _salesCache.GetTrackingTasks(digitalSalesId);
+            var parent = tasks.FirstOrDefault(t => t.TrackingID == parentTrackingId);
+
+            var model = new RM_DigitalSalesTrackingModel
+            {
+                TrackingID = 0,
+                DigitalSalesID = digitalSalesId,
+                ParentID = parentTrackingId,
+                ProcessID = parent?.ProcessID,
+                ProgressID = parent?.ProgressID,
+                StartDate = parent?.StartDate ?? DateTime.Today,
+                Deadline = parent?.MaxDeadline ?? DateTime.Today.AddDays(3),
+                Status = 1,
+                IsCustomTask = true,
+                DurationDays = parent?.EffectiveDurationDays
+            };
+
+            ViewBag.ParentTask = parent;
+            ViewBag.UserList = _userCache.GetAll()?.Select(u => new SelectListItem
+            {
+                Value = u.UserId.ToString(),
+                Text = $"{u.FullName} ({u.UserName})"
+            }).ToList() ?? new List<SelectListItem>();
+
+            return PartialView("_TodoModal", model);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult EditTodoModal(int id, int digitalSalesId)
+        {
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var tasks = _salesCache.GetTrackingTasks(digitalSalesId);
+            var model = tasks.SelectMany(t => t.TodoList.Concat(new[] { t })).FirstOrDefault(t => t.TrackingID == id);
+            if (model == null)
+            {
+                return Json(new { status = false, message = CreateMessage(AppProcessor.Messagor.GetMessage("DigitalSales_Task"), EnumProcessType.DataNotExist, EnumMsgIcon.Error) }, JsonRequestBehavior.AllowGet);
+            }
+
+            var parent = model.ParentID.HasValue ? tasks.FirstOrDefault(t => t.TrackingID == model.ParentID.Value) : null;
+            ViewBag.ParentTask = parent;
+            ViewBag.UserList = _userCache.GetAll()?.Select(u => new SelectListItem
+            {
+                Value = u.UserId.ToString(),
+                Text = $"{u.FullName} ({u.UserName})"
+            }).ToList() ?? new List<SelectListItem>();
+
+            return PartialView("_TodoModal", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Create)]
+        [ValidateAntiForgeryToken]
+        public ActionResult SaveTodo(RM_DigitalSalesTrackingModel model)
+        {
+            if (model.DigitalSalesID <= 0)
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidSalesRecord") });
+            }
+
+            if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            if (string.IsNullOrWhiteSpace(model.TaskName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_TaskNameRequired") });
+            }
+
+            // RÀNG BUỘC NGHIỆP VỤ: Deadline của Todo <= StartDate của Tiến trình + Tổng ngày của Tiến trình
+            if (model.ParentID.HasValue && model.ParentID.Value > 0)
+            {
+                var tasks = _salesCache.GetTrackingTasks(model.DigitalSalesID);
+                var parent = tasks.FirstOrDefault(t => t.TrackingID == model.ParentID.Value);
+                if (parent != null)
+                {
+                    var maxDeadline = parent.MaxDeadline;
+                    if (model.Deadline.HasValue && model.Deadline.Value.Date > maxDeadline.Date)
+                    {
+                        return Json(new { status = false, message = GetAppMessage("DigitalSalesTracking_DeadlineExceeded_Error") });
+                    }
+                }
+            }
+
+            var id = _salesCache.SaveTracking(model, User.UserName);
+            if (id > 0)
+            {
+                return Json(new { status = true, id = id, message = GetAppMessage("DigitalSalesTracking_SaveSuccess") });
+            }
+
+            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_SaveTaskFail") });
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult ConfirmTracking(int trackingId, int digitalSalesId)
+        {
+            if (digitalSalesId > 0 && !HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            var result = _salesCache.UpdateTrackingStatus(trackingId, 3, null, null, null, null, User.UserName);
+            if (result > 0)
+            {
+                return Json(new { status = true, message = GetAppMessage("DigitalSalesTracking_ConfirmSuccess") });
+            }
+
+            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_UpdateTaskFail") });
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult UnlockTracking(int trackingId, int digitalSalesId)
+        {
+            if (digitalSalesId > 0 && !HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            var result = _salesCache.UpdateTrackingStatus(trackingId, 2, null, null, null, null, User.UserName);
+            if (result > 0)
+            {
+                return Json(new { status = true, message = GetAppMessage("DigitalSalesTracking_UnlockSuccess") });
+            }
+
+            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_UpdateTaskFail") });
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult ReportTrackingModal(int trackingId, int digitalSalesId)
+        {
+            if (digitalSalesId > 0 && !HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var tasks = _salesCache.GetTrackingTasks(digitalSalesId);
+            var task = tasks.SelectMany(t => t.TodoList.Concat(new[] { t })).FirstOrDefault(t => t.TrackingID == trackingId);
+            if (task == null)
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") }, JsonRequestBehavior.AllowGet);
+            }
+
+            var model = new RM_DigitalSalesTrackingReportViewModel
+            {
+                TrackingID = trackingId,
+                DigitalSalesID = digitalSalesId,
+                TaskName = task.TaskName,
+                Status = task.Status,
+                ResultNote = task.ResultNote,
+                AttachmentFile = task.AttachmentFile
+            };
+
+            return PartialView("_TrackingReportModal", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Edit)]
+        [ValidateAntiForgeryToken]
+        public ActionResult SaveTrackingReport(RM_DigitalSalesTrackingReportViewModel model, HttpPostedFileBase reportFile)
+        {
+            if (model.DigitalSalesID > 0 && !HasDetailPermission(model.DigitalSalesID, User.UserName))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            string attachmentPath = model.AttachmentFile;
+            if (reportFile != null && reportFile.ContentLength > 0)
+            {
+                attachmentPath = SaveUploadedFile(reportFile);
+            }
+
+            byte newStatus = model.Status > 0 ? model.Status : (byte)2;
+            var result = _salesCache.UpdateTrackingStatus(model.TrackingID, newStatus, model.ResultNote, attachmentPath, null, null, User.UserName);
+            if (result > 0)
+            {
+                return Json(new { status = true, message = GetAppMessage("DigitalSalesTracking_ReportSuccess") });
+            }
+
+            return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_UpdateTaskFail") });
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult DetailTrackingTab(int id)
+        {
+            var model = _salesCache.GetByID(id, User.UserName);
+            if (model == null)
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-exclamation-circle'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_InvalidSalesRecord")}</div>");
+            }
+
+            ViewBag.CanEdit = HasDetailPermission(model, User.UserName);
+            return PartialView("_DetailTracking", model);
+        }
+
+        [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.Edit)]
         public ActionResult UpdateTrackingStatus(int trackingId, byte status, string resultNote, HttpPostedFileBase attachmentFile, int? assignedUserId, DateTime? deadline, int? salesId = null)

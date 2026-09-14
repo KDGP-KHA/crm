@@ -277,6 +277,15 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
+            if (list != null && list.Count > 0)
+            {
+                var parents = list.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
+                var children = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
+                foreach (var p in parents)
+                {
+                    p.TodoList = children.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.TrackingID).ToList();
+                }
+            }
             return list ?? new List<RM_DigitalSalesTrackingModel>();
         }
 
@@ -314,9 +323,51 @@ namespace Core.Cate.Biz
                 model.AttachmentFile,
                 model.IsCustomTask,
                 model.SortOrder,
-                username
+                username,
+                model.ParentID.HasValue ? (object)model.ParentID.Value : DBNull.Value,
+                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
+        }
+
+        public int ChangeProcessOfStatus(int digitalSalesId, int statusId, int newProcessId, string username)
+        {
+            if (digitalSalesId <= 0 || statusId <= 0 || newProcessId <= 0) return 0;
+
+            var currentTasks = GetTrackingTasks(digitalSalesId);
+            var oldTasks = currentTasks.Where(t => t.StatusID == statusId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+            foreach (var ot in oldTasks)
+            {
+                DeleteTracking(ot.TrackingID, username);
+            }
+
+            var progressList = new RM_DigitalSalesWorkflowBiz().GetProgressesByProcess(newProcessId);
+            if (progressList != null && progressList.Count > 0)
+            {
+                int sort = 1;
+                foreach (var pg in progressList.OrderBy(p => p.SortOrder))
+                {
+                    int duration = pg.DefaultDurationDays > 0 ? pg.DefaultDurationDays : 3;
+                    var task = new RM_DigitalSalesTrackingModel
+                    {
+                        TrackingID = 0,
+                        DigitalSalesID = digitalSalesId,
+                        ProcessID = newProcessId,
+                        ProgressID = pg.ProgressID,
+                        TaskName = pg.ProgressName,
+                        DurationDays = duration,
+                        DefaultDurationDays = duration,
+                        StartDate = DateTime.Now,
+                        Deadline = DateTime.Now.AddDays(duration),
+                        Status = 1,
+                        IsCustomTask = false,
+                        SortOrder = sort++
+                    };
+                    SaveTracking(task, username);
+                }
+            }
+
+            return 1;
         }
 
         public int DeleteTracking(int trackingId, string username)

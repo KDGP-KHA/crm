@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Models.Base;
 
@@ -8,15 +9,19 @@ namespace Core.Cate.Models
     {
         public int TrackingID { get; set; }
         public int DigitalSalesID { get; set; }
+        public int? ParentID { get; set; }
         public int? ProcessID { get; set; }
         public string ProcessName { get; set; }
         public int? StatusID { get; set; }
         public string SalesStatusName { get; set; }
+        public int ProcessCountOfStatus { get; set; }
         public int? ProgressID { get; set; }
         [CustomRequired]
         [CustomDisplayName("DigitalSalesTracking_TaskName_Label")]
         public string TaskName { get; set; }
         public string ProgressName { get; set; }
+        [CustomDisplayName("DigitalSalesTracking_DurationDays_Label")]
+        public int? DurationDays { get; set; }
         public int DefaultDurationDays { get; set; }
         [CustomDisplayName("DigitalSalesTracking_AssignedUser_Label")]
         public int? AssignedUserID { get; set; }
@@ -39,5 +44,10 @@ namespace Core.Cate.Models
         public bool IsCustomTask { get; set; }
         public int SortOrder { get; set; }
         public DateTime CreatedDate { get; set; }
+
+        // Helper computed properties
+        public int EffectiveDurationDays => DurationDays.HasValue && DurationDays.Value > 0 ? DurationDays.Value : (DefaultDurationDays > 0 ? DefaultDurationDays : 3);
+        public DateTime MaxDeadline => StartDate.AddDays(EffectiveDurationDays);
+        public List<RM_DigitalSalesTrackingModel> TodoList { get; set; } = new List<RM_DigitalSalesTrackingModel>();
     }
 }

@@ -1,0 +1,153 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesTrackingModel
+@{
+    var parent = ViewBag.ParentTask as Core.Cate.Models.RM_DigitalSalesTrackingModel;
+    var userList = ViewBag.UserList as List<SelectListItem> ?? new List<SelectListItem>();
+    string maxDateStr = parent != null ? parent.MaxDeadline.ToString("dd/MM/yyyy") : "";
+    string maxDateIso = parent != null ? parent.MaxDeadline.ToString("yyyy-MM-dd") : "";
+    string startDateIso = parent != null ? parent.StartDate.ToString("yyyy-MM-dd") : "";
+    bool isEdit = Model.TrackingID > 0;
+}
+
+<div class="modal fade" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="todoModalTitle" aria-hidden="true" data_width="650">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <div class="modal-header bgc-orange-d1 text-white px-3 py-25">
+                <h5 class="modal-title font-bold text-110" id="todoModalTitle">
+                    <i class="fa @(isEdit ? "fa-edit" : "fa-plus-circle") mr-1"></i>
+                    @(isEdit ? AppProcessor.Messagor.GetMessage("DigitalSalesTracking_EditTodo_Title") : AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AddTodo_Title"))
+                </h5>
+                <button type="button" class="close text-white opacity-2 text-130" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="frmTodoItem" method="post" autocomplete="off">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.TrackingID, new { id = "Todo_TrackingID" })
+                @Html.HiddenFor(m => m.DigitalSalesID, new { id = "Todo_DigitalSalesID" })
+                @Html.HiddenFor(m => m.ParentID, new { id = "Todo_ParentID" })
+                @Html.HiddenFor(m => m.ProcessID, new { id = "Todo_ProcessID" })
+                @Html.HiddenFor(m => m.ProgressID, new { id = "Todo_ProgressID" })
+                <input type="hidden" id="Todo_MaxDeadlineIso" value="@maxDateIso" />
+                <input type="hidden" id="Todo_StartDateIso" value="@startDateIso" />
+
+                <div class="modal-body p-3 p-md-4">
+                    @if (parent != null)
+                    {
+                        <!-- THÃ”NG TIN TIáº¾N TRÃŒNH CHA & RÃ€NG BUá»˜C THá»œI Háº N -->
+                        <div class="card bgc-warning-l4 border-1 brc-warning-m3 mb-3 radius-1 p-25 shadow-none">
+                            <div class="d-flex align-items-start">
+                                <div class="text-orange-d2 mr-2 text-130"><i class="fa fa-info-circle"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="text-90 text-secondary-d2">
+                                        Thuá»™c tiáº¿n trÃ¬nh: <strong class="text-dark">@parent.TaskName</strong>
+                                    </div>
+                                    <div class="d-flex flex-wrap text-85 text-secondary-d1 mt-1" style="gap: 15px;">
+                                        <span><i class="fa fa-calendar-alt text-primary mr-1"></i>Báº¯t Ä‘áº§u: <strong>@parent.StartDate.ToString("dd/MM/yyyy")</strong></span>
+                                        <span><i class="fa fa-clock text-warning mr-1"></i>Tá»•ng ngÃ y: <strong>@parent.EffectiveDurationDays ngÃ y</strong></span>
+                                        <span><i class="fa fa-calendar-check text-danger mr-1"></i>Háº¡n tá»‘i Ä‘a: <strong class="text-danger-d1">@maxDateStr</strong></span>
+                                    </div>
+                                    <div class="text-80 text-danger-d1 font-italic mt-1">
+                                        <i class="fa fa-exclamation-triangle mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesTracking_DeadlineExceeded_Error")
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- TÃŠN CÃ”NG VIá»†C -->
+                    <div class="form-group mb-3">
+                        <label class="font-bolder text-secondary-d2 mb-1" for="Todo_TaskName">
+                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_TaskName_Label") <span class="text-danger">*</span>
+                        </label>
+                        @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control radius-1 font-bold", id = "Todo_TaskName", placeholder = "VÃ­ dá»¥: Gáº·p trá»±c tiáº¿p khÃ¡ch hÃ ng trao Ä‘á»•i ká»¹ thuáº­t...", required = "required" })
+                    </div>
+
+                    <div class="row">
+                        <!-- NGÆ¯á»œI THá»°C HIá»†N -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="font-bolder text-secondary-d2 mb-1" for="Todo_AssignedUserID">
+                                    @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AssignedUser_Label")
+                                </label>
+                                @Html.DropDownListFor(m => m.AssignedUserID, userList, "-- Chá»n nhÃ¢n sá»± phá»¥ trÃ¡ch --", new { @class = "form-control select2 radius-1", id = "Todo_AssignedUserID" })
+                            </div>
+                        </div>
+
+                        <!-- TRáº NG THÃI -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="font-bolder text-secondary-d2 mb-1" for="Todo_Status">
+                                    @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Status_Label")
+                                </label>
+                                <select name="Status" id="Todo_Status" class="form-control radius-1">
+                                    <option value="1" @(Model.Status == 1 ? "selected" : "")>1. ChÆ°a thá»±c hiá»‡n</option>
+                                    <option value="2" @(Model.Status == 2 ? "selected" : "")>2. Äang thá»±c hiá»‡n</option>
+                                    <option value="3" @(Model.Status == 3 ? "selected" : "")>3. ÄÃ£ hoÃ n thÃ nh</option>
+                                    <option value="4" @(Model.Status == 4 ? "selected" : "")>4. QuÃ¡ háº¡n / Táº¡m dá»«ng</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- NGÃ€Y Báº®T Äáº¦U -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="font-bolder text-secondary-d2 mb-1" for="Todo_StartDate">
+                                    @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_StartDate_Label") <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control date-picker radius-1" id="Todo_StartDate" name="StartDate"
+                                           value="@(Model.StartDate != DateTime.MinValue ? Model.StartDate.ToString("dd/MM/yyyy") : DateTime.Today.ToString("dd/MM/yyyy"))"
+                                           data-date-format="dd/mm/yyyy" placeholder="dd/mm/yyyy" required />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><i class="fa fa-calendar text-primary"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Háº N Xá»¬ LÃ (DEADLINE - RÃ€NG BUá»˜C NGHIá»†P Vá»¤) -->
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label class="font-bolder text-secondary-d2 mb-1" for="Todo_Deadline">
+                                    @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Deadline_Label") <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control date-picker radius-1" id="Todo_Deadline" name="Deadline"
+                                           value="@(Model.Deadline.HasValue ? Model.Deadline.Value.ToString("dd/MM/yyyy") : maxDateStr)"
+                                           data-date-format="dd/mm/yyyy" placeholder="dd/mm/yyyy" required />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><i class="fa fa-calendar-alt text-danger"></i></span>
+                                    </div>
+                                </div>
+                                <div class="invalid-feedback d-none" id="todoDeadlineError">
+                                    Háº¡n xá»­ lÃ½ khÃ´ng Ä‘Æ°á»£c lá»›n hÆ¡n ngÃ y @maxDateStr!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GHI CHÃš / Káº¾T QUáº¢ -->
+                    <div class="form-group mb-0">
+                        <label class="font-bolder text-secondary-d2 mb-1" for="Todo_ResultNote">
+                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_ResultNote_Label")
+                        </label>
+                        @Html.TextAreaFor(m => m.ResultNote, new { @class = "form-control radius-1", id = "Todo_ResultNote", rows = "3", placeholder = "Ghi chÃº tiáº¿n Ä‘á»™ hoáº·c ná»™i dung cÃ´ng viá»‡c..." })
+                    </div>
+                </div>
+
+                <div class="modal-footer bgc-secondary-l4 border-t-1 brc-grey-l2 px-3 py-2">
+                    <button type="button" class="btn btn-sm btn-white border-1 brc-grey-l1 text-secondary-d2 px-3 radius-1 shadow-sm font-bold" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Close")
+                    </button>
+                    <button type="button" class="btn btn-sm btn-orange px-4 radius-1 shadow-sm font-bold" id="btnSaveTodoItem" onclick="submitTodoItem();">
+                        <i class="fa fa-save mr-1"></i> @(isEdit ? "Cáº­p nháº­t" : "LÆ°u cÃ´ng viá»‡c")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

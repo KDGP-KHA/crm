@@ -1,0 +1,72 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesTrackingReportViewModel
+
+<div class="modal fade" id="trackingReportModal" tabindex="-1" role="dialog" aria-labelledby="trackingReportModalTitle" aria-hidden="true" data_width="600">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <div class="modal-header bgc-primary-d1 text-white px-3 py-25">
+                <h5 class="modal-title font-bold text-110" id="trackingReportModalTitle">
+                    <i class="fa fa-file-alt mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Report_Title")
+                </h5>
+                <button type="button" class="close text-white opacity-2 text-130" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="frmTrackingReport" method="post" enctype="multipart/form-data" autocomplete="off">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.TrackingID, new { id = "Report_TrackingID" })
+                @Html.HiddenFor(m => m.DigitalSalesID, new { id = "Report_DigitalSalesID" })
+                @Html.HiddenFor(m => m.AttachmentFile, new { id = "Report_CurrentAttachmentFile" })
+
+                <div class="modal-body p-3 p-md-4">
+                    <div class="form-group mb-3">
+                        <label class="text-secondary-d2 font-bold mb-1">CÃ´ng viá»‡c thá»±c hiá»‡n:</label>
+                        <div class="font-bolder text-primary-d2 text-105 p-2 bgc-secondary-l4 border-1 brc-grey-l2 radius-1">
+                            @Model.TaskName
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="font-bolder text-secondary-d2 mb-1" for="Report_ResultNote">
+                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_ResultNote_Label") <span class="text-danger">*</span>
+                        </label>
+                        @Html.TextAreaFor(m => m.ResultNote, new { @class = "form-control radius-1 font-95", id = "Report_ResultNote", rows = "4", placeholder = "Nháº­p ná»™i dung bÃ¡o cÃ¡o káº¿t quáº£ thá»±c hiá»‡n...", required = "required" })
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="font-bolder text-secondary-d2 mb-1" for="Report_File">
+                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AttachmentFile_Label")
+                        </label>
+                        <input type="file" name="reportFile" id="Report_File" class="form-control-file border-1 p-2 radius-1 bg-white" />
+                        @if (!string.IsNullOrWhiteSpace(Model.AttachmentFile))
+                        {
+                            <div class="mt-2 text-85 text-secondary-d1">
+                                <i class="fa fa-paperclip mr-1 text-primary"></i> File hiá»‡n táº¡i:
+                                <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = Model.AttachmentFile })" target="_blank" class="font-bold text-primary">
+                                    @System.IO.Path.GetFileName(Model.AttachmentFile)
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="custom-control custom-checkbox mt-2">
+                        <input type="checkbox" class="custom-control-input" id="Report_ChkCompleted" name="Status" value="3" @(Model.Status == 3 ? "checked" : "") />
+                        <label class="custom-control-label font-bold text-dark cursor-pointer select-none" for="Report_ChkCompleted">
+                            ÄÃ¡nh dáº¥u cÃ´ng viá»‡c nÃ y Ä‘Ã£ hoÃ n thÃ nh
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer bgc-secondary-l4 border-t-1 brc-grey-l2 px-3 py-2">
+                    <button type="button" class="btn btn-sm btn-white border-1 brc-grey-l1 text-secondary-d2 px-3 radius-1 shadow-sm font-bold" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Close")
+                    </button>
+                    <button type="button" class="btn btn-sm btn-primary px-4 radius-1 shadow-sm font-bold" id="btnSaveTrackingReport" onclick="submitTrackingReport();">
+                        <i class="fa fa-save mr-1"></i> LÆ°u bÃ¡o cÃ¡o
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
