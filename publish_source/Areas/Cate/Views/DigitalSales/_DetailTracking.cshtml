@@ -6,9 +6,9 @@
     var parentTasks = allTasks.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
     var allTodoTasks = allTasks.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
     
-    // Tính tổng số lượng và hoàn thành (tính theo Todo list nếu có, hoặc tính theo toàn bộ task)
-    int totalCount = allTasks.Count;
-    int completedCount = allTasks.Count(t => t.Status == 3);
+    // Tính tổng số lượng và hoàn thành (chỉ tính theo các công việc thực tế, loại trừ placeholder rỗng)
+    int totalCount = allTasks.Count(t => !string.IsNullOrWhiteSpace(t.TaskName));
+    int completedCount = allTasks.Count(t => !string.IsNullOrWhiteSpace(t.TaskName) && t.Status == 3);
 }
 
 <span id="partialTrackingProgress" class="d-none" data-completed="@completedCount" data-total="@totalCount"></span>
@@ -71,8 +71,8 @@
                 foreach (var stGroup in statusGroups)
                 {
                     string statusNodeId = "status_node_" + stGroup.Key.StatusID;
-                    int statusTaskCount = stGroup.Count();
-                    int statusTodoCount = stGroup.Sum(p => p.TodoList?.Count ?? 0);
+                    int statusTaskCount = stGroup.Count(t => !string.IsNullOrWhiteSpace(t.TaskName));
+                    int statusTodoCount = stGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).Sum(p => p.TodoList?.Count ?? 0);
 
                     <!-- ========================================================================= -->
                     <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
@@ -102,23 +102,33 @@
                     foreach (var prGroup in procGroups)
                     {
                         string procNodeId = $"{statusNodeId}_proc_{prGroup.Key.ProcessID}";
+                        var realTasks = prGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                        int realTaskCount = realTasks.Count;
 
                         <!-- ========================================================================= -->
                         <!-- CẤP 2: QUY TRÌNH (TIÊU ĐỀ: QUY TRÌNH ... CÓ CÂY BÚT CHÌ NẾU SỐ QT >= 2)  -->
                         <!-- ========================================================================= -->
                         <tr class="tree-row tree-process-row" data-node="@procNodeId" data-parent="@statusNodeId" data-level="2" data-expanded="true">
                             <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_@procNodeId"></i>
+                                <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                        <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-1" id="icon_@procNodeId"></i>
                                         <span class="tree-process-title">QUY TRÌNH: @(prGroup.Key.ProcessName.ToUpper())</span>
                                         @if (stGroup.Key.ProcessCountOfStatus >= 2 && canEdit)
                                         {
-                                            <a href="javascript:void(0);" class="btn-edit-process ml-2" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
+                                            <a href="javascript:void(0);" class="btn-edit-process" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
                                                 <i class="fa fa-pencil-alt"></i>
                                             </a>
                                         }
-                                        <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">@prGroup.Count() tiến trình</span>
+                                        <span class="badge @(realTaskCount > 0 ? "badge-light-warning text-warning-d3" : "badge-light-secondary text-secondary-d3") border-1 text-75 font-bold">
+                                            @realTaskCount tiến trình
+                                        </span>
+                                        @if (canEdit && prGroup.Key.ProcessID > 0)
+                                        {
+                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-add-progress-header" onclick="event.stopPropagation(); openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))');" title="Thêm tiến trình mới vào quy trình này">
+                                                <i class="fa fa-plus mr-1"></i> Thêm tiến trình
+                                            </button>
+                                        }
                                     </div>
                                     @if (stGroup.Key.ProcessCountOfStatus >= 2)
                                     {
@@ -130,9 +140,29 @@
                             </td>
                         </tr>
 
-                        int taskIdx = 1;
-                        foreach (var task in prGroup.OrderBy(p => p.SortOrder).ThenBy(p => p.TrackingID))
+                        @if (realTaskCount == 0)
                         {
+                            <!-- DÒNG THÔNG BÁO KHI QUY TRÌNH CHƯA CÓ TIẾN TRÌNH NÀO -->
+                            <tr class="tree-row tree-empty-progress-row" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3">
+                                <td colspan="@(canEdit ? 8 : 7)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
+                                    <div class="tree-empty-progress-box">
+                                        <i class="fa fa-info-circle text-primary text-105"></i>
+                                        <span>Quy trình <strong>@prGroup.Key.ProcessName</strong> chưa có tiến trình nào.</span>
+                                        @if (canEdit && prGroup.Key.ProcessID > 0)
+                                        {
+                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-25 py-1 radius-1 shadow-sm ml-2" onclick="openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))');">
+                                                <i class="fa fa-plus mr-1"></i> Thêm tiến trình ngay
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int taskIdx = 1;
+                            foreach (var task in realTasks.OrderBy(p => p.SortOrder).ThenBy(p => p.TrackingID))
+                            {
                             string taskNodeId = $"{procNodeId}_task_{task.TrackingID}";
                             bool isOverdue = task.IsOverdue == 1;
 
@@ -301,6 +331,7 @@
                                 }
                             }
                             taskIdx++;
+                        }
                         }
                         procIdx++;
                     }

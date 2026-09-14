@@ -33,7 +33,7 @@ BEGIN
         st.StatusName AS SalesStatusName,
         (SELECT COUNT(1) FROM dbo.RM_DigitalSalesProcess pr WHERE pr.StatusID = p.StatusID AND pr.IsActive = 1 AND pr.IsDeleted = 0) AS ProcessCountOfStatus,
         t.ProgressID,
-        ISNULL(t.TaskName, ISNULL(pg.ProgressName, N'Công việc')) AS TaskName,
+        ISNULL(t.TaskName, pg.ProgressName) AS TaskName,
         ISNULL(pg.ProgressName, t.TaskName) AS ProgressName,
         ISNULL(t.DurationDays, ISNULL(pg.DefaultDurationDays, 3)) AS DurationDays,
         ISNULL(pg.DefaultDurationDays, 3) AS DefaultDurationDays,

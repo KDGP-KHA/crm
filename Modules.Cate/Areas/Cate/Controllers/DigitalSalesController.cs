@@ -2509,7 +2509,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult AddTrackingModal(int digitalSalesId)
+        public ActionResult AddTrackingModal(int digitalSalesId, int? processId = null)
         {
             if (!HasDetailPermission(digitalSalesId, User.UserName))
             {
@@ -2519,11 +2519,18 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var model = new RM_DigitalSalesTrackingModel
             {
                 DigitalSalesID = digitalSalesId,
+                ProcessID = processId,
                 StartDate = DateTime.Today,
                 Deadline = DateTime.Today.AddDays(3),
                 Status = 1,
                 IsCustomTask = true
             };
+
+            if (processId.HasValue && processId.Value > 0)
+            {
+                var proc = _workflowCache.GetProcessByID(processId.Value);
+                ViewBag.ProcessName = proc?.ProcessName;
+            }
 
             ViewBag.UserList = _userCache.GetAll()?.Select(u => new SelectListItem
             {

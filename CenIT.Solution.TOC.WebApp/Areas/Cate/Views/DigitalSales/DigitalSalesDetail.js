@@ -697,8 +697,14 @@ function deleteMemberItem(id, salesId) {
 }
 
 /* ================= 5. Tiến trình & Checklist (Tab 4) ================= */
-function openAddTrackingModal(salesId) {
-    $.get(_detailUrls.addTrackingModal, { digitalSalesId: salesId }, function (html) {
+function openAddTrackingModal(salesId, processId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId) return;
+    var params = { digitalSalesId: salesId };
+    if (processId) params.processId = processId;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.addTrackingModal, params, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
         $("#modalContainer").html(html);
         var $modal = $("#modalTracking");
         if ($.fn.select2) {
@@ -774,6 +780,10 @@ function openAddTrackingModal(salesId) {
             });
         });
     });
+}
+
+function openAddProgressToProcessModal(salesId, processId, processName) {
+    openAddTrackingModal(salesId, processId);
 }
 
 function openEditTrackingModal(id, salesId) {

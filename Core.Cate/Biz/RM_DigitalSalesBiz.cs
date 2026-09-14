@@ -308,6 +308,24 @@ namespace Core.Cate.Biz
 
         public int SaveTracking(RM_DigitalSalesTrackingModel model, string username)
         {
+            // Nếu thêm tiến trình thực tế mới vào quy trình đang có placeholder rỗng, xóa placeholder đi
+            if (model.TrackingID <= 0 && model.ProcessID.HasValue && model.ProcessID.Value > 0 && !string.IsNullOrWhiteSpace(model.TaskName) && (!model.ParentID.HasValue || model.ParentID.Value <= 0))
+            {
+                try
+                {
+                    var existingTasks = GetTrackingTasks(model.DigitalSalesID);
+                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                    foreach (var ep in emptyPlaceholders)
+                    {
+                        DeleteTracking(ep.TrackingID, username);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+            }
+
             var result = AppProcessor.ProcedureProvider.Execute(
                 _spTrackingSave,
                 DATA_PROVIDER_NAME,
@@ -366,6 +384,27 @@ namespace Core.Cate.Biz
                     };
                     SaveTracking(task, username);
                 }
+            }
+            else
+            {
+                // Nếu quy trình được chọn chưa có tiến trình mẫu nào, lưu 1 bản ghi tiến trình rỗng
+                // để giữ quy trình hiển thị trên bảng Checklist và cho phép bấm "Thêm tiến trình"
+                var emptyTask = new RM_DigitalSalesTrackingModel
+                {
+                    TrackingID = 0,
+                    DigitalSalesID = digitalSalesId,
+                    ProcessID = newProcessId,
+                    ProgressID = null,
+                    TaskName = string.Empty,
+                    DurationDays = 3,
+                    DefaultDurationDays = 3,
+                    StartDate = DateTime.Now,
+                    Deadline = DateTime.Now.AddDays(3),
+                    Status = 1,
+                    IsCustomTask = true,
+                    SortOrder = 1
+                };
+                SaveTracking(emptyTask, username);
             }
 
             return 1;
