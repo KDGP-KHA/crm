@@ -1,36 +1,25 @@
 ﻿@using System.Web
+@using System.Web.Mvc
+@using System.Web.Mvc.Html
 @using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesProductModel
-@{ var titleKey = Model.SalesProductID > 0 ? "DigitalSalesProduct_Edit_Title" : "DigitalSalesProduct_Add_Title"; }
+@{
+    var titleKey = Model.SalesProductID > 0 ? "DigitalSalesProduct_Edit_Title" : "DigitalSalesProduct_Add_Title";
+}
 <div class="modal fade" id="modalProduct" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 680px;" role="document"><div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">
-        <div class="modal-header bgc-primary-d1 text-white"><h5 class="modal-title text-110"><i class="fa fa-cubes mr-1"></i>@AppProcessor.Messagor.GetMessage(titleKey)</h5><button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
-        @using (Html.BeginForm("SaveProduct", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmProductModal", @class = "form-horizontal" }))
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+        @using (Html.BeginForm("SaveProduct", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmProductModal", @class = "modal-content border-0 shadow-lg radius-2 overflow-hidden" }))
         {
-            <div class="modal-body bgc-grey-l5" id="bodyForm">@Html.Partial("_ProductForm", Model)</div>
-            <div class="modal-footer bgc-grey-l4"><button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><i class="fa fa-times mr-1"></i>@AppProcessor.Messagor.GetMessage("Button_Cancel")</button><button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-save mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Save_Button")</button></div>
+            <div class="modal-header bgc-primary-d1 text-white">
+                <h5 class="modal-title text-110"><i class="fa fa-cubes mr-1"></i>@AppProcessor.Messagor.GetMessage(titleKey)</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body bgc-grey-l5 p-3" id="bodyForm">@Html.Partial("_ProductForm", Model)</div>
+            <div class="modal-footer bgc-grey-l4">
+                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><i class="fa fa-times mr-1"></i>@AppProcessor.Messagor.GetMessage("Button_Cancel")</button>
+                <button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-save mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Save_Button")</button>
+            </div>
         }
-    </div></div>
+    </div>
 </div>
-<script>
-(function () {
-    window.initDigitalSalesProductForm = function () {
-        var $modal = $('#modalProduct'), $form = $('#frmProductModal');
-        if ($.fn.select2) $modal.find('.select2').select2({ width: '100%', dropdownParent: $modal });
-        if ($.fn.datepicker) $modal.find('.date-picker').datepicker({ format: 'dd/mm/yyyy', autoclose: true, todayHighlight: true });
-        if ($.validator && $.validator.unobtrusive) { $form.removeData('validator').removeData('unobtrusiveValidation'); $.validator.unobtrusive.parse($form); }
-    };
-    initDigitalSalesProductForm();
-    $('#frmProductModal').off('submit.digitalSales').on('submit.digitalSales', function (e) {
-        e.preventDefault(); var $form = $(this); if ($form.valid && !$form.valid()) return false;
-        var $button = $form.find('button[type=submit]').prop('disabled', true);
-        $.post($form.attr('action'), $form.serialize()).done(function (response) {
-            $button.prop('disabled', false);
-            if (typeof response === 'string') { $('#modalProduct #bodyForm').html(response); initDigitalSalesProductForm(); return; }
-            if (response.status) { $('#modalProduct').modal('hide'); executeResponseMessage(response.message, '', true); if (typeof reloadProductsSection === 'function') reloadProductsSection(@Model.DigitalSalesID); }
-            else executeResponseMessage(response.message, '', false);
-        }).fail(function () { $button.prop('disabled', false); executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false); });
-        return false;
-    });
-})();
-</script>
+<!-- Hành vi modal sản phẩm được khởi tạo tập trung từ DigitalSalesDetail.js. -->

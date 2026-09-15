@@ -6,12 +6,34 @@
     ViewBag.Title = AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Title");
 }
 
-@section PageTitle {
-    @ViewBag.Title
+@section PageTitle
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=45">@AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_DanhMuc")</a>
+            </li>
+            <li class="breadcrumb-item">
+                <span>@AppProcessor.Messagor.GetMessage("ReviewBatchItem_Title")</span>
+            </li>
+        </ol>
+    </nav>
 }
 
 @section HeadCss {
     <link rel="stylesheet" href="~/Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.css?v=@DateTime.Now.Ticks" />
+    <style>
+        .breadcrumb-item + .breadcrumb-item::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 600;
+            content: "\f101";
+            font-size: 0.875em;
+            margin: 5px 0;
+        }
+    </style>
 }
 
 <div id="digitalSalesReviewContainer">

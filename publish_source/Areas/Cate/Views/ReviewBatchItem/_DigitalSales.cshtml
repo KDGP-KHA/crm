@@ -3,14 +3,7 @@
 
 <div class="container-fluid px-0">
     @Html.Partial("_SearchDigitalSales", Model)
-
     <div class="card dcard mt-3">
-        <div class="card-header bgc-primary-d1 text-white">
-            <h5 class="card-title text-100 text-white font-bolder mb-0">
-                <i class="fa fa-clipboard-check mr-1"></i>
-                @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_List_Title")
-            </h5>
-        </div>
         <div class="card-body p-0 table-responsive-md">
             <table id="DSDigitalSalesReview" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table">
                 <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">

@@ -1,4 +1,4 @@
-using Core.Cate.Biz;
+﻿using Core.Cate.Biz;
 using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
@@ -109,6 +109,31 @@ namespace Core.Cate.Caches
         public int SaveProduct(RM_DigitalSalesProductModel model, string username)
         {
             var result = Api.SaveProduct(model, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
+        public List<RM_DigitalSalesProductCostModel> GetProductCosts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductCostModel>();
+            return Api.GetProductCosts(salesProductId);
+        }
+
+        public List<RM_DigitalSalesProductRevenueModel> GetProductRevenues(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductRevenueModel>();
+            return Api.GetProductRevenues(salesProductId);
+        }
+
+        public List<RM_DigitalSalesProductMemberModel> GetProductMembers(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductMemberModel>();
+            return Api.GetProductMembers(salesProductId);
+        }
+
+        public int SaveProductDetail(RM_DigitalSalesProductModel model, string username)
+        {
+            var result = Api.SaveProductDetail(model, username);
             if (result > 0) InvalidateCache();
             return result;
         }

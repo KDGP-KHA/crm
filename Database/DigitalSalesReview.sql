@@ -58,7 +58,26 @@ BEGIN
             ds.Title,
             ds.BusinessType,
             CASE ds.BusinessType WHEN 1 THEN N'Cơ hội kinh doanh' WHEN 2 THEN N'Dự án' ELSE N'' END AS BusinessTypeName,
+            ds.StatusID,
             st.StatusName,
+            ISNULL(ds.IsKeyProject, 0) AS IsKeyProject,
+            CAST(CASE WHEN EXISTS
+            (
+                SELECT 1
+                FROM dbo.RM_DigitalSalesFollow salesFollow
+                WHERE salesFollow.DigitalSalesID = ds.DigitalSalesID
+                  AND salesFollow.UserName = @UserName
+            ) THEN 1 ELSE 0 END AS BIT) AS IsFollowed,
+            STUFF
+            ((
+                SELECT N', ' + productService.NameProduct
+                FROM dbo.RM_DigitalSalesProduct salesProduct
+                INNER JOIN dbo.RM_ProductService productService
+                    ON productService.ProductServiceID = salesProduct.ProductServiceID
+                WHERE salesProduct.DigitalSalesID = ds.DigitalSalesID
+                  AND ISNULL(salesProduct.IsDeleted, 0) = 0
+                FOR XML PATH(''), TYPE
+            ).value('.', 'NVARCHAR(MAX)'), 1, 2, N'') AS ProductServiceNames,
             c.CustomerName,
             assigned.FullName AS AssignedEmployeeName,
             department.TenBoPhan AS DepartmentName,
@@ -134,14 +153,10 @@ BEGIN
                 ORDER BY
                     CASE WHEN @Order = '1' AND @OrderDir = 'ASC' THEN Title END ASC,
                     CASE WHEN @Order = '1' AND @OrderDir = 'DESC' THEN Title END DESC,
-                    CASE WHEN @Order = '2' AND @OrderDir = 'ASC' THEN BusinessType END ASC,
-                    CASE WHEN @Order = '2' AND @OrderDir = 'DESC' THEN BusinessType END DESC,
-                    CASE WHEN @Order = '3' AND @OrderDir = 'ASC' THEN CustomerName END ASC,
-                    CASE WHEN @Order = '3' AND @OrderDir = 'DESC' THEN CustomerName END DESC,
-                    CASE WHEN @Order = '4' AND @OrderDir = 'ASC' THEN StatusName END ASC,
-                    CASE WHEN @Order = '4' AND @OrderDir = 'DESC' THEN StatusName END DESC,
-                    CASE WHEN @Order = '5' AND @OrderDir = 'ASC' THEN AssignedEmployeeName END ASC,
-                    CASE WHEN @Order = '5' AND @OrderDir = 'DESC' THEN AssignedEmployeeName END DESC,
+                    CASE WHEN @Order = '2' AND @OrderDir = 'ASC' THEN CustomerName END ASC,
+                    CASE WHEN @Order = '2' AND @OrderDir = 'DESC' THEN CustomerName END DESC,
+                    CASE WHEN @Order = '3' AND @OrderDir = 'ASC' THEN AssignedEmployeeName END ASC,
+                    CASE WHEN @Order = '3' AND @OrderDir = 'DESC' THEN AssignedEmployeeName END DESC,
                     CreatedDate DESC,
                     DigitalSalesID DESC
             ) AS RowIndex,
@@ -339,7 +354,7 @@ VALUES
     ('ReviewDigitalSales_Employee_Label', N'Nhân sự phụ trách'),
     ('ReviewDigitalSales_IsReviewed_Label', N'Tình trạng rà soát'),
     ('ReviewDigitalSales_Batch_Option', N'-- Chọn đợt rà soát --'),
-    ('ReviewDigitalSales_Column_Record', N'Hồ sơ DigitalSales'),
+    ('ReviewDigitalSales_Column_Record', N'Hồ sơ KD sản phẩm DVS'),
     ('ReviewDigitalSales_Column_ReviewInfo', N'Thông tin rà soát'),
     ('ReviewDigitalSales_NotReviewed', N'Chưa rà soát'),
     ('ReviewDigitalSales_Action_Review', N'Rà soát'),

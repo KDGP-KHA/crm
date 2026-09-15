@@ -57,7 +57,11 @@ namespace Core.Cate.Models
         public string Title { get; set; }
         public byte BusinessType { get; set; }
         public string BusinessTypeName { get; set; }
+        public int StatusID { get; set; }
         public string StatusName { get; set; }
+        public bool IsKeyProject { get; set; }
+        public bool IsFollowed { get; set; }
+        public string ProductServiceNames { get; set; }
         public string CustomerName { get; set; }
         public string AssignedEmployeeName { get; set; }
         public string DepartmentName { get; set; }

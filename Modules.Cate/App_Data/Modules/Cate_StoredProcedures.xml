@@ -400,6 +400,10 @@
 		<Procedure Name="RM_DigitalSalesProduct_GetBySalesID" Value="RM_DigitalSalesProduct_GetBySalesID" />
 		<Procedure Name="RM_DigitalSalesProduct_Save" Value="RM_DigitalSalesProduct_Save" />
 		<Procedure Name="RM_DigitalSalesProduct_Delete" Value="RM_DigitalSalesProduct_Delete" />
+		<Procedure Name="RM_DigitalSalesProduct_SaveDetail" Value="RM_DigitalSalesProduct_SaveDetail" />
+		<Procedure Name="RM_DigitalSalesProductCost_GetByProductID" Value="RM_DigitalSalesProductCost_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductRevenue_GetByProductID" Value="RM_DigitalSalesProductRevenue_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductMember_GetByProductID" Value="RM_DigitalSalesProductMember_GetByProductID" />
 
 		<!-- RM_DigitalSalesMember -->
 		<Procedure Name="RM_DigitalSalesMember_GetBySalesID" Value="RM_DigitalSalesMember_GetBySalesID" />
