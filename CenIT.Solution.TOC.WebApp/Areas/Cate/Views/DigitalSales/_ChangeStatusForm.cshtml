@@ -9,6 +9,7 @@
 @Html.HiddenFor(m => m.CurrentStatusName)
 @Html.HiddenFor(m => m.SelectedProcessID)
 @Html.HiddenFor(m => m.TrackingItemsJson)
+@Html.HiddenFor(m => m.HasWorkflowProgressBox, new { id = "HasWorkflowProgressBox" })
 
 <div class="row" id="changeStatusLayoutRow">
     <!-- CỘT TRÁI: THÔNG TIN CHUYỂN TRẠNG THÁI -->
@@ -88,9 +89,14 @@
                     </span>
                     <span class="badge badge-success badge-pill ml-1 font-bold px-2 py-1" id="badgeProgressCount">0</span>
                 </div>
-                <button type="button" class="btn btn-sm btn-success font-weight-bold px-3 py-1 radius-1 shadow-sm" onclick="addCustomProgressRow();">
-                    <i class="fa fa-plus mr-1"></i> Thêm tiến trình
-                </button>
+                <div class="d-flex align-items-center" style="gap: 6px;">
+                    <button type="button" class="btn btn-xs btn-outline-danger font-weight-bold px-2 py-1 radius-1 d-none" id="btnRemoveAllProgress" onclick="removeAllProgressRows();" title="Xóa tất cả các tiến trình trên danh sách">
+                        <i class="fa fa-trash-alt mr-1"></i> Xóa tất cả
+                    </button>
+                    <button type="button" class="btn btn-sm btn-success font-weight-bold px-3 py-1 radius-1 shadow-sm" onclick="addCustomProgressRow();">
+                        <i class="fa fa-plus mr-1"></i> Thêm tiến trình
+                    </button>
+                </div>
             </div>
             <div class="card-body p-2 p-lg-3 ds-progress-list-body">
                 <div class="text-secondary text-80 mb-2 font-italic border-b-1 brc-grey-l3 pb-2">
@@ -374,6 +380,7 @@
         $modal.addClass('has-progress-box');
         $colInfo.removeClass('col-12').addClass('col-lg-5 col-xl-5');
         $colProgress.removeClass('d-none');
+        $('#HasWorkflowProgressBox').val('true');
 
         renderProgressRows(progresses);
     }
@@ -390,7 +397,9 @@
         $progressContainer.empty();
         $('#badgeProgressCount').text('0');
         $('#emptyProgressAlert').addClass('d-none');
+        $('#btnRemoveAllProgress').addClass('d-none');
         $('#TrackingItemsJson').val('');
+        $('#HasWorkflowProgressBox').val('false');
     }
 
     function hideWorkflowSections() {
@@ -427,6 +436,7 @@
         var durationDays = item.durationDays || item.defaultDurationDays || 3;
         var assignedUserId = item.assignedUserId || '';
         var isCustom = item.isCustomTask === true;
+        var note = item.note || item.Note || item.resultNote || item.ResultNote || '';
 
         // Ngày bắt đầu: mặc định hôm nay nếu không có
         var startDate = item.startDate;
@@ -492,6 +502,15 @@
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-hourglass-half text-warning-d2 mr-1"></i> Hạn chót:</label>' +
                     '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m3 py-1 px-2 font-bold d-block text-center text-85 badge-calculated-deadline">' + formatDisplayDate(deadline) + '</span>' +
                     '<input type="hidden" class="txt-deadline ignore-validation" value="' + deadline + '" />' +
+                '</div>' +
+            '</div>' +
+            '<!-- HÀNG 3: GHI CHÚ TIẾN TRÌNH -->' +
+            '<div class="mt-2 pt-2 border-t-1 brc-grey-l3">' +
+                '<div class="d-flex align-items-center">' +
+                    '<span class="text-75 text-secondary font-weight-bold mr-2 flex-shrink-0" style="width: 70px;">' +
+                        '<i class="fa fa-comment-dots text-info mr-1"></i> Ghi chú:' +
+                    '</span>' +
+                    '<input type="text" class="form-control form-control-sm txt-note ignore-validation" placeholder="Nhập ghi chú cho tiến trình này (nếu có)..." value="' + escapeHtml(note) + '" />' +
                 '</div>' +
             '</div>' +
         '</div>');
@@ -595,8 +614,42 @@
             updateProgressBadge();
             if ($('#progressItemsContainer .ds-progress-row-item').length === 0) {
                 $('#emptyProgressAlert').removeClass('d-none');
+                $('#TrackingItemsJson').val('[]');
             }
         });
+    }
+
+    function removeAllProgressRows() {
+        var count = $('#progressItemsContainer .ds-progress-row-item').length;
+        if (count === 0) return;
+
+        var doClear = function () {
+            $('#progressItemsContainer').empty();
+            updateProgressBadge();
+            $('#emptyProgressAlert').removeClass('d-none');
+            $('#btnRemoveAllProgress').addClass('d-none');
+            $('#TrackingItemsJson').val('[]');
+            if (typeof toastr !== 'undefined') {
+                toastr.info('Đã xóa tất cả các tiến trình trên danh sách.');
+            }
+        };
+
+        if (typeof bootbox !== 'undefined') {
+            bootbox.confirm({
+                message: "Bạn có chắc chắn muốn xóa toàn bộ danh sách tiến trình không?",
+                buttons: {
+                    confirm: { label: '<i class="fa fa-check mr-1"></i> Đồng ý', className: 'btn-danger btn-sm' },
+                    cancel: { label: '<i class="fa fa-times mr-1"></i> Hủy', className: 'btn-secondary btn-sm' }
+                },
+                callback: function (result) {
+                    if (result) doClear();
+                }
+            });
+        } else {
+            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách tiến trình không?')) {
+                doClear();
+            }
+        }
     }
 
     function reindexProgressRows() {
@@ -608,6 +661,11 @@
     function updateProgressBadge() {
         var count = $('#progressItemsContainer .ds-progress-row-item').length;
         $('#badgeProgressCount').text(count);
+        if (count > 0) {
+            $('#btnRemoveAllProgress').removeClass('d-none');
+        } else {
+            $('#btnRemoveAllProgress').addClass('d-none');
+        }
     }
 
     function serializeProgressItemsToJson() {
@@ -627,6 +685,7 @@
             var durationDaysVal = parseInt($durationDaysInput.val());
             var assignedUserIdVal = $row.find('.cbo-assigned-user').val();
             var deadlineVal = $row.find('.txt-deadline').val();
+            var noteVal = $.trim($row.find('.txt-note').val());
             var progressId = parseInt($row.attr('data-progress-id')) || 0;
             var processId = parseInt($row.attr('data-process-id')) || parseInt(dsStatusWorkflowState.selectedProcessId) || parseInt($('#SelectedProcessID').val()) || null;
             var isCustom = $row.attr('data-is-custom') === 'true';
@@ -680,13 +739,21 @@
                 DurationDays: durationDaysVal,
                 Deadline: deadlineVal ? deadlineVal : null,
                 SortOrder: sortOrderVal,
-                IsCustomTask: isCustom
+                IsCustomTask: isCustom,
+                Note: noteVal ? noteVal : null
             });
         });
 
         if (!isValid) return false;
 
-        $('#TrackingItemsJson').val(items.length > 0 ? JSON.stringify(items) : '');
+        var hasBox = !$('#colProgressBox').hasClass('d-none');
+        if (hasBox) {
+            $('#TrackingItemsJson').val(JSON.stringify(items));
+            $('#HasWorkflowProgressBox').val('true');
+        } else {
+            $('#TrackingItemsJson').val('');
+            $('#HasWorkflowProgressBox').val('false');
+        }
         return true;
     }
 

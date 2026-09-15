@@ -219,6 +219,13 @@
                                             </span>
                                         }
                                     </div>
+                                    @if (!string.IsNullOrWhiteSpace(task.ResultNote))
+                                    {
+                                        <div class="text-secondary text-80 font-italic mt-1 ml-4 d-flex align-items-center" title="Ghi chú tiến trình">
+                                            <i class="fa fa-comment-dots text-info mr-1"></i>
+                                            <span>@task.ResultNote</span>
+                                        </div>
+                                    }
                                 </td>
                                 <td class="text-center font-progress-cell"><span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@task.TrackingCode</span></td>
                                 <td class="font-progress-cell"><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : task.AssignedUserName)</span></td>

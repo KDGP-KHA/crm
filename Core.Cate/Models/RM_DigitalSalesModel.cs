@@ -158,6 +158,7 @@ namespace Core.Cate.Models
         public List<SelectListItem> AvailableStatuses { get; set; } = new List<SelectListItem>();
         public int? SelectedProcessID { get; set; }
         public string TrackingItemsJson { get; set; }
+        public bool HasWorkflowProgressBox { get; set; }
     }
 
     public class ChangeStatusTrackingItemDTO
@@ -171,6 +172,7 @@ namespace Core.Cate.Models
         public DateTime? Deadline { get; set; }
         public int SortOrder { get; set; }
         public bool IsCustomTask { get; set; }
+        public string Note { get; set; }
     }
 
     public class RM_DigitalSalesChangeProcessViewModel
