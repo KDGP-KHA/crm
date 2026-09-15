@@ -1467,8 +1467,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             var code = _salesCache.ChangeStatus(model.DigitalSalesID, model.NewStatusID, model.Note, attachmentPayload, User.UserName);
 
-            if (code == 1)
+            if (code > 0)
             {
+                int newTimelineId = code;
+
                 // 1. Cập nhật tệp đính kèm trực tiếp vào Activity chuyển trạng thái (ActivityType = 2) vừa được tạo bởi SP
                 if (uploadedFiles.Count > 0)
                 {
@@ -1596,14 +1598,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                     if (items != null && items.Count > 0)
                     {
-                        var currentTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID) ?? new List<RM_DigitalSalesTrackingModel>();
-
-                        // Xóa các task cha của trạng thái mới (bất kể trạng thái là chưa làm hay đã hoàn thành trước đó) để thiết lập danh sách mới
-                        var tasksToDelete = currentTasks.Where(t => t.StatusID == model.NewStatusID && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
-                        foreach (var ot in tasksToDelete)
-                        {
-                            _salesCache.DeleteTracking(ot.TrackingID, User.UserName);
-                        }
+                        // Một trạng thái có thể xuất hiện nhiều lần (chuyển lại trạng thái trước đó).
+                        // TUYỆT ĐỐI KHÔNG XÓA các tiến trình của các lần/chu kỳ trước!
 
                         // Tìm processId mặc định của trạng thái nếu có task bị thiếu ProcessID
                         int? defaultProcId = model.SelectedProcessID;
@@ -1628,6 +1624,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             {
                                 TrackingID = 0,
                                 DigitalSalesID = model.DigitalSalesID,
+                                TimelineID = newTimelineId,
                                 ProcessID = procId,
                                 ProgressID = it.ProgressID,
                                 TaskName = it.TaskName.Trim(),
