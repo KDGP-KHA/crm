@@ -1,260 +1,132 @@
 ﻿@using TSFramework.Libs.Processors
 @model List<Core.Cate.Models.RM_ReviewHistoryModel>
 
+@functions {
+    private string ConclusionClass(byte? value) { return value == 1 ? "badge-success" : value == 2 ? "badge-warning" : "badge-danger"; }
+    private string ConclusionKey(byte? value) { return value == 1 ? "ReviewConclusion_Accepted" : value == 2 ? "ReviewConclusion_Interested" : "ReviewConclusion_Rejected"; }
+}
+
 <div class="review-history-timeline">
-
-    @if (Model != null && Model.Any())
+@if (Model != null && Model.Any())
+{
+    var batches = Model.GroupBy(x => new { x.ReviewBatchID, x.BatchName }).OrderByDescending(x => x.Max(i => i.CreatedDate));
+    foreach (var batch in batches)
     {
-        var groupByBatch = Model
-            .GroupBy(x => new
-            {
-                x.ReviewBatchID,
-                x.BatchName
-            })
-            .ToList();
+        var histories = batch.OrderByDescending(x => x.CreatedDate).ThenByDescending(x => x.ReviewHistoryID).ToList();
+        var finalReview = histories.Where(x => x.IsConfirmed && Core.Cate.Models.RM_ReviewConclusion.IsValid(x.ReviewConclusion))
+            .OrderBy(x => x.ReviewLevel).ThenByDescending(x => x.CreatedDate).ThenByDescending(x => x.ReviewHistoryID).FirstOrDefault();
 
-        for (int n = 0; n < groupByBatch.Count; n++)
-        {
-            var batch = groupByBatch[n];
-            var firstItem = batch.First();
-
-            <div class="text-grey-m1 text-95">
-
-                <div class="d-flex">
-
-                    <!-- timeline -->
-                    <div class="minh-100 pos-rel">
-
-                        @if (n != groupByBatch.Count - 1)
-                        {
-                            <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
-                        }
-
-                        <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-primary text-white">
-                            <i class="far fa-calendar-check"></i>
-                        </div>
-
+        <section class="review-history-batch card dcard mb-3">
+            <header class="review-history-batch-header d-flex align-items-center justify-content-between flex-wrap px-3 py-2 bgc-primary-l5 border-b-1 brc-primary-l3">
+                <div class="d-flex align-items-center min-width-0 mr-2">
+                    <span class="review-history-batch-icon bgc-primary text-white radius-round mr-2"><i class="far fa-calendar-check"></i></span>
+                    <div class="min-width-0">
+                        <div class="font-bolder text-primary-d2 text-truncate">@batch.Key.BatchName</div>
+                        <div class="text-secondary text-90"><i class="fa fa-history mr-1"></i>@string.Format(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ReviewCount_Format"), histories.Count)</div>
                     </div>
-
-                    <!-- content -->
-                    <div class="mx-2 flex-grow-1">
-
-                        <!-- batch -->
-                        <div class="pt-2">
-
-                            <span class="badge badge-primary badge-lg arrowed mb-1">
-                                @firstItem.BatchName
-                            </span>
-
-                        </div>
-
-                        @foreach (var item in batch.OrderByDescending(x => x.CreatedDate))
-                        {
-                            <div class="brc-secondary-m4 px-3 py-2 radius-1 border-l-3 border-0 bgc-secondary-l4 text-grey-d3 text-95 mt-2 pos-rel">
-                                <!-- thời gian + reviewer -->
-                                <div class="mb-2">
-                                    <!-- thời gian -->
-                                    <span class="text-600 text-90">
-                                        @item.CreatedDate.ToString("dd/MM/yyyy HH:mm")
-                                    </span>
-                                    |
-                                    @if (item.ReviewLevel > 0)
-                                    {
-                                        <span class="badge badge-info badge-sm">
-                                            @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Level") @item.ReviewLevel
-                                        </span>
-                                    }
-                                    <!-- tên -->
-                                    <span class="btn-text-primary text-100 text-600 ml-1">
-                                        @item.Reviewer
-                                    </span>
-                                    <!-- trạng thái -->
-                                    <span class="ml-1 @(item.IsConfirmed ? "text-success" : "text-warning") font-bolder">
-                                        @(item.IsConfirmed ? AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Confirmed") : AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Commented"))
-                                    </span>
-                                    @if (item.ReviewConclusion.HasValue)
-                                    {
-                                        var conclusionClass = item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Accepted
-                                            ? "badge-success"
-                                            : item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Interested ? "badge-warning" : "badge-danger";
-                                        var conclusionKey = item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Accepted
-                                            ? "ReviewConclusion_Accepted"
-                                            : item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Interested ? "ReviewConclusion_Interested" : "ReviewConclusion_Rejected";
-                                        <span class="badge @conclusionClass ml-1">
-                                            @AppProcessor.Messagor.GetMessage("ReviewConclusion_Label"): @AppProcessor.Messagor.GetMessage(conclusionKey)
-                                        </span>
-                                    }
-                                </div>
-
-                                <!-- nội dung -->
-                                @if (!string.IsNullOrWhiteSpace(item.ReviewComment))
-                                {
-                                    var decoded = System.Web.HttpUtility.HtmlDecode(item.ReviewComment);
-
-                                    var plainText =
-                                        System.Text.RegularExpressions.Regex
-                                            .Replace(decoded, "<.*?>", "");
-
-                                    var shortText =
-                                        plainText.Length > 150
-                                            ? plainText.Substring(0, 150) + "..."
-                                            : plainText;
-
-                                    var hasImage = decoded.Contains("<img");
-
-                                    <div class="review-wrapper">
-
-                                        <div>
-                                            @if (!string.IsNullOrEmpty(plainText))
-                                            {
-                                                <span class="preview-content text-secondary">
-                                                    @shortText
-                                                </span>
-                                            }
-                                        </div>
-
-                                        @if (hasImage)
-                                        {
-                                            <div class="preview-image mt-2">
-                                                @Html.Raw(item.ReviewComment)
-                                            </div>
-                                        }
-
-                                        @if (plainText.Length > 100)
-                                        {
-                                            <div class="mt-1">
-                                                <span class="toggle-content review-toggle text-primary">
-                                                    @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowMore")
-                                                </span>
-                                            </div>
-                                        }
-
-                                        <div class="review-content review-content-collapsed mt-2">
-                                            @Html.Raw(item.ReviewComment)
-                                        </div>
-
-                                    </div>
-                                }
-
-                                <!-- files -->
-                                @if (item.ExistingFiles != null
-                                     && item.ExistingFiles.Count > 0)
-                                {
-                                    <div class="mt-2">
-
-                                        <span class="font-bolder text-blue-d1">
-                                            @AppProcessor.Messagor.GetMessage("FileAttach_Label"):
-                                        </span>
-
-                                        <div class="mt-1">
-
-                                            @foreach (var file in item.ExistingFiles)
-                                            {
-                                                var ext = System.IO.Path
-                                                    .GetExtension(file.FilePath)?
-                                                    .ToLower();
-
-                                                var icon = "fa-file text-secondary";
-
-                                                if (new[]
-                                                {
-                                                    ".jpg",
-                                                    ".jpeg",
-                                                    ".png",
-                                                    ".gif",
-                                                    ".webp"
-                                                }.Contains(ext))
-                                                {
-                                                    icon = "fa-file-image text-success";
-                                                }
-                                                else if (ext == ".pdf")
-                                                {
-                                                    icon = "fa-file-pdf text-danger";
-                                                }
-                                                else if (new[]
-                                                {
-                                                    ".doc",
-                                                    ".docx"
-                                                }.Contains(ext))
-                                                {
-                                                    icon = "fa-file-word text-primary";
-                                                }
-                                                else if (new[]
-                                                {
-                                                    ".xls",
-                                                    ".xlsx"
-                                                }.Contains(ext))
-                                                {
-                                                    icon = "fa-file-excel text-success";
-                                                }
-
-                                                var fileName =
-                                                    System.IO.Path.GetFileName(file.FilePath);
-
-                                                <a class="badge badge-lg font-normal border-1 brc-grey-m3 mb-1 mr-1"
-                                                   href="@file.FilePath"
-                                                   target="_blank">
-
-                                                    <i class="fa @icon mr-1"></i>
-
-                                                    @fileName
-
-                                                </a>
-                                            }
-
-                                        </div>
-
-                                    </div>
-                                }
-
-                                <!-- action -->
-                                @if (item.CanEdit)
-                                {
-                                    <div class="position-tr mt-2 mr-2">
-                                        @Html.Button(
-                                            true,
-                                            "EditHistory",
-                                            Url.Action("EditHistory", "ReviewBatchItem", new { area = "Cate", id = item.ReviewHistoryID }),
-                                            "<i class='fa fa-edit'></i>", "",
-                                            new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90" }
-                                        )
-                                    </div>
-                                }
-                            </div>
-                        }
-
-                    </div>
-
                 </div>
+                @if (finalReview != null)
+                {
+                    <span class="badge badge-lg @ConclusionClass(finalReview.ReviewConclusion) mt-1 mb-1">
+                        @AppProcessor.Messagor.GetMessage("ReviewConclusion_Final_Label"): @AppProcessor.Messagor.GetMessage(ConclusionKey(finalReview.ReviewConclusion))
+                    </span>
+                }
+            </header>
 
+            <div class="review-history-list px-3 py-2">
+            @foreach (var item in histories)
+            {
+                var decoded = System.Web.HttpUtility.HtmlDecode(item.ReviewComment ?? string.Empty);
+                var plainText = System.Text.RegularExpressions.Regex.Replace(decoded, "<.*?>", " ");
+                plainText = System.Text.RegularExpressions.Regex.Replace(plainText, @"\s+", " ").Trim();
+                var hasRichContent = decoded.IndexOf("<img", StringComparison.OrdinalIgnoreCase) >= 0
+                    || decoded.IndexOf("<table", StringComparison.OrdinalIgnoreCase) >= 0
+                    || decoded.IndexOf("<ul", StringComparison.OrdinalIgnoreCase) >= 0
+                    || decoded.IndexOf("<ol", StringComparison.OrdinalIgnoreCase) >= 0;
+                var canExpand = plainText.Length > 180 || hasRichContent;
+
+                <article class="review-history-entry border-1 brc-secondary-l2 radius-2 mb-2 bgc-white shadow-sm">
+                    <div class="review-history-entry-head d-flex align-items-start justify-content-between px-3 pt-3">
+                        <div class="d-flex align-items-center min-width-0">
+                            <span class="review-history-user-icon bgc-primary-l4 text-primary-d2 radius-round mr-2"><i class="fa fa-user"></i></span>
+                            <div class="min-width-0">
+                                <div class="font-bolder text-primary-d2 text-truncate">@item.Reviewer</div>
+                                <div class="text-secondary text-90"><i class="far fa-clock mr-1"></i>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+                        @if (item.CanEdit)
+                        {
+                            @Html.Button(true, "EditHistory", Url.Action("EditHistory", "ReviewBatchItem", new { area = "Cate", id = item.ReviewHistoryID }),
+                                "<i class='fa fa-edit'></i>", "", new { @class = "btn btn-sm btn-light-blue btn-h-blue btn-a-blue border-0 radius-2 ml-2", title = AppProcessor.Messagor.GetMessage("Button_Edit") })
+                        }
+                    </div>
+
+                    <div class="review-history-badges d-flex flex-wrap px-3 mt-2">
+                        @if (item.ReviewLevel > 0) { <span class="badge badge-info mr-1 mb-1">@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Level") @item.ReviewLevel</span> }
+                        <span class="badge @(item.IsConfirmed ? "badge-success" : "badge-warning") mr-1 mb-1">
+                            @(item.IsConfirmed ? AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Confirmed") : AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Commented"))
+                        </span>
+                        @if (item.ReviewConclusion.HasValue)
+                        {
+                            <span class="badge @ConclusionClass(item.ReviewConclusion) mr-1 mb-1">
+                                @AppProcessor.Messagor.GetMessage("ReviewConclusion_Label"): @AppProcessor.Messagor.GetMessage(ConclusionKey(item.ReviewConclusion))
+                            </span>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(item.ReviewComment))
+                    {
+                        <div class="review-wrapper px-3 mt-2">
+                            <div class="preview-content review-history-preview text-secondary">@plainText</div>
+                            <div class="review-content review-content-collapsed text-dark-m1">@Html.Raw(item.ReviewComment)</div>
+                            @if (canExpand) { <button type="button" class="toggle-content review-toggle btn btn-link btn-sm px-0 mt-1">@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowMore")</button> }
+                        </div>
+                    }
+
+                    @if (item.ExistingFiles != null && item.ExistingFiles.Any())
+                    {
+                        <div class="review-history-files border-t-1 brc-secondary-l3 px-3 py-2 mt-2">
+                            <div class="font-bolder text-secondary text-90 mb-1"><i class="fa fa-paperclip mr-1"></i>@AppProcessor.Messagor.GetMessage("FileAttach_Label") (@item.ExistingFiles.Count)</div>
+                            <div class="d-flex flex-wrap">
+                            @foreach (var file in item.ExistingFiles)
+                            {
+                                var ext = System.IO.Path.GetExtension(file.FilePath)?.ToLower();
+                                var icon = "fa-file text-secondary";
+                                if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext)) { icon = "fa-file-image text-success"; }
+                                else if (ext == ".pdf") { icon = "fa-file-pdf text-danger"; }
+                                else if (new[] { ".doc", ".docx" }.Contains(ext)) { icon = "fa-file-word text-primary"; }
+                                else if (new[] { ".xls", ".xlsx" }.Contains(ext)) { icon = "fa-file-excel text-success"; }
+                                var fileName = System.IO.Path.GetFileName(file.FilePath);
+                                <a class="badge badge-lg font-normal border-1 brc-grey-m3 mb-1 mr-1" href="@file.FilePath" target="_blank" title="@fileName"><i class="fa @icon mr-1"></i>@fileName</a>
+                            }
+                            </div>
+                        </div>
+                    }
+                </article>
+            }
             </div>
-        }
+        </section>
     }
-    else
-    {
-        <div class="text-center text-muted py-3">
-            @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_HistoryEmpty")
-        </div>
-    }
-
+}
+else
+{
+    <div class="review-history-empty text-center text-muted py-5">
+        <i class="fa fa-history text-200 mb-2 d-block"></i>
+        <div class="font-bolder">@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_HistoryEmpty")</div>
+    </div>
+}
 </div>
 
 <script>
     var reviewHistoryShowMoreText = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowMore")))';
     var reviewHistoryShowLessText = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ShowLess")))';
-    $(document).on('click', '.toggle-content', function () {
-
-        const wrapper = $(this).closest('.review-wrapper');
-        const contentDiv = wrapper.find('.review-content');
-        const preview = wrapper.find('.preview-content');
-
-        if (contentDiv.is(':animated')) return;
-
-        const isHidden = contentDiv.is(':hidden');
-
-        contentDiv.slideToggle(200);
-        preview.toggle(!isHidden);
-
-        $(this).text(isHidden ? reviewHistoryShowLessText : reviewHistoryShowMoreText);
+    $(document).off('click.reviewHistory', '.toggle-content').on('click.reviewHistory', '.toggle-content', function () {
+        var $button = $(this), $wrapper = $button.closest('.review-wrapper');
+        var $content = $wrapper.find('.review-content'), $preview = $wrapper.find('.preview-content');
+        if ($content.is(':animated')) return;
+        var isHidden = $content.is(':hidden');
+        $content.stop(true, true).slideToggle(200);
+        $preview.toggle(!isHidden);
+        $button.text(isHidden ? reviewHistoryShowLessText : reviewHistoryShowMoreText);
     });
 </script>
