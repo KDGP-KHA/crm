@@ -59,7 +59,7 @@ var _detailUrls = {
 
 function reloadDigitalSalesReviewHistory() {
     $("#reviewHistoryContainer").load(_urlReloadReviewHistory + "?id=" + _currentDigitalSalesId, function () {
-        var count = $("#reviewHistoryContainer .review-history-timeline .border-l-3.bgc-secondary-l4").length;
+        var count = $("#reviewHistoryContainer .review-history-entry").length;
         $("#badgeTabReviewHistory").text(count);
     });
 }

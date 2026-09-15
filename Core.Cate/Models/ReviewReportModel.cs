@@ -11,6 +11,7 @@ namespace Core.Cate.Models
     {
         public int ObjectType { get; set; }
         public int ObjectID { get; set; }
+        public string ObjectCode { get; set; }
         public string ObjectName { get; set; }
         public string ObjectTypeName { get; set; }
         public string Level4Reviewer { get; set; }
@@ -26,6 +27,7 @@ namespace Core.Cate.Models
         public string Level2Comment { get; set; }
         public bool? Level2Status { get; set; }
         public bool IsReviewed { get; set; }
+        public byte? FinalReviewConclusion { get; set; }
     }
 
     public class ReviewReportSearchModel : BaseSearchModel

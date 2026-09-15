@@ -21,7 +21,13 @@
 #modal_ReviewBatch.review-dock-collapsed .modal-body,
 #modal_ReviewBatch.review-dock-collapsed .modal-footer { display: none; }
 #modal_ReviewBatch.review-dock-collapsed .review-dock-toggle { display: flex; width: 48px; height: 100%; margin: 0; align-items: center; justify-content: center; border: 0; border-radius: 0; }
-#modal_ReviewBatch.review-dock-right .cke_contents { height: 250px !important; }
+#modal_ReviewBatch.review-dock-right .cke_contents { height: 210px !important; }
+.review-conclusion-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; min-height: 32px; }
+.review-conclusion-option { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; cursor: pointer; }
+.review-conclusion-option input[type="radio"] { margin: 0; cursor: pointer; }
+.review-conclusion-accepted { color: #198754; }
+.review-conclusion-interested { color: #d97706; }
+.review-conclusion-rejected { color: #dc3545; }
 body.review-dock-open { overflow: auto !important; padding-right: 0 !important; }
 .review-split-view { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
 .review-detail-pane, .review-form-pane { min-width: 0; }
@@ -30,7 +36,16 @@ body.review-dock-open { overflow: auto !important; padding-right: 0 !important; 
 #reviewFormPane #modal_ReviewBatch.review-dock-right .modal-dialog { position: static; width: 100%; max-width: none; height: 100%; margin: 0; transform: none !important; }
 #reviewFormPane #modal_ReviewBatch.review-dock-right .modal-header { width: auto; height: auto; }
 .review-history-timeline { height: auto !important; max-height: none !important; overflow: visible !important; color: rgb(65, 70, 77); }
-.review-content img, .preview-image img { max-width: 100%; height: auto !important; display: block; }
+.review-history-batch { overflow: hidden; }
+.review-history-batch-header { min-height: 56px; }
+.review-history-batch-icon, .review-history-user-icon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.review-history-batch-icon { width: 36px; height: 36px; }
+.review-history-user-icon { width: 32px; height: 32px; }
+.review-history-badges { gap: 4px; }
+.review-history-preview { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; line-height: 1.55; }
+.review-content img { max-width: 100%; height: auto !important; display: block; }
+.review-content table { max-width: 100%; }
+.review-history-files a { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .review-toggle { cursor: pointer; }
 .review-content-collapsed { display: none; }
 @media (min-width: 992px) {

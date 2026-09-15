@@ -74,6 +74,7 @@ namespace Core.Cate.Models
         public DateTime? LastReviewDate { get; set; }
         public string LastReviewerName { get; set; }
         public string LastReviewComment { get; set; }
+        public byte? FinalReviewConclusion { get; set; }
         public int ReviewCount { get; set; }
     }
 
@@ -181,6 +182,9 @@ namespace Core.Cate.Models
         public string ReviewComment { get; set; }
         [CustomDisplayName("ReviewBatch_Confirm_Label")]
         public bool IsConfirmed { get; set; }
+        [CustomDisplayName("ReviewConclusion_Label")]
+        public byte? ReviewConclusion { get; set; }
+        public List<SelectListItem> ReviewConclusionOptions { get; set; } = new List<SelectListItem>();
         public List<HttpPostedFileBase> DinhKemFile { get; set; }
         public List<RM_ReviewBatchFilePathModel> ExistingFiles { get; set; }
         public List<int> DeletedFileIds { get; set; }
@@ -198,9 +202,22 @@ namespace Core.Cate.Models
         public byte ReviewAction { get; set; }
         public string ReviewComment { get; set; }
         public bool IsConfirmed { get; set; }
+        public byte? ReviewConclusion { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public List<RM_ReviewBatchFilePathModel> ExistingFiles { get; set; }
+    }
+
+    public static class RM_ReviewConclusion
+    {
+        public const byte Accepted = 1;
+        public const byte Interested = 2;
+        public const byte Rejected = 3;
+
+        public static bool IsValid(byte? value)
+        {
+            return value == Accepted || value == Interested || value == Rejected;
+        }
     }
 
     public class RM_ReviewBatchFilePathModel : BaseModel

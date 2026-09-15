@@ -68,9 +68,21 @@ function renderReviewDigitalSalesInfo(row) {
         ? ' <span class="badge badge-secondary">' + encodeReviewDigitalSales(countText) + '</span>'
         : "";
 
+    var conclusion = "";
+    if (row.FinalReviewConclusion) {
+        var conclusionClass = row.FinalReviewConclusion === 1 ? "badge-success"
+            : row.FinalReviewConclusion === 2 ? "badge-warning" : "badge-danger";
+        var conclusionText = row.FinalReviewConclusion === 1 ? messages.conclusionAccepted
+            : row.FinalReviewConclusion === 2 ? messages.conclusionInterested : messages.conclusionRejected;
+        conclusion = '<div class="mt-1"><span class="badge ' + conclusionClass + '">'
+            + encodeReviewDigitalSales(messages.conclusionLabel) + ': '
+            + encodeReviewDigitalSales(conclusionText) + '</span></div>';
+    }
+
     return '<div class="small text-muted"><i class="far fa-clock mr-1"></i>' + dateText + countBadge + '</div>'
         + '<div class="small text-primary font-weight-bold"><i class="fa fa-user mr-1"></i>' + encodeReviewDigitalSales(row.LastReviewerName) + '</div>'
-        + (comment ? '<div class="small mt-1">' + encodeReviewDigitalSales(comment) + '</div>' : '');
+        + (comment ? '<div class="small mt-1">' + encodeReviewDigitalSales(comment) + '</div>' : '')
+        + conclusion;
 }
 
 function saveReviewDigitalSalesState() {

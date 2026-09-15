@@ -4,7 +4,7 @@
 @{
     var roles = ViewBag.Roles as List<RM_RolesModel> ?? new List<RM_RolesModel>();
     var currentRoleList = (Model.RoleTitle ?? "").Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
-        .Select(r => r.Trim())
+        .Select(r => Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(r.Trim()))
         .Where(r => !string.IsNullOrEmpty(r))
         .ToList();
     var knownRoleNames = roles.Select(r => r.RoleName).ToList();
@@ -56,7 +56,7 @@
                             }
                         </select>
                         <input type="text" id="RoleTitle_Custom" value="@customRoleStr" class="form-control mt-2" placeholder="Hoặc nhập thêm vai trò tùy biến..." />
-                        <input type="hidden" id="RoleTitle" name="RoleTitle" value="@Model.RoleTitle" />
+                        <input type="hidden" id="RoleTitle" name="RoleTitle" value="@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(Model.RoleTitle)" />
                     </div>
 
 <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_EditMemberModal.css?v=@DateTime.Now.Ticks" />

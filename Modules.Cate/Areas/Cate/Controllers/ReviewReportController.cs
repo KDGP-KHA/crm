@@ -10,6 +10,7 @@ using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using TSFramework.Libs.Processors;
 
 
 namespace Modules.Cate.Areas.Cate.Controllers
@@ -92,12 +93,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     // HEADER
                     //---------------------------------------------------
 
-                    ws.Cells[1, 1].Value = "STT";
-                    ws.Cells[1, 2].Value = "Tên";
-                    ws.Cells[1, 3].Value = "Loại";
-                    ws.Cells[1, 4].Value = "Rà soát cấp 4";
-                    ws.Cells[1, 5].Value = "Rà soát cấp 3";
-                    ws.Cells[1, 6].Value = "Rà soát cấp 2";
+                    ws.Cells[1, 1].Value = AppProcessor.Messagor.GetMessage("Column_No");
+                    ws.Cells[1, 2].Value = AppProcessor.Messagor.GetMessage("ReviewReport_DigitalSales");
+                    ws.Cells[1, 3].Value = AppProcessor.Messagor.GetMessage("ReviewConclusion_Final_Label");
+                    ws.Cells[1, 4].Value = AppProcessor.Messagor.GetMessage("ReviewReport_Level4");
+                    ws.Cells[1, 5].Value = AppProcessor.Messagor.GetMessage("ReviewReport_Level3");
+                    ws.Cells[1, 6].Value = AppProcessor.Messagor.GetMessage("ReviewReport_Level2");
 
                     using (var range = ws.Cells[1, 1, 1, 6])
                     {
@@ -122,8 +123,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         var item = data[i];
 
                         ws.Cells[row, 1].Value = i + 1;
-                        ws.Cells[row, 2].Value = item.ObjectName;
-                        ws.Cells[row, 3].Value = item.ObjectTypeName;
+                        ws.Cells[row, 2].Value = string.IsNullOrWhiteSpace(item.ObjectCode)
+                            ? item.ObjectName
+                            : $"{item.ObjectCode} - {item.ObjectName}";
+                        ws.Cells[row, 3].Value = GetConclusionText(item.FinalReviewConclusion);
 
                         ws.Cells[row, 4].Value =
                             FormatReviewForExcel(item.Level4Reviewer,
@@ -154,7 +157,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                     ws.Column(1).Width = 8;
                     ws.Column(2).Width = 40;
-                    ws.Column(3).Width = 20;
+                    ws.Column(3).Width = 24;
                     ws.Column(4).Width = 50;
                     ws.Column(5).Width = 50;
                     ws.Column(6).Width = 50;
@@ -248,12 +251,23 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 lines.Add(
                     isConfirmed == true
-                        ? "Đã xác nhận rà soát"
-                        : "Đã cho ý kiến"
+                        ? AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Confirmed")
+                        : AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Commented")
                 );
             }
 
             return string.Join(Environment.NewLine, lines);
+        }
+
+        private string GetConclusionText(byte? conclusion)
+        {
+            if (conclusion == RM_ReviewConclusion.Accepted)
+                return AppProcessor.Messagor.GetMessage("ReviewConclusion_Accepted");
+            if (conclusion == RM_ReviewConclusion.Interested)
+                return AppProcessor.Messagor.GetMessage("ReviewConclusion_Interested");
+            if (conclusion == RM_ReviewConclusion.Rejected)
+                return AppProcessor.Messagor.GetMessage("ReviewConclusion_Rejected");
+            return string.Empty;
         }
     }
 
