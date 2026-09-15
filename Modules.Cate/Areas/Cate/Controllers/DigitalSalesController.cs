@@ -1528,49 +1528,34 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 try
                 {
                     List<ChangeStatusTrackingItemDTO> items = null;
+                    bool hasSubmittedTrackingPayload = (model.HasWorkflowProgressBox || model.TrackingItemsJson != null);
+
                     if (!string.IsNullOrWhiteSpace(model.TrackingItemsJson))
                     {
-                        items = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChangeStatusTrackingItemDTO>>(model.TrackingItemsJson);
-                    }
-
-                    // Fallback 1: Nếu TrackingItemsJson rỗng nhưng người dùng có chọn quy trình (SelectedProcessID)
-                    if ((items == null || items.Count == 0) && model.SelectedProcessID.HasValue && model.SelectedProcessID.Value > 0)
-                    {
-                        var progs = _workflowCache.GetProgressesByProcess(model.SelectedProcessID.Value);
-                        if (progs != null && progs.Count > 0)
+                        try
                         {
-                            items = new List<ChangeStatusTrackingItemDTO>();
-                            int sortIdx = 1;
-                            var today = DateTime.Today;
-                            foreach (var p in progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder))
-                            {
-                                var days = p.DefaultDurationDays > 0 ? p.DefaultDurationDays : 3;
-                                items.Add(new ChangeStatusTrackingItemDTO
-                                {
-                                    ProcessID = model.SelectedProcessID.Value,
-                                    ProgressID = p.ProgressID,
-                                    TaskName = p.ProgressName,
-                                    SortOrder = p.SortOrder > 0 ? p.SortOrder : sortIdx++,
-                                    StartDate = today,
-                                    DurationDays = days,
-                                    Deadline = today.AddDays(days),
-                                    AssignedUserID = null,
-                                    IsCustomTask = false
-                                });
-                            }
+                            items = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ChangeStatusTrackingItemDTO>>(model.TrackingItemsJson);
+                        }
+                        catch (Exception jsonEx)
+                        {
+                            AppProcessor.Logger.Error(jsonEx);
                         }
                     }
-
-                    // Fallback 2: Nếu cả TrackingItemsJson và SelectedProcessID đều rỗng, tự động lấy quy trình đầu tiên của NewStatusID
-                    if ((items == null || items.Count == 0) && model.NewStatusID > 0)
+                    else if (hasSubmittedTrackingPayload)
                     {
-                        int totalProcCount = 0;
-                        var allProcs = _workflowCache.GetProcesses(out totalProcCount, statusId: model.NewStatusID);
-                        var activeProcs = allProcs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
-                        if (activeProcs != null && activeProcs.Count > 0)
+                        // Người dùng đã thao tác trên giao diện modal và chủ động xóa sạch toàn bộ tiến trình
+                        items = new List<ChangeStatusTrackingItemDTO>();
+                    }
+
+                    // CHÚ Ý NGHIỆP VỤ QUAN TRỌNG:
+                    // Nếu người dùng đã mở modal chuyển trạng thái và xóa hết tiến trình (items.Count == 0),
+                    // TUYỆT ĐỐI KHÔNG ĐƯỢC chạy fallback tự động sinh tiến trình từ quy trình vào checklist!
+                    // Chỉ fallback khi KHÔNG submit từ modal có box quy trình (hasSubmittedTrackingPayload == false).
+                    if (!hasSubmittedTrackingPayload)
+                    {
+                        if ((items == null || items.Count == 0) && model.SelectedProcessID.HasValue && model.SelectedProcessID.Value > 0)
                         {
-                            var firstProc = activeProcs[0];
-                            var progs = _workflowCache.GetProgressesByProcess(firstProc.ProcessID);
+                            var progs = _workflowCache.GetProgressesByProcess(model.SelectedProcessID.Value);
                             if (progs != null && progs.Count > 0)
                             {
                                 items = new List<ChangeStatusTrackingItemDTO>();
@@ -1581,7 +1566,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                     var days = p.DefaultDurationDays > 0 ? p.DefaultDurationDays : 3;
                                     items.Add(new ChangeStatusTrackingItemDTO
                                     {
-                                        ProcessID = firstProc.ProcessID,
+                                        ProcessID = model.SelectedProcessID.Value,
                                         ProgressID = p.ProgressID,
                                         TaskName = p.ProgressName,
                                         SortOrder = p.SortOrder > 0 ? p.SortOrder : sortIdx++,
@@ -1591,6 +1576,40 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                         AssignedUserID = null,
                                         IsCustomTask = false
                                     });
+                                }
+                            }
+                        }
+
+                        if ((items == null || items.Count == 0) && model.NewStatusID > 0)
+                        {
+                            int totalProcCount = 0;
+                            var allProcs = _workflowCache.GetProcesses(out totalProcCount, statusId: model.NewStatusID);
+                            var activeProcs = allProcs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                            if (activeProcs != null && activeProcs.Count > 0)
+                            {
+                                var firstProc = activeProcs[0];
+                                var progs = _workflowCache.GetProgressesByProcess(firstProc.ProcessID);
+                                if (progs != null && progs.Count > 0)
+                                {
+                                    items = new List<ChangeStatusTrackingItemDTO>();
+                                    int sortIdx = 1;
+                                    var today = DateTime.Today;
+                                    foreach (var p in progs.Where(x => x.IsActive).OrderBy(x => x.SortOrder))
+                                    {
+                                        var days = p.DefaultDurationDays > 0 ? p.DefaultDurationDays : 3;
+                                        items.Add(new ChangeStatusTrackingItemDTO
+                                        {
+                                            ProcessID = firstProc.ProcessID,
+                                            ProgressID = p.ProgressID,
+                                            TaskName = p.ProgressName,
+                                            SortOrder = p.SortOrder > 0 ? p.SortOrder : sortIdx++,
+                                            StartDate = today,
+                                            DurationDays = days,
+                                            Deadline = today.AddDays(days),
+                                            AssignedUserID = null,
+                                            IsCustomTask = false
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -1635,7 +1654,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                 Status = 1, // Chưa thực hiện
                                 IsCustomTask = it.IsCustomTask,
                                 SortOrder = it.SortOrder > 0 ? it.SortOrder : sort++,
-                                ResultNote = null,
+                                ResultNote = !string.IsNullOrWhiteSpace(it.Note) ? it.Note.Trim() : null,
                                 AttachmentFile = null
                             };
 
