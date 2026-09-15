@@ -40,6 +40,8 @@ namespace Core.Cate.Biz
         private readonly string _spActivityGetList = "RM_DigitalSalesActivity_GetList";
         private readonly string _spActivityDelete = "RM_DigitalSalesActivity_Delete";
         private readonly string _spActivityUpdateLatestStatusChange = "RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments";
+        private readonly string _spGetDepartmentByUserID = "RM_DigitalSales_GetDepartmentByUserID";
+        private readonly string _spGetAccessibleEmployees = "RM_DigitalSales_GetAccessibleEmployees";
 
         public List<RM_DigitalSalesModel> LoadList(out int total, RM_DigitalSalesSearchModel model)
         {
@@ -721,6 +723,25 @@ namespace Core.Cate.Biz
                 username
             );
             return result.GetValueOrDefault(0);
+        }
+
+        public int? GetDepartmentByUserID(int userId)
+        {
+            if (userId <= 0) return null;
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spGetDepartmentByUserID,
+                DATA_PROVIDER_NAME,
+                userId);
+            return (result.HasValue && result.Value > 0) ? result.Value : (int?)null;
+        }
+
+        public List<RM_DigitalSalesUserModel> GetAccessibleEmployees(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName)) return new List<RM_DigitalSalesUserModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesUserModel>(
+                _spGetAccessibleEmployees,
+                DATA_PROVIDER_NAME,
+                userName.Trim()) ?? new List<RM_DigitalSalesUserModel>();
         }
 
         private static readonly Dictionary<char, byte> _win1252Map = new Dictionary<char, byte>()

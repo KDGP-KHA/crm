@@ -1235,6 +1235,15 @@ function submitTodoItem() {
     }
     $("#Todo_TaskName").removeClass("is-invalid border-danger");
 
+    // Validate số ngày thực hiện
+    var durationDays = parseInt($("#Todo_DurationDays").val()) || 0;
+    if (durationDays < 1) {
+        $("#Todo_DurationDays").addClass("is-invalid border-danger").focus();
+        executeResponseMessage("Số ngày thực hiện phải >= 1!", "Thiếu thông tin", false);
+        return false;
+    }
+    $("#Todo_DurationDays").removeClass("is-invalid border-danger");
+
     // RÀNG BUỘC NGHIỆP VỤ: Deadline của Todo <= StartDate của Tiến trình + Tổng ngày của Tiến trình
     var deadlineStr = $("#Todo_Deadline").val();
     var maxDeadlineIso = $("#Todo_MaxDeadlineIso").val();
@@ -1256,24 +1265,52 @@ function submitTodoItem() {
     var origHtml = $btn.html();
     $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
 
-    var formData = $form.serialize();
+    // Sử dụng FormData để hỗ trợ file upload
+    var formData = new FormData($form[0]);
     var salesId = $("#Todo_DigitalSalesID").val();
 
-    $.post(_detailUrls.saveTodo, formData, function (res) {
-        $btn.prop("disabled", false).html(origHtml);
-        if (res.status) {
-            $("#todoModal").modal("hide");
-            $('.modal-backdrop').remove();
-            $('body').removeClass('modal-open').css('padding-right', '');
-            executeResponseMessage(res.message, "Lưu công việc thành công!", true);
-            reloadTrackingSection(salesId);
-        } else {
-            executeResponseMessage(res.message, "Không thể lưu công việc!", false);
+    $.ajax({
+        url: _detailUrls.saveTodo,
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            $btn.prop("disabled", false).html(origHtml);
+            if (res.status) {
+                $("#todoModal").modal("hide");
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                executeResponseMessage(res.message, "Lưu công việc thành công!", true);
+                reloadTrackingSection(salesId);
+            } else {
+                executeResponseMessage(res.message, "Không thể lưu công việc!", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html(origHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
         }
-    }).fail(function () {
-        $btn.prop("disabled", false).html(origHtml);
-        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
     });
+}
+
+function calculateTodoDeadline() {
+    var startDateStr = $("#Todo_StartDate").val();
+    var durationDays = parseInt($("#Todo_DurationDays").val()) || 0;
+    if (!startDateStr || durationDays < 1) return;
+
+    var startDate = parseVnDate(startDateStr);
+    if (!startDate) return;
+
+    var deadline = new Date(startDate);
+    deadline.setDate(deadline.getDate() + durationDays);
+
+    var dd = ('0' + deadline.getDate()).slice(-2);
+    var mm = ('0' + (deadline.getMonth() + 1)).slice(-2);
+    var yyyy = deadline.getFullYear();
+    var formattedDate = dd + '/' + mm + '/' + yyyy;
+
+    $("#Todo_Deadline").val(formattedDate);
 }
 
 /* ================= 4.3. Thao tác Nhanh: Báo cáo | Xác nhận | Mở khóa | Xóa ================= */

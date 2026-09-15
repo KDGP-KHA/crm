@@ -8,6 +8,7 @@ namespace Core.Cate.Models
     public class RM_DigitalSalesTrackingModel : BaseModel
     {
         public int TrackingID { get; set; }
+        public string TrackingCode { get; set; }
         public int DigitalSalesID { get; set; }
         public int? ParentID { get; set; }
         public int? ProcessID { get; set; }

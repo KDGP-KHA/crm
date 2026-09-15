@@ -44,7 +44,8 @@
     <table class="table table-bordered text-90 tree-table" id="tblTracking">
         <thead class="bgc-secondary-l1 text-secondary-d2">
             <tr>
-                <th style="min-width: 440px;">Tên công việc / Đầu mục tiến trình</th>
+                <th style="min-width: 400px;">Tên công việc / Đầu mục tiến trình</th>
+                <th style="width: 130px;" class="text-center">Mã tiến trình</th>
                 <th style="width: 150px;">Người thực hiện</th>
                 <th style="width: 105px;" class="text-center">Bắt đầu</th>
                 <th style="width: 115px;" class="text-center">Hạn chót</th>
@@ -78,7 +79,7 @@
                     <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
                     <!-- ========================================================================= -->
                     <tr class="tree-row tree-status-row" data-node="@statusNodeId" data-level="1" data-expanded="true">
-                        <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
+                        <td colspan="@(canEdit ? 9 : 8)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
@@ -109,7 +110,7 @@
                         <!-- CẤP 2: QUY TRÌNH (TIÊU ĐỀ: QUY TRÌNH ... CÓ CÂY BÚT CHÌ NẾU SỐ QT >= 2)  -->
                         <!-- ========================================================================= -->
                         <tr class="tree-row tree-process-row" data-node="@procNodeId" data-parent="@statusNodeId" data-level="2" data-expanded="true">
-                            <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
+                            <td colspan="@(canEdit ? 9 : 8)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                         <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-1" id="icon_@procNodeId"></i>
@@ -144,7 +145,7 @@
                         {
                             <!-- DÒNG THÔNG BÁO KHI QUY TRÌNH CHƯA CÓ TIẾN TRÌNH NÀO -->
                             <tr class="tree-row tree-empty-progress-row" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3">
-                                <td colspan="@(canEdit ? 8 : 7)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
+                                <td colspan="@(canEdit ? 9 : 8)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
                                     <div class="tree-empty-progress-box">
                                         <i class="fa fa-info-circle text-primary text-105"></i>
                                         <span>Quy trình <strong>@prGroup.Key.ProcessName</strong> chưa có tiến trình nào.</span>
@@ -194,6 +195,7 @@
                                         }
                                     </div>
                                 </td>
+                                <td class="text-center"><span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1 text-80">@task.TrackingCode</span></td>
                                 <td><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : task.AssignedUserName)</span></td>
                                 <td class="text-center">@task.StartDate.ToString("dd/MM/yyyy")</td>
                                 <td class="text-center"><span class="@(isOverdue ? "text-danger font-bold" : "text-dark")">@task.MaxDeadline.ToString("dd/MM/yyyy")</span></td>
@@ -276,6 +278,7 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td class="text-center"><span class="text-secondary-d1 text-75">@todo.TrackingCode</span></td>
                                         <td><span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : todo.AssignedUserName)</span></td>
                                         <td class="text-center text-85">@todo.StartDate.ToString("dd/MM/yyyy")</td>
                                         <td class="text-center">
@@ -341,7 +344,7 @@
             else
             {
                 <tr>
-                    <td colspan="@(canEdit ? 8 : 7)" class="text-center py-4 text-secondary-m1">
+                    <td colspan="@(canEdit ? 9 : 8)" class="text-center py-4 text-secondary-m1">
                         <i class="fa fa-clipboard-list text-180 text-secondary-l1 mb-2 d-block"></i>
                         <span>Chưa có tiến trình / checklist nào được khởi tạo cho hồ sơ này.</span>
                         @if (canEdit)

@@ -265,5 +265,35 @@ namespace Core.Cate.Caches
             if (result > 0) InvalidateCache();
             return result;
         }
+
+        public int? GetDepartmentByUserID(int userId)
+        {
+            if (userId <= 0) return null;
+            var rawKey = string.Concat("RM_DigitalSales_GetDepartmentByUserID_", userId);
+            var cached = GetCacheItem(rawKey);
+            if (cached != null) return (int)cached;
+
+            var data = Api.GetDepartmentByUserID(userId);
+            if (data.HasValue)
+            {
+                AddCacheItem(rawKey, data.Value);
+            }
+            return data;
+        }
+
+        public List<RM_DigitalSalesUserModel> GetAccessibleEmployees(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName)) return new List<RM_DigitalSalesUserModel>();
+            var rawKey = string.Concat("RM_DigitalSales_GetAccessibleEmployees_", userName.ToLower().Trim());
+            if (GetCacheItem(rawKey) is List<RM_DigitalSalesUserModel> cached) return cached;
+
+            var data = Api.GetAccessibleEmployees(userName);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data;
+        }
     }
 }
+

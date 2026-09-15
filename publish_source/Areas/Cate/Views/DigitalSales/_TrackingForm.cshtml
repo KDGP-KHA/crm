@@ -2,6 +2,14 @@
 @model Core.Cate.Models.RM_DigitalSalesTrackingModel
 @Html.AntiForgeryToken()
 @Html.HiddenFor(m => m.TrackingID)@Html.HiddenFor(m => m.DigitalSalesID)@Html.HiddenFor(m => m.ProcessID)@Html.HiddenFor(m => m.ProgressID)@Html.HiddenFor(m => m.IsCustomTask)
+@if (Model.TrackingID > 0 && !string.IsNullOrEmpty(Model.TrackingCode))
+{
+    <div class="alert alert-light border-1 brc-primary-m3 py-2 px-3 mb-3 text-90 radius-1 d-flex align-items-center">
+        <i class="fa fa-barcode mr-2 text-primary text-110"></i>
+        <span class="mr-1">Mã tiến trình:</span>
+        <span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@Model.TrackingCode</span>
+    </div>
+}
 @if (Model.ProcessID.HasValue && Model.ProcessID.Value > 0 && !string.IsNullOrEmpty(ViewBag.ProcessName as string))
 {
     <div class="alert alert-info py-2 px-3 mb-3 text-90 radius-1">
