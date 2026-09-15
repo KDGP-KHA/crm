@@ -523,6 +523,7 @@ namespace Core.Cate.Biz
             return result.GetValueOrDefault(0);
         }
 
+
         public List<RM_DigitalSalesMemberModel> GetMembersBySalesID(int digitalSalesId)
         {
             if (digitalSalesId <= 0) return new List<RM_DigitalSalesMemberModel>();
@@ -531,6 +532,14 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
+            if (list != null)
+            {
+                foreach (var item in list)
+                {
+                    item.RoleTitle = FixVietnameseMojibake(item.RoleTitle);
+                    item.Note = FixVietnameseMojibake(item.Note);
+                }
+            }
             return list ?? new List<RM_DigitalSalesMemberModel>();
         }
 
@@ -833,9 +842,16 @@ namespace Core.Cate.Biz
             if (string.IsNullOrEmpty(input)) return input;
 
             if (input.Contains("Chuyá»") || input.Contains("Ä‘á»") || input.Contains("CÆ") || input.Contains("Dá»±") ||
-                input.Contains("Tráº¡ng") || input.Contains("Ä Ã¡nh") || input.Contains("ÄÃ¡nh") || input.Contains("Bá» "))
+                input.Contains("Tráº¡ng") || input.Contains("Ä Ã¡nh") || input.Contains("ÄÃ¡nh") || input.Contains("Bá» ") ||
+                input.Contains("Chá»§") || input.Contains("Chá»") || input.Contains("NgÆ°") || input.Contains("AM ("))
             {
                 input = input
+                    .Replace("AM (Chá»§ trÃ¬ kinh doanh)", "AM (Chủ trì kinh doanh)")
+                    .Replace("Chá»§ trÃ¬ kinh doanh", "Chủ trì kinh doanh")
+                    .Replace("Chá»§ trÃ¬", "Chủ trì")
+                    .Replace("NgÆ°á» i táº¡o há»“ sÆ¡ cÆ¡ há»™i", "Người tạo hồ sơ cơ hội")
+                    .Replace("NgÆ°á»\u009di táº¡o há»“ sÆ¡ cÆ¡ há»™i", "Người tạo hồ sơ cơ hội")
+                    .Replace("Ng\u00C6\u00B0\u00E1\u00BB\u009Di t\u00E1\u00BA\u00A1o h\u00E1\u00BB\u201C s\u00C6\u00A1 c\u00C6\u00A1 h\u00E1\u00BB\u2122i", "Người tạo hồ sơ cơ hội")
                     .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
                     .Replace("Chuyá»ƒn Ä'á»•i thÃ nh cÃ´ng tá»« CÆ  Há»™i sang Dá»± Ã¡N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
                     .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Trạng thái mới:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
