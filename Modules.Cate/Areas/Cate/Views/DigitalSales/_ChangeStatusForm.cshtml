@@ -498,16 +498,30 @@
 
         $container.append($row);
 
-        // Khởi tạo Select2 cho Người thực hiện của dòng vừa thêm
+        // Khởi tạo Select2 cho Người thực hiện của dòng vừa thêm (gán dropdownParent vào Modal để không bị overflow/clip bởi card)
         if ($.fn.select2) {
+            var $modalParent = $('#modalChangeStatus').length ? $('#modalChangeStatus') : $row.closest('.modal');
             $row.find('.cbo-assigned-user').select2({
                 allowClear: true,
                 placeholder: 'Chọn 1 giá trị',
                 width: '100%',
-                dropdownParent: $row.find('.ds-progress-assigned-wrapper'),
+                dropdownParent: $modalParent,
+                dropdownCssClass: 'ds-select2-dropdown-assigned',
                 dropdownAutoWidth: false,
                 language: 'vi'
             });
+
+            // Tự động đóng dropdown khi cuộn danh sách tiến trình để không bị lệch vị trí
+            if (!$container.data('hasScrollListener')) {
+                $container.data('hasScrollListener', true);
+                $container.on('scroll', function () {
+                    $('.cbo-assigned-user').each(function () {
+                        if ($(this).data('select2') && $(this).data('select2').isOpen()) {
+                            $(this).select2('close');
+                        }
+                    });
+                });
+            }
         }
     }
 

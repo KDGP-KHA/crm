@@ -1,0 +1,48 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesTrackingModel
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_UnlockProgressModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="modalUnlockProgress" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-white mb-0">
+                    <i class="fa fa-unlock-alt mr-1"></i> Mở khóa Tiến trình
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="frmUnlockProgress" onsubmit="return submitUnlockProgressForm(event, @Model.TrackingID, @Model.DigitalSalesID);">
+                <div class="modal-body">
+                    <div class="alert alert-light border-1 brc-warning-m2 py-2 px-3 mb-3 text-90 radius-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m1 font-bold mr-2">@Model.TrackingCode</span>
+                            <span class="font-weight-bold text-dark">@Model.TaskName</span>
+                        </div>
+                        <small class="text-muted d-block">Tiến trình này đang ở trạng thái <strong>Hoàn thành</strong>. Mở khóa cho phép mở lại màn hình Chỉnh sửa để cập nhật lại nội dung (trạng thái vẫn giữ nguyên là <strong>Hoàn thành</strong>).</small>
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label class="text-85 font-weight-bold text-dark mb-1 d-block">
+                            Lý do mở khóa <span class="text-danger">*</span>
+                        </label>
+                        <textarea id="txtUnlockReason" name="reason" rows="3" class="form-control" placeholder="Nhập lý do cần mở khóa tiến trình này..." required></textarea>
+                        <div id="txtUnlockReason_val" class="text-danger text-85 font-weight-bold d-none mt-1">
+                            Vui lòng nhập lý do mở khóa!
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> Hủy bỏ
+                    </button>
+                    <button type="submit" id="btnSubmitUnlockProgress" class="btn btn-sm btn-warning text-white font-weight-bold px-3 radius-1 shadow-sm">
+                        <i class="fa fa-unlock-alt mr-1"></i> Xác nhận mở khóa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

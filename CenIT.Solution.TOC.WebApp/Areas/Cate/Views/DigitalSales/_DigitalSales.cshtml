@@ -10,9 +10,6 @@
 @Html.HiddenFor(m => m.StartDate)
 @Html.HiddenFor(m => m.ExpectedDate)
 @Html.HiddenFor(m => m.ContractID)
-@Html.HiddenFor(m => m.ContractNo)
-@Html.HiddenFor(m => m.ContractValue)
-@Html.HiddenFor(m => m.ContractSignDate)
 
 @if (Model.DigitalSalesID <= 0)
 {
@@ -71,6 +68,38 @@
     <!-- Thẻ tóm tắt thông tin khách hàng được chọn -->
     <div class="col-md-12">
         <div id="customerInfoCard_Form" class="card border-1 brc-primary-m3 bgc-primary-l4 radius-1 p-2 mb-3 shadow-sm" style="display: none;"></div>
+    </div>
+
+    <!-- 4. THÔNG TIN HỢP ĐỒNG (NẾU CÓ) -->
+    <div class="col-md-12 mb-3">
+        <div class="card border-1 brc-default-m4 radius-1 shadow-sm">
+            <div class="card-header bgc-secondary-l4 py-2 px-3 d-flex align-items-center">
+                <span class="font-weight-bold text-dark-m1 text-90">
+                    <i class="fa fa-file-contract text-primary mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_Contract_SectionTitle", "Thông tin Hợp đồng kinh tế (nếu có)")
+                </span>
+            </div>
+            <div class="card-body p-2">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="font-bold text-secondary-d2 mb-1 d-block text-90">@AppProcessor.Messagor.GetMessage("DigitalSales_ContractNo_Label", "Số hợp đồng")</label>
+                        @Html.TextBoxFor(m => m.ContractNo, new { @class = "form-control form-control-sm", id = "ContractNo_Form", placeholder = "Nhập số HĐ..." })
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="font-bold text-secondary-d2 mb-1 d-block text-90">@AppProcessor.Messagor.GetMessage("DigitalSales_ContractValue_Label", "Giá trị hợp đồng (VNĐ)")</label>
+                        @Html.TextBoxFor(m => m.ContractValue, "{0:G0}", new { @class = "form-control form-control-sm text-right font-bold text-success", id = "ContractValue_Form", type = "number", min = "0", step = "any", placeholder = "0" })
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="font-bold text-secondary-d2 mb-1 d-block text-90">@AppProcessor.Messagor.GetMessage("DigitalSales_ContractSignDate_Label", "Ngày ký hợp đồng")</label>
+                        <div class="input-group input-group-sm date" id="dpContractSignDate_Form">
+                            <input type="text" name="ContractSignDate" id="ContractSignDate_Form" class="form-control form-control-sm date-picker" placeholder="dd/MM/yyyy" autocomplete="off" value="@(Model.ContractSignDate.HasValue ? Model.ContractSignDate.Value.ToString("dd/MM/yyyy") : "")" />
+                            <div class="input-group-append">
+                                <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 

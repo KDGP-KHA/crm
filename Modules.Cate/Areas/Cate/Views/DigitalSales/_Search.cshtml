@@ -1,6 +1,18 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesSearchModel
 
+@{
+    var excludedStatusIds = Model.ExcludedStatusIDs ?? new List<int>();
+    var statusItems = Model.StatusItems ?? new List<Core.Cate.Models.RM_DigitalSalesStatusModel>();
+
+    var checkedCount = statusItems.Count(x => !excludedStatusIds.Contains(x.StatusID));
+    var totalCount = statusItems.Count;
+
+    var defaultText = checkedCount == totalCount
+        ? "Tất cả"
+        : (checkedCount == 0 ? "Chưa chọn trạng thái" : $"{checkedCount} trạng thái được chọn");
+}
+
 <div class="Search search-opportunity card mb-3" id="SearchDigitalSales">
     <div class="card-header bgc-primary-d1">
         <div class="card-title text-white">
@@ -18,7 +30,7 @@
         <div class="Search_Box" style="min-width: 140px;">
             @Html.TitleFor(model => model.BusinessType, new { @class = "font-bold text-sm-right" })
             <div>
-                <select id="BusinessType" name="BusinessType" class="form-control">
+                <select id="BusinessType" name="BusinessType" class="form-control" onchange="filterStatusListByBusinessType(this.value);">
                     <option value="">@AppProcessor.Messagor.GetMessage("DigitalSalesSearch_BusinessType_AllOption")</option>
                     <option value="1" @(Model.BusinessType == 1 ? "selected" : "")>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity")</option>
                     <option value="2" @(Model.BusinessType == 2 ? "selected" : "")>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project")</option>
@@ -26,10 +38,54 @@
             </div>
         </div>
 
-        <div class="Search_Box" style="min-width: 150px;">
-            @Html.TitleFor(model => model.StatusID, new { @class = "font-bold text-sm-right" })
-            <div>
-                @Html.DropDownListFor(model => model.StatusID, Model.ListStatus, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Status_Option"), new { @class = "form-control", id = "StatusID" })
+        <div class="position-relative status-filter-wrapper Search_Box" style="min-width: 200px;">
+            <label class="font-bold text-sm-right status-label">
+                @AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Status_Label", "Trạng thái")
+            </label>
+
+            <!-- BUTTON -->
+            <div id="statusDropdownButton"
+                 class="form-control d-flex justify-content-between align-items-center cursor-pointer">
+                <span id="statusDropdownText" class="text-truncate">
+                    @defaultText
+                </span>
+                <i class="fas fa-caret-down ml-2"></i>
+            </div>
+
+            <!-- DROPDOWN -->
+            <div id="statusDropdownMenu"
+                 class="border bg-white shadow-sm rounded p-2">
+                <!-- CHECK ALL -->
+                <div class="mb-2 border-bottom pb-2">
+                    <label class="mb-0 w-100 cursor-pointer">
+                        <input type="checkbox"
+                               id="checkAllStatus"
+                               @(checkedCount == totalCount ? "checked" : "") />
+                        <span class="ml-1 font-weight-bold">
+                            Tất cả
+                        </span>
+                    </label>
+                </div>
+
+                <!-- ITEMS -->
+                @foreach (var item in statusItems)
+                {
+                    var isChecked = !excludedStatusIds.Contains(item.StatusID);
+                    var typePrefix = item.BusinessType == 1 ? "[Cơ hội]" : "[Dự án]";
+
+                    <div class="mb-1 status-item-row" data-businesstype="@item.BusinessType">
+                        <label class="mb-0 w-100 cursor-pointer text-nowrap">
+                            <input type="checkbox"
+                                   class="status-item"
+                                   value="@item.StatusID"
+                                   data-businesstype="@item.BusinessType"
+                                   @(isChecked ? "checked" : "") />
+                            <span class="ml-1 text-85">
+                                <span class="text-secondary opacity-75 font-bold mr-1">@typePrefix</span>@item.StatusName
+                            </span>
+                        </label>
+                    </div>
+                }
             </div>
         </div>
 
@@ -117,42 +173,13 @@
 </div>
 
 <script>
-    function loadStatusesByBusinessType(businessType, selectedStatusId) {
-        var $status = $('#StatusID, #SearchStatusID');
-        var currentVal = selectedStatusId !== undefined ? selectedStatusId : $status.val();
-
-        $status.empty().append('<option value="">-- Chọn trạng thái --</option>');
-
-        $.get('/Cate/DigitalSales/GetStatusesByBusinessType', {
-            businessType: businessType ? businessType : ''
-        }, function (data) {
-            if (data && data.length > 0) {
-                var hasCurrentVal = false;
-                $.each(data, function (i, item) {
-                    var isSelected = (currentVal && item.id == currentVal);
-                    if (isSelected) hasCurrentVal = true;
-                    $status.append(
-                        $('<option>').val(item.id).text(item.name).prop('selected', isSelected)
-                    );
-                });
-                if (!hasCurrentVal) {
-                    $status.val('');
-                }
-            } else {
-                $status.val('');
-            }
-            $status.trigger("chosen:updated");
-            if ($.fn.select2) {
-                $status.trigger("change.select2");
-            }
-            if (typeof reloadSalesTable === 'function') {
-                reloadSalesTable();
-            }
-        });
-    }
-    window.loadStatusesByBusinessType = loadStatusesByBusinessType;
+    window._excludedStatusIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(excludedStatusIds));
 
     $(document).ready(function () {
+        if (typeof updateStatusDropdownText === 'function') {
+            updateStatusDropdownText();
+        }
+
         if ($.fn.datepicker) {
             $('#dpFromDate').datepicker({
                 format: 'dd/mm/yyyy',
@@ -183,10 +210,12 @@
             }
         });
 
-        // Load danh sách trạng thái theo Loại hình (Cơ hội kinh doanh / Dự án)
+        // Lọc danh sách checkbox trạng thái theo Loại hình (Cơ hội / Dự án)
         $('#BusinessType').change(function () {
             var businessType = $(this).val();
-            loadStatusesByBusinessType(businessType);
+            if (typeof filterStatusListByBusinessType === 'function') {
+                filterStatusListByBusinessType(businessType);
+            }
         });
 
         // Load danh sách nhân sự phụ trách (AM) theo phòng ban thuộc TTKDGP

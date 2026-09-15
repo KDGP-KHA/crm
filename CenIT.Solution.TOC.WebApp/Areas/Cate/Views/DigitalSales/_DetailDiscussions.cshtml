@@ -247,7 +247,7 @@
         </button>
     </div>
 
-    <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d2 px-25 py-1 radius-1" onclick="reloadDiscussionsSection(@Model.DigitalSalesID);" title="Làm mới dòng hoạt động">
+    <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d2 px-25 py-1 radius-1" onclick="reloadDiscussionsSection(@Model.DigitalSalesID, @(currentFilter.HasValue ? currentFilter.Value.ToString() : "null"));" title="Làm mới dòng hoạt động">
         <i class="fa fa-sync-alt mr-1"></i> Làm mới
     </button>
 </div>

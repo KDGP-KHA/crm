@@ -1,0 +1,77 @@
+/* CSS for Tracking Logs Modal */
+#modalTrackingLogs .modal-content {
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+#modalTrackingLogs .modal-header {
+    background-color: #0284c7;
+    color: #ffffff;
+    padding: 12px 18px;
+}
+
+#modalTrackingLogs .modal-header .modal-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+#modalTrackingLogs .modal-body {
+    padding: 18px 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+#modalTrackingLogs .tracking-log-timeline {
+    position: relative;
+    padding-left: 20px;
+}
+
+#modalTrackingLogs .tracking-log-timeline::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 7px;
+    width: 2px;
+    background-color: #e2e8f0;
+}
+
+#modalTrackingLogs .tracking-log-item {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+#modalTrackingLogs .tracking-log-item:last-child {
+    margin-bottom: 0;
+}
+
+#modalTrackingLogs .tracking-log-dot {
+    position: absolute;
+    left: -20px;
+    top: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #0284c7;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 2px #bae6fd;
+}
+
+#modalTrackingLogs .tracking-log-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+}
+
+#modalTrackingLogs .tracking-log-card:hover {
+    background-color: #f1f5f9;
+}
+
+#modalTrackingLogs .modal-footer {
+    padding: 10px 18px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}

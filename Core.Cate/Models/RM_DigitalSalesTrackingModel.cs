@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Models.Base;
 
@@ -37,6 +38,7 @@ namespace Core.Cate.Models
         public byte Status { get; set; } // 1: Chưa làm, 2: Đang làm, 3: Hoàn thành, 4: Quá hạn
         public string TaskStatusName { get; set; }
         public int IsOverdue { get; set; } // 1: Quá hạn, 0: Bình thường
+        [AllowHtml]
         [CustomDisplayName("DigitalSalesTracking_ResultNote_Label")]
         public string ResultNote { get; set; }
 
@@ -51,4 +53,40 @@ namespace Core.Cate.Models
         public DateTime MaxDeadline => StartDate.AddDays(EffectiveDurationDays);
         public List<RM_DigitalSalesTrackingModel> TodoList { get; set; } = new List<RM_DigitalSalesTrackingModel>();
     }
+
+    public class RM_DigitalSalesProgressImportRowDTO
+    {
+        public int RowIndex { get; set; }
+        public string TaskName { get; set; }
+        public string AssignedUserName { get; set; }
+        public int? AssignedUserID { get; set; }
+        public string StartDateStr { get; set; }
+        public DateTime? StartDate { get; set; }
+        public int? DurationDays { get; set; }
+        public DateTime? Deadline { get; set; }
+        public string Note { get; set; }
+        public string ErrorMessage { get; set; }
+        public bool IsValid => string.IsNullOrEmpty(ErrorMessage);
+    }
+
+    public class RM_DigitalSalesTodoImportRowDTO
+    {
+        public int RowIndex { get; set; }
+        public string TrackingCode { get; set; }
+        public int? ParentTrackingID { get; set; }
+        public string ParentTaskName { get; set; }
+        public DateTime? ParentMaxDeadline { get; set; }
+        public string TaskName { get; set; }
+        public string AssignedUserName { get; set; }
+        public int? AssignedUserID { get; set; }
+        public string StartDateStr { get; set; }
+        public DateTime? StartDate { get; set; }
+        public string DeadlineStr { get; set; }
+        public DateTime? Deadline { get; set; }
+        public int? DurationDays { get; set; }
+        public string Note { get; set; }
+        public string ErrorMessage { get; set; }
+        public bool IsValid => string.IsNullOrEmpty(ErrorMessage);
+    }
 }
+

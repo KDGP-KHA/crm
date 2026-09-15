@@ -1,0 +1,43 @@
+/* CSS for Tracking Modal & Form */
+#modalTracking .modal-dialog {
+    max-width: 800px;
+}
+
+#modalTracking .modal-content {
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+#modalTracking .modal-header {
+    background-color: #0284c7;
+    color: #ffffff;
+    padding: 12px 18px;
+}
+
+#modalTracking .modal-header .modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+#modalTracking .modal-body {
+    padding: 18px 22px;
+}
+
+#modalTracking .modal-footer {
+    padding: 12px 22px;
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+#modalTracking .form-control:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+}
+
+#modalTracking .readonly-field {
+    background-color: #f1f5f9 !important;
+    cursor: not-allowed;
+    color: #334155;
+}
