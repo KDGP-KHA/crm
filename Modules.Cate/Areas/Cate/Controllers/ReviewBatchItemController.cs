@@ -27,6 +27,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_DigitalSalesCache _digitalSalesCache;
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
+        private readonly RM_DigitalSalesWorkflowCache _workflowCache;
         private readonly string _reviewBatchTitle = AppProcessor.Messagor.GetMessage("ReviewBatch_Title");
         private readonly string _reviewHistoryTitle = AppProcessor.Messagor.GetMessage("ReviewHistory_Title");
         private readonly string _folderImage = ConfigurationManager.AppSettings["AppImageRoot_Path"] ?? "/Contents/imgs";
@@ -39,6 +40,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _digitalSalesCache = new RM_DigitalSalesCache();
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
+            _workflowCache = new RM_DigitalSalesWorkflowCache();
         }
 
         public ActionResult Index(int? id)
@@ -97,6 +99,52 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 recordsFiltered = total,
                 data
             }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetProcessesByStatus(int statusId)
+        {
+            if (statusId <= 0)
+            {
+                return Json(new List<SelectListItem>(), JsonRequestBehavior.AllowGet);
+            }
+
+            var processes = _workflowCache.GetProcesses(out _, search: null, businessType: null, statusId: statusId);
+            var result = (processes ?? new List<RM_DigitalSalesProcessModel>())
+                .Where(p => p.IsActive)
+                .OrderBy(p => p.SortOrder)
+                .Select(p => new SelectListItem
+                {
+                    Value = p.ProcessID.ToString(),
+                    Text = p.ProcessName
+                }).ToList();
+
+            return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetProgressesByProcess(int processId)
+        {
+            if (processId <= 0)
+            {
+                return Json(new List<SelectListItem>(), JsonRequestBehavior.AllowGet);
+            }
+
+            var progresses = _workflowCache.GetProgressesByProcess(processId);
+            var result = (progresses ?? new List<RM_DigitalSalesProgressModel>())
+                .Where(p => p.IsActive)
+                .OrderBy(p => p.SortOrder)
+                .Select(p => new SelectListItem
+                {
+                    Value = p.ProgressID.ToString(),
+                    Text = p.ProgressName
+                }).ToList();
+
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>

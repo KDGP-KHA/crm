@@ -111,6 +111,8 @@ function saveReviewDigitalSalesFilter() {
         Keyword: $("#ReviewDigitalSalesKeyword").val(),
         ReviewBatchID: $("#ReviewDigitalSalesBatchID").val(),
         StatusID: $("#ReviewDigitalSalesStatusID").val(),
+        ProcessID: $("#ReviewDigitalSalesProcessID").val(),
+        ProgressID: $("#ReviewDigitalSalesProgressID").val(),
         DepartmentID: $("#ReviewDigitalSalesDepartmentID").val(),
         EmployeeID: $("#ReviewDigitalSalesEmployeeID").val(),
         IsReviewed: $('input[name="IsReviewed"]:checked').val()
@@ -135,7 +137,12 @@ function restoreReviewDigitalSalesFilter() {
     $("#ReviewDigitalSalesStatusID").val(filter.StatusID || "");
     $("#ReviewDigitalSalesDepartmentID").val(filter.DepartmentID || "");
     $('input[name="IsReviewed"][value="' + (filter.IsReviewed || "false") + '"]').prop("checked", true);
-    return filter.EmployeeID || null;
+    return {
+        employeeId: filter.EmployeeID || null,
+        statusId: filter.StatusID || null,
+        processId: filter.ProcessID || null,
+        progressId: filter.ProgressID || null
+    };
 }
 
 function searchReviewDigitalSales() {
@@ -165,6 +172,8 @@ function initReviewDigitalSalesTable() {
                 data.Keyword = $("#ReviewDigitalSalesKeyword").val();
                 data.ReviewBatchID = $("#ReviewDigitalSalesBatchID").val() || 0;
                 data.StatusID = $("#ReviewDigitalSalesStatusID").val() || 0;
+                data.ProcessID = $("#ReviewDigitalSalesProcessID").val() || 0;
+                data.ProgressID = $("#ReviewDigitalSalesProgressID").val() || 0;
                 data.DepartmentID = $("#ReviewDigitalSalesDepartmentID").val() || 0;
                 data.EmployeeID = $("#ReviewDigitalSalesEmployeeID").val() || 0;
                 data.IsReviewed = String($('input[name="IsReviewed"]:checked').val()).toLowerCase() === "true";
@@ -212,8 +221,12 @@ function initReviewDigitalSalesTable() {
 }
 
 $(function () {
-    var restoredEmployeeID = restoreReviewDigitalSalesFilter();
+    var restored = restoreReviewDigitalSalesFilter();
+    var restoredEmployeeID = restored ? restored.employeeId : null;
+    var restoredProcessID = restored ? restored.processId : null;
+    var restoredProgressID = restored ? restored.progressId : null;
     if (typeof window.loadReviewEmployees === "function") window.loadReviewEmployees(restoredEmployeeID);
+    if (typeof window.loadReviewProcesses === "function") window.loadReviewProcesses(restoredProcessID, restoredProgressID);
     initReviewDigitalSalesTable();
 });
 

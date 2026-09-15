@@ -1,4 +1,8 @@
-﻿@using System.Linq
+$utf8WithBom = New-Object System.Text.UTF8Encoding($true)
+
+# 1. Prepare _SearchDigitalSales.cshtml content
+$searchDigitalSalesContent = @'
+@using System.Linq
 @using System.Web
 @using System.Web.Mvc
 @using TSFramework.Libs.Processors
@@ -238,3 +242,164 @@
         });
     })();
 </script>
+'@
+
+# 2. Prepare ReviewBatchItem.js content
+$jsFilePath = "d:\VNPT\CRM-GIT\crm\Modules.Cate\Areas\Cate\Views\ReviewBatchItem\ReviewBatchItem.js"
+$jsContent = [System.IO.File]::ReadAllText($jsFilePath)
+
+# Update saveReviewDigitalSalesFilter
+$oldSaveFilter = @"
+function saveReviewDigitalSalesFilter() {
+    var filter = {
+        Keyword: $("#ReviewDigitalSalesKeyword").val(),
+        ReviewBatchID: $("#ReviewDigitalSalesBatchID").val(),
+        StatusID: $("#ReviewDigitalSalesStatusID").val(),
+        DepartmentID: $("#ReviewDigitalSalesDepartmentID").val(),
+        EmployeeID: $("#ReviewDigitalSalesEmployeeID").val(),
+        IsReviewed: $('input[name="IsReviewed"]:checked').val()
+    };
+    localStorage.setItem(_reviewDigitalSalesFilterKey, JSON.stringify(filter));
+}
+"@
+
+$newSaveFilter = @"
+function saveReviewDigitalSalesFilter() {
+    var filter = {
+        Keyword: $("#ReviewDigitalSalesKeyword").val(),
+        ReviewBatchID: $("#ReviewDigitalSalesBatchID").val(),
+        StatusID: $("#ReviewDigitalSalesStatusID").val(),
+        ProcessID: $("#ReviewDigitalSalesProcessID").val(),
+        ProgressID: $("#ReviewDigitalSalesProgressID").val(),
+        DepartmentID: $("#ReviewDigitalSalesDepartmentID").val(),
+        EmployeeID: $("#ReviewDigitalSalesEmployeeID").val(),
+        IsReviewed: $('input[name="IsReviewed"]:checked').val()
+    };
+    localStorage.setItem(_reviewDigitalSalesFilterKey, JSON.stringify(filter));
+}
+"@
+
+# Update restoreReviewDigitalSalesFilter
+$oldRestoreFilter = @"
+function restoreReviewDigitalSalesFilter() {
+    var initialBatchID = $("#ReviewDigitalSalesBatchID").val();
+    if (initialBatchID && initialBatchID !== "0") return null;
+
+    var filter;
+    try {
+        filter = JSON.parse(localStorage.getItem(_reviewDigitalSalesFilterKey));
+    } catch (error) {
+        localStorage.removeItem(_reviewDigitalSalesFilterKey);
+    }
+    if (!filter) return null;
+
+    $("#ReviewDigitalSalesKeyword").val(filter.Keyword || "");
+    $("#ReviewDigitalSalesBatchID").val(filter.ReviewBatchID || "");
+    $("#ReviewDigitalSalesStatusID").val(filter.StatusID || "");
+    $("#ReviewDigitalSalesDepartmentID").val(filter.DepartmentID || "");
+    $('input[name="IsReviewed"][value="' + (filter.IsReviewed || "false") + '"]').prop("checked", true);
+    return filter.EmployeeID || null;
+}
+"@
+
+$newRestoreFilter = @"
+function restoreReviewDigitalSalesFilter() {
+    var initialBatchID = $("#ReviewDigitalSalesBatchID").val();
+    if (initialBatchID && initialBatchID !== "0") return null;
+
+    var filter;
+    try {
+        filter = JSON.parse(localStorage.getItem(_reviewDigitalSalesFilterKey));
+    } catch (error) {
+        localStorage.removeItem(_reviewDigitalSalesFilterKey);
+    }
+    if (!filter) return null;
+
+    $("#ReviewDigitalSalesKeyword").val(filter.Keyword || "");
+    $("#ReviewDigitalSalesBatchID").val(filter.ReviewBatchID || "");
+    $("#ReviewDigitalSalesStatusID").val(filter.StatusID || "");
+    $("#ReviewDigitalSalesDepartmentID").val(filter.DepartmentID || "");
+    $('input[name="IsReviewed"][value="' + (filter.IsReviewed || "false") + '"]').prop("checked", true);
+    return {
+        employeeId: filter.EmployeeID || null,
+        statusId: filter.StatusID || null,
+        processId: filter.ProcessID || null,
+        progressId: filter.ProgressID || null
+    };
+}
+"@
+
+# Update initReviewDigitalSalesTable ajax data
+$oldAjaxData = @"
+                data.Keyword = $("#ReviewDigitalSalesKeyword").val();
+                data.ReviewBatchID = $("#ReviewDigitalSalesBatchID").val() || 0;
+                data.StatusID = $("#ReviewDigitalSalesStatusID").val() || 0;
+                data.DepartmentID = $("#ReviewDigitalSalesDepartmentID").val() || 0;
+                data.EmployeeID = $("#ReviewDigitalSalesEmployeeID").val() || 0;
+                data.IsReviewed = String($('input[name="IsReviewed"]:checked').val()).toLowerCase() === "true";
+"@
+
+$newAjaxData = @"
+                data.Keyword = $("#ReviewDigitalSalesKeyword").val();
+                data.ReviewBatchID = $("#ReviewDigitalSalesBatchID").val() || 0;
+                data.StatusID = $("#ReviewDigitalSalesStatusID").val() || 0;
+                data.ProcessID = $("#ReviewDigitalSalesProcessID").val() || 0;
+                data.ProgressID = $("#ReviewDigitalSalesProgressID").val() || 0;
+                data.DepartmentID = $("#ReviewDigitalSalesDepartmentID").val() || 0;
+                data.EmployeeID = $("#ReviewDigitalSalesEmployeeID").val() || 0;
+                data.IsReviewed = String($('input[name="IsReviewed"]:checked').val()).toLowerCase() === "true";
+"@
+
+# Update document ready
+$oldReady = @"
+`$(function () {
+    var restoredEmployeeID = restoreReviewDigitalSalesFilter();
+    if (typeof window.loadReviewEmployees === "function") window.loadReviewEmployees(restoredEmployeeID);
+    initReviewDigitalSalesTable();
+});
+"@
+
+$newReady = @"
+`$(function () {
+    var restored = restoreReviewDigitalSalesFilter();
+    var restoredEmployeeID = restored ? restored.employeeId : null;
+    var restoredProcessID = restored ? restored.processId : null;
+    var restoredProgressID = restored ? restored.progressId : null;
+    if (typeof window.loadReviewEmployees === "function") window.loadReviewEmployees(restoredEmployeeID);
+    if (typeof window.loadReviewProcesses === "function") window.loadReviewProcesses(restoredProcessID, restoredProgressID);
+    initReviewDigitalSalesTable();
+});
+"@
+
+$jsContent = $jsContent.Replace($oldSaveFilter.Trim(), $newSaveFilter.Trim())
+$jsContent = $jsContent.Replace($oldRestoreFilter.Trim(), $newRestoreFilter.Trim())
+$jsContent = $jsContent.Replace($oldAjaxData.Trim(), $newAjaxData.Trim())
+$jsContent = $jsContent.Replace($oldReady.Trim(), $newReady.Trim())
+
+# Write to all 3 locations for Triple Mirroring
+$viewTargets = @(
+    "d:\VNPT\CRM-GIT\crm\Modules.Cate\Areas\Cate\Views\ReviewBatchItem\_SearchDigitalSales.cshtml",
+    "d:\VNPT\CRM-GIT\crm\publish_source\Areas\Cate\Views\ReviewBatchItem\_SearchDigitalSales.cshtml",
+    "d:\VNPT\CRM-GIT\crm\CenIT.Solution.TOC.WebApp\Areas\Cate\Views\ReviewBatchItem\_SearchDigitalSales.cshtml"
+)
+
+$jsTargets = @(
+    "d:\VNPT\CRM-GIT\crm\Modules.Cate\Areas\Cate\Views\ReviewBatchItem\ReviewBatchItem.js",
+    "d:\VNPT\CRM-GIT\crm\publish_source\Areas\Cate\Views\ReviewBatchItem\ReviewBatchItem.js",
+    "d:\VNPT\CRM-GIT\crm\CenIT.Solution.TOC.WebApp\Areas\Cate\Views\ReviewBatchItem\ReviewBatchItem.js"
+)
+
+foreach ($target in $viewTargets) {
+    $dir = [System.IO.Path]::GetDirectoryName($target)
+    if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force }
+    [System.IO.File]::WriteAllText($target, $searchDigitalSalesContent, $utf8WithBom)
+    Write-Host "Wrote View (UTF-8 with BOM) -> $target"
+}
+
+foreach ($target in $jsTargets) {
+    $dir = [System.IO.Path]::GetDirectoryName($target)
+    if (!(Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force }
+    [System.IO.File]::WriteAllText($target, $jsContent, $utf8WithBom)
+    Write-Host "Wrote JS (UTF-8 with BOM) -> $target"
+}
+

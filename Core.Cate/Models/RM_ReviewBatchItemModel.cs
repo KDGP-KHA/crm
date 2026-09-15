@@ -44,9 +44,17 @@ namespace Core.Cate.Models
         [CustomDisplayName("ReviewBatch_IsReviewed_Label")]
         public bool IsReviewed { get; set; }
 
+        [CustomDisplayName("DigitalSalesTracking_Process_Label")]
+        public int ProcessID { get; set; }
+
+        [CustomDisplayName("DigitalSalesTracking_Progress_Label")]
+        public int ProgressID { get; set; }
+
         public string UserName { get; set; }
         public List<RM_ReviewBatchModel> ReviewBatches { get; set; } = new List<RM_ReviewBatchModel>();
         public List<SelectListItem> StatusOptions { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> ProcessOptions { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> ProgressOptions { get; set; } = new List<SelectListItem>();
         public List<MN_BoPhanModel> Departments { get; set; } = new List<MN_BoPhanModel>();
     }
 
