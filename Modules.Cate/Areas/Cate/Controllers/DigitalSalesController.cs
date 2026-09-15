@@ -3355,7 +3355,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var tasks = _salesCache.GetTrackingTasks(digitalSalesId);
-            var task = tasks.FirstOrDefault(t => t.TrackingID == trackingId);
+            var task = tasks.SelectMany(t => (t.TodoList ?? new List<RM_DigitalSalesTrackingModel>()).Concat(new[] { t })).FirstOrDefault(t => t.TrackingID == trackingId);
             if (task == null)
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") }, JsonRequestBehavior.AllowGet);
@@ -3417,6 +3417,30 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var result = _salesCache.UpdateTrackingStatus(model.TrackingID, newStatus, model.ResultNote, attachmentPath, null, null, User.UserName);
             if (result > 0)
             {
+                try
+                {
+                    var statusText = newStatus == 3 ? "Hoàn thành" : (newStatus == 2 ? "Đang thực hiện" : (newStatus == 4 ? "Quá hạn" : "Chưa thực hiện"));
+                    var logContent = $"Cập nhật báo cáo tiến độ: <b>{HttpUtility.HtmlEncode(model.TaskName)}</b> (Trạng thái: {statusText})";
+                    if (!string.IsNullOrWhiteSpace(model.ResultNote))
+                    {
+                        logContent += $"<div class='mt-1 text-secondary'><b>Nội dung báo cáo:</b> {model.ResultNote}</div>";
+                    }
+
+                    var activity = new RM_DigitalSalesActivityModel
+                    {
+                        DigitalSalesID = model.DigitalSalesID,
+                        ActivityType = (byte)(newStatus == 3 ? 4 : 5),
+                        Content = logContent,
+                        ReferenceID = model.TrackingID,
+                        Attachments = attachmentPath
+                    };
+                    _salesCache.AddActivity(activity, User.UserName);
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+
                 return Json(new { status = true, message = GetAppMessage("DigitalSalesTracking_ReportSuccess") });
             }
 
@@ -3470,6 +3494,36 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var result = _salesCache.UpdateTrackingStatus(trackingId, status, resultNote, attachmentPath, assignedUserId, deadline, User.UserName);
             if (result > 0)
             {
+                if (salesId.HasValue && salesId.Value > 0)
+                {
+                    try
+                    {
+                        var tasks = _salesCache.GetTrackingTasks(salesId.Value);
+                        var task = tasks.SelectMany(t => (t.TodoList ?? new List<RM_DigitalSalesTrackingModel>()).Concat(new[] { t })).FirstOrDefault(t => t.TrackingID == trackingId);
+                        var taskTitle = task != null ? task.TaskName : $"Tiến trình #{trackingId}";
+                        var statusText = status == 3 ? "Hoàn thành" : (status == 2 ? "Đang thực hiện" : (status == 4 ? "Quá hạn" : "Chưa thực hiện"));
+                        var logContent = $"Cập nhật trạng thái: <b>{HttpUtility.HtmlEncode(taskTitle)}</b> (Trạng thái: {statusText})";
+                        if (!string.IsNullOrWhiteSpace(resultNote))
+                        {
+                            logContent += $"<div class='mt-1 text-secondary'><b>Ghi chú:</b> {resultNote}</div>";
+                        }
+
+                        var activity = new RM_DigitalSalesActivityModel
+                        {
+                            DigitalSalesID = salesId.Value,
+                            ActivityType = (byte)(status == 3 ? 4 : 5),
+                            Content = logContent,
+                            ReferenceID = trackingId,
+                            Attachments = attachmentPath
+                        };
+                        _salesCache.AddActivity(activity, User.UserName);
+                    }
+                    catch (Exception ex)
+                    {
+                        AppProcessor.Logger.Error(ex);
+                    }
+                }
+
                 return Json(new
                 {
                     status = true,

@@ -1,4 +1,4 @@
-﻿using Core.Cate.Models;
+using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -699,7 +699,7 @@ namespace Core.Cate.Biz
                     _spActivityGetList,
                     DATA_PROVIDER_NAME,
                     digitalSalesId,
-                    DBNull.Value
+                    (byte)255
                 );
             }
             catch (Exception ex)
