@@ -1661,6 +1661,40 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             _salesCache.SaveTracking(trackingModel, User.UserName);
                         }
                     }
+                    else
+                    {
+                        // QUAN TRỌNG: Khi chuyển trạng thái mà trạng thái đó KHÔNG có tiến trình nào (0 tiến trình)
+                        // Bắt buộc phải lưu 1 placeholder rỗng (TaskName = null) gắn với TimelineID mới này vào dbo.RM_DigitalSalesTracking!
+                        // Nhờ vậy, khi tiếp tục chuyển sang các trạng thái sau, trạng thái 0 tiến trình này
+                        // vẫn được lưu trữ vĩnh viễn trong CSDL và hiển thị đầy đủ trên cây Checklist theo lịch sử!
+                        int? defaultProcId = model.SelectedProcessID;
+                        if (!defaultProcId.HasValue || defaultProcId.Value <= 0)
+                        {
+                            int totalDefaultProcs = 0;
+                            var defaultProc = _workflowCache.GetProcesses(out totalDefaultProcs, statusId: model.NewStatusID)?.FirstOrDefault(p => p.IsActive);
+                            if (defaultProc != null) defaultProcId = defaultProc.ProcessID;
+                        }
+
+                        var emptyPlaceholder = new RM_DigitalSalesTrackingModel
+                        {
+                            TrackingID = 0,
+                            DigitalSalesID = model.DigitalSalesID,
+                            TimelineID = newTimelineId,
+                            ProcessID = defaultProcId ?? 0,
+                            ProgressID = null,
+                            TaskName = null,
+                            AssignedUserID = null,
+                            StartDate = DateTime.Today,
+                            DurationDays = 3,
+                            Deadline = null,
+                            Status = 1,
+                            IsCustomTask = false,
+                            SortOrder = 1,
+                            ResultNote = null,
+                            AttachmentFile = null
+                        };
+                        _salesCache.SaveTracking(emptyPlaceholder, User.UserName);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -3024,6 +3058,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var isNew = model.TrackingID <= 0;
+            if (isNew && (!model.TimelineID.HasValue || model.TimelineID.Value <= 0))
+            {
+                var sales = _salesCache.GetByID(model.DigitalSalesID, User.UserName);
+                var curTl = sales?.Timelines?.OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID).FirstOrDefault(tl => tl.ToStatusID == sales.StatusID);
+                if (curTl != null) model.TimelineID = curTl.TimelineID;
+            }
             var id = _salesCache.SaveTracking(model, User.UserName);
             if (id > 0)
             {
@@ -3215,9 +3255,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             // Xử lý file đính kèm (multiple upload)
+            var uploadedPaths = new List<string>();
             try
             {
-                var uploadedPaths = new List<string>();
                 if (Request.Files.Count > 0)
                 {
                     for (int i = 0; i < Request.Files.Count; i++)
@@ -3248,6 +3288,43 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var id = _salesCache.SaveTracking(model, User.UserName);
             if (id > 0)
             {
+                try
+                {
+                    string assignedName = null;
+                    if (model.AssignedUserID.HasValue && model.AssignedUserID.Value > 0)
+                    {
+                        assignedName = _userCache.GetById(model.AssignedUserID.Value)?.FullName;
+                    }
+
+                    string logContent;
+                    if (model.TrackingID <= 0)
+                    {
+                        logContent = $"Khởi tạo tiến trình: <b>{HttpUtility.HtmlEncode(model.TaskName)}</b>" +
+                                     (!string.IsNullOrEmpty(assignedName) ? $"<div class='text-secondary mt-1'><i class='fa fa-user-check text-success mr-1'></i>Người thực hiện: <b>{assignedName}</b></div>" : "") +
+                                     $"<div class='text-secondary'><i class='far fa-clock mr-1'></i>Thời gian: {model.StartDate:dd/MM/yyyy} - {model.Deadline:dd/MM/yyyy}</div>";
+                    }
+                    else
+                    {
+                        logContent = $"Cập nhật tiến trình: <b>{HttpUtility.HtmlEncode(model.TaskName)}</b>" +
+                                     (!string.IsNullOrEmpty(assignedName) ? $"<div class='text-secondary mt-1'><i class='fa fa-user-check text-success mr-1'></i>Người thực hiện: <b>{assignedName}</b></div>" : "") +
+                                     (!string.IsNullOrWhiteSpace(model.ResultNote) ? $"<div class='mt-1 p-2 bgc-grey-l4 border-1 brc-grey-l2 radius-1 text-85'><b>Nội dung kết quả:</b> {model.ResultNote}</div>" : "");
+                    }
+
+                    var act = new RM_DigitalSalesActivityModel
+                    {
+                        DigitalSalesID = model.DigitalSalesID,
+                        ActivityType = 5,
+                        Content = logContent,
+                        Attachments = uploadedPaths.Count > 0 ? string.Join(";", uploadedPaths) : (model.Status == 3 ? null : model.AttachmentFile),
+                        ReferenceID = id
+                    };
+                    _salesCache.AddActivity(act, User.UserName);
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+
                 return Json(new { status = true, id = id, message = GetAppMessage("DigitalSalesTracking_SaveSuccess") });
             }
 
@@ -3377,6 +3454,30 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") }, JsonRequestBehavior.AllowGet);
             }
 
+            if (string.IsNullOrEmpty(task.CreatedByName) && !string.IsNullOrEmpty(task.CreatedBy))
+            {
+                task.CreatedByName = _userCache.GetByUserName(task.CreatedBy)?.FullName ?? task.CreatedBy;
+            }
+            if (string.IsNullOrEmpty(task.AssignedUserName) && task.AssignedUserID.HasValue && task.AssignedUserID.Value > 0)
+            {
+                task.AssignedUserName = _userCache.GetById(task.AssignedUserID.Value)?.FullName;
+            }
+            if (string.IsNullOrEmpty(task.LastModifiedByName) && !string.IsNullOrEmpty(task.LastModifiedBy))
+            {
+                task.LastModifiedByName = _userCache.GetByUserName(task.LastModifiedBy)?.FullName ?? task.LastModifiedBy;
+            }
+
+            if (task.TodoList != null && task.TodoList.Count > 0)
+            {
+                foreach (var child in task.TodoList)
+                {
+                    if (string.IsNullOrEmpty(child.AssignedUserName) && child.AssignedUserID.HasValue && child.AssignedUserID.Value > 0)
+                    {
+                        child.AssignedUserName = _userCache.GetById(child.AssignedUserID.Value)?.FullName;
+                    }
+                }
+            }
+
             var logs = _salesCache.GetActivitiesByTrackingID(digitalSalesId, trackingId);
             ViewBag.Task = task;
             return PartialView("_TrackingLogsModal", logs);
@@ -3440,6 +3541,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     if (!string.IsNullOrWhiteSpace(model.ResultNote))
                     {
                         logContent += $"<div class='mt-1 text-secondary'><b>Nội dung báo cáo:</b> {model.ResultNote}</div>";
+                    }
+
+                    if (newStatus == 3)
+                    {
+                        try
+                        {
+                            var allTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID);
+                            var parentItem = allTasks.FirstOrDefault(t => t.TrackingID == model.TrackingID);
+                            if (parentItem != null && parentItem.TodoList != null && parentItem.TodoList.Count > 0)
+                            {
+                                var autoCompletedCount = parentItem.TodoList.Count(c => c.Status == 3);
+                                if (autoCompletedCount > 0)
+                                {
+                                    logContent += $"<div class='mt-1 text-success'><i class='fa fa-check-double mr-1'></i>Đã chuyển hoàn thành {autoCompletedCount} công việc con trong tiến trình.</div>";
+                                }
+                            }
+                        }
+                        catch { }
                     }
 
                     var activity = new RM_DigitalSalesActivityModel

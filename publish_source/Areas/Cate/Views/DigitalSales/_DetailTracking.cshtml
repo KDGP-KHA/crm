@@ -45,6 +45,7 @@
                 <th style="width: 115px;" class="text-center">Hạn chót</th>
                 <th style="width: 95px;" class="text-center">Tổng ngày</th>
                 <th style="width: 115px;" class="text-center">Trạng thái</th>
+                <th style="width: 160px;" class="text-center">Hoàn thành</th>
                 @if (canEdit)
                 {
                     <th style="width: 105px;" class="text-center">Thao tác</th>
@@ -81,12 +82,12 @@
                     <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
                     <!-- ========================================================================= -->
                     <tr class="tree-row tree-status-row" data-node="@statusNodeId" data-level="1" data-expanded="true">
-                        <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
+                        <td colspan="@(canEdit ? 9 : 8)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
                                     <span class="tree-status-title">@stGroup.Key.StatusName@occurrenceSuffix</span>
-                                    <span class="badge badge-primary badge-pill ml-2 text-80 font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
+                                    <span class="badge badge-primary badge-pill ml-2 tree-status-task-count font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
                                 </div>
                                 <span class="text-secondary-m1 text-80 font-italic mr-2">
                                     <i class="fa fa-info-circle mr-1"></i>Bấm để thu gọn/mở rộng
@@ -112,7 +113,7 @@
                         <!-- CẤP 2: QUY TRÌNH (TIÊU ĐỀ: QUY TRÌNH ... CÓ CÂY BÚT CHÌ NẾU SỐ QT >= 2)  -->
                         <!-- ========================================================================= -->
                         <tr class="tree-row tree-process-row" data-node="@procNodeId" data-parent="@statusNodeId" data-level="2" data-expanded="true">
-                            <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
+                            <td colspan="@(canEdit ? 9 : 8)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                         <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-1" id="icon_@procNodeId"></i>
@@ -129,7 +130,7 @@
                                         @if (stGroup.Key.ProcessCountOfStatus >= 2 && isCurrentStatus)
                                         {
                                             if (canEdit)
-                                            {
+                                             {
                                                 <a href="javascript:void(0);" class="badge badge-can-change-process ml-1" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Bấm để đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
                                                     <i class="fa fa-exchange-alt mr-1"></i>Có thể đổi quy trình
                                                 </a>
@@ -167,7 +168,7 @@
                         {
                             <!-- DÒNG THÔNG BÁO KHI QUY TRÌNH CHƯA CÓ TIẾN TRÌNH NÀO -->
                             <tr class="tree-row tree-empty-progress-row" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3">
-                                <td colspan="@(canEdit ? 8 : 7)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
+                                <td colspan="@(canEdit ? 9 : 8)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
                                     <div class="tree-empty-progress-box flex-wrap justify-content-center">
                                         <i class="fa fa-info-circle text-primary text-105"></i>
                                         <span>Quy trình <strong>@prGroup.Key.ProcessName</strong> chưa có tiến trình nào.</span>
@@ -219,13 +220,6 @@
                                             </span>
                                         }
                                     </div>
-                                    @if (!string.IsNullOrWhiteSpace(task.ResultNote))
-                                    {
-                                        <div class="text-secondary text-80 font-italic mt-1 ml-4 d-flex align-items-center" title="Ghi chú tiến trình">
-                                            <i class="fa fa-comment-dots text-info mr-1"></i>
-                                            <span>@task.ResultNote</span>
-                                        </div>
-                                    }
                                 </td>
                                 <td class="text-center font-progress-cell"><span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@task.TrackingCode</span></td>
                                 <td class="font-progress-cell"><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : task.AssignedUserName)</span></td>
@@ -248,6 +242,23 @@
                                     else
                                     {
                                         <span class="badge badge-secondary px-2">Chưa làm</span>
+                                    }
+                                </td>
+                                <td class="text-center font-progress-cell">
+                                    @if (task.Status == 3)
+                                    {
+                                        string completedUser = !string.IsNullOrEmpty(task.CompletedByName) ? task.CompletedByName : (!string.IsNullOrEmpty(task.LastModifiedByName) ? task.LastModifiedByName : (!string.IsNullOrEmpty(task.CreatedByName) ? task.CreatedByName : "—"));
+                                        DateTime? completedAt = task.CompletedDate.HasValue ? task.CompletedDate : (task.LastModifiedDate.HasValue ? task.LastModifiedDate : (DateTime?)task.CreatedDate);
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="text-dark font-weight-bold text-85">@completedUser</span>
+                                            <span class="text-secondary text-80">
+                                                <i class="fa fa-clock text-success mr-1"></i>@(completedAt.HasValue ? completedAt.Value.ToString("dd/MM/yyyy HH:mm") : "—")
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-secondary">—</span>
                                     }
                                 </td>
                                 @if (canEdit)
@@ -286,70 +297,85 @@
                                 {
                                     bool todoOverdue = todo.IsOverdue == 1;
                                     <tr class="tree-row tree-todo-row" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4">
-                                        <td style="padding-left: 48px;">
+                                        <td style="padding-left: 48px;" class="font-progress-cell">
                                             <div class="d-flex align-items-center flex-wrap">
-                                                <span class="tree-todo-branch">└─</span>
+                                                <span class="tree-todo-branch mr-2">└─</span>
                                                 <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@todo.TrackingID"
                                                        @(todo.Status == 3 ? "checked" : "")
-                                                       @(isCurrentStatus ? $"onchange=\"actionConfirmTracking({todo.TrackingID}, {Model.DigitalSalesID});\"" : "onclick=\"return false;\" onkeydown=\"return false;\" tabindex=\"-1\"")
-                                                       title="@(todo.Status == 3 ? "Đã hoàn thành việc nhỏ" : "Việc nhỏ")" />
-                                                <span class="tree-todo-title mr-2">@todo.TaskName</span>
-                                                @if (isCurrentStatus)
-                                                {
-                                                    <span class="ds-tree-sep">-</span>
-                                                    <div class="ds-tree-actions">
-                                                        <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="openTrackingReportModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Báo cáo tiến độ/kết quả thực hiện">
-                                                            <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                                                        </a>
-                                                        <span class="ds-tree-sep">|</span>
-                                                        <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionConfirmTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xác nhận hoàn thành hạng mục">
-                                                            <i class="fa fa-check mr-1"></i>Xác nhận
-                                                        </a>
-                                                        <span class="ds-tree-sep">|</span>
-                                                        <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionUnlockTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Mở khóa để chỉnh sửa/làm lại">
-                                                            <i class="fa fa-unlock-alt mr-1"></i>Mở khóa
-                                                        </a>
-                                                    </div>
-                                                }
+                                                       @(isCurrentStatus && todo.Status != 3 ? $"onchange=\"actionConfirmTracking({todo.TrackingID}, {Model.DigitalSalesID});\"" : "onclick=\"return false;\" onkeydown=\"return false;\" tabindex=\"-1\"")
+                                                       title="@(todo.Status == 3 ? "Công việc con đã hoàn thành" : "Bấm để đánh dấu hoàn thành")" />
+                                                <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@todo.TaskName</span>
                                             </div>
                                         </td>
-                                        <td class="text-center"><span class="text-secondary-d1 text-75">@todo.TrackingCode</span></td>
-                                        <td><span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : todo.AssignedUserName)</span></td>
-                                        <td class="text-center text-85">@todo.StartDate.ToString("dd/MM/yyyy")</td>
-                                        <td class="text-center">
-                                            <span class="@(todoOverdue ? "text-danger font-bold" : "text-dark") text-85">
+                                        <td class="text-center font-progress-cell">
+                                            <span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@todo.TrackingCode</span>
+                                        </td>
+                                        <td class="font-progress-cell">
+                                            <span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : todo.AssignedUserName)</span>
+                                        </td>
+                                        <td class="text-center font-progress-cell">@todo.StartDate.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center font-progress-cell">
+                                            <span class="@(todoOverdue ? "text-danger font-bold" : "text-dark")">
                                                 @(todo.Deadline.HasValue ? todo.Deadline.Value.ToString("dd/MM/yyyy") : "—")
                                             </span>
                                         </td>
-                                        <td class="text-center text-secondary">—</td>
-                                        <td class="text-center">
+                                        <td class="text-center font-progress-cell">
+                                            <span class="badge badge-light-secondary font-bold">@todo.EffectiveDurationDays ngày</span>
+                                        </td>
+                                        <td class="text-center font-progress-cell">
                                             @if (todo.Status == 3)
                                             {
-                                                <span class="badge badge-success text-75 px-2">Hoàn thành</span>
+                                                <span class="badge badge-success px-2 font-bold">Hoàn thành</span>
                                             }
                                             else if (todo.Status == 2)
                                             {
-                                                <span class="badge badge-warning text-75 px-2">Đang làm</span>
+                                                <span class="badge badge-warning px-2 font-bold">Đang làm</span>
                                             }
                                             else if (todoOverdue)
                                             {
-                                                <span class="badge badge-danger text-75 px-2">Quá hạn</span>
+                                                <span class="badge badge-danger px-2 font-bold">Quá hạn</span>
                                             }
                                             else
                                             {
-                                                <span class="badge badge-secondary text-75 px-2">Chưa làm</span>
+                                                <span class="badge badge-secondary px-2">Chưa làm</span>
+                                            }
+                                        </td>
+                                        <td class="text-center font-progress-cell">
+                                            @if (todo.Status == 3)
+                                            {
+                                                string completedUser = !string.IsNullOrEmpty(todo.CompletedByName) ? todo.CompletedByName : (!string.IsNullOrEmpty(todo.LastModifiedByName) ? todo.LastModifiedByName : (!string.IsNullOrEmpty(todo.CreatedByName) ? todo.CreatedByName : "—"));
+                                                DateTime? completedAt = todo.CompletedDate.HasValue ? todo.CompletedDate : (todo.LastModifiedDate.HasValue ? todo.LastModifiedDate : (DateTime?)todo.CreatedDate);
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="text-dark font-weight-bold text-85">@completedUser</span>
+                                                    <span class="text-secondary text-80">
+                                                        <i class="fa fa-clock text-success mr-1"></i>@(completedAt.HasValue ? completedAt.Value.ToString("dd/MM/yyyy HH:mm") : "—")
+                                                    </span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-secondary">—</span>
                                             }
                                         </td>
                                         @if (canEdit)
                                         {
-                                            <td class="text-center text-nowrap">
+                                            <td class="text-center text-nowrap font-progress-cell">
                                                 <div class="ds-action-group">
-                                                    @if (isCurrentStatus)
+                                                    <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-log" onclick="openTrackingLogsModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Xem Log thao tác công việc con">
+                                                        <i class="fa fa-history"></i>
+                                                    </a>
+                                                    @if (todo.Status == 3)
                                                     {
-                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-edit" onclick="openEditTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa việc nhỏ">
+                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-unlock" onclick="openUnlockProgressModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Mở khóa công việc con">
+                                                            <i class="fa fa-unlock-alt"></i>
+                                                        </a>
+                                                    }
+                                                    else if (isCurrentStatus)
+                                                    {
+                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-edit" onclick="openEditTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa công việc con">
                                                             <i class="fa fa-pencil-alt"></i>
                                                         </a>
-                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-delete" onclick="actionDeleteTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xóa việc nhỏ">
+                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-delete" onclick="actionDeleteTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xóa công việc con">
                                                             <i class="fa fa-trash-alt"></i>
                                                         </a>
                                                     }
@@ -370,7 +396,7 @@
             else
             {
                 <tr>
-                    <td colspan="@(canEdit ? 8 : 7)" class="text-center py-4 text-secondary-m1">
+                    <td colspan="@(canEdit ? 9 : 8)" class="text-center py-4 text-secondary-m1">
                         <i class="fa fa-clipboard-list text-180 text-secondary-l1 mb-2 d-block"></i>
                         <span>Chưa có tiến trình / checklist nào được khởi tạo cho hồ sơ này.</span>
                         @if (canEdit)
