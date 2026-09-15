@@ -20,6 +20,24 @@
         @Html.LabelFor(model => model.IsConfirmed, new { @class = "col-form-label pr-0 font-bold" })
     </div>
 
+    <div class="col-12 mt-2">
+        @Html.TitleFor(model => model.ReviewConclusion, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        <div class="review-conclusion-options" role="radiogroup" aria-label="@AppProcessor.Messagor.GetMessage("ReviewConclusion_Label")">
+            @foreach (var option in Model.ReviewConclusionOptions ?? new List<SelectListItem>())
+            {
+                var optionId = "ReviewConclusion_" + option.Value;
+                var optionClass = option.Value == "1" ? "review-conclusion-accepted"
+                    : option.Value == "2" ? "review-conclusion-interested"
+                    : "review-conclusion-rejected";
+                <label class="review-conclusion-option @optionClass" for="@optionId">
+                    @Html.RadioButtonFor(model => model.ReviewConclusion, option.Value, new { id = optionId })
+                    <span>@option.Text</span>
+                </label>
+            }
+        </div>
+        @Html.ValidationMessageFor(model => model.ReviewConclusion, "", new { @class = "text-danger text-85" })
+    </div>
+
     <div class="col-12">
         @AppProcessor.Messagor.GetMessage("FileAttach_Label")
         @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
@@ -82,7 +100,16 @@
             filebrowserWindowWidth: '1000',
             filebrowserWindowHeight: '350',
             // Vùng soạn thảo thấp để toàn bộ form rà soát vừa một màn hình
-            height: 250,
+            height: 210,
+            toolbar: [
+                { name: 'clipboard', items: ['Undo', 'Redo'] },
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'JustifyLeft', 'JustifyCenter', 'JustifyRight'] },
+                { name: 'links', items: ['Link', 'Unlink'] },
+                { name: 'insert', items: ['Image', 'Table'] },
+                { name: 'styles', items: ['Format'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
         });
         editor.on('change', function (e) {
             $("#ReviewComment").val(editor.getData());

@@ -158,6 +158,7 @@ namespace Core.Cate.Biz
                 model.DigitalSalesID,
                 model.ReviewComment,
                 model.IsConfirmed,
+                model.ReviewConclusion,
                 username);
             return result.GetValueOrDefault(0);
         }
@@ -194,6 +195,7 @@ namespace Core.Cate.Biz
                 model.ReviewBatchItemID,
                 model.ReviewComment,
                 model.IsConfirmed,
+                model.ReviewConclusion,
                 username);
             return result.GetValueOrDefault(0);
         }

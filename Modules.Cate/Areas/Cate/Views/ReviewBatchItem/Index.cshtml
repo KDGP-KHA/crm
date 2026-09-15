@@ -46,7 +46,11 @@
             notReviewed: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_NotReviewed")))',
             review: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Action_Review")))',
             viewDetail: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Action_ViewDetail")))',
-            reviewCount: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ReviewCount_Format")))'
+            reviewCount: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ReviewCount_Format")))',
+            conclusionLabel: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Final_Label")))',
+            conclusionAccepted: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Accepted")))',
+            conclusionInterested: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Interested")))',
+            conclusionRejected: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Rejected")))'
         };
     </script>
     <script src="~/Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.js?v=@DateTime.Now.Ticks"></script>

@@ -191,7 +191,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 ReviewBatchID = reviewBatchID.Value,
                 DigitalSalesID = digitalSalesID.Value,
-                IsConfirmed = true
+                IsConfirmed = true,
+                ReviewConclusion = RM_ReviewConclusion.Accepted,
+                ReviewConclusionOptions = BuildReviewConclusionOptions()
             };
             return PartialView("_ReviewBatch", model);
         }
@@ -208,8 +210,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [ValidateInput(false)]
         public ActionResult ReviewBatch(RM_ReviewFormModel model, bool continueReview = false)
         {
+            ValidateReviewConclusion(model);
             if (!ModelState.IsValid)
             {
+                model.ReviewConclusionOptions = BuildReviewConclusionOptions();
                 return PartialView("_ReviewForm", model);
             }
             var result = _reviewBatchItemCache.Save(model, User.UserName);
@@ -279,7 +283,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ReviewHistoryID = history.ReviewHistoryID,
                 ReviewBatchItemID = history.ReviewBatchItemID,
                 ReviewComment = history.ReviewComment,
-                IsConfirmed = history.IsConfirmed
+                IsConfirmed = history.IsConfirmed,
+                ReviewConclusion = history.ReviewConclusion,
+                ReviewConclusionOptions = BuildReviewConclusionOptions()
             };
             model.ExistingFiles = _reviewBatchItemBiz.GetFilePaths(id);
             return PartialView("_EditHistory", model);
@@ -297,9 +303,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [ValidateInput(false)]
         public ActionResult EditHistory(RM_ReviewFormModel model)
         {
+            ValidateReviewConclusion(model);
             if (!ModelState.IsValid)
             {
                 model.ExistingFiles = _reviewBatchItemBiz.GetFilePaths(model.ReviewHistoryID);
+                model.ReviewConclusionOptions = BuildReviewConclusionOptions();
                 return PartialView("_ReviewForm", model);
             }
 
@@ -411,6 +419,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         ReviewLevel = item.ReviewLevel,
                         ReviewComment = item.ReviewComment,
                         IsConfirmed = item.IsConfirmed,
+                        ReviewConclusion = item.ReviewConclusion,
                         ExistingFiles = files ?? new List<RM_ReviewBatchFilePathModel>(),
                         ReviewHistoryID = item.ReviewHistoryID,
                         Reviewer = item.Reviewer,
@@ -422,6 +431,28 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
             return result;
+        }
+
+        private void ValidateReviewConclusion(RM_ReviewFormModel model)
+        {
+            if (model.IsConfirmed && !RM_ReviewConclusion.IsValid(model.ReviewConclusion))
+            {
+                ModelState.AddModelError(nameof(model.ReviewConclusion), GetAppMessage("ReviewConclusion_Required"));
+            }
+            else if (model.ReviewConclusion.HasValue && !RM_ReviewConclusion.IsValid(model.ReviewConclusion))
+            {
+                ModelState.AddModelError(nameof(model.ReviewConclusion), GetAppMessage("ReviewConclusion_Invalid"));
+            }
+        }
+
+        private List<SelectListItem> BuildReviewConclusionOptions()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = RM_ReviewConclusion.Accepted.ToString(), Text = GetAppMessage("ReviewConclusion_Accepted") },
+                new SelectListItem { Value = RM_ReviewConclusion.Interested.ToString(), Text = GetAppMessage("ReviewConclusion_Interested") },
+                new SelectListItem { Value = RM_ReviewConclusion.Rejected.ToString(), Text = GetAppMessage("ReviewConclusion_Rejected") }
+            };
         }
 
         private string GetAppMessage(string labelKey)

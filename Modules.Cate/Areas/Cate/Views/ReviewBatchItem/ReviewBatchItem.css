@@ -21,7 +21,13 @@
 #modal_ReviewBatch.review-dock-collapsed .modal-body,
 #modal_ReviewBatch.review-dock-collapsed .modal-footer { display: none; }
 #modal_ReviewBatch.review-dock-collapsed .review-dock-toggle { display: flex; width: 48px; height: 100%; margin: 0; align-items: center; justify-content: center; border: 0; border-radius: 0; }
-#modal_ReviewBatch.review-dock-right .cke_contents { height: 250px !important; }
+#modal_ReviewBatch.review-dock-right .cke_contents { height: 210px !important; }
+.review-conclusion-options { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; min-height: 32px; }
+.review-conclusion-option { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; cursor: pointer; }
+.review-conclusion-option input[type="radio"] { margin: 0; cursor: pointer; }
+.review-conclusion-accepted { color: #198754; }
+.review-conclusion-interested { color: #d97706; }
+.review-conclusion-rejected { color: #dc3545; }
 body.review-dock-open { overflow: auto !important; padding-right: 0 !important; }
 .review-split-view { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
 .review-detail-pane, .review-form-pane { min-width: 0; }

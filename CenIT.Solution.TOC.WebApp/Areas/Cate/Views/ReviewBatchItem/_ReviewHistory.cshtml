@@ -72,6 +72,18 @@
                                     <span class="ml-1 @(item.IsConfirmed ? "text-success" : "text-warning") font-bolder">
                                         @(item.IsConfirmed ? AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Confirmed") : AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Commented"))
                                     </span>
+                                    @if (item.ReviewConclusion.HasValue)
+                                    {
+                                        var conclusionClass = item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Accepted
+                                            ? "badge-success"
+                                            : item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Interested ? "badge-warning" : "badge-danger";
+                                        var conclusionKey = item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Accepted
+                                            ? "ReviewConclusion_Accepted"
+                                            : item.ReviewConclusion == Core.Cate.Models.RM_ReviewConclusion.Interested ? "ReviewConclusion_Interested" : "ReviewConclusion_Rejected";
+                                        <span class="badge @conclusionClass ml-1">
+                                            @AppProcessor.Messagor.GetMessage("ReviewConclusion_Label"): @AppProcessor.Messagor.GetMessage(conclusionKey)
+                                        </span>
+                                    }
                                 </div>
 
                                 <!-- nội dung -->
