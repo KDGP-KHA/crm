@@ -1,0 +1,167 @@
+﻿@model Core.Cate.Models.RM_BusinessOpportunityWeeklyReportSearchModel
+
+<style>
+    .weekly-report-search {
+        max-width: 100%;
+        overflow: visible;
+    }
+
+    .weekly-report-search .card-title {
+        font-size: 16px;
+    }
+
+    /* MAIN ROW */
+    .weekly-report-search .Search_Row {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+
+    /* COMMON BOX */
+    .weekly-report-search .Search_Box {
+        min-width: 0;
+    }
+
+    /* WEEK */
+    .weekly-report-search .weekly-report-week-box {
+        width: 345px;
+        flex-shrink: 0;
+    }
+
+    /* DEPARTMENT */
+    .weekly-report-search .weekly-report-department-box {
+        width: 260px;
+        flex-shrink: 0;
+    }
+
+    /* EMPLOYEE */
+    .weekly-report-search .weekly-report-employee-box {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    /* WEEK PICKER */
+    .weekly-report-week-picker {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        height: 36px;
+    }
+
+    .weekly-report-week-nav {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: #fff;
+        color: #495057;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .weekly-report-week-range {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: #fff;
+        color: #495057;
+    }
+
+    .weekly-report-week-range input {
+        width: 104px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        text-align: center;
+    }
+
+    .weekly-report-week-range strong {
+        font-weight: normal;
+        min-width: 104px;
+        text-align: center;
+    }
+
+    /* SELECT2 */
+    .weekly-report-search .select2-container {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .weekly-report-search .select2-container--default .select2-selection--multiple {
+        height: 32px;
+        padding: 0;
+    }
+
+    .weekly-report-search .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        font-size: 13px;
+        height: 23px;
+        margin: 0;
+        padding: 0.0rem 1.125rem 0rem 0.375rem;
+    }
+</style>
+
+<div class="Search card mb-2 weekly-report-search" id="card-business-opportunity-weekly-report">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;Tìm kiếm
+        </div>
+    </div>
+
+    <div class="card-body p-2">
+        <form id="frmBusinessOpportunityWeeklyReportSearch" method="post">
+            @Html.HiddenFor(model => model.FromDate, new { id = "FromDate" })
+            @Html.HiddenFor(model => model.ToDate, new { id = "ToDate" })
+            @Html.HiddenFor(model => model.EmployeeIDs, new { id = "EmployeeIDs" })
+
+            <div class="Search_Row">
+                <div class="Search_Box weekly-report-week-box">
+                    <label class="font-bold">Tuần <span class="text-danger">*</span></label>
+                    <div class="weekly-report-week-picker">
+                        <button type="button" class="weekly-report-week-nav" id="btnPrevWeek" title="Tuần trước">
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+
+                        <div class="weekly-report-week-range">
+                            @Html.TextBoxFor(model => model.WeekDate, new { @class = "form-control", id = "WeekDate", autocomplete = "off" })
+                            <span>→</span>
+                            <strong id="WeekEndText">@Model.ToDate</strong>
+                        </div>
+
+                        <button type="button" class="weekly-report-week-nav" id="btnNextWeek" title="Tuần sau">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="Search_Box weekly-report-department-box">
+                    <label class="font-bold">Phòng</label>
+                    @Html.DropDownListFor(model => model.BoPhanID, new SelectList(Model.Departments, "BoPhan_ID", "TenBoPhanView"), "", new { @class = "form-control", id = "BoPhanID" })
+                </div>
+
+                <div class="Search_Box weekly-report-employee-box mr-3">
+                    <label class="font-bold">Nhân viên</label>
+                    <select id="EmployeeSelect" class="form-control" multiple="multiple" style="display:none"></select>
+                </div>
+
+                <div class="Search_button">
+                    <button type="button" class="btn btn-primary" id="btnSearchBusinessOpportunityWeeklyReport">
+                        <i class="fa fa-search-plus"></i>&nbsp;Tìm kiếm
+                    </button>
+                </div>
+                <div class="Search_button">
+                    <button type="button" class="btn btn-warning" id="btnExportBusinessOpportunityWeeklyReport">
+                        <i class="fa fa-download"></i>&nbsp;Xuất Excel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,56 @@
+﻿@using TSFramework.Libs.Processors
+
+<link href="~/Views/Shared/_Footer.css" rel="stylesheet" />
+<div class="navbar-darkblue pos-rel">
+    <div class="container container-plus py-1">
+
+    </div>
+</div>
+
+<div class="col-12 container">
+    <div class="py-45">
+        <div class="container container-plus">
+            <div class="row d-flex justify-content-between">
+                <div class="col-lg-5 col-md-12 text-dark-m3">
+                    <div class="">
+                        <img alt="Logo" height="100" src="/Contents/Base/imgs/app.ico">
+                    </div>
+                    <h3 class="text-110 text-blue-d1 font-weight-bold mt-15">@AppProcessor.Messagor.GetMessage("App_Title")</h3>
+                    <div class="mb-1"><i class="w-3 text-center fas fa-map-marker-alt"></i>@AppProcessor.Messagor.GetMessage("AppFooter_DiaChi")</div>
+                    <div class="mb-1"><i class="w-3 text-center fas fa-phone"></i><a class="no-underline text-dark-m3" href="tel:@AppProcessor.Messagor.GetMessage("AppFooter_DienThoai").Replace(" ","")">@AppProcessor.Messagor.GetMessage("AppFooter_DienThoai")</a></div>
+                    <div class="mb-1"><i class="w-3 text-center fas fa-envelope"></i><a class="no-underline text-dark-m3" href="mailto:@AppProcessor.Messagor.GetMessage("AppFooter_Email")">@AppProcessor.Messagor.GetMessage("AppFooter_Email")</a></div>
+                    <div class="p-2"></div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h3 class="text-dark-tp3 text-95 text-600 mb-3 modtitle text-uppercase">@AppProcessor.Messagor.GetMessage("AppFooter_HoTroKhachHang_Title")</h3>
+                    <div class="modcontent clearfix">
+                        <ul class="menu menu-loaihinh-ft">
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","Accommodation")">@AppProcessor.Messagor.GetMessage("CSLT_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","Tourism")">@AppProcessor.Messagor.GetMessage("DLH_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","TourGuide")">@AppProcessor.Messagor.GetMessage("HDV_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","Restaurant")">@AppProcessor.Messagor.GetMessage("HoSoNH_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","Entertainment")">@AppProcessor.Messagor.GetMessage("DVC_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","TourismResources")">@AppProcessor.Messagor.GetMessage("TaiNguyenDL_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","TourismProducts")">@AppProcessor.Messagor.GetMessage("SanPhamDL_Title")</a></li>
+                            <li class="mb-1 pl-2"><a class="no-underline text-dark-m3" href="@Url.Action("Index","Shopping")">@AppProcessor.Messagor.GetMessage("DMS_Title")</a></li>
+                        </ul>
+                    </div>
+                </div>
+                    @{Html.RenderAction("LoadThongKeTruyCap", "Home", new { area = "" }); }
+                </div>
+            </div><!-- /.row -->
+
+    </div><!-- /.container -->
+</div><!-- /.footer-inner -->
+<div class="text-center py-3 bgc-primary-l4 brc-primary-l3">
+    <div>
+        @*<img src="~/Contents/Base/imgs/logo-vnpt.png" width="3%"/>*@
+        <span class="d-lg-inline-block d-block text-danger-d1 text-upcase font-bold">@AppProcessor.Messagor.GetMessage("App_Title").Split(',').First().ToUpper()</span>
+        <span class="d-lg-inline-block d-block text-blue-d1 text-upcase font-bold">@AppProcessor.Messagor.GetMessage("App_Title").Split(',').Last().ToUpper()</span>
+    </div>
+</div>
+<div class="footer-tools">
+    <a href="#" class="btn-scroll-up btn btn-dark px-25 py-2 text-95 border-2 radius-round mb-2 mr-2">
+        <i class="fa fa-arrow-up w-2 h-2"></i>
+    </a>
+</div>

@@ -1,0 +1,148 @@
+﻿@model Core.Cate.Models.RM_DashboardModel
+@{
+    var today = DateTime.Today;
+    var weekStart = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
+    var weekEnd = weekStart.AddDays(6);
+}
+
+<style>
+    .plan-filter-card {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        padding: 10px 0;
+        color: #333;
+        font-weight: normal;
+    }
+
+    .plan-week-picker {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+    }
+
+    .plan-week-nav {
+        width: 32px;
+        height: 32px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: #fff;
+        color: #495057;
+        cursor: pointer;
+    }
+
+    .plan-week-range {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        background: #fff;
+        color: #495057;
+    }
+
+    .plan-week-range input {
+        width: 96px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #495057;
+        text-align: center;
+    }
+
+    .plan-week-range strong {
+        font-weight: normal;
+    }
+
+    .plan-filter-search {
+        width: 390px;
+        height: 32px;
+    }
+
+    .plan-filter-spacer {
+        flex: 1 1 auto;
+    }
+
+    .plan-filter-personal {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        margin: 0;
+        color: #333;
+        font-weight: normal;
+        cursor: pointer;
+    }
+
+    .plan-filter-personal input {
+        margin: 0;
+    }
+
+    .plan-filter-refresh {
+        height: 32px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        font-weight: normal;
+    }
+
+    .plan-filter-total {
+        display: inline-flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid #6fb3e0;
+        border-radius: 4px;
+        background: #eef7ff;
+        color: #2b6ea6;
+    }
+
+    .plan-filter-total span {
+        color: #0d6efd;
+        font-weight: 700;
+    }
+</style>
+
+<div class="dashboard-filter plan-filter-card" id="planFilter">
+    @Html.Hidden("PlanFromDate", weekStart.ToString("dd/MM/yyyy"), new { id = "PlanFromDate" })
+    @Html.Hidden("PlanToDate", weekEnd.ToString("dd/MM/yyyy"), new { id = "PlanToDate" })
+
+    <div class="plan-week-picker" aria-label="Chọn tuần kế hoạch">
+        <button type="button" class="plan-week-nav" id="btnPlanPrevWeek" title="Tuần trước">
+            <i class="fa fa-chevron-left"></i>
+        </button>
+
+        <div class="plan-week-range">
+            <input type="text"
+                   id="PlanWeekDate"
+                   class="datepicker"
+                   value="@weekStart.ToString("dd/MM/yyyy")"
+                   title="Chọn ngày bất kỳ trong tuần" />
+            <span>→</span>
+            <strong id="PlanWeekEndText">@weekEnd.ToString("dd/MM/yyyy")</strong>
+        </div>
+
+        <button type="button" class="plan-week-nav" id="btnPlanNextWeek" title="Tuần sau">
+            <i class="fa fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <label class="plan-filter-personal" for="chkPlanPersonal">
+        <input type="checkbox" id="chkPlanPersonal" />
+        <span>Lịch cá nhân</span>
+    </label>
+
+    <input type="text"
+           id="PlanSearchText"
+           class="form-control form-control-sm plan-filter-search"
+           placeholder="Từ khóa tìm kiếm" />
+
+    <div class="plan-filter-spacer"></div>
+
+    <div class="plan-filter-total">
+        Tổng: <span id="planFilterTotal" class="ml-1">0</span>
+    </div>
+</div>

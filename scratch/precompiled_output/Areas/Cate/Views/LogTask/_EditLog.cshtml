@@ -1,0 +1,23 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_LogTaskModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("LogTask_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{ primary }
+@section FormIcon{ <i class="far fa-edit"></i> }
+
+@section FormBody{
+    @using (Ajax.BeginForm("Edit", "LogTask", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "LogTask_OnProcessSuccess(data, 'EditLogTask')"
+    }, new { @class = "form-horizontal", id = "EditLogTask" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_LogTask")
+        </div>
+    }
+}

@@ -1,0 +1,212 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ContractsModel
+
+@Html.AntiForgeryToken()
+<div id="CHKD">
+    @Html.HiddenFor(model => model.ContractID)
+    @Html.HiddenFor(model => model.ProjectID)
+    @Html.HiddenFor(model => model.CustomerID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ContractCode, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-5">
+            @Html.TextBoxFor(model => model.ContractCode, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContractCode_Label_Name") })
+            @Html.ValidationMessageFor(model => model.ContractCode, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ContractName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-7">
+            @Html.TextBoxFor(model => model.ContractName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContractName_Label") })
+            @Html.ValidationMessageFor(model => model.ContractName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    @*<div class="form-group row">
+        @Html.TitleFor(model => model.CustomerID, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-7">
+            @Html.DropDownListFor(model => model.CustomerID,
+                     new SelectList(Model.ListCustomer ?? new List<System.Web.Mvc.SelectListItem>(), "Value", "Text", Model.CustomerID),
+                     "-- Chọn khách hàng --",
+                     new { @class = "col form-control select2" })
+        </div>
+    </div>*@
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.StatusContract, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            @Html.DropDownListFor(model => model.StatusContract,
+                     new SelectList(Model.ListStatus ?? new List<System.Web.Mvc.SelectListItem>(), "Value", "Text", Model.StatusContract),
+                     "-- Chọn trạng thái --",
+                     new { @class = "form-control select2" })
+            @Html.ValidationMessageFor(model => model.StatusContract, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.SignDate, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.SignDate, "{0:dd/MM/yyyy}", new { id = "SignDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                    @Html.ValidationMessageFor(model => model.SignDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.StartDate, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.StartDate, "{0:dd/MM/yyyy}", new { id = "StartDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                    @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.EndDate, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.EndDate, "{0:dd/MM/yyyy}", new { id = "EndDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                    @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.ContractValue, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.ContractValue, new
+                    {
+                        @class = "form-control text-right",
+
+                        placeholder = "0"
+                    })
+                    @Html.ValidationMessageFor(model => model.ContractValue, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.VAT, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.VAT, new
+                    {
+                        @class = "form-control",
+                        type = "number",
+                        min = "0",
+                        max = "100",
+                        step = "0.01",
+                        placeholder = "0 – 100",
+                        data_format = "percent"
+                    })
+                    @Html.ValidationMessageFor(model => model.VAT, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.TotalAmount, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-6">
+                    @Html.TextBoxFor(model => model.TotalAmount, new
+                    {
+                        @class = "form-control text-right",
+
+                        placeholder = "0"
+                    })
+                    @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label text-sm-right pr-0 font-bold">
+            @AppProcessor.Messagor.GetMessage("FileAttach_Label")
+        </label>
+        <div class="col-md-7">
+            @Html.FileFor(model => model.DinhKemFile, ".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls", true,
+                     new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+
+            <div id="contractFileList" class="mt-2"></div>
+
+            @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+            {
+                <div id="contractOldFileList" class="mt-2">
+                    @foreach (var file in Model.ExistingFiles)
+                    {
+                        var fileName = file.FilePath.Split('/').Last();
+                        <div class="d-flex align-items-center border rounded px-2 py-1 mb-1">
+                            <a href="@file.FilePath" target="_blank" style="color:#0000ffc4; font-size:13px;">
+                                <i class="fas fa-paperclip mr-1"></i>@fileName
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    // ✅ PATCH: Load FormUtils.js nếu chưa có
+    (function () {
+        if (typeof initFormUtils === 'undefined') {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#CHKD'); };
+            document.head.appendChild(s);
+        } else {
+            $(function () { initFormUtils('#CHKD'); });
+        }
+    })();
+
+    var contractFilesList = [];
+    var contractDataTransfer = new DataTransfer();
+
+    $(document).on("change", "#DinhKemFile", function (e) {
+        var newFiles = Array.from(e.target.files);
+        newFiles.forEach(function (file) {
+            if (!contractFilesList.some(function (f) { return f.name === file.name && f.size === file.size; })) {
+                contractFilesList.push(file);
+            }
+        });
+        contractSyncInputFiles();
+        contractRenderFileList();
+    });
+
+    function contractSyncInputFiles() {
+        contractDataTransfer = new DataTransfer();
+        contractFilesList.forEach(function (file) { contractDataTransfer.items.add(file); });
+        var input = document.getElementById("DinhKemFile");
+        if (input) input.files = contractDataTransfer.files;
+    }
+
+    function contractRenderFileList() {
+        var html = "";
+        contractFilesList.forEach(function (file, index) {
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                + '<span><i class="fa fa-file text-primary mr-1"></i>' + file.name + '</span>'
+                + '<button type="button" class="btn btn-sm btn-danger" onclick="contractRemoveFile(' + index + ')">'
+                + '<i class="fa fa-times"></i></button></div>';
+        });
+        $("#contractFileList").html(html);
+    }
+
+    function contractRemoveFile(index) {
+        contractFilesList.splice(index, 1);
+        contractSyncInputFiles();
+        contractRenderFileList();
+    }
+
+    $(document).ready(function () {
+        $("#SignDate").datetimepicker({ "format": "DD/MM/YYYY" });
+        $("#StartDate").datetimepicker({ "format": "DD/MM/YYYY" });
+        $("#EndDate").datetimepicker({ "format": "DD/MM/YYYY" });
+    });
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

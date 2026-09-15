@@ -1,0 +1,9 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityDashboardViewModel
+
+<div class="db-section-title mt-4">
+    <i class="fa fa-chart-bar mr-1 text-blue"></i> @AppProcessor.Messagor.GetMessage("Dashboard_SectionChart")
+</div>
+<div id="chartContainer">
+    <canvas id="opportunityChart"></canvas>
+</div>

@@ -1,0 +1,45 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Modules.Sys.Areas.Sys.Data.AppSettingModel
+
+@Html.AntiForgeryToken()
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@{
+    var id = string.Empty;
+    var isReadonly = string.Empty;
+    if (Model != null)
+    {
+        if (!string.IsNullOrEmpty(Model.AppValue) && !string.IsNullOrEmpty(Model.AppKey))
+        {
+            isReadonly = "readonly";
+            id = Model.AppValue + Model.AppKey;
+        }
+    }
+}
+@Html.Hidden("ID", id)
+<div id="Message" class="row">
+
+    <div class="form-group col-12">
+        @Html.TitleFor(model => model.AppKey, new { @class = "pr-0 font-bold" })
+        @Html.TextBoxFor(model => model.AppKey, new { @class = "form-control col-md-12", placeholder = AppProcessor.Messagor.GetMessage("AppSetting_Label_KeyName") })
+        @Html.ValidationMessageFor(model => model.AppKey, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group col-12">
+        @Html.TitleFor(model => model.AppValue, new { @class = "pr-0 font-bold" })
+        @Html.TextAreaFor(model => model.AppValue, new { rows = 4, @class = "form-control col-md-12", placeholder = AppProcessor.Messagor.GetMessage("AppSetting_Label_Value") })
+        @Html.ValidationMessageFor(model => model.AppValue, "", new { @class = "text-danger" })
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        var readonly = "@isReadonly";
+
+        if (readonly.length > 0) {
+            //$("input[type='text'][id$='AppValue']").attr(readonly, "readonly");
+            $("input[type='text'][id$='AppKey']").attr(readonly, "readonly");
+        }
+    });
+</script>

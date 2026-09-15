@@ -1,0 +1,393 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_TaskManagementModel
+
+@Html.AntiForgeryToken()
+
+@Html.HiddenFor(m => m.TaskManagementID)
+@Html.HiddenFor(m => m.ProjectID)
+@Html.HiddenFor(m => m.BusinessOpportunityID)
+@Html.HiddenFor(m => m.TaskID)
+
+<div class="row">
+    <div class="col-md-6">
+        @Html.TitleFor(model => model.TaskTypeID, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.DropDownListFor(m => m.TaskTypeID, ViewBag.TaskTypeList as List<SelectListItem>, "-- Không có loại công việc --", new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.TaskTypeID, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-md-6">
+        @Html.TitleFor(model => model.ParentTaskID, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.DropDownListFor(m => m.ParentTaskID, ViewBag.ListTask as List<SelectListItem>, "-- Không có task cha --", new { @class = "form-control" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        @Html.TitleFor(model => model.TaskName, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.TextBoxFor(m => m.TaskName, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.TaskName, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-6">
+        @Html.TitleFor(model => model.StatusID, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.DropDownListFor(m => m.StatusID, ViewBag.ListStatus as List<SelectListItem>, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.StatusID, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-3 col-sm-6">
+        @Html.TitleFor(model => model.PriorityID, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.DropDownListFor(m => m.PriorityID, ViewBag.Priorities as List<SelectListItem>, new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.PriorityID, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                @Html.TitleFor(model => model.EstimatedHours, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+                @Html.TextBoxFor(m => m.EstimatedHours, new { @class = "form-control" })
+            </div>
+            <div class="col-md-4 col-sm-4">
+                @Html.TitleFor(model => model.ActualHours, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+                @Html.TextBoxFor(m => m.ActualHours, new { @class = "form-control" })
+            </div>
+            <div class="col-md-4 col-sm-4">
+                @Html.TitleFor(model => model.CompletionPercentage, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+                @Html.TextBoxFor(model => model.CompletionPercentage, new
+                    {
+                        @class = "form-control",
+                        type = "number",
+                        min = "0",
+                        max = "100",
+                        step = "1",
+                        placeholder = "0 – 100",
+                        data_format = "percent",
+                    })
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        @Html.TitleFor(model => model.AssigneeIDList, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.ListBoxFor(m => m.AssigneeIDList, Model.ListEmployee, new { @class = "form-control select2", multiple = "multiple" })
+    </div>
+    <div class="col-md-3 col-sm-6">
+        @Html.TitleFor(model => model.StartDate, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        <div class="input-group">
+            @Html.TextBoxFor(m => m.StartDate, "{0:dd/MM/yyyy}", new { @class = "form-control dateinput", placeholder = "dd/MM/yyyy", autocomplete = "off" })
+            <div class="input-group-append">
+                <span class="input-group-text">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        @Html.TitleFor(model => model.EndDate, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        <div class="input-group">
+            @Html.TextBoxFor(m => m.EndDate, "{0:dd/MM/yyyy}", new { @class = "form-control dateinput", placeholder = "dd/MM/yyyy", autocomplete = "off" })
+            <div class="input-group-append">
+                <span class="input-group-text">
+                    <i class="fas fa-calendar-alt"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        @Html.TitleFor(model => model.Description, new { @class = "col-md-12 col-form-label text-sm-left pr-0 font-bold" })
+        @Html.TextAreaFor(model => model.Description,
+            new
+            {
+                @class = "form-control",
+                placeholder = AppProcessor.Messagor.GetMessage("TaskManagement_Description_Label"),
+                id = "ContentDescriptionTask"
+            })
+
+    </div>
+    <div class="col-md-12">
+        <label>@AppProcessor.Messagor.GetMessage("TaskManagement_Files_Label")</label>
+        <div class="input-group">
+            <div class="custom-file">
+                <label class="custom-file-label" for="taskFiles">
+                    @AppProcessor.Messagor.GetMessage("FileUpload")
+                </label>
+                <input type="file"
+                       class="custom-file-input"
+                       id="taskFiles"
+                       name="Files"
+                       multiple
+                       accept=".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls" />
+            </div>
+        </div>
+        <div id="fileList" class="mt-2"></div>
+        @if (Model.FilePaths != null && Model.FilePaths.Any())
+        {
+            <div class="mt-3">
+
+                <label class="font-weight-bold">
+                    File đã tải lên
+                </label>
+
+                <div id="dbFileList">
+
+                    @foreach (var file in Model.FilePaths)
+                    {
+                        var ext = System.IO.Path
+                            .GetExtension(file.FilePath)?
+                            .ToLower();
+
+                        var icon = "fa-file text-secondary";
+
+                        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext))
+                        {
+                            icon = "fa-file-image text-success";
+                        }
+                        else if (ext == ".pdf")
+                        {
+                            icon = "fa-file-pdf text-danger";
+                        }
+                        else if (new[] { ".doc", ".docx" }.Contains(ext))
+                        {
+                            icon = "fa-file-word text-primary";
+                        }
+                        else if (new[] { ".xls", ".xlsx" }.Contains(ext))
+                        {
+                            icon = "fa-file-excel text-success";
+                        }
+
+                        var fileName = System.IO.Path.GetFileName(file.FilePath);
+
+                        <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+
+                            <div>
+                                <i class="fa @icon mr-1"></i>
+
+                                <a href="@file.FilePath"
+                                   target="_blank">
+                                    @fileName
+                                </a>
+
+                                <small class="text-muted ml-2">
+                                    @(file.CreatedDate?.ToString("dd/MM/yyyy HH:mm"))
+                                </small>
+                            </div>
+
+                            @Html.Button(true, "DeleteFileComment",
+                           Url.Action("DeleteFile", "Comment", new { area = "Cate", id = file.FilePathID }),
+                           "<i class='fa fa-trash'></i>",
+                           "",
+                           new
+                           {
+                               @class = "btn btn-sm btn-outline-danger",
+                           })
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    function _initTaskDetailForm() {
+        // init datepicker
+        initTaskDetailDatePicker();
+
+        // ── CKEditor ──────────────────────────────────────────
+        function initTaskManagementCKEditor() {
+            if (typeof CKEDITOR === 'undefined') return;
+            var ex = CKEDITOR.instances['ContentDescriptionTask'];
+            if (ex) ex.destroy(true);
+            CKEDITOR.replace('ContentDescriptionTask', {
+                height: 200,
+                allowedContent: true,
+                extraAllowedContent: 'img[width,height,style]',
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                    { name: 'insert', items: ['Image', 'Table', 'Link'] },
+                    { name: 'styles', items: ['Format'] },
+                    { name: 'tools', items: ['Maximize'] }
+                ]
+            });
+        }
+
+        function loadCKEditorThenInit() {
+            if (typeof CKEDITOR !== 'undefined') { initTaskManagementCKEditor(); return; }
+            var s = document.createElement('script');
+            s.src = '/Contents/Modules/Major/ckeditor4/ckeditor.js';
+            s.onload = function () {
+                var s2 = document.createElement('script');
+                s2.src = '/Contents/Modules/Major/ckfinder/ckfinder.js';
+                s2.onload = function () { initTaskManagementCKEditor(); };
+                s2.onerror = function () { initTaskManagementCKEditor(); };
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        }
+
+        $(document).off('click', '#btnSave').on('click', '#btnSave', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            var btn = this;
+            if (btn.disabled) return;
+            btn.disabled = true;
+            setTimeout(function () { btn.disabled = false; }, 2000);
+
+            if (typeof CKEDITOR !== 'undefined') {
+                for (var inst in CKEDITOR.instances) {
+                    CKEDITOR.instances[inst].updateElement();
+                }
+            }
+            var $form = $('#EditTaskManagement:visible, #AddTaskManagement:visible');
+            var formData = new FormData($form[0]);
+            $.ajax({
+                url: $form[0].action,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    TaskManagement_OnProcessSuccess(response);
+                },
+                error: function (xhr) {
+                    console.error('LogTask save error:', xhr);
+                }
+            });
+
+            //$form.trigger('submit');
+        });
+
+        $(document).off('click', '.modal-footer .btn-outline-danger')
+            .on('click', '.modal-footer .btn-outline-danger', function (e) {
+
+                var $editForm = $('#EditTaskManagement:visible');
+                var $addForm = $('#AddTaskManagement:visible');
+
+
+                // ===== EDIT =====
+                if ($editForm.length > 0) {
+                    var taskId = $('#TaskManagementID').val();
+
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.location.href = '/Cate/TaskManagement/Detail/' + taskId;
+
+                    return false;
+                }
+
+                // ===== ADD =====
+                if ($addForm.length > 0) {
+                    var ProductProjectID = $('#ProductProjectID').val();
+                    localStorage.setItem("openProjectTaskTab", "1");
+                    // quay về danh sách
+                    window.location.href = '/Cate/ProductProjectOverview/Index/' + ProductProjectID;
+                    return false;
+                }
+            });
+
+        loadCKEditorThenInit();
+    }
+
+    function initTaskDetailDatePicker() {
+        $(".dateinput").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+    }
+
+    if (typeof jQuery !== 'undefined') {
+        $(document).ready(function () {
+            _initTaskDetailForm();
+        });
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            _initTaskDetailForm();
+        });
+    }
+
+    // ── File picker - hỗ trợ chọn nhiều lần, cộng dồn file ──
+    var taskFilesList = [];
+    var taskDataTransfer = new DataTransfer();
+
+    $(document).on('change', '#taskFiles', function () {
+        var newFiles = Array.from(this.files);
+
+        // Merge, tránh trùng theo tên + size
+        newFiles.forEach(function (file) {
+            if (!taskFilesList.some(function (f) {
+                return f.name === file.name && f.size === file.size;
+            })) {
+                taskFilesList.push(file);
+            }
+        });
+
+        taskSyncInputFiles();
+        taskRenderFileList();
+    });
+
+    function taskSyncInputFiles() {
+        taskDataTransfer = new DataTransfer();
+
+        taskFilesList.forEach(function (file) {
+            taskDataTransfer.items.add(file);
+        });
+
+        var input = document.getElementById('taskFiles');
+
+        if (input) {
+            input.files = taskDataTransfer.files;
+        }
+
+        // Update label
+        var label = $('.custom-file-label[for="taskFiles"]');
+
+        if (taskFilesList.length > 0) {
+            label.text(taskFilesList.length + ' file đã chọn');
+        } else {
+            label.text('Chọn file...');
+        }
+    }
+
+    function taskRenderFileList() {
+        var html = '';
+        taskFilesList.forEach(function (file, index) {
+            var ext = file.name.split('.').pop().toLowerCase();
+            var icon = 'fa-file';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) > -1) icon = 'fa-file-image text-success';
+            else if (ext === 'pdf') icon = 'fa-file-pdf text-danger';
+            else if (['doc', 'docx'].indexOf(ext) > -1) icon = 'fa-file-word text-primary';
+            else if (['xls', 'xlsx'].indexOf(ext) > -1) icon = 'fa-file-excel text-success';
+
+            var size = file.size > 1024 * 1024
+                ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
+                : (file.size / 1024).toFixed(1) + ' KB';
+
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                + '<span><i class="fa ' + icon + ' mr-1"></i>' + file.name
+                + ' <small class="text-muted">(' + size + ')</small></span>'
+                + '<button type="button" class="btn btn-sm btn-danger" onclick="taskRemoveFile(' + index + ')">'
+                + '<i class="fa fa-times"></i></button>'
+                + '</div>';
+        });
+        $('#fileList').html(html);
+    }
+
+    function taskRemoveFile(index) {
+        taskFilesList.splice(index, 1);
+        taskSyncInputFiles();
+        taskRenderFileList();
+    }
+</script>

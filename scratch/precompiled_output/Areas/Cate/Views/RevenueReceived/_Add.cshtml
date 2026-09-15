@@ -1,0 +1,31 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("RevenueReceived_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Add", "RevenueReceived", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "RevenueReceived_OnProcessSuccess(data, 'AddRevenueReceived')"
+    }, new { @class = "form-horizontal", id = "AddRevenueReceived" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_RevenueReceived")
+        </div>
+    }
+}
+
+@section ContinueForm{
+
+}

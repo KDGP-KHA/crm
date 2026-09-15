@@ -1,6 +1,6 @@
 ﻿@using TSFramework.Libs.Processors
 @{
-    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Review"), AppProcessor.Messagor.GetMessage("ProjectOpportunity_Title"));
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Review"), AppProcessor.Messagor.GetMessage("DigitalSales_Entity_Name"));
     Layout = "~/Views/Shared/_Form.cshtml";
 }
 
@@ -13,182 +13,9 @@
 }
 
 @section FormBody{
-    <style>
-        /* Panel rà soát neo bên phải màn hình để nhập nhanh, không che toàn bộ trang.
-           Lớp phủ của modal được cho xuyên chuột để vẫn thao tác được với nội dung phía sau. */
-        #modal_ReviewBatch.review-dock-right {
-            padding-right: 0 !important;
-            pointer-events: none;
-            overflow: visible;
-        }
-
-        #modal_ReviewBatch.review-dock-right .modal-dialog {
-            position: fixed;
-            top: 0;
-            right: 0;
-            margin: 0;
-            width: 760px;
-            max-width: 96vw;
-            height: 100%;
-            display: flex;
-            align-items: stretch;
-            pointer-events: auto;
-            transition: width .25s ease-out, max-width .25s ease-out, transform .25s ease-out;
-        }
-
-        #modal_ReviewBatch.review-dock-right .modal-content {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            border-radius: 0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -4px 0 18px rgba(0, 0, 0, .18);
-        }
-
-        #modal_ReviewBatch.review-dock-right .modal-body {
-            flex: 1 1 auto;
-            min-height: 0;
-            overflow-y: auto;
-        }
-
-        #modal_ReviewBatch.review-dock-right .modal-footer {
-            flex: 0 0 auto;
-            background: #fff;
-            z-index: 1;
-        }
-
-        /* Hiệu ứng trượt vào từ cạnh phải */
-        #modal_ReviewBatch.review-dock-right.fade .modal-dialog {
-            transform: translateX(100%);
-            transition: transform .25s ease-out, width .25s ease-out, max-width .25s ease-out;
-        }
-
-        #modal_ReviewBatch.review-dock-right.show .modal-dialog {
-            transform: translateX(0);
-        }
-
-        #modal_ReviewBatch .review-dock-toggle {
-            margin-left: auto;
-        }
-
-        #modal_ReviewBatch.review-dock-collapsed .modal-dialog {
-            width: 48px;
-            max-width: 48px;
-        }
-
-        #modal_ReviewBatch.review-dock-collapsed .modal-header {
-            width: 48px;
-            height: 100%;
-            padding: 0 !important;
-            justify-content: center;
-            border-radius: 0;
-        }
-
-        #modal_ReviewBatch.review-dock-collapsed .modal-title,
-        #modal_ReviewBatch.review-dock-collapsed .modal-header [data-dismiss],
-        #modal_ReviewBatch.review-dock-collapsed .modal-body,
-        #modal_ReviewBatch.review-dock-collapsed .modal-footer {
-            display: none;
-        }
-
-        #modal_ReviewBatch.review-dock-collapsed .review-dock-toggle {
-            display: flex;
-            width: 48px;
-            height: 100%;
-            margin: 0;
-            align-items: center;
-            justify-content: center;
-            border: 0;
-            border-radius: 0;
-        }
-
-        /* Thu gọn vùng soạn thảo để form vừa một màn hình, không phải cuộn nhiều */
-        #modal_ReviewBatch.review-dock-right .cke_contents {
-            height: 250px !important;
-        }
-
-        /* Khi panel mở, trang nền vẫn cuộn và bấm được như bình thường */
-        body.review-dock-open {
-            overflow: auto !important;
-            padding-right: 0 !important;
-        }
-
-        .review-split-view {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr);
-            gap: 16px;
-            align-items: start;
-        }
-
-        .review-detail-pane,
-        .review-form-pane {
-            min-width: 0;
-        }
-
-        .review-form-pane {
-            position: sticky;
-            top: 8px;
-            align-self: start;
-            height: calc(100vh - 16px);
-            max-height: calc(100vh - 16px);
-            overflow: hidden;
-        }
-
-        #reviewFormPane #modal_ReviewBatch.review-dock-right {
-            position: static !important;
-            display: block !important;
-            width: 100%;
-            height: 100%;
-            padding: 0 !important;
-            overflow: visible;
-            z-index: auto;
-        }
-
-        #reviewFormPane #modal_ReviewBatch.review-dock-right .modal-dialog {
-            position: static;
-            width: 100%;
-            max-width: none;
-            height: 100%;
-            margin: 0;
-            transform: none !important;
-        }
-
-        #reviewFormPane #modal_ReviewBatch.review-dock-right .modal-header {
-            width: auto;
-            height: auto;
-        }
-
-        #reviewSplitView.review-split-collapsed #reviewFormPane #modal_ReviewBatch .modal-dialog,
-        #reviewSplitView.review-split-collapsed #reviewFormPane #modal_ReviewBatch .modal-header {
-            width: 48px;
-        }
-
-        #reviewSplitView.review-split-collapsed #reviewFormPane #modal_ReviewBatch .modal-header {
-            height: 100%;
-        }
-
-        @@media (min-width: 992px) {
-            .review-split-view.review-split-active {
-                grid-template-columns: minmax(0, 1fr) minmax(360px, 34%);
-            }
-
-            .review-split-view.review-split-active.review-split-collapsed {
-                grid-template-columns: minmax(0, 1fr) 48px;
-            }
-        }
-
-        @@media (max-width: 991.98px) {
-            #modal_ReviewBatch.review-dock-right .modal-dialog {
-                width: 100%;
-                max-width: 100vw;
-            }
-        }
-    </style>
-
-    @using (Html.BeginForm("ReviewBatch", "ReviewBatchItem", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "ReviewBatch", @class = "form-horizontal" }))
+@using (Html.BeginForm("ReviewBatch", "ReviewBatchItem", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "ReviewBatch", @class = "form-horizontal" }))
     {
-        <input type="hidden" id="ReviewBatchContinueReview" name="ContinueReview" value="false" />
+        @Html.Hidden("ContinueReview", false, new { id = "ReviewBatchContinueReview" })
         <div id="bodyForm">
             @Html.Partial("_ReviewForm")
         </div>
@@ -201,6 +28,10 @@
         var $reviewDock = $('#modal_ReviewBatch');
         var $reviewSplitView = $('#reviewSplitView');
         var $reviewFormPane = $('#reviewFormPane');
+
+        // Panel rà soát là một phần của màn hình chi tiết, không cho đóng bằng
+        // nút X, nút Hủy hoặc phím Escape. Người dùng vẫn có thể thu gọn panel.
+        $reviewDock.find('.modal-header [data-dismiss="modal"], .modal-footer [data-dismiss="modal"]').remove();
 
         function resizeReviewFormPane() {
             if (!$reviewFormPane.length) return;
@@ -220,7 +51,7 @@
         if (!$reviewDock.find('.review-dock-toggle').length) {
             $reviewDock.find('.modal-header').append(
                 '<button type="button" class="review-dock-toggle btn btn-outline-white btn-h-primary btn-a-primary mr-2" ' +
-                'title="Thu gọn form rà soát" aria-label="Thu gọn form rà soát" aria-expanded="true">' +
+                'title="@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))" aria-label="@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))" aria-expanded="true">' +
                 '<i class="fas fa-chevron-right"></i></button>'
             );
         }
@@ -228,7 +59,7 @@
         $reviewDock
             .addClass('review-dock-right')
             .removeClass('modal-lg modal-fs')
-            .modal({ backdrop: false, keyboard: true, show: false })
+            .modal({ backdrop: false, keyboard: false, show: false })
             .on('show.bs.modal', function () {
                 if ($reviewFormPane.length) {
                     $(this).appendTo($reviewFormPane);
@@ -244,8 +75,8 @@
                 $(this).removeClass('review-dock-collapsed');
                 $reviewSplitView.removeClass('review-split-active review-split-collapsed');
                 $(this).find('.review-dock-toggle')
-                    .attr('title', 'Thu gọn form rà soát')
-                    .attr('aria-label', 'Thu gọn form rà soát')
+                    .attr('title', '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
+                    .attr('aria-label', '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
                     .attr('aria-expanded', 'true')
                     .find('i')
                     .removeClass('fa-chevron-left')
@@ -263,8 +94,8 @@
                     .hasClass('review-dock-collapsed');
                 $reviewSplitView.toggleClass('review-split-collapsed', isCollapsed);
                 $(this)
-                    .attr('title', isCollapsed ? 'Mở rộng form rà soát' : 'Thu gọn form rà soát')
-                    .attr('aria-label', isCollapsed ? 'Mở rộng form rà soát' : 'Thu gọn form rà soát')
+                    .attr('title', isCollapsed ? '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Expand")))' : '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
+                    .attr('aria-label', isCollapsed ? '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Expand")))' : '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
                     .attr('aria-expanded', (!isCollapsed).toString())
                     .find('i')
                     .toggleClass('fa-chevron-right', !isCollapsed)
@@ -284,12 +115,28 @@
             });
 
         $('form#ReviewBatch').ajaxForm({
+            beforeSubmit: function () {
+                if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.ReviewComment) {
+                    CKEDITOR.instances.ReviewComment.updateElement();
+                }
+                return true;
+            },
             success: function (response) {
                 const formId = "ReviewBatch";
                 const $modal = $("#modal_" + formId);
                 // validate fail
                 if (response.status === undefined) {
                     $modal.find("#bodyForm").html(response);
+                    var $form = $modal.find('form#ReviewBatch');
+                    if ($.validator && $.validator.unobtrusive) {
+                        $form.removeData('validator').removeData('unobtrusiveValidation');
+                        $.validator.unobtrusive.parse($form);
+                    }
+                    return;
+                }
+                if (response.status !== true) {
+                    eval(response.message);
+                    response.status = undefined;
                     return;
                 }
                 const processSuccess = (targetUrl) => {
@@ -298,16 +145,11 @@
                     response.status = undefined;
                 };
 
-                let tab = "project";
-                if (response.tab === 1) {
-                    tab = "opportunity";
-                }
-
-                // Quay lại đúng đợt và đúng tab khi không tiếp tục hoặc đã rà soát hết.
+                // Quay lại đúng đợt khi không tiếp tục hoặc đã rà soát hết.
                 const batchId = response.reviewBatchID || 0;
                 const backUrl = batchId > 0
-                    ? "/Cate/ReviewBatchItem/Index/" + batchId + "?tab=" + tab
-                    : "/Cate/ReviewBatchItem?tab=" + tab;
+                    ? "/Cate/ReviewBatchItem/Index/" + batchId
+                    : "/Cate/ReviewBatchItem";
                 const targetUrl = reviewBatchSaveAndContinue && response.nextReviewUrl
                     ? response.nextReviewUrl
                     : backUrl;

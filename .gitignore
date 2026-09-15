@@ -28,3 +28,10 @@
 !dlls/
 !dlls/**
 
+# ==========================================
+# Uploads and temporary agent files
+# ==========================================
+[Cc]ontents/[Uu]ploads/
+**/[Cc]ontents/[Uu]ploads/**
+.agents/scratch/
+

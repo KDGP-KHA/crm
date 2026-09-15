@@ -1,0 +1,29 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesProcessModel
+
+@{
+    var isNew = Model.ProcessID == 0;
+    ViewBag.Title = (isNew ? "Thêm mới" : "Cập nhật") + " Quy trình";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormIcon{
+    <i class="fa fa-@(isNew ? "plus" : "pencil-alt")"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("SaveProcess", "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "DigitalSalesWorkflow.onProcessSaveSuccess(data)"
+    }, new { @class = "form-horizontal", id = "formProcessModal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ProcessForm", Model)
+        </div>
+    }
+}

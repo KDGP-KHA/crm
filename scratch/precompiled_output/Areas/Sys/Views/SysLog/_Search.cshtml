@@ -1,0 +1,47 @@
+﻿@using TSFramework.Libs.Processors
+<div class="card bcard border-0 shadow-sm radius-0" id="SearchFile">
+    <div class="card-header bgc-primary-d1">
+        <h5 class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;Tìm kiếm
+        </h5>
+        <div class="card-toolbar">
+            <a href="#" data-action="toggle" class="card-toolbar-btn text-white">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+
+        <div class="col-md-12 form-horizontal mt-4">
+            <div class="form-group row">
+                <label class="col-form-label text-sm-right pr-0 font-bold col-md-2">Tháng</label>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        @Html.TextBox("FromMonth", DateTime.Now.ToString("MM/yyyy"), new { @class = "form-control col-md-4 col-sm-6", placeholder = "MM/yyyy" })
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar-alt"></i>
+                            </span>
+                        </div>
+                        @Html.TextBox("ToMonth", DateTime.Now.ToString("MM/yyyy"), new { @class = "form-control col-md-4 col-sm-6", placeholder = "MM/yyyy" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="card-footer">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn px-4 btn-outline-primary mb-1" onclick="OnSearchFile()"><i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Search")</button>
+        </div>
+    </div>
+</div>

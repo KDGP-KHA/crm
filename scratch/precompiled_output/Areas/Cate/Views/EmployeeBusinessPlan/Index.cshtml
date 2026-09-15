@@ -1,0 +1,56 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("BusinessPlan_Title");
+}
+
+@section PageTitle
+{
+    @ViewBag.Title
+}
+
+@section PageAction
+{
+    @Html.Button(true, "ImportEmployeeBusinessPlan", Url.Action("Import", new { area = "Cate" }), "<i class='fas fa-file-import'></i>", AppProcessor.Messagor.GetMessage("Button_ImportBusinessPlan"), new { @class = "btn btn-light-green btn-h-green btn-a-green border-0 radius-3 py-2 text-600 text-90 pull-right", @data_width = "fullscreen" }) &#160;
+    @Html.Button(true, "AddEmployeeBusinessPlan", Url.Action("Add", new { area = "Cate" }), "<i class='fa fa-plus'></i>", AppProcessor.Messagor.GetMessage("Button_Add_BusinessPlan"), new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right" })
+}
+
+<link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/33.1.44/fluent.css" />
+
+<style>
+    /* Header */
+    .e-treegrid .e-headercell {
+        font-weight: 600;
+        background: #f8f9fa;
+        font-size: 13px;
+    }
+
+    /* Cell */
+    .e-treegrid .e-rowcell {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+
+    /* Hover */
+    .e-treegrid .e-row:hover {
+        background-color: #eef5ff;
+    }
+
+    /* Zebra */
+    .e-treegrid .e-row:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    .e-grid .e-rowcell {
+        overflow: visible !important;
+    }
+</style>
+
+@Html.Partial("_Search")
+
+<div id="TreeGrid"></div>
+
+@section BottomScript
+{
+    <script src="https://cdn.syncfusion.com/ej2/33.1.44/dist/ej2.min.js"></script>
+    <script src="~/Areas/Cate/Views/EmployeeBusinessPlan/EmployeeBusinessPlan.js"></script>
+}

@@ -1,0 +1,66 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("User_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @*@using (Ajax.BeginForm("Add", "User", new { area = "Sys" }, new AjaxOptions
+        {
+            HttpMethod = "POST",
+            OnSuccess = "User_OnProcessSuccess(data, 'AddUser')"
+        }, new { @class = "form-horizontal", role = "form" }))*@
+    @using (Html.BeginForm("Add", "User", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "AddUser", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_User")
+        </div>
+    }
+
+    <script type="text/javascript">
+
+        $('form#AddUser').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if ($("#ModalContent #modal_AddUser #chkNotDismissModal").is(":checked")) {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableUser.ajax.reload(null, false);
+                            response.status = undefined;
+                            $("#ModalContent #modal_AddUser form")[0].reset();
+                        }
+                    } else {
+                        if (!response.status && response.errorCode == 1) {
+                            eval(response.message);
+                            response.status = undefined;
+                        } else {
+                            $("#ModalContent #modal_AddUser").modal("hide");
+                            $("#ModalContent #modal_AddUser").on('hidden.bs.modal',
+                                function () {
+                                    if (response.status != undefined) {
+                                        eval(response.message);
+                                        _tableUser.ajax.reload(null, false);
+                                        response.status = undefined;
+                                    }
+                                });
+                        }
+                    }
+                } else {
+                    $("#ModalContent #modal_AddUser" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}
+
+@section ContinueForm{
+
+}

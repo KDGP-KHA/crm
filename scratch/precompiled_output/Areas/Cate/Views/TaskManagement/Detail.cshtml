@@ -1,0 +1,212 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_TaskManagementModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectOverview_Title");
+}
+
+@section PageTitle {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2">
+                    <i class="fa fa-home fa-1x"></i> <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=45">
+                    @AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_DanhMuc")
+                </a>
+            </li>
+
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Cate/Project">
+                    @AppProcessor.Messagor.GetMessage("Project_Title")
+                </a>
+            </li>
+
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Cate/ProjectOverview/Index/@ViewBag.ProjectId">
+                    @ViewBag.ProjectName
+                </a>
+            </li>
+
+            @*<li class="breadcrumb-item">
+                    <a class="no-underline text-primary-d2"
+                       href="javascript:void(0)"
+                       onclick="openProjectTask(@Model.ProductProjectID)">
+                        Công việc
+                    </a>
+                </li>*@
+            @if (Model.TaskManagementID > 0)
+            {
+                <li class="breadcrumb-item active">
+                    #@Model.TaskManagementID - @Model.TaskName
+                </li>
+            }
+            else
+            {
+                <li class="breadcrumb-item active">
+                    Thêm công việc
+                </li>
+            }
+        </ol>
+    </nav>
+}
+
+<div class="dcard">
+
+    <!-- TAB -->
+    <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
+
+        <!-- TAB DETAIL -->
+        <li class="nav-item mr-2px">
+            <a id="detail-tab-btn"
+               class="nav-link active d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab"
+               href="#detailTask"
+               role="tab"
+               aria-controls="detailTask"
+               aria-selected="true">
+
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-info-circle text-info mr-3px"></i>
+                Chi tiết công việc
+            </a>
+        </li>
+
+        <!-- TAB LOG -->
+        @if (Model.TaskManagementID != 0)
+        {
+            <li class="nav-item mr-2px">
+                <a id="log-tab-btn"
+                   class="nav-link d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+                   data-toggle="tab"
+                   href="#log"
+                   role="tab"
+                   aria-controls="log"
+                   aria-selected="false">
+
+                    <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                    <i class="fa fa-info-circle text-warning mr-3px"></i>
+                    Nhật ký công việc
+                </a>
+            </li>
+        }
+
+
+
+    </ul>
+
+    <!-- CONTENT -->
+    <div class="tab-content bgc-white p-35 border-0">
+
+        <!-- DETAIL -->
+        <div class="tab-pane fade show active text-95"
+             id="detailTask"
+             role="tabpanel"
+             aria-labelledby="detail-tab-btn">
+
+            <div id="taskDetailContainer">
+                @if (Model.TaskManagementID != 0)
+                {
+                    if (Model.IsEdit)
+                    {@Html.Partial("_Edit", Model) }
+                else
+                {@Html.Partial("_TaskDetailView", Model)}
+        }
+        else
+        {
+            @Html.Partial("_Add", Model)
+        }
+            </div>
+
+        </div>
+
+        <!-- LOG -->
+        @if (Model.TaskManagementID != 0)
+        {
+            <div class="tab-pane fade text-95"
+                 id="log"
+                 role="tabpanel"
+                 aria-labelledby="log-tab-btn">
+
+                <div id="logContainer">
+                    @*@Html.Partial("~/Areas/Cate/Views/LogTask/_LichSuLog.cshtml")*@
+                    @Html.Action("TaskLog", "LogTask", new { taskManagementId = @Model.TaskManagementID })
+                </div>
+
+            </div>
+        }
+
+    </div>
+</div>
+
+<style>
+    #taskDetailContainer .modal-header {
+        display: none !important;
+    }
+
+    #taskDetailContainer .modal-footer {
+        justify-content: flex-start !important;
+        background: white !important;
+    }
+
+    .no-transition {
+        transition: none !important;
+        animation: none !important;
+    }
+</style>
+<script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+
+<script>
+    // ===== INIT =====
+    var taskId = @Model.TaskManagementID;
+
+    $(document).ready(function () {
+
+        $(".datepicker").datepicker({
+            format: "DD/MM/YYYY",
+            locale: "vi"
+        });
+
+        // restore tab
+        var activeTab = localStorage.getItem("activeTaskTab");
+
+        if (activeTab) {
+
+            $("#log").addClass("no-transition");
+            $("#detailTask").addClass("no-transition");
+
+            $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+        }
+
+        // save current tab
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+
+            var target = $(e.target).attr("href");
+
+            localStorage.setItem("activeTaskTab", target);
+        });
+
+    });
+
+    function openProjectTask(projectId) {
+        localStorage.setItem("openProjectTaskTab", "1");
+        window.location.href = '/Cate/ProductProjectOverview/Index/' + projectId;
+    }
+
+    function TaskManagement_OnProcessSuccess(response) {
+        if (response.status != undefined) {
+            eval(response.message);
+            if (response.projectId) {
+                // taskId = response.taskManagementId; // cập nhật lại biến taskId
+                window.location.href = '/Cate/ProjectOverview/Index/' + response.projectId;
+            }
+        } else {
+            $("#taskDetailContainer #bodyForm").html(response);
+        }
+    }
+</script>

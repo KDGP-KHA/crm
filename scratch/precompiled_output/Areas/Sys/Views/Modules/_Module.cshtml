@@ -1,0 +1,79 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysModuleModel
+
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(model => model.ModuleId)
+
+<div id="AppModule">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ModuleName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.ModuleName, new { @class = "form-control col-md-8", placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_ModuleName") })
+            @Html.ValidationMessageFor(model => model.ModuleName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.DefaultAction, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.DefaultAction, new { @class = "form-control col-md-8", placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_DefaultAction") })
+            @Html.ValidationMessageFor(model => model.DefaultAction, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    @*<div class="form-group row">
+        @Html.TitleFor(model => model.ModuleView, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.ModuleView, new { @class = "form-control col-md-8", placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_ModuleView") })
+            @Html.ValidationMessageFor(model => model.ModuleView, "", new { @class = "text-danger" })
+        </div>
+    </div>*@
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Description, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Description, new { rows = "3", @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_Description") })
+            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ModuleFileZip, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.FileFor(model => model.ModuleFileZip, ".zip", true, new { @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("AppModule_Label_ZipFile") })
+            @Html.ValidationMessageFor(model => model.ModuleFileZip, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Menu_Label_Icon")</label>
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle iconpicker-component" data-selected="fa-car" data-toggle="dropdown" id="iconpicker">
+                        <i class="fa-2x @Model.Icon"></i>
+                    </button>
+                    <div class="dropdown-menu"></div>
+                </div>
+                @Html.TextBoxFor(model => model.Icon, new { @class = "form-control form-control-lg col-sm-8 iconpicker-component", Value = Model.Icon, @readonly = true })
+            </div>
+            @*<button type="button" class="btn btn-default fa-2x iconpicker" data-iconset="fontawesome" role="iconpicker" id="iconpicker" data-icon="@Model.Icon"></button>
+            @Html.HiddenFor(model => model.Icon, new {@class = "form-control", Value = Model.Icon})*@
+            @Html.ValidationMessageFor(model => model.Icon, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+@Html.RenderScripts(ScriptPosition.BodyInside)
+
+<script type="text/javascript">
+    $(function() {
+        $('#iconpicker').iconpicker({ placement: 'top', defaultValue: true, hideOnSelect: true, selectedCustomClass: "fa-2x" });
+        $(".iconpicker-items a").on('click',
+            function(e) {
+                e.preventDefault();
+                return false;
+            });
+        $('#iconpicker').on('iconpickerSelected',
+            function(e) {
+                $("#Icon").val(e.iconpickerValue);
+                $(this).children('i').get(0).className = 'fa-2x ' + e.iconpickerValue;
+            });
+    });
+</script>

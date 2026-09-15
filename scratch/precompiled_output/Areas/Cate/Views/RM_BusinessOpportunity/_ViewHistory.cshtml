@@ -1,0 +1,41 @@
+﻿@using TSFramework.Libs.Processors
+@using System.Configuration
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("RM_ExchangeHistory_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    purple
+}
+
+@section FormIcon{
+    <i class="fas fa-history"></i>
+}
+
+@section FormBody{
+    <style>
+        .exchange-history-full {
+            height: auto !important;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+
+        .exchange-history-full .ace-scroll-inner {
+            height: auto !important;
+            max-height: none !important;
+        }
+    </style>
+
+    <div id="bodyForm">
+        <div class="row">
+            <div class="col-md-12 col-sm-12" id="History">
+                <div class="px-2 exchange-history-full">
+                    @Html.Partial("_LichSuPhieu")
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section SubmitControl{}

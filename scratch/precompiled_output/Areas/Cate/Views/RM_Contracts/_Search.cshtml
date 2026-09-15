@@ -1,0 +1,51 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ContractsSearchModel
+
+<div class="Search card bcard border-0 shadow-sm radius-0" id="SearchContracts">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+    <div class="card-body p-2 d-flex align-items-end">
+        <div class="Search_Box w-25 keyWord">
+            <label class="font-bold text-sm-right">@AppProcessor.Messagor.GetMessage("Label_TuKhoa")</label>
+            <input type="text" id="Keyword" class="form-control" placeholder="@AppProcessor.Messagor.GetMessage("Contracts_SearchPlaceholder")" />
+        </div>
+
+        <div class="Group">
+            <div class="Search_Box">
+                <label class="font-bold text-sm-right">@AppProcessor.Messagor.GetMessage("Customer_Status_Label")</label>
+                <div class="">
+                    @Html.DropDownListFor(model => model.StatusID,
+                                                 new SelectList(Model.Status, "ID", "StatusName"),
+                                                 "",
+                                                 new { @class = "form-control", data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select") })
+                </div>
+            </div>
+        </div>
+
+        <div class="Group Group_button">
+            <div class="Search_button">
+                <button type="button" class="btn btn-primary" onclick="Search()">
+                    <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#SearchContracts').on('keydown', 'input, select', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                Search();
+            }
+        });
+        $('#SearchContracts').on('change', 'select', function () {
+            Search();
+        });
+    });
+</script>
+

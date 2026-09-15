@@ -1,0 +1,89 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysJobModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.JobId)
+<div id="JobSchedule">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.JobLibrary, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.FileFor(model => model.FileLibrary, ".dll", true, new { @class = "form-control col-md-8" })
+            @Html.ValidationMessageFor(model => model.FileLibrary, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.JobLibrary)
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.JobName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.JobName, new { @class = "form-control col-md-9", placeholder = AppProcessor.Messagor.GetMessage("Job_Label_Name") })
+            @Html.ValidationMessageFor(model => model.JobName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.JobDescription, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.JobDescription, new { rows = 3, @class = "form-control col-md-9", placeholder = AppProcessor.Messagor.GetMessage("Job_Label_JobDescription") })
+            @Html.ValidationMessageFor(model => model.JobDescription, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @*@Html.TitleFor(model => model.IsActive, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })*@
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold"></label>
+        <div class="col-md-9">
+            <label class="col-md-4 px-0">
+                @Html.CheckBoxFor(model => model.IsActive)
+                @Html.DisplayNameFor(model => model.IsActive)
+            </label>
+            @Html.ValidationMessageFor(model => model.JobDescription, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CronExpression, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.CronExpression, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Job_Label_CronExpression") })
+                <div class="input-group-append">
+                    <a class="input-group-text btn btn-primary" data-modal="true" data-modal-id="CronExpression" data_width="1024px" href="/Sys/Job/CronExpression">&nbsp;Tạo Lịch</a>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.CronExpression, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-12">
+            <div class="alert alert-success">
+                <p>
+                    <strong>Mô tả:</strong> <span id="ExplainCronExpression"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+@Html.RenderScripts(ScriptPosition.BodyInside)
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        requirejs(['cronstrue'],
+            function(cronstrue) {
+                var expression = $("#JobSchedule #CronExpression").val();
+                if (expression.length > 0) {
+                    var result = cronstrue.toString(expression);
+                    $("#JobSchedule #ExplainCronExpression").text(result);
+                }
+            });
+
+        $("#JobSchedule #CronExpression").change(function() {
+            requirejs(['cronstrue'],
+                function(cronstrue) {
+                    var expression = $("#JobSchedule #CronExpression").val();
+                    if (expression.length > 0) {
+                        var result = cronstrue.toString(expression);
+                        $("#JobSchedule #ExplainCronExpression").text(result);
+                    }
+                });
+        });
+    });
+
+</script>

@@ -353,6 +353,9 @@
 		<!--ReviewBatchItem-->
 		<Procedure Name="RM_ReviewBatchItem_Save"		Value="RM_ReviewBatchItem_Save" />
 		<Procedure Name="RM_ReviewBatch_GetHistory"		Value="RM_ReviewBatch_GetHistory" />
+		<Procedure Name="RM_DigitalSalesReview_GetList" Value="RM_DigitalSalesReview_GetList" />
+		<Procedure Name="RM_DigitalSalesReview_Save" Value="RM_DigitalSalesReview_Save" />
+		<Procedure Name="RM_DigitalSalesReview_GetHistory" Value="RM_DigitalSalesReview_GetHistory" />
 		<Procedure Name="RM_ReviewHistory_Save"			Value="RM_ReviewHistory_Save" />
 		<Procedure Name="RM_ReviewHistory_GetByID"			Value="RM_ReviewHistory_GetByID" />
 
@@ -432,5 +435,11 @@
 		<Procedure Name="RM_DigitalSalesActivity_GetList" Value="RM_DigitalSalesActivity_GetList" />
 		<Procedure Name="RM_DigitalSalesActivity_Add" Value="RM_DigitalSalesActivity_Add" />
 		<Procedure Name="RM_DigitalSalesActivity_Delete" Value="RM_DigitalSalesActivity_Delete" />
+		<Procedure Name="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" Value="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" />
+
+		<!-- RM_DigitalSales Helpers -->
+		<Procedure Name="RM_DigitalSales_GetDepartmentByUserID" Value="RM_DigitalSales_GetDepartmentByUserID" />
+		<Procedure Name="RM_DigitalSales_GetAccessibleEmployees" Value="RM_DigitalSales_GetAccessibleEmployees" />
 	</StoredProcedures>
 </Provider>
+

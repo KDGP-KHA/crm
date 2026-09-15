@@ -1,0 +1,15 @@
+﻿@using TSFramework.Libs.Processors
+
+
+<footer class="footer d-none d-sm-block" style="height: 3.6rem">
+    <div class="footer-inner bgc-white-tp1 row justify-content-center pt-3 border-none border-t-3 brc-grey-l2 border-double" style="gap: 4px">
+        <span class="d-lg-inline-block d-block text-danger-d1 text-upcase font-bold">@AppProcessor.Messagor.GetMessage("App_Title").Split(',').First().ToUpper()</span>
+        <span class="d-lg-inline-block d-block text-blue-d1 text-upcase font-bold">@AppProcessor.Messagor.GetMessage("App_Title").Split(',').Last().ToUpper()</span>
+    </div><!-- .footer-inner -->
+    <!-- `scroll to top` button inside footer (for example when in boxed layout) -->
+    <div class="footer-tools">
+        <a href="#" class="btn-scroll-up btn btn-dark mb-2 mr-2">
+            <i class="fa fa-angle-double-up mx-2px text-95"></i>
+        </a>
+    </div>
+</footer>

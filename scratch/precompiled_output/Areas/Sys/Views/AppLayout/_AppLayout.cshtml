@@ -1,0 +1,53 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysLayoutModel
+
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(model => model.LayoutId)
+
+<div id="SysLayout">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.LayoutName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.LayoutName, new { @class = "form-control col-md-8", placeholder = AppProcessor.Messagor.GetMessage("AppLayout_Label_LayoutName") })
+            @Html.ValidationMessageFor(model => model.LayoutName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.LayoutView, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.LayoutView, new { @class = "form-control col-md-8", placeholder = AppProcessor.Messagor.GetMessage("AppLayout_Label_LayoutView") })
+            @Html.ValidationMessageFor(model => model.LayoutView, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Note, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Note, new { rows = "3", @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("AppLayout_Label_Note") })
+            @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.NumberContentPanel, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.NumberContentPanel, new { @class = "form-control col-md-2", type = "number", min = "1", max = "12", placeholder = AppProcessor.Messagor.GetMessage("AppLayout_Label_NumberContentPanel") })
+            @Html.ValidationMessageFor(model => model.NumberContentPanel, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.NumberCol, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.NumberCol, new { @class = "form-control col-md-2", type = "number", min = "1", max = "12", placeholder = AppProcessor.Messagor.GetMessage("AppLayout_Label_NumberCol") })
+            @Html.ValidationMessageFor(model => model.NumberCol, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ZipFile, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.FileFor(model => model.ZipFile, ".zip", true, new { @class = "form-control col-md-10", placeholder = AppProcessor.Messagor.GetMessage("AppLayout_Label_ZipFile") })
+            @Html.ValidationMessageFor(model => model.ZipFile, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+@Html.RenderScripts(ScriptPosition.BodyInside)

@@ -1,0 +1,136 @@
+﻿@using System
+@using System.Collections.Generic
+@using System.Web.Mvc
+@using System.Web.Mvc.Html
+@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesProductModel
+@{
+    var productList = ViewBag.ProductList as List<SelectListItem> ?? new List<SelectListItem>();
+    var costTypes = ViewBag.CostTypes as List<SelectListItem> ?? new List<SelectListItem>();
+    var costs = Model.Costs ?? new List<Core.Cate.Models.RM_DigitalSalesProductCostModel>();
+    var revenues = Model.Revenues ?? new List<Core.Cate.Models.RM_DigitalSalesProductRevenueModel>();
+    var costTokens = ViewBag.ProductCostTokens as List<string> ?? new List<string>();
+    var revenueTokens = ViewBag.ProductRevenueTokens as List<string> ?? new List<string>();
+}
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.SalesProductID)
+@Html.HiddenFor(model => model.DigitalSalesID)
+
+<div class="card bcard border-1 brc-primary-m3 shadow-sm mb-3">
+    <div class="card-header bgc-primary-d1 text-white py-2">
+        <h6 class="card-title text-100 text-white font-bolder mb-0"><i class="fa fa-cube mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_GeneralSection_Title")</h6>
+    </div>
+    <div class="card-body p-3">
+        <div class="row product-main-row">
+            <div class="col-md-6 form-group">
+                @Html.TitleFor(model => model.ProductServiceID, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.DropDownListFor(model => model.ProductServiceID, productList, AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ProductService_Option"), new { @class = "form-control select2 product-service-select none-select2" })
+                @Html.ValidationMessageFor(model => model.ProductServiceID, "", new { @class = "text-danger text-85" })
+            </div>
+            <div class="col-md-6 form-group">
+                @Html.TitleFor(model => model.PackageName, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.TextBoxFor(model => model.PackageName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesProduct_PackageName_Placeholder") })
+                @Html.ValidationMessageFor(model => model.PackageName, "", new { @class = "text-danger text-85" })
+            </div>
+        </div>
+        <div class="row product-metrics-row">
+            <div class="col-md-3 form-group">
+                @Html.TitleFor(model => model.Quantity, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.TextBoxFor(model => model.Quantity, new { @class = "form-control", type = "number", min = "1", step = "1" })
+                @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger text-85" })
+            </div>
+            <div class="col-md-3 form-group">
+                @Html.TitleFor(model => model.ExpectedRevenueMillion, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.TextBoxFor(model => model.ExpectedRevenueMillion, "{0:0.##}", new { @class = "form-control text-right js-expected-revenue", inputmode = "decimal", placeholder = "0" })
+                @Html.ValidationMessageFor(model => model.ExpectedRevenueMillion, "", new { @class = "text-danger text-85" })
+            </div>
+            <div class="col-md-3 form-group">
+                @Html.TitleFor(model => model.StartDate, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.TextBoxFor(model => model.StartDate, "{0:dd/MM/yyyy}", new { @class = "form-control date-picker product-date-input", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Date_Placeholder"), autocomplete = "off" })
+                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger text-85" })
+            </div>
+            <div class="col-md-3 form-group">
+                @Html.TitleFor(model => model.EndDate, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.TextBoxFor(model => model.EndDate, "{0:dd/MM/yyyy}", new { @class = "form-control date-picker product-date-input", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_Date_Placeholder"), autocomplete = "off" })
+                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger text-85" })
+            </div>
+        </div>
+        <div class="row product-note-row">
+            <div class="col-12 form-group mb-0">
+                @Html.TitleFor(model => model.Note, new { @class = "text-85 text-600 mb-1 d-block" })
+                @Html.TextAreaFor(model => model.Note, 2, 50, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Note_Placeholder") })
+                @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger text-85" })
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card bcard border-1 brc-orange-m3 shadow-sm mb-3">
+    <div class="card-header bgc-orange-d1 text-white py-2 d-flex justify-content-between align-items-center">
+        <h6 class="card-title text-100 text-white font-bolder mb-0"><i class="fa fa-file-invoice-dollar mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_CostSection_Title")</h6>
+        <button type="button" class="btn btn-xs btn-white btn-h-light-orange text-orange-d2 font-bolder" data-add-row="cost"><i class="fa fa-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_AddCost_Button")</button>
+    </div>
+    <div class="card-body p-2">
+        <div class="table-responsive"><table class="table table-bordered table-hover mb-0 text-90">
+            <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>@AppProcessor.Messagor.GetMessage("CostType_Title")</th><th>@AppProcessor.Messagor.GetMessage("ProductCost_Amount_Label")</th><th>@AppProcessor.Messagor.GetMessage("ProductCost_PaymentDate_Label")</th><th>@AppProcessor.Messagor.GetMessage("ProductCost_Note_Label")</th><th class="text-center col-1">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Column_Action")</th></tr></thead>
+            <tbody id="productCostRows">
+                @for (var index = 0; index < costs.Count; index++)
+                {
+                    var item = costs[index]; var token = costTokens.Count > index ? costTokens[index] : index.ToString();
+                    <tr data-detail-row="cost">
+                        <td>@Html.Hidden("Costs.Index", token)@Html.Hidden("Costs[" + token + "].SalesProductCostID", item.SalesProductCostID)@Html.DropDownList("Costs[" + token + "].CostTypeID", new SelectList(costTypes, "Value", "Text", item.CostTypeID), AppProcessor.Messagor.GetMessage("DigitalSalesProduct_CostType_Option"), new { @class = "form-control form-control-sm product-detail-select none-select2 product-detail-select-sm" })@Html.ValidationMessage("Costs[" + token + "].CostTypeID", new { @class = "text-danger text-85" })</td>
+                        <td>@Html.TextBox("Costs[" + token + "].Amount", item.Amount, "{0:0.##}", new { @class = "form-control form-control-sm text-right js-cost-amount", inputmode = "decimal", placeholder = "0" })@Html.ValidationMessage("Costs[" + token + "].Amount", new { @class = "text-danger text-85" })</td>
+                        <td>@Html.TextBox("Costs[" + token + "].PaymentDate", item.PaymentDate, "{0:dd/MM/yyyy}", new { @class = "form-control form-control-sm date-picker product-date-input", placeholder = "dd/MM/yyyy", autocomplete = "off" })</td>
+                        <td>@Html.TextBox("Costs[" + token + "].Note", item.Note, new { @class = "form-control form-control-sm", placeholder = AppProcessor.Messagor.GetMessage("ProductCost_Note_Label") })</td>
+                        <td class="text-center align-middle"><button type="button" class="btn btn-xs btn-outline-danger border-0" data-remove-row title="@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_RemoveRow_Title")"><i class="fa fa-trash-alt"></i></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table></div>
+        <div class="text-center py-3 text-secondary-m2 @(costs.Count > 0 ? "d-none" : "")" data-empty-state="cost"><i class="fa fa-receipt text-140 d-block mb-1 opacity-2"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_NoCost_Message")</div>
+    </div>
+</div>
+
+<div class="card bcard border-1 brc-success-m3 shadow-sm mb-3">
+    <div class="card-header bgc-success-d1 text-white py-2 d-flex justify-content-between align-items-center">
+        <h6 class="card-title text-100 text-white font-bolder mb-0"><i class="fa fa-coins mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_RevenueSection_Title")</h6>
+        <button type="button" class="btn btn-xs btn-white btn-h-light-green text-green-d2 font-bolder" data-add-row="revenue"><i class="fa fa-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_AddRevenue_Button")</button>
+    </div>
+    <div class="card-body p-2">
+        @Html.ValidationMessage("Revenues", new { @class = "text-danger text-85 d-block mb-2" })
+        <div class="table-responsive"><table class="table table-bordered table-hover mb-0 text-90">
+            <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>@AppProcessor.Messagor.GetMessage("RevenueReceived_Amount_Label")</th><th>@AppProcessor.Messagor.GetMessage("RevenueReceived_ReceivedDate_Label")</th><th>@AppProcessor.Messagor.GetMessage("RevenueReceived_ReceivedTime_Label")</th><th>@AppProcessor.Messagor.GetMessage("RevenueReceived_Note_Label")</th><th class="text-center col-1">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Column_Action")</th></tr></thead>
+            <tbody id="productRevenueRows">
+                @for (var index = 0; index < revenues.Count; index++)
+                {
+                    var item = revenues[index]; var token = revenueTokens.Count > index ? revenueTokens[index] : index.ToString();
+                    <tr data-detail-row="revenue">
+                        <td>@Html.Hidden("Revenues.Index", token)@Html.Hidden("Revenues[" + token + "].SalesProductRevenueID", item.SalesProductRevenueID)@Html.TextBox("Revenues[" + token + "].Amount", item.Amount, "{0:0.##}", new { @class = "form-control form-control-sm text-right js-revenue-amount", inputmode = "decimal", placeholder = "0" })@Html.ValidationMessage("Revenues[" + token + "].Amount", new { @class = "text-danger text-85" })</td>
+                        <td>@Html.TextBox("Revenues[" + token + "].ReceivedDate", item.ReceivedDate, "{0:dd/MM/yyyy}", new { @class = "form-control form-control-sm date-picker product-date-input", placeholder = "dd/MM/yyyy", autocomplete = "off" })@Html.ValidationMessage("Revenues[" + token + "].ReceivedDate", new { @class = "text-danger text-85" })</td>
+                        <td>@Html.TextBox("Revenues[" + token + "].ReceivedTime", item.ReceivedTime, "{0:dd/MM/yyyy}", new { @class = "form-control form-control-sm date-picker product-date-input", placeholder = "dd/MM/yyyy", autocomplete = "off" })</td>
+                        <td>@Html.TextBox("Revenues[" + token + "].Note", item.Note, new { @class = "form-control form-control-sm", placeholder = AppProcessor.Messagor.GetMessage("RevenueReceived_Note_Label") })</td>
+                        <td class="text-center align-middle"><button type="button" class="btn btn-xs btn-outline-danger border-0" data-remove-row title="@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_RemoveRow_Title")"><i class="fa fa-trash-alt"></i></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table></div>
+        <div class="text-center py-3 text-secondary-m2 @(revenues.Count > 0 ? "d-none" : "")" data-empty-state="revenue"><i class="fa fa-hand-holding-usd text-140 d-block mb-1 opacity-2"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_NoRevenue_Message")</div>
+    </div>
+</div>
+
+<div class="card bcard border-1 brc-grey-l2 shadow-sm mb-0">
+    <div class="card-header bgc-secondary-l2 py-2"><h6 class="card-title text-100 text-secondary-d3 font-bolder mb-0"><i class="fa fa-calculator mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_SummarySection_Title")</h6></div>
+    <div class="card-body p-2"><div class="row text-center">
+        <div class="col-6 col-md-3 py-2 border-r-1 brc-grey-l2"><div class="text-secondary text-85">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ExpectedRevenue_Summary")</div><div class="text-primary font-bolder text-110"><span data-finance-summary="expected">@((Model.ExpectedRevenueMillion ?? 0).ToString("N2"))</span> @AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Unit_Million")</div></div>
+        <div class="col-6 col-md-3 py-2 border-r-1 brc-grey-l2"><div class="text-secondary text-85">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ActualRevenue_Summary")</div><div class="text-success font-bolder text-110"><span data-finance-summary="revenue">@Model.ActualRevenueMillion.ToString("N2")</span> @AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Unit_Million")</div></div>
+        <div class="col-6 col-md-3 py-2 border-r-1 brc-grey-l2"><div class="text-secondary text-85">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_TotalCost_Summary")</div><div class="text-orange-d2 font-bolder text-110"><span data-finance-summary="cost">@Model.TotalCostMillion.ToString("N2")</span> @AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Unit_Million")</div></div>
+        <div class="col-6 col-md-3 py-2"><div class="text-secondary text-85">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Profit_Summary")</div><div class="font-bolder text-110"><span data-finance-summary="profit">@Model.ProfitMillion.ToString("N2")</span> @AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Unit_Million")</div></div>
+    </div></div>
+</div>
+
+<div id="productDetailTemplates" class="d-none"><table><tbody>
+    <tr data-template-row="cost"><td>@Html.Hidden("Costs.Index", "__index__")@Html.Hidden("Costs[__index__].SalesProductCostID", 0)@Html.DropDownList("Costs[__index__].CostTypeID", new SelectList(costTypes, "Value", "Text"), AppProcessor.Messagor.GetMessage("DigitalSalesProduct_CostType_Option"), new { @class = "form-control form-control-sm product-detail-select none-select2 product-detail-select-sm" })</td><td>@Html.TextBox("Costs[__index__].Amount", null, new { @class = "form-control form-control-sm text-right js-cost-amount", inputmode = "decimal", placeholder = "0" })</td><td>@Html.TextBox("Costs[__index__].PaymentDate", null, new { @class = "form-control form-control-sm date-picker product-date-input", placeholder = "dd/MM/yyyy", autocomplete = "off" })</td><td>@Html.TextBox("Costs[__index__].Note", null, new { @class = "form-control form-control-sm", placeholder = AppProcessor.Messagor.GetMessage("ProductCost_Note_Label") })</td><td class="text-center align-middle"><button type="button" class="btn btn-xs btn-outline-danger border-0" data-remove-row title="@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_RemoveRow_Title")"><i class="fa fa-trash-alt"></i></button></td></tr>
+    <tr data-template-row="revenue"><td>@Html.Hidden("Revenues.Index", "__index__")@Html.Hidden("Revenues[__index__].SalesProductRevenueID", 0)@Html.TextBox("Revenues[__index__].Amount", null, new { @class = "form-control form-control-sm text-right js-revenue-amount", inputmode = "decimal", placeholder = "0" })</td><td>@Html.TextBox("Revenues[__index__].ReceivedDate", null, new { @class = "form-control form-control-sm date-picker product-date-input", placeholder = "dd/MM/yyyy", autocomplete = "off" })</td><td>@Html.TextBox("Revenues[__index__].ReceivedTime", null, new { @class = "form-control form-control-sm date-picker product-date-input", placeholder = "dd/MM/yyyy", autocomplete = "off" })</td><td>@Html.TextBox("Revenues[__index__].Note", null, new { @class = "form-control form-control-sm", placeholder = AppProcessor.Messagor.GetMessage("RevenueReceived_Note_Label") })</td><td class="text-center align-middle"><button type="button" class="btn btn-xs btn-outline-danger border-0" data-remove-row title="@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_RemoveRow_Title")"><i class="fa fa-trash-alt"></i></button></td></tr>
+</tbody></table></div>

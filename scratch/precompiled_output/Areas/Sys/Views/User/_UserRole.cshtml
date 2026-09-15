@@ -1,0 +1,81 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysRoleModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.RoleId)
+
+<link rel="stylesheet" href="~/Contents/Modules/Sys/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css" type="text/css"/>
+<div id="UserRole">
+    <div class="form-group row">
+        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Role_Title")</label>
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.Name, new { @class = "form-control col-sm-10 col-md-9", placeholder = AppProcessor.Messagor.GetMessage("Role_Label_Name"), disabled = true })
+            @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.Name)
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.SelectedUsers, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownList("SelectedUsers", new SelectList(Model.ListUsers, "UserId", "FullName"),
+                new { @class = "form-control col-md-10 none-select2", multiple = "multiple", placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select_User") })
+        </div>
+        @Html.HiddenFor(model => model.Users)
+    </div>
+</div>
+<script type="text/javascript" src="~/Contents/Modules/Sys/plugins/bootstrap-multiselect/js/bootstrap-multiselect.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#UserRole select#SelectedUsers').multiselect({
+            maxHeight: 400,
+            numberDisplayed: 1,
+            includeSelectAllOption: true,
+            selectAllNumber: true,
+            selectAllText: 'Chọn/Bỏ chọn tất cả!',
+            nonSelectedText: 'Chọn người dùng',
+            resetText: "Reset",
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            includeResetOption: true,
+            includeResetDivider: true,
+            filterPlaceholder: 'Tìm kiếm người dùng',
+            allSelectedText: 'Chọn tất cả',
+            nSelectedText: 'người dùng đã được chọn',
+            enableClickableOptGroups: true,
+            enableCollapsibleOptGroups: true,
+            onChange: function (option, checked, select) {
+                var selectedValues = $('#UserRole input[type="hidden"][id$="Users"]').val();
+                var arrSelectedValues = selectedValues != undefined && selectedValues.length > 0
+                    ? selectedValues.split(',')
+                    : [];
+                var idxOpt = arrSelectedValues.indexOf($(option).val());
+
+                if (checked) {
+                    if (idxOpt < 0) {
+                        arrSelectedValues.push($(option).val());
+                        $('#UserRole input[type="hidden"][id$="Users"]').val(arrSelectedValues);
+                    }
+                } else {
+                    if (idxOpt > -1) {
+                        arrSelectedValues.splice(idxOpt, 1);
+                        $('#UserRole input[type="hidden"][id$="Users"]').val(arrSelectedValues);
+                    }
+                }
+            },
+            onSelectAll: function () {
+                var arrSelectedValues = $('#UserRole select#SelectedUsers option:selected').map(function (a, item) { return item.value; });
+                $('#UserRole input[type="hidden"][id$="Users"]').val(arrSelectedValues.toArray());
+            },
+            onDeselectAll: function () {
+                $('#UserRole input[type="hidden"][id$="Users"]').val('');
+            }
+        });
+    });
+
+    $(function () {
+        var selectedValues = $('#UserRole input[type="hidden"][id$="Users"]').val();
+        $('#UserRole select#SelectedUsers').multiselect('select', selectedValues.split(","));
+    });
+</script>

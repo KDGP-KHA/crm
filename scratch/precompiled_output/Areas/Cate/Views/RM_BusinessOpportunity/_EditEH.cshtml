@@ -1,0 +1,48 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ExchangeHistoryModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("RM_ExchangeHistory_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+    var modelId = "EditEH-" + Model.ExchangeHistoryID;
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("EditEH", "RM_BusinessOpportunity", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = modelId, @class = "form-horizontal" }))
+    {
+        <div id="bodyFormEdit">
+            @Html.Partial("_EditExchangeHistory")
+        </div>
+
+    }
+
+<script type="text/javascript">
+        $('form#@modelId').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    $("#ModalContent #modal_@modelId").modal("hide");
+                    $("#ModalContent #modal_@modelId").on("hidden.bs.modal",
+                        function () {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                $("#modal_EditExchangeHistory" + " #LogList").html(response.list);
+                                response.status = undefined;
+                                reloadBOHistory();
+                            }
+                        });
+                } else {
+                    $("#ModalContent #modal_@modelId" + " #bodyFormEdit").html(response);
+                }
+            }
+        });
+</script>
+}

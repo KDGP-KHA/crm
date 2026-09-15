@@ -1,0 +1,346 @@
+﻿@*
+    Popup Quy chế sử dụng CRM (tóm tắt): quy trình 12 bước và các vai trò tham gia.
+    Tự động hiển thị 01 lần cho mỗi người dùng (đánh dấu bằng localStorage).
+    Nguồn: ~/Contents/File/QuyChe_SuDung_CRM_TTKDGP_v4.docx
+*@
+<style>
+    #regulationModal .modal-dialog {
+        max-width: 960px;
+    }
+
+    #regulationModal .modal-body {
+        max-height: 72vh;
+        overflow-y: auto;
+    }
+
+    #regulationModal .reg-section-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #2c405a;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e7f1;
+        padding-bottom: 6px;
+        margin: 4px 0 10px;
+    }
+
+    #regulationModal .reg-principle {
+        display: inline-block;
+        font-weight: 700;
+        font-size: 12px;
+        color: #1b6aaa;
+        background: #eaf3fb;
+        border: 1px solid #cbe2f5;
+        border-radius: 3px;
+        padding: 2px 10px;
+        margin: 0 2px;
+    }
+
+    #regulationModal .reg-phase-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #fff;
+        border-radius: 3px;
+        padding: 5px 10px;
+        margin-bottom: 8px;
+    }
+
+    #regulationModal .reg-step {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 6px 8px;
+        border: 1px solid #e8ecf3;
+        border-radius: 4px;
+        margin-bottom: 6px;
+        background: #fbfcfe;
+    }
+
+    #regulationModal .reg-step-no {
+        flex: 0 0 34px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 11.5px;
+        color: #fff;
+        background: #5b7bb2;
+        border-radius: 3px;
+        padding: 3px 0;
+        margin-top: 1px;
+    }
+
+    #regulationModal .reg-step-name {
+        font-weight: 600;
+        font-size: 12.5px;
+        color: #333;
+        line-height: 1.35;
+    }
+
+    #regulationModal .reg-step-meta {
+        font-size: 11.5px;
+        color: #777;
+        line-height: 1.4;
+    }
+
+    #regulationModal .reg-dept {
+        font-weight: 600;
+    }
+
+    #regulationModal .reg-dept-khdn {
+        color: #1b6aaa;
+    }
+
+    #regulationModal .reg-dept-gp {
+        color: #278562;
+    }
+
+    #regulationModal .reg-role-card {
+        border: 1px solid #e8ecf3;
+        border-radius: 4px;
+        background: #fbfcfe;
+        padding: 8px 10px;
+        height: 100%;
+    }
+
+    #regulationModal .reg-role-code {
+        display: inline-block;
+        font-weight: 700;
+        font-size: 12px;
+        color: #fff;
+        background: #6f5bb2;
+        border-radius: 3px;
+        padding: 1px 8px;
+        margin-right: 6px;
+    }
+
+    #regulationModal .reg-role-name {
+        font-weight: 600;
+        font-size: 12px;
+        color: #444;
+    }
+
+    #regulationModal .reg-role-desc {
+        font-size: 11.5px;
+        color: #666;
+        line-height: 1.45;
+        margin: 4px 0 2px;
+    }
+
+    #regulationModal .reg-role-steps {
+        font-size: 11px;
+        font-weight: 600;
+        color: #b26a1b;
+    }
+</style>
+
+<div class="modal fade" id="regulationModal" tabindex="-1" role="dialog" aria-labelledby="regulationModalTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2 bgc-primary-tp1 border-0 radius-t-1">
+                <h5 class="modal-title text-white-tp1 text-110 pl-2 font-bolder my-auto" id="regulationModalTitle">
+                    <i class="fas fa-book-open"></i>&nbsp;Quy chế sử dụng CRM &amp; phối hợp xử lý cơ hội kinh doanh (tóm tắt)
+                </h5>
+                <button type="button" class="btn btn-outline-white btn-h-danger btn-a-danger mt-1px mr-1px btn-brc-tp" data-dismiss="modal" aria-label="Đóng" title="Đóng">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <div class="text-90 text-secondary-d2 mb-2">
+                        100% khách hàng, cơ hội kinh doanh phải được ghi nhận, cập nhật trên CRM theo nguyên tắc:
+                    </div>
+                    <span class="reg-principle">ĐÚNG</span>
+                    <span class="reg-principle">ĐỦ</span>
+                    <span class="reg-principle">SẠCH</span>
+                    <span class="reg-principle">SỐNG</span>
+                </div>
+
+                <div class="reg-section-title"><i class="fa fa-route text-primary mr-1"></i> Quy trình xử lý cơ hội kinh doanh — 12 bước, 02 giai đoạn</div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="reg-phase-title" style="background:#1b6aaa;">GIAI ĐOẠN I — CƠ HỘI KINH DOANH (B1 – B6)</div>
+                        <div class="reg-step">
+                            <span class="reg-step-no">B1</span>
+                            <span>
+                                <span class="reg-step-name">Tiếp nhận, ghi nhận cơ hội</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (AM, OM) — trong 24 giờ kể từ khi phát sinh</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no">B2</span>
+                            <span>
+                                <span class="reg-step-name">Phân công, lập kế hoạch hành động</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (OM, AM) — 01 ngày làm việc kể từ B1</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no">B3</span>
+                            <span>
+                                <span class="reg-step-name">Khởi tạo yêu cầu hỗ trợ giải pháp (YCHT)</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (AM, BA, OM) — gửi trước buổi làm việc với khách hàng tối thiểu 03 ngày làm việc</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no">B4</span>
+                            <span>
+                                <span class="reg-step-name">Khảo sát, xây dựng, trình bày giải pháp</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-gp">Phòng Giải pháp</span> (BA, TechLead, AM) — tiếp nhận YCHT trong 08 giờ, phản hồi phương án trong 03 ngày làm việc</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no">B5</span>
+                            <span>
+                                <span class="reg-step-name">Báo giá, đàm phán, theo dõi tiến độ</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (AM, Tender, TechLead, OM) — cập nhật theo tần suất quy định</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no">B6</span>
+                            <span>
+                                <span class="reg-step-name">Chốt cơ hội, chuyển đổi thành dự án</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (AM, OM, TechLead, Tender) — 01 ngày làm việc kể từ khi khách hàng chấp thuận</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="reg-phase-title" style="background:#278562;">GIAI ĐOẠN II — DỰ ÁN (B7 – B12)</div>
+                        <div class="reg-step">
+                            <span class="reg-step-no" style="background:#4f9e7e;">B7</span>
+                            <span>
+                                <span class="reg-step-name">Thành lập nhóm dự án</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (PM, AM, BA, TechLead, Dev, Tester) — 02 ngày làm việc kể từ khi chuyển đổi</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no" style="background:#4f9e7e;">B8</span>
+                            <span>
+                                <span class="reg-step-name">Lập, phê duyệt kế hoạch triển khai</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-gp">Phòng Giải pháp</span> (PM, BA, TechLead, AM) — 03 ngày làm việc kể từ B7</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no" style="background:#4f9e7e;">B9</span>
+                            <span>
+                                <span class="reg-step-name">Hoàn thiện hồ sơ, ký kết hợp đồng</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (AM, Tender, TechLead) — cập nhật trong 24 giờ kể từ khi ký</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no" style="background:#4f9e7e;">B10</span>
+                            <span>
+                                <span class="reg-step-name">Triển khai, giám sát tiến độ</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-gp">Phòng Giải pháp</span> (PM, TechLead, Dev, Tester, AM) — cập nhật tối thiểu 02 lần/tuần</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no" style="background:#4f9e7e;">B11</span>
+                            <span>
+                                <span class="reg-step-name">Nghiệm thu, bàn giao</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-gp">Phòng Giải pháp</span> (PM, Tester, AM) — cập nhật trong 24 giờ kể từ khi nghiệm thu</span>
+                            </span>
+                        </div>
+                        <div class="reg-step">
+                            <span class="reg-step-no" style="background:#4f9e7e;">B12</span>
+                            <span>
+                                <span class="reg-step-name">Kết thúc dự án, ghi nhận doanh thu, chăm sóc sau bán</span><br />
+                                <span class="reg-step-meta"><span class="reg-dept reg-dept-khdn">Phòng KHDN</span> (AM, PM, TechLead, OM) — 03 ngày làm việc kể từ khi bàn giao</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-section-title mt-3"><i class="fa fa-users text-purple mr-1"></i> Các vai trò tham gia trên CRM</div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#1b6aaa;">AM</span><span class="reg-role-name">Account Manager</span>
+                            <div class="reg-role-desc">Đầu mối khách hàng. Khởi tạo, cập nhật khách hàng, cơ hội; khởi tạo YCHT; báo giá, đàm phán; giữ đầu mối suốt vòng đời cơ hội, dự án.</div>
+                            <div class="reg-role-steps">Tham gia: B1 – B12</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#1b6aaa;">OM</span><span class="reg-role-name">Opportunity Manager</span>
+                            <div class="reg-role-desc">Chủ quản cơ hội (Giám đốc Phòng KHDN). Phân công AM, kiểm soát chất lượng, duyệt giá ngoài khung, quyết định chuyển cơ hội thành dự án.</div>
+                            <div class="reg-role-steps">Tham gia: B2, B5, B6, B12</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#278562;">BA</span><span class="reg-role-name">Business Analyst</span>
+                            <div class="reg-role-desc">Phân tích yêu cầu; trao đổi làm rõ nhu cầu với khách hàng; lập tài liệu yêu cầu, phạm vi công việc làm đầu vào cho giải pháp, kiểm thử.</div>
+                            <div class="reg-role-steps">Tham gia: B3, B4, B8</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#b26a1b;">Tender</span><span class="reg-role-name">Chuyên viên đấu thầu</span>
+                            <div class="reg-role-desc">Theo dõi mời thầu; chủ trì lập, kiểm soát hồ sơ dự thầu; cập nhật kết quả lựa chọn nhà thầu; bảo đảm hồ sơ hợp đồng phù hợp kết quả trúng thầu.</div>
+                            <div class="reg-role-steps">Tham gia: B5, B6, B9</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#8a3fa8;">PM</span><span class="reg-role-name">Project Manager</span>
+                            <div class="reg-role-desc">Chủ sở hữu bản ghi Dự án. Lập kế hoạch, mốc tiến độ, phân công nhóm; quản trị rủi ro; chủ trì nghiệm thu, đóng dự án.</div>
+                            <div class="reg-role-steps">Tham gia: B7 – B12</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#8a3fa8;">TechLead</span><span class="reg-role-name">Trưởng nhóm phát triển</span>
+                            <div class="reg-role-desc">Chủ trì phương án kỹ thuật, cấu hình – dự toán; phân công, giám sát Dev; chịu trách nhiệm chất lượng kỹ thuật sản phẩm bàn giao.</div>
+                            <div class="reg-role-steps">Tham gia: B4, B5, B8, B9, B10, B12</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#5b7bb2;">Dev</span><span class="reg-role-name">Developer</span>
+                            <div class="reg-role-desc">Phát triển, cấu hình, tích hợp theo phân công của TechLead; cập nhật trạng thái công việc được giao trên hệ thống.</div>
+                            <div class="reg-role-steps">Tham gia: B10</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <div class="reg-role-card">
+                            <span class="reg-role-code" style="background:#5b7bb2;">Tester</span><span class="reg-role-name">Software Tester</span>
+                            <div class="reg-role-desc">Kiểm thử theo tài liệu yêu cầu do BA lập; ghi nhận lỗi, xác nhận đã khắc phục trước khi nghiệm thu.</div>
+                            <div class="reg-role-steps">Tham gia: B10, B11</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <a href="@Url.Content("~/Contents/File/QuyChe_SuDung_CRM_TTKDGP_v4.docx")" class="btn px-3 btn-outline-primary mb-1" target="_blank">
+                    <i class="fas fa-download"></i>&nbsp;Tải quy chế đầy đủ
+                </a>
+                <button type="button" class="btn px-4 btn-primary mb-1" data-dismiss="modal">
+                    <i class="fas fa-check"></i>&nbsp;Đã hiểu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var showRegulation = @Html.Raw((ViewBag.ShowRegulation ?? false).ToString().ToLower());
+        if (!showRegulation)
+            return;
+       $('#regulationModal')
+        .one('hidden.bs.modal', function () {
+
+            $.ajax({
+                url: '@Url.Action("MarkRegulationViewed", "Dashboard")',
+                type: 'POST',
+                success: function (res) {
+                    if (!res.success) {
+                        console.log('Update regulation status failed.');
+                    }
+                },
+                error: function () {
+                    console.log('Ajax error.');
+                }
+            });
+
+        })
+        .modal('show');
+    });
+</script>

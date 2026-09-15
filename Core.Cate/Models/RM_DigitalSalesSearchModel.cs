@@ -15,6 +15,9 @@ namespace Core.Cate.Models
 
         [CustomDisplayName("DigitalSalesSearch_Status_Label")]
         public int StatusID { get; set; }
+        public string StatusIDs { get; set; }
+        public List<int> ExcludedStatusIDs { get; set; } = new List<int>();
+        public List<RM_DigitalSalesStatusModel> StatusItems { get; set; } = new List<RM_DigitalSalesStatusModel>();
         public int CustomerID { get; set; }
         [CustomDisplayName("DigitalSalesSearch_ProductService_Label")]
         public int ProductServiceID { get; set; }

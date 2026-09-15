@@ -1,0 +1,29 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysJobModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Message_Confirm_Execute"), $"[{Model.JobName}]");
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    green
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("ExecNow", "Job", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Job_OnProcessSuccess(data, 'ExecJob')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.JobId)
+        @Html.HiddenFor(model => model.JobName)
+        @Html.HiddenFor(model => model.JobLibrary)
+        @Html.HiddenFor(model => model.JobDescription)
+        @Html.HiddenFor(model => model.JobParrams)
+        @Html.HiddenFor(model => model.CronExpression)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

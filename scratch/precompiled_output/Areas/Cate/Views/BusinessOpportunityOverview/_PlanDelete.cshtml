@@ -1,0 +1,25 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityPlanModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("OpportunityPlan_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using(Ajax.BeginForm("DeletePlan", "BusinessOpportunityOverview", new { area = "Cate" }, new AjaxOptions
+    {
+            HttpMethod = "POST",
+            OnSuccess = "OpportunityPlan_OnProcessSuccess"
+        }, new { @class = "form-horizontal", id = "frmDeleteOpportunityPlan" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.BusinessOpportunityID)
+    <h5>Bạn có chắc chắn muốn xóa kế hoạch "@Model.PlanName" không?</h5 >
+    }
+}

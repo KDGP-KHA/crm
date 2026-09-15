@@ -1,0 +1,17 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysUserModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.UserId)
+@Html.HiddenFor(model => model.UserName)
+@Html.HiddenFor(model => model.FullName)
+
+<h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+<hr/>
+<div class="form-group row">
+	@Html.TitleFor(model => model.Reason, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+	<div class="col-sm-9">
+		@Html.TextAreaFor(model => model.Reason, new { rows = "3", @class = "form-control col-sm-10", placeholder = AppProcessor.Messagor.GetMessage("Reason_Label") })
+		@Html.ValidationMessageFor(model => model.Reason, "", new { @class = "text-danger" })
+	</div>
+</div>

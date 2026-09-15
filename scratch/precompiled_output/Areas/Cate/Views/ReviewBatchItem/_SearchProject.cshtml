@@ -1,0 +1,257 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewProjectSearchModel
+
+<style>
+    #SearchProject .Search_Box {
+        flex: 1;
+        min-width: 180px;
+    }
+    #SearchProject .button-box {
+        flex: 0 0 150px;
+        min-width: 150px;
+    }
+    #SearchProject .radio-group {
+        height: 34px;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="Search card bcard border-0 shadow-sm radius-0" id="SearchProject">
+
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>
+            &nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+
+    <div class="card-body p-2">
+        <div class="d-flex flex-wrap align-items-end mb-2 search-row">
+            <!-- KEYWORD -->
+            <div class="Search_Box keyWord">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+                </label>
+                <input type="text"
+                       id="ProjectKeyword"
+                       class="form-control"
+                       value="@Model.Keyword"
+                       placeholder="@AppProcessor.Messagor.GetMessage("Customer_Keyword")" />
+            </div>
+            <!-- REVIEW BATCH -->
+            <div class="Search_Box">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ReviewBatch_Title")
+                </label>
+                @Html.DropDownListFor(
+                    model => model.ReviewBatchID,
+                    new SelectList(Model.ListReviewPatch, "ReviewBatchID", "BatchName", Model.ReviewBatchID),
+                    "",
+                    new {id = "ProjectReviewBatchID", @class = "form-control", data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")})
+            </div>
+            <!-- STATUS -->
+            <div class="Search_Box">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("Project_Status_Label")
+                </label>
+
+                @Html.DropDownListFor(
+                    model => model.Status,
+                    new SelectList(Model.ListStatus, "ID", "StatusName", Model.Status),
+                    "",
+                    new {id = "ProjectStatus", @class = "form-control", data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")})
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-end search-row">
+            <!-- DEPARTMENT -->
+            <div class="Search_Box">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("Department_Search_Label")
+                </label>
+                @Html.DropDownListFor(
+                    model => model.BoPhanID,
+                    new SelectList(Model.Departments, "BoPhan_ID", "TenBoPhanView"),
+                    "-- Chọn phòng --",
+                    new {id = "ProjectBoPhanID", @class = "form-control"})
+            </div>
+            <!-- EMPLOYEE -->
+            <div class="Search_Box">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("Employee_Search_Label")
+                </label>
+                @Html.DropDownListFor(
+                    model => model.EmployeeID,
+                    Enumerable.Empty<SelectListItem>(),
+                    "-- Chọn nhân viên --",
+                    new {id = "ProjectEmployeeID", @class = "form-control"})
+            </div>
+            <!-- IS REVIEWED -->
+            <div class="Search_Box review-box">
+                <label class="font-bold d-block">
+                    @AppProcessor.Messagor.GetMessage("ReviewBatch_IsReviewed_Label")
+                </label>
+                <div class="d-flex align-items-center radio-group">
+                    <div class="custom-control custom-radio mr-3">
+                        <input type="radio"
+                               id="ProjectIsReviewed_No"
+                               name="ProjectIsReviewed"
+                               class="custom-control-input"
+                               value="false"
+                               @(!Model.IsReviewed ? "checked" : "") />
+                        <label class="custom-control-label"
+                               for="ProjectIsReviewed_No">
+                            @AppProcessor.Messagor.GetMessage("IsReviewed_No_Label")
+                        </label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input type="radio"
+                               id="ProjectIsReviewed_Yes"
+                               name="ProjectIsReviewed"
+                               class="custom-control-input"
+                               value="true"
+                               @(Model.IsReviewed ? "checked" : "") />
+                        <label class="custom-control-label" for="ProjectIsReviewed_Yes">
+                            @AppProcessor.Messagor.GetMessage("IsReviewed_Yes_Label")
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <!-- BUTTON -->
+            <div class="Search_Box button-box">
+                <button type="button" class="btn btn-primary w-100" onclick="SearchProject()">
+                    <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // =========================================
+        // LOAD EMPLOYEE BY DEPARTMENT
+        // =========================================
+        $("#ProjectBoPhanID").on("change", function () {
+            var departmentId = $(this).val();
+            var $employee = $("#ProjectEmployeeID");
+
+            $employee.empty()
+                .append('<option value="">-- Chọn nhân viên --</option>');
+
+            if (!departmentId) {
+                $employee.trigger("chosen:updated");
+                return;
+            }
+
+            $.get('/Cate/Project/GetEmployeesByDepartment', {
+                departmentId: departmentId
+            }, function (data) {
+
+                $.each(data, function (i, item) {
+
+                    $employee.append(
+                        $('<option>')
+                            .val(item.Value)
+                            .text(item.Text)
+                    );
+                });
+
+                // restore employee
+                const projectFilter =
+                    JSON.parse(localStorage.getItem("review_project_filter"));
+
+                if (projectFilter && projectFilter.EmployeeID) {
+
+                    $employee.val(projectFilter.EmployeeID);
+                }
+
+                $employee.trigger("chosen:updated");
+
+                // search AFTER restore employee
+                SearchProject();
+            });
+        });
+
+        // =========================================
+        // RESTORE FILTER
+        // =========================================
+
+        const reviewBatchID = '@Model.ReviewBatchID';
+
+        if (!reviewBatchID || reviewBatchID === "0") {
+
+            const projectFilter =
+                JSON.parse(localStorage.getItem("review_project_filter"));
+
+            if (projectFilter) {
+
+                $("#ProjectKeyword").val(projectFilter.Keyword || "");
+
+                $("#ProjectReviewBatchID")
+                    .val(projectFilter.ReviewBatchID || "")
+                    .trigger("chosen:updated");
+
+                $("#ProjectStatus")
+                    .val(projectFilter.Status || "")
+                    .trigger("chosen:updated");
+
+                $("#ProjectBoPhanID")
+                    .val(projectFilter.BoPhanID || "")
+                    .trigger("chosen:updated");
+
+                $('input[name="ProjectIsReviewed"][value="' + projectFilter.IsReviewed + '"]')
+                    .prop("checked", true);
+
+                // trigger AFTER bind
+                if (projectFilter.BoPhanID) {
+                    $("#ProjectBoPhanID").trigger("change");
+                }
+            }
+        }
+
+        // =========================================
+        // EVENTS
+        // =========================================
+
+        $('#SearchProject').on('keydown', 'input, select', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                SearchProject();
+            }
+        });
+
+        // bind riêng từng control
+        $("#ProjectReviewBatchID").change(SearchProject);
+        $("#ProjectStatus").change(SearchProject);
+        $("#ProjectEmployeeID").change(SearchProject);
+        $('input[name="ProjectIsReviewed"]').change(SearchProject);
+    });
+
+    function saveProjectFilter() {
+
+        const filter = {
+            Keyword: $("#ProjectKeyword").val(),
+            ReviewBatchID: $("#ProjectReviewBatchID").val(),
+            Status: $("#ProjectStatus").val(),
+            BoPhanID: $("#ProjectBoPhanID").val(),
+            EmployeeID: $("#ProjectEmployeeID").val(),
+            IsReviewed: $('input[name="ProjectIsReviewed"]:checked').val()
+        };
+
+        localStorage.setItem(
+            "review_project_filter",
+            JSON.stringify(filter)
+        );
+    }
+
+    function SearchProject() {
+
+        saveProjectFilter();
+
+        if (_tableProject) {
+            _tableProject.ajax.reload();
+        }
+    }
+</script>

@@ -1,0 +1,139 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ExchangeHistoryModel
+
+@Html.AntiForgeryToken()
+<div id="ExchangeHistory">
+    @Html.HiddenFor(model => model.ExchangeHistoryID)
+    @Html.HiddenFor(model => model.BusinessOpportunityID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ExchangeDate, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.ExchangeDate, "{0:dd/MM/yyyy HH:mm}", new { id = "ExchangeDate", @class = "form-control datetimepicker", placeholder = "dd/mm/yyyy hh:mm" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.ExchangeDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ContactPerson_ID, new { @class = "col-md-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.DropDownListFor(model => model.ContactPerson_ID, new SelectList(Model.ListContactPerson, "Value", "Text"), "", new { @class = "col form-control" })
+            @Html.ValidationMessageFor(model => model.ContactPerson_ID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.MemberID, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            <div class="input-group">
+                @Html.DropDownList("ParticipatingMembersEHSelect", new SelectList(Model.Members, "MemberID", "FullName"), "", new { @class = "form-control", multiple = true, data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select") })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.StatusID, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            <div class="input-group">
+                @Html.DropDownListFor(model => model.StatusID, new SelectList(Model.OpportunityStatus, "ID", "StatusName"), "", new { @class = "form-control", data_placeholder = AppProcessor.Messagor.GetMessage("Opportunity_Status_Label") })
+            </div>
+            @Html.ValidationMessageFor(model => model.StatusID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.FileAttach, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            <div id="fileList" class="mt-2"></div>
+        </div>
+    </div>
+    @if (Model.ExchangeHistoryID > 0)
+    {
+        <div class="form-group row">
+            @Html.TitleFor(model => model.ExchangeContent, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-8">
+                @Html.TextAreaFor(model => model.ExchangeContent, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+                @Html.ValidationMessageFor(model => model.ExchangeContent, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="form-group row">
+            <div class="col-md-12">
+                @Html.TextAreaFor(model => model.ExchangeContent, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+                @Html.ValidationMessageFor(model => model.ExchangeContent, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    }
+
+</div>
+<script>
+    $(document).ready(function () {
+        $('#FormXacNhan #btnSave').attr('type', 'button');
+        reloadCKEditor();
+    });
+
+    //Contructor CKEDITOR
+    function reloadCKEditor() {
+
+        var editor = CKEDITOR.instances['ExchangeContent'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('ExchangeContent', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '750',
+        });
+        editor.on('instanceReady', function (e) {
+            editor.widgets.registered.uploadimage.onUploaded = function (upload) {
+                this.replaceWith('<img src="' + upload.url + '" ' + 'width="100%" ' + 'height="auto">');
+            };
+        });
+    }
+</script>
+<script>
+    var filesList = [];
+    var dataTransfer = new DataTransfer();
+
+    $(document).on("change", "#DinhKemFile", function (e) {
+        let newFiles = Array.from(e.target.files);
+
+        newFiles.forEach(file => {
+            if (!filesList.some(f => f.name === file.name)) {
+                filesList.push(file);
+                dataTransfer.items.add(file);
+            }
+        });
+
+        renderFileList();
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+        let input = document.getElementById("DinhKemDinhKemFileFileEdit");
+    });
+
+    function renderFileList() {
+        let html = "";
+
+        filesList.forEach((file, index) => {
+            html += `
+            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                <span><i class="fa fa-file text-primary mr-1"></i>${file.name}</span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        `;
+        });
+
+        $("#fileList").html(html);
+    }
+
+    function removeFile(index) {
+        filesList.splice(index, 1);
+        dataTransfer = new DataTransfer();
+        filesList.forEach(file => dataTransfer.items.add(file));
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+        renderFileList();
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

@@ -1,0 +1,72 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_DigitalSalesStatusModel>
+
+<div class="list-group list-group-flush status-list-wrapper" id="statusListItems">
+    @if (Model != null && Model.Count > 0)
+    {
+        foreach (var item in Model)
+        {
+            var activeClass = item.IsActive ? "" : "opacity-65";
+            var defaultBadge = item.IsDefault ? "<span class='badge bgc-yellow-l1 text-dark-m2 border-1 brc-yellow-m3 ml-1 text-80' title='Trạng thái mặc định'><i class='fa fa-star text-orange-d1 mr-1'></i>Default</span>" : "";
+            var bgcClass = "bgc-blue-d1";
+            var brcClass = "brc-blue-tp1";
+            var iconClass = "fa-flag";
+            switch (item.StatusID)
+            {
+                case 1: bgcClass = "bgc-blue-d1"; brcClass = "brc-blue-tp1"; iconClass = "fa-hourglass-start"; break; // Chưa nắm bắt
+                case 2: bgcClass = "bgc-orange-d1"; brcClass = "brc-orange-tp1"; iconClass = "fa-paper-plane"; break; // Đang tiếp cận
+                case 3: bgcClass = "bgc-red-d1"; brcClass = "brc-danger-tp1"; iconClass = "fa-times-circle"; break; // Đã bỏ mất
+                case 4: bgcClass = "bgc-purple-d1"; brcClass = "brc-purple-tp1"; iconClass = "fa-flask"; break; // Hình thành dự án (PoC)
+                case 5: bgcClass = "bgc-primary-d1"; brcClass = "brc-primary-tp1"; iconClass = "fa-tasks"; break; // Triển khai dự án
+                case 6: bgcClass = "bgc-danger-d2"; brcClass = "brc-danger-tp1"; iconClass = "fa-ban"; break; // Mất dự án
+                case 7: bgcClass = "bgc-success-d1"; brcClass = "brc-success-tp1"; iconClass = "fa-file-signature"; break; // Đã ký hợp đồng
+                case 8: bgcClass = "bgc-green-d2"; brcClass = "brc-green-tp1"; iconClass = "fa-check-circle"; break; // Hoàn thành
+                default: bgcClass = "bgc-secondary-d1"; brcClass = "brc-secondary-tp1"; iconClass = "fa-flag"; break;
+            }
+
+            <div class="list-group-item list-group-item-action status-item px-3 py-2 cursor-pointer border-1 brc-grey-l2 border-l-4 mb-2 radius-1 bgc-h-blue-l4 @brcClass @activeClass"
+                 data-id="@item.StatusID"
+                 data-name="@item.StatusName"
+                 data-type="@item.BusinessType"
+                 onclick="DigitalSalesWorkflow.selectStatus(@item.StatusID, this)">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center text-truncate mr-2">
+                        <span class="badge badge-sm badge-pill mr-2 text-white @bgcClass">
+                            <i class="fa @iconClass"></i>
+                        </span>
+                        <div class="text-truncate">
+                            <span class="font-bold text-dark-m1 status-name text-95">@item.StatusName</span>
+                            @Html.Raw(defaultBadge)
+                            <div class="text-secondary-m2 text-85 text-truncate">
+                                <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1">#@item.SortOrder</span>
+                                <code>@item.StatusCode</code>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-actions action-buttons d-flex align-items-center" onclick="event.stopPropagation();">
+                        <a href="/Cate/DigitalSalesWorkflow/EditStatus/@item.StatusID"
+                           data-modal="" data-modal-id="editStatus" data-width="700"
+                           class="btn btn-xs btn-outline-primary btn-h-primary btn-a-primary border-0 mr-1 p-1"
+                           title="Sửa trạng thái" data-rel="tooltip">
+                            <i class="fa fa-pencil-alt text-90"></i>
+                        </a>
+                        <a href="/Cate/DigitalSalesWorkflow/DeleteStatus/@item.StatusID"
+                           data-modal="" data-modal-id="deleteStatus" data-width="500"
+                           class="btn btn-xs btn-outline-danger btn-h-danger btn-a-danger border-0 p-1"
+                           title="Xóa trạng thái" data-rel="tooltip">
+                            <i class="fa fa-trash-alt text-90"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5 text-secondary-m2">
+            <i class="fa fa-folder-open text-180 mb-2 opacity-50"></i>
+            <p class="mb-0 text-90">Chưa có trạng thái nào trong nhóm này.</p>
+            <small>Nhấn <strong>+ Thêm mới</strong> để tạo trạng thái đầu tiên.</small>
+        </div>
+    }
+</div>

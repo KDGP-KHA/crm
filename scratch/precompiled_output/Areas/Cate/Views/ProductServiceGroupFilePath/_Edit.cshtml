@@ -1,0 +1,37 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("ProductServiceGroupFilePath_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Edit", "ProductServiceGroupFilePath", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditProductServiceGroupFilePath", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ProductServiceGroupFilePath")
+        </div>
+
+    }
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#modal_EditProductServiceGroupFilePath .modal-dialog').addClass('modal-dialog-scrollable');
+            $('#modal_EditProductServiceGroupFilePath .modal-body').addClass('ace-scrollbar');
+        });
+
+
+        $('form#EditProductServiceGroupFilePath').ajaxForm({
+            success: function (response) {
+                ProductServiceGroupFilePath_OnProcessSuccess(response, 'EditProductServiceGroupFilePath')
+            }
+        });
+    </script>
+}

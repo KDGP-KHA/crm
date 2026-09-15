@@ -1,0 +1,46 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Permission"), AppProcessor.Messagor.GetMessage("Module_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-shield-alt"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Permission", "Modules", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Module_OnProcessSuccess(data, 'PermissionModule')"
+    }, new { @class = "form-horizontal", id = "PermissionModule" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_PermissionModule")
+        </div>
+    }
+    <script type="text/javascript">
+        $('form#PermissionModule').ajaxForm({
+            success: function(response) {
+                if (response.status != undefined) {
+                    $("#ModalContent #modal_PermissionModule").modal("hide");
+                    $("#ModalContent #modal_PermissionModule").on('hidden.bs.modal',
+                        function() {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                _tableModule.ajax.reload(null, false);
+                                response.status = undefined;
+                            }
+                        });
+                } else {
+                    $("#ModalContent #modal_PermissionModule" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

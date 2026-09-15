@@ -1,0 +1,157 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerModel
+
+<div class="mt-1">
+    <div class="d-flex justify-content-end pb-2">
+        @Html.Button(true, "AddContactPersons",
+            Url.Action("Add", "ContactPersons", new { area = "Cate"}),
+            "<i class='fa fa-plus'></i>",
+            AppProcessor.Messagor.GetMessage("Button_Add_ContactPersons"),
+            new
+            {
+                @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right mr-1",
+                data_width = "900px"
+            })
+    </div>
+
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md">
+            <table id="tblCustomerContactPersons"
+                   class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table"
+                   width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ContactPersons_FullName_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Email_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ContactPersons_Contact_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("GroupService_Status_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#modal_AddCustomerContact').addClass('modal-fs').removeClass('modal-lg');
+    });
+
+    function htmlEncode(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    var _ContactPersonsActionURLs = {
+        ContactPersons_GetData: "@Url.Action("Get", "ContactPersons", new { area = "Cate" })"
+    };
+
+    var _tableContactPersons = null;
+
+    function initTableContactPersons() {
+        if ($.fn.DataTable.isDataTable('#tblCustomerContactPersons')) {
+            $('#tblCustomerContactPersons').DataTable().destroy();
+            $('#tblCustomerContactPersons').empty();
+        }
+
+        _tableContactPersons = $("#tblCustomerContactPersons").DataTable({
+            responsive: true,
+            lengthChange: true,
+            processing: true,
+            serverSide: true,
+            destroy: true,
+            ajax: {
+                url: _ContactPersonsActionURLs.ContactPersons_GetData,
+                type: "POST",
+                dataType: "JSON",
+                data: function (d) {
+                    d.Keyword = $('#tblCustomerContactPersons_wrapper input[type="search"]').val();
+                    return d;
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    defaultContent: "",
+                    render: function (data, type, row, meta) {
+                        return meta.settings._iDisplayStart + meta.row + 1;
+                    }
+                },
+                {
+                    data: "FullName",
+                    className: "text-left",
+                    defaultContent: "",
+                    render: function (data) {
+                        return '<strong class="text-dark">' + htmlEncode(data) + '</strong>';
+                    }
+                },
+                {
+                    data: "Email",
+                    defaultContent: "",
+                    render: function (data) {
+                        if (!data) return '<span class="text-muted">—</span>';
+                        return '<a href="mailto:' + htmlEncode(data) + '">' + htmlEncode(data) + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    defaultContent: "",
+                    render: function (data, type, row) {
+                        var html = '';
+                        if (row.Phone)  html += '<div><i class="fa fa-phone text-success mr-1"></i>' + htmlEncode(row.Phone) + '</div>';
+                        if (row.Mobile) html += '<div><i class="fa fa-mobile text-info mr-1"></i>' + htmlEncode(row.Mobile) + '</div>';
+                        if (row.Zalo)   html += '<div><i class="fa fa-comment text-primary mr-1"></i>' + htmlEncode(row.Zalo) + '</div>';
+                        return html || '<span class="text-muted">—</span>';
+                    }
+                },
+                {
+                    data: "Status",
+                    className: "text-center",
+                    render: function (data) {
+                        return data === 1
+                            ? '<span class="badge badge-success">@AppProcessor.Messagor.GetMessage("RMPS_Label_IsActived")</span>'
+                            : '<span class="badge badge-secondary">@AppProcessor.Messagor.GetMessage("RMPS_Label_Inactive")</span>';
+                    }
+                },
+                {
+                    data: "ContactPerson_ID",
+                    orderable: false,
+                    className: "text-center",
+                    render: function (data, type) {
+                        if (type !== "display") return "";
+                        return _renderButton(
+                            true,
+                            "AddCustomerContactDetail",
+                            "btn btn-lighter-primary mr-1 btn-a-outline-primary btn-sm d-inline-flex align-items-center",
+                            "/Cate/CustomerContact/AddCustomerContactDetail?CustomerID=" + '@Model.CustomerID' + "&ContactPersonID=" + data,
+                            '<i class="fa fa-plus mr-1"></i>',
+                            "Thêm",
+                            800
+                        );
+                    }
+                }
+            ]
+        });
+    }
+
+    $(document)
+        .off('shown.bs.modal', '#modal_AddCustomerContact')
+        .on('shown.bs.modal', '#modal_AddCustomerContact', function () {
+            initTableContactPersons();
+        });
+
+    $(document).on('hidden.bs.modal', '#modal_AddCustomerContact', function () {
+        if ($.fn.DataTable.isDataTable('#tblCustomerContactPersons')) {
+            $('#tblCustomerContactPersons').DataTable().destroy();
+            $('#tblCustomerContactPersons').empty();
+        }
+        _tableContactPersons = null;
+    });
+</script>

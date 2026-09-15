@@ -1,0 +1,106 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityModel
+
+@Html.AntiForgeryToken()
+<div id="CHKD">
+    @Html.HiddenFor(model => model.BusinessOpportunityID)
+    @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.FileAttach)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.OpportunityName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.OpportunityName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Opportunity_Name_Label") })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CustomerName, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextBoxFor(model => model.CustomerName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Customer_CustomerName_Label"), @readonly = true })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ProductServiceIDs, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownListFor(model => model.lst_SP, new SelectList(Model.SPDichVus.Where(p => p.NodeType == "P").ToList(), "pID", "DisplayName"), "", new { @class = "form-control", multiple = true })
+            @Html.ValidationMessageFor(model => model.lst_SP, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                @Html.TitleFor(model => model.ClosingProbability, new { @class = "col-sm-4 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.ClosingProbability, new
+                    {
+            @class = "form-control",
+            type = "number",
+            step = "0.01",
+            min = "0",
+            max = "9999999999999999.99",
+            placeholder = AppProcessor.Messagor.GetMessage("ClosingProbability_Label")
+        })
+                    @Html.ValidationMessageFor(model => model.ClosingProbability, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                @Html.TitleFor(model => model.ExpectedValue, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+                <div class="col-md-7">
+                    @Html.TextBoxFor(model => model.ExpectedValue, new
+               {
+                   @class = "form-control",
+                   type = "number",
+                   step = "0.01",
+                   min = "0",
+                   max = "9999999999999999.99",
+                   placeholder = AppProcessor.Messagor.GetMessage("ExpectedValue_Label")
+               })
+                    @Html.ValidationMessageFor(model => model.ExpectedValue, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Description, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Description, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+            @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.FileAttach, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.FileFor(model => model.DinhKemFile, ".pdf, .jpeg,.png,.gif,.jpg", false, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            @if (Model.FileAttach != null)
+            {
+                <a href="@Model.FileAttach" id="download-file"><span class="fa fa-download">File đính kèm</span></a>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var spDichVu = @Html.Raw(Json.Encode(Model.lst_SP));
+
+    $(function () {
+        $("#lst_SP").select2({
+            allowClear: true,
+            width: "element",
+        });
+        if (spDichVu && spDichVu.length) {
+            var selectedSchool = spDichVu.join(',');
+            $("#lst_SP").val(selectedSchool.split(","));
+            $("#lst_SP").trigger('change');
+        }
+    });
+    $('select option').each(function () {
+        var text = $(this).text();
+        // Thay thế tất cả cụm &nbsp; thành rỗng
+        $(this).text(text.replace(/&nbsp;/g, "\u00A0"));
+    });
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

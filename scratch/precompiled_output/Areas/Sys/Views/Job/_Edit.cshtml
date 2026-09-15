@@ -1,0 +1,44 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("SysJob_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("Edit", "Job", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditJob", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_SysJob")
+        </div>
+    }
+    <script type="text/javascript" src="~/Contents/Modules/Sys/plugins/cRonstrue/require.min.js"></script>
+    <script type="text/javascript" src="~/Contents/Modules/Sys/plugins/cRonstrue/cronstrue.min.js"></script>
+    <script type="text/javascript" src="~/Contents/Modules/Sys/plugins/cronBuilder/jquery-cron-quartz.js"></script>
+    <script type="text/javascript">
+        $('form#EditJob').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    $("#ModalContent #modal_EditJob").modal("hide");
+                    $("#ModalContent #modal_EditJob").on('hidden.bs.modal',
+                        function () {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                _tableJob.ajax.reload(null, false);
+                                response.status = undefined;
+                            }
+                        });
+                } else {
+                    $("#ModalContent #modal_EditJob" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

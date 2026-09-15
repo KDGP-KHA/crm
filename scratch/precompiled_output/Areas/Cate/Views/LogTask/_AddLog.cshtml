@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("LogTask_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "LogTask", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "LogTask_OnProcessSuccess(data, 'AddLogTask')"
+    }, new { @class = "form-horizontal", id = "AddLogTask", enctype = "multipart/form-data" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_LogTask")
+        </div>
+    }
+}
+

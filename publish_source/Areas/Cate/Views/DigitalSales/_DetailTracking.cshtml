@@ -1,11 +1,17 @@
-﻿@model Core.Cate.Models.RM_DigitalSalesModel
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
 @{
     bool canEdit = ViewBag.CanEdit == true;
-    var totalTasks = Model.TrackingTasks?.Count ?? 0;
-    var completedTasks = Model.TrackingTasks?.Count(t => t.Status == 3) ?? 0;
+    var allTasks = Model.TrackingTasks ?? new List<Core.Cate.Models.RM_DigitalSalesTrackingModel>();
+    var parentTasks = allTasks.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
+    var allTodoTasks = allTasks.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
+    
+    // Tính tổng số lượng và hoàn thành (chỉ tính theo các công việc thực tế, loại trừ placeholder rỗng)
+    int totalCount = allTasks.Count(t => !string.IsNullOrWhiteSpace(t.TaskName));
+    int completedCount = allTasks.Count(t => !string.IsNullOrWhiteSpace(t.TaskName) && t.Status == 3);
 }
 
-<span id="partialTrackingProgress" class="d-none" data-completed="@completedTasks" data-total="@totalTasks"></span>
+<span id="partialTrackingProgress" class="d-none" data-completed="@completedCount" data-total="@totalCount"></span>
 
 <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_DetailTracking.css?v=@DateTime.Now.Ticks" />
 
@@ -15,7 +21,7 @@
         <h6 class="text-orange font-weight-bold mb-0 text-110">
             <i class="fa fa-tasks mr-1"></i> Checklist
         </h6>
-        <span class="badge badge-pill badge-warning ml-2 font-bold px-2 py-1" id="badgeChecklistSummary">@completedTasks/@(totalTasks > 0 ? totalTasks : 12)</span>
+        <span class="badge badge-pill badge-warning ml-2 font-bold px-2 py-1" id="badgeChecklistSummary">@completedCount/@totalCount</span>
     </div>
     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
         <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d1 radius-1 px-2 py-1 shadow-sm font-bold" id="btnExpandAllChecklist" onclick="toggleAllChecklistTree(true);">
@@ -24,962 +30,345 @@
         <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d1 radius-1 px-2 py-1 shadow-sm font-bold" id="btnCollapseAllChecklist" onclick="toggleAllChecklistTree(false);">
             <i class="fa fa-compress-alt mr-1 text-orange"></i> Thu gọn tất cả
         </button>
-        @if (canEdit)
-        {
-            <button type="button" class="btn btn-sm btn-orange px-3 radius-1 shadow-sm font-bold ml-1" onclick="openAddTrackingModal(@Model.DigitalSalesID);">
-                <i class="fa fa-plus mr-1"></i> Thêm công việc tùy biến
-            </button>
-        }
     </div>
 </div>
 
-<!-- BẢNG TREE GRID PHÂN CẤP 4 TẦNG -->
-<div class="table-responsive">
+<!-- BẢNG TREE GRID PHÂN CẤP 4 TẦNG: TRẠNG THÁI -> QUY TRÌNH -> TIẾN TRÌNH -> TODO LIST -->
+<div class="table-responsive ds-tracking-responsive-wrapper">
     <table class="table table-bordered text-90 tree-table" id="tblTracking">
         <thead class="bgc-secondary-l1 text-secondary-d2">
             <tr>
-                <th style="min-width: 480px;">Tên công việc / Đầu mục tiến trình</th>
+                <th style="min-width: 400px;">Tên công việc / Đầu mục tiến trình</th>
+                <th style="width: 130px;" class="text-center">Mã tiến trình</th>
                 <th style="width: 150px;">Người thực hiện</th>
                 <th style="width: 105px;" class="text-center">Bắt đầu</th>
                 <th style="width: 115px;" class="text-center">Hạn chót</th>
-                <th style="width: 120px;" class="text-center">Trạng thái</th>
-                <th style="width: 100px;">Kết quả / File</th>
+                <th style="width: 95px;" class="text-center">Tổng ngày</th>
+                <th style="width: 115px;" class="text-center">Trạng thái</th>
                 @if (canEdit)
                 {
-                    <th style="width: 80px;" class="text-center">Thao tác</th>
+                    <th style="width: 105px;" class="text-center">Thao tác</th>
                 }
             </tr>
         </thead>
         <tbody id="treeTrackingBody">
-
-            <!-- ========================================================================================= -->
-            <!-- A. CƠ HỘI -->
-            <!-- ========================================================================================= -->
-            <tr class="tree-row tree-level-1" data-node="node_A" data-level="1" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l1">
-                            <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_node_A"></i>
-                            <span class="font-bolder text-105 text-primary-d2">A. Cơ hội</span>
-                            <span class="badge badge-primary badge-pill ml-2 text-75 font-bold">2 Trạng thái</span>
-                        </div>
-                        <span class="text-secondary-m1 text-80 font-italic mr-2"><i class="fa fa-info-circle mr-1"></i>Bấm để thu gọn/mở rộng</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> I. Trạng thái 1 -->
-            <tr class="tree-row tree-level-2" data-node="node_A_I" data-parent="node_A" data-level="2" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A_I');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l2">
-                            <i class="fa fa-chevron-down tree-toggle-icon text-secondary-d2 mr-2" id="icon_node_A_I"></i>
-                            <span class="font-bold text-dark text-100">I. Trạng thái 1</span>
-                            <span class="badge badge-light-secondary text-secondary-d3 border-1 ml-2 text-75 font-bold">2 Quy trình</span>
-                        </div>
-                        <span class="badge badge-light-primary text-primary-d2 border-1 mr-2 text-75">Giai đoạn tiếp cận ban đầu</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> I -> 1. Quy trình 1 -->
-            <tr class="tree-row tree-level-3" data-node="node_A_I_1" data-parent="node_A_I" data-root="node_A" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A_I_1');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_A_I_1" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_A_I_1"></i>
-                            <span class="font-bold text-dark text-95">1. Quy trình 1</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">3 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Khảo sát & Làm rõ nhu cầu</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> I -> 1 -> a. Tiến trình 1 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_I_1" data-subparent="node_A_I" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_I_1_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 1</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 1');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 1');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 1');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">12/09/2026</td>
-                <td class="text-center"><span class="text-dark">14/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
+            @if (parentTasks != null && parentTasks.Count > 0)
+            {
+                var statusGroups = parentTasks.GroupBy(t => new
                 {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
+                    StatusID = t.StatusID ?? 0,
+                    StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Trạng thái",
+                    ProcessCountOfStatus = t.ProcessCountOfStatus
+                }).OrderBy(g => g.Key.StatusID).ToList();
 
-            <!-- A -> I -> 1 -> b. Tiến trình 2 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_I_1" data-subparent="node_A_I" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_I_1_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình 2</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình 2');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình 2');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình 2');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">12/09/2026</td>
-                <td class="text-center"><span class="text-dark">15/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-warning px-2">Đang làm</span></td>
-                <td>—</td>
-                @if (canEdit)
+                int statusIdx = 1;
+                foreach (var stGroup in statusGroups)
                 {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
+                    bool isCurrentStatus = (stGroup.Key.StatusID == Model.StatusID);
+                    string statusNodeId = "status_node_" + stGroup.Key.StatusID;
+                    int statusTaskCount = stGroup.Count(t => !string.IsNullOrWhiteSpace(t.TaskName));
+                    int statusTodoCount = stGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).Sum(p => p.TodoList?.Count ?? 0);
+
+                    <!-- ========================================================================= -->
+                    <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
+                    <!-- ========================================================================= -->
+                    <tr class="tree-row tree-status-row" data-node="@statusNodeId" data-level="1" data-expanded="true">
+                        <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
+                                    <span class="tree-status-title">@stGroup.Key.StatusName</span>
+                                    <span class="badge badge-primary badge-pill ml-2 text-80 font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
+                                </div>
+                                <span class="text-secondary-m1 text-80 font-italic mr-2">
+                                    <i class="fa fa-info-circle mr-1"></i>Bấm để thu gọn/mở rộng
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    var procGroups = stGroup.GroupBy(t => new
+                    {
+                        ProcessID = t.ProcessID ?? 0,
+                        ProcessName = !string.IsNullOrEmpty(t.ProcessName) ? t.ProcessName : "Quy trình thực hiện"
+                    }).OrderBy(g => g.Key.ProcessID).ToList();
+
+                    int procIdx = 1;
+                    foreach (var prGroup in procGroups)
+                    {
+                        string procNodeId = $"{statusNodeId}_proc_{prGroup.Key.ProcessID}";
+                        var realTasks = prGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                        int realTaskCount = realTasks.Count;
+
+                        <!-- ========================================================================= -->
+                        <!-- CẤP 2: QUY TRÌNH (TIÊU ĐỀ: QUY TRÌNH ... CÓ CÂY BÚT CHÌ NẾU SỐ QT >= 2)  -->
+                        <!-- ========================================================================= -->
+                        <tr class="tree-row tree-process-row" data-node="@procNodeId" data-parent="@statusNodeId" data-level="2" data-expanded="true">
+                            <td colspan="@(canEdit ? 8 : 7)" class="cursor-pointer py-2 px-4" onclick="toggleTreeNode('@procNodeId');">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
+                                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
+                                        <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-1" id="icon_@procNodeId"></i>
+                                        <span class="tree-process-title">QUY TRÌNH: @(prGroup.Key.ProcessName.ToUpper())</span>
+                                        @if (stGroup.Key.ProcessCountOfStatus >= 2 && canEdit && isCurrentStatus)
+                                        {
+                                            <a href="javascript:void(0);" class="btn-edit-process" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
+                                                <i class="fa fa-pencil-alt"></i>
+                                            </a>
+                                        }
+                                        <span class="badge @(realTaskCount > 0 ? "badge-light-warning text-warning-d3" : "badge-light-secondary text-secondary-d3") border-1 font-bold tree-process-task-count">
+                                            @realTaskCount tiến trình
+                                        </span>
+                                        @if (stGroup.Key.ProcessCountOfStatus >= 2 && isCurrentStatus)
+                                        {
+                                            if (canEdit)
+                                            {
+                                                <a href="javascript:void(0);" class="badge badge-can-change-process ml-1" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Bấm để đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
+                                                    <i class="fa fa-exchange-alt mr-1"></i>Có thể đổi quy trình
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-can-change-process ml-1">
+                                                    <i class="fa fa-exchange-alt mr-1"></i>Có thể đổi quy trình
+                                                </span>
+                                            }
+                                        }
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap ml-auto" style="gap: 6px;">
+                                        @if (canEdit && isCurrentStatus && prGroup.Key.ProcessID > 0)
+                                        {
+                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-add-progress-header" onclick="event.stopPropagation(); openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))');" title="Thêm tiến trình mới vào quy trình này">
+                                                <i class="fa fa-plus mr-1"></i> Thêm tiến trình
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-primary font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-import-progress-header" onclick="event.stopPropagation(); openImportProgressModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID);" title="Import danh sách tiến trình vào quy trình này">
+                                                <i class="fa fa-file-import mr-1"></i> Import tiến trình
+                                            </button>
+                                            if (realTaskCount > 0)
+                                            {
+                                                <button type="button" class="btn btn-xs btn-info font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-import-todo-header" onclick="event.stopPropagation(); openImportTodoModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID);" title="Import danh sách công việc con vào tiến trình của quy trình này">
+                                                    <i class="fa fa-file-excel mr-1"></i> Import công việc
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                        if (realTaskCount == 0)
+                        {
+                            <!-- DÒNG THÔNG BÁO KHI QUY TRÌNH CHƯA CÓ TIẾN TRÌNH NÀO -->
+                            <tr class="tree-row tree-empty-progress-row" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3">
+                                <td colspan="@(canEdit ? 8 : 7)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
+                                    <div class="tree-empty-progress-box flex-wrap justify-content-center">
+                                        <i class="fa fa-info-circle text-primary text-105"></i>
+                                        <span>Quy trình <strong>@prGroup.Key.ProcessName</strong> chưa có tiến trình nào.</span>
+                                        @if (canEdit && isCurrentStatus && prGroup.Key.ProcessID > 0)
+                                        {
+                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-25 py-1 radius-1 shadow-sm ml-2" onclick="openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))');">
+                                                <i class="fa fa-plus mr-1"></i> Thêm tiến trình ngay
+                                            </button>
+                                            <button type="button" class="btn btn-xs btn-primary font-weight-bold px-25 py-1 radius-1 shadow-sm ml-1" onclick="openImportProgressModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID);">
+                                                <i class="fa fa-file-import mr-1"></i> Import tiến trình
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int taskIdx = 1;
+                            foreach (var task in realTasks.OrderBy(p => p.SortOrder).ThenBy(p => p.TrackingID))
+                            {
+                            string taskNodeId = $"{procNodeId}_task_{task.TrackingID}";
+                            bool isOverdue = task.IsOverdue == 1;
+
+                            <!-- ========================================================================= -->
+                            <!-- CẤP 3: TIẾN TRÌNH (CÓ NGÀY BẮT ĐẦU, TỔNG NGÀY VÀ DẤU (+) SAU TÊN)        -->
+                            <!-- ========================================================================= -->
+                            <tr class="tree-row tree-progress-row" data-node="@taskNodeId" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3" data-expanded="true">
+                                <td class="pl-4 font-progress-cell">
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <input type="checkbox" class="tree-checkbox chk-task mr-2" id="chk_task_@task.TrackingID"
+                                               @(task.Status == 3 ? "checked" : "")
+                                               onclick="return false;" onkeydown="return false;" tabindex="-1"
+                                               title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
+                                        <span class="tree-progress-title">@taskIdx. @task.TaskName</span>
+
+                                        @if (canEdit && isCurrentStatus)
+                                        {
+                                            <!-- DẤU (+) PHÍA SAU TÊN TIẾN TRÌNH: THÊM TODO LIST -->
+                                            <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con (Todo list)">
+                                                <i class="fa fa-plus"></i>
+                                            </a>
+                                        }
+
+                                        @if (task.TodoList != null && task.TodoList.Count > 0)
+                                        {
+                                            <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@taskNodeId');">
+                                                <i class="fa fa-list-ul mr-1"></i>@task.TodoList.Count việc
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-center font-progress-cell"><span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@task.TrackingCode</span></td>
+                                <td class="font-progress-cell"><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : task.AssignedUserName)</span></td>
+                                <td class="text-center font-progress-cell">@task.StartDate.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center font-progress-cell"><span class="@(isOverdue ? "text-danger font-bold" : "text-dark")">@task.MaxDeadline.ToString("dd/MM/yyyy")</span></td>
+                                <td class="text-center font-progress-cell"><span class="badge badge-light-secondary font-bold">@task.EffectiveDurationDays ngày</span></td>
+                                <td class="text-center font-progress-cell">
+                                    @if (task.Status == 3)
+                                    {
+                                        <span class="badge badge-success px-2 font-bold">Hoàn thành</span>
+                                    }
+                                    else if (task.Status == 2)
+                                    {
+                                        <span class="badge badge-warning px-2 font-bold">Đang làm</span>
+                                    }
+                                    else if (isOverdue)
+                                    {
+                                        <span class="badge badge-danger px-2 font-bold">Quá hạn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-secondary px-2">Chưa làm</span>
+                                    }
+                                </td>
+                                @if (canEdit)
+                                {
+                                    <td class="text-center text-nowrap font-progress-cell">
+                                        <div class="ds-action-group">
+                                            <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-log" onclick="openTrackingLogsModal(@task.TrackingID, @Model.DigitalSalesID);" title="Xem Log thao tác tiến trình">
+                                                <i class="fa fa-history"></i>
+                                            </a>
+                                            @if (task.Status == 3)
+                                            {
+                                                <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-unlock" onclick="openUnlockProgressModal(@task.TrackingID, @Model.DigitalSalesID);" title="Mở khóa tiến trình">
+                                                    <i class="fa fa-unlock-alt"></i>
+                                                </a>
+                                            }
+                                            else if (isCurrentStatus)
+                                            {
+                                                <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-edit" onclick="openEditTrackingModal(@task.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa tiến trình">
+                                                    <i class="fa fa-pencil-alt"></i>
+                                                </a>
+                                                <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-delete" onclick="actionDeleteTracking(@task.TrackingID, @Model.DigitalSalesID);" title="Xóa tiến trình">
+                                                    <i class="fa fa-trash-alt"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+
+                            <!-- ========================================================================= -->
+                            <!-- CẤP 4: TODO LIST TRONG TIẾN TRÌNH (CÔNG VIỆC NHỎ, DEADLINE <= START + TỔNG)-->
+                            <!-- ========================================================================= -->
+                            if (task.TodoList != null && task.TodoList.Count > 0)
+                            {
+                                foreach (var todo in task.TodoList)
+                                {
+                                    bool todoOverdue = todo.IsOverdue == 1;
+                                    <tr class="tree-row tree-todo-row" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4">
+                                        <td style="padding-left: 48px;">
+                                            <div class="d-flex align-items-center flex-wrap">
+                                                <span class="tree-todo-branch">└─</span>
+                                                <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@todo.TrackingID"
+                                                       @(todo.Status == 3 ? "checked" : "")
+                                                       @(isCurrentStatus ? $"onchange=\"actionConfirmTracking({todo.TrackingID}, {Model.DigitalSalesID});\"" : "onclick=\"return false;\" onkeydown=\"return false;\" tabindex=\"-1\"")
+                                                       title="@(todo.Status == 3 ? "Đã hoàn thành việc nhỏ" : "Việc nhỏ")" />
+                                                <span class="tree-todo-title mr-2">@todo.TaskName</span>
+                                                @if (isCurrentStatus)
+                                                {
+                                                    <span class="ds-tree-sep">-</span>
+                                                    <div class="ds-tree-actions">
+                                                        <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="openTrackingReportModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Báo cáo tiến độ/kết quả thực hiện">
+                                                            <i class="fa fa-file-alt mr-1"></i>Báo cáo
+                                                        </a>
+                                                        <span class="ds-tree-sep">|</span>
+                                                        <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionConfirmTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xác nhận hoàn thành hạng mục">
+                                                            <i class="fa fa-check mr-1"></i>Xác nhận
+                                                        </a>
+                                                        <span class="ds-tree-sep">|</span>
+                                                        <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionUnlockTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Mở khóa để chỉnh sửa/làm lại">
+                                                            <i class="fa fa-unlock-alt mr-1"></i>Mở khóa
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td class="text-center"><span class="text-secondary-d1 text-75">@todo.TrackingCode</span></td>
+                                        <td><span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : todo.AssignedUserName)</span></td>
+                                        <td class="text-center text-85">@todo.StartDate.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center">
+                                            <span class="@(todoOverdue ? "text-danger font-bold" : "text-dark") text-85">
+                                                @(todo.Deadline.HasValue ? todo.Deadline.Value.ToString("dd/MM/yyyy") : "—")
+                                            </span>
+                                        </td>
+                                        <td class="text-center text-secondary">—</td>
+                                        <td class="text-center">
+                                            @if (todo.Status == 3)
+                                            {
+                                                <span class="badge badge-success text-75 px-2">Hoàn thành</span>
+                                            }
+                                            else if (todo.Status == 2)
+                                            {
+                                                <span class="badge badge-warning text-75 px-2">Đang làm</span>
+                                            }
+                                            else if (todoOverdue)
+                                            {
+                                                <span class="badge badge-danger text-75 px-2">Quá hạn</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-secondary text-75 px-2">Chưa làm</span>
+                                            }
+                                        </td>
+                                        @if (canEdit)
+                                        {
+                                            <td class="text-center text-nowrap">
+                                                <div class="ds-action-group">
+                                                    @if (isCurrentStatus)
+                                                    {
+                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-edit" onclick="openEditTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa việc nhỏ">
+                                                            <i class="fa fa-pencil-alt"></i>
+                                                        </a>
+                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-delete" onclick="actionDeleteTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xóa việc nhỏ">
+                                                            <i class="fa fa-trash-alt"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                            taskIdx++;
+                        }
+                        }
+                        procIdx++;
+                    }
+                    statusIdx++;
                 }
-            </tr>
-
-            <!-- A -> I -> 1 -> c. Tiến trình 3 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_I_1" data-subparent="node_A_I" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_I_1_c" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">c. Tiến trình 3</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('c. Tiến trình 3');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('c. Tiến trình 3');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('c. Tiến trình 3');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">12/09/2026</td>
-                <td class="text-center"><span class="text-dark">16/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="@(canEdit ? 8 : 7)" class="text-center py-4 text-secondary-m1">
+                        <i class="fa fa-clipboard-list text-180 text-secondary-l1 mb-2 d-block"></i>
+                        <span>Chưa có tiến trình / checklist nào được khởi tạo cho hồ sơ này.</span>
+                        @if (canEdit)
+                        {
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-xs btn-orange px-3 radius-1 font-bold" onclick="openAddTrackingModal(@Model.DigitalSalesID);">
+                                    <i class="fa fa-plus mr-1"></i> Thêm công việc đầu tiên
+                                </button>
+                            </div>
+                        }
                     </td>
-                }
-            </tr>
-
-            <!-- A -> I -> 2. Quy trình 2 -->
-            <tr class="tree-row tree-level-3" data-node="node_A_I_2" data-parent="node_A_I" data-root="node_A" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A_I_2');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_A_I_2" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_A_I_2"></i>
-                            <span class="font-bold text-dark text-95">2. Quy trình 2</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">2 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Tư vấn & Thống nhất giải pháp</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> I -> 2 -> a. Tiến trình 5 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_I_2" data-subparent="node_A_I" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_I_2_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 5</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 5');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 5');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 5');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">13/09/2026</td>
-                <td class="text-center"><span class="text-dark">16/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- A -> I -> 2 -> b. Tiến trình -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_I_2" data-subparent="node_A_I" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_I_2_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">13/09/2026</td>
-                <td class="text-center"><span class="text-dark">17/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- A -> II. Trạng thái 2 -->
-            <tr class="tree-row tree-level-2" data-node="node_A_II" data-parent="node_A" data-level="2" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A_II');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l2">
-                            <i class="fa fa-chevron-down tree-toggle-icon text-secondary-d2 mr-2" id="icon_node_A_II"></i>
-                            <span class="font-bold text-dark text-100">II. Trạng thái 2</span>
-                            <span class="badge badge-light-secondary text-secondary-d3 border-1 ml-2 text-75 font-bold">2 Quy trình</span>
-                        </div>
-                        <span class="badge badge-light-warning text-warning-d3 border-1 mr-2 text-75">Giai đoạn đàm phán hợp đồng</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> II -> 1. Quy trình 1 -->
-            <tr class="tree-row tree-level-3" data-node="node_A_II_1" data-parent="node_A_II" data-root="node_A" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A_II_1');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_A_II_1" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_A_II_1"></i>
-                            <span class="font-bold text-dark text-95">1. Quy trình 1</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">3 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Hoàn thiện hồ sơ chào giá</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> II -> 1 -> a. Tiến trình 1 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_II_1" data-subparent="node_A_II" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_II_1_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 1</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 1');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 1');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 1');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">14/09/2026</td>
-                <td class="text-center"><span class="text-dark">17/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- A -> II -> 1 -> b. Tiến trình 2 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_II_1" data-subparent="node_A_II" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_II_1_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình 2</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình 2');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình 2');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình 2');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">14/09/2026</td>
-                <td class="text-center"><span class="text-dark">18/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- A -> II -> 1 -> c. Tiến trình 3 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_II_1" data-subparent="node_A_II" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_II_1_c" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">c. Tiến trình 3</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('c. Tiến trình 3');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('c. Tiến trình 3');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('c. Tiến trình 3');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">14/09/2026</td>
-                <td class="text-center"><span class="text-dark">19/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- A -> II -> 2. Quy trình 2 -->
-            <tr class="tree-row tree-level-3" data-node="node_A_II_2" data-parent="node_A_II" data-root="node_A" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_A_II_2');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_A_II_2" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_A_II_2"></i>
-                            <span class="font-bold text-dark text-95">2. Quy trình 2</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">2 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Thương thảo các điều khoản hợp đồng</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- A -> II -> 2 -> a. Tiến trình 5 -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_II_2" data-subparent="node_A_II" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_II_2_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 5</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 5');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 5');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 5');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">15/09/2026</td>
-                <td class="text-center"><span class="text-dark">19/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- A -> II -> 2 -> b. Tiến trình -->
-            <tr class="tree-row tree-level-4" data-parent="node_A_II_2" data-subparent="node_A_II" data-root="node_A" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_A_II_2_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">15/09/2026</td>
-                <td class="text-center"><span class="text-dark">20/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- ========================================================================================= -->
-            <!-- B. DỰ ÁN (A. Dự án) -->
-            <!-- ========================================================================================= -->
-            <tr class="tree-row tree-level-1" data-node="node_B" data-level="1" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l1">
-                            <i class="fa fa-chevron-down tree-toggle-icon text-success-d1 mr-2" id="icon_node_B"></i>
-                            <span class="font-bolder text-105 text-success-d2">A. Dự án</span>
-                            <span class="badge badge-success badge-pill ml-2 text-75 font-bold">2 Trạng thái</span>
-                        </div>
-                        <span class="text-secondary-m1 text-80 font-italic mr-2"><i class="fa fa-info-circle mr-1"></i>Bấm để thu gọn/mở rộng</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> I. Trạng thái 1 -->
-            <tr class="tree-row tree-level-2" data-node="node_B_I" data-parent="node_B" data-level="2" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B_I');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l2">
-                            <i class="fa fa-chevron-down tree-toggle-icon text-secondary-d2 mr-2" id="icon_node_B_I"></i>
-                            <span class="font-bold text-dark text-100">I. Trạng thái 1</span>
-                            <span class="badge badge-light-secondary text-secondary-d3 border-1 ml-2 text-75 font-bold">2 Quy trình</span>
-                        </div>
-                        <span class="badge badge-light-success text-success-d2 border-1 mr-2 text-75">Giai đoạn khởi tạo & chuẩn bị</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> I -> 1. Quy trình 1 -->
-            <tr class="tree-row tree-level-3" data-node="node_B_I_1" data-parent="node_B_I" data-root="node_B" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B_I_1');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_B_I_1" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_B_I_1"></i>
-                            <span class="font-bold text-dark text-95">1. Quy trình 1</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">3 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Khởi tạo hạ tầng dự án</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> I -> 1 -> a. Tiến trình 1 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_I_1" data-subparent="node_B_I" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_I_1_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 1</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 1');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 1');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 1');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">16/09/2026</td>
-                <td class="text-center"><span class="text-dark">20/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> I -> 1 -> b. Tiến trình 2 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_I_1" data-subparent="node_B_I" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_I_1_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình 2</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình 2');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình 2');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình 2');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">16/09/2026</td>
-                <td class="text-center"><span class="text-dark">21/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> I -> 1 -> c. Tiến trình 3 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_I_1" data-subparent="node_B_I" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_I_1_c" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">c. Tiến trình 3</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('c. Tiến trình 3');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('c. Tiến trình 3');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('c. Tiến trình 3');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">16/09/2026</td>
-                <td class="text-center"><span class="text-dark">22/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> I -> 2. Quy trình 2 -->
-            <tr class="tree-row tree-level-3" data-node="node_B_I_2" data-parent="node_B_I" data-root="node_B" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B_I_2');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_B_I_2" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_B_I_2"></i>
-                            <span class="font-bold text-dark text-95">2. Quy trình 2</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">2 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Triển khai cài đặt hệ thống</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> I -> 2 -> a. Tiến trình 5 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_I_2" data-subparent="node_B_I" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_I_2_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 5</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 5');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 5');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 5');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">17/09/2026</td>
-                <td class="text-center"><span class="text-dark">23/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> I -> 2 -> b. Tiến trình -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_I_2" data-subparent="node_B_I" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_I_2_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">17/09/2026</td>
-                <td class="text-center"><span class="text-dark">24/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> II. Trạng thái 2 -->
-            <tr class="tree-row tree-level-2" data-node="node_B_II" data-parent="node_B" data-level="2" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B_II');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l2">
-                            <i class="fa fa-chevron-down tree-toggle-icon text-secondary-d2 mr-2" id="icon_node_B_II"></i>
-                            <span class="font-bold text-dark text-100">II. Trạng thái 2</span>
-                            <span class="badge badge-light-secondary text-secondary-d3 border-1 ml-2 text-75 font-bold">2 Quy trình</span>
-                        </div>
-                        <span class="badge badge-light-purple text-purple-d2 border-1 mr-2 text-75">Giai đoạn nghiệm thu & chuyển giao</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> II -> 1. Quy trình 1 -->
-            <tr class="tree-row tree-level-3" data-node="node_B_II_1" data-parent="node_B_II" data-root="node_B" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B_II_1');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_B_II_1" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_B_II_1"></i>
-                            <span class="font-bold text-dark text-95">1. Quy trình 1</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">3 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Đào tạo người dùng & Nghiệm thu kỹ thuật</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> II -> 1 -> a. Tiến trình 1 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_II_1" data-subparent="node_B_II" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_II_1_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 1</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 1');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 1');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 1');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">18/09/2026</td>
-                <td class="text-center"><span class="text-dark">24/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> II -> 1 -> b. Tiến trình 2 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_II_1" data-subparent="node_B_II" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_II_1_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình 2</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình 2');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình 2');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình 2');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">18/09/2026</td>
-                <td class="text-center"><span class="text-dark">25/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> II -> 1 -> c. Tiến trình 3 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_II_1" data-subparent="node_B_II" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_II_1_c" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">c. Tiến trình 3</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('c. Tiến trình 3');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('c. Tiến trình 3');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('c. Tiến trình 3');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">18/09/2026</td>
-                <td class="text-center"><span class="text-dark">26/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> II -> 2. Quy trình 2 -->
-            <tr class="tree-row tree-level-3" data-node="node_B_II_2" data-parent="node_B_II" data-root="node_B" data-level="3" data-expanded="true">
-                <td colspan="@(canEdit ? 7 : 6)" class="tree-node-clickable" onclick="toggleTreeNode('node_B_II_2');">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center indent-l3">
-                            <input type="checkbox" class="tree-checkbox chk-process" id="chk_B_II_2" onclick="event.stopPropagation();" title="Đánh dấu hoàn thành quy trình" />
-                            <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-2" id="icon_node_B_II_2"></i>
-                            <span class="font-bold text-dark text-95">2. Quy trình 2</span>
-                            <span class="badge badge-light-warning text-warning-d3 border-1 ml-2 text-75 font-bold">2 Tiến trình</span>
-                        </div>
-                        <span class="text-secondary text-80 mr-2">Ký biên bản nghiệm thu & Quyết toán</span>
-                    </div>
-                </td>
-            </tr>
-
-            <!-- B -> II -> 2 -> a. Tiến trình 5 -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_II_2" data-subparent="node_B_II" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_II_2_a" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">a. Tiến trình 5</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('a. Tiến trình 5');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('a. Tiến trình 5');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('a. Tiến trình 5');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">19/09/2026</td>
-                <td class="text-center"><span class="text-dark">27/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
-            <!-- B -> II -> 2 -> b. Tiến trình -->
-            <tr class="tree-row tree-level-4" data-parent="node_B_II_2" data-subparent="node_B_II" data-root="node_B" data-level="4">
-                <td class="indent-l4">
-                    <div class="d-flex align-items-center flex-wrap">
-                        <input type="checkbox" class="tree-checkbox chk-task" id="chk_B_II_2_b" title="Đánh dấu hoàn thành tiến trình" />
-                        <span class="font-weight-600 text-dark mr-2">b. Tiến trình</span>
-                        <span class="ds-tree-sep">-</span>
-                        <div class="ds-tree-actions">
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-report" onclick="actionTreeReport('b. Tiến trình');" title="Báo cáo tiến độ/kết quả thực hiện">
-                                <i class="fa fa-file-alt mr-1"></i>Báo cáo
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-confirm" onclick="actionTreeConfirm('b. Tiến trình');" title="Xác nhận hoàn thành hạng mục">
-                                <i class="fa fa-check mr-1"></i>Xác nhận hoàn thành
-                            </a>
-                            <span class="ds-tree-sep">|</span>
-                            <a href="javascript:void(0);" class="ds-tree-btn ds-tree-btn-unlock" onclick="actionTreeUnlock('b. Tiến trình');" title="Mở khóa để chỉnh sửa/làm lại">
-                                <i class="fa fa-unlock-alt mr-1"></i>Mở khóa xác nhận
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td><span class="text-dark">Trần Duy Tân</span></td>
-                <td class="text-center">19/09/2026</td>
-                <td class="text-center"><span class="text-dark">28/09/2026</span></td>
-                <td class="text-center"><span class="badge badge-secondary px-2">Chưa làm</span></td>
-                <td>—</td>
-                @if (canEdit)
-                {
-                    <td class="text-center">
-                        <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" class="text-danger" title="Xóa"><i class="fa fa-trash-alt"></i></a>
-                    </td>
-                }
-            </tr>
-
+                </tr>
+            }
         </tbody>
     </table>
 </div>
@@ -1000,8 +389,8 @@
             $icon.addClass('collapsed');
         }
 
-        // Tầng 1: Đóng/mở toàn bộ con thuộc nhánh node_A hoặc node_B
-        if ($row.hasClass('tree-level-1')) {
+        // Tầng 1: Đóng/mở toàn bộ con thuộc nhánh Status
+        if ($row.hasClass('tree-status-row')) {
             var $descendants = $('#treeTrackingBody tr[data-parent="' + nodeId + '"], #treeTrackingBody tr[data-root="' + nodeId + '"]');
             if (newExpanded) {
                 $descendants.show();
@@ -1016,8 +405,8 @@
                 $descendants.hide();
             }
         }
-        // Tầng 2: Đóng/mở các quy trình và tiến trình con của trạng thái
-        else if ($row.hasClass('tree-level-2')) {
+        // Tầng 2: Đóng/mở các tiến trình con của quy trình
+        else if ($row.hasClass('tree-process-row')) {
             var $children = $('#treeTrackingBody tr[data-parent="' + nodeId + '"], #treeTrackingBody tr[data-subparent="' + nodeId + '"]');
             if (newExpanded) {
                 $children.show();
@@ -1032,8 +421,8 @@
                 $children.hide();
             }
         }
-        // Tầng 3: Đóng/mở các tiến trình con của quy trình
-        else if ($row.hasClass('tree-level-3')) {
+        // Tầng 3: Đóng/mở các Todo list con của tiến trình
+        else if ($row.hasClass('tree-progress-row')) {
             var $items = $('#treeTrackingBody tr[data-parent="' + nodeId + '"]');
             if (newExpanded) {
                 $items.show();
@@ -1051,36 +440,10 @@
             $body.find('.tree-toggle-icon').removeClass('collapsed');
             $body.find('tr[data-node]').attr('data-expanded', 'true');
         } else {
-            // Chỉ giữ lại tầng 1 (A. Cơ hội & A. Dự án)
-            $body.find('tr.tree-level-2, tr.tree-level-3, tr.tree-level-4').hide();
+            // Chỉ giữ lại tầng 1 (Trạng thái)
+            $body.find('tr.tree-process-row, tr.tree-progress-row, tr.tree-todo-row').hide();
             $body.find('.tree-toggle-icon').addClass('collapsed');
             $body.find('tr[data-node]').attr('data-expanded', 'false');
         }
     }
-
-    // Các hàm placeholder cho hành động UI (Khoan code chức năng theo yêu cầu)
-    function actionTreeReport(name) {
-        if (typeof toastr !== "undefined") {
-            toastr.info("Mở form Báo cáo cho: " + name);
-        } else {
-            alert("Báo cáo: " + name);
-        }
-    }
-
-    function actionTreeConfirm(name) {
-        if (typeof toastr !== "undefined") {
-            toastr.success("Xác nhận hoàn thành cho: " + name);
-        } else {
-            alert("Xác nhận hoàn thành: " + name);
-        }
-    }
-
-    function actionTreeUnlock(name) {
-        if (typeof toastr !== "undefined") {
-            toastr.warning("Mở khóa xác nhận cho: " + name);
-        } else {
-            alert("Mở khóa xác nhận: " + name);
-        }
-    }
 </script>
-

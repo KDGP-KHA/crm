@@ -1,0 +1,60 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Cate_ProductServiceModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("RM_ProductService_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Edit", "ProductService", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditProductService", @class = "form-horizontal" }))
+    {
+        <div id="bodyFormEdit">
+            @Html.Partial("_ProductService")
+        </div>
+
+    }
+
+    <script type="text/javascript">
+        $('form#EditProductService').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if ($("#ModalContent #modal_EditProductService #chkNotDismissModal").is(":checked")) {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            ProductService_LoadData();
+                            response.status = undefined;
+                            $("#ModalContent #modal_EditProductService form")[0].reset();
+                        }
+                    } else {
+                        if (!response.status && response.errorCode == 1) {
+                            eval(response.message);
+                            response.status = undefined;
+                        } else {
+                            $("#ModalContent #modal_EditProductService").modal("hide");
+                            $("#ModalContent #modal_EditProductService").on('hidden.bs.modal',
+                                function () {
+                                    if (response.status != undefined) {
+                                        eval(response.message);
+                                        ProductService_LoadData();
+                                        response.status = undefined;
+                                    }
+                                });
+                        }
+                    }
+                } else {
+                    $("#ModalContent #modal_EditProductService" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

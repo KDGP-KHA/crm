@@ -15,6 +15,20 @@ namespace Core.Cate.Caches
 
         private RM_ReviewBatchItemBiz Api => _RM_ReviewBatchItemApi ?? (_RM_ReviewBatchItemApi = new RM_ReviewBatchItemBiz());
 
+        [DataObjectMethod(DataObjectMethodType.Select, true)]
+        public List<RM_ReviewDigitalSalesModel> LoadDigitalSales(out int total, RM_ReviewDigitalSalesSearchModel model, BaseSearchModel search = null)
+        {
+            var rawKey = string.Concat("GetSearch_RM_ReviewDigitalSales", UtilEncrypt.FromObject(model), UtilEncrypt.FromObject(search));
+            var rawKeyTotal = string.Concat(rawKey, "-Total");
+            total = (int?)GetCacheItem(rawKeyTotal) ?? 0;
+            var data = GetCacheItem(rawKey) as List<RM_ReviewDigitalSalesModel>;
+            if (data != null) return data;
+            data = Api.LoadDigitalSales(out total, model, search);
+            AddCacheItem(rawKey, data);
+            AddCacheItem(rawKeyTotal, total);
+            return data;
+        }
+
         /// <summary>
         /// Lấy toàn bộ danh sách RM_ReviewBatchItem
         /// </summary>
@@ -100,6 +114,17 @@ namespace Core.Cate.Caches
             if (data != null) return data;
             data = Api.GetHistory(objectType, objectID);
             AddCacheItem(rawKey, data); return data;
+        }
+
+        [DataObjectMethod(DataObjectMethodType.Select, true)]
+        public List<RM_ReviewHistoryModel> GetDigitalSalesHistory(int digitalSalesID)
+        {
+            var rawKey = string.Concat("RM_DigitalSalesReview_GetHistory", digitalSalesID);
+            var data = GetCacheItem(rawKey) as List<RM_ReviewHistoryModel>;
+            if (data != null) return data;
+            data = Api.GetDigitalSalesHistory(digitalSalesID);
+            AddCacheItem(rawKey, data);
+            return data;
         }
 
         /// <summary>

@@ -1,0 +1,258 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Models
+
+@model RM_CommentModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.CommentID)
+@Html.HiddenFor(m => m.TaskManagementID)
+
+<div class="form-group">
+    <label class="font-weight-bold text-primary">@AppProcessor.Messagor.GetMessage("Comment_Content_Label")</label>
+    @Html.TextAreaFor(model => model.Content,
+                new
+                {
+                    @class = "form-control",
+                    placeholder = AppProcessor.Messagor.GetMessage("TaskManagement_Description_Label"),
+                    id = "ContentDescriptionComment"
+                })
+    <div class="col-md-12">
+        <label>@AppProcessor.Messagor.GetMessage("TaskManagement_Files_Label")</label>
+        <div class="input-group">
+            <div class="custom-file">
+                <label class="custom-file-label" for="commentFiles">
+                    @AppProcessor.Messagor.GetMessage("FileUpload")
+                </label>
+                <input type="file"
+                       class="custom-file-input"
+                       id="commentFiles"
+                       name="Files"
+                       multiple
+                       accept=".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls" />
+            </div>
+        </div>
+        <div id="fileList" class="mt-2"></div>
+        @if (Model.FilePaths != null && Model.FilePaths.Any())
+        {
+            <div class="mt-3">
+
+                <label class="font-weight-bold">
+                    File đã tải lên
+                </label>
+
+                <div id="dbFileList">
+
+                    @foreach (var file in Model.FilePaths)
+                    {
+                        var ext = System.IO.Path
+                            .GetExtension(file.FilePath)?
+                            .ToLower();
+
+                        var icon = "fa-file text-secondary";
+
+                        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext))
+                        {
+                            icon = "fa-file-image text-success";
+                        }
+                        else if (ext == ".pdf")
+                        {
+                            icon = "fa-file-pdf text-danger";
+                        }
+                        else if (new[] { ".doc", ".docx" }.Contains(ext))
+                        {
+                            icon = "fa-file-word text-primary";
+                        }
+                        else if (new[] { ".xls", ".xlsx" }.Contains(ext))
+                        {
+                            icon = "fa-file-excel text-success";
+                        }
+
+                        var fileName = System.IO.Path.GetFileName(file.FilePath);
+
+                        <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+
+                            <div>
+                                <i class="fa @icon mr-1"></i>
+
+                                <a href="@file.FilePath"
+                                   target="_blank">
+                                    @fileName
+                                </a>
+
+                                <small class="text-muted ml-2">
+                                    @(file.CreatedDate?.ToString("dd/MM/yyyy HH:mm"))
+                                </small>
+                            </div>
+
+                            @Html.Button(true, "DeleteFileComment",
+                                   Url.Action("DeleteFile", "Comment", new { area = "Cate", id = file.FilePathID }),
+                                   "<i class='fa fa-trash'></i>",
+                                   "",
+                                   new
+                                   {
+                                       @class = "btn btn-sm btn-outline-danger",
+                                   })
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    function _initTaskDetailForm() {
+        // init datepicker
+        initTaskDetailDatePicker();
+
+        // ── CKEditor ──────────────────────────────────────────
+        function initTaskManagementCKEditor() {
+            if (typeof CKEDITOR === 'undefined') return;
+            var ex = CKEDITOR.instances['ContentDescriptionComment'];
+            if (ex) ex.destroy(true);
+            CKEDITOR.replace('ContentDescriptionComment', {
+                height: 100,
+                allowedContent: true,
+                extraAllowedContent: 'img[width,height,style]',
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+                    { name: 'insert', items: ['Image', 'Table', 'Link'] },
+                    { name: 'styles', items: ['Format'] },
+                    { name: 'tools', items: ['Maximize'] }
+                ]
+            });
+        }
+
+        function loadCKEditorThenInit() {
+            if (typeof CKEDITOR !== 'undefined') { initTaskManagementCKEditor(); return; }
+            var s = document.createElement('script');
+            s.src = '/Contents/Modules/Major/ckeditor4/ckeditor.js';
+            s.onload = function () {
+                var s2 = document.createElement('script');
+                s2.src = '/Contents/Modules/Major/ckfinder/ckfinder.js';
+                s2.onload = function () { initTaskManagementCKEditor(); };
+                s2.onerror = function () { initTaskManagementCKEditor(); };
+                document.head.appendChild(s2);
+            };
+            document.head.appendChild(s);
+        }
+
+        $(document).off('click', '#btnSave').on('click', '#btnSave', function () {
+            var btn = this;
+            if (btn.disabled) return;
+            btn.disabled = true;
+            setTimeout(function () { btn.disabled = false; }, 2000);
+
+            if (typeof CKEDITOR !== 'undefined') {
+                for (var inst in CKEDITOR.instances) {
+                    CKEDITOR.instances[inst].updateElement();
+                }
+            }
+            var $form = $('#EditComment:visible, #AddComment:visible');
+
+            var formData = new FormData($form[0]);
+
+            $.ajax({
+                url: $form.attr('action'),
+                type: $form.attr('method'),
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    Comment_OnProcessSuccess(response);
+                },
+                error: function (xhr) {
+                    console.log(xhr);
+                }
+            });
+            // submit đúng form
+            //$form.trigger('submit');
+        });
+        loadCKEditorThenInit();
+    }
+
+    function initTaskDetailDatePicker() {
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true
+        });
+    }
+
+    if (typeof jQuery !== 'undefined') {
+        $(document).ready(function () {
+            _initTaskDetailForm();
+        });
+    } else {
+        document.addEventListener('DOMContentLoaded', function () {
+            _initTaskDetailForm();
+        });
+    }
+
+    // ── File picker - hỗ trợ chọn nhiều lần, cộng dồn file ──
+    var commentFilesList = [];
+    var taskDataTransfer = new DataTransfer();
+
+    $(document).on('change', '#commentFiles', function () {
+        var newFiles = Array.from(this.files);
+
+        // Merge, tránh trùng theo tên + size
+        newFiles.forEach(function (file) {
+            if (!commentFilesList.some(function (f) {
+                return f.name === file.name && f.size === file.size;
+            })) {
+                commentFilesList.push(file);
+            }
+        });
+
+        taskSyncInputFiles();
+        taskRenderFileList();
+    });
+
+    function taskSyncInputFiles() {
+        taskDataTransfer = new DataTransfer();
+        commentFilesList.forEach(function (file) {
+            taskDataTransfer.items.add(file);
+        });
+        var input = document.getElementById('commentFiles');
+        if (input) input.files = taskDataTransfer.files;
+
+        // Cập nhật label
+        var names = commentFilesList.map(function (f) { return f.name; }).join(', ');
+        $('.custom-file-label[for="commentFiles"]').text(names || 'Chọn file...');
+    }
+
+    function taskRenderFileList() {
+        var html = '';
+        commentFilesList.forEach(function (file, index) {
+            var ext = file.name.split('.').pop().toLowerCase();
+            var icon = 'fa-file';
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].indexOf(ext) > -1) icon = 'fa-file-image text-success';
+            else if (ext === 'pdf') icon = 'fa-file-pdf text-danger';
+            else if (['doc', 'docx'].indexOf(ext) > -1) icon = 'fa-file-word text-primary';
+            else if (['xls', 'xlsx'].indexOf(ext) > -1) icon = 'fa-file-excel text-success';
+
+            var size = file.size > 1024 * 1024
+                ? (file.size / 1024 / 1024).toFixed(1) + ' MB'
+                : (file.size / 1024).toFixed(1) + ' KB';
+
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                + '<span><i class="fa ' + icon + ' mr-1"></i>' + file.name
+                + ' <small class="text-muted">(' + size + ')</small></span>'
+                + '<button type="button" class="btn btn-sm btn-danger" onclick="taskRemoveFile(' + index + ')">'
+                + '<i class="fa fa-times"></i></button>'
+                + '</div>';
+        });
+        $('#fileList').html(html);
+    }
+
+    function taskRemoveFile(index) {
+        commentFilesList.splice(index, 1);
+        taskSyncInputFiles();
+        taskRenderFileList();
+    }
+</script>

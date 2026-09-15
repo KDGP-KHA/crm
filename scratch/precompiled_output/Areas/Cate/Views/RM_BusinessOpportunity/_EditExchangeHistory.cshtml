@@ -1,0 +1,214 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ExchangeHistoryModel
+
+@Html.AntiForgeryToken()
+<div id="ExchangeHistory">
+    @Html.HiddenFor(model => model.ExchangeHistoryID)
+    @Html.HiddenFor(model => model.BusinessOpportunityID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ExchangeDate, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.ExchangeDate, "{0:dd/MM/yyyy HH:mm}", new { id = "ExchangeDate", @class = "form-control datetimepicker", placeholder = "dd/mm/yyyy hh:mm" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.ExchangeDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ContactPerson_ID, new { @class = "col-md-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.DropDownListFor(model => model.ContactPerson_ID, new SelectList(Model.ListContactPerson, "Value", "Text"), "", new { @class = "col form-control" })
+            @Html.ValidationMessageFor(model => model.ContactPerson_ID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.MemberID, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                @Html.DropDownList("ParticipatingMembersSelect", new SelectList(Model.Members, "MemberID", "FullName"), "", new { @class = "form-control", multiple = true, data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select") })
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.StatusID, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                @Html.DropDownListFor(model => model.StatusID, new SelectList(Model.OpportunityStatus, "ID", "StatusName"), "", new { @class = "form-control", data_placeholder = "Trạng thái" })
+            </div>
+            @Html.ValidationMessageFor(model => model.StatusID, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.FileAttachEdit, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.FileFor(model => model.DinhKemFileEdit, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            <div id="oldFileList" class="mt-2">
+                @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+                {
+                    foreach (var file in Model.ExistingFiles)
+                    {
+                        var fileName = Path.GetFileName(file.FilePath);
+
+                        <div class="old-file d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                            <a class="js-file-preview text-decoration-none text-dark"
+                               href="@file.FilePath"
+                               data-file-path="@file.FilePath"
+                               data-file-name="@fileName"
+                               data-preview-title="Tệp đính kèm"
+                               onclick="return openBusinessOpportunityFilePreviewLink(this);">
+                                <i class="fa fa-file text-success mr-1"></i>
+                                @fileName
+                            </a>
+
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="removeOldFile(this, @file.FilePathID)">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+            <div id="fileEditList" class="mt-2"></div>
+            <div id="deletedFilesEditContainer"></div>
+        </div>
+    </div>
+    @if (Model.ExchangeHistoryID > 0)
+    {
+        <div class="form-group row">
+            @Html.TitleFor(model => model.ExchangeContent, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+            <div class="col-md-9">
+                @Html.TextAreaFor(model => model.ExchangeContent, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+                @Html.ValidationMessageFor(model => model.ExchangeContent, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="form-group row">
+            <div class="col-md-12">
+                @Html.TextAreaFor(model => model.ExchangeContent, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+                @Html.ValidationMessageFor(model => model.ExchangeContent, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    }
+
+</div>
+@Html.Partial("~/Areas/Cate/Views/RM_BusinessOpportunity/_FilePreviewScripts.cshtml")
+<script>
+    $(document).ready(function () {
+        $('#modal_EditEH-@Model.ExchangeHistoryID #btnSave').attr('type', 'button');
+
+        reloadCKEditor();
+        $("#modal_EditEH-@Model.ExchangeHistoryID #ExchangeDate").datetimepicker({
+            "format": "DD/MM/YYYY",
+        });
+
+        $("#modal_EditEH-@Model.ExchangeHistoryID #btnSave").click(function () {
+            for (instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+            $("form#EditEH-@Model.ExchangeHistoryID").submit();
+        });
+    });
+
+    // Constructor CKEDITOR
+    function reloadCKEditor() {
+
+        var textarea = $('#modal_EditEH-@Model.ExchangeHistoryID').find('#ExchangeContent');
+
+        if (textarea.length === 0) return; // không tồn tại trong modal thì bỏ
+
+        editor = CKEDITOR.replace(textarea[0], {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '750',
+        });
+
+        editor.on('instanceReady', function (e) {
+            editor.widgets.registered.uploadimage.onUploaded = function (upload) {
+                this.replaceWith('<img src="' + upload.url + '" width="100%" height="auto">');
+            };
+        });
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        var selectedValues = @Html.Raw(Json.Encode(Model.ParticipatingMembersSelect ?? new List<int>()));
+        $('#ParticipatingMembersSelect')
+            .select2({
+                width: "100%"
+            })
+            .val(selectedValues)
+            .trigger('change');
+    });
+</script>
+<script>
+    var filesList = [];
+    var dataTransfer = new DataTransfer();
+
+    // CHỌN FILE MỚI
+    $(document).on("change", "#DinhKemFileEdit", function (e) {
+        let newFiles = Array.from(e.target.files);
+
+        newFiles.forEach(file => {
+            // check trùng (name + size cho chắc)
+            if (!filesList.some(f => f.name === file.name && f.size === file.size)) {
+                filesList.push(file);
+            }
+        });
+
+        syncInputFiles();
+        renderFileList();
+    });
+
+    // SYNC FILE VÀO INPUT
+    function syncInputFiles() {
+        dataTransfer = new DataTransfer();
+
+        filesList.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        document.getElementById("DinhKemFileEdit").files = dataTransfer.files;
+    }
+
+    // RENDER FILE MỚI
+    function renderFileList() {
+        let html = "";
+
+        filesList.forEach((file, index) => {
+            html += `
+            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1 new-file">
+                <span>
+                    <i class="fa fa-file text-primary mr-1"></i>
+                    ${file.name}
+                </span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            `;
+        });
+
+        $("#fileEditList").html(html);
+    }
+
+    // XÓA FILE MỚI
+    function removeFile(index) {
+        filesList.splice(index, 1);
+        syncInputFiles();
+        renderFileList();
+    }
+
+    // XÓA FILE CŨ (EDIT)
+    function removeOldFile(btn, fileId) {
+        $(btn).closest(".old-file").remove();
+        $("#deletedFilesEditContainer").append(
+            `<input type="hidden" name="DeletedFileIds" value="${fileId}" />`
+        );
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

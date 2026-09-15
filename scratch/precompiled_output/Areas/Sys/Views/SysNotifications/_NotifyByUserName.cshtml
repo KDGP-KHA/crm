@@ -1,0 +1,181 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Sys.Models.Sys.SysNotificationsModel>
+@{
+    <style>
+        .btn-hover:hover {
+            background-color: #e4e6e9;
+        }
+    </style>
+
+    if (Model != null)
+    {
+        var lastItem = Model.LastOrDefault();
+        <a class="nav-link dropdown-toggle pr-lg-4" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" data_rel="tooltip" , title="@AppProcessor.Messagor.GetMessage("Notification_Title")">
+            <i class="fa fa-bell text-110 ml-lg-2"></i>
+            <span class="d-inline-block d-lg-none ml-2">@AppProcessor.Messagor.GetMessage("Notification_Title")</span>
+            @if (Model.Where(x => x.IsRead == false).ToList().Count > 0)
+            {
+                <span id="id-navbar-badge1" class="badge badge-danger radius-round text-75">@Model.Where(x => x.IsRead == false).ToList().Count</span>
+            }
+            <i class="caret fa fa-angle-left d-block d-lg-none text-warning-d2"></i>
+        </a>
+        <div class="shadow dropdown-menu dropdown-animated dropdown-sm p-0 brc-primary-m3 border-b-2 bgc-white ">
+            <div class="tab-pane mh-none" id="notifications" role="tabpanel">
+                <div data-ace-scroll='{"ignore": "mobile", "height": 380, "smooth":true}'>
+                    @{
+                        var items = Model.ToList();
+                        if (items.Any())
+                        {
+                            foreach (var item in items)
+                            {
+                                if (item.Type == 1)
+                                {
+                                    var deadline = item.HanHoanThanh.ToString("o");
+                                    <a data-width="1024" data-modal="" data-modal-id="QuickConfirmPhieu" href="/Cate/NV_Phieu/QuickConfirm/@item.PhieuID" msg-id="@item.PhieuID" class="d-flex mb-0 border-0 list-group-item list-group-item-action msg notify-btn btn-hover" style="cursor: pointer" data-deadline="@deadline">
+                                        <div>
+                                            <div class="row px-3 justify-content-between align-items-center">
+                                                <h5 class="mb-2 text-primary">
+                                                    <i class="fas fa-user-check"></i>
+                                                    <span class="font-bold">Bạn có công việc cần xác nhận</span>
+                                                </h5>
+                                            </div>
+                                            <div class="text-500 text-success">@item.TenPhieu</div>
+                                            <div class="text-90 text-dark">Người tạo: @item.HoTenNguoiLapPhieu</div>
+                                            <div class="text-90 text-dark">Quy trình: @item.TenQuyTrinh</div>
+                                            <div class="text-danger text-85">
+                                                <i class="far fa-clock"></i>
+                                                Hạn hoàn thành: <span class="han-hoan-thanh"></span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                    if (item != items.Last())
+                                    {
+                                        <hr class="my-1px brc-grey-l3" />
+                                    }
+                                }
+                                else if (item.Type == 2)
+                                {
+                                    <a target="_blank" onclick="handleClick(@item.Notification_ID)" href="/Cate/NV_Phieu/BienTapPhieu/@item.PhieuID" class="d-flex mb-0 border-0 list-group-item list-group-item-action msg btn-hover" style="cursor: pointer">
+                                        <div>
+                                            @if (!@item.IsRead)
+                                            {
+                                                <span class="float-right mt-1 d-inline-block radius-round p-2 bgc-red"></span>
+                                            }
+                                            <div class="row @(item.IsRead ? "px-3" : "") justify-content-between align-items-center">
+                                                <h5 class="mb-2 text-danger">
+                                                    <i class="fas fa-redo-alt"></i>
+                                                    <span class="font-bold">Thông báo trả lại phiếu</span>
+                                                </h5>
+                                            </div>
+                                            <div class="text-500 text-success">@item.TenPhieu</div>
+                                            <div class="text-90 text-dark"><i class="far fa-user"></i> @item.NguoiTao</div>
+                                            <div class="text-90 text-dark">
+                                                <i class="far fa-clock"></i>
+                                                @item.NgayTao
+                                            </div>
+                                            <div class="text-danger text-85">
+                                                Lý do: @item.LyDo
+                                            </div>
+                                        </div>
+                                    </a>
+                                    if (item != items.Last())
+                                    {
+                                        <hr class="my-1px brc-grey-l3" />
+                                    }
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-500 text-center my-3">
+                                Không có thông báo
+                            </div>
+                        }
+                    }
+                </div>
+                @if (items.Any())
+                {
+                    <hr class="mt-1 mb-1px brc-secondary-l2" />
+                    <a href="#" class="mb-0 py-3 border-0 list-group-item text-blue text-uppercase text-center text-85 font-bolder">
+                        Xem tất cả
+                        <i class="ml-2 fa fa-arrow-right text-muted"></i>
+                    </a>
+                }
+            </div>
+        </div>
+        <script>
+            function handleClick(notificationId) {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("MarkAsRead", "SysNotifications", new { area = "Sys" })?id=" + notificationId,
+                    dataType: "JSON",
+                    success: function () {
+                        reloadNotifications();
+                    }
+                });
+            }
+
+            //Load lại danh sách thông báo
+            function reloadNotifications() {
+                console.log('reload');
+                $.ajax({
+                    url: '@Url.Action("GetNotifyByUserName", "SysNotifications", new { area = "Sys" })',
+                    type: 'GET',
+                    success: function (data) {
+                        $('#lstWarningTasks').html(data);
+                    },
+                    error: function () {
+                        alert('Có lỗi xảy ra khi tải lại danh sách.');
+                    }
+                });
+            }
+
+            // Hàm lấy thời hạn hoàn thành = hạn hoàn thành - thời gian hiện tại
+            function updateTimeDifference() {
+                document.querySelectorAll('.notify-btn').forEach(function (element) {
+                    var deadline = moment(element.getAttribute('data-deadline'));
+                    var currentTime = moment();
+                    var isPastDeadline = deadline.isBefore(currentTime);
+                    var duration = moment.duration(isPastDeadline ? currentTime.diff(deadline) : deadline.diff(currentTime));
+
+                    var days = Math.floor(duration.asDays());
+                    var hours = duration.hours();
+                    var minutes = duration.minutes();
+
+                    var formattedTimeDifference = '';
+                    if (days > 0) formattedTimeDifference += days + ' ngày ';
+                    if (hours > 0 || days > 0) formattedTimeDifference += hours + ' giờ ';
+                    formattedTimeDifference += minutes + ' phút';
+
+                    if (isPastDeadline) {
+                        formattedTimeDifference = 'Trễ ' + formattedTimeDifference;
+                        element.classList.add('text-danger');
+                        element.classList.remove('text-warning');
+                    } else {
+                        formattedTimeDifference = 'Còn ' + formattedTimeDifference;
+                        var hoursDifference = deadline.diff(currentTime, 'hours');
+                        if (hoursDifference < 12) {
+                            element.classList.add('text-danger');
+                            element.classList.remove('text-warning');
+                        } else if (hoursDifference < 24) {
+                            element.classList.add('text-warning');
+                            element.classList.remove('text-danger');
+                        } else {
+                            element.classList.remove('text-danger', 'text-warning');
+                        }
+                    }
+
+                    element.querySelector('.han-hoan-thanh').textContent = formattedTimeDifference;
+                });
+            }
+
+            // Gọi lại hàm mỗi phút để cập nhật lại giá trị
+            setInterval(updateTimeDifference, 60000);
+            // Gọi lần đâu để lấy dữ liệu
+            setTimeout(function () {
+                updateTimeDifference();
+            }, 1000);
+        </script>
+    }
+}

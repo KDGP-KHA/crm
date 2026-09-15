@@ -1,0 +1,126 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectRevenueReportSearchModel
+
+<style>
+    .project-revenue-report-search {
+        max-width: 100%;
+        overflow: visible;
+    }
+
+        .project-revenue-report-search .card-title {
+            font-size: 16px;
+        }
+
+        .project-revenue-report-search .Search_Row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 8px 16px;
+        }
+
+        .project-revenue-report-search .Search_Box {
+            min-width: 0;
+            margin-right: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        .project-revenue-report-search .report-type-box,
+        .project-revenue-report-search .month-box,
+        .project-revenue-report-search .quarter-box,
+        .project-revenue-report-search .year-box {
+            width: 220px;
+        }
+
+        .project-revenue-report-search .Action_Row {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 14px;
+        }
+
+            .project-revenue-report-search .Group_button {
+                gap: 8px;
+            }
+
+            .project-revenue-report-search .Action_Row .Search_button {
+                float: none;
+                margin: 0;
+            }
+
+</style>
+
+<div class="Search card mb-2 project-revenue-report-search" id="card-project-revenue-report">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_SearchSectionTitle")
+        </div>
+    </div>
+
+    <div class="card-body p-2">
+        <form id="frmProjectRevenueReportSearch" method="post" class="d-flex flex-wrap align-items-end">
+            <div
+                id="ProjectRevenueReportMessages"
+                data-report-type-required="@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Message_ReportTypeRequired")"
+                data-year-required="@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Message_YearRequired")"
+                data-month-required="@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Message_MonthRequired")"
+                data-quarter-required="@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Message_QuarterRequired")"
+                data-invalid-report-type="@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Message_InvalidReportType")">
+            </div>
+
+                <div class="Search_Box report-type-box">
+                    <label class="font-bold">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_ReportType") <span class="text-danger">*</span></label>
+                    @Html.DropDownListFor(
+                        model => model.ReportType,
+                        Model.ReportTypes,
+                        "",
+                        new { @class = "form-control", id = "ReportType" })
+                </div>
+
+                <div class="Search_Box month-box flex-column" id="ProjectRevenueReportMonthWrapper">
+                    <label class="font-bold">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Month") <span class="text-danger">*</span></label>
+                    @Html.DropDownListFor(
+                        model => model.Month,
+                        Model.Months,
+                        "",
+                        new { @class = "form-control", id = "Month" })
+                </div>
+
+                <div class="Search_Box quarter-box flex-column" id="ProjectRevenueReportQuarterWrapper">
+                    <label class="font-bold">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Quarter") <span class="text-danger">*</span></label>
+                    @Html.DropDownListFor(
+                        model => model.Quarter,
+                        Model.Quarters,
+                        "",
+                        new { @class = "form-control", id = "Quarter" })
+                </div>
+
+                <div class="Search_Box year-box ">
+                    <label class="font-bold">@AppProcessor.Messagor.GetMessage("ProjectRevenueReport_Year") <span class="text-danger">*</span></label>
+                    @Html.TextBoxFor(
+                        model => model.Year,
+                        new
+                        {
+                            @class = "form-control",
+                            id = "Year",
+                            type = "number",
+                            min = "2000",
+                            max = "2100",
+                            autocomplete = "off"
+                        })
+                </div>
+
+                <div class="Group Group_button">
+                    <div class="Search_button">
+                        <button type="button" class="btn btn-primary" id="btnSearchProjectRevenueReport">
+                            <i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Search")
+                        </button>
+                    </div>
+                    <div class="Search_button">
+                        <button type="button" class="btn btn-warning" id="btnExportProjectRevenueReport">
+                            <i class="fa fa-download"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Export")
+                        </button>
+                    </div>
+                </div>
+        </form>
+    </div>
+</div>

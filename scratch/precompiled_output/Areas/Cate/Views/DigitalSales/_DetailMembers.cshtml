@@ -1,0 +1,115 @@
+﻿@model Core.Cate.Models.RM_DigitalSalesModel
+@{
+    bool canEdit = ViewBag.CanEdit == true;
+    var rawMembers = Model.Members ?? new List<Core.Cate.Models.RM_DigitalSalesMemberModel>();
+    var displayMembers = rawMembers
+        .GroupBy(m => m.UserID > 0 ? m.UserID : m.MemberID)
+        .Select(g => {
+            var first = g.First();
+            var allRoles = g.SelectMany(x => (x.RoleTitle ?? "").Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
+                            .Select(r => r.Trim())
+                            .Where(r => !string.IsNullOrEmpty(r))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+            return new {
+                MemberID = first.MemberID,
+                UserID = first.UserID,
+                FullName = first.FullName,
+                UserName = first.UserName,
+                Roles = allRoles,
+                RoleTitle = string.Join(", ", allRoles),
+                IsAM = g.Any(x => x.IsAM),
+                Note = first.Note
+            };
+        }).ToList();
+}
+
+<span id="partialMembersCount" class="d-none" data-count="@displayMembers.Count"></span>
+
+<div class="card border-1 brc-grey-l2 p-3 p-lg-4 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center border-b-1 brc-grey-l2 pb-2 mb-3">
+        <h6 class="text-primary font-weight-bold mb-0">
+            <i class="fa fa-users mr-1"></i> Thành viên tham gia & Vai trò
+            <span class="badge badge-primary badge-pill ml-1" id="badgeMemberCount">@displayMembers.Count</span>
+        </h6>
+        @if (canEdit)
+        {
+            <button type="button" class="btn btn-xs btn-outline-primary radius-1 font-bold" onclick="openAddMemberModal(@Model.DigitalSalesID);" title="Thêm thành viên">
+                <i class="fa fa-user-plus mr-1"></i> Thêm thành viên
+            </button>
+        }
+    </div>
+
+    @if (displayMembers.Count > 0)
+    {
+        <div class="row">
+            @foreach (var m in displayMembers)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
+                    <div class="card h-100 border-1 brc-primary-l2 radius-2 p-3 shadow-sm hover-shadow bgc-white">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center min-width-0">
+                                <div class="w-4 h-4 radius-round bgc-primary-l3 text-primary-d1 d-flex align-items-center justify-content-center mr-2 font-bolder text-90 flex-shrink-0" style="width: 36px; height: 36px; border-radius: 50%;">
+                                    <i class="fa fa-user text-primary"></i>
+                                </div>
+                                <div class="min-width-0">
+                                    <div class="d-flex align-items-center">
+                                        <span class="font-weight-bold text-dark text-95 text-truncate" title="@m.FullName">
+                                            @m.FullName
+                                        </span>
+                                        @if (m.IsAM)
+                                        {
+                                            <span class="text-success ml-1 flex-shrink-0" title="Có quyền cập nhật thông tin & trạng thái hồ sơ" data-toggle="tooltip">
+                                                <i class="fa fa-check-circle text-110"></i>
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="text-secondary text-80 text-truncate font-mono">
+                                        @m.UserName
+                                    </div>
+                                </div>
+                            </div>
+                            @if (canEdit)
+                            {
+                                <div class="d-flex align-items-center ml-2 flex-shrink-0">
+                                    <button type="button" class="btn btn-xs btn-outline-primary radius-1 px-15 py-1 mr-1" title="Chỉnh sửa vai trò" onclick="openEditMemberModal(@m.MemberID, @Model.DigitalSalesID);">
+                                        <i class="fa fa-pencil-alt"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-15 py-1" title="Xóa thành viên" onclick="deleteMemberItem(@m.MemberID, @Model.DigitalSalesID);">
+                                        <i class="fa fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                        <div class="pt-2 border-t-1 brc-grey-l3 mt-1">
+                            <div class="d-flex flex-wrap align-items-center" style="gap: 4px;">
+                                @if (m.Roles.Count > 0)
+                                {
+                                    foreach (var r in m.Roles)
+                                    {
+                                        <span class="badge bgc-purple-l3 text-purple-d2 border-1 brc-purple-m3 px-2 py-05 font-bold text-80" title="@r">
+                                            <i class="fa fa-id-badge mr-1 opacity-75"></i>@r
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bgc-purple-l3 text-purple-d2 border-1 brc-purple-m3 px-2 py-05 font-bold text-80">
+                                        <i class="fa fa-id-badge mr-1 opacity-75"></i>Thành viên
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-muted py-4">
+            <i class="fa fa-user-slash fa-2x mr-1 text-secondary-l1 mb-2 d-block"></i>
+            Chưa có thành viên tham gia nào.@(canEdit ? " Bấm \"Thêm thành viên\" để phân công nhân sự vào hồ sơ." : "")
+        </div>
+    }
+</div>

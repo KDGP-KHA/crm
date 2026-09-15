@@ -1,0 +1,35 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerContactModel
+@{
+    ViewBag.Title = string.Format("Cập nhật thông tin người liên hệ vào khách hàng [ {0} ]", ViewBag.CustomerName);
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-user-plus"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("AddCustomerContactDetail", "CustomerContact", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "CustomerContact_OnProcessSuccess(data, 'AddCustomerContactDetail')"
+    }, new { @class = "form-horizontal", id = "AddCustomerContactDetail" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_CustomerContactDetail", Model)
+        </div>
+    }
+}
+
+@section ContinueForm{
+    <script>
+        $(document).ready(function () {
+            $("button[type='submit']").html('<i class="fa fa-check mr-1"></i> Đồng ý');
+        });
+    </script>
+}

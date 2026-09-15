@@ -1,0 +1,179 @@
+﻿@using System.Linq
+@model Core.Cate.Models.RM_BusinessOpportunityWeeklyReportResultModel
+
+<style>
+    .weekly-report-result-card {
+        max-width: 100%;
+    }
+
+    .weekly-report-result-card .card-header {
+        min-height: 40px;
+        padding: 8px 12px;
+    }
+
+    .weekly-report-result-card .card-title {
+        font-size: 16px;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .weekly-report-summary {
+        font-size: 13px;
+        color: #495057;
+    }
+
+    .weekly-report-table thead th {
+        padding: 5px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        vertical-align: middle;
+    }
+
+    .weekly-report-table tbody td {
+        padding: 5px;
+        font-size: 13px;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+
+    .weekly-report-table .group-department td {
+        background: #f1f6fb;
+        font-weight: 700;
+    }
+
+    .weekly-report-table .group-employee td {
+        background: #fafafa;
+        font-weight: 700;
+    }
+
+    .weekly-report-result-card .table-responsive {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .weekly-report-table {
+        width: 100%;
+        table-layout: fixed;
+        margin-bottom: 0;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        display: block;
+        height: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 5px;
+    }
+
+    .weekly-report-table th,
+    .weekly-report-table td {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .weekly-report-table tbody td:nth-child(3),
+    .weekly-report-table tbody td:nth-child(7) {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .col-opportunity {
+        width: 300px;
+    }
+
+    .col-exchangeinfo {
+        width: 500px;
+    }
+
+    .col-stage {
+        width: 100px
+    }
+
+</style>
+
+<div class="card weekly-report-result-card">
+    <div class="card-header justify-content-start align-items-center font-bold">
+        <i class="fa fa-table mr-2"></i> Kết quả báo cáo
+    </div>
+
+    <div class="card-body p-0">
+        <div class="p-2 border-bottom weekly-report-summary">
+            <div><strong>Tuần:</strong> @Model.WeekFrom.ToString("dd/MM/yyyy") - @Model.WeekTo.ToString("dd/MM/yyyy")</div>
+            <div><strong>Phòng:</strong> @Model.DepartmentFilterText</div>
+            <div><strong>Nhân viên:</strong> @Model.EmployeeFilterText</div>
+        </div>
+
+        @if (Model.Items == null || !Model.Items.Any())
+        {
+            <div class="p-3 text-muted">Không có dữ liệu.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 weekly-report-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;" class="text-center">STT</th>
+                            <th style="width:100px;">Mã CHKD</th>
+                            <th class="col-opportunity">Tên cơ hội</th>
+                            <th style="width:70px;" class="text-right">Xác suất chốt(%)</th>
+                            <th style="width:100px;" class="text-right">Doanh thu dự kiến(triệu)</th>
+                            <th class="col-stage">Giai đoạn</th>
+                            <th>Khách hàng</th>
+                            <th class="col-exchangeinfo">Thông tin trao đổi gần nhất</th>
+                            <th>Kế hoạch trong tuần</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var departmentGroup in Model.Items.GroupBy(x => new { x.BoPhanID, x.DepartmentDisplayName }))
+                        {
+                            <tr class="group-department">
+                                <td colspan="9">Phòng: @departmentGroup.Key.DepartmentDisplayName</td>
+                            </tr>
+
+                            foreach (var employeeGroup in departmentGroup.GroupBy(x => new { x.EmployeeID, x.EmployeeName, x.EmployeeCode }))
+                            {
+                                var stt = 1;
+                                <tr class="group-employee">
+                                    <td colspan="9">Nhân viên: @employeeGroup.Key.EmployeeName (@employeeGroup.Key.EmployeeCode)</td>
+                                </tr>
+
+                                foreach (var item in employeeGroup)
+                                {
+                                    <tr>
+                                        <td class="text-center">@(stt++)</td>
+                                        <td>@item.CodeOpportunity</td>
+                                        <td class="col-opportunity">@item.OpportunityName</td>
+                                        <td class="text-right">@item.ClosingProbability.ToString("0.##")</td>
+                                        <td class="text-right">@item.ExpectedValue.ToString("#,##0.##")</td>
+                                        <td class="col-stage">@item.StageName</td>
+                                        <td>@item.CustomerName</td>
+                                        @{
+                                            var fullText = item.LatestExchangeInfo ?? "";
+                                            var shortText = fullText.Length > 120
+                                                ? fullText.Substring(0, 120) + "..."
+                                                : fullText;
+                                        }
+                                        <td class="col-exchangeinfo" style="white-space:pre-line; word-break:break-word; overflow-wrap:anywhere;" title="@fullText">@shortText</td>
+                                        <td style="white-space:pre-line; word-break:break-word; overflow-wrap:anywhere;">@item.WeeklyPlan</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

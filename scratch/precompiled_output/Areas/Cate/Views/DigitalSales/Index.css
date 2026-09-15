@@ -1,0 +1,49 @@
+#tblDigitalSales {
+        font-size: 14.5px !important;
+    }
+    #tblDigitalSales thead th {
+        font-size: 14px !important;
+        letter-spacing: 0.3px;
+        padding-top: 11px !important;
+        padding-bottom: 11px !important;
+    }
+    #tblDigitalSales tbody td {
+        font-size: 14.5px !important;
+        padding-top: 11px !important;
+        padding-bottom: 11px !important;
+    }
+    #tblDigitalSales .sale-title {
+        font-size: 15px !important;
+        line-height: 1.45;
+    }
+    #tblDigitalSales .sale-badge {
+        font-size: 11.5px !important;
+        padding: 3px 8px !important;
+    }
+    #tblDigitalSales .sale-customer,
+    #tblDigitalSales .sale-am {
+        font-size: 14.5px !important;
+        line-height: 1.4;
+    }
+    #tblDigitalSales .sale-subtext {
+        font-size: 13px !important;
+        line-height: 1.4;
+    }
+    #tblDigitalSales .sale-revenue {
+        font-size: 14px !important;
+    }
+    #tblDigitalSales .btn-action {
+        font-size: 12.5px !important;
+        padding: 4px 10px !important;
+    }
+    /* Điều chỉnh font chữ bộ phân trang và thông tin bản ghi của DataTable */
+    .dt-top, .dt-bottom,
+    #tblDigitalSales_wrapper .dataTables_info,
+    #tblDigitalSales_wrapper .dataTables_length,
+    #tblDigitalSales_wrapper .dataTables_paginate {
+        font-size: 13px !important;
+    }
+    #tblDigitalSales_wrapper .pagination .page-link {
+        font-size: 13px !important;
+        padding: 5px 12px !important;
+    }

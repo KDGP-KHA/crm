@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,6 +13,11 @@ namespace Core.Cate.Services
     /// </summary>
     public static class NotificationSourceType
     {
+        /// <summary>
+        /// Hồ sơ kinh doanh sản phẩm dịch vụ số.
+        /// </summary>
+        public const string DigitalSales = "DigitalSales";
+
         /// <summary>
         /// Cơ hội kinh doanh.
         /// </summary>
@@ -38,6 +43,7 @@ namespace Core.Cate.Services
         private const string OpportunityDetailUrlFormat = "/Cate/BusinessOpportunityOverview/Index/{0}";
         private const string ProjectDetailUrlFormat = "/Cate/ProjectOverview/Index/{0}";
         private const string TaskDetailUrlFormat = "/Cate/TaskManagement/Detail/{0}";
+        private const string DigitalSalesDiscussionUrlFormat = "/Cate/DigitalSales/Detail/{0}#tab-discussions";
         private const int MaxContentLength = 300;
 
         private static readonly Regex HtmlTagRegex = new Regex("<[^>]*>", RegexOptions.Compiled);
@@ -53,6 +59,29 @@ namespace Core.Cate.Services
         }
 
         #region Public Methods
+
+        /// <summary>
+        /// Tạo thông báo gắn với phần trao đổi của hồ sơ kinh doanh sản phẩm dịch vụ số.
+        /// </summary>
+        /// <param name="digitalSalesId">Mã hồ sơ kinh doanh sản phẩm dịch vụ số.</param>
+        /// <param name="title">Tiêu đề thông báo.</param>
+        /// <param name="content">Nội dung tóm tắt.</param>
+        /// <param name="userNames">Danh sách username người nhận.</param>
+        /// <param name="notificationType">Mã loại nghiệp vụ.</param>
+        /// <param name="createdBy">Username người thực hiện.</param>
+        /// <param name="createdByFullName">Họ tên người thực hiện.</param>
+        public void PushDigitalSalesNotification(
+            int digitalSalesId,
+            string title,
+            string content,
+            IEnumerable<string> userNames,
+            string notificationType,
+            string createdBy = null,
+            string createdByFullName = null)
+        {
+            Push(NotificationSourceType.DigitalSales, digitalSalesId, title, content, userNames,
+                notificationType, createdBy, createdByFullName, "fa-at", "text-primary");
+        }
 
         /// <summary>
         /// Tạo thông báo gắn với một cơ hội kinh doanh.
@@ -239,6 +268,11 @@ namespace Core.Cate.Services
             if (string.Equals(sourceType, NotificationSourceType.Task, StringComparison.OrdinalIgnoreCase))
             {
                 return string.Format(TaskDetailUrlFormat, sourceId);
+            }
+
+            if (string.Equals(sourceType, NotificationSourceType.DigitalSales, StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Format(DigitalSalesDiscussionUrlFormat, sourceId);
             }
 
             return null;

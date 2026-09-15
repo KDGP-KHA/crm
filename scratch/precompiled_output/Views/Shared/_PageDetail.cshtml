@@ -1,0 +1,47 @@
+﻿@{
+    Layout = "~/Views/Shared/_Main.cshtml";
+}
+
+
+@section PluginCss{
+
+    <!-- include vendor stylesheets used in "Search Results" page. see "/views//pages/partials/page-search/vendor-stylesheets.hbs" -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/nouislider/distribute/nouislider.min.css">
+
+    @RenderSection("PluginCss", false)
+}
+
+@section HeadJs{
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section HeadCss{
+    @RenderSection("HeadCss", false)
+}
+
+<div class="page-content container container-plus">
+    @Html.BuildBreadcrumbNavigation()
+
+    @RenderBody()
+</div>
+
+@section PluginJs{
+
+    <!-- include vendor scripts used in "Search Results" page. see "/views//pages/partials/page-search/vendor-scripts.hbs" -->
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/holderjs/holder.js"></script>
+
+    @RenderSection("PluginJs", false)
+}
+
+@section BottomScript{
+
+    <!-- "Landing Page 1" page script to enable its demo functionality -->
+    <script src="~/Contents/Base/plugins/ace_v4/views/pages/landing-page-1/page-script.js"></script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/nouislider/distribute/nouislider.js"></script>
+
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/nouislider/distribute/wNumb.min.js"></script>
+    
+    @RenderSection("BottomScript", false)
+}

@@ -1,0 +1,292 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_InvoicesModel
+
+
+    @Html.AntiForgeryToken()
+    <div id="Invoices">
+        @Html.HiddenFor(model => model.ContractID)
+        @Html.HiddenFor(model => model.InvoiceID)
+        <style>
+            .not-allowed {
+                cursor: not-allowed !important;
+            }
+        </style>
+        <div class="row form-group ">
+            <div class="col-md-4">
+                @Html.TitleFor(model => model.Serial, new { @class = "font-bold" })
+                @Html.TextBoxFor(model => model.Serial, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Serial_Label") })
+                @Html.ValidationMessageFor(model => model.Serial, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3">
+                @Html.TitleFor(model => model.Number, new { @class = "font-bold" })
+                @Html.TextBoxFor(model => model.Number, new { @class = "form-control int-number", placeholder = AppProcessor.Messagor.GetMessage("Number_Label") })
+                @Html.ValidationMessageFor(model => model.Number, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        @*<div class="form-group row">
+                @Html.TitleFor(model => model.Serial, new { @class = "font-bold" })
+                <div class="col-md-5">
+                    @Html.TextBoxFor(model => model.Serial, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Serial_Label") })
+                    @Html.ValidationMessageFor(model => model.Serial, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group row">
+                @Html.TitleFor(model => model.Number, new { @class = "font-bold" })
+                <div class="col-md-5">
+                    @Html.TextBoxFor(model => model.Number, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Number_Label") })
+                    @Html.ValidationMessageFor(model => model.Number, "", new { @class = "text-danger" })
+                </div>
+            </div>*@
+
+        <div class="row form-group ">
+            <div class="col-md-8">
+                @Html.TitleFor(model => model.Buyer, new { @class = "font-bold" })
+                @Html.TextBoxFor(model => model.Buyer, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Buyer_Label") })
+                @Html.ValidationMessageFor(model => model.Buyer, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-4">
+                @Html.TitleFor(model => model.TaxCode, new { @class = "font-bold" })
+                @Html.TextBoxFor(model => model.TaxCode, new { @class = "form-control int-number", placeholder = AppProcessor.Messagor.GetMessage("TaxCode_Label") })
+                @Html.ValidationMessageFor(model => model.TaxCode, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-8">
+                @Html.TitleFor(model => model.TotalAmount, new { @class = "font-bold" })
+                @Html.HiddenFor(model => model.TotalAmount)
+                <div class="input-group">
+                    @Html.TextBox("TotalAmount_View", Model.TotalAmount, new { @onchange = "fnTinhToan()", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("TotalAmount_Label") })
+                    <div class="input-group-append">
+                        <span class="input-group-text">VNĐ</span>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-4">
+                @Html.TitleFor(model => model.VAT_Rate, new { @class = "font-bold" })
+                @Html.TextBoxFor(model => model.VAT_Rate, new
+                {
+                    @class = "form-control",
+                    //type = "number",
+                    //min = "0",
+                    //max = "100",
+                    //step = "0.01",
+                    placeholder = "0 – 100",
+                    //data_format = "percent"
+                })
+                @Html.ValidationMessageFor(model => model.VAT_Rate, "", new { @onchange = "fnTinhToan()", @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-8">
+                @Html.TitleFor(model => model.VAT_Amount, new { @class = "font-bold" })
+                @Html.HiddenFor(model => model.VAT_Amount)
+                <div class="input-group">
+                    @Html.TextBox("VAT_Amount_View", Model.VAT_Amount, new { @class = "form-control text-success-m2 bgc-white text-600 not-allowed", @readonly = "true", placeholder = AppProcessor.Messagor.GetMessage("VAT_Amount_Label") })
+                    <div class="input-group-append">
+                        <span class="input-group-text">VNĐ</span>
+                    </div>
+                </div>
+                <div class="text-90 text-primary font-italic">(@AppProcessor.Messagor.GetMessage("VAT_Amount_Label") = @AppProcessor.Messagor.GetMessage("TotalAmount_Label") x @AppProcessor.Messagor.GetMessage("VAT_Rate_Label"))</div>
+
+                @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-8">
+                @Html.TitleFor(model => model.TotalPayment, new { @class = "font-bold" })
+                @Html.HiddenFor(model => model.TotalPayment)
+                <div class="input-group">
+                    @Html.TextBox("TotalPayment_View", Model.TotalPayment, new { @class = "form-control text-success-m2 bgc-white text-600 not-allowed", @readonly = "true", placeholder = AppProcessor.Messagor.GetMessage("TotalPayment_Label") })
+                    <div class="input-group-append">
+                        <span class="input-group-text">VNĐ</span>
+                    </div>
+                </div>
+                <div class="text-90 text-primary font-italic">(@AppProcessor.Messagor.GetMessage("TotalPayment_Label") = @AppProcessor.Messagor.GetMessage("TotalAmount_Label") + @AppProcessor.Messagor.GetMessage("VAT_Amount_Label"))</div>
+                @Html.ValidationMessageFor(model => model.TotalPayment, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-12">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("FileAttach_Label")
+                </label>
+                @Html.FileFor(model => model.Files, ".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+                <div id="contractFileList" class="mt-2"></div>
+                <div id="lstFileUploaded"></div>
+                @*@if (Model.FilePaths != null && Model.FilePaths.Any())
+                    {
+                        <div id="contractOldFileList" class="mt-2">
+                            @foreach (var file in Model.FilePaths)
+                            {
+                                var fileName = file.URLFile.Split('/').Last();
+                                <div class="d-flex align-items-center border rounded px-2 py-1 mb-1">
+                                    <a href="@file.URLFile" target="_blank" style="color:#0000ffc4; font-size:13px;">
+                                        <i class="fas fa-paperclip mr-1"></i>@fileName
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }*@
+            </div>
+        </div>
+    </div>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/bootbox/bootbox.all.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap-touchspin/dist/jquery.bootstrap-touchspin.js"></script>
+    <script>
+    var contractFilesList = [];
+    var contractDataTransfer = new DataTransfer();
+    jQuery(function ($) {
+
+        $('#TotalAmount_View').val(vnFormatter.format($('#TotalAmount_View').val()));
+        $('#VAT_Amount_View').val(vnFormatter.format($('#VAT_Amount_View').val()));
+        $('#TotalPayment_View').val(vnFormatter.format($('#TotalPayment_View').val()));
+
+        // input spinner
+        $("#VAT_Rate").TouchSpin({
+            min: 0,
+            max: 100,
+            step: 1,
+            //decimals: 2,
+            //boostat: 5,
+            maxboostedstep: 10,
+            postfix: "%",
+            buttondown_class: "btn btn-primary",
+            buttonup_class: "btn btn-primary",
+            buttondown_txt: '<i class="fa fa-minus"></i>',
+            buttonup_txt: '<i class="fa fa-plus"></i>',
+        }).on('touchspin.on.startspin', fnTinhToan);
+
+
+        if ($('#InvoiceID').val() != '') {
+            ReloadListFileUploaded();
+        }
+
+    });
+
+    $(document).on("input", ".int-number", function (e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    $(document).on("change", "#Files", function (e) {
+        var newFiles = Array.from(e.target.files);
+        newFiles.forEach(function (file) {
+            if (!contractFilesList.some(function (f) { return f.name === file.name && f.size === file.size; })) {
+                contractFilesList.push(file);
+            }
+        });
+        contractSyncInputFiles();
+        contractRenderFileList();
+
+        $("#VAT_Rate").TouchSpin({
+            verticalbuttons: true,
+
+            buttondown_class: "btn btn-xs btn-primary",
+            buttonup_class: "btn btn-xs btn-primary",
+
+            verticaldownclass: "",
+            verticalupclass: "",
+
+            verticaldown: '<i class="fa fa-caret-down"></i>',
+            verticalup: '<i class="fa fa-caret-up"></i>',
+        });
+    });
+
+    function contractSyncInputFiles() {
+        contractDataTransfer = new DataTransfer();
+        contractFilesList.forEach(function (file) { contractDataTransfer.items.add(file); });
+        var input = document.getElementById("DinhKemFile");
+        if (input) input.files = contractDataTransfer.files;
+    }
+
+    function contractRenderFileList() {
+        var html = "";
+        contractFilesList.forEach(function (file, index) {
+            html += '<div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">'
+                + '<span><i class="fa fa-file text-grey-l4 mr-1"></i>' + file.name + '</span>'
+                + '<button type="button" class="btn-sm p-0 btn px-2 border-0 btn-outline-danger" onclick="contractRemoveFile(' + index + ')">'
+                + '<i class="fa fa-times"></i></button></div>';
+        });
+        $("#contractFileList").html(html);
+    }
+
+    function contractRemoveFile(index) {
+        contractFilesList.splice(index, 1);
+        contractSyncInputFiles();
+        contractRenderFileList();
+    }
+    function fnTinhToan() {
+        debugger
+        var tienHang = $('#Invoices #TotalAmount_View').val() == '' ? 0 : parseFloat(removeNonNumericChars($('#Invoices #TotalAmount_View').val()));
+        $('#Invoices #TotalAmount').val(tienHang);
+        $('#Invoices #TotalAmount_View').val(vnFormatter.format(tienHang));
+
+        var phanTramThue = $('#Invoices #VAT_Rate').val() == '' ? 0 : parseFloat($('#Invoices #VAT_Rate').val());
+        var tienThue = tienHang * phanTramThue / 100;
+        $('#Invoices #VAT_Amount').val(tienThue);
+        $('#Invoices #VAT_Amount_View').val(vnFormatter.format(tienThue));
+        var tongCongThToan = tienHang + tienThue;
+        $('#Invoices #TotalPayment').val(tongCongThToan);
+        $('#Invoices #TotalPayment_View').val(vnFormatter.format(tongCongThToan));
+    }
+
+
+    //function _formatNumber(e) {
+    //    debugger
+    //    var id = e.id.replace('_text', '');
+    //    var e_value = removeNonNumericChars(e.value);
+    //    e.value = vnFormatter.format(e_value);
+    //    $('#' + id).val(e_value)
+    //}
+    function removeNonNumericChars(inputString) {
+        return inputString.replace(/\D/g, ''); // \D khớp với tất cả các ký tự không phải số
+    }
+    function ReloadListFileUploaded() {
+        $.ajax({
+            url: "/Cate/Invoices/GetFilePathsByInvoiceID/@Model.InvoiceID", // The URL to send the request to
+            type: "GET",
+            dataType: "html",
+            // The HTTP method (GET, POST, etc.)
+            success: function (response) {       // Runs if the request is successful
+                $('#lstFileUploaded').html(response);
+            },
+            error: function (xhr, status, error) { // Runs if the request fails
+                $('#lstFileUploaded').html('');
+            }
+        });
+    }
+    function fnDeleteFile(fileId, filename) {
+        bootbox.confirm({
+            message: `Bạn có muốn xóa tập tin <span class="text-danger text-600 text-95">${filename}</span>`,
+            onEscape: true,
+            callback: function (result) {
+                if (result) {
+                    console.log('t')
+                     $.ajax({
+                         url: "/Cate/Invoices/DeleteFilePaths/" + fileId, // The URL to send the request to
+                         type: "GET",
+                         success: function (response) {       // Runs if the request is successful
+                             eval(response.message);
+                             ReloadListFileUploaded()
+                             response.status = undefined;
+                         }
+                     });
+                } else { console.log('f') }
+            },
+            buttons: {
+                confirm: {
+                    label: '<i class="fas fa-check"></i> Có',
+                    className: 'btn px-4 btn-outline-danger'
+                }, cancel: {
+                    label: '<i class="fas fa-ban"></i> Không',
+                    className: 'btn px-4 btn-outline-lightgrey'
+                },
+            },
+        })
+
+    }
+    </script>
+    @Html.RenderScripts(ScriptPosition.BodyInside)

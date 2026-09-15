@@ -1,0 +1,21 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = Html.Raw(string.Concat(AppProcessor.Messagor.GetMessage("BusinessOpportunity_Title"), $" <b>{Model.CustomerName}</b>"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    purple
+}
+
+@section FormIcon{
+    <i class="far fa-eye"></i>
+}
+
+@section FormBody{
+    @Html.Partial("IndexBusinessOpportunity")
+}
+
+@section SubmitControl{
+
+}

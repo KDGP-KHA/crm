@@ -1,0 +1,183 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.ProjectOverviewModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectOverview_Title");
+}
+
+@section PageTitle
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=45">@AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_DanhMuc")</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Cate/Project">@AppProcessor.Messagor.GetMessage("Project_Title")</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                @Model.ProjectModel.ProjectName
+            </li>
+        </ol>
+    </nav>
+}
+
+<style>
+    .breadcrumb-item + .breadcrumb-item::before {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 600;
+        content: "\f101";
+        font-size: 0.875em;
+        margin: 5px 0;
+    }
+
+    /* Khung quá trình trao đổi nằm cùng tab Dự án: cuộn riêng, không kéo dài trang */
+    .prj-history-scroll {
+        max-height: 850px;
+        overflow-y: auto;
+    }
+</style>
+
+@if (Model.ReviewBatchID > 0)
+{
+    <a id="reviewBatchAutoTrigger"
+       class="d-none"
+       data-modal=""
+       data-modal-id="ReviewBatch"
+       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID = Model.ReviewBatchID, projectID = Model.ProjectModel.ProjectID })"
+       aria-hidden="true"></a>
+}
+
+<div id="reviewSplitView" class="review-split-view">
+<div class="review-detail-pane">
+<div class="dcard">
+    <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
+        <li class="nav-item mr-2px">
+            <a id="project-tab-btn" class="d-style active btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#project" role="tab" aria-controls="project" aria-selected="true">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-home text-success mr-3px"></i>
+                Dự án
+            </a>
+        </li>
+
+        <li class="nav-item mr-2px">
+            <a id="product-tab-btn" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#product" role="tab" aria-controls="product" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-cogs text-info mr-2"></i>
+                Dịch vụ
+                <span class="badge badge-info ml-1">@Model.TotalProduct</span>
+            </a>
+        </li>
+
+        @*<li class="nav-item mr-2px">
+            <a id="product-tab-btn" class="d-style btn btn-tp btn-light-primary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#contracts" role="tab" aria-controls="contracts" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-primary mt-n2px"></span>
+                <i class="fa fa-file-contract text-primary mr-2"></i>
+                Hợp đồng
+                <span class="badge badge-primary ml-1">@Model.TotalContract</span>
+            </a>
+        </li>*@
+
+        <li class="nav-item mr-2px">
+            <a id="product-tab-btn" class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0" data-toggle="tab" href="#congviec" role="tab" aria-controls="congviec" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-orange mt-n2px"></span>
+                <i class="fa fa-tasks text-orange mr-2"></i>
+                Công việc
+            </a>
+        </li>
+
+        <li class="nav-item mr-2px">
+            <a id="history-tab-btn"
+               class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+               data-toggle="tab" href="#bo-history" role="tab" aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fas fa-history text-success mr-2"></i>
+                @AppProcessor.Messagor.GetMessage("ReviewHistory_Title")
+                <span class="badge badge-success ml-1">@Model.TotalReviewHistory</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content bgc-white p-35 border-0">
+        <div class="tab-pane fade show active text-95" id="project" role="tabpanel" aria-labelledby="project-tab-btn">
+            <div class="row">
+                <!-- Thông tin dự án -->
+                <div class="col-xl-6 col-md-5">
+                    <div id="projectContainer">
+                        @Html.Partial("_Project", @Model)
+                    </div>
+                </div>
+
+                <!-- Quá trình trao đổi hiển thị cùng tab Dự án -->
+                <div class="col-xl-6 col-md-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light font-weight-bold d-flex align-items-center">
+                            <i class="fas fa-comments text-purple mr-2"></i>
+                            Quá trình trao đổi
+                        </div>
+                        <div class="card-body p-25 prj-history-scroll">
+                            @Html.Partial("_TaskManagements", Model.ProductProjects, new ViewDataDictionary { { "ProjectID", Model.ProjectModel.ProjectID } })
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade show text-95" id="product" role="tabpanel" aria-labelledby="product-tab-btn">
+            <div id="productProjectContainer">
+                @Html.Partial("_Product", Model.ProductProjects, new ViewDataDictionary { { "ProjectID", Model.ProjectModel.ProjectID } })
+            </div>
+        </div>
+        @*<div class="tab-pane fade show text-95" id="contracts" role="tabpanel" aria-labelledby="contracts-tab-btn">
+            <div id="contractsContainer">
+                @Html.Partial("_Contracts", Model.Contracts, new ViewDataDictionary { { "ProjectID", Model.ProjectModel.ProjectID } })
+            </div>
+        </div>*@
+        <div class="tab-pane fade show text-95" id="congviec" role="tabpanel" aria-labelledby="congviec-tab-btn">
+            <div id="">
+                @Html.Action("Index", "TaskManagement", new { projectId = Model.ProjectModel.ProjectID })
+            </div>
+        </div>
+
+        <div class="tab-pane fade show text-95" id="bo-history" role="tabpanel">
+            <div id="reviewHistoryContainer">
+                @Html.Partial("~/Areas/Cate/Views/ReviewBatchItem/_ReviewHistory.cshtml", Model.ReviewHistory)
+            </div>
+        </div>
+    </div>
+</div><!-- /.bcard -->
+</div>
+@if (Model.ReviewBatchID > 0)
+{
+    <aside id="reviewFormPane" class="review-form-pane" aria-label="Form rà soát"></aside>
+}
+</div>
+
+@section BottomScript
+{
+    <script src="@Url.Content("~/Areas/Cate/Views/ProjectOverview/ProjectOverview.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+    <script>
+        var _projectId = @Model.ProjectModel.ProjectID;
+        var _reviewBatchID = @Model.ProjectModel.ProjectID;
+        var _urlReloadProductProject = '@Url.Action("ListByProject", "ProjectOverview", new { area = "Cate" })';
+        var _urlReloadProject = '@Url.Action("GetProjectInfo", "ProjectOverview", new { area = "Cate" })';
+        var _urlReloadReviewHistory = '@Url.Action("GetReviewHistory", "ReviewBatchItem", new { area = "Cate" })';
+
+        // Vào từ danh sách rà soát: hiển thị ngay form để có thể rà soát liên tục.
+        $(function () {
+            @if (Model.ReviewBatchID > 0)
+            {
+                <text>
+                var btnReview = document.getElementById('reviewBatchAutoTrigger');
+                if (btnReview) {
+                    setTimeout(function () { btnReview.click(); }, 300);
+                }
+                </text>
+            }
+        });
+    </script>
+}

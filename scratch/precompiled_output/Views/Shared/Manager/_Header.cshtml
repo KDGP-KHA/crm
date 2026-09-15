@@ -1,0 +1,167 @@
+﻿@using TSFramework.Libs.Processors
+
+<style>
+    /* Từ LG trở lên: nhóm nút bên phải luôn nằm trên một hàng, không rớt dòng làm vỡ header */
+    @@media (min-width: 992px) {
+        .navbar .nav.has-active-border {
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+
+        /* Tên người dùng dài sẽ cắt bớt thay vì đẩy các nút khác ra ngoài */
+        .navbar .nav-user-name {
+            display: inline-block;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            vertical-align: bottom;
+        }
+    }
+
+    /* Khoảng cách đều giữa các nhóm nút trên header */
+    .navbar .nav.has-active-border > .nav-item > .nav-link {
+        white-space: nowrap;
+    }
+</style>
+
+<nav class="navbar navbar-sm navbar-expand-lg navbar-fixed navbar-skyblue">
+    <div class="navbar-inner shadow-md">
+        <button type="button" class="btn btn-burger align-self-center ml-25 mr-1 d-none d-xl-flex" data-toggle="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="true" aria-label="Toggle sidebar">
+            <span class="bars text-white"></span>
+        </button>
+        <!-- sidebar toggler button -->
+        <!--<div class="d-flex h-100 justify-content-xl-between align-items-center">
+        <button type="button" class="btn btn-burger burger-arrowed static collapsed ml-2 d-flex d-xl-none" data-toggle-mobile="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle sidebar">
+            <span class="bars text-white"></span>
+        </button>-->
+        <!-- mobile sidebar toggler button -->
+        <!--<a class="navbar-brand d-xl-none mx-1 text-dark-m3 text-130" href="/Manager/">
+                <div class="text-80">
+                    <span class="text-90 text-danger-d1 text-upcase font-bold">Trung tâm</span>
+                    <span class="text-blue-d1 text-upcase font-bold">Điều hành du lịch</span>
+                </div>
+            </a>
+        </div>-->
+
+        <div class="d-flex h-100 justify-content-xl-between align-items-center">
+            <button type="button" class="btn btn-burger burger-arrowed static collapsed ml-2 d-flex d-xl-none btn-h-lighter-blue" data-toggle-mobile="sidebar" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle sidebar">
+                <span class="bars text-default"></span>
+            </button>
+            <!-- mobile sidebar toggler button -->
+            @*<a class="navbar-brand d-xl-none mx-1 text-dark-m3 text-90" href="/Dashboard/Manager/">*@
+            <a class="navbar-brand d-xl-none mx-1 text-dark-m3 text-90" href="/Dashboard/Dashboard/">
+                <span class="text-70 text-danger-d1 text-upcase font-bold d-block ">@AppProcessor.Messagor.GetMessage("App_Title").Split(',').First().ToUpper()</span>
+                <span class="text-110 text-white text-upcase font-bold d-block">@AppProcessor.Messagor.GetMessage("App_Title").Split(',').Last().ToUpper()</span>
+            </a>
+        </div>
+
+        <!-- #SearchMenu-->
+        @* Thu hẹp ô tìm kiếm ở khổ LG để nhường chỗ cho nhóm nút bên phải *@
+        <div class="navbar-content d-none d-sm-flex col-6 col-lg-4 col-xl-6 p-md-1">
+            <div class="collapse navbar-collapse navbar-backdrop col-7 p-md-1" id="navbarSearch">
+                <select id="search-menu" class="js-example-placeholder-single js-states form-control" data-placeholder="Tìm kiếm menu...">
+                    <option></option>
+                </select>
+            </div>
+        </div>
+
+        @*<button class="navbar-toggler py-2" type="button" data-toggle="collapse" data-target="#navbarSearch" aria-controls="navbarSearch" aria-expanded="false" aria-label="Toggle navbar search">
+                <i class="fa fa-search text-white text-90 py-1"></i>
+            </button>*@
+        <!-- #navbarMenu toggler -->
+        <button class="navbar-toggler ml-1 mr-2 px-1" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navbar menu 1">
+            <img class="radius-round border-2 brc-primary-tp3 p-1px avatar-login-circle" src="@User.Avatar" width="36" alt="@User.FullName">
+        </button>
+
+        <div class="ml-auto mr-xl-3 navbar-menu collapse navbar-collapse navbar-backdrop" id="navbarMenu">
+
+            <div class="navbar-nav">
+                <ul class="nav has-active-border">
+                    @* Gom các tiện ích vào một menu thao tác để thanh header không bị vỡ khi thu hẹp màn hình *@
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle pr-lg-4" data-toggle="dropdown" href="#" role="button"
+                           aria-haspopup="true" aria-expanded="false" title="Tiện ích">
+                            <i class="fa fa-th-large text-110 ml-lg-2"></i>
+                            <span class="d-inline-block d-lg-none ml-2">Tiện ích</span>
+                            <i class="caret fa fa-angle-left d-block d-lg-none text-warning-d2"></i>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-caret dropdown-menu-right dropdown-animated brc-primary-m3 py-1">
+                            <a href="javascript:void(0);"
+                               id="btnShowRegulation"
+                               class="dropdown-item btn btn-outline-grey bgc-h-primary-l3 btn-h-light-primary btn-a-light-primary">
+                                <i class="fa fa-book text-primary-m1 text-105 mr-1"></i>
+                                @AppProcessor.Messagor.GetMessage("Regulation_Title")
+                            </a>
+
+                            @Html.Button(
+                                true,
+                                "ViewInstruct",
+                                Url.Action("ViewInstruct", "Instruct", new { area = "Sys" }),
+                                "<i class='fa fa-info-circle text-info-m1 text-105 mr-1'></i>",
+                                AppProcessor.Messagor.GetMessage("Instruct_Title"),
+                                new
+                                {
+                                    @class = "mt-1 dropdown-item btn btn-outline-grey bgc-h-primary-l3 btn-h-light-primary btn-a-light-primary btn-view-instruct"
+                                }
+                                )
+
+                            <div class="dropdown-divider brc-primary-l2"></div>
+
+                            @Html.Button(
+                                false,
+                                "ClearCache",
+                                Url.Action("ClearCache", "SysTool", new { area = "Sys", returnUrl = HttpContext.Current.Request.Url.PathAndQuery }),
+                                "<i class='fa fa-sync-alt text-warning-d1 text-105 mr-1'></i>",
+                                "Xoá cache",
+                                new
+                                {
+                                    @class = "dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary"
+                                }
+                                )
+                        </div>
+                    </li>
+
+                    @* Chuông thông báo: bấm vào từng thông báo sẽ mở chi tiết cơ hội/dự án tương ứng *@
+                    <li class="nav-item dropdown" id="crmHeaderNotification">
+                        @{
+                            Html.RenderAction("HeaderNotifications", "Notification", new { area = "Cate" });
+                        }
+                    </li>
+
+                    <li class="nav-item dropdown order-first order-lg-last">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                            <img id="id-navbar-user-image" class="d-none d-lg-inline-block radius-round border-2 brc-white-tp1 mr-1 w-6 avatar-login-circle" src="@User.Avatar" alt="@User.FullName">
+                            <span class="d-inline-block d-lg-none d-xl-inline-block">
+                                <span class="text-90" id="id-user-welcome">Chào mừng,</span>
+                                <span class="nav-user-name mw-100">@User.FullName</span>
+                            </span>
+                            <i class="caret fa fa-angle-down d-none d-xl-block ml-1"></i>
+                            <i class="caret fa fa-angle-left d-block d-lg-none"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-caret dropdown-menu-right dropdown-animated brc-primary-m3 py-1">
+                            <div class="d-none d-lg-block d-xl-none">
+                                <div class="dropdown-header">
+                                    Chào mừng, @User.FullName
+                                </div>
+                                <div class="dropdown-divider"></div>
+                            </div>
+
+                            @Html.Button(true, "EditInfo", Url.Action("EditInfo", "Account", new { area = "", userName = User.UserName }), "<i class='fa fa-user text-primary-m1 text-105 mr-1'></i>", "Cập nhật thông tin", new { data_rel = "tooltip", title = "Cập nhật thông tin", @class = "mt-1 dropdown-item btn btn-outline-grey bgc-h-success-l3 btn-h-light-success btn-a-light-success", data_width = "1024" })
+
+                            @Html.Button(true, "ChangePassword", Url.Action("ChangePassword", "Account", new { area = "", userName = User.UserName }), "<i class='fa fa-key text-success-m1 text-105 mr-1'></i>", AppProcessor.Messagor.GetMessage("Button_ChangePassword"), new { data_rel = "tooltip", title = AppProcessor.Messagor.GetMessage("Button_ChangePassword"), @class = "mt-1 dropdown-item btn btn-outline-grey bgc-h-success-l3 btn-h-light-success btn-a-light-success" })
+
+                            <div class="dropdown-divider brc-primary-l2"></div>
+                            <a class="dropdown-item btn btn-outline-grey bgc-h-secondary-l3 btn-h-light-secondary btn-a-light-secondary" href="@Url.Action("Logout", "Account", new { area = "" })">
+                                <i class="fa fa-sign-out-alt text-warning-d1 text-105 mr-1"></i>
+                                @AppProcessor.Messagor.GetMessage("Button_Logout")
+                            </a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+<script src="@Url.Content("~/Views/Shared/Manager/header.js")"></script>

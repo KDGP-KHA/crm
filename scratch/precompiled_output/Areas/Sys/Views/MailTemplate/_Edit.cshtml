@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Cập nhật mẫu email";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("Edit", "MailTemplate", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditMailTemplate", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_MailTemplate")
+        </div>
+    }
+
+    <script type="text/javascript">
+        MailTemplate_BindForm("EditMailTemplate", "EditMailTemplate");
+    </script>
+}

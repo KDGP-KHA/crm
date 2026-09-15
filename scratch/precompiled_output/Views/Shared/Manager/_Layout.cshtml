@@ -1,0 +1,73 @@
+﻿@using TSFramework.Libs.Processors
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta property="og:url" content="@HttpContext.Current.Request.Url" />
+    <meta property="og:type" content="article" />
+    @{
+        if (ViewData["OG_Title"] == null)
+        {
+            ViewData["OG_Title"] = AppProcessor.Messagor.GetMessage("App_Title");
+        }
+        if (ViewData["OG_Description"] == null)
+        {
+            ViewData["OG_Description"] = AppProcessor.Messagor.GetMessage("og_description_label");
+        }
+        if (ViewData["OG_Image"] == null)
+        {
+            ViewData["OG_Image"] = "~/Contents/Base/imgs/app.ico";
+        }
+    }
+    <meta property="og:title" content="@ViewData["OG_Title"]" />
+    <meta property="og:description" content="@ViewData["OG_Description"]" />
+    <meta property="og:image" content="@string.Concat(HttpContext.Current.Request.Url.Scheme ,"://" ,HttpContext.Current.Request.Url.Host, "/Contents/Base/imgs/app.ico")" />
+
+    <base href="/" />
+
+    <title>@ViewBag.Title</title>
+
+    <!-- include common vendor stylesheets & fontawesome -->
+
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/bootstrap/dist/css/bootstrap.css">
+
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/fortawesome/fontawesome-free/css/all.css">
+
+
+    <style type="text/css">
+        .ace-toaster-container {
+            z-index: 1080 !important;
+        }
+    </style>
+    @RenderSection("PluginCss", false)
+
+    <!-- include vendor stylesheets used in "Landing Page 1" page. see "/views//pages/partials/landing-page-1/vendor-stylesheets.hbs" -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/aos/dist/aos.css">
+
+    <!-- include fonts -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/dist/css/ace-font.css">
+
+    <!-- favicon -->
+    <link rel="icon" type="image/png" href="~/Contents/Base/imgs/app.ico" />
+
+    <!-- ace.css -->
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/dist/css/ace.css">
+
+    <!-- "Dashboard 2" page styles, specific to this page for demo only -->
+    @*<link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/views/pages/dashboard-2/page-style.css">*@
+    @*<link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/dist/css/ace-themes.css">*@
+
+    <!-- "Landing Page 1" page styles, specific to this page for demo only -->
+    @*<link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/views/pages/landing-page-1/page-style.css">
+        <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/dist/css/ace-themes.css">*@
+
+    @RenderSection("HeadCss", false)
+    @RenderSection("HeadJs", false)
+
+</head>
+
+@RenderBody()
+
+</html>

@@ -1,0 +1,216 @@
+﻿@using System.Collections.Generic
+@using System.Linq
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Cate_ProductServiceModel
+
+@{
+    List<Core.Cate.Models.Cate_ProductServiceModel> treeItems =
+        (Model.selectListItems ?? new List<Core.Cate.Models.Cate_ProductServiceModel>())
+        .OrderBy(item => item.SortPath)
+        .ToList();
+}
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.ProductServiceID)
+    @Html.HiddenFor(model => model.GroupServiceID, new { id = "ProductService_GroupServiceID" })
+    @Html.HiddenFor(model => model.ParentProductID, new { id = "ProductService_ParentProductID" })
+
+    <div class="row">
+        <label class="col-sm-12 col-form-label text-sm-left pr-0 font-bold">
+            Nhóm dịch vụ / sản phẩm cha
+        </label>
+        <div class="col-md-12">
+            <select id="ProductService_HierarchySelection"
+                    class="form-control col-md-12">
+                <option value="">-- Chọn nhóm dịch vụ / sản phẩm cha --</option>
+                @foreach (Core.Cate.Models.Cate_ProductServiceModel item in treeItems)
+                {
+                    bool isGroup = string.Equals(item.NodeType, "G", System.StringComparison.OrdinalIgnoreCase);
+                    bool isCurrentProduct = !isGroup && item.ProductServiceID == Model.ProductServiceID;
+                    string optionValue = isGroup
+                        ? string.Format("G_{0}", item.GroupServiceID)
+                        : string.Format("P_{0}", item.ProductServiceID);
+                    string optionText = !string.IsNullOrWhiteSpace(item.NameProductView)
+                        ? item.NameProductView
+                        : item.NameProduct;
+
+                    <option value="@optionValue"
+                            data-node-type="@item.NodeType"
+                            data-group-id="@item.GroupServiceID"
+                            data-parent-product-id="@(isGroup ? 0 : item.ProductServiceID)"
+                            @(isCurrentProduct ? "disabled=\"disabled\"" : string.Empty)>
+                        @optionText
+                    </option>
+                }
+            </select>
+            <small class="form-text text-muted">
+                Chọn nhóm dịch vụ để tạo sản phẩm cấp gốc, hoặc chọn sản phẩm để gán làm sản phẩm cha.
+            </small>
+            @Html.ValidationMessageFor(model => model.GroupServiceID, "", new { @class = "text-danger d-block mt-1" })
+        </div>
+    </div>
+
+    <div class="row">
+        @Html.TitleFor(model => model.NameProduct, new { @class = "col-sm-12 col-form-label text-sm-left pr-0 font-bold" })
+        <div class="col-md-12">
+            @Html.TextBoxFor(model => model.NameProduct, new { @class = "form-control col-md-12", placeholder = AppProcessor.Messagor.GetMessage("Customer_Label_Code") })
+            @Html.ValidationMessageFor(model => model.NameProduct, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="row">
+                @Html.TitleFor(model => model.CodeProduct, new { @class = "col-sm-12 col-form-label text-sm-left pr-0 font-bold" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(model => model.CodeProduct, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Customer_Label_Code") })
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                @Html.TitleFor(model => model.ShortNameProduct, new { @class = "col-sm-12 col-form-label text-sm-left pr-0 font-bold" })
+                <div class="col-md-12">
+                    @Html.TextBoxFor(model => model.ShortNameProduct, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Customer_Label_ShortNameProduct") })
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <label>
+                @Html.CheckBoxFor(model => model.IsActived)
+                @Html.LabelFor(model => model.IsActived, new { @class = "col-form-label pr-0 font-bold" })
+            </label>
+        </div>
+    </div>
+
+    @*<div class="row">
+        @Html.TitleFor(model => model.FileAttach, new { @class = "col-sm-12 col-form-label text-sm-left pr-0 font-bold" })
+        <div class="col-md-12">
+            @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            <div id="oldFileList">
+                @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+                {
+                    foreach (var file in Model.ExistingFiles)
+                    {
+                        var fileName = Path.GetFileName(file.FilePath);
+
+                        <div class="old-file d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                            <span>
+                                <i class="fa fa-file text-success mr-1"></i>
+                                @fileName
+                            </span>
+
+                            <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="removeOldFile(this, @file.FilePathID)">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    }
+                }
+            </div>
+            <div id="fileList"></div>
+            <div id="deletedFilesContainer"></div>
+        </div>
+    </div>*@
+
+    <div class="row">
+        @Html.TitleFor(model => model.Note, new { @class = "col-sm-12 col-form-label text-sm-left pr-0 font-bold" })
+        <div class="col-md-12">
+            @Html.TextAreaFor(model => model.Note, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("RMPS_Label_Note") })
+            @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        ProductService_InitParentSelector();
+        reloadCKEditor();
+    });
+    
+    var filesList = [];
+    var dataTransfer = new DataTransfer();
+
+    // CHỌN FILE MỚI
+    $(document).on("change", "#DinhKemFile", function (e) {
+        let newFiles = Array.from(e.target.files);
+
+        newFiles.forEach(file => {
+            // check trùng (name + size cho chắc)
+            if (!filesList.some(f => f.name === file.name && f.size === file.size)) {
+                filesList.push(file);
+            }
+        });
+
+        syncInputFiles();
+        renderFileList();
+    });
+
+    //Contructor CKEDITOR
+    function reloadCKEditor() {
+        var editor = CKEDITOR.instances['Note'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('Note', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '350',
+        });
+        editor.on('change', function (e) {
+            $("#Note").val(editor.getData());
+        });
+    }
+
+    // SYNC FILE VÀO INPUT
+    function syncInputFiles() {
+        dataTransfer = new DataTransfer();
+
+        filesList.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+    }
+
+    // RENDER FILE MỚI
+    function renderFileList() {
+        let html = "";
+
+        filesList.forEach((file, index) => {
+            html += `
+            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1 new-file">
+                <span>
+                    <i class="fa fa-file text-primary mr-1"></i>
+                    ${file.name}
+                </span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            `;
+        });
+
+        $("#fileList").html(html);
+    }
+
+    // XÓA FILE MỚI
+    function removeFile(index) {
+        filesList.splice(index, 1);
+        syncInputFiles();
+        renderFileList();
+    }
+
+    // XÓA FILE CŨ (EDIT)
+    function removeOldFile(btn, fileId) {
+        // xóa UI
+        $(btn).closest(".old-file").remove();
+
+        // add hidden để submit
+        $("#deletedFilesContainer").append(
+            `<input type="hidden" name="DeletedFileIds" value="${fileId}" />`
+        );
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

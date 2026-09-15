@@ -17,7 +17,7 @@
                  data-id="@item.ProcessID"
                  data-name="@item.ProcessName"
                  data-status-id="@item.StatusID"
-                 onclick="DigitalSalesWorkflow.selectProcess(@item.ProcessID, this)">
+                 onclick="return DigitalSalesWorkflow.selectProcess(@item.ProcessID, this, event)">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center text-truncate mr-2">
                         <span class="badge badge-sm badge-pill mr-2 bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3">

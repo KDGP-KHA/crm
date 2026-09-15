@@ -1,0 +1,64 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysPermissionAPIModel
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(m => m.UserID)
+@Html.HiddenFor(m => m.ThongTinUser.FullName)
+@Html.HiddenFor(m => m.ThongTinUser.UserName)
+@Html.HiddenFor(m => m.ThongTinUser.Email)
+@Html.HiddenFor(m => m.UserName)
+
+<div id="SysPermissionAPI">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ThongTinUser.FullName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="far fa-user-circle"></i>
+                    </span>
+                </div>
+                @Html.TextBoxFor(model => model.ThongTinUser.FullName, new { disabled = true, @class = "form-control col-sm-10 col-md-8", placeholder = AppProcessor.Messagor.GetMessage("User_Label_FullName") })
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ThongTinUser.Email, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fa fa-envelope"></i>
+                    </span>
+                </div>
+                @Html.TextBoxFor(model => model.ThongTinUser.Email, new { disabled = true, @class = "form-control col-sm-7", placeholder = AppProcessor.Messagor.GetMessage("User_Label_Email") })
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ThongTinUser.UserName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fa fa-user"></i>
+                    </span>
+                </div>
+                @Html.TextBoxFor(model => model.ThongTinUser.UserName, new { disabled = true, @class = "form-control col-sm-7 col-md-5", placeholder = AppProcessor.Messagor.GetMessage("User_Label_UserName") })
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ApplyFor, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-6">
+            @Html.DropDownListFor(model => model.ApplyFor, new SelectList(Model.ListApplyFor, "Value", "Text"), "", new { @class = "form-control col-md-10" })
+            @Html.ValidationMessageFor(model => model.ApplyFor, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,37 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ExchangeHistoryModel
+
+@Html.AntiForgeryToken()
+<div id="ExchangeHistory">
+    @Html.HiddenFor(model => model.ExchangeHistoryID)
+    @Html.HiddenFor(model => model.MemberID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ExchangeDate, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-4">
+            <div class="input-group">
+                @Html.TextBoxFor(model => model.ExchangeDate, "{0:dd/MM/yyyy}", new { id = "ExchangeDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                </div>
+            </div>
+            @Html.ValidationMessageFor(model => model.ExchangeDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.ExchangeContent, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.ExchangeContent, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Contact_Content") })
+            @Html.ValidationMessageFor(model => model.ExchangeContent, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#ExchangeDate").datetimepicker({
+            "format": "DD/MM/YYYY",
+        });
+    });
+</script>

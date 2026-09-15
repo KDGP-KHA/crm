@@ -1,0 +1,141 @@
+﻿@using TSFramework.Libs.Processors
+<div class="modal-header">
+    <h4 class="modal-title">
+        <i class="fa fa-upload text-info"></i> @AppProcessor.Messagor.GetMessage("Import_Title")
+    </h4>
+    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+</div>
+
+<div class="modal-body">
+    <div id="stepUpload">
+        <div class="alert alert-info mb-3">
+            <i class="fa fa-info-circle"></i>
+            File Excel phải đúng cấu trúc template.
+            &nbsp;<a href="@Url.Action("DownloadImportTemplate", "Customer")" class="alert-link font-weight-bold">
+                <i class="fa fa-download"></i> @AppProcessor.Messagor.GetMessage("Import_DownloadTemplate")
+            </a>
+        </div>
+
+        <div class="form-group">
+            <label class="font-weight-bold">@AppProcessor.Messagor.GetMessage("Import_SelectFile")</label>
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="importFileInput" accept=".xlsx,.xls">
+                    <label class="custom-file-label" for="importFileInput">Chọn file...</label>
+                </div>
+            </div>
+            <small class="form-text text-muted">@AppProcessor.Messagor.GetMessage("Import_FileHint")</small>
+        </div>
+
+        <div id="uploadProgress" class="d-none mt-2">
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                     role="progressbar" style="width:100%">
+                    @AppProcessor.Messagor.GetMessage("Import_Reading")
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stepPreview" class="d-none">
+
+        <div class="row mb-3" id="importSummary"></div>
+
+        <ul class="nav nav-tabs" id="importTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" href="#tabValid" role="tab">
+                    <i class="fa fa-check-circle text-success"></i>
+                    @AppProcessor.Messagor.GetMessage("Import_Valid")
+                    &nbsp;<span class="badge badge-success" id="cntValid">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tab" href="#tabError" role="tab">
+                    <i class="fa fa-exclamation-circle text-danger"></i>
+                    @AppProcessor.Messagor.GetMessage("Import_Error")
+                    &nbsp;<span class="badge badge-danger" id="cntError">0</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content border border-top-0 rounded-bottom" style="max-height:360px;overflow-y:auto;">
+            <div class="tab-pane fade show active p-1" id="tabValid" role="tabpanel">
+                <table class="table table-sm table-hover table-bordered mb-0 small">
+                    <thead class="thead-light">
+                        <tr>
+                            <th class="text-center" style="width:45px">@AppProcessor.Messagor.GetMessage("Import_ColRow")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColShortName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColTaxCode")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColType")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColStatus")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColPhone")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColAddress")</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyValid">
+                        <tr><td colspan="8" class="text-center text-muted py-3">@AppProcessor.Messagor.GetMessage("Import_NoData")</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade p-1" id="tabError" role="tabpanel">
+                <table class="table table-sm table-hover table-bordered mb-0 small">
+                    <thead style="background:#f8d7da;color:#721c24;">
+                        <tr>
+                            <th class="text-center" style="width:45px">@AppProcessor.Messagor.GetMessage("Import_ColRow")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColShortName")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColTaxCode")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColType")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColStatus")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColPhone")</th>
+                            <th>@AppProcessor.Messagor.GetMessage("Import_ColAddress")</th>
+                            <th style="min-width:200px">@AppProcessor.Messagor.GetMessage("Import_ColError")</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyError">
+                        <tr><td colspan="9" class="text-center text-muted py-3">@AppProcessor.Messagor.GetMessage("Import_NoError")</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="importResult" class="d-none mt-3"></div>
+    </div>
+
+</div>
+
+<div class="modal-footer">
+
+    <div id="footerUpload">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fa fa-times"></i> Đóng
+        </button>
+        <button type="button" class="btn btn-primary" id="btnReadFile">
+            <i class="fa fa-search"></i> @AppProcessor.Messagor.GetMessage("Import_ReadFile")
+        </button>
+    </div>
+
+    <div id="footerPreview" class="d-none">
+        <button type="button" class="btn btn-warning d-none" id="btnExportErrorRows">
+            <i class="fa fa-download"></i> @AppProcessor.Messagor.GetMessage("Import_Error")
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnBackUpload">
+            <i class="fa fa-arrow-left"></i> @AppProcessor.Messagor.GetMessage("Import_Back")
+        </button>
+        <button type="button" class="btn btn-success" id="btnConfirmImport">
+            <i class="fa fa-check"></i> @AppProcessor.Messagor.GetMessage("Import_Confirm")
+        </button>
+    </div>
+
+    <div id="footerDone" class="d-none">
+
+        <button type="button" class="btn btn-warning" id="btnExportDuplicateRowsDone">
+            <i class="fa fa-download"></i> @AppProcessor.Messagor.GetMessage("Import_ExportDuplicate")
+        </button>
+        <button type="button" class="btn btn-primary" id="btnCloseDone" data-dismiss="modal">
+            <i class="fa fa-refresh"></i> @AppProcessor.Messagor.GetMessage("Import_Close")
+        </button>
+    </div>
+
+</div>

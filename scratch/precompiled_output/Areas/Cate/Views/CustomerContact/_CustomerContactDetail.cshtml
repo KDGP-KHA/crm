@@ -1,0 +1,87 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerContactModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.CustomerContactID)
+    @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.ContactPersonID)
+    <!-- Full Name (full width) -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.FullName, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.FullName,
+            new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_FullName_Label"), disabled = "disabled" })
+        @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.FullName)
+    </div>
+
+    <!-- Position -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.Position, new { @class = "font-bold" })
+
+        @Html.TextBoxFor(model => model.Position,
+        new
+        {
+            @class = "form-control",
+            placeholder = AppProcessor.Messagor.GetMessage("ContactPersons_Position_Label")
+        })
+    </div>
+
+    <div class="row">
+        <!-- Phone -->
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Phone, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Phone,
+                new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_Phone_Label"), disabled = "disabled" })
+        </div>
+
+        <!-- Mobile -->
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Mobile, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Mobile,
+                new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_Mobile_Label"), disabled = "disabled" })
+        </div>
+
+        <!-- Email -->
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Email, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Email,
+                new
+                    {
+                    @class = "form-control",
+                    placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_Email_Label"),
+                    type = "email"
+})
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+
+        <!-- Zalo -->
+        <div class="col-md-6 form-group">
+            @Html.TitleFor(model => model.Zalo, new { @class = "font-bold" })
+            @Html.TextBoxFor(model => model.Zalo,
+                new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_Zalo_Label"), disabled = "disabled" })
+        </div>
+
+    </div>
+    <!-- Address -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.Address, new { @class = "font-bold" })
+        @Html.TextBoxFor(model => model.Address,
+            new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_Address_Label"), disabled = "disabled" })
+    </div>
+
+
+    <!-- Note -->
+    <div class="form-group">
+        @Html.TitleFor(model => model.Note, new { @class = "font-bold" })
+
+        @Html.TextAreaFor(model => model.Note,
+            new
+            {
+                @class = "form-control",
+                placeholder = AppProcessor.Messagor.GetMessage("ContactPersonal_Note_Label"),
+                rows = "3",
+                style = "resize: vertical;"
+            })
+    </div>
+</div>

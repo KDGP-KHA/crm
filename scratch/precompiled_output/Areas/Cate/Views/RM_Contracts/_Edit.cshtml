@@ -1,0 +1,41 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("Contracts_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Edit", "RM_Contracts", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditContracts", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Contract")
+        </div>
+    }
+
+    <script type="text/javascript">
+        $('form#EditContracts').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if (response.status == false) {
+                        eval(response.message);
+                        response.status = undefined;
+                    } else {
+                        Contracts_OnProcessSuccess(response, "EditContracts");
+                    }
+                }
+                else {
+                    Contracts_OnProcessSuccess(response, "EditContracts");
+                }
+            }
+        });
+    </script>
+}

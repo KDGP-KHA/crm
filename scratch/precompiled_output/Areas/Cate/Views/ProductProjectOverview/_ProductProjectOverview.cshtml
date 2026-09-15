@@ -1,0 +1,167 @@
+﻿@model Core.Cate.Models.ProductProjectOverviewModel
+
+@{
+    var project = Model.ProductProjectModel;
+}
+
+<div class="container-fluid mt-3">
+
+    <!-- 1. THÔNG TIN CHI TIẾT SẢN PHẨM DỰ ÁN -->
+    <div class="card shadow-sm border-0 mb-3">
+
+        <div class="card-header bg-light">
+            <b>Thông tin chi tiết</b>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted">Tên dự án</label>
+                    <div class="font-weight-bold">
+                        @project.ProjectName
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted">Tên sản phẩm</label>
+                    <div class="font-weight-bold">
+                        @project.NameProduct
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted">Doanh thu dự kiến</label>
+                    <div class="text-success font-weight-bold">
+                        @project.ExpectedRevenue.ToString("N0") triệu VNĐ
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted">Ngày bắt đầu</label>
+                    <div>
+                        @(project.StartDate?.ToString("dd/MM/yyyy") ?? "--")
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted">Ngày kết thúc</label>
+                    <div>
+                        @(project.EndDate?.ToString("dd/MM/yyyy") ?? "--")
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 2. SỐ LIỆU TỔNG HỢP -->
+    <div class="row mb-3">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+
+                    <div class="text-muted">Tổng doanh thu</div>
+
+                    <h5 class="text-success">
+                        @Model.TotalRevenue.ToString("N0") triệu VNĐ
+                    </h5>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+
+                    <div class="text-muted">Tổng chi phí</div>
+
+                    <h5 class="text-danger">
+                        @Model.TotalCost.ToString("N0") triệu VNĐ
+                    </h5>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+
+                    <div class="text-muted">Lợi nhuận</div>
+
+                    <h5 class="text-primary">
+                        @Model.Profit.ToString("N0") triệu VNĐ
+                    </h5>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center">
+                <div class="card-body">
+
+                    <div class="text-muted">Số lượng thành viên</div>
+
+                    <h5>
+                        @Model.TotalMember
+                    </h5>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- 3. THÀNH VIÊN DỰ ÁN -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-light">
+            <b>Thành viên chủ trì</b>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="text-muted">Account Manager (AM)</label>
+                    <div>
+                        @if (Model.AMs.Any())
+                        {
+                            foreach (var ba in Model.AMs)
+                            {
+                                <span class="badge badge-info mr-1">@ba</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="text-muted">Project Manager (PM)</label>
+                    <div>
+                        @if (Model.PMs.Any())
+                        {
+                            foreach (var pm in Model.PMs)
+                            {
+                                <span class="badge badge-primary mr-1">@pm</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

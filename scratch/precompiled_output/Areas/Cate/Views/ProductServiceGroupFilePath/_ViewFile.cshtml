@@ -1,0 +1,65 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProductServiceFilePathModel
+@{
+    string filename = Path.GetFileName(Model.FilePath);
+    var ext = Path.GetExtension(Model.FilePath).ToLower();
+
+    ViewBag.Title = "Tập tin " + filename;
+    Layout = "~/Views/Shared/_Form.cshtml";
+
+    List<string> officeExtensions = new List<string> { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" };
+
+}
+
+@section FormType{
+    success
+}
+
+@section FormIcon{
+    <i class="fas fa-eye"></i>
+}
+
+@section FormBody{
+    <style>
+        .file-preview-container iframe {
+            height: 80vh !important;
+            width: 100% !important;
+        }
+    </style>
+    <div class="file-preview-container">
+        @if (ext == ".pdf")
+        {
+            <iframe src="@Model.FilePath" width="100%"></iframe>
+        }
+        @*else if (ext == ".docx" || ext == ".xlsx" || ext == ".pptx")
+            {
+                <iframe src="https://live.com" width="100%"></iframe>
+            }*@
+        else if (ext == ".jpg" || ext == ".png" || ext == ".jpeg" || ext == ".gif")
+        {
+            <img src="@Model.FilePath" style="max-width:100%; height:auto;" />
+        }
+        else if (officeExtensions.Contains(ext))
+        {
+            string absoluteFileUrl = Request.Url.GetLeftPart(UriPartial.Authority) + Model.FilePath;
+
+            // Mã hóa URL để đảm bảo an toàn nếu tên file có khoảng trắng/tiếng Việt
+            string encodedFileUrl = System.Web.HttpUtility.UrlEncode(absoluteFileUrl);
+
+            @*<h1>@absoluteFileUrl</h1>*@
+            <iframe src="https://view.officeapps.live.com/op/view.aspx?src=@encodedFileUrl" width="100%"></iframe>
+        }
+        else
+        {
+            <div class="alert bgc-blue-l3 brc-blue-l1 text-dark-tp2" role="alert">
+                Định dạng tập tin không hỗ trợ xem trực tuyến. Tải tập tin về
+                <a href="@Model.FilePath" class="alert-link text-primary-d1">
+                    tại đây
+                </a>.
+            </div>
+        }
+    </div>
+}
+@section SubmitControl{
+
+}

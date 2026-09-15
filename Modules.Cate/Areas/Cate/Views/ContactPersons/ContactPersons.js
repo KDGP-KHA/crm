@@ -1,4 +1,4 @@
-var _tableContactPersons;
+﻿var _tableContactPersons;
 
 function htmlEncode(str) {
     if (str === null || str === undefined) return '';

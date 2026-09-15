@@ -1,0 +1,223 @@
+﻿@model Core.Cate.Models.SysMailTemplateModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(model => model.MailTemplateId)
+@Html.HiddenFor(model => model.FilePath)
+
+<style type="text/css">
+    .mail-template-box {
+        border: 1px solid #d5d5d5;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        padding: 12px;
+    }
+
+    .mail-template-file-picker {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .mail-template-file-name {
+        flex: 1;
+        min-height: 34px;
+        line-height: 34px;
+        padding: 0 10px;
+        border: 1px solid #d5d5d5;
+        border-radius: 4px;
+        background-color: #ffffff;
+        color: #666666;
+    }
+
+    .mail-template-file-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .mail-template-param-table th,
+    .mail-template-param-table td {
+        vertical-align: middle;
+    }
+
+    .mail-template-editor-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        border: 1px solid #d5d5d5;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        color: #333333;
+        text-align: left;
+    }
+
+    .mail-template-editor-toggle:hover,
+    .mail-template-editor-toggle:focus {
+        color: #333333;
+        text-decoration: none;
+    }
+
+    .mail-template-editor-toggle .toggle-icon {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .mail-template-editor-toggle[aria-expanded="true"] .toggle-icon {
+        transform: rotate(180deg);
+    }
+</style>
+
+<div class="form-group row">
+    <div class="col-sm-6">
+        <label class="font-bold">Mã mẫu email</label>
+        @Html.TextBoxFor(model => model.TemplateCode, new { @class = "form-control", placeholder = "Ví dụ: THONGBAONGUOITHAMGIA" })
+        @Html.ValidationMessageFor(model => model.TemplateCode, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-sm-6">
+        <label class="font-bold">Tên mẫu email</label>
+        @Html.TextBoxFor(model => model.TemplateName, new { @class = "form-control", placeholder = "Nhập tên mẫu email" })
+        @Html.ValidationMessageFor(model => model.TemplateName, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-sm-9">
+        <label class="font-bold">Tiêu đề email</label>
+        @Html.TextBoxFor(model => model.SubjectTemplate, new { @class = "form-control", placeholder = "Ví dụ: Thông báo: $$PlanName" })
+        @Html.ValidationMessageFor(model => model.SubjectTemplate, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-sm-3 d-flex align-items-end pb-2">
+        <div class="form-check">
+            @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" })
+            <label class="form-check-label font-bold ml-1" for="IsActive">Hoạt động</label>
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="font-bold">Mô tả</label>
+    @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = "2", placeholder = "Mô tả ngắn về mục đích sử dụng mẫu email" })
+    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+</div>
+
+<div class="form-group">
+    <label class="font-bold">Import file mẫu email</label>
+    <div class="mail-template-box">
+        <div class="mail-template-file-picker">
+            <label class="btn btn-default mb-0" for="TemplateFile">
+                <i class="fa fa-upload"></i>&nbsp;Chọn file
+            </label>
+            @Html.TextBoxFor(
+                model => model.TemplateFile,
+                new
+                {
+                    type = "file",
+                    accept = ".cshtml",
+                    id = "TemplateFile",
+                    style = "position:absolute;left:-9999px;"
+                })
+            <div class="mail-template-file-name" id="TemplateFileName">Chưa chọn file .cshtml</div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.FilePath))
+        {
+            <div class="mail-template-file-actions">
+                <a class="btn btn-outline-primary btn-sm" href="@Url.Action("Download", "MailTemplate", new { area = "Sys", id = Model.MailTemplateId })">
+                    <i class="fa fa-download"></i>&nbsp;Tải file hiện tại
+                </a>
+                <span class="text-muted">@Model.FilePath</span>
+            </div>
+        }
+    </div>
+    @Html.ValidationMessageFor(model => model.TemplateFile, "", new { @class = "text-danger" })
+    <small class="text-muted">Chỉ hỗ trợ file .cshtml. Khi chọn file, hệ thống sẽ nạp nội dung file vào trình soạn thảo bên dưới.</small>
+</div>
+
+<div class="form-group">
+    <button
+        class="mail-template-editor-toggle"
+        type="button"
+        data-toggle="collapse"
+        data-target="#MailTemplateEditorCollapse"
+        aria-expanded="false"
+        aria-controls="MailTemplateEditorCollapse">
+        <span class="font-bold">Nội dung mẫu email (.cshtml)</span>
+        <i class="fa fa-chevron-down toggle-icon"></i>
+    </button>
+
+    <div class="collapse mt-2" id="MailTemplateEditorCollapse">
+        @Html.TextAreaFor(model => model.TemplateContent, new { @class = "form-control", id = "TemplateContent", rows = "18", placeholder = "Nhập trực tiếp nội dung .cshtml hoặc import từ file .cshtml" })
+        @Html.ValidationMessageFor(model => model.TemplateContent, "", new { @class = "text-danger" })
+        <small class="text-muted">Trong body email dùng cú pháp như: @("@Model.GetString(\"FullName\")").</small>
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <label class="font-bold mb-0">Khai báo tham số</label>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddTemplateParam">
+            <i class="fa fa-plus"></i>&nbsp;Thêm tham số
+        </button>
+    </div>
+
+    <div class="mail-template-box">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm mb-0 mail-template-param-table">
+                <thead>
+                    <tr>
+                        <th style="width: 18%;">Mã tham số</th>
+                        <th style="width: 18%;">Tên tham số</th>
+                        <th style="width: 10%;" class="text-center">Bắt buộc</th>
+                        <th>Giá trị mặc định</th>
+                        <th style="width: 70px;" class="text-center">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody id="TemplateParamBody">
+                    @if (Model.TemplateParams != null && Model.TemplateParams.Count > 0)
+                    {
+                        for (int index = 0; index < Model.TemplateParams.Count; index++)
+                        {
+                            <tr class="template-param-row">
+                                <td>
+                                    @Html.HiddenFor(model => model.TemplateParams[index].MailTemplateParamId, new { @class = "template-param-id" })
+                                    @Html.HiddenFor(model => model.TemplateParams[index].MailTemplateId, new { @class = "template-param-templateid" })
+                                    @Html.TextBoxFor(model => model.TemplateParams[index].ParamCode, new { @class = "form-control form-control-sm template-param-code", maxlength = "100" })
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(model => model.TemplateParams[index].ParamName, new { @class = "form-control form-control-sm template-param-name", maxlength = "250" })
+                                </td>
+                                <td class="text-center">
+                                    <input class="template-param-required" type="checkbox" @(Model.TemplateParams[index].IsRequired ? "checked=\"checked\"" : string.Empty) />
+                                </td>
+                                <td>
+                                    @Html.TextBoxFor(model => model.TemplateParams[index].DefaultValue, new { @class = "form-control form-control-sm template-param-default" })
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-template-param">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr class="template-param-empty">
+                            <td colspan="5" class="text-center text-muted">
+                                Chưa có tham số nào. Nhấn "Thêm tham số" để khai báo các biến dùng trong mẫu email.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @Html.ValidationMessage("TemplateParams", "", new { @class = "text-danger" })
+    <small class="text-muted">Người dùng sẽ lấy object từ danh sách tham số này, gán giá trị rồi gọi hàm gửi email.</small>
+</div>

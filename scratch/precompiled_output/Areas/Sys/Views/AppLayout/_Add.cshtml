@@ -1,0 +1,55 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("AppLayout_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Add", "AppLayout", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "AddAppLayout", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_AppLayout")
+        </div>
+    }
+    <script type="text/javascript">
+        $('form#AddAppLayout').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if ($("#ModalContent #modal_AddJob #chkNotDismissModal").is(":checked")) {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableAppLayout.ajax.reload(null, false);
+                            response.status = undefined;
+                            $("#ModalContent #modal_AddJob form")[0].reset();
+                        }
+                    } else {
+                        $("#ModalContent #modal_AddAppLayout").modal("hide");
+                        $("#ModalContent #modal_AddAppLayout").on('hidden.bs.modal',
+                            function () {
+                                if (response.status != undefined) {
+                                    eval(response.message);
+                                    _tableAppLayout.ajax.reload(null, false);
+                                    response.status = undefined;
+                                }
+                            });
+                    }
+                } else {
+                    $("#ModalContent #modal_AddAppLayout" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}
+
+@section ContinueForm{
+
+}

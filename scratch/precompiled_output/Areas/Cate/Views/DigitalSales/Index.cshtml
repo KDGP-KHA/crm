@@ -1,0 +1,62 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesSearchModel
+
+@{
+    ViewBag.Title = "Danh sách kinh doanh sản phẩm dịch vụ số";
+}
+
+@section PageTitle {
+    <i class="fa fa-chart-line text-primary mr-1"></i>
+    Danh sách kinh doanh sản phẩm dịch vụ số
+    <small class="page-info text-secondary-d2 text-90 font-normal ml-2">
+        (Cơ hội kinh doanh ➔ Dự án số)
+    </small>
+}
+
+@section PageAction {
+    @if (ViewBag.IsQTHT == true)
+    {
+        <a href="@Url.Action("Index", "DigitalSalesWorkflow", new { area = "Cate" })" class="btn btn-sm btn-outline-purple mr-2">
+            <i class="fa fa-sitemap mr-1"></i> Cấu hình Quy trình & Tiến trình
+        </a>
+    }
+    <button type="button" class="btn btn-sm btn-primary" onclick="openAddSalesModal();">
+        <i class="fa fa-plus-circle mr-1"></i> Khởi tạo Cơ hội mới
+    </button>
+}
+
+<div class="mb-3">
+    @Html.Partial("_Search", Model)
+</div>
+
+@section HeadCss {
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Index.css?v=@DateTime.Now.Ticks" />
+}
+
+<div class="card dcard">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="tblDigitalSales" class="table table-striped table-hover text-dark-m1 w-100 border-y-1 brc-black-tp11" style="font-size: 14.5px;">
+                <thead class="bgc-secondary-l1 text-secondary-d2 text-uppercase font-weight-bold" style="font-size: 14px;">
+                    <tr>
+                        <th style="width: 45px;" class="text-center">STT</th>
+                        <th>Cơ hội / Dự án</th>
+                        <th style="min-width: 200px;">Khách hàng</th>
+                        <th style="min-width: 160px;">AM chủ trì</th>
+                        <th style="min-width: 170px;" class="text-right">Doanh thu (VNĐ)</th>
+                        <th style="width: 130px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER LOAD MODALS AJAX -->
+<div id="modalContainer"></div>
+
+@section BottomScript {
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script src="~/Areas/Cate/Views/DigitalSales/DigitalSales.js?v=@DateTime.Now.Ticks"></script>
+}

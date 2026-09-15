@@ -1,0 +1,47 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysUserSearchModel
+
+<div class="card bcard border-0 shadow-sm radius-0" id="SearchUser">
+    <div class="card-header bgc-primary-d1">
+        <h5 class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </h5>
+        <div class="card-toolbar">
+            <a href="#" data-action="toggle" class="card-toolbar-btn text-white">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="col-md-12 form-horizontal mt-4">
+            <div class="form-group row">
+                <label class="col-form-label text-sm-right pr-0 font-bold col-md-2">@AppProcessor.Messagor.GetMessage("Label_TuKhoa")</label>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.TuKhoa, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("Label_TuKhoa_User") })
+                    </div>
+                </div>
+
+                <label class="col-form-label text-sm-right pr-0 font-bold col-md-1">@AppProcessor.Messagor.GetMessage("ChucVu_Title")</label>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        @Html.DropDownListFor(model => model.ChucVuId, new SelectList(Model.ListChucVus, "Value", "Text"), "", new { @class = "form-control col-md-10" })
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-form-label text-sm-right pr-0 font-bold col-md-2">@AppProcessor.Messagor.GetMessage("BoPhan_Title")</label>
+                <div class="col-md-8">
+                    <div class="input-group">
+                        @Html.DropDownListFor(model => model.BoPhanId, new SelectList(Model.ListBoPhans, "Value", "Text"), "", new { @class = "form-control col-md-10" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn btn-primary" onclick="Search()"><i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")</button>
+        </div>
+    </div>
+</div>

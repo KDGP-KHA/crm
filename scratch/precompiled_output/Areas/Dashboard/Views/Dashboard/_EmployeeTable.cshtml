@@ -1,0 +1,75 @@
+﻿@using System.Linq
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityDashboardViewModel
+
+<div class="db-section-title">
+    <i class="fa fa-table mr-1 text-blue"></i> @AppProcessor.Messagor.GetMessage("Dashboard_SectionTable")
+</div>
+<div id="tableContainer">
+    @if (Model.Rows == null || !Model.Rows.Any())
+    {
+        <div class="alert alert-info text-center" id="oppNoData">
+            <i class="fa fa-info-circle mr-1"></i> @AppProcessor.Messagor.GetMessage("Dashboard_NoData")
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover tbl-dashboard mb-0 w-100" id="opportunityTable">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:40px">@AppProcessor.Messagor.GetMessage("Dashboard_Col_STT")</th>
+                    <th>@AppProcessor.Messagor.GetMessage("Dashboard_Col_EmployeeName")</th>
+                    <th class="text-center">@AppProcessor.Messagor.GetMessage("Dashboard_Col_Total")</th>
+                    <th class="text-center">@AppProcessor.Messagor.GetMessage("Dashboard_Col_Open")</th>
+                    <th class="text-center">@AppProcessor.Messagor.GetMessage("Dashboard_Col_Closed")</th>
+                    <th class="text-center">@AppProcessor.Messagor.GetMessage("Dashboard_Col_Won")</th>
+                    <th class="text-center">@AppProcessor.Messagor.GetMessage("Dashboard_Col_WinRate")</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int stt = 1; }
+                @foreach (var r in Model.Rows)
+                {
+                    string badgeClass, winRateText;
+                    if (!r.WinRate.HasValue) { badgeClass = "wr-none"; winRateText = "--"; }
+                    else if (r.WinRate >= 70) { badgeClass = "wr-high"; winRateText = r.WinRate.Value.ToString("0.0") + "%"; }
+                    else if (r.WinRate >= 40) { badgeClass = "wr-medium"; winRateText = r.WinRate.Value.ToString("0.0") + "%"; }
+                    else { badgeClass = "wr-low"; winRateText = r.WinRate.Value.ToString("0.0") + "%"; }
+                    <tr>
+                        <td class="text-center text-muted">@(stt++)</td>
+                        <td>
+                            <span class="font-weight-bold">@r.FullName</span>
+                            @if (!string.IsNullOrEmpty(r.EmployeeCode))
+                            {
+                                <span class="text-muted text-90 ml-1">(@r.EmployeeCode)</span>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <h6 class="mb-0 text-primary" style="cursor:pointer;" onclick="detailOpportunityByUser('@r.EmployeeID', 0)">@r.Total</h6>
+                            <div class="d-none">
+                                @Html.Button(
+                                    true,
+                                    "OpportunityByUser",
+                                    Url.Action("OpportunityByUser", "Dashboard", new { area = "Dashboard" }),
+                                    "<i class='far fa-clock'></i>",
+                                    "",
+                                    new { @class = "btn btn-sm btn-primary" }
+                                )
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <h6 class="mb-0 text-primary" style="cursor:pointer;" onclick="detailOpportunityByUser('@r.EmployeeID', 1)">@r.Open</h6>
+                        </td>
+                        <td class="text-center">
+                            <h6 class="mb-0 text-warning" style="cursor:pointer;" onclick="detailOpportunityByUser('@r.EmployeeID', 2)">@r.Closed</h6>
+                        </td>
+                        <td class="text-center">
+                            <h6 class="mb-0 text-success" style="cursor:pointer;" onclick="detailOpportunityByUser('@r.EmployeeID', 3)">@r.Won</h6>
+                        </td>
+                        <td class="text-center"><span class="badge-winrate @badgeClass">@winRateText</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

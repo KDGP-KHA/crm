@@ -1,0 +1,95 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Cate_ProductServiceModel
+@{
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    green
+}
+
+@section FormIcon{
+    <i class="fas fa-paperclip"></i>
+}
+
+@section FormBody{
+    <style>
+        .article-content img {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .article-content {
+            text-align: justify;
+        }
+
+        .article-short-content {
+            /*max-height: 120px;*/
+            max-height: 50px !important;
+            overflow: hidden;
+        }
+
+        .article-short-content {
+            position: relative;
+        }
+
+            .article-short-content::after {
+                content: "";
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 10px;
+                /*background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));*/
+            }
+
+        .show-full-article-button {
+            cursor: pointer;
+        }
+    </style>
+    <div class="card dcard mb-3" id="searchTaiLieu">
+        <div class="card-header">
+            <div class="w-50 ">
+                <div class="input-group">
+                    @Html.TextBoxFor(m => m.Search, "", new { @class = "form-control", @placeholder = "Tìm theo tiêu đề, nội dung tài liệu" })
+                    <div class="input-group-append">
+                        <button class="btn btn btn-primary" type="button" onclick="_tableProductServiceGroupFilePath.ajax.reload(null, false);">
+                            <i class="fa fa-search-plus mr-1"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-toolbar">
+                <div class="card-toolbar no-border">
+                    @Html.Button(true, "AddProductServiceGroupFilePath", Url.Action("Add", new { area = "Cate", ProductServiceID = Model.ProductServiceID }), "<i class='fa fa-plus'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-outline-blue text-600 pull-right", @data_width = "1024px" })
+                </div>
+            </div>
+        </div><!-- /.card-header -->
+        <!-- /.card-body -->
+    </div>
+    <div></div>
+    <div class="card dcard mt-3">
+        <div class="col-sm-12 table-responsive-md p-2">
+            <table id="DSProductServiceGroupFilePath" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("ThongBao_TieuDe")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("FileName")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Project_Note_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("LastUpdate")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <script>
+        var _ProductServiceID = @Model.ProductServiceID;
+    </script>
+    <script src="~/Areas/Cate/Views/ProductServiceGroupFilePath/ProductServiceGroupFilePath.js"></script>
+}
+@section SubmitControl{
+
+}

@@ -1,0 +1,197 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_OpportunityPlanRelatedPersonFormModel
+<div class="card">
+    @Html.HiddenFor(model => model.OpportunityPlanID)
+    <div class="card-header justify-content-start align-items-center font-bold">
+        <i class="fas fa-users mr-2"></i>
+        <span>@AppProcessor.Messagor.GetMessage("OpportunityPlanRelatedPerson_Title")</span>
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <input type="text" id="searchPersonName" class="form-control" placeholder="Tìm theo tên hoặc username...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label class="col-md-3 col-form-label text-md-right">Đơn vị</label>
+                    <div class="col-md-9">
+                        <select id="searchPersonUnit" class="form-control no-select2" data-no-select2="true">
+                            <option value="">-- Tất cả đơn vị --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="button" id="btnSearchPerson" class="btn btn-primary btn-block">
+                    <i class="fas fa-search mr-1"></i> Tìm
+                </button>
+            </div>
+        </div>
+
+        <div id="selectedSummary" class="mb-2" style="display:none;">
+            <span class="badge badge-primary" id="selectedCount">0</span> người đã chọn
+            <a href="#" id="btnClearAll" class="ml-2 text-danger small">
+                <i class="fas fa-times"></i> Bỏ chọn tất cả
+            </a>
+        </div>
+
+        <div id="personListWrapper" class="related-person-list" style="display:none;">
+            <div class="row" id="personList">
+                @Html.HiddenFor(model => model.Usernames)
+                @foreach (var user in Model.Users)
+                {
+                    if (Model.ExistingUsernames == null || !Model.ExistingUsernames.Contains(user.UserName))
+                    {
+                        var fullName = user.FullName ?? "";
+                        var userName = user.UserName ?? "";
+                        var officeName = user.OfficeName ?? "";
+                        var checkboxId = "person-" + userName.Replace(".", "-").Replace("@", "-");
+                        <div class="col-md-3 mb-1 person-item"
+                             data-name="@fullName.ToLower()"
+                             data-username="@userName.ToLower()"
+                             data-unit="@officeName.ToLower()"
+                             data-unit-display="@officeName">
+                            <div class="form-check">
+                                <input class="form-check-input person-checkbox"
+                                       value="@userName"
+                                       type="checkbox"
+                                       id="@checkboxId">
+                                <label class="form-check-label" for="@checkboxId">
+                                    @fullName
+                                    <small class="text-muted d-block">@userName</small>
+                                    @if (!string.IsNullOrEmpty(officeName))
+                                    {
+                                        <small class="text-muted d-block">@officeName</small>
+                                    }
+                                </label>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+            <div id="noResultMsg" class="text-muted text-center py-3" style="display:none;">
+                <i class="fas fa-search mr-1"></i> Không tìm thấy người phù hợp.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    (function () {
+        var usernamesSelected = [];
+        var $select = $("#searchPersonUnit");
+
+        try {
+            if ($.fn.select2 && $select.hasClass("select2-hidden-accessible")) {
+                $select.select2("destroy");
+            }
+        } catch (e) { }
+
+        var units = {};
+        $(".person-item").each(function () {
+            var unit = $(this).attr("data-unit-display");
+            if (unit && !units[unit.toLowerCase()]) {
+                units[unit.toLowerCase()] = unit;
+            }
+        });
+
+        Object.keys(units).sort(function (a, b) {
+            return units[a].localeCompare(units[b], "vi");
+        }).forEach(function (key) {
+            $select.append('<option value="' + key + '">' + units[key] + '</option>');
+        });
+
+        $("#btnSearchPerson").on("click", function () { doSearch(); });
+        $("#searchPersonName").on("keypress", function (e) {
+            if (e.which === 13) { e.preventDefault(); doSearch(); }
+        });
+
+        function doSearch() {
+            var keyword = $("#searchPersonName").val().trim().toLowerCase();
+            var unit = ($("#searchPersonUnit").val() || "").toLowerCase();
+
+            if (!keyword && !unit) {
+                alert("Vui lòng nhập tên hoặc chọn đơn vị để tìm kiếm.");
+                return;
+            }
+
+            var visibleCount = 0;
+            $(".person-item").each(function () {
+                var name = $(this).attr("data-name") || "";
+                var username = $(this).attr("data-username") || "";
+                var rowUnit = $(this).attr("data-unit") || "";
+                var matchName = !keyword || name.indexOf(keyword) >= 0;
+                var matchUser = !keyword || username.indexOf(keyword) >= 0;
+                var matchUnit = !unit || rowUnit === unit;
+
+                if ((matchName || matchUser) && matchUnit) {
+                    $(this).show();
+                    visibleCount++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            $("#personListWrapper").show();
+            $("#noResultMsg").toggle(visibleCount === 0);
+        }
+
+        $(document).on("change", ".person-checkbox", function () {
+            var value = $(this).val();
+            if ($(this).is(":checked")) {
+                if (!usernamesSelected.includes(value)) usernamesSelected.push(value);
+            } else {
+                usernamesSelected = usernamesSelected.filter(function (v) { return v != value; });
+            }
+            $("#Usernames").val(usernamesSelected.join(";"));
+            if (usernamesSelected.length > 0) {
+                $("#selectedCount").text(usernamesSelected.length);
+                $("#selectedSummary").show();
+            } else {
+                $("#selectedSummary").hide();
+            }
+        });
+
+        $("#btnClearAll").on("click", function (e) {
+            e.preventDefault();
+            usernamesSelected = [];
+            $(".person-checkbox").prop("checked", false);
+            $("#Usernames").val("");
+            $("#selectedSummary").hide();
+        });
+    })();
+</script>
+
+<style>
+    .related-person-list {
+        max-height: 240px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        padding: 10px 8px 4px;
+        background: #fff;
+    }
+
+    .person-item .form-check {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0;
+        padding-left: 0;
+    }
+
+    .person-item .form-check-input {
+        position: static;
+        margin-top: 4px;
+        margin-left: 0;
+        margin-right: 6px;
+        flex-shrink: 0;
+    }
+
+    .person-item .form-check-label {
+        margin-bottom: 0;
+        line-height: 1.35;
+    }
+</style>

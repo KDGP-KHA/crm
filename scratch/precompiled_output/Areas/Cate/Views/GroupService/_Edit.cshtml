@@ -1,0 +1,27 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("GroupService_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("Edit", "GroupService", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "GroupService_OnProcessSuccess(data, 'EditGroupService')"
+    }, new { @class = "form-horizontal", id = "EditCustomer" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_GroupService")
+        </div>
+    }
+}

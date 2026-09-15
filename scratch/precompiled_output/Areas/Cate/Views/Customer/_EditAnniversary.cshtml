@@ -1,0 +1,19 @@
+﻿﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerAnniversaryModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("Anniversary_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType{ primary }
+@section FormIcon{ <i class="far fa-edit"></i> }
+@section FormBody{
+    @using (Ajax.BeginForm("EditAnniversary", "Customer", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Anniversary_OnProcessSuccess(data, 'EditCustomerAnniversary')"
+    }, new { @class = "form-horizontal", id = "EditCustomerAnniversary" }))
+    {
+        <div id="bodyForm">@Html.Partial("_Anniversary_View", Model)</div>
+    }
+}
+@section ContinueForm{}

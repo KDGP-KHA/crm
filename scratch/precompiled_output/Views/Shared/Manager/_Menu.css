@@ -1,0 +1,105 @@
+﻿
+.sidebar .nav-text {
+    word-break: break-word !important;
+    margin-right: 10px !important;
+}
+
+hr {
+    margin-top: 2px !important;
+}
+/*
+/*.sidebar .nav > .nav-item > .submenu > .submenu-inner {
+    padding-right: 10px;
+}
+*/
+.sidebar-white .submenu .nav-item > .nav-link:hover > .nav-text::before {
+    display: none !important;
+}
+
+.sidebar-white .submenu .nav-item.active:not(.open) > .nav-link > .nav-text::before {
+    display: none !important;
+}
+
+/*.fa-angle-right:before {
+    width: 70px !important;
+    display: inline-block !important;
+}
+*/
+.sidebar-inner i::before {
+    width: 70px !important;
+    display: inline-block !important;
+}
+.sidebar-white .submenu .nav-link {
+    font-size: 12px !important;
+}
+
+.sidebar-white .nav > .nav-item > .nav-link {
+    font-size: 13px !important;
+}
+
+.ace-scroll/*:hover*/
+{
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    overflow-y: scroll !important;
+}
+
+.sidebar-inner::-webkit-scrollbar {
+    display: none;
+}
+
+.sidebar-inner .submenu-inner::-webkit-scrollbar {
+    display: none;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.sidebar-inner {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+
+.sidebar-white .ace-scroll {
+    scrollbar-color: #fff #fff !important;
+}
+
+.sidebar .ace-scroll:not(:hover) {
+    -webkit-animation: none !important;
+    animation: none !important;
+}
+
+.avatar-login-circle {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.menu-item {
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.menu-item.active-item {
+    background-color: #e3eff9;
+    color: #0f62a6;
+}
+
+.menu-item:hover {
+    background-color: #f5f9fd;
+}
+
+.left-panel {
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.08);
+    z-index: 1;
+    background: #fff;
+    border-right: 2px solid #3c90d6;
+}
+#content-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 10px 0;
+}

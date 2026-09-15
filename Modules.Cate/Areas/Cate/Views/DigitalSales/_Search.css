@@ -64,3 +64,30 @@
         background-color: #e03131 !important;
         border-color: #e03131 !important;
     }
+
+    /* Checkbox cho nhỏ lại và hình vuông chuẩn, chống dãn chiều cao do .Search_Box input { height: 32px; } */
+    #statusDropdownMenu input[type="checkbox"],
+    .Search_Box input[type="checkbox"]:not(.custom-control-input) {
+        width: 14px !important;
+        height: 14px !important;
+        min-width: 14px !important;
+        min-height: 14px !important;
+        max-width: 14px !important;
+        max-height: 14px !important;
+        margin: 0 6px 0 0 !important;
+        padding: 0 !important;
+        border-radius: 2px !important;
+        vertical-align: middle !important;
+        cursor: pointer;
+        flex-shrink: 0 !important;
+        accent-color: #0284c7;
+    }
+
+    #statusDropdownMenu label {
+        display: flex !important;
+        align-items: center !important;
+        margin-bottom: 0 !important;
+        cursor: pointer;
+        font-size: 13px;
+        line-height: 1.4 !important;
+    }

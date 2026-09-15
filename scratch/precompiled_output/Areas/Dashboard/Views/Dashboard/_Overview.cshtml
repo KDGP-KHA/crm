@@ -1,0 +1,413 @@
+﻿@model Core.Cate.Models.RM_OverviewDashboardModel
+@using TSFramework.Libs.Processors
+
+<style>
+    /* Số liệu tổng có thể click để mở popup danh sách */
+    .db-total-click {
+        cursor: pointer;
+    }
+
+        .db-total-click:hover {
+            color: #1b6aaa !important;
+            text-decoration: underline;
+        }
+
+    /* Ô số liệu tổng */
+    .db-stat-card {
+        background: #fff;
+        border: 1px solid #e9edf2;
+        border-radius: 8px;
+        padding: 12px 14px;
+        height: 100%;
+    }
+
+    .db-stat-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .db-stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+        .db-stat-icon i {
+            color: #fff;
+            font-size: 17px;
+        }
+
+    .db-stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #3e4b5b;
+    }
+
+    .db-stat-label {
+        font-size: 11.5px;
+        color: #6c757d;
+        text-transform: uppercase;
+        line-height: 1.25;
+    }
+
+    .db-stat-revenues {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed #e4e9ef;
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+        .db-stat-revenues .db-rev-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 6px;
+        }
+
+        .db-stat-revenues .db-rev-val {
+            font-weight: 600;
+            color: #3e4b5b;
+            white-space: nowrap;
+        }
+
+        .db-stat-revenues .db-rev-empty {
+            color: #b7bfc8;
+            font-weight: 400;
+        }
+
+    /* Card chart cột phải */
+    .db-chart-card .card-body {
+        min-height: 120px;
+    }
+</style>
+
+@* Hàm hiển thị tiền: bằng 0 thì hiện gạch ngang mờ thay vì số 0 *@
+@helper Money(decimal? value)
+{
+    if (value.HasValue && value.Value != 0)
+    {
+        <span class="db-rev-val">@value.Value.ToString("N0")</span>
+    }
+    else
+    {
+        <span class="db-rev-val db-rev-empty" title="Chưa có dữ liệu">—</span>
+    }
+}
+
+<div class="row mt-2">
+
+    <!-- ============ CỘT TRÁI: SỐ LIỆU TỔNG + DANH SÁCH ============ -->
+    <div class="col-xl-8">
+
+        <!-- 4 ô số liệu tổng -->
+        <div class="row">
+            <div class="col-sm-6 col-lg-3 mb-2 px-2">
+                <div class="db-stat-card">
+                    <div class="db-stat-head">
+                        <span class="db-stat-icon bgc-danger-d1"><i class="fa fa-folder-open"></i></span>
+                        <div>
+                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách dự án"
+                                 onclick="detailProjectBySuccessRate(0, true)">
+                                @((Model.Summary?.TotalProjects ?? 0).ToString("N0"))
+                            </div>
+                            <div class="db-stat-label">Dự án</div>
+                        </div>
+                    </div>
+                    <div class="db-stat-revenues">
+                        <div class="db-rev-row"><span>DT dự kiến (tr.đ)</span> @Money(Model.Summary?.TotalprojRevenue)</div>
+                        <div class="db-rev-row"><span>DT thực hiện (tr.đ)</span> @Money(Model.Summary?.TotalRevenue)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3 mb-2 px-2">
+                <div class="db-stat-card">
+                    <div class="db-stat-head">
+                        <span class="db-stat-icon bgc-success-d1"><i class="fa fa-folder-open"></i></span>
+                        <div>
+                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách dự án (tỉ lệ thành công ≥ 80%)"
+                                 onclick="detailProjectBySuccessRate(80, true)">
+                                @((Model.FeasibilitySummary?.TotalProjects ?? 0).ToString("N0"))
+                            </div>
+                            <div class="db-stat-label">Dự án ≥ 80%</div>
+                        </div>
+                    </div>
+                    <div class="db-stat-revenues">
+                        <div class="db-rev-row"><span>DT dự kiến (tr.đ)</span> @Money(Model.FeasibilitySummary?.TotalprojRevenue)</div>
+                        <div class="db-rev-row"><span>DT thực hiện (tr.đ)</span> @Money(Model.FeasibilitySummary?.TotalRevenue)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3 mb-2 px-2">
+                <div class="db-stat-card">
+                    <div class="db-stat-head">
+                        <span class="db-stat-icon bgc-warning-d1"><i class="fa fa-handshake"></i></span>
+                        <div>
+                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách cơ hội kinh doanh"
+                                 onclick="detailOpportunityBySuccessRate(0, true)">
+                                @((Model.Summary?.TotalOpportunities ?? 0).ToString("N0"))
+                            </div>
+                            <div class="db-stat-label">Cơ hội KD</div>
+                        </div>
+                    </div>
+                    <div class="db-stat-revenues">
+                        <div class="db-rev-row"><span>DT dự kiến (tr.đ)</span> @Money(Model.Summary?.TotalExpectedValue)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3 mb-2 px-2">
+                <div class="db-stat-card">
+                    <div class="db-stat-head">
+                        <span class="db-stat-icon bgc-blue-d1"><i class="fa fa-handshake"></i></span>
+                        <div>
+                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách cơ hội kinh doanh (xác suất chốt ≥ 80%)"
+                                 onclick="detailOpportunityBySuccessRate(80, true)">
+                                @((Model.FeasibilitySummary?.TotalOpportunities ?? 0).ToString("N0"))
+                            </div>
+                            <div class="db-stat-label">Cơ hội ≥ 80%</div>
+                        </div>
+                    </div>
+                    <div class="db-stat-revenues">
+                        <div class="db-rev-row"><span>DT dự kiến (tr.đ)</span> @Money(Model.FeasibilitySummary?.TotalExpectedValue)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cơ hội và dự án cần cập nhật -->
+        @Html.Partial("_StaleUpdates", Model.StaleUpdates)
+
+        <!-- Danh sách cơ hội kinh doanh -->
+        <div id="opportunityOverviewTable">
+            @Html.Partial("_OpportunityTable", Model.Opportunitys)
+        </div>
+
+        <!-- Danh sách dự án -->
+        <div id="projectOverviewTable">
+            @Html.Partial("_ProjectTable", Model.Projects)
+        </div>
+    </div>
+
+    <!-- ============ CỘT PHẢI: CÁC BIỂU ĐỒ ============ -->
+    <div class="col-xl-4">
+
+        <div class="bcard card db-chart-card mt-0 mb-2">
+            <div class="card-header border-0 pb-1">
+                <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
+                    <i class="fa fa-chart-pie text-danger mr-2"></i>Dự án theo tỉ lệ thành công
+                </h6>
+            </div>
+            <div class="card-body p-2 d-flex justify-content-center">
+                <div id="bieudo_duan"></div>
+            </div>
+        </div>
+
+        <div class="bcard card db-chart-card mb-2">
+            <div class="card-header border-0 pb-1">
+                <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
+                    <i class="fa fa-chart-pie text-blue mr-2"></i>Cơ hội theo xác suất chốt
+                </h6>
+            </div>
+            <div class="card-body p-2 d-flex justify-content-center">
+                <div id="bieudo_cohoikd"></div>
+            </div>
+        </div>
+
+        <div class="bcard card db-chart-card mb-2">
+            <div class="card-header border-0 pb-1">
+                <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
+                    <i class="fa fa-cubes text-primary mr-2"></i>Cơ hội theo nhóm dịch vụ
+                </h6>
+            </div>
+            <div class="card-body p-2 d-flex justify-content-center">
+                <div id="gs-opp-chart"></div>
+            </div>
+        </div>
+
+        <div class="bcard card db-chart-card mb-2">
+            <div class="card-header border-0 pb-1">
+                <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
+                    <i class="fa fa-cubes text-warning mr-2"></i>Dự án theo nhóm dịch vụ
+                </h6>
+            </div>
+            <div class="card-body p-2 d-flex justify-content-center">
+                <div id="gs-prj-chart"></div>
+            </div>
+        </div>
+
+        <div class="bcard card db-chart-card mb-2">
+            <div class="card-header border-0 pb-1">
+                <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
+                    <i class="fa fa-chart-line text-success mr-2"></i>Cơ hội theo giai đoạn
+                </h6>
+            </div>
+            <div class="card-body p-2">
+                <canvas id="status-chart" height="180"></canvas>
+            </div>
+        </div>
+
+        <div class="bcard card db-chart-card mb-2">
+            <div class="card-header border-0 pb-1">
+                <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
+                    <i class="fa fa-tasks text-orange mr-2"></i>Dự án theo trạng thái
+                </h6>
+            </div>
+            <div class="card-body p-2">
+                <canvas id="project-status-chart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Các nút ẩn dùng để mở popup danh sách từ chart và ô số liệu *@
+<div class="d-none">
+    @Html.Button(true, "ProjectBySuccessRate",
+        Url.Action("ProjectBySuccessRate", "Dashboard", new { area = "Dashboard" }),
+        "", "", new { @class = "btn btn-sm btn-primary" })
+    @Html.Button(true, "OpportunityBySuccessRate",
+        Url.Action("OpportunityBySuccessRate", "Dashboard", new { area = "Dashboard" }),
+        "", "", new { @class = "btn btn-sm btn-primary" })
+    @Html.Button(true, "OpportunityByGroupService",
+        Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" }),
+        "", "", new { @class = "btn btn-sm btn-primary" })
+    @Html.Button(true, "ProjectByGroupService",
+        Url.Action("ProjectByGroupService", "Dashboard", new { area = "Dashboard" }),
+        "", "", new { @class = "btn btn-sm btn-primary" })
+</div>
+
+<script>
+    // Dữ liệu cho 2 chart cột (Chart.js) — vẽ trong Dashboard.js
+    window.opportunityByStatus = @Html.Raw(Json.Encode(Model.OpportunityByStatus));
+    window.projectByStatus = @Html.Raw(Json.Encode(Model.ProjectByStatus));
+
+    // Giữ instance để hủy trước khi vẽ lại (tránh chồng chart khi lọc)
+    window._apexCharts = window._apexCharts || {};
+
+    function _renderApexPie(elementId, labels, series, onSelect) {
+        var el = document.querySelector('#' + elementId);
+        if (!el) return;
+
+        if (window._apexCharts[elementId]) {
+            window._apexCharts[elementId].destroy();
+            window._apexCharts[elementId] = null;
+        }
+
+        if (!series.length) {
+            el.innerHTML = '<div class="text-center text-secondary-l1 py-4">Không có dữ liệu</div>';
+            return;
+        }
+
+        el.innerHTML = '';
+        var options = {
+            series: series,
+            labels: labels,
+            chart: {
+                width: 330,
+                type: 'pie',
+                events: { dataPointSelection: onSelect }
+            },
+            plotOptions: { pie: { dataLabels: { offset: -5 } } },
+            grid: { padding: { top: 0, bottom: 0, left: 0, right: 0 } },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val, opts) {
+                    return opts.w.config.series[opts.seriesIndex];
+                }
+            },
+            legend: { show: true, position: 'bottom' }
+        };
+
+        var chart = new ApexCharts(el, options);
+        chart.render();
+        window._apexCharts[elementId] = chart;
+    }
+
+    // Chart theo tỉ lệ thành công / xác suất chốt (type: 1 = dự án, 0 = cơ hội)
+    function LoadChart(type) {
+        $.ajax({
+            url: "/Dashboard/Dashboard/GetPieChart",
+            type: "POST",
+            data: {
+                "Type": type,
+                "FromDate": function () { return $(".dashboard-filter #FromDate").val(); },
+                "ToDate": function () { return $(".dashboard-filter #ToDate").val(); }
+            },
+            success: function (result) {
+                var series = [], labels = [];
+                for (var i = 0; i < result.data.length; i++) {
+                    series.push(result.data[i].Quantity);
+                    labels.push(result.data[i].Name);
+                }
+
+                _renderApexPie(
+                    type == 1 ? 'bieudo_duan' : 'bieudo_cohoikd',
+                    labels,
+                    series,
+                    function (event, chartContext, config) {
+                        var category = labels[config.dataPointIndex];
+                        var successRate = parseInt(category.match(/\d+/)[0]);
+                        if (type == 1) {
+                            detailProjectBySuccessRate(successRate);
+                        } else {
+                            detailOpportunityBySuccessRate(successRate);
+                        }
+                    });
+            },
+            error: function (xhr, status, error) {
+                console.log("Error: " + error);
+            }
+        });
+    }
+
+    // Chart theo nhóm dịch vụ (type: 1 = dự án, 0 = cơ hội); click lát cắt mở danh sách chi tiết
+    function LoadGroupServiceChart(type) {
+        $.ajax({
+            url: "/Dashboard/Dashboard/GetGroupServiceChart",
+            type: "POST",
+            data: {
+                "Type": type,
+                "FromDate": function () { return $(".dashboard-filter #FromDate").val(); },
+                "ToDate": function () { return $(".dashboard-filter #ToDate").val(); }
+            },
+            success: function (result) {
+                var series = [], labels = [], groupIds = [];
+                for (var i = 0; i < result.data.length; i++) {
+                    series.push(result.data[i].Quantity);
+                    labels.push(result.data[i].Name);
+                    groupIds.push(result.data[i].GroupServiceID);
+                }
+
+                _renderApexPie(
+                    type == 1 ? 'gs-prj-chart' : 'gs-opp-chart',
+                    labels,
+                    series,
+                    function (event, chartContext, config) {
+                        var groupId = groupIds[config.dataPointIndex];
+                        if (type == 1) {
+                            detailProjectByGroupService(groupId);
+                        } else {
+                            detailOpportunityByGroupService(groupId);
+                        }
+                    });
+            },
+            error: function (xhr, status, error) {
+                console.log("Error: " + error);
+            }
+        });
+    }
+
+    $(function () {
+        LoadChart(1);
+        LoadChart(0);
+        LoadGroupServiceChart(1);
+        LoadGroupServiceChart(0);
+    });
+</script>

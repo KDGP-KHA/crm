@@ -1,9 +1,10 @@
-using Core.Cate.Models;
+﻿using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using TSFramework.Libs.Processors;
 
 namespace Core.Cate.Biz
@@ -18,6 +19,10 @@ namespace Core.Cate.Biz
         private readonly string _spProductGetBySalesID = "RM_DigitalSalesProduct_GetBySalesID";
         private readonly string _spProductSave = "RM_DigitalSalesProduct_Save";
         private readonly string _spProductDelete = "RM_DigitalSalesProduct_Delete";
+        private readonly string _spProductDetailSave = "RM_DigitalSalesProduct_SaveDetail";
+        private readonly string _spProductCostGetByProductID = "RM_DigitalSalesProductCost_GetByProductID";
+        private readonly string _spProductRevenueGetByProductID = "RM_DigitalSalesProductRevenue_GetByProductID";
+        private readonly string _spProductMemberGetByProductID = "RM_DigitalSalesProductMember_GetByProductID";
         private readonly string _spChangeStatus = "RM_DigitalSales_ChangeStatus";
         private readonly string _spTrackingGetBySalesID = "RM_DigitalSalesTracking_GetBySalesID";
         private readonly string _spTrackingSave = "RM_DigitalSalesTracking_Save";
@@ -34,6 +39,9 @@ namespace Core.Cate.Biz
         private readonly string _spActivityAdd = "RM_DigitalSalesActivity_Add";
         private readonly string _spActivityGetList = "RM_DigitalSalesActivity_GetList";
         private readonly string _spActivityDelete = "RM_DigitalSalesActivity_Delete";
+        private readonly string _spActivityUpdateLatestStatusChange = "RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments";
+        private readonly string _spGetDepartmentByUserID = "RM_DigitalSales_GetDepartmentByUserID";
+        private readonly string _spGetAccessibleEmployees = "RM_DigitalSales_GetAccessibleEmployees";
 
         public List<RM_DigitalSalesModel> LoadList(out int total, RM_DigitalSalesSearchModel model)
         {
@@ -69,7 +77,8 @@ namespace Core.Cate.Biz
                 model.PageSize <= 0 ? 20 : model.PageSize,
                 model.UserName,
                 model.IsKeyProject.HasValue && model.IsKeyProject.Value ? 1 : 0,
-                model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0
+                model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0,
+                string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim()
             );
 
             if (data != null && data.Count > 0)
@@ -243,6 +252,99 @@ namespace Core.Cate.Biz
             return result.GetValueOrDefault(0);
         }
 
+        public List<RM_DigitalSalesProductCostModel> GetProductCosts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductCostModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesProductCostModel>(
+                _spProductCostGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_DigitalSalesProductCostModel>();
+        }
+
+        public List<RM_DigitalSalesProductRevenueModel> GetProductRevenues(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductRevenueModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesProductRevenueModel>(
+                _spProductRevenueGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_DigitalSalesProductRevenueModel>();
+        }
+
+        public List<RM_DigitalSalesProductMemberModel> GetProductMembers(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductMemberModel>();
+            var members = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesProductMemberModel>(
+                _spProductMemberGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_DigitalSalesProductMemberModel>();
+
+            foreach (var member in members)
+            {
+                member.RoleIDs = string.IsNullOrWhiteSpace(member.RoleIDsText)
+                    ? new int[0]
+                    : member.RoleIDsText.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(value =>
+                        {
+                            int roleId;
+                            return int.TryParse(value.Trim(), out roleId) ? roleId : 0;
+                        })
+                        .Where(roleId => roleId > 0)
+                        .Distinct()
+                        .ToArray();
+            }
+
+            return members;
+        }
+
+        public int SaveProductDetail(RM_DigitalSalesProductModel model, string username)
+        {
+            if (model == null) return 0;
+
+            var costs = model.Costs ?? new List<RM_DigitalSalesProductCostModel>();
+            var revenues = model.Revenues ?? new List<RM_DigitalSalesProductRevenueModel>();
+
+            model.ActualRevenue = revenues.Sum(item => item.Amount ?? 0m) * 1000000m;
+
+            var costsXml = new XElement("Items",
+                costs.Select(item => new XElement("Item",
+                    new XAttribute("ID", item.SalesProductCostID),
+                    new XAttribute("CostTypeID", item.CostTypeID),
+                    new XAttribute("Amount", (item.Amount ?? 0m).ToString(CultureInfo.InvariantCulture)),
+                    item.PaymentDate.HasValue ? new XAttribute("PaymentDate", item.PaymentDate.Value.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)) : null,
+                    new XElement("Note", item.Note ?? string.Empty))));
+
+            var revenuesXml = new XElement("Items",
+                revenues.Select(item => new XElement("Item",
+                    new XAttribute("ID", item.SalesProductRevenueID),
+                    new XAttribute("Amount", (item.Amount ?? 0m).ToString(CultureInfo.InvariantCulture)),
+                    item.ReceivedDate.HasValue ? new XAttribute("ReceivedDate", item.ReceivedDate.Value.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)) : null,
+                    item.ReceivedTime.HasValue ? new XAttribute("ReceivedTime", item.ReceivedTime.Value.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)) : null,
+                    new XElement("Note", item.Note ?? string.Empty))));
+
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spProductDetailSave,
+                DATA_PROVIDER_NAME,
+                model.SalesProductID,
+                model.DigitalSalesID,
+                model.ProductServiceID,
+                model.ExpectedRevenue,
+                model.PackageName,
+                model.Quantity <= 0 ? 1 : model.Quantity,
+                model.StartDate,
+                model.EndDate,
+                model.Note,
+                costsXml.ToString(SaveOptions.DisableFormatting),
+                revenuesXml.ToString(SaveOptions.DisableFormatting),
+                "<Items />",
+                username
+            );
+
+            return result.GetValueOrDefault(0);
+        }
+
         public int DeleteProduct(int salesProductId, string username)
         {
             var result = AppProcessor.ProcedureProvider.Execute(
@@ -277,6 +379,15 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
+            if (list != null && list.Count > 0)
+            {
+                var parents = list.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
+                var children = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
+                foreach (var p in parents)
+                {
+                    p.TodoList = children.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.TrackingID).ToList();
+                }
+            }
             return list ?? new List<RM_DigitalSalesTrackingModel>();
         }
 
@@ -298,6 +409,24 @@ namespace Core.Cate.Biz
 
         public int SaveTracking(RM_DigitalSalesTrackingModel model, string username)
         {
+            // Nếu thêm tiến trình thực tế mới vào quy trình đang có placeholder rỗng, xóa placeholder đi
+            if (model.TrackingID <= 0 && model.ProcessID.HasValue && model.ProcessID.Value > 0 && !string.IsNullOrWhiteSpace(model.TaskName) && (!model.ParentID.HasValue || model.ParentID.Value <= 0))
+            {
+                try
+                {
+                    var existingTasks = GetTrackingTasks(model.DigitalSalesID);
+                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                    foreach (var ep in emptyPlaceholders)
+                    {
+                        DeleteTracking(ep.TrackingID, username);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+            }
+
             var result = AppProcessor.ProcedureProvider.Execute(
                 _spTrackingSave,
                 DATA_PROVIDER_NAME,
@@ -314,9 +443,72 @@ namespace Core.Cate.Biz
                 model.AttachmentFile,
                 model.IsCustomTask,
                 model.SortOrder,
-                username
+                username,
+                model.ParentID.HasValue ? (object)model.ParentID.Value : DBNull.Value,
+                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
+        }
+
+        public int ChangeProcessOfStatus(int digitalSalesId, int statusId, int newProcessId, string username)
+        {
+            if (digitalSalesId <= 0 || statusId <= 0 || newProcessId <= 0) return 0;
+
+            var currentTasks = GetTrackingTasks(digitalSalesId);
+            var oldTasks = currentTasks.Where(t => t.StatusID == statusId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+            foreach (var ot in oldTasks)
+            {
+                DeleteTracking(ot.TrackingID, username);
+            }
+
+            var progressList = new RM_DigitalSalesWorkflowBiz().GetProgressesByProcess(newProcessId);
+            if (progressList != null && progressList.Count > 0)
+            {
+                int sort = 1;
+                foreach (var pg in progressList.OrderBy(p => p.SortOrder))
+                {
+                    int duration = pg.DefaultDurationDays > 0 ? pg.DefaultDurationDays : 3;
+                    var task = new RM_DigitalSalesTrackingModel
+                    {
+                        TrackingID = 0,
+                        DigitalSalesID = digitalSalesId,
+                        ProcessID = newProcessId,
+                        ProgressID = pg.ProgressID,
+                        TaskName = pg.ProgressName,
+                        DurationDays = duration,
+                        DefaultDurationDays = duration,
+                        StartDate = DateTime.Now,
+                        Deadline = DateTime.Now.AddDays(duration),
+                        Status = 1,
+                        IsCustomTask = false,
+                        SortOrder = sort++
+                    };
+                    SaveTracking(task, username);
+                }
+            }
+            else
+            {
+                // Nếu quy trình được chọn chưa có tiến trình mẫu nào, lưu 1 bản ghi tiến trình rỗng
+                // để giữ quy trình hiển thị trên bảng Checklist và cho phép bấm "Thêm tiến trình"
+                var emptyTask = new RM_DigitalSalesTrackingModel
+                {
+                    TrackingID = 0,
+                    DigitalSalesID = digitalSalesId,
+                    ProcessID = newProcessId,
+                    ProgressID = null,
+                    TaskName = string.Empty,
+                    DurationDays = 3,
+                    DefaultDurationDays = 3,
+                    StartDate = DateTime.Now,
+                    Deadline = DateTime.Now.AddDays(3),
+                    Status = 1,
+                    IsCustomTask = true,
+                    SortOrder = 1
+                };
+                SaveTracking(emptyTask, username);
+            }
+
+            return 1;
         }
 
         public int DeleteTracking(int trackingId, string username)
@@ -449,6 +641,77 @@ namespace Core.Cate.Biz
 
             if (list != null && list.Count > 0)
             {
+                if (!activityType.HasValue)
+                {
+                    // Lọc bỏ hoàn toàn các hoạt động checklist (3, 4, 5) khỏi dòng thảo luận/hoạt động
+                    list = list.Where(a => a.ActivityType != 3 && a.ActivityType != 4 && a.ActivityType != 5).ToList();
+                }
+
+                foreach (var item in list)
+                {
+                    item.Content = FixVietnameseMojibake(item.Content);
+                    item.ActionByName = FixVietnameseMojibake(item.ActionByName);
+
+                    if (!string.IsNullOrWhiteSpace(item.Attachments))
+                    {
+                        try
+                        {
+                            if (item.Attachments.TrimStart().StartsWith("["))
+                            {
+                                item.AttachmentList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ActivityAttachmentItem>>(item.Attachments) ?? new List<ActivityAttachmentItem>();
+                            }
+                            else
+                            {
+                                var parts = item.Attachments.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var p in parts)
+                                {
+                                    var trimmed = p?.Trim();
+                                    if (string.IsNullOrEmpty(trimmed)) continue;
+                                    var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                    item.AttachmentList.Add(new ActivityAttachmentItem
+                                    {
+                                        FileName = System.IO.Path.GetFileName(trimmed),
+                                        FilePath = trimmed,
+                                        Extension = ext,
+                                        IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)
+                                    });
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore parse error
+                        }
+                    }
+                }
+            }
+
+            return list ?? new List<RM_DigitalSalesActivityModel>();
+        }
+
+        public List<RM_DigitalSalesActivityModel> GetActivitiesByTrackingID(int digitalSalesId, int trackingId)
+        {
+            if (digitalSalesId <= 0 || trackingId <= 0) return new List<RM_DigitalSalesActivityModel>();
+            List<RM_DigitalSalesActivityModel> list = null;
+            try
+            {
+                list = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesActivityModel>(
+                    _spActivityGetList,
+                    DATA_PROVIDER_NAME,
+                    digitalSalesId,
+                    DBNull.Value
+                );
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return new List<RM_DigitalSalesActivityModel>();
+            }
+
+            if (list != null && list.Count > 0)
+            {
+                list = list.Where(a => a.ReferenceID == trackingId).OrderByDescending(a => a.ActionDate).ToList();
+
                 foreach (var item in list)
                 {
                     item.Content = FixVietnameseMojibake(item.Content);
@@ -519,6 +782,38 @@ namespace Core.Cate.Biz
                 username
             );
             return result.GetValueOrDefault(0);
+        }
+
+        public int UpdateLatestStatusChangeActivityAttachments(int digitalSalesId, string attachmentsJson, string username)
+        {
+            if (digitalSalesId <= 0 || string.IsNullOrWhiteSpace(attachmentsJson)) return 0;
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spActivityUpdateLatestStatusChange,
+                DATA_PROVIDER_NAME,
+                digitalSalesId,
+                attachmentsJson,
+                username
+            );
+            return result.GetValueOrDefault(0);
+        }
+
+        public int? GetDepartmentByUserID(int userId)
+        {
+            if (userId <= 0) return null;
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spGetDepartmentByUserID,
+                DATA_PROVIDER_NAME,
+                userId);
+            return (result.HasValue && result.Value > 0) ? result.Value : (int?)null;
+        }
+
+        public List<RM_DigitalSalesUserModel> GetAccessibleEmployees(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName)) return new List<RM_DigitalSalesUserModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesUserModel>(
+                _spGetAccessibleEmployees,
+                DATA_PROVIDER_NAME,
+                userName.Trim()) ?? new List<RM_DigitalSalesUserModel>();
         }
 
         private static readonly Dictionary<char, byte> _win1252Map = new Dictionary<char, byte>()

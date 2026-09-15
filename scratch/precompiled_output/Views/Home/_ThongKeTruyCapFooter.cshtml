@@ -1,0 +1,28 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Log.Models.Log_ReportRequestSiteTotalModel
+
+<div class="col-lg-3 col-md-6">
+    <h3 class="text-dark-tp3 text-95 text-600 mb-3 modtitle text-uppercase">@AppProcessor.Messagor.GetMessage("AppFooter_ThongKe_Title")</h3>
+    <table>
+        <tr>
+            <td class="text-nowrap"><i class="fa fa-user mr-2"></i><span>@AppProcessor.Messagor.GetMessage("CurrentAccess_Label"):</span></td>
+            <td class="text-nowrap pl-2"><span class="float-right font-bold">@Model.OnlineNumber</span></td>
+        </tr>
+        <tr>
+            <td class="text-nowrap"><i class="fa fa-user mr-2"></i><span>@AppProcessor.Messagor.GetMessage("Today_Label"):</span></td>
+            <td class="text-nowrap pl-2"><span class="float-right font-bold">@Model.TodayNumber</span></td>
+        </tr>
+        <tr>
+            <td class="text-nowrap"><i class="fa fa-user mr-2"></i><span>@AppProcessor.Messagor.GetMessage("Month_Label") @DateTime.Now.ToString("MM"):</span></td>
+            <td class="text-nowrap pl-2"><span class="float-right font-bold">@Model.MonthNumber</span></td>
+        </tr>
+        <tr>
+            <td class="text-nowrap"><i class="fa fa-user mr-2"></i><span>@AppProcessor.Messagor.GetMessage("Year_Label") @DateTime.Now.ToString("yyyy"):</span></td>
+            <td class="text-nowrap pl-2"><span class="float-right font-bold">@Model.YearNumber</span></td>
+        </tr>
+    </table>
+    @*<div><i class="fa fa-user mr-2"></i><label>Lượt truy cập hiện tại:</label><span class="float-right font-bold">8</span></div>
+        <div><i class="fa fa-user mr-2"></i><label>Hôm nay:</label><span class="float-right font-bold">424</span></div>
+        <div><i class="fa fa-user mr-2"></i><label>Tháng @DateTime.Now.ToString("MM"):</label><span class="float-right font-bold">27180</span></div>
+        <div><i class="fa fa-user mr-2"></i><label>Năm @DateTime.Now.ToString("yyyy"):</label><span class="float-right font-bold">69642</span></div>*@
+</div>

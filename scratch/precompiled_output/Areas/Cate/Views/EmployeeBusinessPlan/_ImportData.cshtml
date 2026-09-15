@@ -1,0 +1,30 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = "Tải lên tập tin import";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-upload"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("ImportData", "EmployeeBusinessPlan", FormMethod.Post, new { area = "Cate", encType = "multipart/form-data", @class = "form-horizontal", id = "ImportData" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ImportDataView")
+        </div>
+    }
+    <!-- xử lý sau khi submit -->
+    <script type="text/javascript">
+        $('form#ImportData').ajaxForm({
+            success: function (response) {
+                ImportEmployeeBusinessPlan_OnProcessSuccess(response, 'ImportData');
+            }
+        });
+    </script>
+}

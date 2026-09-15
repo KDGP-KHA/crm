@@ -1,0 +1,172 @@
+﻿@using TSFramework.Libs.Processors
+@model List<Core.Cate.Models.RM_ContractsModel>
+
+@{
+    var productProjectId = ViewData["ProductProjectID"];
+}
+
+<style>
+    .contract-paper .contract-header,
+    .contract-paper .contract-body {
+        font-family: "Times New Roman", serif;
+    }
+    .contract-paper {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        height: 100%;
+        position: relative;
+    }
+
+    .contract-header {
+        border-bottom: 1px solid #ccc;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .contract-title {
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+
+    .contract-name {
+        font-size: 18px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .contract-code {
+        font-size: 12px;
+    }
+
+    .contract-body p {
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .contract-money {
+        padding-left: 15px;
+    }
+
+    .contract-money .total {
+        font-weight: bold;
+        color: #000;
+    }
+
+    .contract-footer {
+        border-top: 1px dashed #ccc;
+        margin-top: 15px;
+        padding-top: 10px;
+    }
+</style>
+
+@Html.Button(true, "AddContracts", Url.Action("Add", "RM_Contracts", new { area = "Cate", id = productProjectId }), "<i class='fa fa-plus'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right mb-3", data_width = "1024px" })
+
+<div class="row">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="contract-paper">
+                    <!-- Header -->
+                    <div class="contract-header text-center">
+                        <div class="contract-title">
+                            HỢP ĐỒNG
+                        </div>
+                        <div class="contract-name">
+                            @item.ContractName
+                        </div>
+                        <div class="contract-code text-muted">
+                            Số: @item.ContractCode
+                        </div>
+                    </div>
+                    <!-- Body -->
+                    <div class="contract-body">
+                        <p>
+                            <strong>Khách hàng:</strong> @item.CustomerName
+                        </p>
+                        <p>
+                            <strong>Dịch vụ:</strong> @item.NameProduct
+                        </p>
+                        <p>
+                            <strong>Thời gian thực hiện:</strong><br />
+                            Từ ngày @(item.StartDate?.ToString("dd/MM/yyyy") ?? "--")
+                            đến ngày @(item.EndDate?.ToString("dd/MM/yyyy") ?? "--")
+                        </p>
+                        <p>
+                            <strong>Ngày ký:</strong>
+                            @(item.SignDate?.ToString("dd/MM/yyyy") ?? "--")
+                        </p>  
+                        <p>
+                            <strong>Định kì xuất hóa đơn:</strong>
+                            @item.CycleName
+                        </p>
+                        <hr />
+                        <p><strong>Giá trị hợp đồng:</strong></p>
+                        <ul class="contract-money">
+                            <li>Trước VAT: @item.ContractValue.ToString("N0") triệu VNĐ</li>
+                            <li>
+                                VAT (@item.VAT %):
+                                @((item.ContractValue * item.VAT / 100.0).ToString("N0")) triệu VNĐ
+                            </li>
+                            <li class="total">Tổng: @item.TotalAmount.ToString("N0") triệu VNĐ</li>
+                        </ul>
+                        <!-- Hiển thị danh sách file đính kèm -->
+                        @if (item.ExistingFiles != null && item.ExistingFiles.Any())
+                        {
+                            <div class="mt-2">
+                                <div class="font-weight-bold mb-2">File đính kèm:</div>
+
+                                @foreach (var file in item.ExistingFiles)
+                                {
+                                    var fileName = System.IO.Path.GetFileName(file.FilePath);
+
+                                    <div class="mb-2">
+                                        <a href="@file.FilePath"
+                                           target="_blank"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-download mr-1"></i>
+                                            @fileName
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Không có file đính kèm</p>
+                        }
+                    </div>
+                    <!-- Footer -->
+                    <div class="contract-footer text-right">
+                        @Html.Button(true, "ListRM_Invoices",
+                                    Url.Action("GetByContract", "Invoices", new { area = "Cate", ContractID = item.ContractID }),
+                                    "<i class='fas fa-file-invoice-dollar'></i>", "Danh sách hóa đơn",
+                                    new { @class = "btn btn-sm btn-green mb-1", data_width = "1024px" })
+
+                        @Html.Button(true, "EditContracts",
+                                      Url.Action("Edit", "RM_Contracts", new { area = "Cate", id = item.ContractID }),
+                                      "<i class='fa fa-edit'></i>", "Sửa",
+                                      new { @class = "btn btn-sm btn-primary mb-1", data_width = "1024px" })
+
+                        @Html.Button(true, "DeleteContracts",
+                                      Url.Action("Delete", "RM_Contracts", new { area = "Cate", id = item.ContractID }),
+                                      "<i class='fa fa-trash'></i>", "Xóa",
+                                      new { @class = "btn btn-sm btn-danger mb-1" })
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                Chưa có hợp đồng nào.
+            </div>
+        </div>
+    }
+</div>

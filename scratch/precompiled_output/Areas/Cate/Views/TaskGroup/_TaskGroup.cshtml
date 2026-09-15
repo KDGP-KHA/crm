@@ -1,0 +1,23 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_TaskGroupModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.TaskGroupID)
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.TaskGroupCode, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextBoxFor(m => m.TaskGroupCode,
+                 new { @class = "form-control", maxlength = "150", placeholder = AppProcessor.Messagor.GetMessage("TaskGroup_Code_Label") })
+        @Html.ValidationMessageFor(m => m.TaskGroupCode, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(model => model.TaskGroupName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextBoxFor(m => m.TaskGroupName,
+                 new { @class = "form-control", maxlength = "255", placeholder = AppProcessor.Messagor.GetMessage("TaskGroup_Name_Label") })
+        @Html.ValidationMessageFor(m => m.TaskGroupName, "", new { @class = "text-danger" })
+    </div>
+</div>

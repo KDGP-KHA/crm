@@ -1,83 +1,120 @@
-﻿@using TSFramework.Libs.Processors
+﻿@using System.Web
+@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesChangeStatusViewModel
 
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_ChangeStatusModal.css?v=@DateTime.Now.Ticks" />
+
 <div class="modal fade" id="modalChangeStatus" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header bgc-warning-d2 text-white">
-                <h5 class="modal-title text-110">
-                    <i class="fa fa-exchange-alt mr-1"></i> Chuyển Trạng thái Hồ sơ Kinh doanh Số
+    <div class="modal-dialog modal-dialog-centered modal-dialog-status-custom" role="document">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <div class="modal-header bgc-warning-d2 text-white py-25 px-3">
+                <h5 class="modal-title text-110 font-weight-bold">
+                    <i class="fa fa-exchange-alt mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_Title")
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-
-            <form id="frmChangeStatus" method="post" enctype="multipart/form-data" novalidate="novalidate">
-                <div class="modal-body" id="bodyForm">
-                    @Html.AntiForgeryToken()
-                    @Html.HiddenFor(m => m.DigitalSalesID)
-
-                    <div class="card bgc-grey-l4 border-1 brc-grey-m4 p-2 mb-3">
-                        <div class="text-90 mb-1">
-                            <span class="text-secondary">Hồ sơ:</span>
-                            <strong class="text-dark">@Model.Title</strong>
-                        </div>
-                        <div class="text-90">
-                            <span class="text-secondary">Loại hình hiện tại:</span>
-                            <span class="badge @(Model.CurrentBusinessType == 1 ? "badge-primary" : "badge-success")">
-                                @(Model.CurrentBusinessType == 1 
-                                    ? AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity") 
-                                    : (Model.CurrentBusinessType == 2 
-                                        ? AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project") 
-                                        : Model.CurrentBusinessTypeName))
-                            </span>
-                            <span class="mx-1 text-secondary">➔</span>
-                            <span class="text-secondary">Trạng thái:</span>
-                            <span class="badge badge-info font-weight-bold">
-                                @Model.CurrentStatusName
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-warning py-2 px-3 mb-3 text-85" id="alertProjectRequirement">
-                        <i class="fa fa-exclamation-triangle mr-1 text-warning-d2"></i>
-                        <strong>Lưu ý khi chuyển sang DỰ ÁN:</strong>
-                        <ul class="mb-0 pl-3">
-                            <li>Bắt buộc phải có ít nhất 1 <strong>Sản phẩm / Dịch vụ số</strong> (kèm doanh thu).</li>
-                            <li>Bắt buộc phải có ít nhất 1 <strong>Thành viên tham gia dự án</strong>.</li>
-                        </ul>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        @Html.TitleFor(m => m.NewStatusID, new { @class = "text-85 text-600 mb-1 d-block font-bold" })
-                        @Html.DropDownListFor(m => m.NewStatusID, Model.AvailableStatuses, "-- Chọn trạng thái mới --", new { @class = "form-control form-control-sm select2", id = "cboNewStatusID" })
-                        @Html.ValidationMessageFor(m => m.NewStatusID, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
-                    </div>
-
-                    <div class="form-group mb-3">
-                        @Html.TitleFor(m => m.AttachmentPath, new { @class = "text-85 text-600 mb-1 d-block font-bold" })
-                        <input type="file" name="attachmentFile" class="form-control-file border p-1 rounded" />
-                        <small class="text-muted">Đính kèm file minh chứng cho việc chuyển trạng thái (nếu có)</small>
-                    </div>
-
-                    <div class="form-group mb-2">
-                        @Html.TitleFor(m => m.Note, new { @class = "text-85 text-600 mb-1 d-block font-bold" })
-                        @Html.TextAreaFor(m => m.Note, 3, 50, new { @class = "form-control form-control-sm", id = "txtChangeStatusNote", placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatusNote_Placeholder") })
-                        @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
-                        <small class="text-muted text-80 d-block mt-1">
-                            <i class="fa fa-info-circle mr-1 text-primary"></i> Ghi nhận vào Dòng thời gian (Timeline) của hồ sơ; không thay đổi Mô tả chi tiết nhu cầu / Ghi chú dịch vụ số.
-                        </small>
-                    </div>
+            @using (Html.BeginForm("ChangeStatus", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmChangeStatus", enctype = "multipart/form-data" }))
+            {
+                <div class="modal-body p-3" id="bodyForm">
+                    @Html.Partial("_ChangeStatusForm", Model)
                 </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-sm btn-warning font-weight-bold text-dark">
-                        <i class="fa fa-check mr-1"></i> Xác nhận chuyển
+                <div class="modal-footer bgc-grey-l5 py-2 px-3">
+                    <button type="button" class="btn btn-sm btn-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Cancel")
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-warning font-weight-bold text-dark px-4 radius-1 shadow-sm">
+                        <i class="fa fa-check mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_ChangeStatus_Confirm_Button")
                     </button>
                 </div>
-            </form>
+            }
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    window.initDigitalSalesChangeStatusForm = function () {
+        var $modal = $('#modalChangeStatus'), $form = $('#frmChangeStatus');
+        if ($.fn.select2) {
+            $modal.find('.select2').select2({ width: '100%', dropdownParent: $modal });
+        }
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData('validator').removeData('unobtrusiveValidation');
+            $.validator.unobtrusive.parse($form);
+        }
+        if ($.validator) {
+            var valObj = $form.data('validator');
+            if (valObj) {
+                valObj.settings.ignore = ":hidden:not(#TrackingItemsJson, #SelectedProcessID), #progressItemsContainer *";
+            }
+        }
+
+        // Lắng nghe sự kiện đổi trạng thái từ Select2 và dropdown
+        $('#cboNewStatus').off('change.statusWorkflow').on('change.statusWorkflow', function () {
+            if (typeof handleNewStatusChange === 'function') {
+                handleNewStatusChange($(this).val());
+            }
+        });
+
+        // Nếu đã có trạng thái được chọn sẵn, kích hoạt nạp quy trình
+        var initialStatus = $('#cboNewStatus').val();
+        if (initialStatus && parseInt(initialStatus) > 0) {
+            if (typeof handleNewStatusChange === 'function') {
+                handleNewStatusChange(initialStatus);
+            }
+        }
+    };
+
+    initDigitalSalesChangeStatusForm();
+
+    $('#frmChangeStatus').off('submit.digitalSales').on('submit.digitalSales', function (e) {
+        e.preventDefault();
+        var $form = $(this);
+
+        // 1. Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi kiểm tra form
+        if (typeof serializeProgressItemsToJson === 'function') {
+            if (!serializeProgressItemsToJson()) {
+                return false;
+            }
+        }
+
+        // 2. Kiểm tra tính hợp lệ của các trường form chính
+        if ($form.valid && !$form.valid()) return false;
+
+        var $button = $form.find('button[type=submit]').prop('disabled', true);
+        var data = new FormData(this);
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: data,
+            contentType: false,
+            processData: false
+        }).done(function (response) {
+            $button.prop('disabled', false);
+            if (typeof response === 'string') {
+                $('#modalChangeStatus #bodyForm').html(response);
+                initDigitalSalesChangeStatusForm();
+                return;
+            }
+            if (response.status) {
+                $('#modalChangeStatus').modal('hide');
+                executeResponseMessage(response.message, '', true);
+                if (typeof reloadStatusAndTimelineSection === 'function') reloadStatusAndTimelineSection(@Model.DigitalSalesID);
+                if (typeof reloadOverviewAndMetrics === 'function') reloadOverviewAndMetrics(@Model.DigitalSalesID);
+                if (typeof reloadTrackingSection === 'function') reloadTrackingSection(@Model.DigitalSalesID);
+                if (typeof reloadDiscussionsSection === 'function') reloadDiscussionsSection(@Model.DigitalSalesID);
+            } else {
+                executeResponseMessage(response.message, '', false);
+            }
+        }).fail(function () {
+            $button.prop('disabled', false);
+            executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false);
+        });
+
+        return false;
+    });
+})();
+</script>

@@ -1,0 +1,20 @@
+﻿﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerAnniversaryModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("Anniversary_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+@section FormType{ danger }
+@section FormBody{
+    @using (Ajax.BeginForm("DeleteAnniversary", "Customer", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess  = "Anniversary_OnProcessSuccess(data, 'DeleteCustomerAnniversary')"
+    }, new { @class = "form-horizontal", id = "DeleteCustomerAnniversary" }))
+    {
+        @Html.HiddenFor(model => model.CustomerAnniversaryId)
+        @Html.HiddenFor(model => model.CustomerID)
+        @Html.HiddenFor(model => model.CustomerName)
+        <h5>@Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

@@ -1,0 +1,58 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_GroupServiceModel
+
+@Html.AntiForgeryToken()
+
+<div id="Language">
+
+    @Html.HiddenFor(model => model.GroupServiceID)
+
+    <!-- Name -->
+    <div class="form-group row">
+        @Html.TitleFor(model => model.NameGroup, new { @class = "col-sm-3 col-form-label text-sm-left pr-0 font-bold" })
+
+        <div class="col-sm-9">
+            @Html.TextBoxFor(model => model.NameGroup,
+                new
+                {
+                    @class = "form-control",
+                    placeholder = AppProcessor.Messagor.GetMessage("GroupService_Name_Label")
+                })
+        </div>
+    </div>
+
+    <!-- Parent Group -->
+    <div class="form-group row">
+
+        <label class="col-sm-3 col-form-label text-sm-left pr-0 font-bold">
+            @AppProcessor.Messagor.GetMessage("ParentGroupService_label")
+        </label>
+
+        <div class="col-sm-9">
+            @Html.DropDownListFor(
+                m => m.ParentGroupServiceID,
+                ViewBag.ParentList as List<SelectListItem>,
+                "-- Chọn nhóm cha --",
+                new { @class = "form-control" }
+            )
+        </div>
+
+    </div>
+
+    <!-- Active -->
+    <div class="form-group row">
+
+        <div class="col-sm-3"></div>
+
+        <div class="col-sm-9">
+            <div class="form-check">
+                @Html.CheckBoxFor(model => model.IsActived, new { @class = "form-check-input" })
+
+                @Html.LabelFor(model => model.IsActived,
+                    new { @class = "form-check-label font-bold ml-1" })
+            </div>
+        </div>
+
+    </div>
+
+</div>

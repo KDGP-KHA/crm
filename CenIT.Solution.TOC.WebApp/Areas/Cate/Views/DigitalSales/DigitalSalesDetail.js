@@ -1,4 +1,4 @@
-window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -20,6 +20,24 @@ var _detailUrls = {
     saveTracking: "/Cate/DigitalSales/SaveTracking",
     updateTrackingStatus: "/Cate/DigitalSales/UpdateTrackingStatus",
     deleteTracking: "/Cate/DigitalSales/DeleteTracking",
+    changeProcessModal: "/Cate/DigitalSales/ChangeProcessModal",
+    saveChangeProcess: "/Cate/DigitalSales/SaveChangeProcess",
+    addTodoModal: "/Cate/DigitalSales/AddTodoModal",
+    editTodoModal: "/Cate/DigitalSales/EditTodoModal",
+    saveTodo: "/Cate/DigitalSales/SaveTodo",
+    confirmTracking: "/Cate/DigitalSales/ConfirmTracking",
+    unlockTracking: "/Cate/DigitalSales/UnlockTracking",
+    trackingLogsModal: "/Cate/DigitalSales/GetTrackingLogsModal",
+    unlockProgressModal: "/Cate/DigitalSales/UnlockProgressModal",
+    submitUnlockProgress: "/Cate/DigitalSales/SubmitUnlockProgress",
+    reportTrackingModal: "/Cate/DigitalSales/ReportTrackingModal",
+    saveTrackingReport: "/Cate/DigitalSales/SaveTrackingReport",
+    importProgressModal: "/Cate/DigitalSales/ImportProgressModal",
+    previewImportProgress: "/Cate/DigitalSales/PreviewImportProgress",
+    confirmImportProgress: "/Cate/DigitalSales/ConfirmImportProgress",
+    importTodoModal: "/Cate/DigitalSales/ImportTodoModal",
+    previewImportTodo: "/Cate/DigitalSales/PreviewImportTodo",
+    confirmImportTodo: "/Cate/DigitalSales/ConfirmImportTodo",
 
     uploadAttachment: "/Cate/DigitalSales/UploadAttachment",
     deleteAttachment: "/Cate/DigitalSales/DeleteAttachment",
@@ -38,6 +56,41 @@ var _detailUrls = {
     deleteDiscussion: "/Cate/DigitalSales/DeleteDiscussion",
     getMembersForMention: "/Cate/DigitalSales/GetMembersForMention"
 };
+
+function reloadDigitalSalesReviewHistory() {
+    $("#reviewHistoryContainer").load(_urlReloadReviewHistory + "?id=" + _currentDigitalSalesId, function () {
+        var count = $("#reviewHistoryContainer .review-history-timeline .border-l-3.bgc-secondary-l4").length;
+        $("#badgeTabReviewHistory").text(count);
+    });
+}
+
+function ReviewHistory_OnProcessSuccess(response, formId) {
+    var $modal = $("#ModalContent #modal_" + formId);
+    if (response.status === undefined) {
+        $modal.find("#bodyForm").html(response);
+        var $form = $modal.find("form");
+        if ($.validator && $.validator.unobtrusive) {
+            $form.removeData("validator").removeData("unobtrusiveValidation");
+            $.validator.unobtrusive.parse($form);
+        }
+        return;
+    }
+
+    if (response.status !== true) {
+        executeResponseMessage(response.message, null, false);
+        response.status = undefined;
+        return;
+    }
+
+    $modal.one("hidden.bs.modal", function () {
+        executeResponseMessage(response.message, null, true);
+        reloadDigitalSalesReviewHistory();
+        response.status = undefined;
+    });
+    $modal.modal("hide");
+}
+
+window.ReviewHistory_OnProcessSuccess = ReviewHistory_OnProcessSuccess;
 
 function executeResponseMessage(message, defaultText, isSuccess) {
     if (!message && defaultText) {
@@ -224,8 +277,8 @@ function updateHeaderInfo(businessType, statusName, title, code) {
                     .html('<i class="fa fa-lightbulb mr-1"></i>Cơ hội kinh doanh');
             }
         }
-        $("#lblKeyProject").text(isProject ? "Dự án trọng điểm" : "Cơ hội trọng điểm");
-        $("#lblFollowSales").text(isProject ? "Quan tâm dự án" : "Quan tâm cơ hội");
+        $("#lblKeyProject").text("Trọng điểm");
+        $("#lblFollowSales").text("Đang quan tâm");
     }
 
     if (statusName) {
@@ -477,6 +530,13 @@ function openChangeStatusModal(id) {
                 return false;
             }
 
+            // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+            if (typeof serializeProgressItemsToJson === "function") {
+                if (!serializeProgressItemsToJson()) {
+                    return false;
+                }
+            }
+
             var $btnSubmit = $form.find("button[type='submit']");
             var origBtnHtml = $btnSubmit.html();
             $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
@@ -490,6 +550,11 @@ function openChangeStatusModal(id) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesChangeStatusForm === "function") initDigitalSalesChangeStatusForm();
+                        return;
+                    }
                     if (res.status) {
                         $modal.modal("hide");
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
@@ -499,6 +564,7 @@ function openChangeStatusModal(id) {
                         reloadStatusAndTimelineSection(id);
                         reloadOverviewAndMetrics(id);
                         reloadTrackingSection(id);
+                        reloadDiscussionsSection(id);
                     } else {
                         executeResponseMessage(res.message, "Không thể chuyển trạng thái!", false);
                     }
@@ -513,6 +579,168 @@ function openChangeStatusModal(id) {
 }
 
 /* ================= 3. Sản phẩm / Dịch vụ số (Tab 2) ================= */
+function parseDigitalSalesProductNumber(value) {
+    var normalized = String(value || "").trim().replace(/\s/g, "");
+    if (normalized.indexOf(",") >= 0) {
+        normalized = normalized.replace(/\./g, "").replace(",", ".");
+    }
+    var parsed = parseFloat(normalized);
+    return isNaN(parsed) ? 0 : parsed;
+}
+
+function formatDigitalSalesProductNumber(value) {
+    return Number(value || 0).toLocaleString("vi-VN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function updateDigitalSalesProductEmptyStates($form) {
+    ["cost", "revenue"].forEach(function (type) {
+        var hasRows = $form.find('[data-detail-row="' + type + '"]').length > 0;
+        $form.find('[data-empty-state="' + type + '"]').toggleClass("d-none", hasRows);
+    });
+}
+
+function updateDigitalSalesProductFinanceSummary($form) {
+    var expected = parseDigitalSalesProductNumber($form.find(".js-expected-revenue").val());
+    var revenue = 0;
+    var cost = 0;
+    $form.find(".js-revenue-amount").each(function () { revenue += parseDigitalSalesProductNumber($(this).val()); });
+    $form.find(".js-cost-amount").each(function () { cost += parseDigitalSalesProductNumber($(this).val()); });
+    $form.find('[data-finance-summary="expected"]').text(formatDigitalSalesProductNumber(expected));
+    $form.find('[data-finance-summary="revenue"]').text(formatDigitalSalesProductNumber(revenue));
+    $form.find('[data-finance-summary="cost"]').text(formatDigitalSalesProductNumber(cost));
+    $form.find('[data-finance-summary="profit"]').text(formatDigitalSalesProductNumber(revenue - cost));
+}
+
+function initDigitalSalesProductControls($scope, $modal) {
+    if ($.fn.select2) {
+        $scope.find(".product-service-select, .product-detail-select").filter(function () {
+            return !$(this).closest("#productDetailTemplates").length;
+        }).each(function () {
+            var $select = $(this);
+            if ($select.data("select2")) $select.select2("destroy");
+            $select.select2({ width: "100%", dropdownParent: $modal });
+            if ($select.hasClass("product-detail-select-sm")) {
+                $select.next(".select2-container").addClass("product-detail-select-container-sm");
+            }
+        });
+    }
+
+    if ($.fn.datepicker) {
+        $scope.find(".product-date-input").filter(function () {
+            return !$(this).closest("#productDetailTemplates").length;
+        }).each(function () {
+            var $input = $(this);
+            $input.off("click.digitalSalesProductDate");
+            try { $input.datepicker("destroy"); } catch (ignore) { }
+            $input.datepicker({
+                autoclose: true,
+                format: "dd/mm/yyyy",
+                todayHighlight: true,
+                todayBtn: true,
+                weekStart: 1,
+                language: "vi",
+                orientation: "auto"
+            });
+            $input.on("click.digitalSalesProductDate", function () { $(this).datepicker("show"); });
+        });
+    }
+}
+
+function scrollDigitalSalesProductRowIntoView($row) {
+    var row = $row.get(0);
+    if (!row) return;
+    window.setTimeout(function () {
+        try {
+            row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch (error) {
+            row.scrollIntoView(false);
+        }
+    }, 0);
+}
+
+window.initDigitalSalesProductRuntimeForm = function () {
+    var $modal = $("#modalProduct");
+    var $form = $("#frmProductModal");
+    if (!$form.length) return;
+
+    $form.find("#productDetailTemplates :input").prop("disabled", true);
+    initDigitalSalesProductControls($form, $modal);
+    if ($.validator && $.validator.unobtrusive) {
+        $form.removeData("validator").removeData("unobtrusiveValidation");
+        $.validator.unobtrusive.parse($form);
+    }
+
+    $form.off("click.productRows", "[data-add-row]").on("click.productRows", "[data-add-row]", function () {
+        var type = $(this).data("add-row");
+        var token = type + Date.now().toString() + Math.floor(Math.random() * 1000).toString();
+        var template = $form.find('#productDetailTemplates [data-template-row="' + type + '"]').prop("outerHTML");
+        if (!template) return;
+        template = template.replace(/__index__/g, token).replace('data-template-row="' + type + '"', 'data-detail-row="' + type + '"');
+        var target = type === "cost" ? "#productCostRows" : "#productRevenueRows";
+        var $row = $(template).appendTo($form.find(target));
+        $row.find(":input").prop("disabled", false);
+        initDigitalSalesProductControls($row, $modal);
+        updateDigitalSalesProductEmptyStates($form);
+        updateDigitalSalesProductFinanceSummary($form);
+        scrollDigitalSalesProductRowIntoView($row);
+    });
+
+    $form.off("click.removeProductRow", "[data-remove-row]").on("click.removeProductRow", "[data-remove-row]", function () {
+        var $row = $(this).closest("[data-detail-row]");
+        $row.find(".product-detail-select").each(function () { if ($(this).data("select2")) $(this).select2("destroy"); });
+        $row.remove();
+        updateDigitalSalesProductEmptyStates($form);
+        updateDigitalSalesProductFinanceSummary($form);
+    });
+
+    $form.off("input.productFinance change.productFinance", ".js-expected-revenue, .js-cost-amount, .js-revenue-amount")
+        .on("input.productFinance change.productFinance", ".js-expected-revenue, .js-cost-amount, .js-revenue-amount", function () {
+            updateDigitalSalesProductFinanceSummary($form);
+        });
+
+    $form.off("submit.digitalSales").off("submit.digitalSalesProductRuntime").on("submit.digitalSalesProductRuntime", function (event) {
+        event.preventDefault();
+        if ($form.valid && !$form.valid()) return false;
+
+        var salesId = Number($form.find('[name="DigitalSalesID"]').val()) || _currentDigitalSalesId;
+        var $button = $form.find('button[type="submit"]');
+        var originalButtonHtml = $button.data("original-html") || $button.html();
+        $button.data("original-html", originalButtonHtml).prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Đang lưu...');
+
+        $.post($form.attr("action"), $form.serialize()).done(function (response) {
+            $button.prop("disabled", false).html(originalButtonHtml);
+            if (typeof response === "string") {
+                $("#modalProduct #bodyForm").html(response);
+                window.initDigitalSalesProductRuntimeForm();
+                var validationMessage = $("#modalProduct .text-danger:visible").first().text();
+                if (validationMessage) executeResponseMessage(validationMessage, validationMessage, false);
+                return;
+            }
+
+            if (response.status) {
+                var completed = false;
+                var onClosed = function () {
+                    if (completed) return;
+                    completed = true;
+                    executeResponseMessage(response.message, "", true);
+                    reloadProductsSection(salesId);
+                };
+                $modal.one("hidden.bs.modal", onClosed).modal("hide");
+                window.setTimeout(onClosed, 500);
+            } else {
+                executeResponseMessage(response.message, "", false);
+            }
+        }).fail(function () {
+            $button.prop("disabled", false).html(originalButtonHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+        });
+        return false;
+    });
+
+    updateDigitalSalesProductEmptyStates($form);
+    updateDigitalSalesProductFinanceSummary($form);
+};
+
 function openAddProductModal(salesId) {
     if (typeof _onWaiting === "function") _onWaiting();
     $.get(_detailUrls.addProductModal, { digitalSalesId: salesId })
@@ -520,9 +748,9 @@ function openAddProductModal(salesId) {
             if (typeof _endWaiting === "function") _endWaiting();
             $("#modalContainer").html(html);
             var $modal = $("#modalProduct");
-            if ($.fn.select2) {
-                $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
-            }
+            $modal.one("shown.bs.modal", function () {
+                window.initDigitalSalesProductRuntimeForm();
+            });
             $modal.modal("show");
         })
         .fail(function () {
@@ -538,9 +766,9 @@ function openEditProductModal(id, salesId) {
             if (typeof _endWaiting === "function") _endWaiting();
             $("#modalContainer").html(html);
             var $modal = $("#modalProduct");
-            if ($.fn.select2) {
-                $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
-            }
+            $modal.one("shown.bs.modal", function () {
+                window.initDigitalSalesProductRuntimeForm();
+            });
             $modal.modal("show");
         })
         .fail(function () {
@@ -675,152 +903,248 @@ function deleteMemberItem(id, salesId) {
 }
 
 /* ================= 5. Tiến trình & Checklist (Tab 4) ================= */
-function openAddTrackingModal(salesId) {
-    $.get(_detailUrls.addTrackingModal, { digitalSalesId: salesId }, function (html) {
-        $("#modalContainer").html(html);
-        var $modal = $("#modalTracking");
-        if ($.fn.select2) {
-            $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
-        }
-        $modal.modal("show");
-
-        var $form = $("#frmTrackingModal");
-        if ($.validator && $.validator.unobtrusive) {
-            $.validator.unobtrusive.parse($form);
-        }
-
-        $form.find("#txtTrackingTaskName").on("input propertychange", function () {
-            if (($(this).val() || "").trim()) {
-                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
-                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
-                $(this).removeClass("input-validation-error border-danger");
-            }
+function initTrackingModalBehavior($modal, salesId) {
+    if ($.fn.select2) {
+        $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
+    }
+    if ($.fn.datepicker) {
+        $modal.find(".date-picker").datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true,
+            todayHighlight: true
         });
+    }
 
-        $form.off("submit").on("submit", function (e) {
-            e.preventDefault();
+    if (typeof CKEDITOR !== "undefined" && $modal.find("#Tracking_ResultNote").length > 0) {
+        if (CKEDITOR.instances["Tracking_ResultNote"]) {
+            CKEDITOR.instances["Tracking_ResultNote"].destroy(true);
+        }
+        CKEDITOR.replace("Tracking_ResultNote", {
+            height: 140,
+            toolbar: [
+                { name: "basicstyles", items: ["Bold", "Italic", "Underline", "Strike"] },
+                { name: "paragraph", items: ["NumberedList", "BulletedList", "-", "Outdent", "Indent"] },
+                { name: "links", items: ["Link", "Unlink"] }
+            ]
+        });
+    }
 
-            if (typeof $form.valid === "function" && !$form.valid()) {
-                return false;
-            }
+    $modal.on("hidden.bs.modal", function () {
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances["Tracking_ResultNote"]) {
+            CKEDITOR.instances["Tracking_ResultNote"].destroy(true);
+        }
+    });
 
-            var $taskInput = $form.find("input[name='TaskName']");
-            var taskVal = ($taskInput.val() || "").trim();
-            if (!taskVal) {
-                var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
-                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
-                    reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
+    window.calculateTrackingDeadline = function () {
+        var startVal = $("#Tracking_StartDate").val();
+        var durationVal = parseInt($("#Tracking_DurationDays").val(), 10);
+        if (startVal && !isNaN(durationVal) && durationVal > 0) {
+            var parts = startVal.split("/");
+            if (parts.length === 3) {
+                var day = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1;
+                var year = parseInt(parts[2], 10);
+                var startDate = new Date(year, month, day);
+                if (!isNaN(startDate.getTime())) {
+                    startDate.setDate(startDate.getDate() + durationVal);
+                    var d = ("0" + startDate.getDate()).slice(-2);
+                    var m = ("0" + (startDate.getMonth() + 1)).slice(-2);
+                    var y = startDate.getFullYear();
+                    $("#Tracking_Deadline").val(d + "/" + m + "/" + y);
                 }
-                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
-                $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
-                       .removeClass("field-validation-valid")
-                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
-                $taskInput.addClass("input-validation-error border-danger").focus();
-                return false;
             }
+        }
+    };
 
-            var $btnSubmit = $form.find("button[type='submit']");
-            var origBtnHtml = $btnSubmit.html();
-            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+    window.onTrackingStatusChange = function (select) {
+        var val = $(select).val();
+        if (val === "3") {
+            var now = new Date();
+            var d = ("0" + now.getDate()).slice(-2);
+            var m = ("0" + (now.getMonth() + 1)).slice(-2);
+            var y = now.getFullYear();
+            $("#Tracking_CompletedDate").val(d + "/" + m + "/" + y);
+            $("#groupCompletedDate").show();
+        } else {
+            $("#Tracking_CompletedDate").val("");
+            $("#groupCompletedDate").hide();
+        }
+    };
 
-            var formData = new FormData(this);
-            $.ajax({
-                url: _detailUrls.saveTracking,
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (res) {
-                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
-                    if (res.status) {
-                        $modal.modal("hide");
-                        executeResponseMessage(res.message, "Lưu tiến trình thành công!", true);
-                        reloadTrackingSection(salesId);
-                    } else {
-                        executeResponseMessage(res.message, "Không thể lưu tiến trình!", false);
-                    }
-                },
-                error: function () {
-                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
-                    executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    var $form = $("#frmTrackingModal");
+    if ($.validator && $.validator.unobtrusive) {
+        $.validator.unobtrusive.parse($form);
+    }
+
+    $form.find("#txtTrackingTaskName").on("input propertychange", function () {
+        if (($(this).val() || "").trim()) {
+            var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+            $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
+            $(this).removeClass("input-validation-error border-danger");
+        }
+    });
+
+    $form.off("submit").on("submit", function (e) {
+        e.preventDefault();
+
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances["Tracking_ResultNote"]) {
+            CKEDITOR.instances["Tracking_ResultNote"].updateElement();
+        }
+
+        if (typeof $form.valid === "function" && !$form.valid()) {
+            return false;
+        }
+
+        var taskVal = ($form.find("#txtTrackingTaskName").val() || "").trim();
+        if (!taskVal) {
+            var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
+            if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
+                reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
+            }
+            var $valMsg = $form.find("[data-valmsg-for='TaskName']");
+            $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
+                   .removeClass("field-validation-valid")
+                   .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
+            $form.find("#txtTrackingTaskName").addClass("input-validation-error border-danger").focus();
+            return false;
+        }
+
+        var $btnSubmit = $form.find("button[type='submit']");
+        var origBtnHtml = $btnSubmit.html();
+        $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+        var formData = new FormData(this);
+        $.ajax({
+            url: _detailUrls.saveTracking,
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (res) {
+                $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                if (typeof res === "string") {
+                    $modal.find("#bodyForm").html(res);
+                    initTrackingModalBehavior($modal, salesId);
+                    return;
                 }
-            });
+                if (res.status) {
+                    $modal.modal("hide");
+                    executeResponseMessage(res.message, "Lưu tiến trình thành công!", true);
+                    reloadTrackingSection(salesId);
+                } else {
+                    executeResponseMessage(res.message, "Không thể lưu tiến trình!", false);
+                }
+            },
+            error: function () {
+                $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+            }
         });
     });
 }
 
-function openEditTrackingModal(id, salesId) {
-    $.get(_detailUrls.editTrackingModal, { id: id, digitalSalesId: salesId }, function (html) {
+function openAddTrackingModal(salesId, processId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId) return;
+    var params = { digitalSalesId: salesId };
+    if (processId) params.processId = processId;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.addTrackingModal, params, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
         $("#modalContainer").html(html);
         var $modal = $("#modalTracking");
-        if ($.fn.select2) {
-            $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
-        }
+        initTrackingModalBehavior($modal, salesId);
         $modal.modal("show");
-
-        var $form = $("#frmTrackingModal");
-        if ($.validator && $.validator.unobtrusive) {
-            $.validator.unobtrusive.parse($form);
-        }
-
-        $form.find("#txtTrackingTaskName").on("input propertychange", function () {
-            if (($(this).val() || "").trim()) {
-                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
-                $valMsg.empty().removeClass("field-validation-error").addClass("field-validation-valid");
-                $(this).removeClass("input-validation-error border-danger");
-            }
-        });
-
-        $form.off("submit").on("submit", function (e) {
-            e.preventDefault();
-
-            if (typeof $form.valid === "function" && !$form.valid()) {
-                return false;
-            }
-
-            var $taskInput = $form.find("input[name='TaskName']");
-            var taskVal = ($taskInput.val() || "").trim();
-            if (!taskVal) {
-                var reqMsg = "Dữ liệu [Tên công việc / Đầu việc] bắt buộc nhập";
-                if (typeof App_Message !== "undefined" && App_Message.DigitalSales_Msg_TaskNameRequired) {
-                    reqMsg = App_Message.DigitalSales_Msg_TaskNameRequired;
-                }
-                var $valMsg = $form.find("[data-valmsg-for='TaskName']");
-                $valMsg.html('<span id="TaskName-error">' + reqMsg + '</span>')
-                       .removeClass("field-validation-valid")
-                       .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
-                $taskInput.addClass("input-validation-error border-danger").focus();
-                return false;
-            }
-
-            var $btnSubmit = $form.find("button[type='submit']");
-            var origBtnHtml = $btnSubmit.html();
-            $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
-
-            var formData = new FormData(this);
-            $.ajax({
-                url: _detailUrls.saveTracking,
-                type: "POST",
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function (res) {
-                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
-                    if (res.status) {
-                        $modal.modal("hide");
-                        executeResponseMessage(res.message, "Cập nhật tiến trình thành công!", true);
-                        reloadTrackingSection(salesId);
-                    } else {
-                        executeResponseMessage(res.message, "Không thể cập nhật tiến trình!", false);
-                    }
-                },
-                error: function () {
-                    $btnSubmit.prop("disabled", false).html(origBtnHtml);
-                    executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
-                }
-            });
-        });
     });
+}
+
+function openAddProgressToProcessModal(salesId, processId, processName) {
+    openAddTrackingModal(salesId, processId);
+}
+
+function openEditTrackingModal(id, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.editTrackingModal, { id: id, digitalSalesId: salesId }, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalContainer").html(html);
+        var $modal = $("#modalTracking");
+        initTrackingModalBehavior($modal, salesId);
+        $modal.modal("show");
+    });
+}
+
+function openTrackingLogsModal(trackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!trackingId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.trackingLogsModal, { trackingId: trackingId, digitalSalesId: salesId }, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalContainer").html(html);
+        $("#modalTrackingLogs").modal("show");
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+function openUnlockProgressModal(trackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!trackingId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.unlockProgressModal, { trackingId: trackingId, digitalSalesId: salesId }, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalContainer").html(html);
+        $("#modalUnlockProgress").modal("show");
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+function submitUnlockProgressForm(e, trackingId, salesId) {
+    if (e && e.preventDefault) e.preventDefault();
+    var reason = ($("#txtUnlockReason").val() || "").trim();
+    if (!reason) {
+        $("#txtUnlockReason_val").removeClass("d-none");
+        $("#txtUnlockReason").addClass("border-danger").focus();
+        return false;
+    }
+    $("#txtUnlockReason_val").addClass("d-none");
+    $("#txtUnlockReason").removeClass("border-danger");
+
+    var $btn = $("#btnSubmitUnlockProgress");
+    var origHtml = $btn.html();
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang mở khóa...');
+
+    $.ajax({
+        url: _detailUrls.submitUnlockProgress,
+        type: "POST",
+        data: { trackingId: trackingId, digitalSalesId: salesId, reason: reason },
+        success: function (res) {
+            $btn.prop("disabled", false).html(origHtml);
+            if (res.status) {
+                executeResponseMessage(res.message, "Mở khóa tiến trình thành công!", true);
+                var opened = false;
+                var openNext = function () {
+                    if (!opened) {
+                        opened = true;
+                        openEditTrackingModal(res.trackingId, res.digitalSalesId);
+                    }
+                };
+                $("#modalUnlockProgress").one("hidden.bs.modal", openNext);
+                $("#modalUnlockProgress").modal("hide");
+                setTimeout(openNext, 400);
+            } else {
+                executeResponseMessage(res.message, "Không thể mở khóa tiến trình!", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html(origHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+        }
+    });
+    return false;
 }
 
 function deleteTrackingItem(id, salesId) {
@@ -865,6 +1189,647 @@ function deleteTrackingItem(id, salesId) {
     });
 
     $modal.modal('show');
+}
+
+/* ================= 4.1. Cập nhật Quy trình (Cây bút chì) ================= */
+function openChangeProcessModal(salesId, statusId, currentProcessId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId || !statusId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.changeProcessModal, { digitalSalesId: salesId, statusId: statusId, currentProcessId: currentProcessId })
+        .done(function (html) {
+            if (typeof _endWaiting === "function") _endWaiting();
+            $("#modalContainer").html(html);
+            $("#changeProcessModal").modal("show");
+        })
+        .fail(function () {
+            if (typeof _endWaiting === "function") _endWaiting();
+            executeResponseMessage("Không thể tải danh sách quy trình!", "Lỗi kết nối!", false);
+        });
+}
+
+function submitChangeProcess() {
+    var $form = $("#frmChangeProcess");
+    var salesId = $("#ChangeProcess_DigitalSalesID").val();
+    var statusId = $("#ChangeProcess_StatusID").val();
+    var newProcessId = $("input[name='SelectedProcessID']:checked").val();
+
+    if (!newProcessId) {
+        executeResponseMessage("Vui lòng chọn một quy trình áp dụng!", "Thông báo", false);
+        return;
+    }
+
+    var $btn = $("#btnSaveChangeProcess");
+    var origHtml = $btn.html();
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
+
+    $.post(_detailUrls.saveChangeProcess, { digitalSalesId: salesId, statusId: statusId, newProcessId: newProcessId }, function (res) {
+        $btn.prop("disabled", false).html(origHtml);
+        if (res.status) {
+            $("#changeProcessModal").modal("hide");
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css('padding-right', '');
+            executeResponseMessage(res.message, "Cập nhật quy trình thành công!", true);
+            reloadTrackingSection(salesId);
+        } else {
+            executeResponseMessage(res.message, "Không thể cập nhật quy trình!", false);
+        }
+    }).fail(function () {
+        $btn.prop("disabled", false).html(origHtml);
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+/* ================= 4.2. Quản lý Todo list (Công việc nhỏ bên trong tiến trình) ================= */
+function parseVnDate(str) {
+    if (!str) return null;
+    var p = str.split('/');
+    if (p.length !== 3) return null;
+    return new Date(parseInt(p[2], 10), parseInt(p[1], 10) - 1, parseInt(p[0], 10));
+}
+
+function openAddTodoModal(parentTrackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId || !parentTrackingId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.addTodoModal, { parentTrackingId: parentTrackingId, digitalSalesId: salesId })
+        .done(function (html) {
+            if (typeof _endWaiting === "function") _endWaiting();
+            $("#modalContainer").html(html);
+            initTodoModalControls();
+            $("#todoModal").modal("show");
+        })
+        .fail(function () {
+            if (typeof _endWaiting === "function") _endWaiting();
+            executeResponseMessage("Không thể tải form thêm việc con!", "Lỗi kết nối!", false);
+        });
+}
+
+function openEditTodoModal(id, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId || !id) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.editTodoModal, { id: id, digitalSalesId: salesId })
+        .done(function (html) {
+            if (typeof _endWaiting === "function") _endWaiting();
+            $("#modalContainer").html(html);
+            initTodoModalControls();
+            $("#todoModal").modal("show");
+        })
+        .fail(function () {
+            if (typeof _endWaiting === "function") _endWaiting();
+            executeResponseMessage("Không thể tải form sửa việc con!", "Lỗi kết nối!", false);
+        });
+}
+
+function initTodoModalControls() {
+    var $modal = $("#todoModal");
+    if ($.fn.select2) {
+        $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
+    }
+    if ($.fn.datepicker) {
+        var maxDeadlineIso = $("#Todo_MaxDeadlineIso").val();
+        var endDateOpt = undefined;
+        if (maxDeadlineIso) {
+            var parts = maxDeadlineIso.split('-');
+            if (parts.length === 3) {
+                endDateOpt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            }
+        }
+        $modal.find("#Todo_StartDate").datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true,
+            todayHighlight: true
+        });
+        $modal.find("#Todo_Deadline").datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true,
+            todayHighlight: true,
+            endDate: endDateOpt
+        });
+    }
+}
+
+function submitTodoItem() {
+    var $form = $("#frmTodoItem");
+    var taskName = ($("#Todo_TaskName").val() || "").trim();
+    if (!taskName) {
+        $("#Todo_TaskName").addClass("is-invalid border-danger").focus();
+        executeResponseMessage("Vui lòng nhập tên công việc con!", "Thiếu thông tin", false);
+        return false;
+    }
+    $("#Todo_TaskName").removeClass("is-invalid border-danger");
+
+    // Validate số ngày thực hiện
+    var durationDays = parseInt($("#Todo_DurationDays").val()) || 0;
+    if (durationDays < 1) {
+        $("#Todo_DurationDays").addClass("is-invalid border-danger").focus();
+        executeResponseMessage("Số ngày thực hiện phải >= 1!", "Thiếu thông tin", false);
+        return false;
+    }
+    $("#Todo_DurationDays").removeClass("is-invalid border-danger");
+
+    // RÀNG BUỘC NGHIỆP VỤ: Deadline của Todo <= StartDate của Tiến trình + Tổng ngày của Tiến trình
+    var deadlineStr = $("#Todo_Deadline").val();
+    var maxDeadlineIso = $("#Todo_MaxDeadlineIso").val();
+    if (deadlineStr && maxDeadlineIso) {
+        var deadlineDate = parseVnDate(deadlineStr);
+        var maxDateParts = maxDeadlineIso.split('-');
+        var maxDate = new Date(parseInt(maxDateParts[0], 10), parseInt(maxDateParts[1], 10) - 1, parseInt(maxDateParts[2], 10));
+        if (deadlineDate && maxDate && deadlineDate.getTime() > maxDate.getTime()) {
+            $("#todoDeadlineError").removeClass("d-none");
+            $("#Todo_Deadline").addClass("is-invalid border-danger").focus();
+            executeResponseMessage("Hạn xử lý không được lớn hơn hạn tối đa của tiến trình!", "Lỗi ràng buộc thời hạn", false);
+            return false;
+        }
+    }
+    $("#todoDeadlineError").addClass("d-none");
+    $("#Todo_Deadline").removeClass("is-invalid border-danger");
+
+    var $btn = $("#btnSaveTodoItem");
+    var origHtml = $btn.html();
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+    // Sử dụng FormData để hỗ trợ file upload
+    var formData = new FormData($form[0]);
+    var salesId = $("#Todo_DigitalSalesID").val();
+
+    $.ajax({
+        url: _detailUrls.saveTodo,
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            $btn.prop("disabled", false).html(origHtml);
+            if (res.status) {
+                $("#todoModal").modal("hide");
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                executeResponseMessage(res.message, "Lưu công việc thành công!", true);
+                reloadTrackingSection(salesId);
+            } else {
+                executeResponseMessage(res.message, "Không thể lưu công việc!", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html(origHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+        }
+    });
+}
+
+function calculateTodoDeadline() {
+    var startDateStr = $("#Todo_StartDate").val();
+    var durationDays = parseInt($("#Todo_DurationDays").val()) || 0;
+    if (!startDateStr || durationDays < 1) return;
+
+    var startDate = parseVnDate(startDateStr);
+    if (!startDate) return;
+
+    var deadline = new Date(startDate);
+    deadline.setDate(deadline.getDate() + durationDays);
+
+    var dd = ('0' + deadline.getDate()).slice(-2);
+    var mm = ('0' + (deadline.getMonth() + 1)).slice(-2);
+    var yyyy = deadline.getFullYear();
+    var formattedDate = dd + '/' + mm + '/' + yyyy;
+
+    $("#Todo_Deadline").val(formattedDate);
+}
+
+/* ================= 4.3. Thao tác Nhanh: Báo cáo | Xác nhận | Mở khóa | Xóa ================= */
+function actionConfirmTracking(trackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!trackingId) return;
+    $.post(_detailUrls.confirmTracking, { trackingId: trackingId, digitalSalesId: salesId }, function (res) {
+        if (res.status) {
+            executeResponseMessage(res.message, "Xác nhận hoàn thành thành công!", true);
+            reloadTrackingSection(salesId);
+        } else {
+            executeResponseMessage(res.message, "Không thể xác nhận hoàn thành!", false);
+        }
+    }).fail(function () {
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+function actionUnlockTracking(trackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!trackingId) return;
+    $.post(_detailUrls.unlockTracking, { trackingId: trackingId, digitalSalesId: salesId }, function (res) {
+        if (res.status) {
+            executeResponseMessage(res.message, "Mở khóa xác nhận thành công!", true);
+            reloadTrackingSection(salesId);
+        } else {
+            executeResponseMessage(res.message, "Không thể mở khóa xác nhận!", false);
+        }
+    }).fail(function () {
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+function openTrackingReportModal(trackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!trackingId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.reportTrackingModal, { trackingId: trackingId, digitalSalesId: salesId })
+        .done(function (html) {
+            if (typeof _endWaiting === "function") _endWaiting();
+            $("#modalContainer").html(html);
+            $("#trackingReportModal").modal("show");
+        })
+        .fail(function () {
+            if (typeof _endWaiting === "function") _endWaiting();
+            executeResponseMessage("Không thể tải form báo cáo!", "Lỗi kết nối!", false);
+        });
+}
+
+function submitTrackingReport() {
+    var $form = $("#frmTrackingReport");
+    var note = ($("#Report_ResultNote").val() || "").trim();
+    if (!note) {
+        $("#Report_ResultNote").addClass("is-invalid border-danger").focus();
+        executeResponseMessage("Vui lòng nhập nội dung báo cáo kết quả!", "Thiếu thông tin", false);
+        return false;
+    }
+    $("#Report_ResultNote").removeClass("is-invalid border-danger");
+
+    var $btn = $("#btnSaveTrackingReport");
+    var origHtml = $btn.html();
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+    var formData = new FormData($form[0]);
+    var salesId = $("#Report_DigitalSalesID").val();
+
+    $.ajax({
+        url: _detailUrls.saveTrackingReport,
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            $btn.prop("disabled", false).html(origHtml);
+            if (res.status) {
+                $("#trackingReportModal").modal("hide");
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                executeResponseMessage(res.message, "Lưu báo cáo tiến độ thành công!", true);
+                reloadTrackingSection(salesId);
+            } else {
+                executeResponseMessage(res.message, "Không thể lưu báo cáo!", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html(origHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+        }
+    });
+}
+
+function actionDeleteTracking(trackingId, salesId) {
+    deleteTrackingItem(trackingId, salesId);
+}
+
+// =========================================================================
+// CHỨC NĂNG IMPORT TIẾN TRÌNH & CÔNG VIỆC CON (THEO ĐẶC TẢ)
+// =========================================================================
+var _progressImportPreviewData = [];
+var _todoImportPreviewData = [];
+
+function openImportProgressModal(salesId, processId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId || !processId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.importProgressModal, { processId: processId, digitalSalesId: salesId })
+        .done(function (html) {
+            if (typeof _endWaiting === "function") _endWaiting();
+            $("#modalContainer").html(html);
+            _progressImportPreviewData = [];
+            $("#importProgressModal").modal("show");
+            $("#fileProgressImport").on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $("#lblProgressFileName").text(fileName || "Chọn tệp Excel từ máy tính...");
+            });
+        })
+        .fail(function () {
+            if (typeof _endWaiting === "function") _endWaiting();
+            executeResponseMessage("Không thể tải giao diện import tiến trình!", "Lỗi kết nối!", false);
+        });
+}
+
+function readProgressImportExcel() {
+    var fileInput = document.getElementById("fileProgressImport");
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        executeResponseMessage("Vui lòng chọn tệp Excel (.xlsx hoặc .xls) trước khi đọc dữ liệu!", "Cảnh báo", false);
+        return;
+    }
+
+    var $modal = $("#importProgressModal");
+    var downloadLink = $modal.find("a[href*='processId']").attr("href");
+    var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+
+    var formData = new FormData();
+    formData.append("importFile", fileInput.files[0]);
+    formData.append("processId", procId);
+    formData.append("digitalSalesId", _currentDigitalSalesId);
+
+    var $btn = $("#btnReadProgressExcel");
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang đọc file...');
+
+    $.ajax({
+        url: _detailUrls.previewImportProgress,
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            $btn.prop("disabled", false).html('<i class="fa fa-search mr-1"></i> Đọc dữ liệu từ file');
+            if (res && res.status) {
+                _progressImportPreviewData = res.rows || [];
+                renderProgressImportPreview(res);
+            } else {
+                executeResponseMessage(res && res.message ? res.message : "Đọc tệp thất bại!", "Thông báo", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html('<i class="fa fa-search mr-1"></i> Đọc dữ liệu từ file');
+            executeResponseMessage("Lỗi kết nối khi đọc tệp Excel!", "Lỗi!", false);
+        }
+    });
+}
+
+function renderProgressImportPreview(data) {
+    var rows = data.rows || [];
+    $("#boxProgressPreview").removeClass("d-none");
+    $("#badgeProgressTotalRows").text(data.total + " dòng");
+    $("#badgeProgressValidRows").text(data.validCount + " hợp lệ");
+    $("#badgeProgressErrorRows").text(data.errorCount + " lỗi");
+
+    var html = "";
+    if (rows.length === 0) {
+        html = '<tr><td colspan="8" class="text-center text-muted py-3">Không có dữ liệu</td></tr>';
+    } else {
+        $.each(rows, function (idx, item) {
+            var isValid = item.IsValid;
+            var trClass = isValid ? "" : "bgc-danger-l4 text-danger-d2";
+            var errBadge = isValid 
+                ? '<span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Hợp lệ</span>'
+                : '<span class="text-danger font-bold"><i class="fa fa-exclamation-triangle mr-1"></i>' + (item.ErrorMessage || "Lỗi") + '</span>';
+
+            html += '<tr class="' + trClass + '">' +
+                '<td class="text-center">' + item.RowIndex + '</td>' +
+                '<td class="font-bold">' + (item.TaskName || "") + '</td>' +
+                '<td>' + (item.AssignedUserName || "—") + '</td>' +
+                '<td class="text-center">' + (item.StartDateStr || "") + '</td>' +
+                '<td class="text-center">' + (item.DurationDays || 3) + ' ngày</td>' +
+                '<td class="text-center">' + (item.Deadline ? formatDetailDateVN(item.Deadline) : "—") + '</td>' +
+                '<td>' + (item.Note || "") + '</td>' +
+                '<td>' + errBadge + '</td>' +
+                '</tr>';
+        });
+    }
+
+    $("#tbodyProgressPreview").html(html);
+
+    if (data.validCount > 0) {
+        $("#btnConfirmProgressImport").removeClass("d-none").html('<i class="fa fa-check mr-1"></i> Xác nhận Import (' + data.validCount + ' dòng hợp lệ)');
+        $("#lblProgressFooterNote").html('Sẵn sàng import <strong>' + data.validCount + '</strong> tiến trình hợp lệ vào quy trình.');
+    } else {
+        $("#btnConfirmProgressImport").addClass("d-none");
+        $("#lblProgressFooterNote").html('<span class="text-danger font-bold">Tệp không có dòng nào hợp lệ để import. Vui lòng kiểm tra lại cột lỗi!</span>');
+    }
+}
+
+function clearProgressImportPreview() {
+    _progressImportPreviewData = [];
+    $("#fileProgressImport").val("");
+    $("#lblProgressFileName").text("Chọn tệp Excel từ máy tính...");
+    $("#tbodyProgressPreview").empty();
+    $("#boxProgressPreview").addClass("d-none");
+    $("#btnConfirmProgressImport").addClass("d-none");
+    $("#lblProgressFooterNote").text("Đã xóa dữ liệu xem trước. Vui lòng chọn tệp mới.");
+}
+
+function executeConfirmProgressImport() {
+    var validRows = [];
+    $.each(_progressImportPreviewData, function (_, r) {
+        if (r.IsValid) validRows.push(r);
+    });
+
+    if (validRows.length === 0) {
+        executeResponseMessage("Không có dữ liệu hợp lệ nào để import!", "Cảnh báo", false);
+        return;
+    }
+
+    var $btn = $("#btnConfirmProgressImport");
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+    var downloadLink = $("#importProgressModal").find("a[href*='processId']").attr("href");
+    var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+
+    $.ajax({
+        url: _detailUrls.confirmImportProgress,
+        type: "POST",
+        data: {
+            processId: parseInt(procId),
+            digitalSalesId: _currentDigitalSalesId,
+            validDataJson: JSON.stringify(validRows)
+        },
+        success: function (res) {
+            $btn.prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận dữ liệu Import');
+            if (res && res.status) {
+                executeResponseMessage(res.message || "Import thành công!", "Thành công!", true);
+                $("#importProgressModal").modal("hide");
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                reloadTrackingSection(_currentDigitalSalesId);
+            } else {
+                executeResponseMessage(res && res.message ? res.message : "Import thất bại!", "Lỗi", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận dữ liệu Import');
+            executeResponseMessage("Lỗi kết nối khi lưu dữ liệu import!", "Lỗi", false);
+        }
+    });
+}
+
+function openImportTodoModal(salesId, processId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId || !processId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.importTodoModal, { processId: processId, digitalSalesId: salesId })
+        .done(function (html) {
+            if (typeof _endWaiting === "function") _endWaiting();
+            $("#modalContainer").html(html);
+            _todoImportPreviewData = [];
+            $("#importTodoModal").modal("show");
+            $("#fileTodoImport").on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $("#lblTodoFileName").text(fileName || "Chọn tệp Excel từ máy tính...");
+            });
+        })
+        .fail(function () {
+            if (typeof _endWaiting === "function") _endWaiting();
+            executeResponseMessage("Không thể tải giao diện import công việc con!", "Lỗi kết nối!", false);
+        });
+}
+
+function readTodoImportExcel() {
+    var fileInput = document.getElementById("fileTodoImport");
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        executeResponseMessage("Vui lòng chọn tệp Excel (.xlsx hoặc .xls) trước khi đọc dữ liệu!", "Cảnh báo", false);
+        return;
+    }
+
+    var $modal = $("#importTodoModal");
+    var downloadLink = $modal.find("a[href*='processId']").attr("href");
+    var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+
+    var formData = new FormData();
+    formData.append("importFile", fileInput.files[0]);
+    formData.append("processId", procId);
+    formData.append("digitalSalesId", _currentDigitalSalesId);
+
+    var $btn = $("#btnReadTodoExcel");
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang đọc file...');
+
+    $.ajax({
+        url: _detailUrls.previewImportTodo,
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            $btn.prop("disabled", false).html('<i class="fa fa-search mr-1"></i> Đọc dữ liệu từ file');
+            if (res && res.status) {
+                _todoImportPreviewData = res.rows || [];
+                renderTodoImportPreview(res);
+            } else {
+                executeResponseMessage(res && res.message ? res.message : "Đọc tệp thất bại!", "Thông báo", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html('<i class="fa fa-search mr-1"></i> Đọc dữ liệu từ file');
+            executeResponseMessage("Lỗi kết nối khi đọc tệp Excel!", "Lỗi!", false);
+        }
+    });
+}
+
+function renderTodoImportPreview(data) {
+    var rows = data.rows || [];
+    $("#boxTodoPreview").removeClass("d-none");
+    $("#badgeTodoTotalRows").text(data.total + " dòng");
+    $("#badgeTodoValidRows").text(data.validCount + " hợp lệ");
+    $("#badgeTodoErrorRows").text(data.errorCount + " lỗi");
+
+    var html = "";
+    if (rows.length === 0) {
+        html = '<tr><td colspan="9" class="text-center text-muted py-3">Không có dữ liệu</td></tr>';
+    } else {
+        $.each(rows, function (idx, item) {
+            var isValid = item.IsValid;
+            var trClass = isValid ? "" : "bgc-danger-l4 text-danger-d2";
+            var errBadge = isValid 
+                ? '<span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Hợp lệ</span>'
+                : '<span class="text-danger font-bold"><i class="fa fa-exclamation-triangle mr-1"></i>' + (item.ErrorMessage || "Lỗi") + '</span>';
+
+            html += '<tr class="' + trClass + '">' +
+                '<td class="text-center">' + item.RowIndex + '</td>' +
+                '<td class="text-center font-bold text-primary">' + (item.TrackingCode || "—") + '</td>' +
+                '<td>' + (item.ParentTaskName || '<span class="text-danger font-italic">Không tìm thấy</span>') + '</td>' +
+                '<td class="font-bold">' + (item.TaskName || "") + '</td>' +
+                '<td>' + (item.AssignedUserName || "—") + '</td>' +
+                '<td class="text-center">' + (item.StartDateStr || "") + '</td>' +
+                '<td class="text-center font-bold">' + (item.DeadlineStr || "") + '</td>' +
+                '<td>' + (item.Note || "") + '</td>' +
+                '<td>' + errBadge + '</td>' +
+                '</tr>';
+        });
+    }
+
+    $("#tbodyTodoPreview").html(html);
+
+    if (data.validCount > 0) {
+        $("#btnConfirmTodoImport").removeClass("d-none").html('<i class="fa fa-check mr-1"></i> Xác nhận Import (' + data.validCount + ' việc hợp lệ)');
+        $("#lblTodoFooterNote").html('Sẵn sàng import <strong>' + data.validCount + '</strong> công việc con hợp lệ vào tiến trình.');
+    } else {
+        $("#btnConfirmTodoImport").addClass("d-none");
+        $("#lblTodoFooterNote").html('<span class="text-danger font-bold">Tệp không có công việc nào hợp lệ để import. Vui lòng kiểm tra lại cột lỗi!</span>');
+    }
+}
+
+function clearTodoImportPreview() {
+    _todoImportPreviewData = [];
+    $("#fileTodoImport").val("");
+    $("#lblTodoFileName").text("Chọn tệp Excel từ máy tính...");
+    $("#tbodyTodoPreview").empty();
+    $("#boxTodoPreview").addClass("d-none");
+    $("#btnConfirmTodoImport").addClass("d-none");
+    $("#lblTodoFooterNote").text("Đã xóa dữ liệu xem trước. Vui lòng chọn tệp mới.");
+}
+
+function executeConfirmTodoImport() {
+    var validRows = [];
+    $.each(_todoImportPreviewData, function (_, r) {
+        if (r.IsValid) validRows.push(r);
+    });
+
+    if (validRows.length === 0) {
+        executeResponseMessage("Không có dữ liệu hợp lệ nào để import!", "Cảnh báo", false);
+        return;
+    }
+
+    var $btn = $("#btnConfirmTodoImport");
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+    var downloadLink = $("#importTodoModal").find("a[href*='processId']").attr("href");
+    var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+
+    $.ajax({
+        url: _detailUrls.confirmImportTodo,
+        type: "POST",
+        data: {
+            processId: parseInt(procId),
+            digitalSalesId: _currentDigitalSalesId,
+            validDataJson: JSON.stringify(validRows)
+        },
+        success: function (res) {
+            $btn.prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận dữ liệu Import');
+            if (res && res.status) {
+                executeResponseMessage(res.message || "Import thành công!", "Thành công!", true);
+                $("#importTodoModal").modal("hide");
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                reloadTrackingSection(_currentDigitalSalesId);
+            } else {
+                executeResponseMessage(res && res.message ? res.message : "Import thất bại!", "Lỗi", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận dữ liệu Import');
+            executeResponseMessage("Lỗi kết nối khi lưu dữ liệu import!", "Lỗi", false);
+        }
+    });
+}
+
+function getDetailUrlParam(url, param) {
+    if (!url) return "";
+    var regex = new RegExp("[?&]" + param + "(=([^&#]*)|&|#|$)");
+    var results = regex.exec(url);
+    if (!results || !results[2]) return "";
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function formatDetailDateVN(dateVal) {
+    if (!dateVal) return "";
+    var d = new Date(dateVal);
+    if (isNaN(d.getTime())) return dateVal;
+    var day = ("0" + d.getDate()).slice(-2);
+    var month = ("0" + (d.getMonth() + 1)).slice(-2);
+    var year = d.getFullYear();
+    return day + "/" + month + "/" + year;
 }
 
 function loadContactPersonsByCustomer(customerId, targetSelector) {

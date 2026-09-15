@@ -1,0 +1,75 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesStatusModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.StatusID)
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.BusinessType, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        <div class="radio-inline d-inline-block mr-3">
+            <label class="d-inline-flex align-items-center cursor-pointer">
+                @Html.RadioButtonFor(m => m.BusinessType, 1, new { @class = "mr-1" })
+                <span class="badge badge-lg bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3 px-2 py-1"><i class="fa fa-lightbulb mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity")</span>
+            </label>
+        </div>
+        <div class="radio-inline d-inline-block">
+            <label class="d-inline-flex align-items-center cursor-pointer">
+                @Html.RadioButtonFor(m => m.BusinessType, 2, new { @class = "mr-1" })
+                <span class="badge badge-lg bgc-purple-l2 text-purple-d2 border-1 brc-purple-m3 px-2 py-1"><i class="fa fa-project-diagram mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project")</span>
+            </label>
+        </div>
+        @Html.ValidationMessageFor(m => m.BusinessType, "", new { @class = "text-danger text-90 d-block" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.StatusCode, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.StatusCode, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_StatusCode_Placeholder"), required = "required", maxlength = 50 })
+        @Html.ValidationMessageFor(m => m.StatusCode, "", new { @class = "text-danger text-90" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.StatusName, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.StatusName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_StatusName_Placeholder"), required = "required", maxlength = 250 })
+        @Html.ValidationMessageFor(m => m.StatusName, "", new { @class = "text-danger text-90" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.SortOrder, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-4">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fa fa-sort-numeric-down"></i></span>
+            </div>
+            @Html.TextBoxFor(m => m.SortOrder, new { @class = "form-control", type = "number", min = "1", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_SortOrder_Placeholder") })
+        </div>
+        @Html.ValidationMessageFor(m => m.SortOrder, "", new { @class = "text-danger text-90" })
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-8 pt-2">
+        <label class="mr-4 cursor-pointer">
+            @Html.CheckBoxFor(m => m.IsDefault, new { @class = "ace-switch ace-switch-check input-lg" })
+            <span class="ml-1 text-95 font-600 text-blue-d2">@AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_IsDefault_Label")</span>
+        </label>
+        <label class="cursor-pointer">
+            @Html.CheckBoxFor(m => m.IsActive, new { @class = "ace-switch ace-switch-check input-lg" })
+            <span class="ml-1 text-95 font-600 text-success-d1">@AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_StatusIsActive_Label")</span>
+        </label>
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.Description, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_StatusDescription_Placeholder") })
+        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger text-90" })
+    </div>
+</div>

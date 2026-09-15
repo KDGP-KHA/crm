@@ -1,0 +1,29 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesProgressModel
+
+@{
+    var isNew = Model.ProgressID == 0;
+    ViewBag.Title = (isNew ? "Thêm mới" : "Cập nhật") + " Tiến trình thực hiện";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    success
+}
+
+@section FormIcon{
+    <i class="fa fa-@(isNew ? "plus" : "pencil-alt")"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("SaveProgress", "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "DigitalSalesWorkflow.onProgressSaveSuccess(data)"
+    }, new { @class = "form-horizontal", id = "formProgressModal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ProgressForm", Model)
+        </div>
+    }
+}

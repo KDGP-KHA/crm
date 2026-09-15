@@ -1,0 +1,116 @@
+﻿<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronEveryMinute" name="cronMinute" checked="checked">
+            Every minute
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronMinuteIncrement" name="cronMinute">
+            Every
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronMinuteIncrementIncrement" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 60; idx++)
+                {
+                    <option value="@idx">@idx</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="col-form-label"> minute(s) starting at minute </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronMinuteIncrementStart" class="col-md-8">
+            @{
+                for (var idx = 0; idx < 60; idx++)
+                {
+                    <option value="@idx">@(idx.ToString().PadLeft(2, '0'))</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronMinuteSpecific" checked="checked" name="cronMinute">
+            Specific minute (choose one or many)
+        </label>
+    </div>
+    <div class="col-md-1">
+    </div>
+    @{
+        var isCheckMinute = false;
+        for (var idx = 0; idx < 60; idx++)
+        {
+            if (idx % 10 == 0)
+            {
+                <div class="col-md-1"></div>
+            }
+            var eleId = $"cronMinute{idx}";
+
+            <div class="col-md-1">
+                <label>
+                    @{
+                        if (!isCheckMinute)
+                        {
+                            <input type="checkbox" id="@eleId" name="cronMinuteSpecificSpecific" value="@idx"
+                                   checked="checked">
+                            isCheckMinute = true;
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="@eleId" name="cronMinuteSpecificSpecific" value="@idx">
+                        }
+                    }
+                    @(idx.ToString().PadLeft(2, '0'))
+                </label>
+            </div>
+            if (idx % 10 == 9)
+            {
+                <div class="col-md-1"></div>
+            }
+        }
+    }
+
+    <div class="col-md-1">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-4">
+        <label>
+            <input type="radio" id="cronMinuteRange" name="cronMinute">
+            Every minute between minute
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronMinuteRangeStart" class="col-md-8">
+            @{
+                for (var idx = 0; idx < 60; idx++)
+                {
+                    <option value="@idx">@(idx.ToString().PadLeft(2, '0'))</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="col-form-label"> and minute </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronMinuteRangeEnd" class="col-md-8">
+            @{
+                for (var idx = 0; idx < 60; idx++)
+                {
+                    <option value="@idx">@(idx.ToString().PadLeft(2, '0'))</option>
+                }
+            }
+        </select>
+    </div>
+</div>

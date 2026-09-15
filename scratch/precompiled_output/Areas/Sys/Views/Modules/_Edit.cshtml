@@ -1,0 +1,42 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("Module_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Edit", "Modules", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditModule", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Module")
+        </div>
+    }
+    <script type="text/javascript">
+        $('form#EditModule').ajaxForm({
+            success: function(response) {
+                if (response.status != undefined) {
+                    $("#ModalContent #modal_EditModule").modal("hide");
+                    $("#ModalContent #modal_EditModule").on('hidden.bs.modal',
+                        function() {
+                            if (response.status != undefined) {
+                                eval(response.message);
+                                _tableModule.ajax.reload(null, false);
+                                response.status = undefined;
+                            }
+                        });
+                } else {
+                    $("#ModalContent #modal_EditModule" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}

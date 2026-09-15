@@ -2,11 +2,11 @@
 @model Core.Cate.Models.RM_DigitalSalesModel
 
 @{
-    ViewBag.Title = $"Chi tiết: {Model.Code} - {Model.Title}";
     var totalTasks = Model.TrackingTasks?.Count ?? 0;
     var completedTasks = Model.TrackingTasks?.Count(t => t.Status == 3) ?? 0;
     var progressPercent = totalTasks > 0 ? (int)Math.Round((double)completedTasks * 100 / totalTasks) : 0;
     bool canEdit = ViewBag.CanEdit == true;
+    int reviewBatchID = ViewBag.ReviewBatchID ?? 0;
 }
 
 @section PageTitle {
@@ -45,19 +45,19 @@
 
 @section PageAction {
     <div class="ds-header-action-bar d-flex align-items-center">
-        <!-- 1. Cụm Switches: Trọng điểm & Quan tâm (Luôn đi cùng nhau) -->
+        <!-- 1. Cụm Switches: Trọng điểm & Quan tâm (Luôn đi cùng nhau, đồng bộ chuẩn giao diện với màn hình danh sách) -->
         <div class="ds-header-switches-group d-flex align-items-center flex-nowrap">
-            <div class="custom-control custom-switch custom-control-inline ds-custom-switch" title="Đánh dấu trọng điểm">
+            <div class="custom-control custom-switch custom-switch-lg mr-3 mr-xl-4" title="Đánh dấu trọng điểm">
                 <input type="checkbox" class="custom-control-input cursor-pointer" id="chkIsKeyProject" @(Model.IsKeyProject ? "checked" : "") @(canEdit ? "" : "disabled") onchange="toggleKeyProject(@Model.DigitalSalesID, this.checked);">
-                <label class="custom-control-label font-bolder text-dark cursor-pointer select-none mb-0" for="chkIsKeyProject" id="lblKeyProject">
-                    @(Model.BusinessType == 2 ? "Dự án trọng điểm" : "Cơ hội trọng điểm")
+                <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0" for="chkIsKeyProject" id="lblKeyProject">
+                    Trọng điểm
                 </label>
             </div>
 
-            <div class="custom-control custom-switch custom-control-inline ds-custom-switch mr-0" title="Quan tâm cơ hội/dự án">
+            <div class="custom-control custom-switch custom-switch-lg" title="Quan tâm cơ hội/dự án">
                 <input type="checkbox" class="custom-control-input cursor-pointer" id="chkIsFollowed" @(Model.IsFollowed ? "checked" : "") onchange="toggleFollowSales(@Model.DigitalSalesID, this.checked);">
-                <label class="custom-control-label font-bolder text-dark cursor-pointer select-none mb-0" for="chkIsFollowed" id="lblFollowSales">
-                    @(Model.BusinessType == 2 ? "Quan tâm dự án" : "Quan tâm cơ hội")
+                <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0" for="chkIsFollowed" id="lblFollowSales">
+                    Đang quan tâm
                 </label>
             </div>
         </div>
@@ -90,8 +90,21 @@
 
 @section HeadCss {
     <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Detail.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.css?v=@DateTime.Now.Ticks" />
 }
 
+@if (reviewBatchID > 0)
+{
+    <a id="reviewBatchAutoTrigger"
+       class="d-none"
+       data-modal=""
+       data-modal-id="ReviewBatch"
+       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID, digitalSalesID = Model.DigitalSalesID })"
+       aria-hidden="true"></a>
+}
+
+<div id="reviewSplitView" class="review-split-view">
+<div class="review-detail-pane">
 <!-- THẺ CHỈ SỐ NHANH (METRIC TILES) -->
 <div id="containerMetrics" class="ds-section-overlay-container">
     @Html.Partial("_DetailMetrics", Model)
@@ -124,6 +137,12 @@
                     <span class="badge badge-pill badge-primary ml-1" id="badgeTabDiscussions">@(Model.Activities?.Count ?? 0)</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link px-3 px-xl-4 py-3 font-weight-bold" id="tab-review-history-link" data-toggle="tab" href="#tab-review-history" role="tab" aria-selected="false">
+                    <i class="fa fa-history mr-1 text-success"></i> @AppProcessor.Messagor.GetMessage("ReviewDigitalSales_HistoryTab")
+                    <span class="badge badge-pill badge-success ml-1" id="badgeTabReviewHistory">@(Model.ReviewHistory?.Count ?? 0)</span>
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -148,8 +167,21 @@
             <div class="tab-pane fade ds-section-overlay-container" id="tab-discussions" role="tabpanel">
                 @Html.Partial("_DetailDiscussions", Model)
             </div>
+
+            <!-- TAB 5: LỊCH SỬ RÀ SOÁT -->
+            <div class="tab-pane fade ds-section-overlay-container" id="tab-review-history" role="tabpanel">
+                <div id="reviewHistoryContainer">
+                    @Html.Partial("~/Areas/Cate/Views/ReviewBatchItem/_ReviewHistory.cshtml", Model.ReviewHistory)
+                </div>
+            </div>
         </div>
     </div>
+</div>
+</div>
+@if (reviewBatchID > 0)
+{
+    <aside id="reviewFormPane" class="review-form-pane" aria-label="@AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Form_AriaLabel")"></aside>
+}
 </div>
 
 <!-- CONTAINER LOAD MODALS AJAX -->
@@ -158,8 +190,21 @@
 @section BottomScript {
     <script type="text/javascript">
         window.CKEDITOR_BASEPATH = "@Url.Content("~/Contents/Modules/Major/ckeditor4/")";
+        window.CKFINDER_BASEPATH = "@Url.Content("~/Contents/Modules/Major/ckfinder/")";
         var _currentDigitalSalesId = @Model.DigitalSalesID;
+        var _reviewBatchID = @reviewBatchID;
+        var _urlReloadReviewHistory = '@Url.Action("GetReviewHistoryPartial", "DigitalSales", new { area = "Cate" })';
     </script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
     <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
     <script src="~/Areas/Cate/Views/DigitalSales/DigitalSalesDetail.js?v=@DateTime.Now.Ticks"></script>
+    @if (reviewBatchID > 0)
+    {
+        <script type="text/javascript">
+            $(function () {
+                var reviewTrigger = document.getElementById('reviewBatchAutoTrigger');
+                if (reviewTrigger) setTimeout(function () { reviewTrigger.click(); }, 300);
+            });
+        </script>
+    }
 }

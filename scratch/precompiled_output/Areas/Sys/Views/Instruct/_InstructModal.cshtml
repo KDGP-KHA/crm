@@ -1,0 +1,76 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Sys.Models.Sys
+@model List<SysInstructModel>
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Instruct_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+@section FormBody{
+    <div id="bodyForm" style="height: calc(100vh - 220px)">
+        <div class="row h-100 overflow-hidden">
+
+            <!-- LEFT TREE -->
+            <div class="col-4 d-flex flex-column py-3 left-panel h-100">
+                <div class="SearchBar mb-2">
+                    <input type="text"
+                           class="form-control search-input"
+                           placeholder=@AppProcessor.Messagor.GetMessage("Instruct_Keyword") />
+                </div>
+                <ul class="tree-container overflow-auto flex-grow-1 p-0 h-100">
+
+                    @foreach (var item in Model)
+                    {
+                        <li class="tree-node"
+                            data-id="@item.InstructID"
+                            data-parent="@(item.InstructParentID ?? 0)"
+                            data-level="@item.Level">
+                            <span class="menu-item d-flex align-items-center"
+                                  data-id="@item.InstructID"
+                                  title="@item.InstructName"
+                                  style="padding-left:@(10 + (item.Level * 20))px;">
+
+                                @if (item.HasChild)
+                                {
+                                    <i class="fa fa-caret-right toggle-icon me-2" style="font-size:24px; width:15px"></i>
+                                }
+                                else
+                                {
+                                    <span style="width:15px;"></span>
+                                }
+
+                                <div class="flex-grow-1 text-break">
+                                    <i class="fa fa-file-text-o me-2"></i>
+                                    @item.InstructName
+                                </div>
+                            </span>
+                        </li>
+                    }
+
+                </ul>
+            </div>
+
+            <!-- RIGHT CONTENT -->
+            <div class="col-8 d-flex flex-column h-100 py-3">
+                <div id="InstructContent" class="flex-grow-1 overflow-auto p-0">
+                    <div class="Content">
+                        <h2 id="Title-content-container" class="font-weight-bold text-primary">
+                        </h2>
+                        <div id="content-container">
+                            <div class="text-muted">Chọn hướng dẫn để xem nội dung</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+@section SubmitControl{
+
+}

@@ -1,0 +1,34 @@
+﻿@*@model Core.Cate.Models.RM_InvoicesModel*@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = "Chi tiết " + AppProcessor.Messagor.GetMessage("Invoices_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    secondary
+}
+
+@section FormIcon{
+    <i class="fa fa-eye"></i>
+}
+
+@section FormBody{
+    <style>
+        #Invoices button.btn-sm{
+            display:none !important;
+        }
+    </style>
+    @Html.Partial("_Invoices")
+    <script>
+        $(function () {
+            $('div#Invoices button, div#Invoices div#inputFile_Files').attr("class", "d-none");
+            $('div#Invoices input').attr("readonly", 'readonly').addClass('text-dark not-allowed bgc-white');
+            //$('#Invoices button.btn-sm').addClass('d-none');
+        });
+
+    </script>
+}
+@section SubmitControl{
+
+}

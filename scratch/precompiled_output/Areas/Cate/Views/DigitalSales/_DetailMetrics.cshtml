@@ -1,0 +1,76 @@
+﻿@model Core.Cate.Models.RM_DigitalSalesModel
+@{
+    var totalTasks = Model.TrackingTasks?.Count ?? 0;
+    var completedTasks = Model.TrackingTasks?.Count(t => t.Status == 3) ?? 0;
+    var progressPercent = totalTasks > 0 ? (int)Math.Round((double)completedTasks * 100 / totalTasks) : 0;
+}
+
+<!-- THẺ CHỈ SỐ NHANH (METRIC TILES) -->
+<div class="row mb-3">
+    <div class="col-xl-3 col-md-6 mb-2">
+        <div class="card ds-metric-card ds-metric-blue">
+            <div class="d-flex align-items-center">
+                <div class="ds-metric-icon mr-3">
+                    <i class="fa fa-money-bill-wave fa-fw"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ds-metric-title text-truncate">Doanh thu dự kiến</div>
+                    <div class="ds-metric-value text-truncate">
+                        @((Model.TotalExpectedRevenue ?? 0).ToString("N0"))<span class="ds-metric-unit">VNĐ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-2">
+        <div class="card ds-metric-card ds-metric-green">
+            <div class="d-flex align-items-center">
+                <div class="ds-metric-icon mr-3">
+                    <i class="fa fa-file-invoice-dollar fa-fw"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ds-metric-title text-truncate">Doanh thu thực tế (Ký HĐ)</div>
+                    <div class="ds-metric-value text-truncate">
+                        @((Model.TotalActualRevenue ?? 0).ToString("N0"))<span class="ds-metric-unit">VNĐ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-2">
+        <div class="card ds-metric-card ds-metric-purple">
+            <div class="d-flex align-items-center">
+                <div class="ds-metric-icon mr-3">
+                    <i class="fa fa-cubes fa-fw"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="ds-metric-title text-truncate">Sản phẩm / Dịch vụ số</div>
+                    <div class="ds-metric-value text-truncate">
+                        @(Model.Products?.Count ?? 0)<span class="ds-metric-unit">sản phẩm</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-2">
+        <div class="card ds-metric-card ds-metric-orange">
+            <div class="d-flex align-items-center">
+                <div class="ds-metric-icon mr-3">
+                    <i class="fa fa-tasks fa-fw"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="d-flex justify-content-between align-items-baseline">
+                        <span class="ds-metric-title text-truncate">Tiến trình thực hiện</span>
+                        <span class="font-weight-bold text-white text-90 ml-2 text-nowrap">@completedTasks/@totalTasks công việc</span>
+                    </div>
+                    <div class="ds-metric-progress-track">
+                        <div class="progress-bar ds-metric-progress-bar h-100" role="progressbar" style="width: @progressPercent%;" aria-valuenow="@progressPercent" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

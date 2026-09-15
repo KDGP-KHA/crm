@@ -1,0 +1,664 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
+@{
+    bool canEdit = ViewBag.CanEdit == true;
+    var activities = Model.Activities ?? new List<Core.Cate.Models.RM_DigitalSalesActivityModel>();
+    var currentFilter = ViewBag.CurrentFilter as byte?;
+    var members = Model.Members ?? new List<Core.Cate.Models.RM_DigitalSalesMemberModel>();
+    string currentUserName = User.Identity?.Name ?? "";
+}
+
+@functions {
+    public class ParsedStatusInfo
+    {
+        public string ActionText { get; set; }
+        public string StatusName { get; set; }
+        public string Note { get; set; }
+        public string BgColor { get; set; }
+        public string TextColor { get; set; }
+        public string BorderColor { get; set; }
+        public string IconClass { get; set; }
+        public bool IsConversion { get; set; }
+    }
+
+    public ParsedStatusInfo ParseStatusInfo(string rawContent)
+    {
+        var info = new ParsedStatusInfo
+        {
+            ActionText = "đã chuyển trạng thái sang",
+            StatusName = "",
+            Note = "",
+            BgColor = "#f1f5f9",
+            TextColor = "#475569",
+            BorderColor = "#cbd5e1",
+            IconClass = "fa-exchange-alt",
+            IsConversion = false
+        };
+
+        if (string.IsNullOrWhiteSpace(rawContent)) return info;
+
+        var content = rawContent.Trim();
+
+        int noteIdx = content.IndexOf("| Ghi chú:", StringComparison.OrdinalIgnoreCase);
+        if (noteIdx >= 0)
+        {
+            info.Note = content.Substring(noteIdx + 9).Trim().TrimStart(':').Trim();
+            content = content.Substring(0, noteIdx).Trim();
+        }
+
+        if (content.IndexOf("Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            info.IsConversion = true;
+            info.ActionText = "đã chuyển đổi Cơ hội thành Dự án";
+            int smIdx = content.IndexOf("Trạng thái mới:", StringComparison.OrdinalIgnoreCase);
+            if (smIdx >= 0)
+            {
+                info.StatusName = content.Substring(smIdx + 15).Trim();
+            }
+            else
+            {
+                info.StatusName = "Dự án mới";
+            }
+        }
+        else if (content.StartsWith("Chuyển trạng thái sang:", StringComparison.OrdinalIgnoreCase))
+        {
+            info.ActionText = "đã chuyển trạng thái sang";
+            info.StatusName = content.Substring(23).Trim();
+        }
+        else if (content.IndexOf("trọng điểm", StringComparison.OrdinalIgnoreCase) >= 0)
+        {
+            bool isRemoved = content.StartsWith("Bỏ", StringComparison.OrdinalIgnoreCase);
+            info.ActionText = isRemoved ? "đã bỏ đánh dấu" : "đã đánh dấu";
+            info.StatusName = "Trọng điểm";
+            info.IconClass = "fa-star";
+            info.BgColor = isRemoved ? "#f1f5f9" : "#fef3c7";
+            info.TextColor = isRemoved ? "#64748b" : "#b45309";
+            info.BorderColor = isRemoved ? "#cbd5e1" : "#fcd34d";
+            return info;
+        }
+        else if (content.StartsWith("Khởi tạo", StringComparison.OrdinalIgnoreCase))
+        {
+            info.ActionText = "đã tạo mới hồ sơ:";
+            info.StatusName = "Khởi tạo";
+            int amIdx = content.IndexOf("AM", StringComparison.OrdinalIgnoreCase);
+            if (amIdx >= 0)
+            {
+                info.Note = content.Substring(amIdx).Trim();
+            }
+            info.IconClass = "fa-plus-circle";
+            info.BgColor = "#e0e7ff";
+            info.TextColor = "#3730a3";
+            info.BorderColor = "#a5b4fc";
+            return info;
+        }
+        else
+        {
+            info.StatusName = content;
+        }
+
+        var sUpper = (info.StatusName ?? "").ToUpperInvariant();
+        if (sUpper.Contains("CHƯA NẮM BẮT") || sUpper.Contains("CHUA NAM BAT") || sUpper.Contains("UNCAPTURED"))
+        {
+            info.BgColor = "#f1f5f9";
+            info.TextColor = "#475569";
+            info.BorderColor = "#94a3b8";
+            info.IconClass = "fa-question-circle";
+        }
+        else if (sUpper.Contains("TIẾP CẬN") || sUpper.Contains("TIEP CAN") || sUpper.Contains("APPROACHING"))
+        {
+            info.BgColor = "#e0f2fe";
+            info.TextColor = "#0284c7";
+            info.BorderColor = "#38bdf8";
+            info.IconClass = "fa-paper-plane";
+        }
+        else if (sUpper.Contains("HÌNH THÀNH") || sUpper.Contains("HINH THANH") || sUpper.Contains("FORMATION"))
+        {
+            info.BgColor = "#f3e8ff";
+            info.TextColor = "#7c3aed";
+            info.BorderColor = "#c084fc";
+            info.IconClass = "fa-drafting-compass";
+        }
+        else if (sUpper.Contains("TRIỂN KHAI") || sUpper.Contains("TRIEN KHAI") || sUpper.Contains("IMPLEMENTING"))
+        {
+            info.BgColor = "#dbeafe";
+            info.TextColor = "#1d4ed8";
+            info.BorderColor = "#60a5fa";
+            info.IconClass = "fa-cogs";
+        }
+        else if (sUpper.Contains("HỢP ĐỒNG") || sUpper.Contains("HOP DONG") || sUpper.Contains("CONTRACTED") || sUpper.Contains("KÝ HỢP"))
+        {
+            info.BgColor = "#ccfbf1";
+            info.TextColor = "#0d9488";
+            info.BorderColor = "#2dd4bf";
+            info.IconClass = "fa-file-signature";
+        }
+        else if (sUpper.Contains("HOÀN THÀNH") || sUpper.Contains("HOAN THANH") || sUpper.Contains("COMPLETED"))
+        {
+            info.BgColor = "#dcfce7";
+            info.TextColor = "#15803d";
+            info.BorderColor = "#4ade80";
+            info.IconClass = "fa-check-circle";
+        }
+        else if (sUpper.Contains("MẤT") || sUpper.Contains("BỎ") || sUpper.Contains("BO MAT") || sUpper.Contains("LOST") || sUpper.Contains("THAT BAI"))
+        {
+            info.BgColor = "#fee2e2";
+            info.TextColor = "#dc2626";
+            info.BorderColor = "#f87171";
+            info.IconClass = "fa-times-circle";
+        }
+        else
+        {
+            info.BgColor = "#ede9fe";
+            info.TextColor = "#6d28d9";
+            info.BorderColor = "#a78bfa";
+            info.IconClass = "fa-exchange-alt";
+        }
+
+        return info;
+    }
+}
+
+<span id="partialDiscussionsCount" class="d-none" data-count="@activities.Count"></span>
+
+<!-- 1. FORM SOẠN THẢO TRAO ĐỔI (DISCUSSION COMPOSER) -->
+<div class="card border-1 brc-primary-m3 shadow-sm mb-4 bgc-white radius-2 ds-composer-card">
+    <div class="card-header bgc-primary-l4 border-b-1 brc-primary-l2 py-25 px-3 d-flex align-items-center justify-content-between">
+        <span class="font-weight-bold text-primary-d2 text-95">
+            <i class="fa fa-comments text-primary mr-1"></i> Trao đổi & Thảo luận cơ hội / dự án
+        </span>
+        <span class="text-secondary text-80 d-none d-sm-inline">
+            <i class="fa fa-info-circle mr-1"></i> Gõ <strong>@@</strong> để nhắc tên nhân sự đã gán vào dự án
+        </span>
+    </div>
+
+    <div class="card-body p-3">
+        <form id="frmPostDiscussion" onsubmit="submitDiscussionForm(event, @Model.DigitalSalesID);">
+            <div class="position-relative">
+                <textarea id="txtDiscussionContent" 
+                          name="content" 
+                          class="form-control text-95 ds-discussion-textarea" 
+                          rows="4" 
+                          placeholder="Nhập nội dung trao đổi, tiến độ, báo giá, yêu cầu khách hàng... (Gõ &#64; để nhắc tên thành viên)"></textarea>
+
+                <!-- DROPDOWN AUTOCOMPLETE @@MENTION -->
+                <div id="dsMentionDropdown" class="dropdown-menu shadow-lg border-1 brc-primary-m2 py-1 ds-mention-dropdown" style="display: none;">
+                    <div class="dropdown-header text-80 font-weight-bold text-uppercase text-secondary bgc-grey-l4 py-1 px-2 border-b-1 brc-grey-l2 d-flex align-items-center justify-content-between">
+                        <span><i class="fa fa-users text-primary mr-1"></i> Nhân sự trong dự án</span>
+                        <button type="button" class="btn btn-xs btn-link text-secondary p-0 border-0" onclick="hideMentionDropdown();"><i class="fa fa-times"></i></button>
+                    </div>
+                    <div class="p-1 border-b-1 brc-grey-l3 bgc-white">
+                        <input type="text" id="txtMentionSearch" class="form-control form-control-sm text-85" placeholder="Tìm kiếm nhân sự..." oninput="handleMentionSearchInput(this.value);" onkeydown="handleMentionSearchKeydown(event);" autocomplete="off" />
+                    </div>
+                    <div id="dsMentionList" class="ds-mention-list-scroll">
+                        <!-- Danh sách nạp động qua JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="hdnMentionedUserIds" name="mentionedUserIds" value="" />
+            <input type="hidden" id="hdnMentionedNames" name="mentionedNames" value="" />
+
+            <!-- DANH SÁCH TỆP ĐÍNH KÈM ĐÃ CHỌN TRƯỚC KHI GỬI -->
+            <div id="discussionSelectedFilesContainer" class="mt-2 d-none">
+                <div class="text-85 font-weight-bold text-secondary mb-1">
+                    <i class="fa fa-paperclip mr-1 text-primary"></i> Tệp đính kèm đã chọn (<span id="discussionSelectedFilesCount">0</span>):
+                </div>
+                <div id="discussionSelectedFilesList" class="d-flex flex-wrap" style="gap: 6px;"></div>
+            </div>
+
+            <input type="file" id="discussionFileInput" name="files" multiple class="d-none" onchange="handleDiscussionFileSelect(this);" />
+
+            <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-t-1 brc-grey-l3 flex-wrap" style="gap: 8px;">
+                <div class="d-inline-flex align-items-center flex-wrap" style="gap: 6px;">
+                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-secondary-d2 font-600 px-25 py-1 radius-1" onclick="triggerMentionDropdown();" title="Nhắc tên nhân sự trong dự án">
+                        <i class="fa fa-at text-primary mr-1"></i> Nhắc tên
+                    </button>
+                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-secondary-d2 font-600 px-25 py-1 radius-1" onclick="$('#discussionFileInput').click();" title="Đính kèm một hoặc nhiều tệp">
+                        <i class="fa fa-paperclip text-success mr-1"></i> Đính kèm tệp
+                    </button>
+                    <span class="text-muted text-75 ml-2 d-none d-md-inline">Hỗ trợ ảnh, PDF, Word, Excel, Zip...</span>
+                </div>
+
+                <div class="d-inline-flex align-items-center" style="gap: 8px;">
+                    <span id="discussionWordCountBadge" class="badge bgc-grey-l4 text-secondary-d1 border-1 brc-grey-l2 font-normal text-80 px-2 py-1 radius-1" title="Giới hạn tối đa 500 từ cho mỗi nội dung trao đổi">
+                        <i class="fa fa-file-word mr-1 opacity-75"></i><span id="discussionCurrentWords">0</span>/500 từ
+                    </span>
+                    <span class="text-muted text-75 font-italic d-none d-lg-inline">Nhấn Ctrl + Enter để gửi</span>
+                    <button type="submit" id="btnSubmitDiscussion" class="btn btn-sm btn-primary px-3 font-bolder radius-1 shadow-sm">
+                        <i class="fa fa-paper-plane mr-1"></i> Gửi trao đổi
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 2. THANH BỘ LỌC DÒNG HOẠT ĐỘNG (ACTIVITY FILTER PILLS) -->
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap" style="gap: 8px;">
+    <div class="btn-group ds-filter-group" role="group" aria-label="Bộ lọc hoạt động">
+        <button type="button" class="btn btn-xs btn-white btn-h-light-primary font-bold @(currentFilter == null ? "active text-primary border-primary" : "text-secondary border-grey-l1") px-3 py-1 radius-1" onclick="filterDiscussions(@Model.DigitalSalesID, null);">
+            <i class="fa fa-stream mr-1"></i> Tất cả
+        </button>
+        <button type="button" class="btn btn-xs btn-white btn-h-light-primary font-bold @(currentFilter == 1 ? "active text-primary border-primary" : "text-secondary border-grey-l1") px-3 py-1 radius-1 ml-1" onclick="filterDiscussions(@Model.DigitalSalesID, 1);">
+            <i class="fa fa-comment-dots text-primary mr-1"></i> Chỉ trao đổi
+        </button>
+        <button type="button" class="btn btn-xs btn-white btn-h-light-primary font-bold @(currentFilter == 2 ? "active text-purple border-purple" : "text-secondary border-grey-l1") px-3 py-1 radius-1 ml-1" onclick="filterDiscussions(@Model.DigitalSalesID, 2);">
+            <i class="fa fa-exchange-alt text-purple mr-1"></i> Trạng thái
+        </button>
+        <button type="button" class="btn btn-xs btn-white btn-h-light-primary font-bold @(currentFilter == 99 ? "active text-orange border-orange" : "text-secondary border-grey-l1") px-3 py-1 radius-1 ml-1" onclick="filterDiscussions(@Model.DigitalSalesID, 99);">
+            <i class="fa fa-tasks text-orange mr-1"></i> Tiến trình & Checklist
+        </button>
+    </div>
+
+    <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d2 px-25 py-1 radius-1" onclick="reloadDiscussionsSection(@Model.DigitalSalesID);" title="Làm mới dòng hoạt động">
+        <i class="fa fa-sync-alt mr-1"></i> Làm mới
+    </button>
+</div>
+
+<!-- 3. DÒNG SỰ KIỆN KẾT HỢP (UNIFIED ACTIVITY & COLLABORATION STREAM) -->
+@if (activities.Count > 0)
+{
+    <div class="ds-activity-timeline px-1">
+        @foreach (var act in activities)
+        {
+            bool isDiscussion = act.ActivityType == 1;
+            bool isStatusChange = act.ActivityType == 2;
+            bool isChecklistComplete = act.ActivityType == 3;
+            bool isProcessComplete = act.ActivityType == 4;
+            bool isChecklistUpdate = act.ActivityType == 5;
+
+            string badgeBg = isDiscussion ? "bgc-primary-l4 text-primary border-primary-m3" :
+                             isStatusChange ? "bgc-purple-l4 text-purple-d2 border-purple-m3" :
+                             isChecklistComplete ? "bgc-success-l4 text-success-d3 border-success-m3" :
+                             isProcessComplete ? "bgc-warning-l3 text-warning-d3 border-warning-m2" :
+                             "bgc-blue-l4 text-blue-d2 border-blue-m3";
+
+            string iconClass = isDiscussion ? "fa-comment-alt text-primary" :
+                              isStatusChange ? "fa-exchange-alt text-purple" :
+                              isChecklistComplete ? "fa-check-circle text-success" :
+                              isProcessComplete ? "fa-trophy text-warning" :
+                              "fa-clipboard-check text-blue";
+
+            string typeTitle = isDiscussion ? "Thảo luận / Trao đổi" :
+                               isStatusChange ? "Chuyển trạng thái" :
+                               isChecklistComplete ? "Hoàn thành Checklist" :
+                               isProcessComplete ? "Hoàn thành Quy trình" :
+                               "Cập nhật Checklist";
+
+            if (isStatusChange)
+            {
+                var statusInfo = ParseStatusInfo(act.Content);
+                <div class="ds-activity-item ds-status-item d-flex align-items-center mb-25 position-relative" id="activity-item-@act.ActivityID">
+                    <!-- ICON TRÁI ĐỒNG BỘ THEO MÀU TRẠNG THÁI -->
+                    <div class="ds-activity-icon-wrapper mr-25 mr-sm-3 flex-shrink-0">
+                        <div class="ds-activity-icon-circle shadow-none" style="background-color: @statusInfo.BgColor; border: 1px solid @statusInfo.BorderColor; color: @statusInfo.TextColor; width: 34px; height: 34px; font-size: 13px;">
+                            <i class="fa @statusInfo.IconClass"></i>
+                        </div>
+                    </div>
+
+                    <!-- THANH THÔNG BÁO PHẲNG (NOTIFICATION LABEL DẠNG THÔNG BÁO, KHÔNG LÀM CARD) -->
+                    <div class="ds-status-notice radius-2 shadow-none"
+                         style="border-left: 4px solid @statusInfo.BorderColor;">
+                        <span class="font-weight-bold text-dark-m1 text-90">
+                            @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
+                        </span>
+                        @if (!string.IsNullOrEmpty(act.ActionByDepartment))
+                        {
+                            <span class="text-secondary text-80 font-normal">(@act.ActionByDepartment)</span>
+                        }
+                        
+                        @if (statusInfo.IsConversion)
+                        {
+                            <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
+                                <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                            </span>
+                            <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
+                        }
+                        else
+                        {
+                            <span class="text-secondary font-italic text-85">@statusInfo.ActionText</span>
+                        }
+
+                        <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none" 
+                              style="background-color: @statusInfo.BgColor; color: @statusInfo.TextColor; border: 1px solid @statusInfo.BorderColor;">
+                            @statusInfo.StatusName
+                        </span>
+
+                        @if (!string.IsNullOrEmpty(statusInfo.Note))
+                        {
+                            if (statusInfo.Note.StartsWith("AM", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string amLabel = "AM chủ trì:";
+                                string amValue = statusInfo.Note;
+                                int colonIdx = statusInfo.Note.IndexOf(':');
+                                if (colonIdx >= 0)
+                                {
+                                    amLabel = statusInfo.Note.Substring(0, colonIdx + 1).Trim();
+                                    amValue = statusInfo.Note.Substring(colonIdx + 1).Trim();
+                                }
+                                <span class="ds-am-badge radius-2" title="Cán bộ AM chủ trì hồ sơ">
+                                    <i class="fa fa-user-tie text-primary mr-1"></i>@amLabel <strong class="text-dark-m1 ml-1">@amValue</strong>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="ds-status-note radius-2" title="Ghi chú: @statusInfo.Note">
+                                    <i class="far fa-comment-dots text-secondary-m1 mr-1"></i>@statusInfo.Note
+                                </span>
+                            }
+                        }
+
+                        <span class="ds-status-date" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                            <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    </div>
+                </div>
+            }
+            else
+            {
+            <div class="ds-activity-item d-flex mb-3 position-relative" id="activity-item-@act.ActivityID">
+                <!-- ICON TRÁI CỦA DÒNG THỜI GIAN -->
+                <div class="ds-activity-icon-wrapper mr-25 mr-sm-3 flex-shrink-0">
+                    <div class="ds-activity-icon-circle shadow-sm @badgeBg">
+                        <i class="fa @iconClass"></i>
+                    </div>
+                </div>
+
+                <!-- NỘI DUNG CARD SỰ KIỆN -->
+                <div class="card ds-activity-card flex-grow-1 border-1 brc-grey-l2 radius-2 p-3 shadow-sm bgc-white">
+                    <!-- HEADER CARD -->
+                    <div class="ds-activity-header d-flex align-items-center mb-2 flex-wrap" style="gap: 8px;">
+                        <span class="font-weight-bold text-dark-m1 text-95">
+                            @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
+                        </span>
+                        @if (!string.IsNullOrEmpty(act.ActionByDepartment))
+                        {
+                            <span class="badge bgc-grey-l3 text-secondary-d2 font-normal text-75 radius-1">
+                                @act.ActionByDepartment
+                            </span>
+                        }
+                        <span class="badge @badgeBg text-75 font-bold px-2 py-05 radius-1">
+                            @typeTitle
+                        </span>
+                        <span class="ds-activity-date text-muted text-80 ml-1" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                            <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    </div>
+
+                    <!-- BODY NỘI DUNG -->
+                    <div class="ds-activity-content text-90 text-dark-m2 mb-2">
+                        @if (isDiscussion)
+                        {
+                            <!-- TỰ ĐỘNG NỔI BẬT CÁC THẺ @@MENTION & HIỂN THỊ NỘI DUNG GIÀU VĂN BẢN (CKEDITOR) -->
+                            var formattedContent = Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(act.Content);
+                            if (!string.IsNullOrEmpty(formattedContent))
+                            {
+                                bool isHtml = formattedContent.Contains("<p") || formattedContent.Contains("<div") || 
+                                              formattedContent.Contains("<br") || formattedContent.Contains("<table") || 
+                                              formattedContent.Contains("<ul") || formattedContent.Contains("<ol") || 
+                                              formattedContent.Contains("<b") || formattedContent.Contains("<strong") || 
+                                              formattedContent.Contains("<span");
+
+                                if (!isHtml)
+                                {
+                                    // Chuyển đổi an toàn ký tự đặc biệt HTML mà vẫn giữ nguyên font tiếng Việt UTF-8
+                                    formattedContent = formattedContent.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace("\n", "<br />");
+                                }
+
+                                // Làm sạch ký tự @ hoặc @&nbsp; đứng trước tag mention đã có sẵn từ CKEditor
+                                formattedContent = System.Text.RegularExpressions.Regex.Replace(
+                                    formattedContent,
+                                    @"@(?:\s|&nbsp;|<[^>]+>)*(<span\s+class=[""']ds-mention-badge[""'])",
+                                    "$1"
+                                );
+                                formattedContent = formattedContent.Replace("<i class=\"fa fa-at mr-1\"></i>", "")
+                                                                   .Replace("<i class=\"fa fa-at\"></i>", "");
+                                formattedContent = System.Text.RegularExpressions.Regex.Replace(
+                                    formattedContent,
+                                    @"(<span\s+class=[""']ds-mention-badge[""'][^>]*>)(?:\s|&nbsp;)*@(?:\s|&nbsp;)*",
+                                    "$1"
+                                );
+
+                                // Định dạng nổi bật @Nhắc tên thành viên (loại bỏ @ vì đã dùng tag hiển thị)
+                                if (members != null && members.Count > 0)
+                                {
+                                    var sortedMembers = members.Where(m => !string.IsNullOrWhiteSpace(m.FullName))
+                                                               .OrderByDescending(m => m.FullName.Length);
+                                    foreach (var m in sortedMembers)
+                                    {
+                                        var pat = @"(?<![\w@/""'=])@(" + System.Text.RegularExpressions.Regex.Escape(m.FullName) + @")(?=\s|<|$|[.,;!?]|&nbsp;)";
+                                        formattedContent = System.Text.RegularExpressions.Regex.Replace(
+                                            formattedContent,
+                                            pat,
+                                            "<span class=\"ds-mention-badge\">$1</span>"
+                                        );
+                                    }
+                                }
+                                else
+                                {
+                                    formattedContent = System.Text.RegularExpressions.Regex.Replace(
+                                        formattedContent,
+                                        @"(?<![\w@/""'=])@([\p{L}\p{M}\w.-]+)(?=\s|<|$|[.,;!?]|&nbsp;)",
+                                        "<span class=\"ds-mention-badge\">$1</span>"
+                                    );
+                                }
+
+                                @Html.Raw(formattedContent)
+                            }
+                        }
+                        else
+                        {
+                            var cleanNonDiscussion = Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(act.Content);
+                            <div class="bgc-grey-l5 p-2 radius-1 border-1 brc-grey-l3 text-dark-m2">
+                                @Html.Raw(System.Web.HttpUtility.HtmlEncode(cleanNonDiscussion).Replace("\n", "<br />"))
+                            </div>
+                        }
+                    </div>
+
+                    <!-- DANH SÁCH FILE ĐÍNH KÈM ĐA PHƯƠNG TIỆN -->
+                    @if (act.AttachmentList != null && act.AttachmentList.Count > 0)
+                    {
+                        <div class="ds-activity-attachments mt-2 pt-2 border-t-1 brc-grey-l3">
+                            <div class="text-80 font-weight-bold text-secondary mb-15 d-flex align-items-center">
+                                <i class="fa fa-paperclip mr-15 text-primary"></i> 
+                                <span>Tệp đính kèm (@act.AttachmentList.Count):</span>
+                            </div>
+                            <div class="ds-attachments-grid">
+                                @foreach (var file in act.AttachmentList)
+                                {
+                                    var fileExt = (file.Extension ?? "").ToLowerInvariant().Trim();
+                                    if (string.IsNullOrEmpty(fileExt) && !string.IsNullOrEmpty(file.FileName))
+                                    {
+                                        fileExt = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
+                                    }
+                                    var fileDownloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = file.FilePath });
+                                    var fileExtLabel = fileExt.TrimStart('.').ToUpper();
+                                    if (string.IsNullOrEmpty(fileExtLabel)) { fileExtLabel = "FILE"; }
+
+                                    string fileIconClass = "fa-file-alt";
+                                    string fileIconBg = "#f1f5f9";
+                                    string fileIconColor = "#475569";
+                                    string fileTypeDesc = "Tệp đính kèm";
+
+                                    if (file.IsImage || new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(fileExt))
+                                    {
+                                        fileIconClass = "fa-file-image";
+                                        fileIconBg = "#e0f7fa";
+                                        fileIconColor = "#00838f";
+                                        fileTypeDesc = "Hình ảnh";
+                                    }
+                                    else if (fileExt == ".pdf")
+                                    {
+                                        fileIconClass = "fa-file-pdf";
+                                        fileIconBg = "#ffebee";
+                                        fileIconColor = "#c62828";
+                                        fileTypeDesc = "Tài liệu PDF";
+                                    }
+                                    else if (fileExt == ".doc" || fileExt == ".docx")
+                                    {
+                                        fileIconClass = "fa-file-word";
+                                        fileIconBg = "#e3f2fd";
+                                        fileIconColor = "#1565c0";
+                                        fileTypeDesc = "Tài liệu Word";
+                                    }
+                                    else if (fileExt == ".xls" || fileExt == ".xlsx" || fileExt == ".csv")
+                                    {
+                                        fileIconClass = "fa-file-excel";
+                                        fileIconBg = "#e8f5e9";
+                                        fileIconColor = "#2e7d32";
+                                        fileTypeDesc = "Bảng tính Excel";
+                                    }
+                                    else if (fileExt == ".ppt" || fileExt == ".pptx")
+                                    {
+                                        fileIconClass = "fa-file-powerpoint";
+                                        fileIconBg = "#fff3e0";
+                                        fileIconColor = "#e65100";
+                                        fileTypeDesc = "Bản trình chiếu";
+                                    }
+                                    else if (fileExt == ".zip" || fileExt == ".rar" || fileExt == ".7z" || fileExt == ".tar" || fileExt == ".gz")
+                                    {
+                                        fileIconClass = "fa-file-archive";
+                                        fileIconBg = "#fef3c7";
+                                        fileIconColor = "#d97706";
+                                        fileTypeDesc = "Tệp nén";
+                                    }
+
+                                    <div class="ds-attachment-chip">
+                                        <div class="ds-attachment-icon-box mr-2" style="background-color: @fileIconBg;">
+                                            <i class="fa @fileIconClass fa-lg" style="color: @fileIconColor;"></i>
+                                        </div>
+                                        <div class="ds-attachment-info">
+                                            <a href="@fileDownloadUrl" class="ds-attachment-name" title="@file.FileName">
+                                                @file.FileName
+                                            </a>
+                                            <div class="ds-attachment-meta">
+                                                <span>@(string.IsNullOrEmpty(file.FileSizeFormatted) ? fileTypeDesc : file.FileSizeFormatted)</span>
+                                                <span class="mx-1 opacity-50">•</span>
+                                                <span class="ds-ext-badge" style="background-color: @fileIconBg; color: @fileIconColor;">@fileExtLabel</span>
+                                            </div>
+                                        </div>
+                                        <div class="ds-attachment-actions">
+                                            @if (file.IsImage || new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(fileExt))
+                                            {
+                                                <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trước">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            }
+                                            <a href="@fileDownloadUrl" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-primary-m3 text-primary radius-1 p-1 px-2 font-bold" title="Tải xuống tệp">
+                                                <i class="fa fa-download mr-1"></i> Tải về
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(act.Attachments) && !act.Attachments.TrimStart().StartsWith("["))
+                    {
+                        var singleFile = act.Attachments.Trim();
+                        var singleFileName = System.IO.Path.GetFileName(singleFile);
+                        var singleExt = System.IO.Path.GetExtension(singleFile)?.ToLowerInvariant() ?? "";
+                        var singleDownloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = singleFile });
+                        var singleExtLabel = singleExt.TrimStart('.').ToUpper();
+                        if (string.IsNullOrEmpty(singleExtLabel)) { singleExtLabel = "FILE"; }
+
+                        string singleIconClass = "fa-file-alt";
+                        string singleIconBg = "#f1f5f9";
+                        string singleIconColor = "#475569";
+                        string singleTypeDesc = "Tệp đính kèm";
+
+                        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
+                        {
+                            singleIconClass = "fa-file-image";
+                            singleIconBg = "#e0f7fa";
+                            singleIconColor = "#00838f";
+                            singleTypeDesc = "Hình ảnh";
+                        }
+                        else if (singleExt == ".pdf")
+                        {
+                            singleIconClass = "fa-file-pdf";
+                            singleIconBg = "#ffebee";
+                            singleIconColor = "#c62828";
+                            singleTypeDesc = "Tài liệu PDF";
+                        }
+                        else if (singleExt == ".doc" || singleExt == ".docx")
+                        {
+                            singleIconClass = "fa-file-word";
+                            singleIconBg = "#e3f2fd";
+                            singleIconColor = "#1565c0";
+                            singleTypeDesc = "Tài liệu Word";
+                        }
+                        else if (singleExt == ".xls" || singleExt == ".xlsx" || singleExt == ".csv")
+                        {
+                            singleIconClass = "fa-file-excel";
+                            singleIconBg = "#e8f5e9";
+                            singleIconColor = "#2e7d32";
+                            singleTypeDesc = "Bảng tính Excel";
+                        }
+                        else if (singleExt == ".zip" || singleExt == ".rar" || singleExt == ".7z")
+                        {
+                            singleIconClass = "fa-file-archive";
+                            singleIconBg = "#fef3c7";
+                            singleIconColor = "#d97706";
+                            singleTypeDesc = "Tệp nén";
+                        }
+
+                        <div class="ds-activity-attachments mt-2 pt-2 border-t-1 brc-grey-l3">
+                            <div class="text-80 font-weight-bold text-secondary mb-15 d-flex align-items-center">
+                                <i class="fa fa-paperclip mr-15 text-primary"></i> 
+                                <span>Tệp đính kèm:</span>
+                            </div>
+                            <div class="ds-attachments-grid">
+                                <div class="ds-attachment-chip">
+                                    <div class="ds-attachment-icon-box mr-2" style="background-color: @singleIconBg;">
+                                        <i class="fa @singleIconClass fa-lg" style="color: @singleIconColor;"></i>
+                                    </div>
+                                    <div class="ds-attachment-info">
+                                        <a href="@singleDownloadUrl" class="ds-attachment-name" title="@singleFileName">
+                                            @singleFileName
+                                        </a>
+                                        <div class="ds-attachment-meta">
+                                            <span>@singleTypeDesc</span>
+                                            <span class="mx-1 opacity-50">•</span>
+                                            <span class="ds-ext-badge" style="background-color: @singleIconBg; color: @singleIconColor;">@singleExtLabel</span>
+                                        </div>
+                                    </div>
+                                    <div class="ds-attachment-actions">
+                                        @if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
+                                        {
+                                            <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                        }
+                                        <a href="@singleDownloadUrl" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-primary radius-1 p-1 px-2 font-bold" title="Tải xuống tệp">
+                                            <i class="fa fa-download mr-1"></i> Tải về
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            }
+        }
+    </div>
+}
+else
+{
+    <div class="text-center py-5 bgc-white radius-2 border-1 brc-grey-l2 my-3">
+        <div class="w-6 h-6 radius-round bgc-primary-l3 text-primary-d1 d-inline-flex align-items-center justify-content-center mb-3" style="width: 54px; height: 54px;">
+            <i class="fa fa-comments fa-2x"></i>
+        </div>
+        <h6 class="text-secondary font-weight-bold">Chưa có trao đổi hoặc hoạt động nào</h6>
+        <p class="text-muted text-85 mb-3">Hãy nhập nội dung ở khung phía trên để bắt đầu trao đổi thông tin với các thành viên trong dự án.</p>
+    </div>
+}
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_DetailDiscussions.css?v=@DateTime.Now.Ticks" />
+
+<script type="text/javascript">
+    if (typeof initDiscussionCKEditor === "function") {
+        initDiscussionCKEditor();
+    }
+</script>

@@ -1,0 +1,65 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Log.Models.AccessHistorySearchModel
+
+<div class="card bcard border-0 shadow-sm radius-0" id="SearchAccessHistory">
+    <div class="card-header bgc-primary-d1">
+        <h5 class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </h5>
+        <div class="card-toolbar">
+            <a href="#" data-action="toggle" class="card-toolbar-btn text-white">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </div>
+    </div>
+    <div class="col-md-12 mt-3">
+        <div class="form-group row">
+            <div class="row col-md-6">
+                <label class="col-form-label text-sm-right pr-0 font-bold col-md-3">@AppProcessor.Messagor.GetMessage("Label_TuKhoa")</label>
+                <div class="col-md-9">
+                    <div class="input-group">
+                        @Html.TextBoxFor(model => model.TuKhoa, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("AccessHistory_TuKhoa") })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label class="col-form-label text-sm-right pr-0 font-bold col-md-5">@AppProcessor.Messagor.GetMessage("ThoiGianCap_Lable_TuNgay")</label>
+                            <div class="col-md-7">
+                                <div class="input-group">
+                                    @Html.TextBoxFor(model => model.TuNgay, "{0:dd/MM/yyyy}", new { id = "TuNgay", @class = "form-control datepicker", placeholder = AppProcessor.Messagor.GetMessage("ThoiGianCap_Lable_TuNgay") })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label class="col-form-label text-sm-right pr-0 font-bold col-md-5">@AppProcessor.Messagor.GetMessage("ThoiGianCap_Lable_DenNgay")</label>
+                            <div class="col-md-7">
+                                <div class="input-group">
+                                    @Html.TextBoxFor(model => model.DenNgay, "{0:dd/MM/yyyy}", new { id = "DenNgay", @class = "form-control datepicker", placeholder = AppProcessor.Messagor.GetMessage("ThoiGianCap_Lable_DenNgay") })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn btn-primary" onclick="Search()"><i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom {
+        z-index: 1000 !important;
+    }
+    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-bottom {
+        z-index: 1000 !important;
+    }
+</style>

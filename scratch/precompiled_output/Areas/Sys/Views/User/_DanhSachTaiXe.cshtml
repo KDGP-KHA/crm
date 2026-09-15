@@ -1,0 +1,132 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysUserSearchModel
+@{
+    ViewBag.Title = "Chọn tài xế";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fas fa-user-tie"></i>
+}
+
+@section FormBody{
+    <style>
+        #DSTaiXe_paginate .pagination {
+            justify-content: center;
+            margin: 10px 0px;
+        }
+        #DSTaiXe_filter {
+            margin: 10px 10px 0px 0px;
+            
+        }
+    </style>
+    <div class="d-nonet ttsearch">
+        @Html.HiddenFor(x => x.ChucVuId)
+    </div>
+    <div class="card">
+        <div class="table-responsive-md">
+            <table id="DSTaiXe" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th class="text-nowrap">@AppProcessor.Messagor.GetMessage("MN_TaiXe_HoTen_Label")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("User_Label_UserName")</th>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <script>
+        var _TaiXesActionURLs = {
+            TaiXes_GetData: "/Sys/User/Get"
+        };
+        var _tableTaiXes;
+
+        $(document).ready(function () {
+            $('#modal_ChonTaiXe .modal-footer').addClass('d-none');
+            initTableTaiXes();
+        });
+
+        function initTableTaiXes() {
+            _tableTaiXes = $("#DSTaiXe").DataTable({
+                "Responsive": true,
+                "info": false,
+                "dom": 'ftp',
+                "language": {
+                    "processing":
+                        "<div class='overlay'><i class='fas fa-cog fa-spin'></i></div>"
+                },
+                "lengthChange": true,
+                "processing": true,
+                "serverSide": true,
+                "ajax":
+                {
+                    "url": _TaiXesActionURLs.TaiXes_GetData,
+                    "type": "POST",
+                    "dataType": "JSON",
+                    "data": {
+                        "ChucVuId": function () {
+                            return $("#ttsearch select#ChucVuId").val();
+                        },
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "",
+                        "defaultContent": "1",
+                        "render": function (data, type, row, meta) {
+                            return meta.settings._iDisplayStart + meta.row + 1;
+                        }
+                    },
+                    {
+                        "data": "FullName",
+                        "defaultContent": "",
+                        "className": "pl-2 pl-lg-4 d-flex",
+                        "render": function (data, type, row, meta) {
+                            var avatarPath = row["AvatarPath"] == null ? "/Contents/Base/imgs/avatar-default.png" : row["AvatarPath"];
+                            var html = "";
+                            if (type === "display") {
+                                if (data == null) data = "";
+                                var extendInfo = '<ul class="list-unstyled text-dark-tp3 my-0">{0}</ul>';
+                                var extendInfoItem = '<li class="mb-1 text-nowrap {2}"><i class="w-2 text-center {1} text-95"></i>&nbsp;{0}</li>';
+                                var htmlExtendInfo = extendInfoItem.format(row["Email"] ?? "(Chưa cập nhật)", "fas fa-envelope", "text-green-d2");
+                                htmlExtendInfo += extendInfoItem.format(row["Phone"] ?? "(chưa cập nhật)", "fas fa-mobile", "text-green-d2");
+                                html = ' {2}<div class="mx-2 text-grey-d1 my-auto text-left"><div class="text-600 text-blue-d1"><span class="text-95 btn-text-dark btn-h-text-primary">{0}</span></div>{1}</div>'
+                                    .format(data, extendInfo.format(htmlExtendInfo), '<img alt="{0}" src="{1}" class="radius-round mr-2 w-5 h-5 my-auto">'.format(data, avatarPath));
+                                return html;
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        "data": "UserName",
+                        "defaultContent": ""
+                    },
+                    {
+                        "data": "UserId",
+                        "style": "width:100px;",
+                        "orderable": false,
+                        "render": function (data, type, row, meta) {
+                            var html = '<span class="">';
+                            if (type === "display") {
+                                html = `<button onclick="ChonTaiXe('` + data + `', '` + row.FullName + `')" class="btn btn-lighter-success" data-original-title="Chọn"><i class="fa fa-check-circle text-success text-120"></i></button>`;
+                            }
+                            html += "</span>";
+                            return html;
+                        }
+                    }
+                ]
+            });
+        }
+        function ChonTaiXe(id, ten) {
+            $('.chonTaiXe_hoTen').val(ten);
+            $('.chonTaiXe_id').val(id);
+            $("#ModalContent #modal_ChonTaiXe").modal("hide");
+        }
+    </script>
+}

@@ -1,0 +1,36 @@
+@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("ProjectTask_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+@section FormType{
+    primary
+}
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "ProjectTask", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnBegin = "ProjectTask_BeforeSubmit()",
+        OnSuccess = "ProjectTask_OnProcessSuccess(data, 'AddProjectTask')"
+    }, new { @class = "form-horizontal", id = "AddProjectTask" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ProjectTask", (Core.Cate.Models.RM_ProjectTaskModel)Model)
+        </div>
+    }
+    <script>
+        function ProjectTask_BeforeSubmit() {
+            var selected = $('#AssignedEmployeeIDs_Multi').val();
+            if (selected && selected.length > 0) {
+                $('#hiddenAssignedEmployeeIDs').val(selected.join(','));
+            } else {
+                $('#hiddenAssignedEmployeeIDs').val('');
+            }
+        }
+    </script>
+}
+@section ContinueForm{
+}

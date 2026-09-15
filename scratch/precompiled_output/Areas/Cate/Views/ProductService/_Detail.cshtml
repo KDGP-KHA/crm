@@ -1,0 +1,331 @@
+﻿@using System.IO
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Cate_ProductServiceModel
+
+@{
+    ViewBag.Title = string.Format(
+        AppProcessor.Messagor.GetMessage("Modal_Title_View"),
+        AppProcessor.Messagor.GetMessage("RM_ProductService_Title"));
+
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    info
+}
+
+@section FormIcon{
+    <i class="fas fa-eye"></i>
+}
+
+@section FormBody{
+
+
+    <div class="container-fluid">
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body px-4 py-3">
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted font-weight-bold">Nhóm dịch vụ / Sản phẩm cha</div>
+                    <div class="col-md-8">
+                        <span class="font-weight-semibold">@Model.ParentProductName</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted font-weight-bold">Mã sản phẩm</div>
+                    <div class="col-md-8">
+                        <span class="badge badge-primary px-3 py-2">@Model.CodeProduct</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted font-weight-bold">Tên sản phẩm / dịch vụ</div>
+                    <div class="col-md-8">
+                        <span class="font-weight-bold text-dark">@Model.NameProduct</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted font-weight-bold">Tên viết tắt</div>
+                    <div class="col-md-8">
+                        <span>@(string.IsNullOrWhiteSpace(Model.ShortNameProduct) ? "--" : Model.ShortNameProduct)</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4 text-muted font-weight-bold">Trạng thái</div>
+                    <div class="col-md-8">
+                        @if (Model.IsActived)
+                        {
+                            <span class="badge badge-success px-3 py-2">
+                                <i class="fa fa-check-circle mr-1"></i> Đang hoạt động
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-secondary px-3 py-2">
+                                <i class="fa fa-times-circle mr-1"></i> Ngừng hoạt động
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 text-muted font-weight-bold">File đính kèm</div>
+                    <div class="col-md-8">
+                        @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+                        {
+                            foreach (var file in Model.ExistingFiles)
+                            {
+                                var fileName = Path.GetFileName(file.FilePath);
+
+                                <div class="mb-2 d-flex align-items-center flex-wrap">
+
+                                    <a href="@file.FilePath"
+                                       download
+                                       class="btn btn-sm btn-light-primary border">
+                                        <i class="fa fa-download mr-1"></i>
+                                        @fileName
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-info ml-2"
+                                            onclick="openProductServiceFilePreview(this)"
+                                            data-file-path="@file.FilePath"
+                                            data-file-name="@fileName"
+                                            data-preview-title="@fileName">
+                                        <i class="fa fa-eye mr-1"></i> Xem trước
+                                    </button>
+
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Không có file đính kèm</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="modal fade" id="productServiceFilePreviewModal" tabindex="-1">
+                    <div class="modal-dialog modal-md modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg rounded-lg overflow-hidden">
+
+                            <div class="modal-header bg-info text-white border-0">
+                                <h5 class="modal-title font-weight-bold" id="productServiceFilePreviewTitle">
+                                    <i class="fas fa-file-alt mr-2"></i>
+                                    Xem file đính kèm
+                                </h5>
+
+                                <button type="button" class="close text-white opacity-100" data-dismiss="modal">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+
+                            <div class="modal-body p-0 bg-light">
+                                <iframe id="productServiceFilePreviewFrame"
+                                        src=""
+                                        style="width:100%; height:70vh; border:none;">
+                                </iframe>
+
+                                <div id="productServiceFilePreviewFallback"
+                                     class="d-none p-4 text-center bg-white">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 text-muted font-weight-bold text-left">
+                        @AppProcessor.Messagor.GetMessage("RMPS_Label_Note")
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="rounded p-3 border note-scrollbar" style="max-height: 400px; overflow-y: auto;">
+                            @Html.Raw(string.IsNullOrWhiteSpace(Model.Note) ? "--" : Model.Note)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hiển thị modal xem trước file
+        $(function () {
+            var $previewModal = $("#productServiceFilePreviewModal");
+
+            if ($previewModal.length) {
+                $previewModal.appendTo("body");
+            }
+        });
+
+        /**
+         * Lấy extension file từ filePath hoặc fileName.
+         * Ví dụ: .pdf / .docx / .xlsx
+         */
+        function getProductServiceFileExtension(filePath, fileName) {
+            var name = fileName || filePath || "";
+            return name.substring(name.lastIndexOf(".")).toLowerCase();
+        }
+
+        //Kiểm tra file có phải định dạng Office hay không.
+        function isProductServiceOfficeFile(filePath, fileName) {
+            var ext = getProductServiceFileExtension(filePath, fileName);
+
+            return [".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"]
+                .indexOf(ext) >= 0;
+        }
+
+        /**
+         * Chuyển relative path thành absolute URL.
+         * Office Viewer của Microsoft yêu cầu URL public tuyệt đối.
+         */
+        function toProductServiceAbsoluteUrl(filePath) {
+            if (!filePath) return "";
+
+            if (/^https?:\/\//i.test(filePath)) {
+                return filePath;
+            }
+
+            return window.location.origin + filePath;
+        }
+        /**
+         * Kiểm tra URL file có thể dùng Microsoft Office Viewer không.
+         * Viewer không hoạt động với localhost/private IP/internal network.
+         */
+        function canUseProductServiceOfficeViewer(filePath) {
+            var absoluteUrl = toProductServiceAbsoluteUrl(filePath);
+
+            var link = document.createElement("a");
+            link.href = absoluteUrl;
+
+            if (!/^https?:$/i.test(link.protocol)) {
+                return false;
+            }
+
+            var hostName = (link.hostname || "").toLowerCase();
+
+            if (!hostName ||
+                hostName === "localhost" ||
+                hostName === "127.0.0.1") {
+                return false;
+            }
+
+            if (/^\d+\.\d+\.\d+\.\d+$/.test(hostName)) {
+
+                if (/^(10|127)\./.test(hostName)) return false;
+                if (/^192\.168\./.test(hostName)) return false;
+                if (/^172\.(1[6-9]|2\d|3[0-1])\./.test(hostName)) return false;
+            }
+
+            return true;
+        }
+
+
+        /**
+         * Build URL preview phù hợp cho từng loại file.
+         * - Office file => dùng Microsoft Office Viewer
+         * - File khác => dùng URL gốc
+         */
+        function buildProductServicePreviewUrl(filePath, fileName) {
+            var absoluteUrl = toProductServiceAbsoluteUrl(filePath);
+
+            if (isProductServiceOfficeFile(filePath, fileName)) {
+                return "https://view.officeapps.live.com/op/view.aspx?src="
+                    + encodeURIComponent(absoluteUrl);
+            }
+
+            return absoluteUrl;
+        }
+
+        /**
+         * Mở modal xem trước file.
+         * Nếu preview được thì render iframe.
+         * Nếu không thì hiển thị fallback tải xuống.
+         */
+        function openProductServiceFilePreview(element) {
+            var $link = $(element);
+
+            var filePath = $link.data("filePath");
+            var fileName = $link.data("fileName");
+            var title = $link.data("previewTitle");
+
+            var ext = getProductServiceFileExtension(filePath, fileName);
+
+            var supportedExtensions = [
+                ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp",
+                ".svg", ".txt", ".csv", ".log", ".htm", ".html",
+                ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx"
+            ];
+
+            var canPreview = supportedExtensions.indexOf(ext) >= 0;
+            var isOfficeFile = isProductServiceOfficeFile(filePath, fileName);
+            var canUseOfficeViewer = canUseProductServiceOfficeViewer(filePath);
+
+            var absoluteUrl = toProductServiceAbsoluteUrl(filePath);
+
+            var $modal = $("#productServiceFilePreviewModal");
+            var $frame = $("#productServiceFilePreviewFrame");
+            var $fallback = $("#productServiceFilePreviewFallback");
+
+            var displayTitle = title || fileName;
+
+            if (displayTitle.length > 50) {
+                displayTitle = displayTitle.substring(0, 47) + "...";
+            }
+
+            // Thay thế tiêu đề
+            $("#productServiceFilePreviewTitle")
+                .html('<i class="fas fa-file-alt mr-2"></i>' + displayTitle);
+
+            // Trường hợp preview được
+            if (canPreview && (!isOfficeFile || canUseOfficeViewer)) {
+
+                $fallback.addClass("d-none").empty();
+
+                $frame.removeClass("d-none")
+                    .attr("src", buildProductServicePreviewUrl(filePath, fileName));
+            }
+
+            // Office file nhưng không thể dùng Office Viewer
+            else if (isOfficeFile) {
+
+                $frame.addClass("d-none").attr("src", "");
+
+                $fallback.removeClass("d-none").html(
+                    '<div class="font-weight-bold mb-2">Không thể xem trước file Office.</div>'
+                    + '<div class="small text-muted mb-3">URL file phải public để Microsoft Viewer truy cập được.</div>'
+                    + '<a href="' + absoluteUrl + '" target="_blank" class="btn btn-primary">'
+                    + '<i class="fa fa-download mr-1"></i>Tải xuống'
+                    + '</a>'
+                );
+            }
+
+            // File không hỗ trợ preview
+            else {
+
+                $frame.addClass("d-none").attr("src", "");
+
+                $fallback.removeClass("d-none").html(
+                    '<div class="font-weight-bold mb-2">Không hỗ trợ xem trước định dạng này.</div>'
+                    + '<a href="' + absoluteUrl + '" target="_blank" class="btn btn-primary">'
+                    + '<i class="fa fa-download mr-1"></i>Tải xuống'
+                    + '</a>'
+                );
+            }
+
+            $modal.modal("show");
+
+            return false;
+        }
+    </script>
+}
+
+@section SubmitControl {
+
+}

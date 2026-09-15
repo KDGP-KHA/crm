@@ -1,0 +1,130 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CustomerModel
+
+<div class="contact-person card mb-3">
+
+    <input type="hidden"
+           name="ListContactPersons[__index__].ContactPerson_ID"
+           value="0" />
+
+    <input type="hidden"
+           name="ListContactPersons[__index__].IsDeleted"
+           value="false"
+           class="is-deleted" />
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="font-bold">
+            @AppProcessor.Messagor.GetMessage("Customer_ContactInformation_Label")
+        </div>
+
+        <button type="button" class="btn btn-sm btn-danger remove-contact">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+
+    <div class="card-body">
+
+        <!-- Full Name -->
+        <div class="form-group">
+            <label class="font-bold">
+                @AppProcessor.Messagor.GetMessage("ContactPersonal_FullName_Label")
+            </label>
+
+            <input type="text"
+                   name="ListContactPersons[__index__].FullName"
+                   class="form-control"
+                   placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_FullName_Label")">
+        </div>
+
+        <!-- Gender | Position -->
+        <div class="form-group row">
+            <div class="col-md-6">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ContactPersonal_Gender_Label")
+                </label>
+
+                <select name="ListContactPersons[__index__].Gender"
+                        class="form-control select2">
+                    <option value=""></option>
+                    <option value="1">@AppProcessor.Messagor.GetMessage("ContactPersonal_Male_Label")</option>
+                    <option value="0">@AppProcessor.Messagor.GetMessage("ContactPersonal_Female_Label")</option>
+                    <option value="2">@AppProcessor.Messagor.GetMessage("ContactPersonal_Other_Label")</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ContactPersonal_Position_Label")
+                </label>
+
+                <input type="text"
+                       name="ListContactPersons[__index__].Position"
+                       class="form-control"
+                       placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_Position_Label")">
+            </div>
+        </div>
+
+        <!-- Phone | Mobile -->
+        <div class="form-group row">
+            <div class="col-md-6">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ContactPersonal_Phone_Label")
+                </label>
+
+                <input type="text"
+                       name="ListContactPersons[__index__].Phone"
+                       class="form-control"
+                       placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_Phone_Label")">
+            </div>
+
+            <div class="col-md-6">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ContactPersonal_Mobile_Label")
+                </label>
+
+                <input type="text"
+                       name="ListContactPersons[__index__].Mobile"
+                       class="form-control"
+                       placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_Mobile_Label")">
+            </div>
+        </div>
+
+        <!-- Email | Zalo -->
+        <div class="form-group row">
+            <div class="col-md-6">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ContactPersonal_Email_Label")
+                </label>
+
+                <input type="text"
+                       name="ListContactPersons[__index__].Email"
+                       class="form-control"
+                       placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_Email_Label")">
+            </div>
+
+            <div class="col-md-6">
+                <label class="font-bold">
+                    @AppProcessor.Messagor.GetMessage("ContactPersonal_Zalo_Label")
+                </label>
+
+                <input type="text"
+                       name="ListContactPersons[__index__].Zalo"
+                       class="form-control"
+                       placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_Zalo_Label")">
+            </div>
+        </div>
+
+        <!-- Note -->
+        <div class="form-group">
+            <label class="font-bold">
+                @AppProcessor.Messagor.GetMessage("ContactPersonal_Note_Label")
+            </label>
+
+            <input type="text"
+                   name="ListContactPersons[__index__].Note"
+                   class="form-control"
+                   placeholder="@AppProcessor.Messagor.GetMessage("ContactPersonal_Note_Label")">
+        </div>
+
+    </div>
+</div>

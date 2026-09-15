@@ -1,0 +1,35 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("Invoices_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="far fa-edit"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("Edit", "Invoices", new { area = "Cate" }, FormMethod.Post, new
+    {
+        encType = "multipart/form-data",
+        id = "EditInvoices",
+        @class = "form-horizontal"
+    }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Invoices")
+        </div>
+    }
+    <script type="text/javascript">
+        $('form#EditInvoices').ajaxForm({
+            success: function (response) {
+                Invoices_OnProcessSuccess(response, "EditInvoices");
+            }
+        });
+    </script>
+}
+}

@@ -1,4 +1,4 @@
-using Core.Cate.Biz;
+﻿using Core.Cate.Biz;
 using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
@@ -17,7 +17,7 @@ namespace Core.Cate.Caches
         private string BuildSearchCacheKey(RM_DigitalSalesSearchModel model)
         {
             if (model == null) return "RM_DigitalSales_GetList_Default";
-            return string.Concat("RM_DigitalSales_GetList_", model.Keyword, "_", model.BusinessType, "_", model.StatusID, "_", model.CustomerID, "_", model.ProductServiceID, "_", model.DepartmentID, "_", model.EmployeeID, "_", model.FromDate, "_", model.ToDate, "_", model.PageNumber, "_", model.PageSize, "_", model.UserName, "_", model.IsKeyProject, "_", model.IsFollowed);
+            return string.Concat("RM_DigitalSales_GetList_", model.Keyword, "_", model.BusinessType, "_", model.StatusID, "_", model.StatusIDs, "_", model.CustomerID, "_", model.ProductServiceID, "_", model.DepartmentID, "_", model.EmployeeID, "_", model.FromDate, "_", model.ToDate, "_", model.PageNumber, "_", model.PageSize, "_", model.UserName, "_", model.IsKeyProject, "_", model.IsFollowed);
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, true)]
@@ -113,6 +113,31 @@ namespace Core.Cate.Caches
             return result;
         }
 
+        public List<RM_DigitalSalesProductCostModel> GetProductCosts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductCostModel>();
+            return Api.GetProductCosts(salesProductId);
+        }
+
+        public List<RM_DigitalSalesProductRevenueModel> GetProductRevenues(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductRevenueModel>();
+            return Api.GetProductRevenues(salesProductId);
+        }
+
+        public List<RM_DigitalSalesProductMemberModel> GetProductMembers(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductMemberModel>();
+            return Api.GetProductMembers(salesProductId);
+        }
+
+        public int SaveProductDetail(RM_DigitalSalesProductModel model, string username)
+        {
+            var result = Api.SaveProductDetail(model, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
         public int DeleteProduct(int salesProductId, string username)
         {
             var result = Api.DeleteProduct(salesProductId, username);
@@ -149,6 +174,13 @@ namespace Core.Cate.Caches
         public int DeleteTracking(int trackingId, string username)
         {
             var result = Api.DeleteTracking(trackingId, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
+        public int ChangeProcessOfStatus(int digitalSalesId, int statusId, int newProcessId, string username)
+        {
+            var result = Api.ChangeProcessOfStatus(digitalSalesId, statusId, newProcessId, username);
             if (result > 0) InvalidateCache();
             return result;
         }
@@ -213,6 +245,12 @@ namespace Core.Cate.Caches
             return Api.GetActivitiesBySalesID(digitalSalesId, activityType);
         }
 
+        public List<RM_DigitalSalesActivityModel> GetActivitiesByTrackingID(int digitalSalesId, int trackingId)
+        {
+            if (digitalSalesId <= 0 || trackingId <= 0) return new List<RM_DigitalSalesActivityModel>();
+            return Api.GetActivitiesByTrackingID(digitalSalesId, trackingId);
+        }
+
         public int AddActivity(RM_DigitalSalesActivityModel model, string username)
         {
             var result = Api.AddActivity(model, username);
@@ -226,5 +264,42 @@ namespace Core.Cate.Caches
             if (result > 0) InvalidateCache();
             return result;
         }
+
+        public int UpdateLatestStatusChangeActivityAttachments(int digitalSalesId, string attachmentsJson, string username)
+        {
+            var result = Api.UpdateLatestStatusChangeActivityAttachments(digitalSalesId, attachmentsJson, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
+        public int? GetDepartmentByUserID(int userId)
+        {
+            if (userId <= 0) return null;
+            var rawKey = string.Concat("RM_DigitalSales_GetDepartmentByUserID_", userId);
+            var cached = GetCacheItem(rawKey);
+            if (cached != null) return (int)cached;
+
+            var data = Api.GetDepartmentByUserID(userId);
+            if (data.HasValue)
+            {
+                AddCacheItem(rawKey, data.Value);
+            }
+            return data;
+        }
+
+        public List<RM_DigitalSalesUserModel> GetAccessibleEmployees(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName)) return new List<RM_DigitalSalesUserModel>();
+            var rawKey = string.Concat("RM_DigitalSales_GetAccessibleEmployees_", userName.ToLower().Trim());
+            if (GetCacheItem(rawKey) is List<RM_DigitalSalesUserModel> cached) return cached;
+
+            var data = Api.GetAccessibleEmployees(userName);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data;
+        }
     }
 }
+

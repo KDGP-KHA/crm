@@ -1,0 +1,17 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectTaskReportSearchModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ProjectTaskReport_Title");
+}
+
+@section PageTitle { @ViewBag.Title }
+
+@Html.Partial("_Search", Model)
+
+<div id="ProjectTaskReportContainer"></div>
+
+@section BottomScript
+{
+    <script src="~/Areas/Cate/Views/ProjectTaskReport/ProjectTaskReport.js"></script>
+}

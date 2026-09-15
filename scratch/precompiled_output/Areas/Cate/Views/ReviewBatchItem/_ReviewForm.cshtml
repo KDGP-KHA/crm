@@ -1,0 +1,140 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewFormModel
+
+@Html.AntiForgeryToken()
+
+<div id="ReviewForm">
+    @Html.HiddenFor(model => model.ReviewHistoryID)
+    @Html.HiddenFor(model => model.ReviewBatchID)
+    @Html.HiddenFor(model => model.ReviewBatchItemID)
+    @Html.HiddenFor(model => model.ObjectType)
+    @Html.HiddenFor(model => model.ObjectID)
+
+    <div class="col-12">
+        @Html.TitleFor(model => model.ReviewComment, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        @Html.TextAreaFor(model => model.ReviewComment, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ReviewBatch_ReviewComment_Label") })
+        @Html.ValidationMessageFor(model => model.ReviewComment, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="col-12 mt-2">
+        @Html.CheckBoxFor(model => model.IsConfirmed)
+        @Html.LabelFor(model => model.IsConfirmed, new { @class = "col-form-label pr-0 font-bold" })
+    </div>
+
+    <div class="col-12">
+        @AppProcessor.Messagor.GetMessage("FileAttach_Label")
+        @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+        <div id="oldFileList" class="mt-2">
+            @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
+            {
+                foreach (var file in Model.ExistingFiles)
+                {
+                    var fileName = Path.GetFileName(file.FilePath);
+
+                    <div class="old-file d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
+                        <a class="js-file-preview text-decoration-none text-dark"
+                            href="@file.FilePath"
+                            data-file-path="@file.FilePath"
+                            data-file-name="@fileName"
+                            data-preview-title="Tệp đính kèm"
+                            onclick="return openBusinessOpportunityFilePreviewLink(this);">
+                            <i class="fa fa-file text-success mr-1"></i>
+                            @fileName
+                        </a>
+
+                        <button type="button" class="btn btn-sm btn-danger"
+                                onclick="removeOldFile(this, @file.FilePathID)">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+        <div id="fileList" class="mt-2"></div>
+        <div id="deletedFilesContainer"></div>
+    </div>
+</div>
+
+<script>
+    var filesList = [];
+    var dataTransfer = new DataTransfer();
+    $(document).ready(function () {
+        reloadCKEditor();
+    });
+    // CHỌN FILE MỚI
+    $(document).on("change", "#DinhKemFile", function (e) {
+        let newFiles = Array.from(e.target.files);
+
+        newFiles.forEach(file => {
+            // check trùng (name + size cho chắc)
+            if (!filesList.some(f => f.name === file.name && f.size === file.size)) {
+                filesList.push(file);
+            }
+        });
+
+        syncInputFiles();
+        renderFileList();
+    });
+
+    function reloadCKEditor() {
+        var editor = CKEDITOR.instances['ReviewComment'];
+        if (editor) { editor.destroy(true); }
+        editor = CKEDITOR.replace('ReviewComment', {
+            filebrowserWindowWidth: '1000',
+            filebrowserWindowHeight: '350',
+            // Vùng soạn thảo thấp để toàn bộ form rà soát vừa một màn hình
+            height: 250,
+        });
+        editor.on('change', function (e) {
+            $("#ReviewComment").val(editor.getData());
+        });
+    }
+
+    // SYNC FILE VÀO INPUT
+    function syncInputFiles() {
+        dataTransfer = new DataTransfer();
+
+        filesList.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+
+        document.getElementById("DinhKemFile").files = dataTransfer.files;
+    }
+
+    // RENDER FILE MỚI
+    function renderFileList() {
+        let html = "";
+
+        filesList.forEach((file, index) => {
+            html += `
+            <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1 new-file">
+                <span>
+                    <i class="fa fa-file text-primary mr-1"></i>
+                    ${file.name}
+                </span>
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            `;
+        });
+
+        $("#fileList").html(html);
+    }
+
+    // XÓA FILE MỚI
+    function removeFile(index) {
+        filesList.splice(index, 1);
+        syncInputFiles();
+        renderFileList();
+    }
+
+    // XÓA FILE CŨ (EDIT)
+    function removeOldFile(btn, fileId) {
+        $(btn).closest(".old-file").remove();
+        $("#deletedFilesContainer").append(
+            `<input type="hidden" name="DeletedFileIds" value="${fileId}" />`
+        );
+    }
+</script>
+@Html.RenderScripts(ScriptPosition.BodyInside)

@@ -1,0 +1,135 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_LogTaskFormModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("LogTask_UpdateProgress_Title");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{ primary }
+@section FormIcon{ <i class="far fa-edit"></i> }
+@section SubmitControl{ <span></span> }
+
+@section FormBody{
+    <div id="bodyForm">
+        <div class="row">
+
+            <div class="col-md-6 col-sm-12 mb-3" id="FormXacNhan">
+                <div class="card dcard overflow-hidden">
+                    <div class="card-header">
+                        <h5 class="card-title text-110 text-success-d2 pt-1">
+                            <i class="fas fa-check-circle text-success ml-2"></i>
+                            &nbsp;@AppProcessor.Messagor.GetMessage("LogTask_UpdateProgress_Title")
+                        </h5>
+                    </div>
+                    @using (Html.BeginForm("UpdateProgress", "LogTask", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditLogTask", @class = "form-horizontal" }))
+                    {
+                        <div class="card-body bg-white py-1 pt-3" id="_FormConfirm">
+                            @Html.Partial("_LogTask", Model.RM_LogTask)
+                        </div>
+                    }
+                    <div class="card-footer bgc-white px-4 py-3 brc-dark-l3 d-flex justify-content-end">
+                        <button type="button" id="btnSave"
+                                class="float-right btn border-2 btn-lighter-success btn-text-success btn-h-success btn-a-success btn-bgc-tp">
+                            <i class="fas fa-check mr-2"></i> @AppProcessor.Messagor.GetMessage("LogTask_Confirm_Label")
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-sm-12" id="ListLog">
+                <div class="card dcard overflow-hidden">
+                    <div class="card-header">
+                        <h5 class="card-title text-110 text-primary-d2 pt-1">
+                            <i class="fas fa-history text-primary ml-2"></i>
+                            &nbsp;@AppProcessor.Messagor.GetMessage("LogTask_History_Title")
+                        </h5>
+                    </div>
+                    <div class="card-body bg-white pb-2">
+                        <div id="LogList" class="px-2 ace-scroll ace-scroll-wrap overflow-auto"
+                             data-ace-scroll="{&quot;height&quot;: 320, &quot;smooth&quot;:true}"
+                             style="height: 420px; overflow-y: auto;">
+                            @Html.Partial("_LichSuLog", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            // ── CKEditor ──────────────────────────────────────────
+            function initLogCKEditor() {
+                if (typeof CKEDITOR === 'undefined') return;
+                var ex = CKEDITOR.instances['LogTaskDescription'];
+                if (ex) ex.destroy(true);
+                CKEDITOR.replace('LogTaskDescription');
+            }
+
+            function loadCKEditorThenInit() {
+                if (typeof CKEDITOR !== 'undefined') { initLogCKEditor(); return; }
+                var s = document.createElement('script');
+                s.src = '/Contents/Modules/Major/ckeditor4/ckeditor.js';
+                s.onload = function () {
+                    var s2 = document.createElement('script');
+                    s2.src = '/Contents/Modules/Major/ckfinder/ckfinder.js';
+                    s2.onload = function () { initLogCKEditor(); };
+                    s2.onerror = function () { initLogCKEditor(); };
+                    document.head.appendChild(s2);
+                };
+                document.head.appendChild(s);
+            }
+
+            function onSuccess(response) {
+                if (response.status != undefined) {
+                    try { eval(response.message); } catch (e) { console.warn('eval error:', e); }
+                    $('#_FormConfirm').html(response.page);
+                    $('#LogList').html(response.list);
+                    setTimeout(function () {
+                        initLogCKEditor();
+                        if ($('#LogDate').length) {
+                            $('#LogDate').datetimepicker({ format: 'DD/MM/YYYY HH:mm' });
+                        }
+                    }, 50);
+                } else {
+                    $('#_FormConfirm').html(response);
+                    setTimeout(function () { initLogCKEditor(); }, 50);
+                }
+            }
+
+            $('form#EditLogTask').ajaxForm({ success: onSuccess });
+
+            document.getElementById('btnSave').addEventListener('click', function () {
+                var btn = this;
+                if (btn.disabled) return;
+                btn.disabled = true;
+                setTimeout(function () { btn.disabled = false; }, 2000);
+                var logDateInput = document.getElementById('LogDate');
+                if (logDateInput && (!logDateInput.value || logDateInput.value === '01/01/0001 00:00')) {
+                    var now = new Date();
+                    var pad = function (n) { return n < 10 ? '0' + n : n; };
+                    logDateInput.value = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear()
+                        + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+                }
+                if (typeof CKEDITOR !== 'undefined') {
+                    for (var inst in CKEDITOR.instances) {
+                        CKEDITOR.instances[inst].updateElement();
+                    }
+                }
+                $('form#EditLogTask').trigger('submit');
+            });
+
+            $('#modal_EditLogTask').addClass('modal-fs').removeClass('modal-xl');
+            $('#modal_EditLogTask .modal-footer').hide();
+
+            $(document).off('click.logtoggle').on('click.logtoggle', '.btn-toggle-log', function (e) {
+                e.preventDefault();
+                $(this).closest('.col-12').next('.content-detail-log').slideToggle();
+            });
+
+            loadCKEditorThenInit();
+        })();
+    </script>
+}

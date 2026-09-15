@@ -16,6 +16,12 @@
         addProgress: "/Cate/DigitalSalesWorkflow/AddProgress"
     };
 
+    var pendingRequests = {
+        statuses: null,
+        processes: null,
+        progresses: null
+    };
+
     function init() {
         // Lấy businessType từ radio/tab ban đầu
         var initialType = $("input[name='tabBusinessType']:checked").val() || 1;
@@ -25,7 +31,11 @@
         autoSelectFirstStatus();
     }
 
-    function switchBusinessType(type, element) {
+    function switchBusinessType(type, element, event) {
+        if (event) {
+            event.preventDefault();
+        }
+
         state.businessType = parseInt(type);
         state.statusId = 0;
         state.statusName = "";
@@ -39,19 +49,45 @@
 
         resetProcessColumn();
         resetProgressColumn();
+        loadStatuses(state.businessType);
 
-        $("#statusContainer").html('<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i></div>');
+        return false;
+    }
 
-        $.ajax({
+    function loadStatuses(businessType, targetStatusId) {
+        var $container = $("#statusContainer");
+        $container.html('<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x text-primary"></i></div>');
+
+        abortPendingRequest("statuses");
+        pendingRequests.statuses = $.ajax({
             url: urls.getStatuses,
             type: "GET",
-            data: { businessType: state.businessType },
+            dataType: "html",
+            global: false,
+            data: { businessType: businessType },
             success: function (html) {
-                $("#statusContainer").html(html);
-                autoSelectFirstStatus();
+                if (!replacePartial($container, html, "#statusListItems")) {
+                    return;
+                }
+
+                var targetItem = targetStatusId
+                    ? $container.find(".status-item[data-id='" + targetStatusId + "']")
+                    : $();
+                if (targetItem.length > 0) {
+                    selectStatus(targetStatusId, targetItem[0]);
+                } else {
+                    autoSelectFirstStatus();
+                }
             },
-            error: function () {
-                $("#statusContainer").html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Lỗi tải danh sách trạng thái</div>');
+            error: function (xhr, statusText) {
+                if (statusText !== "abort") {
+                    $container.html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Lỗi tải danh sách trạng thái</div>');
+                }
+            },
+            complete: function (xhr) {
+                if (pendingRequests.statuses === xhr) {
+                    pendingRequests.statuses = null;
+                }
             }
         });
     }
@@ -59,14 +95,18 @@
     function autoSelectFirstStatus() {
         var firstItem = $("#statusContainer .status-item").first();
         if (firstItem.length > 0) {
-            firstItem.trigger("click");
+            selectStatus(firstItem.data("id"), firstItem[0]);
         } else {
             resetProcessColumn();
             resetProgressColumn();
         }
     }
 
-    function selectStatus(statusId, element) {
+    function selectStatus(statusId, element, event) {
+        if (event) {
+            event.preventDefault();
+        }
+
         state.statusId = parseInt(statusId);
         state.statusName = $(element).attr("data-name") || "";
         state.processId = 0;
@@ -85,25 +125,47 @@
 
         // Load processes
         loadProcesses(state.statusId);
+        return false;
     }
 
-    function loadProcesses(statusId, callback) {
-        $("#processContainer").html('<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x text-info"></i></div>');
+    function loadProcesses(statusId, targetProcessId) {
+        var $container = $("#processContainer");
+        $container.html('<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x text-info"></i></div>');
 
-        $.ajax({
+        abortPendingRequest("processes");
+        pendingRequests.processes = $.ajax({
             url: urls.getProcesses,
             type: "GET",
+            dataType: "html",
+            global: false,
             data: { statusId: statusId },
             success: function (html) {
-                $("#processContainer").html(html);
-                if (typeof callback === "function") {
-                    callback();
-                } else {
-                    autoSelectFirstProcess();
+                if (state.statusId !== parseInt(statusId)) {
+                    return;
+                }
+
+                if (!replacePartial($container, html, "#processListItems")) {
+                    return;
+                }
+                if (targetProcessId) {
+                    var targetItem = $container.find(".process-item[data-id='" + targetProcessId + "']");
+                    if (targetItem.length > 0) {
+                        selectProcess(targetProcessId, targetItem[0]);
+                        return;
+                    }
+                }
+
+                autoSelectFirstProcess();
+            },
+            error: function (xhr, statusText) {
+                if (statusText !== "abort") {
+                    $container.html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Lỗi tải danh sách quy trình</div>');
                 }
             },
-            error: function () {
-                $("#processContainer").html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Lỗi tải danh sách quy trình</div>');
+            complete: function (xhr) {
+                if (pendingRequests.processes === xhr) {
+                    pendingRequests.processes = null;
+                }
             }
         });
     }
@@ -111,13 +173,17 @@
     function autoSelectFirstProcess() {
         var firstItem = $("#processContainer .process-item").first();
         if (firstItem.length > 0) {
-            firstItem.trigger("click");
+            selectProcess(firstItem.data("id"), firstItem[0]);
         } else {
             resetProgressColumn();
         }
     }
 
-    function selectProcess(processId, element) {
+    function selectProcess(processId, element, event) {
+        if (event) {
+            event.preventDefault();
+        }
+
         state.processId = parseInt(processId);
         state.processName = $(element).attr("data-name") || "";
 
@@ -131,31 +197,65 @@
 
         // Load progresses
         loadProgresses(state.processId);
+        return false;
     }
 
     function loadProgresses(processId) {
-        $("#progressContainer").html('<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x text-success"></i></div>');
+        var $container = $("#progressContainer");
+        $container.html('<div class="text-center py-4"><i class="fa fa-spinner fa-spin fa-2x text-success"></i></div>');
 
-        $.ajax({
+        abortPendingRequest("progresses");
+        pendingRequests.progresses = $.ajax({
             url: urls.getProgresses,
             type: "GET",
+            dataType: "html",
+            global: false,
             data: { processId: processId },
             success: function (html) {
-                $("#progressContainer").html(html);
+                if (state.processId === parseInt(processId)) {
+                    replacePartial($container, html, "#progressListItems");
+                }
             },
-            error: function () {
-                $("#progressContainer").html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Lỗi tải danh sách tiến trình</div>');
+            error: function (xhr, statusText) {
+                if (statusText !== "abort") {
+                    $container.html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Lỗi tải danh sách tiến trình</div>');
+                }
+            },
+            complete: function (xhr) {
+                if (pendingRequests.progresses === xhr) {
+                    pendingRequests.progresses = null;
+                }
             }
         });
     }
 
+    function replacePartial($container, html, expectedSelector) {
+        var $response = $("<div></div>").append($.parseHTML(html, document, true));
+        if ($response.find(expectedSelector).length === 0) {
+            $container.html('<div class="text-center text-danger py-4"><i class="fa fa-exclamation-triangle mr-1"></i>Dữ liệu trả về không đúng định dạng</div>');
+            return false;
+        }
+
+        $container.html(html);
+        return true;
+    }
+
+    function abortPendingRequest(requestName) {
+        var request = pendingRequests[requestName];
+        if (request && request.readyState !== 4) {
+            request.abort();
+        }
+    }
+
     function resetProcessColumn() {
+        abortPendingRequest("processes");
         $("#lblSelectedStatus").text("(Chưa chọn trạng thái)");
         $("#btnAddProcess").addClass("disabled").attr("disabled", "disabled");
         $("#processContainer").html('<div class="text-center py-5 text-secondary-m2"><i class="fa fa-arrow-left text-160 mb-2 opacity-50"></i><p class="mb-0 text-90">Vui lòng chọn một Trạng thái ở cột bên trái</p></div>');
     }
 
     function resetProgressColumn() {
+        abortPendingRequest("progresses");
         $("#lblSelectedProcess").text("(Chưa chọn quy trình)");
         $("#btnAddProgress").addClass("disabled").attr("disabled", "disabled");
         $("#progressContainer").html('<div class="text-center py-5 text-secondary-m2"><i class="fa fa-arrow-left text-160 mb-2 opacity-50"></i><p class="mb-0 text-90">Vui lòng chọn một Quy trình ở cột giữa</p></div>');
@@ -243,20 +343,7 @@
                         eval(response.message);
                     }
                     var targetStatusId = response.statusId || state.statusId;
-                    $.ajax({
-                        url: urls.getStatuses,
-                        type: "GET",
-                        data: { businessType: response.businessType || state.businessType },
-                        success: function (html) {
-                            $("#statusContainer").html(html);
-                            var targetItem = $("#statusContainer .status-item[data-id='" + targetStatusId + "']");
-                            if (targetItem.length > 0) {
-                                targetItem.trigger("click");
-                            } else {
-                                autoSelectFirstStatus();
-                            }
-                        }
-                    });
+                    loadStatuses(response.businessType || state.businessType, targetStatusId);
                 });
             } else {
                 if (response.message) {
@@ -285,14 +372,7 @@
                     }
                     var stId = response.statusId || state.statusId;
                     var targetProcId = response.processId || state.processId;
-                    loadProcesses(stId, function () {
-                        var targetItem = $("#processContainer .process-item[data-id='" + targetProcId + "']");
-                        if (targetItem.length > 0) {
-                            targetItem.trigger("click");
-                        } else {
-                            autoSelectFirstProcess();
-                        }
-                    });
+                    loadProcesses(stId, targetProcId);
                 });
             } else {
                 if (response.message) {
@@ -344,8 +424,14 @@
                         eval(response.message);
                     }
                     if (targetType === "Status") {
-                        switchBusinessType(state.businessType);
+                        state.statusId = 0;
+                        state.processId = 0;
+                        resetProcessColumn();
+                        resetProgressColumn();
+                        loadStatuses(response.businessType || state.businessType);
                     } else if (targetType === "Process") {
+                        state.processId = 0;
+                        resetProgressColumn();
                         loadProcesses(state.statusId);
                     } else if (targetType === "Progress") {
                         loadProgresses(state.processId);

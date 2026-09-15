@@ -41,6 +41,17 @@ function initSearchDatepicker() {
     }
 }
 
+function formatRevenueInMillions(value) {
+    if (value == null || isNaN(value)) return '0';
+    var num = Number(value);
+    if (num === 0) return '0';
+    var inMillions = num / 1000000;
+    return inMillions.toLocaleString('vi-VN', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+}
+
 function initTableDigitalSales() {
     _tableDigitalSales = $("#tblDigitalSales").DataTable({
         responsive: true,
@@ -58,6 +69,7 @@ function initTableDigitalSales() {
                 d.Keyword = ($("#Keyword").val() || $("#SearchKeyword").val() || "").trim();
                 d.BusinessType = $("#BusinessType").val() || $("#SearchBusinessType").val() || "";
                 d.StatusID = $("#StatusID").val() || $("#SearchStatusID").val() || "";
+                d.StatusIDs = typeof getSelectedStatusIDs === 'function' ? getSelectedStatusIDs() : '';
                 d.CustomerID = $("#CustomerID").val() || 0;
                 d.ProductServiceID = 0;
                 d.EmployeeID = $("#EmployeeID").val() || $("#SearchEmployeeID").val() || "";
@@ -165,14 +177,16 @@ function initTableDigitalSales() {
                 data: null,
                 className: "text-right align-middle",
                 render: function (data, type, row) {
-                    var expRev = row.TotalExpectedRevenue != null ? Number(row.TotalExpectedRevenue).toLocaleString('vi-VN') : '0';
-                    var actRev = row.TotalActualRevenue != null ? Number(row.TotalActualRevenue).toLocaleString('vi-VN') : '0';
+                    var expRev = formatRevenueInMillions(row.TotalExpectedRevenue);
+                    var actRev = formatRevenueInMillions(row.TotalActualRevenue);
+                    var rawExp = row.TotalExpectedRevenue != null ? Number(row.TotalExpectedRevenue).toLocaleString('vi-VN') + ' đ' : '0 đ';
+                    var rawAct = row.TotalActualRevenue != null ? Number(row.TotalActualRevenue).toLocaleString('vi-VN') + ' đ' : '0 đ';
 
-                    var html = '<div class="sale-revenue">' +
-                        '<span class="text-secondary">Dự kiến:</span> <span class="font-weight-bold text-primary">' + expRev + ' đ</span>' +
+                    var html = '<div class="sale-revenue" title="Dự kiến: ' + rawExp + '">' +
+                        '<span class="text-secondary">Dự kiến:</span> <span class="font-weight-bold text-primary">' + expRev + ' tr</span>' +
                         '</div>';
-                    html += '<div class="sale-revenue mt-1">' +
-                        '<span class="text-secondary">Thực tế:</span> <span class="font-weight-bold text-success">' + actRev + ' đ</span>' +
+                    html += '<div class="sale-revenue mt-1" title="Thực tế: ' + rawAct + '">' +
+                        '<span class="text-secondary">Thực tế:</span> <span class="font-weight-bold text-success">' + actRev + ' tr</span>' +
                         '</div>';
                     return html;
                 }
@@ -348,7 +362,25 @@ function resetSalesSearch() {
         }
     });
 
-    loadStatusesByBusinessType("");
+    if (typeof loadStatusesByBusinessType === 'function') {
+        loadStatusesByBusinessType("");
+    }
+
+    // Khôi phục trạng thái checked mặc định cho combobox trạng thái đa chọn
+    $('.status-item-row').show();
+    var excluded = window._excludedStatusIds || [];
+    $('.status-item').each(function () {
+        var val = parseInt($(this).val());
+        $(this).prop('checked', excluded.indexOf(val) < 0);
+    });
+    var totalStatus = $('.status-item').length;
+    var checkedStatus = $('.status-item:checked').length;
+    $('#checkAllStatus').prop('checked', totalStatus > 0 && totalStatus === checkedStatus);
+    if (typeof updateStatusDropdownText === 'function') {
+        updateStatusDropdownText();
+    }
+
+    reloadSalesTable();
 }
 
 function DigitalSales_OnProcessSuccess(response, formId) {
@@ -543,6 +575,13 @@ function openChangeStatusModal(id) {
                 return false;
             }
 
+            // Thu thập dữ liệu tiến trình checklist thành chuỗi JSON trước khi gửi
+            if (typeof serializeProgressItemsToJson === "function") {
+                if (!serializeProgressItemsToJson()) {
+                    return false;
+                }
+            }
+
             var $btnSubmit = $form.find("button[type='submit']");
             var origBtnHtml = $btnSubmit.html();
             $btnSubmit.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang xử lý...');
@@ -556,6 +595,11 @@ function openChangeStatusModal(id) {
                 processData: false,
                 success: function (res) {
                     $btnSubmit.prop("disabled", false).html(origBtnHtml);
+                    if (typeof res === "string") {
+                        $modal.find("#bodyForm").html(res);
+                        if (typeof initDigitalSalesChangeStatusForm === "function") initDigitalSalesChangeStatusForm();
+                        return;
+                    }
                     if (res.status) {
                         executeResponseMessage(res.message, "Chuyển trạng thái thành công!", true);
                         $modal.modal("hide");
@@ -692,7 +736,106 @@ function exportDigitalSales() {
     if ($("#chkFilterKeyProject").is(":checked")) qs.push("isKeyProject=true");
     if ($("#chkFilterFollowed").is(":checked")) qs.push("isFollowed=true");
 
+    var statusIDs = typeof getSelectedStatusIDs === 'function' ? getSelectedStatusIDs() : '';
+    if (statusIDs) qs.push("statusIDs=" + encodeURIComponent(statusIDs));
+
     var url = baseUrl + (qs.length ? "?" + qs.join("&") : "");
     window.location.href = url;
 }
+
+// -------------------------------------------------------------
+// STATUS MULTISELECT DROPDOWN LOGIC (GIỐNG DỰ ÁN)
+// -------------------------------------------------------------
+function getSelectedStatusIDs() {
+    var $items = $('.status-item:visible');
+    if ($items.length === 0) {
+        $items = $('.status-item');
+    }
+    return $items.filter(':checked').map(function () {
+        return $(this).val();
+    }).get().join(',');
+}
+
+function updateStatusDropdownText() {
+    var $items = $('.status-item:visible');
+    if ($items.length === 0) {
+        $items = $('.status-item');
+    }
+    var total = $items.length;
+    var checked = $items.filter(':checked').length;
+
+    if (checked === 0) {
+        $('#statusDropdownText').text('Chưa chọn trạng thái');
+        return;
+    }
+
+    if (checked === total) {
+        $('#statusDropdownText').text('Tất cả');
+        return;
+    }
+
+    $('#statusDropdownText').text(checked + ' trạng thái được chọn');
+}
+
+function filterStatusListByBusinessType(bType) {
+    if (!bType) {
+        $('.status-item-row').show();
+    } else {
+        $('.status-item-row').each(function () {
+            var rowType = $(this).data('businesstype');
+            if (rowType == bType) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+    var $visible = $('.status-item:visible');
+    var total = $visible.length;
+    var checked = $visible.filter(':checked').length;
+    $('#checkAllStatus').prop('checked', total > 0 && total === checked);
+    updateStatusDropdownText();
+    reloadSalesTable();
+}
+
+// Toggle status dropdown menu
+$(document).on('click', '#statusDropdownButton', function (e) {
+    e.stopPropagation();
+    $('#statusDropdownMenu').toggle();
+});
+
+// Click ngoài -> đóng menu
+$(document).on('click', function () {
+    $('#statusDropdownMenu').hide();
+});
+
+// Ngăn đóng menu khi click bên trong
+$(document).on('click', '#statusDropdownMenu', function (e) {
+    e.stopPropagation();
+});
+
+// Check all
+$(document).on('change', '#checkAllStatus', function () {
+    var isChecked = $(this).is(':checked');
+    var $items = $('.status-item:visible');
+    if ($items.length === 0) {
+        $items = $('.status-item');
+    }
+    $items.prop('checked', isChecked);
+    updateStatusDropdownText();
+    reloadSalesTable();
+});
+
+// Item change
+$(document).on('change', '.status-item', function () {
+    var $items = $('.status-item:visible');
+    if ($items.length === 0) {
+        $items = $('.status-item');
+    }
+    var total = $items.length;
+    var checked = $items.filter(':checked').length;
+    $('#checkAllStatus').prop('checked', total > 0 && total === checked);
+    updateStatusDropdownText();
+    reloadSalesTable();
+});
 

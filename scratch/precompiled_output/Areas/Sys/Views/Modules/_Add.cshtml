@@ -1,0 +1,55 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("Module_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+
+    @using (Html.BeginForm("Add", "Modules", new { area = "Sys" }, FormMethod.Post, new { encType = "multipart/form-data", id = "AddModule", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Module")
+        </div>
+    }
+    <script type="text/javascript">
+        $('form').ajaxForm({
+            success: function (response) {
+                if (response.status != undefined) {
+                    if ($("#ModalContent #modal_AddModule #chkNotDismissModal").is(":checked")) {
+                        if (response.status != undefined) {
+                            eval(response.message);
+                            _tableModule.ajax.reload(null, false);
+                            response.status = undefined;
+                            $("#ModalContent #modal_AddModule form")[0].reset();
+                        }
+                    } else {
+                        $("#ModalContent #modal_AddModule").modal("hide");
+                        $("#ModalContent #modal_AddModule").on('hidden.bs.modal',
+                            function () {
+                                if (response.status != undefined) {
+                                    eval(response.message);
+                                    _tableModule.ajax.reload(null, false);
+                                    response.status = undefined;
+                                }
+                            });
+                    }
+                } else {
+                    $("#ModalContent #modal_AddModule" + " #bodyForm").html(response);
+                }
+            }
+        });
+    </script>
+}
+
+@section ContinueForm{
+
+}

@@ -1,44 +1,55 @@
-/* 1. Custom Switches */
-    .ds-custom-switch {
-        padding-left: 2.6rem !important;
-        margin-right: 18px !important;
-        display: inline-flex !important;
-        align-items: center !important;
+﻿/* 1. Custom Switches - Đồng bộ 100% với custom-switch-lg ở màn hình danh sách (_Search.css) */
+    .custom-switch.custom-switch-lg {
+        padding-left: 56px !important;
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 0;
         cursor: pointer;
     }
-    .ds-custom-switch:last-child {
-        margin-right: 0 !important;
-    }
-    .ds-custom-switch .custom-control-label {
-        font-size: 13.5px !important;
-        font-weight: 700 !important;
-        line-height: 22px !important;
-        white-space: nowrap !important;
+    .custom-switch.custom-switch-lg .custom-control-label {
+        font-size: 14px !important;
+        color: #1a1a1a !important;
+        font-weight: 600 !important;
+        line-height: 26px !important;
+        cursor: pointer;
         user-select: none;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        margin-bottom: 0;
+    }
+    .custom-switch.custom-switch-lg .custom-control-label::before {
+        position: absolute;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: -56px !important;
+        width: 46px !important;
+        height: 24px !important;
+        border-radius: 12px !important;
+        background-color: #ced4da;
+        border: 1px solid #adb5bd;
+        pointer-events: all;
         cursor: pointer;
-        padding-left: 6px !important;
-        color: #212529 !important;
     }
-    .ds-custom-switch .custom-control-label::before {
-        left: -2.6rem !important;
-        width: 2.1rem !important;
-        height: 1.25rem !important;
-        border-radius: 1rem !important;
-        top: calc(50% - 0.625rem) !important;
-    }
-    .ds-custom-switch .custom-control-label::after {
-        left: calc(-2.6rem + 2px) !important;
-        width: calc(1.25rem - 4px) !important;
-        height: calc(1.25rem - 4px) !important;
+    .custom-switch.custom-switch-lg .custom-control-label::after {
+        position: absolute;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: -54px !important;
+        width: 20px !important;
+        height: 20px !important;
         border-radius: 50% !important;
-        top: calc(50% - 0.625rem + 2px) !important;
-        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
-    }
-    .ds-custom-switch .custom-control-input:checked ~ .custom-control-label::after {
-        transform: translateX(0.85rem) !important;
         background-color: #fff !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+        cursor: pointer;
     }
-    .ds-custom-switch .custom-control-input:disabled ~ .custom-control-label {
+    .custom-switch.custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateY(-50%) translateX(22px) !important;
+    }
+    .custom-switch.custom-switch-lg .custom-control-input:disabled ~ .custom-control-label {
         opacity: 0.65;
         cursor: not-allowed;
     }
@@ -170,7 +181,7 @@
             align-items: flex-start !important;
             gap: 0.4rem !important;
         }
-        .ds-custom-switch {
+        .custom-switch.custom-switch-lg, .ds-custom-switch {
             margin-right: 0 !important;
         }
     }

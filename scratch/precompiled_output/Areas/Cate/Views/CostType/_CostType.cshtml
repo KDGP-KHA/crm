@@ -1,0 +1,22 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_CostTypeModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.CostTypeID)
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CostTypeCode, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.CostTypeCode, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("CostType_CostTypeCode_Label") })
+            @Html.ValidationMessageFor(model => model.CostTypeCode, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group row">
+        @Html.TitleFor(model => model.CostTypeName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-8">
+            @Html.TextBoxFor(model => model.CostTypeName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("CostType_CostTypeName_Label") })
+            @Html.ValidationMessageFor(model => model.CostTypeName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+</div>

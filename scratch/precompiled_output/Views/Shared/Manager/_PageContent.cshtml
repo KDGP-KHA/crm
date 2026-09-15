@@ -1,0 +1,202 @@
+﻿@{
+    Layout = "~/Views/Shared/Manager/_Main.cshtml";
+}
+
+
+@section PluginCss{
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/photoswipe/dist/photoswipe.css">
+    <link rel="stylesheet" type="text/css" href="~/Contents/Base/plugins/ace_v4/node_modules/photoswipe/dist/default-skin/default-skin.css">
+
+    @RenderSection("PluginCss", false)
+}
+
+@section HeadJs{
+    @RenderSection("HeadJs", false)
+    @Html.RenderScripts(ScriptPosition.HeadEnd)
+}
+
+@section HeadCss{
+    @RenderSection("HeadCss", false)
+}
+
+<!-- page header and toolbox -->
+<div class="page-header pb-0" id="PageTitle">
+    <div class="page-title text-primary-d2" style="font-size:1rem !important">
+        @RenderSection("PageTitle", false)
+    </div>
+
+    <div class="page-tools d-inline-flex" id="PageAction">
+        @RenderSection("PageAction", false)
+    </div>
+</div>
+
+<div class="mt-2">
+    @RenderBody()
+</div>
+
+<!-- for Photoswipe -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe.
+    It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides.
+        PhotoSwipe keeps only 3 of them in the DOM to save memory.
+        Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="text-white border-0 shadow-0" title="Rotate" style="background: rgba(0, 0, 0, 0);width: 44px;height: 44px;position: relative;float: right;opacity:0.75;" onclick="_onRotateImg();"><i class="fas fa-sync"></i></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section PluginJs{
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/photoswipe/dist/photoswipe.js"></script>
+    <script src="~/Contents/Base/plugins/ace_v4/node_modules/photoswipe/dist/photoswipe-ui-default.js"></script>
+
+    <script type="text/javascript">
+
+        function fileListFrom(files) {
+            const b = new ClipboardEvent("").clipboardData || new DataTransfer()
+            for (const file of files) b.items.add(file)
+            return b.files
+        }
+        var rotation = 0;
+
+        function _initGalary(ele) {
+            // set pointer-events to none for dark layers that appear on hover above dark images
+            $(ele + ' .h-100.w-100').css('pointer-events', 'none')
+            ////.pswp__button, .pswp__button--arrow--left::before, .pswp__button--arrow--right::before {background-image: svg;}
+
+            var pswpElement = document.querySelector('.pswp')
+
+            var items = null // the items to be used in the lightbox
+
+            var triggerBtns = document.querySelectorAll('.show-lightbox') // these are the buttons/images that are supposed to trigger lightbox for each image when clicked
+
+            // and each time we click an image/button to open lightbox, it should be initialized ... this is how the plugin works
+            $(triggerBtns).on('click', function (e) {
+                e.preventDefault()
+
+                if (items == null) {
+                    items = []
+                    $(ele + ' img[data-size]').each(function (index, img) {
+                        var size = img.getAttribute('data-size').split(/\D/)
+                        items.push({
+                            src: img.src.replace('/thumb', '/'),
+                            w: size[0],
+                            h: size[1],
+                            ref: img,
+                            title: img.getAttribute('alt') || 'Image ' + (index + 1) + ' caption'
+                        })
+                        triggerBtns[index].setAttribute('data-index', index)
+                    })
+                }
+
+                var options = {
+                    index: +this.getAttribute('data-index'),
+
+                    bgOpacity: 0.8,
+                    history: false,
+                    closeOnScroll: false,
+                    correctOrientation: true,
+
+                    getThumbBoundsFn: function (index) {
+                        var thumbnail = items[index].ref,
+                            pageYScroll = window.pageYOffset || document.documentElement.scrollTop,
+                            rect = thumbnail.getBoundingClientRect()
+
+                        return { x: rect.left, y: rect.top + pageYScroll, w: rect.width }
+                    },
+                    addCaptionHTMLFn: function (item, captionEl) {
+                        if (!item.title) {
+                            return false
+                        }
+                        captionEl.children[0].innerHTML = item.title
+                        return true
+                    }
+
+                }
+
+                var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+                gallery.init();
+                rotation = 0;
+            })// click
+        }
+
+        function _onRotateImg() {
+            var currentImg = $(".pswp__img[style*='display: block']");
+
+            rotation += 90;
+            $(currentImg).rotate(rotation);
+        }
+
+        jQuery.fn.rotate = function (degrees) {
+            $(this).css({
+                '-webkit-transform': 'rotate(' + degrees + 'deg)',
+                '-moz-transform': 'rotate(' + degrees + 'deg)',
+                '-ms-transform': 'rotate(' + degrees + 'deg)',
+                'transform': 'rotate(' + degrees + 'deg)'
+            });
+            return $(this);
+        };
+
+    </script>
+
+    @RenderSection("PluginJs", false)
+}
+
+@section BottomScript{
+    @RenderSection("BottomScript", false)
+}

@@ -1,0 +1,39 @@
+@{
+    var modalId = (ViewData["ModalId"] as string) ?? "contentViewModal";
+    var title = (ViewData["Title"] as string) ?? "Nội dung";
+    var bodyId = (ViewData["BodyId"] as string) ?? (modalId + "Body");
+}
+
+<style>
+    .content-view-modal .modal-dialog {
+        max-width: 720px;
+    }
+
+    .content-view-modal .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+        white-space: pre-line;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="modal fade content-view-modal" id="@modalId" tabindex="-1" role="dialog" aria-labelledby="@(modalId)Title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header py-2 bgc-primary-tp1 border-0 radius-t-1">
+                <h5 class="modal-title text-white-tp1 text-110 pl-2 font-bolder my-auto" id="@(modalId)Title">
+                    <i class="fas fa-file-alt"></i>&nbsp;@title
+                </h5>
+                <button type="button" class="btn btn-outline-white btn-h-danger btn-a-danger mt-1px mr-1px btn-brc-tp" data-dismiss="modal" aria-label="Đóng" title="Đóng" data-rel="tooltip">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="@bodyId"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn px-4 btn-outline-danger mb-1" data-dismiss="modal">
+                    <i class="fas fa-times"></i>&nbsp;Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

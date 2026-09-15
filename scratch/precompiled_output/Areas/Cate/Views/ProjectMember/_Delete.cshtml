@@ -1,0 +1,26 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProjectMemberModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("ProjectMember_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "ProjectMember", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "ProjectMember_OnProcessSuccess(data, 'DeleteProjectMember')"
+    }, new { @class = "form-horizontal", id = "DeleteProjectMember" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.ProjectMemberID)
+        @Html.HiddenFor(model => model.Employee_ID)
+        @Html.HiddenFor(model => model.ProductProjectID)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

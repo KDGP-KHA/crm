@@ -1,0 +1,28 @@
+﻿@model Modules.Dashboard.Areas.Dashboard.Data.MenuListModel
+
+<!DOCTYPE html>
+<link href="~/Areas/Dashboard/Views/Manager/MenuList.css" rel="stylesheet"/>
+@foreach (var item in Model.Items)
+{
+    <div class="col-12 mb-3 col-md-6 col-lg-4 col-xl-3">
+        <div class="bg-white h-10 mx-lg-1" style="border-radius: 20px">
+            <button 
+                onclick="javascript:LoadMenu(@item.MenuId)" 
+                class="d-flex align-items-center btn btn-app btn-outline-primary px-lg-3 menu-item-button " 
+                style="border-radius: 20px; padding: 20px; min-width: 100%; box-shadow: rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px, rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px, rgba(0, 0, 0, 0.07) 0px 16px 16px;"
+            >
+                <div style="width: 32px">
+                    <i class="d-block @item.Icon fa-lg mb-1  mr-2 ml-1"></i>
+                </div>
+                <div class="d-flex align-items-center justify-content-start" style="height: 4.2rem">
+                    <p class="font-weight-bold text-uppercase my-0" style="text-align: start">@item.Name</p>
+                </div>
+            </button>
+        </div>
+    </div>
+}
+
+
+
+
+

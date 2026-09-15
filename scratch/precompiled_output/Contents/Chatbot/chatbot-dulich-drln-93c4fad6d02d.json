@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "chatbot-dulich-drln",
+  "private_key_id": "93c4fad6d02d097c36681ec9e4613bcb8aa110bf",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC6AJYLY1Z7lXdX\nMpq7zRmk8MxSm2dd6j7X4T4Sbz7HSX5Ml0N80H2t8nfjADMlq1PpJe/n4mXqaOQY\nQdvqOzvK6E4A3qyWrVLkjhcdtItmVhbFI6dZTziMsccGVwEI+SGAix4xhldNXp0u\njfX6UXJ+P7uTU3mr8OEvp6pCcl5uVqNd7fpd03Qi9fwVgdMIVynD4WaxqM2wj/Hc\nAc9M9MrSfBNSRRqDiDyZPet5MTeobfzlaacAybuWwV6K+RLnddo2vRWLXD+V+RG/\n6VIcrGOyKWF3cxv3aHXTXlGQhfTsImvfMqgvgR3zGJF/8Z8fPUBOIHsOmLZqUMpe\nevs9LOo9AgMBAAECggEAAqMkacxOx3REniVudhFf8dzpazOo4k+zpaNXBpW7+62L\nZYM6n0a84+qBHtCx6PWXY5qWGcOYU0MnAqJFCYSP8z4acLnynXBQTwhhCRDxWkhD\nIIrpfSXDo86/B14jNZ6XmciGkpv2QO2o9rndy5nja9qHyqPllvqF1GXq9o2cRrG+\nzp0XGaXjVJw7EHpDb0DRL1wA29eCRszX9UEZVZ4COOS1tYz0qslW0yqzl/rTTrSj\nDeDPLKQZcqlbv8/jgq6K1OFRbDdnjj8yCGDsPBi1Ag5iTSUtT/GAm5mdOTUgbGji\nnwuhvbUXHmlUSZJHpCoXQnYpK2ZNSKdQMqh9D78EQQKBgQDtBU5mi0dEGYsBZWfP\n+vXxVKNMEpu4dtXWNBddGnXQXxa6ZbMRg1dH/HCpLTevdGqu9T1U1jCjzynNY1to\nqgcvShq/CCPuklZE2FfDw7VxDHtVulNSwmS8e3m0s3AABDw+C4jDG/ZVDt2ESGSF\n6HOJkm6/KTWiGA4oAgpciTz6bwKBgQDI5XOegwRfqpkuy3R72l1es34g79GV3GKh\nWc6xHCDuCbrW8fCIu5HTVCikOnB9GcAFs26S9B9iNVtPj46CMwidGMHUphYMUiLk\nlmTiPdVqFlW0IiRdU9uPwetWPLwpYMHTe6Wb+ezNsOhAopWUjng9neNszR6RY03C\nMw2wGbjsEwKBgFYNoSNV2e/9nhxJpuE56mVOJ2ONNgBJFOYKT5k77B5VB7lxBwyK\ntPuryXOCuT74c2tGGphck5hFtJWfRya+5JDkxMUqvXD2rF+edG7c9VkwAO9lEK9x\naIWOBuf2Zel7oCueoG7GDi9fkElgxy5e8OO3yIGbAp/xP+KCqyRhp0P9AoGASiIh\n4ESIwKS7kkER4wJZojCqQo080ghZfSEe3Mx8elqsz9TH5i0RSuKrfK70A7YU3gWw\nsBnV2u/Fmj5nYDRk4VPZcxc226UTqza0U6htsJA9YBOZR7dCNnJg3Znb9Yj2/YuL\nOVuovt6hVfipKgDI7jPtUKEAvrXeY+NjEbDsRHECgYEAvGvD3METGQoYoh/icJ6l\nV5h3u7r9Mg9PXge98hPBPCpZ8kbOXhk5lmlr/WiSuL9fcsXtumcPj9BsuG15kwoM\ndwtKbHX0mtWEXQ9c0hXWdtabiDqmpQFw7OdFW0pXYsrAiIyqU9CToeblgNuvOTqg\nzLU0nFVb6k6mt3O7FPLCdRM=\n-----END PRIVATE KEY-----\n",
+  "client_email": "chatbot-ai-travel@chatbot-dulich-drln.iam.gserviceaccount.com",
+  "client_id": "116717679790904621573",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/chatbot-ai-travel%40chatbot-dulich-drln.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

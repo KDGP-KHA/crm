@@ -1,0 +1,24 @@
+﻿@model Core.Sys.Models.Sys.SysUserModel
+
+@{
+    ViewBag.Title = $"Ngưng hoạt động người dùng - [{Model.FullName} - {Model.UserName}]";
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+
+    @using (Ajax.BeginForm("DeActive", "User", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "User_OnProcessSuccess(data, 'DeActiveUser')"
+    }, new { @class = "form-horizontal" }))
+    {
+	    <div id="bodyForm">
+		    @Html.Partial("_DeActiveBody")
+	    </div>
+    }
+}

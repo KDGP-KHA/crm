@@ -1,0 +1,22 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DashboardModel
+
+@*<div class="dashboard-filter" id="employeeFilterBar">
+    <label><i class="fa fa-calendar-alt mr-1 text-blue"></i> @AppProcessor.Messagor.GetMessage("Dashboard_FromDate")</label>
+    <input type="date" id="empFromDate" class="form-control"
+           value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+    <label>@AppProcessor.Messagor.GetMessage("Dashboard_ToDate")</label>
+    <input type="date" id="empToDate" class="form-control"
+           value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+    <span id="dashboardSpinner" style="display:none">
+        <i class="fa fa-spinner fa-spin text-blue ml-1"></i>
+    </span>
+</div>*@
+<div class="dashboard-filter" id="employeeFilterBar">
+    <label><i class="fa fa-calendar-alt mr-1 text-blue"></i> @AppProcessor.Messagor.GetMessage("Dashboard_FromDate")</label>
+    @Html.TextBoxFor(model => model.EmpFromDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker pr-475", placeholder = "dd/mm/yyyy", })
+    <i class="far fa-calendar-alt text-primary text-125 ml-n45"></i>
+    <label>@AppProcessor.Messagor.GetMessage("Dashboard_ToDate")</label>
+    @Html.TextBoxFor(model => model.EmpToDate, "{0:dd/MM/yyyy}", new { @class = "form-control datepicker pr-475 ml-2", placeholder = "dd/mm/yyyy", })
+    <i class="far fa-calendar-alt text-primary text-125 ml-n45"></i>
+</div>

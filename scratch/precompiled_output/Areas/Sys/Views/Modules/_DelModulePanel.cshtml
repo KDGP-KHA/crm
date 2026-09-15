@@ -1,0 +1,22 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.Sys.SysPanelModuleModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete"), AppProcessor.Messagor.GetMessage("Module_Title"));
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("DelPanelModule", "Modules", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "PanelModule_OnProcessSuccess(data, 'DelModuleInPanel')"
+    }, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.ModuleId)
+        @Html.HiddenFor(model => model.ModuleName)
+        @Html.HiddenFor(model => model.PanelName)
+        <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
+    }
+}

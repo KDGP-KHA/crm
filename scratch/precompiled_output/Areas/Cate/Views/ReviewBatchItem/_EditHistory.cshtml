@@ -1,0 +1,34 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Edit"), AppProcessor.Messagor.GetMessage("ReviewHistory_Title"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Html.BeginForm("EditHistory", "ReviewBatchItem", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "EditHistory", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_ReviewForm")
+        </div>
+    }
+
+    <script type="text/javascript">
+        $('form#EditHistory').ajaxForm({
+            success: function (response) {
+                ReviewHistory_OnProcessSuccess(response, "EditHistory");
+            }
+        });
+    </script>
+}
+
+@section ContinueForm{
+
+}

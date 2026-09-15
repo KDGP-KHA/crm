@@ -1,0 +1,11 @@
+﻿@model List<CenIT.Solution.TOC.WebApp.Models.HeaderMenuModel>
+
+@{
+    foreach (var menu in Model)
+    {
+        var isActive = menu.IsActive ? "active" : "";
+        <li class="rd-nav-item @isActive" menuKey="@menu.MenuKey">
+            <a class="rd-nav-link" href="@menu.MenuHref">@menu.MenuName</a>
+        </li>
+    }
+}

@@ -1,0 +1,38 @@
+button.ColVis_Button,
+ul.ColVis_collection li { padding: 0.5em; }
+
+ul.ColVis_collection {
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    z-index: 2002;
+}
+
+ul.ColVis_collection li {
+    clear: both;
+    display: block;
+    margin: -1px 0 0 0;
+    text-align: left;
+}
+
+ul.ColVis_collection li span {
+    cursor: pointer;
+    display: inline-block;
+    padding-left: 0.5em;
+}
+
+div.ColVis_collectionBackground {
+    background-color: black;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1100;
+}
+
+
+div.ColVis_catcher {
+    position: absolute;
+    z-index: 1101;
+}

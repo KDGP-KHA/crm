@@ -1,0 +1,114 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewBatchItemSearchModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ReviewBatchItem_Title");
+}
+
+@section PageTitle
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=45">@AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_DanhMuc")</a>
+            </li>
+            <li class="breadcrumb-item">
+                <span>@AppProcessor.Messagor.GetMessage("ReviewBatchItem_Title")</span>
+            </li>
+        </ol>
+    </nav>
+}
+
+<style>
+    .breadcrumb-item + .breadcrumb-item::before {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 600;
+        content: "\f101";
+        font-size: 0.875em;
+        margin: 5px 0;
+    }
+</style>
+
+<div class="dcard">
+    <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
+        <!-- PROJECT -->
+        <li class="nav-item mr-2px">
+            <a id="project-tab-btn"
+                class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0 active"
+                data-toggle="tab"
+                href="#project"
+                role="tab"
+                aria-controls="project"
+                aria-selected="true">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-home text-success mr-3px"></i>
+                Dự án
+            </a>
+        </li>
+        <!-- BUSINESS -->
+        <li class="nav-item mr-2px">
+            <a id="opportunity-tab-btn"
+                class="d-style btn btn-tp btn-light-secondary btn-h-white btn-a-text-dark btn-a-white text-95 px-3 px-sm-4 py-25 radius-0 border-0"
+                data-toggle="tab"
+                href="#opportunity"
+                role="tab"
+                aria-controls="opportunity"
+                aria-selected="false">
+                <span class="v-active position-tl w-100 border-t-3 brc-blue mt-n2px"></span>
+                <i class="fa fa-cogs text-info mr-2"></i>
+                Cơ hội
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content bgc-white p-35 border-0">
+        <!-- PROJECT -->
+        <div class="tab-pane fade show active text-95" id="project" role="tabpanel" aria-labelledby="project-tab-btn">
+            <div id="projectContainer">
+                @Html.Partial("_Project", Model.ProjectSearch)
+            </div>
+        </div>
+        <!-- BUSINESS -->
+        <div class="tab-pane fade text-95" id="opportunity" role="tabpanel" aria-labelledby="opportunity-tab-btn">
+            <div id="businessOpportunityContainer">
+                @Html.Partial("_BusinessOpportunity", Model.BusinessOpportunitySearch)
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script src="@Url.Content("~/Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.js")"></script>
+    <script>
+        var _urlReloadProject = '@Url.Action("GetProject", "ReviewBatchItem", new { area = "Cate" })';
+        var _urlReloadBusinessOpportunity = '@Url.Action("GetBusinessOpportunity", "ReviewBatchItem", new { area = "Cate" })';
+
+        $(document).ready(function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get("tab");
+            if (tab === "opportunity") {
+                $('#opportunity-tab-btn').tab('show');
+            } else {
+                $('#project-tab-btn').tab('show');
+            }
+        });
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            // fix chosen/select width
+            $(".chosen-container").css("width", "100%");
+            // redraw datatable nếu có
+            if (_tableProject) {
+                _tableProject.columns.adjust().draw(false);
+            }
+            if (_tableBusinessOpportunity) {
+                _tableBusinessOpportunity.columns.adjust().draw(false);
+            }
+            // trigger resize để chosen recalc width
+            $(window).trigger('resize');
+        });
+    </script>
+}

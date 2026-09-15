@@ -47,3 +47,73 @@
         font-size: 13px !important;
         padding: 5px 12px !important;
     }
+
+    /* Status Multiselect Dropdown */
+    #statusDropdownButton {
+        height: 32px;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        padding: 4px 10px;
+        font-size: 13px;
+    }
+
+    #statusDropdownButton:hover {
+        border-color: #80bdff;
+    }
+
+    #statusDropdownMenu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 999;
+        min-width: 290px;
+        max-height: 280px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid rgba(0,0,0,.15);
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    }
+
+    .status-label {
+        margin: 0;
+        font-size: 13px;
+    }
+
+    .status-item-row {
+        padding: 2px 4px;
+    }
+
+    .status-item-row:hover {
+        background-color: #f3f6f9;
+        border-radius: 3px;
+    }
+
+    /* Checkbox cho nhỏ lại và hình vuông chuẩn, chống dãn chiều cao do .Search_Box input { height: 32px; } */
+    #statusDropdownMenu input[type="checkbox"],
+    .Search_Box input[type="checkbox"]:not(.custom-control-input) {
+        width: 14px !important;
+        height: 14px !important;
+        min-width: 14px !important;
+        min-height: 14px !important;
+        max-width: 14px !important;
+        max-height: 14px !important;
+        margin: 0 6px 0 0 !important;
+        padding: 0 !important;
+        border-radius: 2px !important;
+        vertical-align: middle !important;
+        cursor: pointer;
+        flex-shrink: 0 !important;
+        accent-color: #0284c7;
+    }
+
+    #statusDropdownMenu label {
+        display: flex !important;
+        align-items: center !important;
+        margin-bottom: 0 !important;
+        cursor: pointer;
+        font-size: 13px;
+        line-height: 1.4 !important;
+    }

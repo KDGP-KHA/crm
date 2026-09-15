@@ -1,0 +1,362 @@
+﻿@using System.Linq
+@model Core.Cate.Models.RM_ProjectWeeklyTaskReportModelResultModel
+
+<style>
+    .weekly-report-result-card {
+        max-width: 100%;
+    }
+
+        .weekly-report-result-card .card-header {
+            min-height: 40px;
+            padding: 8px 12px;
+        }
+
+        .weekly-report-result-card .card-title {
+            font-size: 16px;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+    .weekly-report-summary {
+        font-size: 13px;
+        color: #495057;
+    }
+
+    .weekly-report-table thead th {
+        padding: 5px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        vertical-align: middle;
+    }
+
+    .weekly-report-table tbody td {
+        padding: 5px;
+        font-size: 13px;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+
+    .weekly-report-table .group-department td {
+        background: #f1f6fb;
+        font-weight: 700;
+    }
+
+    .weekly-report-table .group-employee td {
+        background: #fafafa;
+        font-weight: 700;
+    }
+
+    .weekly-report-result-card .table-responsive {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .weekly-report-table {
+        width: 100%;
+        table-layout: fixed;
+        margin-bottom: 0;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        display: block;
+        height: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 5px;
+    }
+
+    .weekly-report-table th,
+    .weekly-report-table td {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .weekly-report-table tbody td:nth-child(3),
+    .weekly-report-table tbody td:nth-child(7) {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .col-project {
+        width: 300px;
+    }
+
+    .col-exchangeinfo {
+        width: 500px;
+    }
+
+    .col-stage {
+        width: 100px
+    }
+
+    .comment-content {
+        max-width: 500px;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .comment-content img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    .comment-content table {
+        width: 100% !important;
+        max-width: 100%;
+        display: block;
+        overflow-x: auto;
+    }
+
+    .comment-content iframe,
+    .comment-content video {
+        max-width: 100%;
+    }
+
+    .comment-content * {
+        max-width: 100%;
+    }
+
+    .timeline-container {
+        max-width: 100%;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 25px;
+        margin-bottom: 15px;
+        border-left: 2px solid #d9d9d9;
+    }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #007bff;
+        }
+
+    .timeline-header {
+        margin-bottom: 5px;
+    }
+
+    .timeline-user {
+        font-weight: 600;
+        color: #0d6efd;
+    }
+
+    .timeline-date {
+        color: #6c757d;
+        font-size: 12px;
+    }
+
+    .timeline-content {
+        margin-top: 5px;
+    }
+
+    .timeline-hidden {
+        display: none;
+    }
+
+    .btn-toggle-timeline {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+    .timeline-report .comment-content img {
+        max-width: 300px !important;
+        height: auto !important;
+    }
+
+    .timeline-report .comment-content table {
+        display: block;
+        overflow-x: auto;
+        max-width: 100%;
+    }
+
+    .timeline-report .Comment-Content {
+        word-break: break-word;
+    }
+
+    .timeline-report {
+        max-height: 700px;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="card weekly-report-result-card">
+    <div class="card-header justify-content-start align-items-center font-bold">
+        <i class="fa fa-table mr-2"></i> Kết quả báo cáo
+    </div>
+
+    <div class="card-body p-0">
+        <div class="p-2 border-bottom weekly-report-summary">
+            <div><strong>Tuần:</strong> @Model.WeekFrom.ToString("dd/MM/yyyy") - @Model.WeekTo.ToString("dd/MM/yyyy")</div>
+        </div>
+
+        @if (Model.Items == null || !Model.Items.Any())
+        {
+            <div class="p-3 text-muted">Không có dữ liệu.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0 weekly-report-table">
+                    <thead>
+                        <tr>
+                            <th style="width:60px" class="text-center">STT</th>
+                            <th style="width:300px">Tên dự án</th>
+                            <th style="width:180px">AM</th>
+                            <th style="width:250px">Công việc trao đổi gần nhất</th>
+                            <th>Thông tin trao đổi gần nhất</th>
+                        </tr>
+                    </thead>
+                        <tbody>
+                            @{
+                                var stt = 1;
+                            }
+
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        @(stt++)
+                                    </td>
+
+                                    <td style="white-space: normal; word-break: break-word; overflow-wrap: anywhere;">
+                                        <div class="font-weight-bold text-primary">
+                                            <a href="/Cate/ProjectOverview/Index/@item.ProjectID">@item.ProjectName</a>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        @item.AMNames
+                                    </td>
+
+                                    <td style="white-space: normal; word-break: break-word; overflow-wrap: anywhere;">
+                                        @if (!string.IsNullOrWhiteSpace(item.LastTaskName))
+                                        {
+                                            <div>
+                                                <strong>@item.LastTaskName</strong>
+                                            </div>
+
+                                            if (item.LastTaskDate.HasValue)
+                                            {
+                                                <div class="text-muted">
+                                                    @item.LastTaskDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (item.CommentItems != null && item.CommentItems.Any())
+                                        {
+                                            var comments = item.CommentItems
+                                                .OrderByDescending(x => x.CreatedDate)
+                                                .ToList();
+
+                                            var collapseId = "comment_" + item.ProjectID;
+
+                                            <div class="timeline-report">
+
+                                                @for (int i = 0; i < comments.Count; i++)
+                                                {
+                                                    var comment = comments[i];
+
+                                                    var hiddenClass = i >= 3
+                                                        ? "timeline-hidden extra-" + collapseId
+                                                        : "";
+
+                                                    <div class="@hiddenClass">
+
+                                                        <div class="d-flex mb-2">
+
+                                                            <div class="minh-100 pos-rel">
+
+                                                                @if (i != comments.Count - 1)
+                                                                {
+                                                                    <div class="position-tl ml-4 h-100 border-l-3 brc-secondary-l1"></div>
+                                                                }
+
+                                                                <div class="pos-rel text-center pt-2 mx-2px w-6 h-6 border-4 brc-white radius-round bgc-blue text-white">
+                                                                    <i class="far fa-comment"></i>
+                                                                </div>
+
+                                                            </div>
+
+                                                            <div class="mx-2 flex-grow-1">
+                                                                <div class="pt-2">
+
+                                                                    <div class="Comment-Content brc-secondary-m4 px-2 py-1 radius-1 border-l-3 border-0 bgc-secondary-l5 text-grey-d3 text-95 mt-1 pos-rel">
+
+                                                                        <div>
+                                                                            <span class="font-bolder text-primary">
+                                                                                @comment.TaskName
+                                                                            </span>
+                                                                            |
+                                                                            <span class="text-600 text-90">
+                                                                                @comment.CreatedDate.ToString("dd/MM/yyyy")
+                                                                            </span>
+                                                                            |
+                                                                            <span class="btn-text-danger btn-h-text-orange text-100 text-600">
+                                                                                @comment.EmployeeName
+                                                                            </span>
+
+
+                                                                        </div>
+
+                                                                        <div class="comment-content mt-1">
+                                                                            @Html.Raw(comment.Content)
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                    </div>
+                                                }
+
+                                                @if (comments.Count > 3)
+                                                {
+                                                    <div class="text-center mt-2">
+                                                        <button type="button"
+                                                                class="btn btn-xs btn-outline-primary btn-toggle-timeline"
+                                                                data-target="@collapseId">
+                                                            Xem thêm (@(comments.Count - 3))
+                                                        </button>
+                                                    </div>
+                                                }
+
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

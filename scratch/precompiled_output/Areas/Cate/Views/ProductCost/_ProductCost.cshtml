@@ -1,0 +1,62 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ProductCostModel
+
+@Html.AntiForgeryToken()
+<div id="Language">
+    @Html.HiddenFor(model => model.ProductCostID)
+    @Html.HiddenFor(model => model.ProductProjectID)
+    @Html.HiddenFor(model => model.NameProduct)
+
+    <div class="col-12">
+        <div class="row">
+            <div class="col-5">
+                @Html.TitleFor(model => model.CostTypeID, new { @class = "col-form-label text-sm-right pr-0 font-bold" })
+                @Html.DropDownListFor(model => model.CostTypeID, new SelectList(Model.ListCostType, "Value", "Text"), "", new { @class = "col form-control" })
+            </div>
+            <div class="col-3">
+                @Html.TitleFor(model => model.Amount, new { @class = "col-form-label text-sm-right pr-0 font-bold" })
+                @Html.TextBoxFor(model => model.Amount, "{0:0.##}", new { @class = "form-control text-right", data_format = "money", placeholder = "0" })
+                @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-4">
+                @Html.TitleFor(model => model.PaymentDate, new { @class = "col-form-label text-sm-right pr-0 font-bold" })
+                <div class="input-group">
+                    @Html.TextBoxFor(model => model.PaymentDate, "{0:dd/MM/yyyy}", new { id = "PaymentDate", @class = "form-control", placeholder = "dd/mm/yyyy" })
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.PaymentDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        @Html.TitleFor(model => model.Note, new { @class = "col-form-label text-sm-right pr-0 font-bold" })
+        @Html.TextAreaFor(model => model.Note, new { rows = "3", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("ProductCost_Note_Label") })
+        @Html.ValidationMessageFor(model => model.Note, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<script>
+    function _runFormUtils() {
+        if (typeof initFormUtils === 'function') { initFormUtils('#Language'); }
+        else {
+            var s = document.createElement('script');
+            s.src = '@Url.Content("~/Areas/Cate/Views/FormUtils.js")';
+            s.onload = function () { initFormUtils('#Language'); };
+            document.head.appendChild(s);
+        }
+    }
+    setTimeout(_runFormUtils, 0);
+    $(document).ready(function () {
+        $("#PaymentDate").datetimepicker({
+            format: "DD/MM/YYYY",
+            icons: {
+                previous: "fa fa-chevron-left",
+                next: "fa fa-chevron-right"
+            },
+            locale: "vi"
+        });
+    });
+</script>

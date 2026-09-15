@@ -1,0 +1,268 @@
+﻿<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronEveryDay" name="cronDay" checked="checked">
+            Every day
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronDowIncrement" name="cronDay">
+            Every
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronDowIncrementIncrement" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 7; idx++)
+                {
+                    <option value="@idx">@idx</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="col-form-label"> day(s) starting on </label>
+    </div>
+    <div class="col-md-3">
+        <select id="cronDowIncrementStart" class="col-md-10">
+            @{
+                for (var idx = 1; idx <= 7; idx++)
+                {
+                    <option value="@idx">@(((DayOfWeek)(idx - 1)).ToString())</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronDomIncrement" name="cronDay">
+            Every
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronDomIncrementIncrement" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 31; idx++)
+                {
+                    <option value="@idx">@idx</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="col-form-label"> day(s) starting on the</label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronDomIncrementStart" class="col-md-8">
+            <option value="1">1st</option>
+            <option value="2">2nd</option>
+            <option value="3">3rd</option>
+            @{
+                for (var idx = 4; idx <= 31; idx++)
+                {
+                    <option value="@idx">@(idx)th</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="col-form-label"> of the month</label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronDowSpecific" name="cronDay">
+            Specific day of week (choose one or many)
+        </label>
+    </div>
+    <div class="offset-1 col-md-11">
+
+        <label class="col-2">
+            <input type="checkbox" id="cronDowSun" name="cronDowSpecificSpecific" value="SUN">
+            Sunday
+        </label>
+        <label class="col-2">
+            <input type="checkbox" id="cronDowMon" name="cronDowSpecificSpecific" value="MON">
+            Monday
+        </label>
+        <label class="col-2">
+            <input type="checkbox" id="cronDowTue" name="cronDowSpecificSpecific" value="TUE">
+            Tuesday
+        </label>
+        <label class="col-2">
+            <input type="checkbox" id="cronDowWed" name="cronDowSpecificSpecific" value="WED">
+            Wednesday
+        </label>
+        <label class="col-2">
+            <input type="checkbox" id="cronDowThu" name="cronDowSpecificSpecific" value="THU">
+            Thursday
+        </label>
+        <label class="col-2">
+            <input type="checkbox" id="cronDowFri" name="cronDowSpecificSpecific" value="FRI">
+            Friday
+        </label>
+        <label class="col-2">
+            <input type="checkbox" id="cronDowSat" name="cronDowSpecificSpecific" value="SAT">
+            Saturday
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronDomSpecific" name="cronDay">
+            Specific day of month (choose one or many)
+        </label>
+    </div>
+    <div class="col-md-1">
+    </div>
+    @{
+        var isCheckDay = false;
+        for (var idx = 1; idx <= 31; idx++)
+        {
+            if (idx % 10 == 1)
+            {
+                <div class="col-md-1"></div>
+            }
+            var eleId = $"cronDom{idx}";
+
+            <div class="col-md-1">
+                <label>
+                    @{
+                        if (!isCheckDay)
+                        {
+                            <input type="checkbox" id="@eleId" name="cronDomSpecificSpecific" value="@idx"
+                                   checked="checked">
+                            isCheckDay = true;
+                        }
+                        else
+                        {
+                            <input type="checkbox" id="@eleId" name="cronDomSpecificSpecific" value="@idx">
+                        }
+                    }
+                    @(idx.ToString().PadLeft(2, '0'))
+                </label>
+            </div>
+            if (idx % 10 == 0)
+            {
+                <div class="col-md-1"></div>
+            }
+        }
+    }
+    <div class="col-md-1">
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronLastDayOfMonth" name="cronDay">
+            On the last day of the month
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-12">
+        <label>
+            <input type="radio" id="cronLastWeekdayOfMonth" name="cronDay">
+            On the last weekday of the month
+        </label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronLastSpecificDom" name="cronDay">
+            On the last
+        </label>
+    </div>
+    <div class="col-md-3">
+        <select id="cronLastSpecificDomDay" class="col-md-10">
+            @{
+                for (var idx = 1; idx <= 7; idx++)
+                {
+                    <option value="@idx">@(((DayOfWeek)(idx - 1)).ToString())</option>
+                }
+            }
+        </select>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-1">
+        <label>
+            <input type="radio" id="cronDaysBeforeEom" name="cronDay">
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronDaysBeforeEomMinus" class="col-md-8">
+            @{
+                for (var idx = 1; idx <= 31; idx++)
+                {
+                    <option value="@idx">@idx</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="col-form-label"> day(s) before the end of the month</label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-5">
+        <label>
+            <input type="radio" id="cronDaysNearestWeekdayEom" name="cronDay">
+            Nearest weekday (Monday to Friday) to the
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronDaysNearestWeekday" class="col-md-8">
+            <option value="1">1st</option>
+            <option value="2">2nd</option>
+            <option value="3">3rd</option>
+            @{
+                for (var idx = 4; idx <= 31; idx++)
+                {
+                    <option value="@idx">@(idx)th</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="col-form-label"> of the month</label>
+    </div>
+</div>
+<div class="form-group row">
+    <div class="col-md-2">
+        <label>
+            <input type="radio" id="cronNthDay" name="cronDay">
+            On the
+        </label>
+    </div>
+    <div class="col-md-2">
+        <select id="cronNthDayNth" class="col-md-8">
+            <option value="1">1st</option>
+            <option value="2">2nd</option>
+            <option value="3">3rd</option>
+            <option value="4">4th</option>
+            <option value="5">5th</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select id="cronNthDayDay" class="col-md-10">
+            @{
+                for (var idx = 1; idx <= 7; idx++)
+                {
+                    <option value="@idx">@(((DayOfWeek)(idx - 1)).ToString())</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="col-form-label"> of the month</label>
+    </div>
+</div>

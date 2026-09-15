@@ -1,0 +1,44 @@
+﻿@using System.Text.RegularExpressions
+@model Modules.Sys.Areas.Sys.Data.SysLogModel
+
+<div class="font-bolder mb-4 text-primary-d1 text-120">
+    Danh sách file
+</div>
+<div class="table-responsive-md">
+    <table id="DataLogErr" class="mb-0 table table-borderless table-bordered-x brc-secondary-l3 text-dark-m2 radius-1 overflow-hidden">
+        <thead class="text-dark-tp3 bgc-grey-l4 text-90 border-b-1 brc-transparent d-none">
+        <tr>
+            <th></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody class="mt-1">
+        @{
+            foreach (var fi in Model.ListErrFiles)
+            {
+                <tr id="@Regex.Replace(fi.Name, "[^0-9a-zA-Z]+", "", RegexOptions.Compiled)" class="d-style bgc-h-yellow-l4">
+                    <td>
+                        <i class="fa fa-link"></i>
+                        <span class="text">@fi.Name</span>
+                        <!-- Emphasis label -->
+                        <small class="label text-danger">
+                            <i class="fa fa-clock-o"></i> @fi.LastAccessTime.ToString("dd/MM/yyyy HH:mm:ss")
+                        </small>
+                    </td>
+                    <td class="align-middle text-right">
+                        <!-- General tools such as edit or delete-->
+                        <span class="">
+                            <a data-rel="tooltip" title="Tải xuống" href="@Url.Action("DownloadFile", new { fileName = fi.Name, type = "Err" })" class="btn btn-lighter-primary">
+                                <i class="fa fa-cloud-download-alt text-primary"></i>
+                            </a>
+                            <a data-rel="tooltip" title="Xoá" data-modal="" data-modal-id="DeleteFile" href="@Url.Action("DeleteFile", new { fileName = fi.Name, type = "Err" })" class="btn btn-lighter-danger">
+                                <i class="fa fa-trash text-danger"></i>
+                            </a>
+                        </span>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>

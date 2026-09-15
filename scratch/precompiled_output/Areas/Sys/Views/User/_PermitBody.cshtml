@@ -1,0 +1,194 @@
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
+@model Modules.Sys.Areas.Sys.Data.UserPermitModel
+@Html.AntiForgeryToken()
+
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+@Html.HiddenFor(model => model.UserId)
+@Html.HiddenFor(model => model.UserName)
+@Html.HiddenFor(model => model.FullName)
+@Html.HiddenFor(model => model.Email)
+
+<div id="Permit">
+    <div class="form-group row">
+        @Html.TitleFor(model => model.FullName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="far fa-user-circle"></i>
+                    </span>
+                </div>
+                @Html.TextBoxFor(model => model.FullName, new { disabled = true, @class = "form-control col-sm-10 col-md-8", placeholder = AppProcessor.Messagor.GetMessage("User_Label_FullName") })
+            </div>
+            @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.Email, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fa fa-envelope"></i>
+                    </span>
+                </div>
+                @Html.TextBoxFor(model => model.Email, new { disabled = true, @class = "form-control col-sm-7", placeholder = AppProcessor.Messagor.GetMessage("User_Label_Email") })
+            </div>
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.TitleFor(model => model.UserName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-9">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                        <i class="fa fa-user"></i>
+                    </span>
+                </div>
+                @Html.TextBoxFor(model => model.UserName, new { disabled = true, @class = "form-control col-sm-7 col-md-5", placeholder = AppProcessor.Messagor.GetMessage("User_Label_UserName") })
+
+            </div>
+            @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <hr />
+    <div class="form-group row" id="Roles">
+        @Html.HiddenFor(model => model.RoleIDs)
+        @Html.TitleFor(model => model.RoleIDs, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-sm-9 p-0 m-auto">
+            @foreach (var item in Model.ListRoles)
+            {
+                var sChecked = string.IsNullOrEmpty(Model.RoleIDs) || Model.RoleIDs.Split(',').ToList().IndexOf(item.RoleId.ToString()) == -1 ? "" : "checked";
+                <label class="col-sm-5">
+                    <input id="group-@item.RoleId" name="form-field-checkbox" type="checkbox" aria-label="@item.Name" onclick="OnCheckRole(this)" value="@item.RoleId" @sChecked />
+                    @item.Name
+                </label>
+            }
+        </div>
+        @Html.ValidationMessageFor(model => model.RoleIDs, "", new { @class = "text-danger" })
+    </div>
+
+    <hr />
+    <div class="form-group row" id="Modules">
+        @Html.HiddenFor(model => model.ModuleIDs)
+        @Html.TitleFor(model => model.ModuleIDs, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-sm-9 p-0 m-auto">
+            @foreach (var item in Model.ListModules)
+            {
+                var sChecked = string.IsNullOrEmpty(Model.ModuleIDs) || Model.ModuleIDs.Split(',').ToList().IndexOf(item.ModuleId.ToString()) == -1 ? "" : "checked";
+                <label class="col-sm-5">
+                    <input id="group-@item.ModuleId" name="form-field-checkbox" type="checkbox" aria-label="@item.Description" onclick="OnCheckModule(this)" value="@item.ModuleId" @sChecked />
+                    @item.Description
+                </label>
+            }
+        </div>
+        @Html.ValidationMessageFor(model => model.ModuleIDs, "", new { @class = "text-danger" })
+    </div>
+
+    @*<hr />
+    <div class="form-group row" id="TypeServices">
+        @Html.HiddenFor(model => model.TypeServiceIDs)
+        @Html.TitleFor(model => model.TypeServiceIDs, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-sm-9 p-0 m-auto">
+            @foreach (var item in Model.ListTypeService)
+            {
+                var sChecked = string.IsNullOrEmpty(Model.TypeServiceIDs) || Model.TypeServiceIDs.Split(',').ToList().IndexOf(item.TypeServiceId.ToString()) == -1 ? "" : "checked";
+                <label class="col-sm-5">
+                    <input id="group-@item.TypeServiceId" name="form-field-checkbox" type="checkbox" aria-label="@item.TypeServiceName" onclick="OnCheckTypeService(this)" value="@item.TypeServiceId" @sChecked />
+                    @item.TypeServiceName
+                </label>
+            }
+        </div>
+        @Html.ValidationMessageFor(model => model.TypeServiceIDs, "", new { @class = "text-danger" })
+    </div>*@
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#Permit #Roles input[type=checkbox]').each(function () {
+            var roleIDs = $('#Permit input[type="hidden"][id$="RoleIDs"]').val().split(',');
+
+            var roleId = $(this).val();
+            var index = roleIDs.indexOf((roleId));
+
+            if (index > -1) {
+                this.checked = true;
+            }
+        });
+        
+        $('#Permit #Modules input[type=checkbox]').each(function () {
+            var moduleIDs = $('#Permit input[type="hidden"][id$="ModuleIDs"]').val().split(',');
+
+            var moduleId = $(this).val();
+            var index = moduleIDs.indexOf((moduleId));
+
+            if (index > -1) {
+                this.checked = true;
+            }
+        });
+
+        $('#Permit #TypeServices input[type=checkbox]').each(function () {
+            var TypeServiceIDs = $('#Permit input[type="hidden"][id$="TypeServiceIDs"]').val().split(',');
+
+            var typeServiceId = $(this).val();
+            var index = TypeServiceIDs.indexOf((typeServiceId));
+
+            if (index > -1) {
+                this.checked = true;
+            }
+        });
+    });
+
+    function OnCheckRole(chk) {
+        var roleIDs = $('#Permit #Roles input[type="hidden"][id$="RoleIDs"]').val().split(',');
+
+        var index;
+        if ($(chk)[0].checked) {
+            index = roleIDs.indexOf(($(chk).val()));
+            if (index == -1) {
+                roleIDs.push($(chk).val());
+            }
+        } else {
+            index = roleIDs.indexOf(($(chk).val()));
+            roleIDs.splice(index, 1);
+        }
+        $('#Permit #Roles input[type="hidden"][id$="RoleIDs"]').val(roleIDs);
+    }
+    
+    function OnCheckModule(chk) {
+        var moduleIDs = $('#Permit #Modules input[type="hidden"][id$="ModuleIDs"]').val().split(',');
+
+        var index;
+        if ($(chk)[0].checked) {
+            index = moduleIDs.indexOf(($(chk).val()));
+            if (index == -1) {
+                moduleIDs.push($(chk).val());
+            }
+        } else {
+            index = moduleIDs.indexOf(($(chk).val()));
+            moduleIDs.splice(index, 1);
+        }
+        $('#Permit #Modules input[type="hidden"][id$="ModuleIDs"]').val(moduleIDs);
+    }
+
+    function OnCheckTypeService(chk) {
+        var TypeServiceIDs = $('#Permit #TypeServices input[type="hidden"][id$="TypeServiceIDs"]').val().split(',');
+
+        var index;
+        if ($(chk)[0].checked) {
+            index = TypeServiceIDs.indexOf(($(chk).val()));
+            if (index == -1) {
+                TypeServiceIDs.push($(chk).val());
+            }
+        } else {
+            index = TypeServiceIDs.indexOf(($(chk).val()));
+            TypeServiceIDs.splice(index, 1);
+        }
+        $('#Permit #TypeServices input[type="hidden"][id$="TypeServiceIDs"]').val(TypeServiceIDs);
+    }
+</script>
