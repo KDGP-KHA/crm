@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -3319,21 +3319,28 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             // Ghi log hoạt động mở khóa tiến trình để cập nhật nội dung (giữ nguyên trạng thái Hoàn thành)
-            var act = new RM_DigitalSalesActivityModel
+            try
             {
-                DigitalSalesID = digitalSalesId,
-                ActivityType = 5,
-                Content = $"Mở khóa tiến trình: <b>{HttpUtility.HtmlEncode(task.TaskName)}</b><div class='mt-1 text-secondary'><b>Lý do mở khóa:</b> {HttpUtility.HtmlEncode(reason.Trim())}</div>",
-                ReferenceID = trackingId
-            };
-            _salesCache.AddActivity(act, User.UserName);
+                var act = new RM_DigitalSalesActivityModel
+                {
+                    DigitalSalesID = digitalSalesId,
+                    ActivityType = 5,
+                    Content = $"Mở khóa tiến trình: <b>{HttpUtility.HtmlEncode(task.TaskName)}</b><div class='mt-1 text-secondary'><b>Lý do mở khóa:</b> {HttpUtility.HtmlEncode(reason.Trim())}</div>",
+                    ReferenceID = trackingId
+                };
+                _salesCache.AddActivity(act, User.UserName);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+            }
 
             return Json(new
             {
                 status = true,
                 trackingId = trackingId,
                 digitalSalesId = digitalSalesId,
-                message = GetAppMessage("DigitalSalesTracking_UnlockSuccess")
+                message = GetAppMessage("DigitalSalesTracking_UnlockSuccess", "Mở khóa tiến trình thành công! Đang mở màn hình cập nhật...")
             });
         }
 

@@ -158,3 +158,46 @@ BEGIN
     RETURN @@ROWCOUNT;
 END
 GO
+
+-- 5. Cập nhật Stored Procedure RM_DigitalSalesActivity_Add (khớp 8 tham số với Core.Cate Biz)
+IF OBJECT_ID('dbo.RM_DigitalSalesActivity_Add', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.RM_DigitalSalesActivity_Add;
+GO
+
+CREATE PROCEDURE dbo.RM_DigitalSalesActivity_Add
+    @DigitalSalesID INT,
+    @ActivityType TINYINT = 1,
+    @Content NVARCHAR(MAX),
+    @Attachments NVARCHAR(MAX) = NULL,
+    @MentionedUserIDs VARCHAR(500) = NULL,
+    @MentionedNames NVARCHAR(1000) = NULL,
+    @ReferenceID INT = NULL,
+    @UserName VARCHAR(150)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ActionByName NVARCHAR(250);
+    SELECT TOP 1 @ActionByName = FullName FROM dbo.Sys_Users WHERE UserName = @UserName;
+    IF @ActionByName IS NULL SET @ActionByName = @UserName;
+
+    INSERT INTO dbo.RM_DigitalSalesActivity
+    (
+        DigitalSalesID, ActivityType, Content, Attachments, MentionedUserIDs, MentionedNames, ReferenceID, ActionDate, ActionBy, ActionByName, IsDeleted
+    )
+    VALUES
+    (
+        @DigitalSalesID, @ActivityType, @Content, @Attachments, @MentionedUserIDs, @MentionedNames, @ReferenceID, GETDATE(), @UserName, @ActionByName, 0
+    );
+
+    DECLARE @NewActivityID INT = SCOPE_IDENTITY();
+
+    -- Luôn cập nhật ActionTime trên hồ sơ gốc khi có thao luận / hoạt động
+    UPDATE dbo.RM_DigitalSales
+    SET ActionTime = GETDATE(), LastModifiedDate = GETDATE(), LastModifiedBy = @UserName
+    WHERE DigitalSalesID = @DigitalSalesID;
+
+    SELECT @NewActivityID;
+    RETURN @NewActivityID;
+END
+GO
