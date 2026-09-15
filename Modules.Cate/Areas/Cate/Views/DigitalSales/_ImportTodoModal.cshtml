@@ -1,0 +1,136 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    int processId = ViewBag.ProcessID != null ? (int)ViewBag.ProcessID : 0;
+    int digitalSalesId = ViewBag.DigitalSalesID != null ? (int)ViewBag.DigitalSalesID : 0;
+    string processName = ViewBag.ProcessName as string ?? "Quy trình";
+    string salesTitle = ViewBag.SalesTitle as string ?? "";
+}
+
+<div class="modal fade" id="importTodoModal" tabindex="-1" role="dialog" aria-labelledby="importTodoModalTitle" aria-hidden="true" data_width="1024">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <!-- MODAL HEADER -->
+            <div class="modal-header bgc-green-d1 text-white px-3 py-25">
+                <h5 class="modal-title font-bold text-110" id="importTodoModalTitle">
+                    <i class="fa fa-file-excel mr-1"></i> Import danh sách công việc con vào tiến trình
+                </h5>
+                <button type="button" class="close text-white opacity-2 text-130" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- MODAL BODY -->
+            <div class="modal-body p-3 bgc-grey-l4">
+                <!-- THÔNG TIN QUY TRÌNH & HỒ SƠ -->
+                <div class="ds-status-meta-box mb-3 bgc-white p-3 radius-1 border-1 brc-green-m3 shadow-sm">
+                    <div class="row">
+                        <div class="col-md-6 mb-1 mb-md-0">
+                            <span class="text-secondary font-weight-bold text-85">Hồ sơ KDGP:</span>
+                            <span class="text-primary-d2 font-bold text-90 ml-1">@salesTitle</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-secondary font-weight-bold text-85">Quy trình áp dụng:</span>
+                            <span class="badge bgc-green-l4 text-green-d2 border-1 brc-green-m3 font-bold text-85 ml-1 px-2 py-1">
+                                <i class="fa fa-project-diagram mr-1"></i>@processName
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 1: TẢI FILE MẪU & CHỌN TỆP IMPORT -->
+                <div class="card border-1 brc-grey-l1 shadow-sm mb-3 radius-1">
+                    <div class="card-header bgc-white py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 8px;">
+                        <span class="font-weight-bold text-dark text-90">
+                            <i class="fa fa-upload text-success mr-1"></i> Chọn tệp Excel để Import (.xlsx, .xls)
+                        </span>
+                        <a href="@Url.Action("DownloadTodoImportTemplate", "DigitalSales", new { area = "Cate", processId = processId, digitalSalesId = digitalSalesId })"
+                           class="btn btn-xs btn-white btn-h-light-success border-1 brc-green-m3 text-green-d2 font-bold radius-1 px-3 py-1 shadow-sm">
+                            <i class="fa fa-download mr-1 text-110"></i> Tải file mẫu Excel (2 Sheet)
+                        </a>
+                    </div>
+                    <div class="card-body p-3 bgc-white">
+                        <div class="alert alert-info py-2 px-3 mb-3 text-85 radius-1">
+                            <i class="fa fa-lightbulb text-warning mr-1"></i>
+                            File mẫu gồm <strong>2 Sheet</strong>:
+                            <strong>Sheet 1 (Dữ liệu Công việc)</strong> là nơi bạn nhập các công việc con;
+                            <strong>Sheet 2 (Danh sách Tiến trình)</strong> chứa danh sách mã tiến trình cha để bạn tra cứu và điền vào cột Mã tiến trình ở Sheet 1.
+                        </div>
+
+                        <div class="row align-items-center">
+                            <div class="col-md-8 mb-2 mb-md-0">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="fileTodoImport" accept=".xlsx,.xls">
+                                    <label class="custom-file-label text-truncate" for="fileTodoImport" id="lblTodoFileName">Chọn tệp Excel từ máy tính...</label>
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fa fa-info-circle mr-1 text-info"></i> Các cột bắt buộc: <strong>Mã tiến trình</strong>, <strong>Tên công việc con</strong>, <strong>Hạn xử lý</strong>.
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-md-right">
+                                <button type="button" class="btn btn-success font-bold radius-1 px-3 shadow-sm w-100 w-md-auto" id="btnReadTodoExcel" onclick="readTodoImportExcel();">
+                                    <i class="fa fa-search mr-1"></i> Đọc dữ liệu từ file
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2: KHỐI XEM TRƯỚC VÀ KIỂM TRA HỢP LỆ (PREVIEW) -->
+                <div id="boxTodoPreview" class="card border-1 brc-grey-l1 shadow-sm radius-1 d-none">
+                    <div class="card-header bgc-white py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 8px;">
+                        <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                            <span class="font-weight-bold text-dark text-90">
+                                <i class="fa fa-table text-success mr-1"></i> Kết quả phân tích dữ liệu công việc
+                            </span>
+                            <span class="badge badge-secondary px-2 py-1 font-bold text-80" id="badgeTodoTotalRows">0 dòng</span>
+                            <span class="badge badge-success px-2 py-1 font-bold text-80" id="badgeTodoValidRows">0 hợp lệ</span>
+                            <span class="badge badge-danger px-2 py-1 font-bold text-80" id="badgeTodoErrorRows">0 lỗi</span>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-xs btn-white border-1 brc-danger-m3 text-danger-d1 radius-1 px-2 py-1 font-bold shadow-sm" onclick="clearTodoImportPreview();">
+                                <i class="fa fa-trash-alt mr-1"></i> Xóa dữ liệu Import
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 bgc-white">
+                        <div class="table-responsive ds-import-preview-table-wrapper">
+                            <table class="table table-bordered table-hover mb-0 text-85 text-dark" id="tblTodoPreview">
+                                <thead class="bgc-secondary-l3 text-secondary-d3 sticky-top">
+                                    <tr>
+                                        <th class="text-center" style="width: 45px;">STT</th>
+                                        <th style="width: 120px;" class="text-center">Mã tiến trình (*)</th>
+                                        <th style="min-width: 180px;">Tiến trình cha</th>
+                                        <th style="min-width: 200px;">Tên công việc con (*)</th>
+                                        <th style="width: 140px;">Người thực hiện</th>
+                                        <th class="text-center" style="width: 95px;">Bắt đầu</th>
+                                        <th class="text-center" style="width: 95px;">Hạn xử lý</th>
+                                        <th style="min-width: 140px;">Ghi chú</th>
+                                        <th style="min-width: 220px;" class="text-center">Thông tin lỗi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyTodoPreview">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL FOOTER -->
+            <div class="modal-footer bgc-white px-3 py-2 border-t-1 brc-grey-l2 d-flex justify-content-between flex-wrap" style="gap: 8px;">
+                <div>
+                    <span class="text-secondary text-85 font-italic" id="lblTodoFooterNote">Vui lòng tải file mẫu, điền công việc theo mã tiến trình và tải lên để kiểm tra.</span>
+                </div>
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <button type="button" class="btn btn-secondary radius-1 px-3 shadow-sm font-bold" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> Đóng
+                    </button>
+                    <button type="button" class="btn btn-success radius-1 px-3 shadow-sm font-bold d-none" id="btnConfirmTodoImport" onclick="executeConfirmTodoImport();">
+                        <i class="fa fa-check mr-1"></i> Xác nhận dữ liệu Import
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

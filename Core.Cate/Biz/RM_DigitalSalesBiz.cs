@@ -1,4 +1,4 @@
-﻿using Core.Cate.Models;
+using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -77,7 +77,8 @@ namespace Core.Cate.Biz
                 model.PageSize <= 0 ? 20 : model.PageSize,
                 model.UserName,
                 model.IsKeyProject.HasValue && model.IsKeyProject.Value ? 1 : 0,
-                model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0
+                model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0,
+                string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim()
             );
 
             if (data != null && data.Count > 0)
@@ -444,7 +445,8 @@ namespace Core.Cate.Biz
                 model.SortOrder,
                 username,
                 model.ParentID.HasValue ? (object)model.ParentID.Value : DBNull.Value,
-                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value
+                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value,
+                model.TimelineID.HasValue ? (object)model.TimelineID.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
         }
@@ -640,6 +642,77 @@ namespace Core.Cate.Biz
 
             if (list != null && list.Count > 0)
             {
+                if (!activityType.HasValue)
+                {
+                    // Lọc bỏ hoàn toàn các hoạt động checklist (3, 4, 5) khỏi dòng thảo luận/hoạt động
+                    list = list.Where(a => a.ActivityType != 3 && a.ActivityType != 4 && a.ActivityType != 5).ToList();
+                }
+
+                foreach (var item in list)
+                {
+                    item.Content = FixVietnameseMojibake(item.Content);
+                    item.ActionByName = FixVietnameseMojibake(item.ActionByName);
+
+                    if (!string.IsNullOrWhiteSpace(item.Attachments))
+                    {
+                        try
+                        {
+                            if (item.Attachments.TrimStart().StartsWith("["))
+                            {
+                                item.AttachmentList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ActivityAttachmentItem>>(item.Attachments) ?? new List<ActivityAttachmentItem>();
+                            }
+                            else
+                            {
+                                var parts = item.Attachments.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var p in parts)
+                                {
+                                    var trimmed = p?.Trim();
+                                    if (string.IsNullOrEmpty(trimmed)) continue;
+                                    var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                    item.AttachmentList.Add(new ActivityAttachmentItem
+                                    {
+                                        FileName = System.IO.Path.GetFileName(trimmed),
+                                        FilePath = trimmed,
+                                        Extension = ext,
+                                        IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)
+                                    });
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore parse error
+                        }
+                    }
+                }
+            }
+
+            return list ?? new List<RM_DigitalSalesActivityModel>();
+        }
+
+        public List<RM_DigitalSalesActivityModel> GetActivitiesByTrackingID(int digitalSalesId, int trackingId)
+        {
+            if (digitalSalesId <= 0 || trackingId <= 0) return new List<RM_DigitalSalesActivityModel>();
+            List<RM_DigitalSalesActivityModel> list = null;
+            try
+            {
+                list = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesActivityModel>(
+                    _spActivityGetList,
+                    DATA_PROVIDER_NAME,
+                    digitalSalesId,
+                    (byte)255
+                );
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return new List<RM_DigitalSalesActivityModel>();
+            }
+
+            if (list != null && list.Count > 0)
+            {
+                list = list.Where(a => a.ReferenceID == trackingId).OrderByDescending(a => a.ActionDate).ToList();
+
                 foreach (var item in list)
                 {
                     item.Content = FixVietnameseMojibake(item.Content);

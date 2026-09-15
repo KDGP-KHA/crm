@@ -1,25 +1,38 @@
 ﻿@using System.Web
 @using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesTrackingModel
-@{ var titleKey = Model.TrackingID > 0 ? "DigitalSalesTracking_Edit_Title" : "DigitalSalesTracking_Add_Title"; }
-<div class="modal fade" id="modalTracking" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static"><div class="modal-dialog modal-md" role="document"><div class="modal-content">
-    <div class="modal-header bgc-primary-d1 text-white"><h5 class="modal-title text-110"><i class="fa fa-tasks mr-1"></i>@AppProcessor.Messagor.GetMessage(titleKey)</h5><button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
-    @using (Html.BeginForm("SaveTracking", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmTrackingModal", enctype = "multipart/form-data" }))
-    {
-        <div class="modal-body" id="bodyForm">@Html.Partial("_TrackingForm", Model)</div>
-        <div class="modal-footer"><button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">@AppProcessor.Messagor.GetMessage("Button_Cancel")</button><button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-save mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Save_Button")</button></div>
-    }
-</div></div></div>
-<script>
-(function () {
-    window.initDigitalSalesTrackingForm = function () { var $modal = $('#modalTracking'), $form = $('#frmTrackingModal'); if ($.fn.select2) $modal.find('.select2').select2({ width: '100%', dropdownParent: $modal }); if ($.fn.datepicker) $modal.find('.date-picker').datepicker({ format: 'dd/mm/yyyy', autoclose: true, todayHighlight: true }); if ($.validator && $.validator.unobtrusive) { $form.removeData('validator').removeData('unobtrusiveValidation'); $.validator.unobtrusive.parse($form); } };
-    initDigitalSalesTrackingForm();
-    $('#frmTrackingModal').off('submit.digitalSales').on('submit.digitalSales', function (e) {
-        e.preventDefault(); var $form = $(this); if ($form.valid && !$form.valid()) return false; var $button = $form.find('button[type=submit]').prop('disabled', true), data = new FormData(this);
-        $.ajax({ url: $form.attr('action'), type: 'POST', data: data, contentType: false, processData: false }).done(function (response) {
-            $button.prop('disabled', false); if (typeof response === 'string') { $('#modalTracking #bodyForm').html(response); initDigitalSalesTrackingForm(); return; }
-            if (response.status) { $('#modalTracking').modal('hide'); executeResponseMessage(response.message, '', true); if (typeof reloadTrackingSection === 'function') reloadTrackingSection(@Model.DigitalSalesID); } else executeResponseMessage(response.message, '', false);
-        }).fail(function () { $button.prop('disabled', false); executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false); }); return false;
-    });
-})();
-</script>
+@{
+    var isEdit = Model.TrackingID > 0;
+    var modalTitle = isEdit ? "Cập nhật Tiến trình" : "Thêm mới Tiến trình";
+}
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_TrackingModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="modalTracking" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-white">
+                    <i class="fa fa-tasks mr-1"></i> @modalTitle
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("SaveTracking", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmTrackingModal", enctype = "multipart/form-data" }))
+            {
+                <div class="modal-body" id="bodyForm">
+                    @Html.Partial("_TrackingForm", Model)
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-outline-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Cancel")
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-primary px-3 radius-1 shadow-sm font-weight-bold">
+                        <i class="fa fa-save mr-1"></i> Lưu tiến trình
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

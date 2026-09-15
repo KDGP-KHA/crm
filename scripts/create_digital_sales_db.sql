@@ -73,10 +73,15 @@ BEGIN
         FileAttach NVARCHAR(MAX) NULL,
         IsDeleted BIT NOT NULL CONSTRAINT DF_RM_DigitalSales_IsDeleted DEFAULT (0),
         CreatedDate DATETIME NOT NULL CONSTRAINT DF_RM_DigitalSales_CreatedDate DEFAULT (GETDATE()),
-        CreatedBy VARCHAR(150) NULL,
+        ActionTime DATETIME NULL,
         LastModifiedDate DATETIME NULL,
         LastModifiedBy VARCHAR(150) NULL
     );
+
+    IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'RM_DigitalSales' AND COLUMN_NAME = 'ActionTime')
+    BEGIN
+        ALTER TABLE dbo.RM_DigitalSales ADD ActionTime DATETIME NULL;
+    END
 
     CREATE INDEX IX_RM_DigitalSales_StatusID ON dbo.RM_DigitalSales(StatusID);
     CREATE INDEX IX_RM_DigitalSales_CustomerID ON dbo.RM_DigitalSales(CustomerID);
@@ -1393,6 +1398,49 @@ BEGIN
 
     SELECT 1 AS Result;
     RETURN 1;
+END
+GO
+
+-- ========================================================
+-- 20. STORED PROCEDURE: RM_DigitalSalesActivity_GetList
+-- ========================================================
+IF OBJECT_ID('dbo.RM_DigitalSalesActivity_GetList', 'P') IS NOT NULL DROP PROCEDURE dbo.RM_DigitalSalesActivity_GetList;
+GO
+
+CREATE PROCEDURE dbo.RM_DigitalSalesActivity_GetList
+    @DigitalSalesID INT,
+    @ActivityType TINYINT = NULL -- NULL: Tất cả trao đổi & trạng thái (1, 2), 1: Chỉ trao đổi, 2: Trạng thái, 99: Checklist (3, 4, 5), 255: Tất cả toàn bộ
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        a.ActivityID,
+        a.DigitalSalesID,
+        a.ActivityType,
+        a.Content,
+        a.Attachments,
+        a.MentionedUserIDs,
+        a.MentionedNames,
+        a.ReferenceID,
+        a.ActionDate,
+        a.ActionBy,
+        ISNULL(a.ActionByName, u.FullName) AS ActionByName,
+        u.Avatar AS ActionByAvatar,
+        ISNULL(bp.TenBoPhan, u.OfficeName) AS ActionByDepartment,
+        a.IsDeleted
+    FROM dbo.RM_DigitalSalesActivity a
+    LEFT JOIN dbo.Sys_Users u ON a.ActionBy = u.UserName
+    LEFT JOIN dbo.MN_BoPhan bp ON u.MaBoPhan = bp.MaBoPhan
+    WHERE a.DigitalSalesID = @DigitalSalesID 
+      AND a.IsDeleted = 0
+      AND (
+          (@ActivityType IS NULL AND a.ActivityType NOT IN (3, 4, 5))
+          OR (@ActivityType = 99 AND a.ActivityType IN (3, 4, 5))
+          OR (@ActivityType = 255)
+          OR (@ActivityType IS NOT NULL AND @ActivityType NOT IN (99, 255) AND a.ActivityType = @ActivityType)
+      )
+    ORDER BY a.ActionDate DESC, a.ActivityID DESC;
 END
 GO
 
