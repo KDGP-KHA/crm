@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -33,6 +33,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_ContactPersonsCache _contactPersonCache;
         private readonly RM_ContractsCache _contractCache;
         private readonly RM_RolesCache _rolesCache;
+        private readonly RM_CostTypeCache _costTypeCache;
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
         private readonly NotificationService _notificationService;
@@ -71,6 +72,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _contactPersonCache = new RM_ContactPersonsCache();
             _contractCache = new RM_ContractsCache();
             _rolesCache = new RM_RolesCache();
+            _costTypeCache = new RM_CostTypeCache();
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
             _notificationService = new NotificationService();
@@ -1880,6 +1882,31 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         #region 5. Products & Revenue
+        private string GetProductCollectionToken(string collectionName, int index)
+        {
+            var tokens = Request.Form.GetValues(string.Concat(collectionName, ".Index"));
+            return tokens != null && index >= 0 && index < tokens.Length && !string.IsNullOrWhiteSpace(tokens[index])
+                ? tokens[index]
+                : index.ToString();
+        }
+
+        private void PrepareProductFormData(RM_DigitalSalesProductModel model)
+        {
+            ViewBag.ProductList = GetProductSelectList();
+            ViewBag.CostTypes = (_costTypeCache.GetAll() ?? new List<RM_CostTypeModel>())
+                .OrderBy(item => item.CostTypeName)
+                .Select(item => new SelectListItem
+                {
+                    Value = item.CostTypeID.ToString(),
+                    Text = item.CostTypeName
+                }).ToList();
+
+            ViewBag.ProductCostTokens = Enumerable.Range(0, (model.Costs ?? new List<RM_DigitalSalesProductCostModel>()).Count)
+                .Select(index => GetProductCollectionToken("Costs", index)).ToList();
+            ViewBag.ProductRevenueTokens = Enumerable.Range(0, (model.Revenues ?? new List<RM_DigitalSalesProductRevenueModel>()).Count)
+                .Select(index => GetProductCollectionToken("Revenues", index)).ToList();
+        }
+
         private List<SelectListItem> GetProductSelectList()
         {
             try
@@ -1989,6 +2016,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         [HttpGet]
+        [AjaxOnly]
         [ActionType(Type = EnumActionType.Create)]
         public ActionResult AddProductModal(int digitalSalesId)
         {
@@ -2009,12 +2037,13 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 EndDate = DateTime.Today.AddYears(1)
             };
 
-            ViewBag.ProductList = GetProductSelectList();
+            PrepareProductFormData(model);
 
             return PartialView("_ProductModal", model);
         }
 
         [HttpGet]
+        [AjaxOnly]
         [ActionType(Type = EnumActionType.Edit)]
         public ActionResult EditProductModal(int id, int digitalSalesId)
         {
@@ -2038,12 +2067,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }, JsonRequestBehavior.AllowGet);
             }
 
-            ViewBag.ProductList = GetProductSelectList();
+            model.Costs = _salesCache.GetProductCosts(id);
+            model.Revenues = _salesCache.GetProductRevenues(id);
+            PrepareProductFormData(model);
 
             return PartialView("_ProductModal", model);
         }
 
         [HttpPost]
+        [AjaxOnly]
         [ActionType(Type = EnumActionType.Create)]
         [ValidateAntiForgeryToken]
         public ActionResult SaveProduct(RM_DigitalSalesProductModel model, int? ProductServiceID, int? DigitalSalesID)
@@ -2090,6 +2122,70 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ModelState.AddModelError("ProductServiceID", GetAppMessage("DigitalSales_Msg_ProductRequired"));
             }
 
+            var validProductIds = new HashSet<int>(GetProductSelectList()
+                .Select(item =>
+                {
+                    int productId;
+                    return int.TryParse(item.Value, out productId) ? productId : 0;
+                })
+                .Where(productId => productId > 0));
+            if (model.ProductServiceID > 0 && !validProductIds.Contains(model.ProductServiceID))
+            {
+                ModelState.AddModelError("ProductServiceID", GetAppMessage("DigitalSalesProduct_Msg_ReferenceInvalid"));
+            }
+
+            model.Costs = model.Costs ?? new List<RM_DigitalSalesProductCostModel>();
+            model.Revenues = model.Revenues ?? new List<RM_DigitalSalesProductRevenueModel>();
+
+            if (model.ExpectedRevenue.HasValue && model.ExpectedRevenue.Value < 0)
+            {
+                ModelState.AddModelError("ExpectedRevenueMillion", GetAppMessage("DigitalSalesProduct_Msg_ExpectedRevenueInvalid"));
+            }
+
+            if (model.ExpectedRevenue.HasValue && model.ExpectedRevenue.Value > 9999999999999999.99m)
+            {
+                ModelState.AddModelError("ExpectedRevenueMillion", GetAppMessage("DigitalSalesProduct_Msg_AmountTooLarge"));
+            }
+
+            if (model.Quantity <= 0)
+            {
+                ModelState.AddModelError("Quantity", GetAppMessage("DigitalSalesProduct_Msg_QuantityInvalid"));
+            }
+
+            if (!string.IsNullOrEmpty(model.PackageName) && model.PackageName.Length > 255)
+            {
+                ModelState.AddModelError("PackageName", GetAppMessage("DigitalSalesProduct_Msg_PackageTooLong"));
+            }
+
+            if (model.StartDate.HasValue && model.EndDate.HasValue && model.EndDate.Value.Date < model.StartDate.Value.Date)
+            {
+                ModelState.AddModelError("EndDate", GetAppMessage("DigitalSalesProduct_Msg_DateRangeInvalid"));
+            }
+
+            var validCostTypeIds = new HashSet<int>((_costTypeCache.GetAll() ?? new List<RM_CostTypeModel>()).Select(item => item.CostTypeID));
+            for (var index = 0; index < model.Costs.Count; index++)
+            {
+                var cost = model.Costs[index];
+                if (cost.CostTypeID <= 0 || !validCostTypeIds.Contains(cost.CostTypeID) || !cost.Amount.HasValue || cost.Amount.Value <= 0)
+                {
+                    ModelState.AddModelError(string.Concat("Costs[", GetProductCollectionToken("Costs", index), "].Amount"), GetAppMessage("DigitalSalesProduct_Msg_CostInvalid"));
+                }
+            }
+
+            if (model.Revenues.Sum(item => item.Amount ?? 0m) > 9999999999.99m)
+            {
+                ModelState.AddModelError("Revenues", GetAppMessage("DigitalSalesProduct_Msg_AmountTooLarge"));
+            }
+
+            for (var index = 0; index < model.Revenues.Count; index++)
+            {
+                var revenue = model.Revenues[index];
+                if (!revenue.Amount.HasValue || revenue.Amount.Value <= 0 || !revenue.ReceivedDate.HasValue)
+                {
+                    ModelState.AddModelError(string.Concat("Revenues[", GetProductCollectionToken("Revenues", index), "].Amount"), GetAppMessage("DigitalSalesProduct_Msg_RevenueInvalid"));
+                }
+            }
+
             if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
             {
                 return Json(new
@@ -2101,11 +2197,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewBag.ProductList = GetProductSelectList();
+                PrepareProductFormData(model);
                 return PartialView("_ProductForm", model);
             }
 
-            var id = _salesCache.SaveProduct(model, User.UserName);
+            var id = _salesCache.SaveProductDetail(model, User.UserName);
             if (id > 0)
             {
                 return Json(new

@@ -19,6 +19,39 @@ function buildReviewDigitalSalesUrl(row) {
     return url;
 }
 
+function renderReviewDigitalSalesRecord(row) {
+    var url = buildReviewDigitalSalesUrl(row);
+    var badgeClass = "badge-secondary";
+    if (row.StatusID === 2) badgeClass = "badge-info";
+    else if (row.StatusID === 3 || row.StatusID === 6) badgeClass = "badge-danger";
+    else if (row.StatusID === 7) badgeClass = "badge-primary";
+    else if (row.StatusID === 8) badgeClass = "badge-success";
+    else if (row.StatusID !== 1) badgeClass = "badge-warning text-dark";
+
+    var html = '<div class="mb-1 d-flex align-items-center flex-wrap">'
+        + '<span class="badge ' + badgeClass + ' px-2 py-1 sale-badge">' + encodeReviewDigitalSales(row.StatusName || "—") + '</span>'
+        + '</div>';
+    html += '<a class="font-weight-bold text-primary d-block sale-title" style="font-size:15px" title="Xem chi tiết 360 độ" href="' + url + '">'
+        + encodeReviewDigitalSales(row.Title) + '</a>';
+    html += '<div class="mt-1 d-flex align-items-center flex-wrap">'
+        + '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-mono font-bold px-2 py-1 radius-1 shadow-sm sale-badge">'
+        + '<i class="fa fa-hashtag mr-1 opacity-75"></i>' + encodeReviewDigitalSales(row.Code || "—") + '</span>';
+    if (row.IsKeyProject) {
+        html += '<span class="badge bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge" title="Dự án trọng điểm">'
+            + '<i class="fa fa-star text-warning mr-1"></i>Trọng điểm</span>';
+    }
+    if (row.IsFollowed) {
+        html += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge" title="Hồ sơ bạn đang quan tâm">'
+            + '<i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
+    }
+    html += '</div>';
+    if (row.ProductServiceNames) {
+        html += '<div class="sale-subtext text-secondary mt-1"><i class="fa fa-tags text-purple mr-1"></i>'
+            + encodeReviewDigitalSales(row.ProductServiceNames) + '</div>';
+    }
+    return html;
+}
+
 function renderReviewDigitalSalesInfo(row) {
     var messages = getReviewDigitalSalesMessages();
     if (!row || !row.LastReviewDate) {
@@ -101,6 +134,8 @@ function searchReviewDigitalSales() {
 
 function initReviewDigitalSalesTable() {
     var state = getReviewDigitalSalesState();
+    var savedOrderColumn = parseInt(state.orderColumn || 1, 10);
+    if ([1, 2, 3].indexOf(savedOrderColumn) < 0) savedOrderColumn = 1;
     _tableReviewDigitalSales = $("#DSDigitalSalesReview").DataTable({
         responsive: true,
         lengthChange: true,
@@ -109,7 +144,7 @@ function initReviewDigitalSalesTable() {
         ordering: true,
         displayStart: state.start || 0,
         pageLength: state.length || 10,
-        order: [[parseInt(state.orderColumn || 1, 10), state.orderDir || "asc"]],
+        order: [[savedOrderColumn, state.orderDir || "asc"]],
         ajax: {
             url: "/Cate/ReviewBatchItem/GetDigitalSales",
             type: "POST",
@@ -120,7 +155,7 @@ function initReviewDigitalSalesTable() {
                 data.StatusID = $("#ReviewDigitalSalesStatusID").val() || 0;
                 data.DepartmentID = $("#ReviewDigitalSalesDepartmentID").val() || 0;
                 data.EmployeeID = $("#ReviewDigitalSalesEmployeeID").val() || 0;
-                data.IsReviewed = $('input[name="IsReviewed"]:checked').val() === "true";
+                data.IsReviewed = String($('input[name="IsReviewed"]:checked').val()).toLowerCase() === "true";
                 return data;
             }
         },
@@ -133,15 +168,9 @@ function initReviewDigitalSalesTable() {
             {
                 data: "Title",
                 className: "text-left",
-                render: function (_, __, row) {
-                    var url = buildReviewDigitalSalesUrl(row);
-                    return '<a class="font-weight-bold text-primary" href="' + url + '">' + encodeReviewDigitalSales(row.Title) + '</a>'
-                        + '<div class="small text-secondary">' + encodeReviewDigitalSales(row.Code) + '</div>';
-                }
+                render: function (_, __, row) { return renderReviewDigitalSalesRecord(row); }
             },
-            { data: "BusinessTypeName", className: "text-left", defaultContent: "" },
             { data: "CustomerName", className: "text-left", defaultContent: "" },
-            { data: "StatusName", className: "text-left", defaultContent: "" },
             {
                 data: "AssignedEmployeeName",
                 className: "text-left",

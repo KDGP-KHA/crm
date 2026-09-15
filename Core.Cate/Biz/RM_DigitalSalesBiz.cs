@@ -1,9 +1,10 @@
-using Core.Cate.Models;
+﻿using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using TSFramework.Libs.Processors;
 
 namespace Core.Cate.Biz
@@ -18,6 +19,10 @@ namespace Core.Cate.Biz
         private readonly string _spProductGetBySalesID = "RM_DigitalSalesProduct_GetBySalesID";
         private readonly string _spProductSave = "RM_DigitalSalesProduct_Save";
         private readonly string _spProductDelete = "RM_DigitalSalesProduct_Delete";
+        private readonly string _spProductDetailSave = "RM_DigitalSalesProduct_SaveDetail";
+        private readonly string _spProductCostGetByProductID = "RM_DigitalSalesProductCost_GetByProductID";
+        private readonly string _spProductRevenueGetByProductID = "RM_DigitalSalesProductRevenue_GetByProductID";
+        private readonly string _spProductMemberGetByProductID = "RM_DigitalSalesProductMember_GetByProductID";
         private readonly string _spChangeStatus = "RM_DigitalSales_ChangeStatus";
         private readonly string _spTrackingGetBySalesID = "RM_DigitalSalesTracking_GetBySalesID";
         private readonly string _spTrackingSave = "RM_DigitalSalesTracking_Save";
@@ -241,6 +246,99 @@ namespace Core.Cate.Biz
                 model.Note,
                 username
             );
+            return result.GetValueOrDefault(0);
+        }
+
+        public List<RM_DigitalSalesProductCostModel> GetProductCosts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductCostModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesProductCostModel>(
+                _spProductCostGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_DigitalSalesProductCostModel>();
+        }
+
+        public List<RM_DigitalSalesProductRevenueModel> GetProductRevenues(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductRevenueModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesProductRevenueModel>(
+                _spProductRevenueGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_DigitalSalesProductRevenueModel>();
+        }
+
+        public List<RM_DigitalSalesProductMemberModel> GetProductMembers(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_DigitalSalesProductMemberModel>();
+            var members = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesProductMemberModel>(
+                _spProductMemberGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_DigitalSalesProductMemberModel>();
+
+            foreach (var member in members)
+            {
+                member.RoleIDs = string.IsNullOrWhiteSpace(member.RoleIDsText)
+                    ? new int[0]
+                    : member.RoleIDsText.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(value =>
+                        {
+                            int roleId;
+                            return int.TryParse(value.Trim(), out roleId) ? roleId : 0;
+                        })
+                        .Where(roleId => roleId > 0)
+                        .Distinct()
+                        .ToArray();
+            }
+
+            return members;
+        }
+
+        public int SaveProductDetail(RM_DigitalSalesProductModel model, string username)
+        {
+            if (model == null) return 0;
+
+            var costs = model.Costs ?? new List<RM_DigitalSalesProductCostModel>();
+            var revenues = model.Revenues ?? new List<RM_DigitalSalesProductRevenueModel>();
+
+            model.ActualRevenue = revenues.Sum(item => item.Amount ?? 0m) * 1000000m;
+
+            var costsXml = new XElement("Items",
+                costs.Select(item => new XElement("Item",
+                    new XAttribute("ID", item.SalesProductCostID),
+                    new XAttribute("CostTypeID", item.CostTypeID),
+                    new XAttribute("Amount", (item.Amount ?? 0m).ToString(CultureInfo.InvariantCulture)),
+                    item.PaymentDate.HasValue ? new XAttribute("PaymentDate", item.PaymentDate.Value.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)) : null,
+                    new XElement("Note", item.Note ?? string.Empty))));
+
+            var revenuesXml = new XElement("Items",
+                revenues.Select(item => new XElement("Item",
+                    new XAttribute("ID", item.SalesProductRevenueID),
+                    new XAttribute("Amount", (item.Amount ?? 0m).ToString(CultureInfo.InvariantCulture)),
+                    item.ReceivedDate.HasValue ? new XAttribute("ReceivedDate", item.ReceivedDate.Value.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)) : null,
+                    item.ReceivedTime.HasValue ? new XAttribute("ReceivedTime", item.ReceivedTime.Value.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)) : null,
+                    new XElement("Note", item.Note ?? string.Empty))));
+
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spProductDetailSave,
+                DATA_PROVIDER_NAME,
+                model.SalesProductID,
+                model.DigitalSalesID,
+                model.ProductServiceID,
+                model.ExpectedRevenue,
+                model.PackageName,
+                model.Quantity <= 0 ? 1 : model.Quantity,
+                model.StartDate,
+                model.EndDate,
+                model.Note,
+                costsXml.ToString(SaveOptions.DisableFormatting),
+                revenuesXml.ToString(SaveOptions.DisableFormatting),
+                "<Items />",
+                username
+            );
+
             return result.GetValueOrDefault(0);
         }
 

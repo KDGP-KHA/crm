@@ -1,4 +1,4 @@
-window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -570,6 +570,168 @@ function openChangeStatusModal(id) {
 }
 
 /* ================= 3. Sản phẩm / Dịch vụ số (Tab 2) ================= */
+function parseDigitalSalesProductNumber(value) {
+    var normalized = String(value || "").trim().replace(/\s/g, "");
+    if (normalized.indexOf(",") >= 0) {
+        normalized = normalized.replace(/\./g, "").replace(",", ".");
+    }
+    var parsed = parseFloat(normalized);
+    return isNaN(parsed) ? 0 : parsed;
+}
+
+function formatDigitalSalesProductNumber(value) {
+    return Number(value || 0).toLocaleString("vi-VN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function updateDigitalSalesProductEmptyStates($form) {
+    ["cost", "revenue"].forEach(function (type) {
+        var hasRows = $form.find('[data-detail-row="' + type + '"]').length > 0;
+        $form.find('[data-empty-state="' + type + '"]').toggleClass("d-none", hasRows);
+    });
+}
+
+function updateDigitalSalesProductFinanceSummary($form) {
+    var expected = parseDigitalSalesProductNumber($form.find(".js-expected-revenue").val());
+    var revenue = 0;
+    var cost = 0;
+    $form.find(".js-revenue-amount").each(function () { revenue += parseDigitalSalesProductNumber($(this).val()); });
+    $form.find(".js-cost-amount").each(function () { cost += parseDigitalSalesProductNumber($(this).val()); });
+    $form.find('[data-finance-summary="expected"]').text(formatDigitalSalesProductNumber(expected));
+    $form.find('[data-finance-summary="revenue"]').text(formatDigitalSalesProductNumber(revenue));
+    $form.find('[data-finance-summary="cost"]').text(formatDigitalSalesProductNumber(cost));
+    $form.find('[data-finance-summary="profit"]').text(formatDigitalSalesProductNumber(revenue - cost));
+}
+
+function initDigitalSalesProductControls($scope, $modal) {
+    if ($.fn.select2) {
+        $scope.find(".product-service-select, .product-detail-select").filter(function () {
+            return !$(this).closest("#productDetailTemplates").length;
+        }).each(function () {
+            var $select = $(this);
+            if ($select.data("select2")) $select.select2("destroy");
+            $select.select2({ width: "100%", dropdownParent: $modal });
+            if ($select.hasClass("product-detail-select-sm")) {
+                $select.next(".select2-container").addClass("product-detail-select-container-sm");
+            }
+        });
+    }
+
+    if ($.fn.datepicker) {
+        $scope.find(".product-date-input").filter(function () {
+            return !$(this).closest("#productDetailTemplates").length;
+        }).each(function () {
+            var $input = $(this);
+            $input.off("click.digitalSalesProductDate");
+            try { $input.datepicker("destroy"); } catch (ignore) { }
+            $input.datepicker({
+                autoclose: true,
+                format: "dd/mm/yyyy",
+                todayHighlight: true,
+                todayBtn: true,
+                weekStart: 1,
+                language: "vi",
+                orientation: "auto"
+            });
+            $input.on("click.digitalSalesProductDate", function () { $(this).datepicker("show"); });
+        });
+    }
+}
+
+function scrollDigitalSalesProductRowIntoView($row) {
+    var row = $row.get(0);
+    if (!row) return;
+    window.setTimeout(function () {
+        try {
+            row.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } catch (error) {
+            row.scrollIntoView(false);
+        }
+    }, 0);
+}
+
+window.initDigitalSalesProductRuntimeForm = function () {
+    var $modal = $("#modalProduct");
+    var $form = $("#frmProductModal");
+    if (!$form.length) return;
+
+    $form.find("#productDetailTemplates :input").prop("disabled", true);
+    initDigitalSalesProductControls($form, $modal);
+    if ($.validator && $.validator.unobtrusive) {
+        $form.removeData("validator").removeData("unobtrusiveValidation");
+        $.validator.unobtrusive.parse($form);
+    }
+
+    $form.off("click.productRows", "[data-add-row]").on("click.productRows", "[data-add-row]", function () {
+        var type = $(this).data("add-row");
+        var token = type + Date.now().toString() + Math.floor(Math.random() * 1000).toString();
+        var template = $form.find('#productDetailTemplates [data-template-row="' + type + '"]').prop("outerHTML");
+        if (!template) return;
+        template = template.replace(/__index__/g, token).replace('data-template-row="' + type + '"', 'data-detail-row="' + type + '"');
+        var target = type === "cost" ? "#productCostRows" : "#productRevenueRows";
+        var $row = $(template).appendTo($form.find(target));
+        $row.find(":input").prop("disabled", false);
+        initDigitalSalesProductControls($row, $modal);
+        updateDigitalSalesProductEmptyStates($form);
+        updateDigitalSalesProductFinanceSummary($form);
+        scrollDigitalSalesProductRowIntoView($row);
+    });
+
+    $form.off("click.removeProductRow", "[data-remove-row]").on("click.removeProductRow", "[data-remove-row]", function () {
+        var $row = $(this).closest("[data-detail-row]");
+        $row.find(".product-detail-select").each(function () { if ($(this).data("select2")) $(this).select2("destroy"); });
+        $row.remove();
+        updateDigitalSalesProductEmptyStates($form);
+        updateDigitalSalesProductFinanceSummary($form);
+    });
+
+    $form.off("input.productFinance change.productFinance", ".js-expected-revenue, .js-cost-amount, .js-revenue-amount")
+        .on("input.productFinance change.productFinance", ".js-expected-revenue, .js-cost-amount, .js-revenue-amount", function () {
+            updateDigitalSalesProductFinanceSummary($form);
+        });
+
+    $form.off("submit.digitalSales").off("submit.digitalSalesProductRuntime").on("submit.digitalSalesProductRuntime", function (event) {
+        event.preventDefault();
+        if ($form.valid && !$form.valid()) return false;
+
+        var salesId = Number($form.find('[name="DigitalSalesID"]').val()) || _currentDigitalSalesId;
+        var $button = $form.find('button[type="submit"]');
+        var originalButtonHtml = $button.data("original-html") || $button.html();
+        $button.data("original-html", originalButtonHtml).prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Đang lưu...');
+
+        $.post($form.attr("action"), $form.serialize()).done(function (response) {
+            $button.prop("disabled", false).html(originalButtonHtml);
+            if (typeof response === "string") {
+                $("#modalProduct #bodyForm").html(response);
+                window.initDigitalSalesProductRuntimeForm();
+                var validationMessage = $("#modalProduct .text-danger:visible").first().text();
+                if (validationMessage) executeResponseMessage(validationMessage, validationMessage, false);
+                return;
+            }
+
+            if (response.status) {
+                var completed = false;
+                var onClosed = function () {
+                    if (completed) return;
+                    completed = true;
+                    executeResponseMessage(response.message, "", true);
+                    reloadProductsSection(salesId);
+                };
+                $modal.one("hidden.bs.modal", onClosed).modal("hide");
+                window.setTimeout(onClosed, 500);
+            } else {
+                executeResponseMessage(response.message, "", false);
+            }
+        }).fail(function () {
+            $button.prop("disabled", false).html(originalButtonHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+        });
+        return false;
+    });
+
+    updateDigitalSalesProductEmptyStates($form);
+    updateDigitalSalesProductFinanceSummary($form);
+};
+
 function openAddProductModal(salesId) {
     if (typeof _onWaiting === "function") _onWaiting();
     $.get(_detailUrls.addProductModal, { digitalSalesId: salesId })
@@ -577,9 +739,9 @@ function openAddProductModal(salesId) {
             if (typeof _endWaiting === "function") _endWaiting();
             $("#modalContainer").html(html);
             var $modal = $("#modalProduct");
-            if ($.fn.select2) {
-                $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
-            }
+            $modal.one("shown.bs.modal", function () {
+                window.initDigitalSalesProductRuntimeForm();
+            });
             $modal.modal("show");
         })
         .fail(function () {
@@ -595,9 +757,9 @@ function openEditProductModal(id, salesId) {
             if (typeof _endWaiting === "function") _endWaiting();
             $("#modalContainer").html(html);
             var $modal = $("#modalProduct");
-            if ($.fn.select2) {
-                $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
-            }
+            $modal.one("shown.bs.modal", function () {
+                window.initDigitalSalesProductRuntimeForm();
+            });
             $modal.modal("show");
         })
         .fail(function () {
