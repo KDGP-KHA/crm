@@ -7,7 +7,7 @@
         .Select(g => {
             var first = g.First();
             var allRoles = g.SelectMany(x => (x.RoleTitle ?? "").Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
-                            .Select(r => r.Trim())
+                            .Select(r => Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(r.Trim()))
                             .Where(r => !string.IsNullOrEmpty(r))
                             .Distinct(StringComparer.OrdinalIgnoreCase)
                             .ToList();
