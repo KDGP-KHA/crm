@@ -56,18 +56,26 @@
             {
                 var statusGroups = parentTasks.GroupBy(t => new
                 {
+                    TimelineID = t.TimelineID ?? t.TrackingID,
                     StatusID = t.StatusID ?? 0,
                     StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Trạng thái",
                     ProcessCountOfStatus = t.ProcessCountOfStatus
-                }).OrderBy(g => g.Key.StatusID).ToList();
+                }).OrderBy(g => g.Key.TimelineID).ToList();
+
+                var latestCurrentStatusGroup = statusGroups.LastOrDefault(g => g.Key.StatusID == Model.StatusID);
 
                 int statusIdx = 1;
                 foreach (var stGroup in statusGroups)
                 {
-                    bool isCurrentStatus = (stGroup.Key.StatusID == Model.StatusID);
-                    string statusNodeId = "status_node_" + stGroup.Key.StatusID;
+                    bool isCurrentStatus = (latestCurrentStatusGroup != null && stGroup.Key.TimelineID == latestCurrentStatusGroup.Key.TimelineID);
+                    string statusNodeId = $"status_node_{stGroup.Key.StatusID}_{stGroup.Key.TimelineID}";
                     int statusTaskCount = stGroup.Count(t => !string.IsNullOrWhiteSpace(t.TaskName));
                     int statusTodoCount = stGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).Sum(p => p.TodoList?.Count ?? 0);
+
+                    // Xác định xem trạng thái này có xuất hiện nhiều lần không (1 trạng thái có thể xuất hiện nhiều lần)
+                    var occurrencesOfThisStatus = statusGroups.Where(g => g.Key.StatusID == stGroup.Key.StatusID).ToList();
+                    int occurrenceIndex = occurrencesOfThisStatus.IndexOf(stGroup) + 1;
+                    string occurrenceSuffix = occurrencesOfThisStatus.Count > 1 ? $" (Lần {occurrenceIndex})" : "";
 
                     <!-- ========================================================================= -->
                     <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
@@ -77,7 +85,7 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
-                                    <span class="tree-status-title">@stGroup.Key.StatusName</span>
+                                    <span class="tree-status-title">@stGroup.Key.StatusName@occurrenceSuffix</span>
                                     <span class="badge badge-primary badge-pill ml-2 text-80 font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
                                 </div>
                                 <span class="text-secondary-m1 text-80 font-italic mr-2">

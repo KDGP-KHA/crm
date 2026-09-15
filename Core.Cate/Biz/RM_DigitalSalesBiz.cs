@@ -445,7 +445,8 @@ namespace Core.Cate.Biz
                 model.SortOrder,
                 username,
                 model.ParentID.HasValue ? (object)model.ParentID.Value : DBNull.Value,
-                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value
+                model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value,
+                model.TimelineID.HasValue ? (object)model.TimelineID.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
         }

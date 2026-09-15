@@ -17,6 +17,8 @@ namespace Core.Cate.Models
         public int? StatusID { get; set; }
         public string SalesStatusName { get; set; }
         public int ProcessCountOfStatus { get; set; }
+        public int? TimelineID { get; set; }
+        public DateTime? TimelineDate { get; set; }
         public int? ProgressID { get; set; }
         [CustomRequired]
         [CustomDisplayName("DigitalSalesTracking_TaskName_Label")]
