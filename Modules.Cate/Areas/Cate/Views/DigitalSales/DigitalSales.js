@@ -1,4 +1,4 @@
-﻿var _tableDigitalSales;
+var _tableDigitalSales;
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -232,6 +232,9 @@ function initTableDigitalSales() {
                 next: "Sau",
                 last: "Cuối"
             }
+        },
+        initComplete: function () {
+            $('#tblDigitalSales_wrapper .dataTables_length select').addClass('none-select2');
         }
     });
 }
@@ -287,9 +290,9 @@ function executeResponseMessage(message, defaultText, isSuccess) {
     }
 }
 
-function reloadSalesTable() {
+function reloadSalesTable(resetPaging) {
     if (_tableDigitalSales) {
-        _tableDigitalSales.ajax.reload(null, false);
+        _tableDigitalSales.ajax.reload(null, resetPaging === false ? false : true);
     }
 }
 
