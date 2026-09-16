@@ -102,6 +102,9 @@
     <Procedure Name="RM_Contracts_Delete" Value="RM_Contracts_Delete" />
     <Procedure Name="RM_Contracts_GetByProjectID" Value="RM_Contracts_GetByProjectID" />
 	<Procedure Name="RM_Contracts_GetByProductProjectID" Value="RM_Contracts_GetByProductProjectID" />
+	<Procedure Name="RM_DigitalSalesProductContract_GetByProductID" Value="RM_DigitalSalesProductContract_GetByProductID" />
+	<Procedure Name="RM_DigitalSalesProductContract_Link" Value="RM_DigitalSalesProductContract_Link" />
+	<Procedure Name="RM_DigitalSalesProductContract_Unlink" Value="RM_DigitalSalesProductContract_Unlink" />
 
 		<!--RM_ExchangeHistory-->
     <Procedure Name="RM_ExchangeHistory_Save" Value="RM_ExchangeHistory_Save" />

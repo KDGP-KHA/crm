@@ -11,6 +11,8 @@ namespace Core.Cate.Models
     {
         public int ContractID { get; set; }
         public int ProductProjectID { get; set; }
+        /// <summary>DigitalSales product relation; null for existing project contracts.</summary>
+        public int? DigitalSalesProductID { get; set; }
         public int ProjectID { get; set; }
         [CustomRequired]
         [CustomDisplayName("ContractCode_Label_Name")]

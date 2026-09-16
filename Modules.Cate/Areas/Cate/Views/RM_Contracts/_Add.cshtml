@@ -21,21 +21,47 @@
     }
 
     <script type="text/javascript">
-        $('form#AddContracts').ajaxForm({
+        (function () {
+            var $form = $('form#AddContracts');
+            var $modal = $form.closest('.modal');
+            $modal.find('#btnSave').off('click.digitalSalesContract').on('click.digitalSalesContract', function (e) {
+                e.preventDefault();
+                $form.submit();
+            });
+
+            $form.ajaxForm({
+            beforeSubmit: function () {
+                if ($form.valid && !$form.valid()) return false;
+                $modal.find('#btnSave').prop('disabled', true);
+                return true;
+            },
             success: function (response) {
+                $modal.find('#btnSave').prop('disabled', false);
                 if (response.status != undefined) {
                     if (response.status == false) {
                         eval(response.message);
                         response.status = undefined;
                     } else {
-                        Contracts_OnProcessSuccess(response, "AddContracts");
+                        if ($('#DigitalSalesProductID').val() && typeof DigitalSalesContract_OnProcessSuccess === 'function') {
+                            DigitalSalesContract_OnProcessSuccess(response, "AddContracts");
+                        } else if (typeof Contracts_OnProcessSuccess === 'function') {
+                            Contracts_OnProcessSuccess(response, "AddContracts");
+                        }
                     }
                 }
                 else {
 
-                    Contracts_OnProcessSuccess(response, "AddContracts");
+                    if ($('#DigitalSalesProductID').val() && typeof DigitalSalesContract_OnProcessSuccess === 'function') {
+                        DigitalSalesContract_OnProcessSuccess(response, "AddContracts");
+                    } else if (typeof Contracts_OnProcessSuccess === 'function') {
+                        Contracts_OnProcessSuccess(response, "AddContracts");
+                    }
                 }
+            },
+            error: function () {
+                $modal.find('#btnSave').prop('disabled', false);
             }
-        });
+            });
+        })();
     </script>
 }

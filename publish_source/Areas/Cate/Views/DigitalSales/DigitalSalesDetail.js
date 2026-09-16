@@ -192,6 +192,34 @@ function reloadProductsSection(salesId) {
     });
 }
 
+function DigitalSalesContract_OnProcessSuccess(response, formId) {
+    var $modal = $("#ModalContent #modal_" + formId);
+    if ($modal.length === 0) {
+        $modal = $("#modal_" + formId);
+    }
+    if ($modal.length === 0) {
+        $modal = $(".modal.show").last();
+    }
+    if (response.status === undefined) {
+        $modal.find("#bodyForm").html(response);
+        return;
+    }
+
+    var complete = function () {
+        if (response.message) eval(response.message);
+        reloadProductsSection();
+        response.status = undefined;
+    };
+
+    if ($modal.length > 0) {
+        $modal.off("hidden.bs.modal.digitalSalesContract")
+            .one("hidden.bs.modal.digitalSalesContract", complete)
+            .modal("hide");
+    } else {
+        complete();
+    }
+}
+
 function reloadMembersSection(salesId) {
     salesId = getEffectiveSalesId(salesId);
     if (!salesId) return;

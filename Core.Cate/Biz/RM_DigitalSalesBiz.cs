@@ -23,6 +23,8 @@ namespace Core.Cate.Biz
         private readonly string _spProductCostGetByProductID = "RM_DigitalSalesProductCost_GetByProductID";
         private readonly string _spProductRevenueGetByProductID = "RM_DigitalSalesProductRevenue_GetByProductID";
         private readonly string _spProductMemberGetByProductID = "RM_DigitalSalesProductMember_GetByProductID";
+        private readonly string _spProductContractGetByProductID = "RM_DigitalSalesProductContract_GetByProductID";
+        private readonly string _spProductContractLink = "RM_DigitalSalesProductContract_Link";
         private readonly string _spChangeStatus = "RM_DigitalSales_ChangeStatus";
         private readonly string _spTrackingGetBySalesID = "RM_DigitalSalesTracking_GetBySalesID";
         private readonly string _spTrackingSave = "RM_DigitalSalesTracking_Save";
@@ -229,7 +231,49 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
-            return data ?? new List<RM_DigitalSalesProductModel>();
+            data = data ?? new List<RM_DigitalSalesProductModel>();
+            foreach (var product in data)
+            {
+                try
+                {
+                    product.Contracts = GetProductContracts(product.SalesProductID);
+                    product.ContractCount = product.Contracts.Count;
+                    // Contract TotalAmount is already stored in million VND, matching the product summary unit.
+                    product.ContractRevenueMillion = product.Contracts.Sum(item => Convert.ToDecimal(item.TotalAmount));
+                    product.ActualRevenue = product.ContractRevenueMillion * 1000000m;
+                }
+                catch (Exception ex)
+                {
+                    // A missing or not-yet-registered contract procedure must not hide the product list.
+                    AppProcessor.Logger.Error(ex);
+                    product.Contracts = new List<RM_ContractsModel>();
+                    product.ContractCount = 0;
+                    product.ContractRevenueMillion = 0m;
+                }
+            }
+            return data;
+        }
+
+        public List<RM_ContractsModel> GetProductContracts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_ContractsModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_ContractsModel>(
+                _spProductContractGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_ContractsModel>();
+        }
+
+        public int LinkProductContract(int salesProductId, int contractId, string username)
+        {
+            if (salesProductId <= 0 || contractId <= 0) return 0;
+            return AppProcessor.ProcedureProvider.Execute(
+                _spProductContractLink,
+                DATA_PROVIDER_NAME,
+                salesProductId,
+                contractId,
+                username
+            ).GetValueOrDefault(0);
         }
 
         public int SaveProduct(RM_DigitalSalesProductModel model, string username)

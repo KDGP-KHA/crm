@@ -7,7 +7,7 @@
     var titleKey = Model.SalesProductID > 0 ? "DigitalSalesProduct_Edit_Title" : "DigitalSalesProduct_Add_Title";
 }
 <div class="modal fade" id="modalProduct" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width: 800px;" role="document">
         @using (Html.BeginForm("SaveProduct", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmProductModal", @class = "modal-content border-0 shadow-lg radius-2 overflow-hidden" }))
         {
             <div class="modal-header bgc-primary-d1 text-white">

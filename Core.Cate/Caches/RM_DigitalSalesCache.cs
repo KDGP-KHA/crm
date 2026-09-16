@@ -106,6 +106,19 @@ namespace Core.Cate.Caches
             return data;
         }
 
+        public List<RM_ContractsModel> GetProductContracts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_ContractsModel>();
+            return Api.GetProductContracts(salesProductId);
+        }
+
+        public int LinkProductContract(int salesProductId, int contractId, string username)
+        {
+            var result = Api.LinkProductContract(salesProductId, contractId, username);
+            if (result > 0) InvalidateCache();
+            return result;
+        }
+
         public int SaveProduct(RM_DigitalSalesProductModel model, string username)
         {
             var result = Api.SaveProduct(model, username);

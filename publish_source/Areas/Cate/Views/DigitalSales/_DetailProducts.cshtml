@@ -1,96 +1,113 @@
-﻿@model Core.Cate.Models.RM_DigitalSalesModel
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
 @{
-    bool canEdit = ViewBag.CanEdit == true;
+    var canEdit = ViewBag.CanEdit == true;
+    var products = Model.Products ?? new List<Core.Cate.Models.RM_DigitalSalesProductModel>();
 }
 
-<span id="partialProductsCount" class="d-none" data-count="@(Model.Products?.Count ?? 0)"></span>
+<span id="partialProductsCount" class="d-none" data-count="@products.Count"></span>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h6 class="text-purple font-weight-bold mb-0">
-        <i class="fa fa-cubes mr-1"></i> Danh sách Sản phẩm / Dịch vụ số đính kèm
-    </h6>
+    <h6 class="text-purple font-weight-bold mb-0"><i class="fa fa-cubes mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_List_Title")</h6>
     @if (canEdit)
     {
-        <button type="button" class="btn btn-sm btn-purple px-3" onclick="openAddProductModal(@Model.DigitalSalesID);">
-            <i class="fa fa-plus mr-1"></i> Thêm sản phẩm / DV số
-        </button>
+        <button type="button" class="btn btn-sm btn-purple px-3" onclick="openAddProductModal(@Model.DigitalSalesID);"><i class="fa fa-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Add_Button")</button>
     }
 </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover text-90" id="tblProducts">
-        <thead class="bgc-secondary-l1 text-secondary-d2">
-            <tr>
-                <th style="width: 40px;" class="text-center">STT</th>
-                <th>Sản phẩm / Dịch vụ số</th>
-                <th>Gói cước / Quy mô</th>
-                <th style="width: 80px;" class="text-center">Số lượng</th>
-                <th class="text-right">DT dự kiến (VNĐ)</th>
-                <th class="text-right">DT thực tế (VNĐ)</th>
-                <th>Thời hạn</th>
-                <th>Ghi chú</th>
-                @if (canEdit)
-                {
-                    <th style="width: 100px;" class="text-center">Thao tác</th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Products != null && Model.Products.Count > 0)
-            {
-                int idx = 1;
-                foreach (var p in Model.Products)
-                {
-                    <tr>
-                        <td class="text-center">@idx</td>
-                        <td class="font-weight-bold text-dark">
-                            @p.ProductServiceName
-                            @if (!string.IsNullOrWhiteSpace(p.ProductServiceCode))
+@if (products.Count > 0)
+{
+    <div class="row">
+        @foreach (var product in products)
+        {
+            <div class="col-xl-6 col-lg-12 mb-3">
+                <div class="card bcard border-1 brc-purple-m3 shadow-sm h-100">
+                    <div class="card-header bgc-purple-l4 py-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-bolder text-purple-d2 text-105">@product.ProductServiceName</div>
+                            @if (!string.IsNullOrWhiteSpace(product.ProductServiceCode))
                             {
-                                <span class="text-secondary text-85 font-mono ml-1">(@p.ProductServiceCode.Trim())</span>
+                                <span class="text-secondary text-85 font-mono">@product.ProductServiceCode.Trim()</span>
                             }
-                        </td>
-                        <td>@(string.IsNullOrEmpty(p.PackageName) ? "—" : p.PackageName)</td>
-                        <td class="text-center">@p.Quantity</td>
-                        <td class="text-right font-weight-bold text-primary">@((p.ExpectedRevenue ?? 0).ToString("N0"))</td>
-                        <td class="text-right font-weight-bold text-success">@((p.ActualRevenue ?? 0).ToString("N0"))</td>
-                        <td>
-                            @(p.StartDate.HasValue ? p.StartDate.Value.ToString("dd/MM/yyyy") : "")
-                            @(p.EndDate.HasValue ? " ➔ " + p.EndDate.Value.ToString("dd/MM/yyyy") : "")
-                        </td>
-                        <td>@(string.IsNullOrEmpty(p.Note) ? "—" : p.Note)</td>
+                        </div>
                         @if (canEdit)
                         {
-                            <td class="text-center">
-                                <a href="javascript:void(0);" class="text-primary mr-2" title="Chỉnh sửa" onclick="openEditProductModal(@p.SalesProductID, @Model.DigitalSalesID);">
-                                    <i class="fa fa-edit"></i>
-                                </a>
-                                <a href="javascript:void(0);" class="text-danger" title="Xóa" onclick="deleteProductItem(@p.SalesProductID, @Model.DigitalSalesID);">
-                                    <i class="fa fa-trash-alt"></i>
-                                </a>
-                            </td>
+                            <div class="card-toolbar">
+                                <button type="button" class="btn btn-xs btn-white btn-h-light-blue text-blue-d2 border-0 mr-1" title="@AppProcessor.Messagor.GetMessage("Button_Edit")" onclick="openEditProductModal(@product.SalesProductID, @Model.DigitalSalesID);"><i class="fa fa-edit"></i></button>
+                                <button type="button" class="btn btn-xs btn-white btn-h-light-red text-danger border-0" title="@AppProcessor.Messagor.GetMessage("Button_Delete")" onclick="deleteProductItem(@product.SalesProductID, @Model.DigitalSalesID);"><i class="fa fa-trash-alt"></i></button>
+                            </div>
                         }
-                    </tr>
-                    idx++;
-                }
-            }
-            else
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-flex flex-wrap text-85 text-secondary mb-2">
+                            <div class="mr-3 mb-1"><i class="fa fa-layer-group mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Column_Package"): <span class="text-dark font-weight-bold">@(string.IsNullOrWhiteSpace(product.PackageName) ? "—" : product.PackageName)</span></div>
+                            <div class="mb-1"><i class="fa fa-calendar-alt mr-1"></i><span class="text-dark font-weight-bold">@(product.StartDate.HasValue ? product.StartDate.Value.ToString("dd/MM/yyyy") : "—") - @(product.EndDate.HasValue ? product.EndDate.Value.ToString("dd/MM/yyyy") : "—")</span></div>
+                        </div>
+                        <div class="row text-center border-y-1 brc-grey-l2 py-2 mx-0">
+                            <div class="col-6 border-r-1 brc-grey-l2"><div class="text-secondary text-80">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_ExpectedRevenue_Summary")</div><div class="text-primary font-bolder">@product.ExpectedRevenueMillion.GetValueOrDefault().ToString("N2") <span class="text-80 font-weight-normal">Triệu VNĐ</span></div></div>
+                            <div class="col-6"><div class="text-secondary text-80">Doanh thu thực tế</div><div class="text-success font-bolder">@product.ContractRevenueMillion.ToString("N2") <span class="text-80 font-weight-normal">Triệu VNĐ</span></div></div>
+                        </div>
+                        <div class="mt-2 text-90 text-secondary"><i class="fa fa-sticky-note mr-1"></i><span class="font-weight-bold">Ghi chú:</span> <span class="text-dark">@(string.IsNullOrWhiteSpace(product.Note) ? "—" : product.Note)</span></div>
+                        <div class="mt-2 pt-2 border-top">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="font-weight-bold text-90"><i class="fa fa-file-signature mr-1 text-primary"></i>Hợp đồng</div>
+                                @if (canEdit)
+                                {
+                                    @Html.Button(true, "AddDigitalSalesContract_" + product.SalesProductID,
+                                        Url.Action("Add", "RM_Contracts", new { area = "Cate", digitalSalesProductId = product.SalesProductID }),
+                                        "<i class='fa fa-plus'></i>", "Thêm hợp đồng",
+                                        new { @class = "btn btn-xs btn-primary", data_width = "1024px" })
+                                }
+                            </div>
+                            @if (product.Contracts != null && product.Contracts.Count > 0)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered mb-0 text-85">
+                                        <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>Mã hợp đồng</th><th>Tên hợp đồng</th><th class="text-right">Giá trị</th><th class="text-center">Thao tác</th></tr></thead>
+                                        <tbody>
+                                        @foreach (var contract in product.Contracts)
+                                        {
+                                            <tr>
+                                                <td>@contract.ContractCode</td>
+                                                <td>@contract.ContractName</td>
+                                                <td class="text-right">@contract.TotalAmount.ToString("N0")</td>
+                                                <td class="text-center">
+                                                    @if (canEdit)
+                                                    {
+                                                        @Html.Button(true, "EditDigitalSalesContract_" + contract.ContractID,
+                                                            Url.Action("Edit", "RM_Contracts", new { area = "Cate", id = contract.ContractID, digitalSalesProductId = product.SalesProductID }),
+                                                            "<i class='fa fa-edit'></i>", "Sửa",
+                                                            new { @class = "btn btn-xs btn-outline-primary", data_width = "1024px" })
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-secondary text-85">Chưa có hợp đồng.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card bcard border-1 brc-grey-l2 shadow-sm">
+        <div class="card-body text-center py-5 text-secondary-m2">
+            <i class="fa fa-cubes fa-3x mb-3 d-block opacity-2"></i>
+            <div class="font-bolder text-105">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Empty_Title")</div>
+            <div class="text-90 mt-1">@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Empty_Description")</div>
+            @if (canEdit)
             {
-                <tr>
-                    <td colspan="@(canEdit ? 9 : 8)" class="text-center py-4 text-muted">
-                        <i class="fa fa-inbox fa-2x mb-2 d-block text-secondary-l1"></i>
-                        Chưa có sản phẩm / dịch vụ số nào.@(canEdit ? " Vui lòng bấm \"Thêm sản phẩm / DV số\"." : "")
-                    </td>
-                </tr>
+                <button type="button" class="btn btn-sm btn-purple px-3 mt-3" onclick="openAddProductModal(@Model.DigitalSalesID);"><i class="fa fa-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesProduct_Add_Button")</button>
             }
-        </tbody>
-        <tfoot class="bgc-grey-l4 font-weight-bold">
-            <tr>
-                <td colspan="4" class="text-right">TỔNG CỘNG:</td>
-                <td class="text-right text-primary">@((Model.TotalExpectedRevenue ?? 0).ToString("N0")) VNĐ</td>
-                <td class="text-right text-success">@((Model.TotalActualRevenue ?? 0).ToString("N0")) VNĐ</td>
-                <td colspan="@(canEdit ? 3 : 2)"></td>
-            </tr>
-        </tfoot>
-    </table>
-</div>
+        </div>
+    </div>
+}

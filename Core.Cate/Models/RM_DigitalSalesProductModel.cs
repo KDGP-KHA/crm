@@ -60,6 +60,9 @@ namespace Core.Cate.Models
         }
         public int MemberCount { get; set; }
         public int RevenueCount { get; set; }
+        public decimal ContractRevenueMillion { get; set; }
+        public int ContractCount { get; set; }
+        public List<RM_ContractsModel> Contracts { get; set; } = new List<RM_ContractsModel>();
 
         public List<RM_DigitalSalesProductCostModel> Costs { get; set; } = new List<RM_DigitalSalesProductCostModel>();
         public List<RM_DigitalSalesProductRevenueModel> Revenues { get; set; } = new List<RM_DigitalSalesProductRevenueModel>();
