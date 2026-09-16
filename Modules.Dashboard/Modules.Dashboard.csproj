@@ -152,6 +152,7 @@
     <Content Include="Areas\Dashboard\Views\Dashboard\OpportunityByGroupService.cshtml" />
     <Content Include="Areas\Dashboard\Views\Dashboard\Chart.cshtml" />
     <Content Include="Areas\Dashboard\Views\Dashboard\_ChartOverview.cshtml" />
+    <Content Include="Areas\Dashboard\Views\Dashboard\DigitalSalesByStatus.cshtml" />
     <Content Include="Areas\Dashboard\Views\Dashboard\Chart.css" />
     <Content Include="Areas\Dashboard\Views\Dashboard\Chart.js" />
     <None Include="packages.config" />

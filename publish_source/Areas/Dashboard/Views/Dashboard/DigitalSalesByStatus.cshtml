@@ -1,0 +1,183 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesSearchModel
+@{
+    ViewBag.Title = "Danh sách Cơ hội kinh doanh - " + (ViewBag.StatusName as string) + " (Năm " + ViewBag.ApplyYear + ")";
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType {
+    primary
+}
+
+@section FormIcon {
+    <i class="fa fa-briefcase"></i>
+}
+
+@section FormBody {
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 pb-2 border-b-1 brc-default-l2">
+        <div class="mb-1 mb-sm-0">
+            <span class="badge badge-info text-90 mr-2 py-1 px-2">
+                <i class="fa fa-calendar-alt mr-1"></i>Năm @ViewBag.ApplyYear
+            </span>
+            <span class="badge badge-primary text-90 mr-2 py-1 px-2">
+                <i class="fa fa-tag mr-1"></i>@ViewBag.StatusName
+            </span>
+        </div>
+        <div>
+            <a href="/Cate/DigitalSales?applyYear=@ViewBag.ApplyYear@(ViewBag.StatusID > 0 ? "&statusId=" + ViewBag.StatusID : "")"
+               target="_blank"
+               class="btn btn-xs btn-outline-primary radius-2 px-2">
+                <i class="fa fa-external-link-alt mr-1"></i>Mở trên trang Quản lý
+            </a>
+        </div>
+    </div>
+
+    <div class="card dcard">
+        <div class="col-sm-12 table-responsive-md p-0">
+            <table id="DSDigitalSalesByStatus" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                    <tr>
+                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th>Thông tin cơ hội / dự án</th>
+                        <th>Doanh thu</th>
+                        <th>Thời gian</th>
+                        <th>Phụ trách</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var _tableDigitalSalesByStatus;
+
+        function formatMoney(val) {
+            if (val === null || val === undefined || val === "") return "—";
+            var num = parseFloat(val);
+            if (isNaN(num)) return "—";
+            return num.toLocaleString('vi-VN') + " đ";
+        }
+
+        function formatDate(val) {
+            if (!val) return "";
+            if (typeof moment !== "undefined") {
+                var m = moment(val);
+                return m.isValid() ? m.format("DD/MM/YYYY") : "";
+            }
+            return "";
+        }
+
+        $(document).ready(function () {
+            // Thiết lập kích thước modal toàn màn hình linh hoạt
+            $('#modal_DigitalSalesByStatus').addClass('modal-fs').removeClass('modal-lg');
+            initTableDigitalSalesByStatus();
+        });
+
+        function initTableDigitalSalesByStatus() {
+            _tableDigitalSalesByStatus = $("#DSDigitalSalesByStatus").DataTable({
+                responsive: true,
+                lengthChange: true,
+                processing: true,
+                serverSide: false,
+                ordering: true,
+                order: [[1, "asc"]],
+                ajax: {
+                    url: "/Dashboard/Dashboard/GetDigitalSalesByStatus",
+                    type: "POST",
+                    dataType: "JSON",
+                    data: {
+                        applyYear: '@Model.ApplyYear',
+                        statusId: '@Model.StatusID'
+                    }
+                },
+                columnDefs: [
+                    { targets: 0, width: "45px", className: "text-center", orderable: false },
+                    { targets: 1, minWidth: "240px" },
+                    { targets: 2, minWidth: "170px" },
+                    { targets: 3, minWidth: "130px" },
+                    { targets: 4, minWidth: "150px" },
+                    { targets: 5, width: "75px", className: "text-center", orderable: false }
+                ],
+                columns: [
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + 1 + meta.settings._iDisplayStart;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var typeBadge = row.BusinessType === 1
+                                ? '<span class="badge badge-info mr-1 text-80">Cơ hội</span>'
+                                : '<span class="badge badge-primary mr-1 text-80">Dự án</span>';
+
+                            var statusBadge = row.StatusName
+                                ? '<span class="badge badge-secondary mr-1 text-80">' + row.StatusName + '</span>'
+                                : '';
+
+                            var codeText = row.Code ? '[' + row.Code + '] ' : '';
+                            var titleHtml = '<a href="/Cate/DigitalSales/Detail/' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary">'
+                                + codeText + (row.Title || '') + '</a>';
+
+                            var customerHtml = row.CustomerName
+                                ? '<div class="text-secondary small mt-1"><i class="fa fa-building mr-1 text-primary"></i>' + row.CustomerName + '</div>'
+                                : '';
+
+                            return '<div>' + typeBadge + statusBadge + '</div>' + titleHtml + customerHtml;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var exp = row.TotalExpectedRevenue != null ? formatMoney(row.TotalExpectedRevenue) : '—';
+                            var act = row.TotalActualRevenue != null ? formatMoney(row.TotalActualRevenue) : '—';
+                            var prob = (row.ClosingProbability != null && row.ClosingProbability > 0)
+                                ? ' <span class="badge badge-warning text-dark ml-1" title="Xác suất chốt">' + row.ClosingProbability + '%</span>'
+                                : '';
+
+                            return '<div class="small"><b>DT Dự kiến:</b> <span class="text-primary font-weight-bold">' + exp + '</span>' + prob + '</div>'
+                                 + '<div class="small mt-1"><b>DT Thực tế:</b> <span class="text-success font-weight-bold">' + act + '</span></div>';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var yearHtml = '<div class="small"><b>Năm:</b> ' + (row.ApplyYear || '@Model.ApplyYear') + '</div>';
+                            var expDate = formatDate(row.ExpectedDate);
+                            var dateHtml = expDate
+                                ? '<div class="small text-muted mt-1"><i class="far fa-calendar-alt mr-1"></i>Dự kiến: ' + expDate + '</div>'
+                                : '';
+                            return yearHtml + dateHtml;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            var leader = row.LeaderEmployeeName || '—';
+                            var dept = row.DepartmentName
+                                ? '<div class="small text-muted">' + row.DepartmentName + '</div>'
+                                : '';
+                            var contact = row.ContactPersonName
+                                ? '<div class="small text-secondary mt-1"><i class="fa fa-phone mr-1"></i>' + row.ContactPersonName + (row.ContactPersonPhone ? ' (' + row.ContactPersonPhone + ')' : '') + '</div>'
+                                : '';
+                            return '<div class="small font-weight-bold text-dark-m1"><i class="fa fa-user mr-1 text-info"></i>' + leader + '</div>' + dept + contact;
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return '<a href="/Cate/DigitalSales/Detail/' + row.DigitalSalesID + '" target="_blank" class="btn btn-xs btn-outline-primary" title="Xem chi tiết">'
+                                 + '<i class="fa fa-eye mr-1"></i>Chi tiết</a>';
+                        }
+                    }
+                ]
+            });
+        }
+    </script>
+}
+
+@section SubmitControl {
+}

@@ -374,3 +374,26 @@
     max-width: 550px;
     margin: 0 auto;
 }
+
+/* Card Clickable Interaction */
+.stat-card-clickable {
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.stat-card-clickable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.16);
+    border-color: #2563eb !important;
+}
+
+.stat-card-clickable:active {
+    transform: translateY(-1px);
+}
+
+.card-total-summary.stat-card-clickable:hover {
+    box-shadow: 0 10px 25px rgba(30, 58, 138, 0.35);
+    transform: translateY(-3px);
+    filter: brightness(1.03);
+}

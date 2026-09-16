@@ -38,7 +38,7 @@
 }
 
 <!-- 1. HỘP TỔNG CỘNG CÁC TRẠNG THÁI (Hero Summary Card) -->
-<div class="card-total-summary">
+<div class="card-total-summary stat-card-clickable" onclick="openDigitalSalesByStatus(0, 'Tất cả trạng thái')" role="button" title="Click để xem danh sách toàn bộ @Model.TotalCountAll hồ sơ năm @Model.ApplyYear">
     <div class="total-summary-title">
         <i class="fa fa-layer-group"></i>
         Tổng cộng các Trạng thái Kinh doanh Dịch vụ số - Năm @Model.ApplyYear
@@ -47,7 +47,7 @@
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng số Cơ hội & Dự án</div>
             <div class="total-metric-val">@Model.TotalCountAll.ToString("N0") <span style="font-size: 14px; font-weight: normal;">hồ sơ</span></div>
-            <div class="total-metric-sub">Tất cả trạng thái năm @Model.ApplyYear</div>
+            <div class="total-metric-sub">Tất cả trạng thái năm @Model.ApplyYear (Click để xem chi tiết)</div>
         </div>
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng Doanh thu Dự kiến</div>
@@ -68,7 +68,7 @@
         <i class="fa fa-th-large"></i>
         Chi tiết theo Trạng thái hồ sơ
     </h5>
-    <span class="text-muted text-90">Hiển thị @Model.StatusList.Count trạng thái cấu hình</span>
+    <span class="text-muted text-90">Hiển thị @Model.StatusList.Count trạng thái cấu hình (Click card để xem danh sách chi tiết)</span>
 </div>
 
 <div class="row">
@@ -79,7 +79,7 @@
         var typeBadgeClass = st.BusinessType == 1 ? "badge-info" : "badge-primary";
 
         <div class="col-xl-3 col-lg-4 col-md-6 col-12">
-            <div class="stat-box-card @borderClass">
+            <div class="stat-box-card @borderClass stat-card-clickable" onclick="openDigitalSalesByStatus(@st.StatusID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(st.StatusName))')" role="button" title="Click để xem danh sách @st.TotalCount hồ sơ trạng thái @st.StatusName">
                 <div>
                     <div class="stat-box-header">
                         <div class="stat-box-name">
