@@ -12,9 +12,13 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
-    padding: 12px 20px;
+    padding: 10px 20px;
     margin-bottom: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
 .db-page-title {
@@ -36,6 +40,11 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.db-filter-group .select2-container {
+    min-width: 140px;
+    vertical-align: middle;
 }
 
 .db-filter-label {

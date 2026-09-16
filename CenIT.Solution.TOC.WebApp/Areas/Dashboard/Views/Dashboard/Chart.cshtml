@@ -11,14 +11,14 @@
 
 <div class="dashboard-chart-wrapper">
     <!-- 1. Thanh tiêu đề & Bộ lọc Năm áp dụng -->
-    <div class="db-header-bar d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-        <div class="db-page-title mb-2 mb-md-0">
+    <div class="db-header-bar d-flex flex-wrap align-items-center">
+        <div class="db-page-title mr-4 my-1">
             <i class="fa fa-tachometer-alt"></i>
             Dashboard Kinh doanh Sản phẩm Dịch vụ số
         </div>
 
-        <div class="db-filter-group">
-            <label class="db-filter-label" for="ApplyYear">
+        <div class="db-filter-group my-1">
+            <label class="db-filter-label mr-2" for="ApplyYear">
                 <i class="fa fa-calendar-alt text-primary mr-1"></i>Năm áp dụng:
             </label>
             <select id="ApplyYear" name="ApplyYear" class="db-filter-select" onchange="onDashboardYearChange(this.value);">
