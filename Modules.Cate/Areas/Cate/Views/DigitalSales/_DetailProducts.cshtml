@@ -56,7 +56,7 @@
                                     @Html.Button(true, "AddDigitalSalesContract_" + product.SalesProductID,
                                         Url.Action("Add", "RM_Contracts", new { area = "Cate", digitalSalesProductId = product.SalesProductID }),
                                         "<i class='fa fa-plus'></i>", "Thêm hợp đồng",
-                                        new { @class = "btn btn-xs btn-primary", data_width = "1024px" })
+                                        new { @class = "btn btn-xs btn-success", data_width = "1024px" })
                                 }
                             </div>
                             @if (product.Contracts != null && product.Contracts.Count > 0)
