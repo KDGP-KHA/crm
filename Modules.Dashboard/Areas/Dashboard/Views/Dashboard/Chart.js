@@ -47,3 +47,22 @@ $(document).ready(function () {
         }
     });
 });
+
+/**
+ * Mở modal popup danh sách cơ hội / dự án kinh doanh dịch vụ số theo trạng thái
+ */
+window.openDigitalSalesByStatus = function (statusId, statusName) {
+    var year = $("#ApplyYear").val() || new Date().getFullYear();
+    var baseUrl = window._dashboardChartUrls && window._dashboardChartUrls.digitalSalesByStatus
+        ? window._dashboardChartUrls.digitalSalesByStatus
+        : '/Dashboard/Dashboard/DigitalSalesByStatus';
+
+    var url = baseUrl + '?applyYear=' + encodeURIComponent(year)
+        + '&statusId=' + encodeURIComponent(statusId || 0)
+        + '&statusName=' + encodeURIComponent(statusName || '');
+
+    var $btn = $('<a data-modal="" data-modal-id="DigitalSalesByStatus" data-width="1200" href="' + url + '"></a>');
+    $("body").append($btn);
+    $btn.trigger("click");
+    $btn.remove();
+};

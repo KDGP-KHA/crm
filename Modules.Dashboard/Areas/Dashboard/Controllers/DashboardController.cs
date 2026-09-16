@@ -157,6 +157,47 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         }
 
         /// <summary>
+        /// Hiển thị popup modal danh sách cơ hội/dự án kinh doanh dịch vụ số theo trạng thái và năm áp dụng.
+        /// </summary>
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult DigitalSalesByStatus(int? applyYear, int? statusId, string statusName)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var model = new RM_DigitalSalesSearchModel
+            {
+                ApplyYear = year,
+                StatusID = statusId.GetValueOrDefault(0),
+                Keyword = statusName
+            };
+            ViewBag.ApplyYear = year;
+            ViewBag.StatusID = statusId.GetValueOrDefault(0);
+            ViewBag.StatusName = string.IsNullOrEmpty(statusName) ? (statusId > 0 ? "Theo trạng thái" : "Tất cả trạng thái") : statusName;
+            return PartialView("DigitalSalesByStatus", model);
+        }
+
+        /// <summary>
+        /// Trả dữ liệu JSON danh sách cơ hội/dự án kinh doanh dịch vụ số theo trạng thái và năm áp dụng cho DataTable.
+        /// </summary>
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetDigitalSalesByStatus(int? applyYear, int? statusId)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var search = new RM_DigitalSalesSearchModel
+            {
+                ApplyYear = year,
+                StatusID = statusId.GetValueOrDefault(0),
+                PageNumber = 1,
+                PageSize = 1000,
+                UserName = User.UserName
+            };
+            var data = _digitalSalesCache.LoadList(out var total, search);
+            return Json(new { recordsTotal = total, recordsFiltered = total, data }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
         /// Màn hình dashboard tổng hợp legacy.
         /// </summary>
         public ActionResult IndexLegacy()

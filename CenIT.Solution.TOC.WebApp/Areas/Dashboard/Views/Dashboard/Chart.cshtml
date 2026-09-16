@@ -67,7 +67,8 @@
 @section BottomScript {
     <script>
         window._dashboardChartUrls = {
-            getOverview: '@Url.Action("GetChartOverviewData", "Dashboard", new { area = "Dashboard" })'
+            getOverview: '@Url.Action("GetChartOverviewData", "Dashboard", new { area = "Dashboard" })',
+            digitalSalesByStatus: '@Url.Action("DigitalSalesByStatus", "Dashboard", new { area = "Dashboard" })'
         };
     </script>
     <script src="~/Areas/Dashboard/Views/Dashboard/Chart.js?v=@DateTime.Now.Ticks"></script>
