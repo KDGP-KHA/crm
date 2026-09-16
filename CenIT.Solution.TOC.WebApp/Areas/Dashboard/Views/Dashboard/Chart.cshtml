@@ -61,14 +61,22 @@
                 <p>Khu vực quản lý và theo dõi tiến độ thực hiện Kế hoạch kinh doanh đang được chuẩn bị. Bạn có thể chuyển về tab <strong>Tổng quát</strong> để theo dõi các chỉ số trạng thái và doanh thu.</p>
             </div>
         </div>
+    <!-- Hidden Buttons phục vụ kích hoạt Modal hệ thống -->
+    <div class="d-none">
+        @Html.Button(true, "OpportunityByGroupService",
+            Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" }),
+            "", "", new { @class = "d-none" })
     </div>
 </div>
 
 @section BottomScript {
+    <script src="~/Contents/Base/plugins/apexcharts/apexcharts.min.js"></script>
     <script>
         window._dashboardChartUrls = {
             getOverview: '@Url.Action("GetChartOverviewData", "Dashboard", new { area = "Dashboard" })',
-            digitalSalesByStatus: '@Url.Action("DigitalSalesByStatus", "Dashboard", new { area = "Dashboard" })'
+            digitalSalesByStatus: '@Url.Action("DigitalSalesByStatus", "Dashboard", new { area = "Dashboard" })',
+            getGroupServiceChart: '@Url.Action("GetGroupServiceChart", "Dashboard", new { area = "Dashboard" })',
+            opportunityByGroupService: '@Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" })'
         };
     </script>
     <script src="~/Areas/Dashboard/Views/Dashboard/Chart.js?v=@DateTime.Now.Ticks"></script>

@@ -23,5 +23,6 @@ namespace Core.Cate.Models
         public int TotalCountAll { get; set; }
         public decimal TotalExpectedRevenueAll { get; set; }
         public decimal TotalActualRevenueAll { get; set; }
+        public List<RM_DigitalSalesModel> KeyProjects { get; set; } = new List<RM_DigitalSalesModel>();
     }
 }
