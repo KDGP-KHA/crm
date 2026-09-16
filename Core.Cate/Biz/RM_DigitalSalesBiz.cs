@@ -107,6 +107,7 @@ namespace Core.Cate.Biz
                 try { model.TrackingTasks = GetTrackingTasks(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.TrackingTasks = new List<RM_DigitalSalesTrackingModel>(); }
                 try { model.Timelines = GetTimeline(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Timelines = new List<RM_DigitalSalesTimelineModel>(); }
                 try { model.Activities = GetActivitiesBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Activities = new List<RM_DigitalSalesActivityModel>(); }
+                try { EnsureCurrentStatusTrackingPlaceholder(model); } catch (Exception ex) { AppProcessor.Logger.Error(ex); }
             }
             return model;
         }
@@ -415,6 +416,82 @@ namespace Core.Cate.Biz
             return result.GetValueOrDefault(0);
         }
 
+        public void EnsureCurrentStatusTrackingPlaceholder(RM_DigitalSalesModel model)
+        {
+            if (model == null || model.DigitalSalesID <= 0) return;
+            if (model.TrackingTasks == null) model.TrackingTasks = new List<RM_DigitalSalesTrackingModel>();
+
+            var workflowBiz = new RM_DigitalSalesWorkflowBiz();
+
+            // 1. Duyệt toàn bộ các mốc chuyển trạng thái trong lịch sử Timelines
+            // Nếu một trạng thái từng được chuyển tới nhưng không có tiến trình nào (0 tiến trình),
+            // bắt buộc phải giữ lại placeholder cho mốc TimelineID đó để không bị biến mất khỏi Checklist!
+            if (model.Timelines != null && model.Timelines.Count > 0)
+            {
+                var transitions = model.Timelines
+                    .Where(tl => tl.ToStatusID > 0 && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderBy(tl => tl.ActionDate).ThenBy(tl => tl.TimelineID)
+                    .ToList();
+
+                foreach (var tl in transitions)
+                {
+                    bool hasTaskForTimeline = model.TrackingTasks.Any(t => t.TimelineID == tl.TimelineID);
+                    if (!hasTaskForTimeline)
+                    {
+                        int totalProcs = 0;
+                        var procs = workflowBiz.GetProcesses(out totalProcs, statusId: tl.ToStatusID);
+                        var activeProcs = procs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                        var defaultProc = activeProcs?.FirstOrDefault();
+
+                        var placeholder = new RM_DigitalSalesTrackingModel
+                        {
+                            TrackingID = 0,
+                            DigitalSalesID = model.DigitalSalesID,
+                            ParentID = null,
+                            ProcessID = defaultProc?.ProcessID ?? 0,
+                            ProcessName = defaultProc?.ProcessName ?? "Quy trình thực hiện",
+                            StatusID = tl.ToStatusID,
+                            SalesStatusName = !string.IsNullOrEmpty(tl.ToStatusName) ? tl.ToStatusName : "Trạng thái",
+                            ProcessCountOfStatus = activeProcs?.Count ?? 0,
+                            ProgressID = null,
+                            TaskName = null,
+                            Status = 1,
+                            TimelineID = tl.TimelineID
+                        };
+                        model.TrackingTasks.Add(placeholder);
+                    }
+                }
+            }
+
+            // 2. Đồng thời kiểm tra trạng thái hiện tại (model.StatusID) nếu chưa có trong TrackingTasks
+            if (model.StatusID > 0 && !model.TrackingTasks.Any(t => t.StatusID == model.StatusID))
+            {
+                int totalProcs = 0;
+                var procs = workflowBiz.GetProcesses(out totalProcs, statusId: model.StatusID);
+                var activeProcs = procs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                var defaultProc = activeProcs?.FirstOrDefault();
+
+                int? latestTimelineId = model.Timelines?.OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID).FirstOrDefault(tl => tl.ToStatusID == model.StatusID)?.TimelineID;
+
+                var placeholder = new RM_DigitalSalesTrackingModel
+                {
+                    TrackingID = 0,
+                    DigitalSalesID = model.DigitalSalesID,
+                    ParentID = null,
+                    ProcessID = defaultProc?.ProcessID ?? 0,
+                    ProcessName = defaultProc?.ProcessName ?? "Quy trình thực hiện",
+                    StatusID = model.StatusID,
+                    SalesStatusName = !string.IsNullOrEmpty(model.StatusName) ? model.StatusName : "Trạng thái",
+                    ProcessCountOfStatus = activeProcs?.Count ?? 0,
+                    ProgressID = null,
+                    TaskName = null,
+                    Status = 1,
+                    TimelineID = latestTimelineId
+                };
+                model.TrackingTasks.Add(placeholder);
+            }
+        }
+
         public List<RM_DigitalSalesTrackingModel> GetTrackingTasks(int digitalSalesId)
         {
             if (digitalSalesId <= 0) return new List<RM_DigitalSalesTrackingModel>();
@@ -459,7 +536,10 @@ namespace Core.Cate.Biz
                 try
                 {
                     var existingTasks = GetTrackingTasks(model.DigitalSalesID);
-                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value 
+                        && (!t.ParentID.HasValue || t.ParentID.Value <= 0) 
+                        && string.IsNullOrWhiteSpace(t.TaskName)
+                        && (!model.TimelineID.HasValue || t.TimelineID == model.TimelineID.Value)).ToList();
                     foreach (var ep in emptyPlaceholders)
                     {
                         DeleteTracking(ep.TrackingID, username);
@@ -764,7 +844,22 @@ namespace Core.Cate.Biz
 
             if (list != null && list.Count > 0)
             {
-                list = list.Where(a => a.ReferenceID == trackingId).OrderByDescending(a => a.ActionDate).ToList();
+                var targetIds = new HashSet<int> { trackingId };
+                try
+                {
+                    var allTasks = GetTrackingTasks(digitalSalesId);
+                    var parentTask = allTasks.FirstOrDefault(t => t.TrackingID == trackingId);
+                    if (parentTask != null && parentTask.TodoList != null && parentTask.TodoList.Count > 0)
+                    {
+                        foreach (var child in parentTask.TodoList)
+                        {
+                            targetIds.Add(child.TrackingID);
+                        }
+                    }
+                }
+                catch { }
+
+                list = list.Where(a => a.ReferenceID.HasValue && targetIds.Contains(a.ReferenceID.Value)).OrderByDescending(a => a.ActionDate).ToList();
 
                 foreach (var item in list)
                 {

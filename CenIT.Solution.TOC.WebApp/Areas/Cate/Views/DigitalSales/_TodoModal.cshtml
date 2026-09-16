@@ -9,8 +9,8 @@
     bool isEdit = Model.TrackingID > 0;
 }
 
-<div class="modal fade" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="todoModalTitle" aria-hidden="true" data_width="650">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal fade" id="todoModal" tabindex="-1" role="dialog" aria-labelledby="todoModalTitle" aria-hidden="true" data_width="800">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content border-0 radius-2 shadow-lg">
             <div class="modal-header bgc-orange-d1 text-white px-3 py-25">
                 <h5 class="modal-title font-bold text-110" id="todoModalTitle">
@@ -123,7 +123,7 @@
                         </div>
 
                         <!-- SỐ NGÀY THỰC HIỆN -->
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group mb-3">
                                 <label class="font-bolder text-secondary-d2 mb-1" for="Todo_DurationDays">
                                     Số ngày <span class="text-danger">*</span>
@@ -135,7 +135,7 @@
                         </div>
 
                         <!-- HẠN XỬ LÝ (DEADLINE - RÀNG BUỘC NGHIỆP VỤ) -->
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <div class="form-group mb-3">
                                 <label class="font-bolder text-secondary-d2 mb-1" for="Todo_Deadline">
                                     @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Deadline_Label") <span class="text-danger">*</span>

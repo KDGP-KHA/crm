@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Models.Base;
@@ -23,7 +23,23 @@ namespace Core.Cate.Models
         public decimal? ExpectedRevenueMillion
         {
             get { return ExpectedRevenue.HasValue ? ExpectedRevenue.Value / 1000000m : (decimal?)null; }
-            set { ExpectedRevenue = value.HasValue ? value.Value * 1000000m : (decimal?)null; }
+            set 
+            { 
+                if (!value.HasValue)
+                {
+                    ExpectedRevenue = null;
+                }
+                else if (value.Value >= 100000m)
+                {
+                    // Người dùng nhập trực tiếp giá trị VNĐ (ví dụ 15,000,000)
+                    ExpectedRevenue = value.Value;
+                }
+                else
+                {
+                    // Người dùng nhập theo đơn vị triệu VNĐ (ví dụ 15 hoặc 50.486)
+                    ExpectedRevenue = value.Value * 1000000m;
+                }
+            }
         }
 
         [CustomDisplayName("DigitalSalesProduct_ActualRevenue_Label")]

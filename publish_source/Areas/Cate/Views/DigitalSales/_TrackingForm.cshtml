@@ -74,8 +74,7 @@
             {
                 new SelectListItem { Value = "1", Text = "Chưa thực hiện" },
                 new SelectListItem { Value = "2", Text = "Đang thực hiện" },
-                new SelectListItem { Value = "3", Text = "Hoàn thành" },
-                new SelectListItem { Value = "4", Text = "Quá hạn" }
+                new SelectListItem { Value = "3", Text = "Hoàn thành" }
             }, new { @class = "form-control select2", id = "Tracking_Status", onchange = "onTrackingStatusChange(this);" })
             @Html.ValidationMessageFor(m => m.Status, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
         }
@@ -151,20 +150,25 @@
     <label class="text-85 text-600 mb-1 d-block">Tệp đính kèm</label>
     @if (!string.IsNullOrEmpty(Model.AttachmentFile))
     {
-        var files = Model.AttachmentFile.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-        <div class="mb-2 d-flex flex-wrap" style="gap: 6px;">
-            @foreach (var f in files)
-            {
-                var trimmed = f.Trim();
-                var fname = System.IO.Path.GetFileName(trimmed);
-                <span class="badge badge-light-primary border-1 brc-primary-m3 text-primary-d2 px-2 py-1 radius-1 d-inline-flex align-items-center">
-                    <i class="fa fa-paperclip mr-1"></i>
-                    <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmed })" target="_blank" class="text-primary-d2 mr-1">@fname</a>
-                </span>
-            }
-        </div>
+        if (Model.Status != 3)
+        {
+            var files = Model.AttachmentFile.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            <div class="mb-2 d-flex flex-wrap" style="gap: 6px;">
+                @foreach (var f in files)
+                {
+                    var trimmed = f.Trim();
+                    var fname = System.IO.Path.GetFileName(trimmed);
+                    <span class="badge badge-light-primary border-1 brc-primary-m3 text-primary-d2 px-2 py-1 radius-1 d-inline-flex align-items-center">
+                        <i class="fa fa-paperclip mr-1"></i>
+                        <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmed })" target="_blank" class="text-primary-d2 mr-1">@fname</a>
+                    </span>
+                }
+            </div>
+        }
         <input type="hidden" name="AttachmentFile" value="@Model.AttachmentFile" />
     }
     <input type="file" name="attachmentFiles" multiple class="form-control-file border p-1 rounded" id="Tracking_AttachmentFiles" />
-    <small class="text-muted text-75 mt-1 d-block">Có thể chọn nhiều tệp (hỗ trợ ảnh, PDF, Word, Excel, Zip...)</small>
+    <small class="text-muted text-75 mt-1 d-block">
+        @(Model.Status == 3 ? "Tải lên tệp bổ sung (nếu có). Các tệp đã đính kèm trước đó vẫn được lưu trữ nguyên vẹn trong lịch sử tiến trình." : "Có thể chọn nhiều tệp (hỗ trợ ảnh, PDF, Word, Excel, Zip...)")
+    </small>
 </div>
