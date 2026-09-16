@@ -91,3 +91,20 @@
         font-size: 13px;
         line-height: 1.4 !important;
     }
+
+    /* Gom nhóm 2 switch Trọng điểm & Đang quan tâm */
+    .search-switches-box {
+        margin-bottom: 5px;
+    }
+    .search-switches-box .custom-switch.custom-switch-lg {
+        margin-right: 0 !important;
+    }
+    @media (max-width: 991px) {
+        .Search_Box.keyWord {
+            flex: 1 1 100% !important;
+            max-width: 100% !important;
+        }
+        .search-switches-box {
+            width: 100%;
+        }
+    }
