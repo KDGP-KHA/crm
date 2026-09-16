@@ -63,13 +63,14 @@
                             {
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered mb-0 text-85">
-                                        <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>Mã hợp đồng</th><th>Tên hợp đồng</th><th class="text-right">Giá trị</th><th class="text-center">Thao tác</th></tr></thead>
+                                        <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>Mã hợp đồng</th><th>Tên hợp đồng</th><th class="text-center">Ngày ký</th><th class="text-right">Giá trị</th><th class="text-center">Thao tác</th></tr></thead>
                                         <tbody>
                                         @foreach (var contract in product.Contracts)
                                         {
                                             <tr>
                                                 <td>@contract.ContractCode</td>
                                                 <td>@contract.ContractName</td>
+                                                <td class="text-center">@(contract.SignDate.HasValue ? contract.SignDate.Value.ToString("dd/MM/yyyy") : "—")</td>
                                                 <td class="text-right">@contract.TotalAmount.ToString("N0")</td>
                                                 <td class="text-center">
                                                     @if (canEdit)
