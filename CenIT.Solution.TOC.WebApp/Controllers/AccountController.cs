@@ -121,28 +121,12 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         /// <returns>Màn hình đăng nhập.</returns>
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl = "")
+        public ActionResult Login(string returnUrl = "", string loginMode = "")
         {
             // Chống Open Redirect
             if (!Url.IsLocalUrl(returnUrl))
             {
                 returnUrl = "/Dashboard/Dashboard";
-            }
-
-            // Local, IP hoặc host thử nghiệm dùng lại màn hình đăng nhập cũ.
-            if (!IsSsoRequest())
-            {
-                if (Session[SESSION_VARIABLE_NAME] == null) Session[SESSION_VARIABLE_NAME] = 0;
-                List<string> sessionKeys = Session.Keys.Cast<string>().ToList();
-                foreach (string key in sessionKeys)
-                {
-                    if (!string.Equals(key, "FrontEndUser"))
-                        Session.Remove(key);
-                }
-                ViewBag.ReturnUrl = returnUrl;
-                FormsAuthentication.SignOut();
-                if (Request.IsAjaxRequest()) Response.StatusCode = 401;
-                return View(new LoginModel());
             }
 
             // =====================================================
@@ -153,16 +137,36 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             string ssoTicket = Request.QueryString["Ticket"];
             // URL đăng nhập SSO
             string ssoPortalLogin = string.Format("{0}?appcode={1}", _ssoPortalUrl.TrimEnd('/'), Server.UrlEncode(appCode));
+            var hasSsoCallback = !string.IsNullOrEmpty(ssoSession) && !string.IsNullOrEmpty(ssoTicket);
+
+            // Không phân biệt host: người dùng luôn được chọn SSO hoặc tài khoản CRM.
+            // SSO chỉ được khởi tạo khi bấm nút tương ứng; callback vẫn được xử lý ở mọi host.
+            if (!hasSsoCallback)
+            {
+                if (string.Equals(loginMode, "sso", StringComparison.OrdinalIgnoreCase))
+                    return Redirect(ssoPortalLogin);
+
+                if (Session[SESSION_VARIABLE_NAME] == null) Session[SESSION_VARIABLE_NAME] = 0;
+                List<string> sessionKeys = Session.Keys.Cast<string>().ToList();
+                foreach (string key in sessionKeys)
+                {
+                    if (!string.Equals(key, "FrontEndUser"))
+                        Session.Remove(key);
+                }
+                ViewBag.ReturnUrl = returnUrl;
+                ViewBag.UseSso = true;
+                ViewBag.SsoLoginUrl = Url.Action("Login", "Account", new { returnUrl, loginMode = "sso" });
+                FormsAuthentication.SignOut();
+                if (Request.IsAjaxRequest()) Response.StatusCode = 401;
+                return View(new LoginModel());
+            }
+
             try
             {
                 // =====================================================
                 // CHƯA CÓ THÔNG TIN SSO
                 // → CHUYỂN SANG CỔNG SSO
                 // =====================================================
-                if (string.IsNullOrEmpty(ssoSession) || string.IsNullOrEmpty(ssoTicket))
-                {
-                    return Redirect(ssoPortalLogin);
-                }
                 // =====================================================
                 // XÁC THỰC THÔNG TIN SSO
                 // =====================================================
@@ -216,19 +220,12 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         }
 
         /// <summary>
-        /// Xử lý đăng nhập cũ cho local, IP và các host không trùng App_HostUrl.
-        /// Host chính thức luôn quay về GET Login để bắt đầu luồng SSO.
+        /// Xử lý đăng nhập thông thường bằng tài khoản CRM, không phụ thuộc host.
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult Login(LoginModel model, string returnUrl = "")
+        public ActionResult Login(LoginModel model, string returnUrl = "", string loginMode = "")
         {
-            if (IsSsoRequest())
-            {
-                if (!Url.IsLocalUrl(returnUrl)) returnUrl = "/Dashboard/Dashboard";
-                return RedirectToAction("Login", "Account", new { returnUrl });
-            }
-
             model = model ?? new LoginModel();
 
             if (!string.IsNullOrEmpty(model.URLLink))
@@ -560,12 +557,12 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         [AllowAnonymous]
         public ActionResult Logout()
         {
-            bool useSso = IsSsoRequest();
             // Lấy SSO Ticket trước khi xóa Session
             string ssoTicket = Session[SSO_TICKET_SESSION_KEY] as string;
+            bool useSso = !string.IsNullOrWhiteSpace(ssoTicket);
             try
             {
-                // Chỉ hủy ticket SSO trên host chính thức.
+                // Chỉ hủy ticket khi phiên hiện tại thực sự đăng nhập qua SSO.
                 if (useSso && !string.IsNullOrWhiteSpace(ssoTicket))
                 {
                     CreateSsoService().LogOutByTicket(ssoTicket);
@@ -581,7 +578,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             Session.Clear();
             Session.Abandon();
 
-            // Local, IP hoặc host thử nghiệm quay lại form đăng nhập cũ.
+            // Phiên đăng nhập CRM quay về màn hình chọn phương thức đăng nhập.
             if (!useSso)
                 return RedirectToAction("Login", "Account");
 

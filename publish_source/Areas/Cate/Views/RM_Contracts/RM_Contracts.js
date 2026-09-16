@@ -44,53 +44,39 @@ function initTableContracts() {
             {
                 "data": "ContractCode",
                 "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return data;
+                "render": function (data, type, row) {
+                    var name = row.ContractName || "";
+                    return '<div class="font-weight-bold text-primary">' + (data || "") + '</div>' +
+                        '<div class="text-dark-m2 text-90 mt-1">' + name + '</div>';
                 }
             },
             {
-                "data": "ContractName",
+                "data": "DigitalSalesName",
                 "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return data;
+                "render": function (data, type, row) {
+                    if (!data || !row.DigitalSalesID) return '<span class="text-secondary">—</span>';
+                    var code = row.DigitalSalesCode ? '<small class="d-block text-secondary">' + row.DigitalSalesCode + '</small>' : '';
+                    var product = row.NameProduct ? '<div class="text-dark-m2 text-90 mt-1"><i class="fa fa-cubes text-purple-m1 mr-1"></i>' + row.NameProduct + '</div>' : '';
+                    return '<a class="font-weight-bold text-primary" href="/Cate/DigitalSales/Detail/' + row.DigitalSalesID + '" title="Mở hồ sơ KD SPDV số">' + data + '</a>' + code + product;
                 }
             },
             {
                 "data": "CustomerName",
-                "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return data;
-                }
-            },
-            {
-                "data": "NameProduct",
-                "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return data;
-                }
-            },
-            {
-                "data": "SignDate",
                 "orderable": false,
                 "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return data != null ? moment(data).format("DD/MM/YYYY") : "";
-                }
-            },
-            {
-                "data": "ContractValue",
-                "orderable": false,
-                "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return formatCurrency(data);
+                "render": function (data) {
+                    return data ? '<i class="fa fa-building text-secondary mr-1"></i>' + data : '';
                 }
             },
             {
                 "data": "TotalAmount",
                 "orderable": false,
                 "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return formatCurrency(data);
+                "render": function (data, type, row) {
+                    var signed = row.SignDate ? moment(row.SignDate).format("DD/MM/YYYY") : "Chưa ký";
+                    var value = formatCurrency(data || row.ContractValue);
+                    return '<div class="font-weight-bold text-success text-105">' + value + ' triệu VNĐ</div>' +
+                        '<small class="text-secondary">Ký: ' + signed + '</small>';
                 }
             },
             {
@@ -99,13 +85,6 @@ function initTableContracts() {
                 "defaultContent": "",
                 "render": function (data, type, row, meta) {
                     return '<span class="badge ' + row.StatusClass + ' text-white mr-1"> ' + data + ' </span>';
-                }
-            },
-            {
-                "data": "UserCreated",
-                "defaultContent": "",
-                "render": function (data, type, row, meta) {
-                    return data;
                 }
             },
             {

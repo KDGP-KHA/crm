@@ -86,6 +86,19 @@
                                             </div>
                                         }
 
+                                        @if (ViewBag.UseSso != null && (bool)ViewBag.UseSso)
+                                        {
+                                            <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-4">
+                                                <a class="btn btn-primary px-2 btn-bold w-100" style="background: linear-gradient(to bottom, #239FF7, #0A6DB4); font-weight: bold;" href="@ViewBag.SsoLoginUrl">
+                                                    <i class="fa fa-shield-alt mr-1"></i> Đăng nhập bằng VNPT SSO
+                                                </a>
+                                                <div class="text-center text-secondary text-85 my-3 position-relative">
+                                                    <span class="px-2 bgc-white position-relative" style="z-index: 1;">hoặc đăng nhập bằng tài khoản CRM</span>
+                                                    <span class="position-absolute w-100 brc-grey-l2 border-t-1" style="left: 0; top: 50%;"></span>
+                                                </div>
+                                            </div>
+                                        }
+
                                         @Html.Partial("_Login")
 
                                         <div class="form-row my-4">
