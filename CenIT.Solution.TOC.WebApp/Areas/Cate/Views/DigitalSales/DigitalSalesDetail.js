@@ -43,6 +43,8 @@ var _detailUrls = {
     deleteAttachment: "/Cate/DigitalSales/DeleteAttachment",
     toggleKeyProject: "/Cate/DigitalSales/ToggleKeyProject",
     toggleFollow: "/Cate/DigitalSales/ToggleFollow",
+    statusTimelineModal: "/Cate/DigitalSales/StatusTimelineModal",
+    statusTimelineDetailModal: "/Cate/DigitalSales/StatusTimelineDetailModal",
 
     getMetricsPartial: "/Cate/DigitalSales/GetMetricsPartial",
     getOverviewPartial: "/Cate/DigitalSales/GetOverviewPartial",
@@ -1071,11 +1073,12 @@ function initTrackingModalBehavior($modal, salesId) {
     });
 }
 
-function openAddTrackingModal(salesId, processId) {
+function openAddTrackingModal(salesId, processId, timelineId) {
     salesId = getEffectiveSalesId(salesId);
     if (!salesId) return;
     var params = { digitalSalesId: salesId };
     if (processId) params.processId = processId;
+    if (timelineId) params.timelineId = timelineId;
     if (typeof _onWaiting === "function") _onWaiting();
     $.get(_detailUrls.addTrackingModal, params, function (html) {
         if (typeof _endWaiting === "function") _endWaiting();
@@ -1086,8 +1089,8 @@ function openAddTrackingModal(salesId, processId) {
     });
 }
 
-function openAddProgressToProcessModal(salesId, processId, processName) {
-    openAddTrackingModal(salesId, processId);
+function openAddProgressToProcessModal(salesId, processId, processName, timelineId) {
+    openAddTrackingModal(salesId, processId, timelineId);
 }
 
 function openEditTrackingModal(id, salesId) {
@@ -1108,8 +1111,24 @@ function openTrackingLogsModal(trackingId, salesId) {
     if (typeof _onWaiting === "function") _onWaiting();
     $.get(_detailUrls.trackingLogsModal, { trackingId: trackingId, digitalSalesId: salesId }, function (html) {
         if (typeof _endWaiting === "function") _endWaiting();
-        $("#modalContainer").html(html);
-        $("#modalTrackingLogs").modal("show");
+        $("#modalTrackingLogsContainer").remove();
+        $("body").append('<div id="modalTrackingLogsContainer">' + html + '</div>');
+        var $modal = $("#modalTrackingLogs");
+
+        $modal.on("show.bs.modal", function () {
+            setTimeout(function () {
+                $('.modal-backdrop:last').addClass('tracking-logs-backdrop').css('z-index', 1080);
+            }, 0);
+        });
+
+        $modal.on("hidden.bs.modal", function () {
+            $("#modalTrackingLogsContainer").remove();
+            if ($('.modal.show').length > 0) {
+                $("body").addClass("modal-open");
+            }
+        });
+
+        $modal.modal("show");
     }).fail(function () {
         if (typeof _endWaiting === "function") _endWaiting();
         executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
@@ -1152,19 +1171,23 @@ function submitUnlockProgressForm(e, trackingId, salesId) {
         success: function (res) {
             $btn.prop("disabled", false).html(origHtml);
             if (res.status) {
-                executeResponseMessage(res.message, "Mở khóa tiến trình thành công!", true);
+                executeResponseMessage(res.message, res.isSubTask ? "Mở khóa công việc thành công!" : "Mở khóa tiến trình thành công!", true);
                 var opened = false;
                 var openNext = function () {
                     if (!opened) {
                         opened = true;
-                        openEditTrackingModal(res.trackingId, res.digitalSalesId);
+                        if (res.isSubTask) {
+                            openEditTodoModal(res.trackingId, res.digitalSalesId);
+                        } else {
+                            openEditTrackingModal(res.trackingId, res.digitalSalesId);
+                        }
                     }
                 };
                 $("#modalUnlockProgress").one("hidden.bs.modal", openNext);
                 $("#modalUnlockProgress").modal("hide");
                 setTimeout(openNext, 400);
             } else {
-                executeResponseMessage(res.message, "Không thể mở khóa tiến trình!", false);
+                executeResponseMessage(res.message, res.isSubTask ? "Không thể mở khóa công việc!" : "Không thể mở khóa tiến trình!", false);
             }
         },
         error: function () {
@@ -1525,11 +1548,13 @@ function actionDeleteTracking(trackingId, salesId) {
 var _progressImportPreviewData = [];
 var _todoImportPreviewData = [];
 
-function openImportProgressModal(salesId, processId) {
+function openImportProgressModal(salesId, processId, timelineId) {
     salesId = getEffectiveSalesId(salesId);
     if (!salesId || !processId) return;
     if (typeof _onWaiting === "function") _onWaiting();
-    $.get(_detailUrls.importProgressModal, { processId: processId, digitalSalesId: salesId })
+    var params = { processId: processId, digitalSalesId: salesId };
+    if (timelineId) params.timelineId = timelineId;
+    $.get(_detailUrls.importProgressModal, params)
         .done(function (html) {
             if (typeof _endWaiting === "function") _endWaiting();
             $("#modalContainer").html(html);
@@ -1611,7 +1636,7 @@ function renderProgressImportPreview(data) {
                 '<td>' + (item.AssignedUserName || "—") + '</td>' +
                 '<td class="text-center">' + (item.StartDateStr || "") + '</td>' +
                 '<td class="text-center">' + (item.DurationDays || 3) + ' ngày</td>' +
-                '<td class="text-center">' + (item.Deadline ? formatDetailDateVN(item.Deadline) : "—") + '</td>' +
+                '<td class="text-center">' + (item.DeadlineStr || (item.Deadline ? formatDetailDateVN(item.Deadline) : "—")) + '</td>' +
                 '<td>' + (item.Note || "") + '</td>' +
                 '<td>' + errBadge + '</td>' +
                 '</tr>';
@@ -1655,6 +1680,7 @@ function executeConfirmProgressImport() {
 
     var downloadLink = $("#importProgressModal").find("a[href*='processId']").attr("href");
     var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+    var timelineId = $("#importProgress_TimelineID").val() || $("#importProgressModal").data("timeline-id");
 
     $.ajax({
         url: _detailUrls.confirmImportProgress,
@@ -1662,7 +1688,8 @@ function executeConfirmProgressImport() {
         data: {
             processId: parseInt(procId),
             digitalSalesId: _currentDigitalSalesId,
-            validDataJson: JSON.stringify(validRows)
+            validDataJson: JSON.stringify(validRows),
+            timelineId: timelineId ? parseInt(timelineId) : null
         },
         success: function (res) {
             $btn.prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận dữ liệu Import');
@@ -1754,7 +1781,7 @@ function renderTodoImportPreview(data) {
 
     var html = "";
     if (rows.length === 0) {
-        html = '<tr><td colspan="9" class="text-center text-muted py-3">Không có dữ liệu</td></tr>';
+        html = '<tr><td colspan="11" class="text-center text-muted py-3">Không có dữ liệu</td></tr>';
     } else {
         $.each(rows, function (idx, item) {
             var isValid = item.IsValid;
@@ -1763,13 +1790,22 @@ function renderTodoImportPreview(data) {
                 ? '<span class="badge badge-success px-2 py-1"><i class="fa fa-check mr-1"></i>Hợp lệ</span>'
                 : '<span class="text-danger font-bold"><i class="fa fa-exclamation-triangle mr-1"></i>' + (item.ErrorMessage || "Lỗi") + '</span>';
 
+            var statusBadge = '<span class="badge badge-secondary px-2 py-05 text-80 radius-1">Chưa thực hiện</span>';
+            if (item.Status === 2) {
+                statusBadge = '<span class="badge badge-warning px-2 py-05 text-80 radius-1">Đang thực hiện</span>';
+            } else if (item.Status === 3) {
+                statusBadge = '<span class="badge badge-success px-2 py-05 text-80 radius-1">Đã xong</span>';
+            }
+
             html += '<tr class="' + trClass + '">' +
                 '<td class="text-center">' + item.RowIndex + '</td>' +
                 '<td class="text-center font-bold text-primary">' + (item.TrackingCode || "—") + '</td>' +
                 '<td>' + (item.ParentTaskName || '<span class="text-danger font-italic">Không tìm thấy</span>') + '</td>' +
                 '<td class="font-bold">' + (item.TaskName || "") + '</td>' +
                 '<td>' + (item.AssignedUserName || "—") + '</td>' +
+                '<td class="text-center">' + statusBadge + '</td>' +
                 '<td class="text-center">' + (item.StartDateStr || "") + '</td>' +
+                '<td class="text-center font-bold">' + (item.DurationDays ? item.DurationDays + ' ngày' : "—") + '</td>' +
                 '<td class="text-center font-bold">' + (item.DeadlineStr || "") + '</td>' +
                 '<td>' + (item.Note || "") + '</td>' +
                 '<td>' + errBadge + '</td>' +
@@ -1852,7 +1888,20 @@ function getDetailUrlParam(url, param) {
 
 function formatDetailDateVN(dateVal) {
     if (!dateVal) return "";
-    var d = new Date(dateVal);
+    var d;
+    if (typeof dateVal === "string") {
+        if (dateVal.indexOf("/Date(") !== -1) {
+            var m = dateVal.match(/\/Date\((\d+)\)\//);
+            if (m) {
+                d = new Date(parseInt(m[1], 10));
+            }
+        } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateVal)) {
+            return dateVal;
+        }
+    }
+    if (!d) {
+        d = new Date(dateVal);
+    }
     if (isNaN(d.getTime())) return dateVal;
     var day = ("0" + d.getDate()).slice(-2);
     var month = ("0" + (d.getMonth() + 1)).slice(-2);
@@ -2756,4 +2805,74 @@ function deleteDiscussionItem(activityId, salesId) {
     });
 
     $modal.modal('show');
+}
+
+/* ==========================================================================
+   STATUS TIMELINE & TIMELINE DETAIL MODAL
+   ========================================================================== */
+function openStatusTimelineModal(salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.statusTimelineModal, { digitalSalesId: salesId }, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalStatusTimelineContainer").remove();
+        $("body").append('<div id="modalStatusTimelineContainer">' + html + '</div>');
+        var $modal = $("#modalStatusTimeline");
+
+        $modal.on("show.bs.modal", function () {
+            setTimeout(function () {
+                $('.modal-backdrop:last').addClass('timeline-backdrop').css('z-index', 1050);
+            }, 0);
+        });
+
+        $modal.on("hidden.bs.modal", function () {
+            $("#modalStatusTimelineContainer").remove();
+            if ($('.modal.show').length > 0) {
+                $("body").addClass("modal-open");
+            }
+        });
+
+        $modal.modal("show");
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        executeResponseMessage("Lỗi kết nối máy chủ khi tải Timeline!", "Lỗi", false);
+    });
+}
+
+function openStatusTimelineDetailModal(salesId, timelineId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!salesId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.statusTimelineDetailModal, { digitalSalesId: salesId, timelineId: timelineId }, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalStatusTimelineDetailContainer").remove();
+        $("body").append('<div id="modalStatusTimelineDetailContainer">' + html + '</div>');
+        var $modal = $("#modalStatusTimelineDetail");
+
+        $modal.on("show.bs.modal", function () {
+            setTimeout(function () {
+                $('.modal-backdrop:last').addClass('timeline-detail-backdrop').css('z-index', 1065);
+            }, 0);
+        });
+
+        $modal.on("hidden.bs.modal", function () {
+            $("#modalStatusTimelineDetailContainer").remove();
+            if ($('.modal.show').length > 0) {
+                $("body").addClass("modal-open");
+            }
+        });
+
+        $modal.modal("show");
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        executeResponseMessage("Lỗi kết nối máy chủ khi tải chi tiết Trạng thái!", "Lỗi", false);
+    });
+}
+
+function toggleTimelineAttachmentFiles(timelineId) {
+    var $el = $("#timelineFiles_" + timelineId);
+    if ($el.length) {
+        $el.toggleClass("show");
+    }
 }

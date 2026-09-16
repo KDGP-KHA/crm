@@ -19,12 +19,22 @@ def ensure_bom(filepath):
 
 # 1. Check & Ensure BOM on source views
 views_to_sync = [
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DigitalSales.cshtml",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailTracking.cshtml",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_TrackingLogsModal.cshtml",
-    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_TrackingForm.cshtml"
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_TrackingForm.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_UnlockProgressModal.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_ImportProgressModal.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineModal.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineDetailModal.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_ImportTodoModal.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\DigitalSalesDetail.js"
 ]
 css_files_to_sync = [
-    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailTracking.css"
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailTracking.css",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineModal.css",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineDetailModal.css",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_TrackingLogsModal.css"
 ]
 
 for v in views_to_sync:
@@ -66,7 +76,7 @@ if os.path.exists(web_config):
 print("Triple Mirroring synchronization completed successfully!")
 
 # Verify hashes
-for v in views_to_sync:
+for v in views_to_sync + css_files_to_sync:
     fname = os.path.basename(v)
     src_md5 = get_md5(v)
     pub_md5 = get_md5(os.path.join(r"d:\SVN\crm\publish_source\Areas\Cate\Views\DigitalSales", fname))

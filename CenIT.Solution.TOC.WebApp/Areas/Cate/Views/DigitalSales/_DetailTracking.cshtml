@@ -22,6 +22,9 @@
             <i class="fa fa-tasks mr-1"></i> Checklist
         </h6>
         <span class="badge badge-pill badge-warning ml-2 font-bold px-2 py-1" id="badgeChecklistSummary">@completedCount/@totalCount</span>
+        <button type="button" class="btn btn-xs btn-white border-1 brc-primary-m2 text-primary-d2 radius-1 px-2 py-1 ml-2 shadow-sm font-bold btn-view-timeline" onclick="openStatusTimelineModal(@Model.DigitalSalesID);" title="Xem timeline cập nhật chuyển trạng thái">
+            <i class="fa fa-stream mr-1 text-primary"></i> Xem timeline
+        </button>
     </div>
     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
         <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d1 radius-1 px-2 py-1 shadow-sm font-bold" id="btnExpandAllChecklist" onclick="toggleAllChecklistTree(true);">
@@ -57,7 +60,7 @@
             {
                 var statusGroups = parentTasks.GroupBy(t => new
                 {
-                    TimelineID = t.TimelineID ?? t.TrackingID,
+                    TimelineID = t.TimelineID ?? (t.StatusID ?? 0),
                     StatusID = t.StatusID ?? 0,
                     StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Trạng thái",
                     ProcessCountOfStatus = t.ProcessCountOfStatus
@@ -78,16 +81,48 @@
                     int occurrenceIndex = occurrencesOfThisStatus.IndexOf(stGroup) + 1;
                     string occurrenceSuffix = occurrencesOfThisStatus.Count > 1 ? $" (Lần {occurrenceIndex})" : "";
 
+                    // Thông tin người chuyển trạng thái và thời gian chuyển
+                    var timeline = Model.Timelines?.FirstOrDefault(tl => tl.TimelineID == stGroup.Key.TimelineID);
+                    if (timeline == null && stGroup.Key.StatusID > 0)
+                    {
+                        timeline = Model.Timelines?.OrderBy(tl => tl.ActionDate).ThenBy(tl => tl.TimelineID)
+                            .Skip(occurrenceIndex - 1)
+                            .FirstOrDefault(tl => tl.ToStatusID == stGroup.Key.StatusID)
+                            ?? Model.Timelines?.LastOrDefault(tl => tl.ToStatusID == stGroup.Key.StatusID);
+                    }
+
+                    string transitionUser = timeline != null 
+                        ? (!string.IsNullOrEmpty(timeline.ActionByName) ? timeline.ActionByName : timeline.ActionBy) 
+                        : (!string.IsNullOrEmpty(Model.CreatedByName) ? Model.CreatedByName : Model.CreatedBy);
+                    DateTime? transitionDate = timeline != null ? (DateTime?)timeline.ActionDate : (DateTime?)Model.CreatedDate;
+
                     <!-- ========================================================================= -->
                     <!-- CẤP 1: TRẠNG THÁI (BOLD ĐẬM, FONT CHỮ TO)                                 -->
                     <!-- ========================================================================= -->
                     <tr class="tree-row tree-status-row" data-node="@statusNodeId" data-level="1" data-expanded="true">
                         <td colspan="@(canEdit ? 9 : 8)" class="cursor-pointer py-25 px-3" onclick="toggleTreeNode('@statusNodeId');">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 8px;">
+                                <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                     <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
                                     <span class="tree-status-title">@stGroup.Key.StatusName@occurrenceSuffix</span>
-                                    <span class="badge badge-primary badge-pill ml-2 tree-status-task-count font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
+                                    <span class="badge badge-primary badge-pill ml-1 tree-status-task-count font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
+                                    @if (!string.IsNullOrEmpty(transitionUser) || transitionDate.HasValue)
+                                    {
+                                        <span class="badge bgc-white text-dark-m1 border-1 brc-grey-m3 px-2 py-1 ml-2 font-normal text-85 shadow-none d-inline-flex align-items-center" title="Người chuyển trạng thái và thời gian chuyển">
+                                            @if (!string.IsNullOrEmpty(transitionUser))
+                                            {
+                                                <span class="text-dark font-bold mr-2">
+                                                    <i class="fa fa-user-circle text-primary mr-1"></i>@transitionUser
+                                                </span>
+                                            }
+                                            @if (transitionDate.HasValue)
+                                            {
+                                                <span class="text-secondary">
+                                                    <i class="far fa-clock text-success mr-1"></i>@transitionDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                                </span>
+                                            }
+                                        </span>
+                                    }
                                 </div>
                                 <span class="text-secondary-m1 text-80 font-italic mr-2">
                                     <i class="fa fa-info-circle mr-1"></i>Bấm để thu gọn/mở rộng
@@ -146,10 +181,10 @@
                                     <div class="d-flex align-items-center flex-wrap ml-auto" style="gap: 6px;">
                                         @if (canEdit && isCurrentStatus && prGroup.Key.ProcessID > 0)
                                         {
-                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-add-progress-header" onclick="event.stopPropagation(); openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))');" title="Thêm tiến trình mới vào quy trình này">
+                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-add-progress-header" onclick="event.stopPropagation(); openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))', @stGroup.Key.TimelineID);" title="Thêm tiến trình mới vào quy trình này">
                                                 <i class="fa fa-plus mr-1"></i> Thêm tiến trình
                                             </button>
-                                            <button type="button" class="btn btn-xs btn-primary font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-import-progress-header" onclick="event.stopPropagation(); openImportProgressModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID);" title="Import danh sách tiến trình vào quy trình này">
+                                            <button type="button" class="btn btn-xs btn-primary font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-import-progress-header" onclick="event.stopPropagation(); openImportProgressModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, @stGroup.Key.TimelineID);" title="Import danh sách tiến trình vào quy trình này">
                                                 <i class="fa fa-file-import mr-1"></i> Import tiến trình
                                             </button>
                                             if (realTaskCount > 0)
@@ -164,31 +199,10 @@
                             </td>
                         </tr>
 
-                        if (realTaskCount == 0)
-                        {
-                            <!-- DÒNG THÔNG BÁO KHI QUY TRÌNH CHƯA CÓ TIẾN TRÌNH NÀO -->
-                            <tr class="tree-row tree-empty-progress-row" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3">
-                                <td colspan="@(canEdit ? 9 : 8)" class="py-3 px-4 text-center bgc-white border-1 brc-grey-l3">
-                                    <div class="tree-empty-progress-box flex-wrap justify-content-center">
-                                        <i class="fa fa-info-circle text-primary text-105"></i>
-                                        <span>Quy trình <strong>@prGroup.Key.ProcessName</strong> chưa có tiến trình nào.</span>
-                                        @if (canEdit && isCurrentStatus && prGroup.Key.ProcessID > 0)
-                                        {
-                                            <button type="button" class="btn btn-xs btn-success font-weight-bold px-25 py-1 radius-1 shadow-sm ml-2" onclick="openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))');">
-                                                <i class="fa fa-plus mr-1"></i> Thêm tiến trình ngay
-                                            </button>
-                                            <button type="button" class="btn btn-xs btn-primary font-weight-bold px-25 py-1 radius-1 shadow-sm ml-1" onclick="openImportProgressModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID);">
-                                                <i class="fa fa-file-import mr-1"></i> Import tiến trình
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        else
+                        if (realTaskCount > 0)
                         {
                             int taskIdx = 1;
-                            foreach (var task in realTasks.OrderBy(p => p.SortOrder).ThenBy(p => p.TrackingID))
+                            foreach (var task in realTasks.OrderBy(p => p.StartDate).ThenBy(p => p.SortOrder).ThenBy(p => p.TrackingID))
                             {
                             string taskNodeId = $"{procNodeId}_task_{task.TrackingID}";
                             bool isOverdue = task.IsOverdue == 1;
@@ -205,7 +219,7 @@
                                                title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
                                         <span class="tree-progress-title">@taskIdx. @task.TaskName</span>
 
-                                        @if (canEdit && isCurrentStatus)
+                                        @if (canEdit && isCurrentStatus && task.Status != 3)
                                         {
                                             <!-- DẤU (+) PHÍA SAU TÊN TIẾN TRÌNH: THÊM TODO LIST -->
                                             <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con (Todo list)">
@@ -302,8 +316,8 @@
                                                 <span class="tree-todo-branch mr-2">└─</span>
                                                 <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@todo.TrackingID"
                                                        @(todo.Status == 3 ? "checked" : "")
-                                                       @(isCurrentStatus && todo.Status != 3 ? $"onchange=\"actionConfirmTracking({todo.TrackingID}, {Model.DigitalSalesID});\"" : "onclick=\"return false;\" onkeydown=\"return false;\" tabindex=\"-1\"")
-                                                       title="@(todo.Status == 3 ? "Công việc con đã hoàn thành" : "Bấm để đánh dấu hoàn thành")" />
+                                                       onclick="return false;" onkeydown="return false;" tabindex="-1"
+                                                       title="@(todo.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
                                                 <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@todo.TaskName</span>
                                             </div>
                                         </td>

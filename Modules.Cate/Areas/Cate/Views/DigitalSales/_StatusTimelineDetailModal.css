@@ -1,0 +1,157 @@
+/* ==========================================================================
+   CSS MODAL CHI TIẾT TRẠNG THÁI (STATUS TIMELINE DETAIL) — CHUẨN CRM SOURCE
+   ========================================================================== */
+
+#modalStatusTimelineDetail {
+    z-index: 1070 !important;
+}
+
+.modal-backdrop.timeline-detail-backdrop {
+    z-index: 1065 !important;
+}
+
+.timeline-detail-dialog {
+    max-width: 1120px;
+    margin: 1.5rem auto;
+}
+
+#modalStatusTimelineDetail .modal-content {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+}
+
+/* Modal Header chuẩn hệ thống CRM */
+#modalStatusTimelineDetail .modal-header {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    padding: 12px 20px;
+    border-bottom: none;
+}
+
+#modalStatusTimelineDetail .modal-header .close {
+    font-size: 1.4rem;
+    color: #ffffff;
+    opacity: 0.85;
+    text-shadow: none;
+    transition: opacity 0.2s ease;
+    padding: 10px 14px;
+    margin: -10px -14px -10px auto;
+}
+
+#modalStatusTimelineDetail .modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Modal Body */
+#modalStatusTimelineDetail .modal-body {
+    background-color: #f1f5f9;
+    padding: 16px;
+    max-height: calc(88vh - 120px);
+    overflow-y: auto;
+}
+
+/* Scroll pane cho danh sách nội dung */
+.timeline-detail-scroll-pane {
+    max-height: 480px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.timeline-detail-scroll-pane::-webkit-scrollbar {
+    width: 6px;
+}
+
+.timeline-detail-scroll-pane::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+.timeline-detail-scroll-pane::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+.timeline-detail-scroll-pane::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}
+
+/* Item hover & tương tác */
+.hover-bgc-light:hover {
+    background-color: #f8fafc !important;
+}
+
+.transition-base {
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Thẻ Card bên trong */
+#modalStatusTimelineDetail .card {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background-color: #ffffff;
+    overflow: hidden;
+}
+
+#modalStatusTimelineDetail .card-header {
+    background-color: #f0f9ff;
+    border-bottom: 1px solid #bae6fd;
+    padding: 10px 16px;
+}
+
+/* Footer Modal */
+#modalStatusTimelineDetail .modal-footer {
+    background-color: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 10px 20px;
+}
+
+/* ==========================================================================
+   MỤC 2: FILE ĐÍNH KÈM LIÊN QUAN (TEXT NHỎ LẠI, TINH TẾ)
+   ========================================================================== */
+.timeline-file-group-header {
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.timeline-file-item {
+    padding: 6px 10px !important;
+}
+
+.timeline-file-name {
+    font-size: 0.8rem !important; /* Text nhỏ gọn theo yêu cầu */
+    font-weight: 500 !important;
+    color: #0284c7 !important;
+    line-height: 1.35;
+    transition: color 0.15s ease;
+}
+
+.timeline-file-name:hover {
+    color: #0369a1 !important;
+    text-decoration: underline;
+}
+
+.timeline-file-icon {
+    font-size: 1rem !important;
+}
+
+.timeline-file-btn-download {
+    padding: 2px 7px !important;
+    font-size: 0.75rem !important;
+    line-height: 1.2;
+}
+
+/* Responsive layout */
+@media (max-width: 991.98px) {
+    .timeline-detail-dialog {
+        max-width: 95vw;
+        margin: 0.75rem auto;
+    }
+
+    .timeline-detail-scroll-pane {
+        max-height: 360px;
+    }
+}

@@ -72,6 +72,7 @@ namespace Core.Cate.Models
         public string StartDateStr { get; set; }
         public DateTime? StartDate { get; set; }
         public int? DurationDays { get; set; }
+        public string DeadlineStr { get; set; }
         public DateTime? Deadline { get; set; }
         public string Note { get; set; }
         public string ErrorMessage { get; set; }
@@ -88,11 +89,13 @@ namespace Core.Cate.Models
         public string TaskName { get; set; }
         public string AssignedUserName { get; set; }
         public int? AssignedUserID { get; set; }
+        public byte? Status { get; set; }
+        public string StatusStr { get; set; }
         public string StartDateStr { get; set; }
         public DateTime? StartDate { get; set; }
+        public int? DurationDays { get; set; }
         public string DeadlineStr { get; set; }
         public DateTime? Deadline { get; set; }
-        public int? DurationDays { get; set; }
         public string Note { get; set; }
         public string ErrorMessage { get; set; }
         public bool IsValid => string.IsNullOrEmpty(ErrorMessage);

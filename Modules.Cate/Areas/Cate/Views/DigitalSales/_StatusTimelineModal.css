@@ -1,0 +1,244 @@
+/* ==========================================================================
+   CSS TIMELINE CẬP NHẬT CHUYỂN TRẠNG THÁI (STATUS TIMELINE)
+   ========================================================================== */
+
+#modalStatusTimeline {
+    z-index: 1055 !important;
+}
+
+.modal-backdrop.timeline-backdrop {
+    z-index: 1050 !important;
+}
+
+.timeline-modal-dialog {
+    max-width: 1060px;
+    margin: 1.75rem auto;
+}
+
+.timeline-modal-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e0e6ed;
+    padding: 16px 24px;
+}
+
+.timeline-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #1e293b;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.timeline-container {
+    position: relative;
+    padding: 30px 15px;
+    background-color: #ffffff;
+    min-height: 420px;
+}
+
+/* Trục đứng giữa */
+.timeline-container::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    bottom: 20px;
+    left: 50%;
+    width: 2px;
+    background-color: #246944;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+/* Từng mốc timeline row */
+.timeline-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.timeline-row:last-child {
+    margin-bottom: 10px;
+}
+
+/* Node oval mốc thời gian ở giữa */
+.timeline-center-node {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    background: #ffffff;
+    border: 2px solid #246944;
+    border-radius: 40px;
+    padding: 6px 18px;
+    min-width: 130px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.timeline-node-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: #246944;
+    line-height: 1.2;
+}
+
+.timeline-node-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: #246944;
+    line-height: 1.2;
+}
+
+/* Nửa trái và nửa phải */
+.timeline-half {
+    width: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-half-left {
+    padding-right: 90px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.timeline-half-right {
+    padding-left: 90px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+/* Cành nối ngang từ node ra card */
+.timeline-row-right .timeline-branch-line {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90px;
+    height: 2px;
+    background-color: #246944;
+    z-index: 1;
+}
+
+.timeline-row-left .timeline-branch-line {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    width: 90px;
+    height: 2px;
+    background-color: #246944;
+    z-index: 1;
+}
+
+/* Thẻ card timeline */
+.timeline-card {
+    background: #ffffff;
+    border: 2px solid #246944;
+    border-radius: 12px;
+    padding: 14px 20px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timeline-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(36, 105, 68, 0.15);
+}
+
+.timeline-card-author {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.timeline-card-status {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #2b2b2b;
+}
+
+.timeline-tag-cohoi {
+    color: #d32f2f;
+    font-weight: 800;
+}
+
+.timeline-tag-duan {
+    color: #1976d2;
+    font-weight: 800;
+}
+
+.timeline-card-note {
+    font-size: 13px;
+    color: #4b5563;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.timeline-card-links {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+}
+
+.timeline-link-files,
+.timeline-link-detail {
+    font-size: 12.5px;
+    font-style: italic;
+    color: #1e293b;
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 2px 4px;
+    transition: color 0.15s ease;
+}
+
+.timeline-link-files:hover,
+.timeline-link-detail:hover {
+    color: #246944;
+    font-weight: 600;
+}
+
+.timeline-files-dropdown {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    text-align: left;
+    display: none;
+}
+
+.timeline-files-dropdown.show {
+    display: block;
+}
+
+.timeline-file-link {
+    display: block;
+    font-size: 12px;
+    color: #0284c7;
+    margin-bottom: 3px;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.timeline-file-link:hover {
+    text-decoration: underline;
+}
+
+.timeline-empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: #64748b;
+}
