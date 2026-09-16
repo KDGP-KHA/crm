@@ -102,7 +102,17 @@ namespace Core.Cate.Biz
             var model = AppProcessor.ProcedureProvider.ExecuteScalarObject<RM_DigitalSalesModel>(_spGetByID, DATA_PROVIDER_NAME, id, userName);
             if (model != null)
             {
-                try { model.Products = GetProductsBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Products = new List<RM_DigitalSalesProductModel>(); }
+                try
+                {
+                    model.Products = GetProductsBySalesID(id);
+                    // Giá trị hợp đồng được nhập theo triệu VNĐ; TotalActualRevenue của hồ sơ dùng VNĐ.
+                    model.TotalActualRevenue = model.Products.Sum(item => item.ContractRevenueMillion) * 1000000m;
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                    model.Products = new List<RM_DigitalSalesProductModel>();
+                }
                 try { model.Members = GetMembersBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Members = new List<RM_DigitalSalesMemberModel>(); }
                 try { model.TrackingTasks = GetTrackingTasks(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.TrackingTasks = new List<RM_DigitalSalesTrackingModel>(); }
                 try { model.Timelines = GetTimeline(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Timelines = new List<RM_DigitalSalesTimelineModel>(); }

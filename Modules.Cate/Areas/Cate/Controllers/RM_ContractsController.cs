@@ -349,6 +349,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (result > 0)
             {
                 SaveFiles(model.DinhKemFile, model.ContractID);
+                if (model.DigitalSalesProductID.GetValueOrDefault() > 0)
+                {
+                    // Làm mới tổng doanh thu thực tế của hồ sơ DigitalSales sau khi sửa giá trị hợp đồng.
+                    _digitalSalesCache.LinkProductContract(model.DigitalSalesProductID.Value, model.ContractID, User.UserName);
+                }
                 if (model.DeletedFileIds != null && model.DeletedFileIds.Any())
                 {
                     foreach (var fileId in model.DeletedFileIds)
