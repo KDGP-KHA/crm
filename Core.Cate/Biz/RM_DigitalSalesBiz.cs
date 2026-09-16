@@ -56,13 +56,23 @@ namespace Core.Cate.Biz
                 applyYear
             ) ?? new List<RM_DigitalSalesDashboardStatusModel>();
 
+            int totalKey = 0;
+            var keyProjects = LoadList(out totalKey, new RM_DigitalSalesSearchModel
+            {
+                ApplyYear = applyYear,
+                IsKeyProject = true,
+                PageNumber = 1,
+                PageSize = 50
+            }) ?? new List<RM_DigitalSalesModel>();
+
             return new DigitalSalesDashboardOverviewModel
             {
                 ApplyYear = applyYear,
                 StatusList = list,
                 TotalCountAll = list.Sum(x => x.TotalCount),
                 TotalExpectedRevenueAll = list.Sum(x => x.TotalExpectedRevenue),
-                TotalActualRevenueAll = list.Sum(x => x.TotalActualRevenue)
+                TotalActualRevenueAll = list.Sum(x => x.TotalActualRevenue),
+                KeyProjects = keyProjects
             };
         }
 

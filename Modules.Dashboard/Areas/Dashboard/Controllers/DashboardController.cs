@@ -919,8 +919,13 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.View)]
-        public ActionResult GetGroupServiceChart(DashboardSearchModel model)
+        public ActionResult GetGroupServiceChart(DashboardSearchModel model, int? applyYear)
         {
+            if (applyYear.HasValue && applyYear.Value > 0)
+            {
+                model.FromDate = new DateTime(applyYear.Value, 1, 1);
+                model.ToDate = new DateTime(applyYear.Value, 12, 31, 23, 59, 59);
+            }
             // Cùng điều kiện quyền với popup chi tiết để số trên chart khớp danh sách
             model.EmployeeIds = GetPermissionContext().GetAllowedEmployeeIdsString();
             model.Username = User.UserName;
