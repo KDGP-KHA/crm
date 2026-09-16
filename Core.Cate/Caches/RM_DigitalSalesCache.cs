@@ -1,4 +1,4 @@
-﻿using Core.Cate.Biz;
+using Core.Cate.Biz;
 using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
@@ -307,6 +307,21 @@ namespace Core.Cate.Caches
             if (GetCacheItem(rawKey) is List<RM_DigitalSalesUserModel> cached) return cached;
 
             var data = Api.GetAccessibleEmployees(userName);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data;
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        {
+            if (applyYear <= 0) applyYear = DateTime.Now.Year;
+            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear);
+            var data = GetCacheItem(rawKey) as DigitalSalesDashboardOverviewModel;
+            if (data != null) return data;
+
+            data = Api.GetDashboardStatusStats(applyYear);
             if (data != null)
             {
                 AddCacheItem(rawKey, data);

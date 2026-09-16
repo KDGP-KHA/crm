@@ -44,6 +44,27 @@ namespace Core.Cate.Biz
         private readonly string _spActivityUpdateLatestStatusChange = "RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments";
         private readonly string _spGetDepartmentByUserID = "RM_DigitalSales_GetDepartmentByUserID";
         private readonly string _spGetAccessibleEmployees = "RM_DigitalSales_GetAccessibleEmployees";
+        private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        {
+            if (applyYear <= 0) applyYear = DateTime.Now.Year;
+
+            var list = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesDashboardStatusModel>(
+                _spGetDashboardStatusStats,
+                DATA_PROVIDER_NAME,
+                applyYear
+            ) ?? new List<RM_DigitalSalesDashboardStatusModel>();
+
+            return new DigitalSalesDashboardOverviewModel
+            {
+                ApplyYear = applyYear,
+                StatusList = list,
+                TotalCountAll = list.Sum(x => x.TotalCount),
+                TotalExpectedRevenueAll = list.Sum(x => x.TotalExpectedRevenue),
+                TotalActualRevenueAll = list.Sum(x => x.TotalActualRevenue)
+            };
+        }
 
         public List<RM_DigitalSalesModel> LoadList(out int total, RM_DigitalSalesSearchModel model)
         {

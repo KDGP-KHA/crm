@@ -1,0 +1,74 @@
+﻿@model Core.Cate.Models.DigitalSalesDashboardOverviewModel
+@{
+    ViewBag.Title = "Dashboard";
+    int currentYear = DateTime.Now.Year;
+    int selectedYear = Model.ApplyYear > 0 ? Model.ApplyYear : currentYear;
+}
+@section PageTitle {}
+@section PageAction {}
+
+<link rel="stylesheet" href="~/Areas/Dashboard/Views/Dashboard/Chart.css?v=@DateTime.Now.Ticks" />
+
+<div class="dashboard-chart-wrapper">
+    <!-- 1. Thanh tiêu đề & Bộ lọc Năm áp dụng -->
+    <div class="db-header-bar d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+        <div class="db-page-title mb-2 mb-md-0">
+            <i class="fa fa-tachometer-alt"></i>
+            Dashboard Kinh doanh Sản phẩm Dịch vụ số
+        </div>
+
+        <div class="db-filter-group">
+            <label class="db-filter-label" for="ApplyYear">
+                <i class="fa fa-calendar-alt text-primary mr-1"></i>Năm áp dụng:
+            </label>
+            <select id="ApplyYear" name="ApplyYear" class="db-filter-select" onchange="onDashboardYearChange(this.value);">
+                @for (int y = currentYear + 3; y >= currentYear - 5; y--)
+                {
+                    <option value="@y" @(y == selectedYear ? "selected" : "")>Năm @y</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- 2. Hệ thống Tab (Tổng quát & Kế hoạch kinh doanh) -->
+    <ul class="nav db-nav-tabs" role="tablist" id="dashboardTabs">
+        <li class="nav-item">
+            <a class="nav-link active" id="tab-overview-btn" data-toggle="tab" href="#tab-overview" role="tab" aria-controls="tab-overview" aria-selected="true">
+                <i class="fa fa-chart-line text-primary mr-2"></i>Tổng quát
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab-plan-btn" data-toggle="tab" href="#tab-plan" role="tab" aria-controls="tab-plan" aria-selected="false">
+                <i class="fa fa-tasks text-purple mr-2"></i>Kế hoạch kinh doanh
+            </a>
+        </li>
+    </ul>
+
+    <!-- 3. Nội dung các Tab -->
+    <div class="tab-content db-tab-content">
+        <!-- TAB 1: TỔNG QUÁT -->
+        <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" aria-labelledby="tab-overview-btn">
+            <div id="overview-content-container">
+                @Html.Partial("_ChartOverview", Model)
+            </div>
+        </div>
+
+        <!-- TAB 2: KẾ HOẠCH KINH DOANH -->
+        <div class="tab-pane fade" id="tab-plan" role="tabpanel" aria-labelledby="tab-plan-btn">
+            <div class="tab-plan-placeholder">
+                <i class="fa fa-calendar-check"></i>
+                <h5>Kế hoạch kinh doanh - Năm <span class="current-selected-year">@selectedYear</span></h5>
+                <p>Khu vực quản lý và theo dõi tiến độ thực hiện Kế hoạch kinh doanh đang được chuẩn bị. Bạn có thể chuyển về tab <strong>Tổng quát</strong> để theo dõi các chỉ số trạng thái và doanh thu.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section BottomScript {
+    <script>
+        window._dashboardChartUrls = {
+            getOverview: '@Url.Action("GetChartOverviewData", "Dashboard", new { area = "Dashboard" })'
+        };
+    </script>
+    <script src="~/Areas/Dashboard/Views/Dashboard/Chart.js?v=@DateTime.Now.Ticks"></script>
+}
