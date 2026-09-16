@@ -56,7 +56,12 @@
             if (val === null || val === undefined || val === "") return "—";
             var num = parseFloat(val);
             if (isNaN(num)) return "—";
-            return num.toLocaleString('vi-VN') + " đ";
+            if (num === 0) return "0 tr đ";
+            var mil = num / 1000000;
+            var formatted = (mil % 1 === 0)
+                ? mil.toLocaleString('vi-VN')
+                : mil.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            return formatted + " tr đ";
         }
 
         function formatDate(val) {

@@ -3,22 +3,13 @@
 @functions {
     public static string FormatRevenue(decimal value)
     {
-        if (value == 0) return "0 đ";
-        if (Math.Abs(value) >= 1000000000m)
-        {
-            return (value / 1000000000m).ToString("#,##0.##") + " tỷ đ";
-        }
-        if (Math.Abs(value) >= 1000000m)
-        {
-            return (value / 1000000m).ToString("#,##0.##") + " tr đ";
-        }
-        return value.ToString("#,##0") + " đ";
-    }
-
-    public static string FormatMillions(decimal value)
-    {
+        if (value == 0) return "0 tr đ";
         var mil = value / 1000000m;
-        return mil.ToString("#,##0.##") + " tr";
+        if (mil % 1 == 0)
+        {
+            return mil.ToString("#,##0") + " tr đ";
+        }
+        return mil.ToString("#,##0.##") + " tr đ";
     }
 
     public static string GetStatusBorderClass(string code)
@@ -52,12 +43,12 @@
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng Doanh thu Dự kiến</div>
             <div class="total-metric-val text-yellow">@FormatRevenue(Model.TotalExpectedRevenueAll)</div>
-            <div class="total-metric-sub">Tương đương ~@FormatMillions(Model.TotalExpectedRevenueAll) VNĐ</div>
+            <div class="total-metric-sub">Nguyên tệ: @Model.TotalExpectedRevenueAll.ToString("N0") VNĐ</div>
         </div>
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng Doanh thu Thực hiện (Ký HĐ)</div>
             <div class="total-metric-val text-green">@FormatRevenue(Model.TotalActualRevenueAll)</div>
-            <div class="total-metric-sub">Tương đương ~@FormatMillions(Model.TotalActualRevenueAll) VNĐ</div>
+            <div class="total-metric-sub">Nguyên tệ: @Model.TotalActualRevenueAll.ToString("N0") VNĐ</div>
         </div>
     </div>
 </div>
