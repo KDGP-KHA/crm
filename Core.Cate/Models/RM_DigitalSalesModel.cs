@@ -33,6 +33,10 @@ namespace Core.Cate.Models
         public int CustomerID { get; set; }
         public string CustomerName { get; set; }
 
+        [CustomRequired]
+        [CustomDisplayName("DigitalSales_ApplyYear_Label")]
+        public int? ApplyYear { get; set; } = DateTime.Now.Year;
+
         [CustomDisplayName("DigitalSales_ContactPerson_Label")]
         public int? ContactPerson_ID { get; set; }
         public string ContactPersonName { get; set; }

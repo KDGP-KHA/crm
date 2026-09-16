@@ -32,6 +32,9 @@
                 <span id="headerStatusName" class="badge badge-lg bgc-green-l2 text-green-d3 border-1 brc-green-m3 text-85 font-bold px-25 py-1 radius-1">
                     <i class="fa fa-check-circle mr-1"></i>@Model.StatusName
                 </span>
+                <span id="headerApplyYear" class="badge badge-lg bgc-red-l3 text-danger-d2 border-1 brc-danger-m2 text-85 font-bold px-25 py-1 radius-1" title="Năm áp dụng">
+                    <i class="fa fa-calendar-alt text-danger mr-1"></i>Năm @(Model.ApplyYear.HasValue && Model.ApplyYear.Value > 0 ? Model.ApplyYear.Value : (Model.CreatedDate.Year > 1900 ? Model.CreatedDate.Year : DateTime.Now.Year))
+                </span>
                 <span id="badgeKeyProject" class="badge badge-lg bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 text-85 font-bold px-25 py-1 radius-1 @(Model.IsKeyProject ? "" : "d-none")" title="Dự án trọng điểm">
                     <i class="fa fa-star text-warning mr-1"></i>Trọng điểm
                 </span>

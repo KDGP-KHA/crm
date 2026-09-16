@@ -80,7 +80,8 @@ namespace Core.Cate.Biz
                 model.UserName,
                 model.IsKeyProject.HasValue && model.IsKeyProject.Value ? 1 : 0,
                 model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0,
-                string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim()
+                string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim(),
+                model.ApplyYear.GetValueOrDefault(0)
             );
 
             if (data != null && data.Count > 0)
@@ -118,6 +119,30 @@ namespace Core.Cate.Biz
                 try { model.Timelines = GetTimeline(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Timelines = new List<RM_DigitalSalesTimelineModel>(); }
                 try { model.Activities = GetActivitiesBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Activities = new List<RM_DigitalSalesActivityModel>(); }
                 try { EnsureCurrentStatusTrackingPlaceholder(model); } catch (Exception ex) { AppProcessor.Logger.Error(ex); }
+                try
+                {
+                    var connStr = System.Configuration.ConfigurationManager.ConnectionStrings["TOC.Conn.Major"]?.ConnectionString;
+                    if (!string.IsNullOrEmpty(connStr))
+                    {
+                        using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                        using (var cmd = new System.Data.SqlClient.SqlCommand("SELECT ApplyYear FROM dbo.RM_DigitalSales WHERE DigitalSalesID = @id", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@id", id);
+                            conn.Open();
+                            var val = cmd.ExecuteScalar();
+                            if (val != null && val != DBNull.Value)
+                            {
+                                model.ApplyYear = Convert.ToInt32(val);
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                if (!model.ApplyYear.HasValue || model.ApplyYear.Value <= 0)
+                {
+                    model.ApplyYear = model.CreatedDate.Year > 1900 ? model.CreatedDate.Year : DateTime.Now.Year;
+                }
             }
             return model;
         }
@@ -228,7 +253,8 @@ namespace Core.Cate.Biz
                 model.DepartmentID,
                 model.Note,
                 model.FileAttach,
-                username
+                username,
+                model.ApplyYear.HasValue && model.ApplyYear.Value > 0 ? model.ApplyYear.Value : DateTime.Now.Year
             );
 
             return result.GetValueOrDefault(0);

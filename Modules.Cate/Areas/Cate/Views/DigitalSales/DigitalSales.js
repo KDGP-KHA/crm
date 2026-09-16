@@ -1,4 +1,4 @@
-var _tableDigitalSales;
+﻿var _tableDigitalSales;
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -78,6 +78,7 @@ function initTableDigitalSales() {
                 d.ToDate = $("#ToDate").val() || $("#SearchToDate").val() || "";
                 d.IsKeyProject = $("#chkFilterKeyProject").is(":checked");
                 d.IsFollowed = $("#chkFilterFollowed").is(":checked");
+                d.ApplyYear = $("#ApplyYear").val() || "";
             }
         },
         columns: [
@@ -347,6 +348,7 @@ function resetSalesSearch() {
 
     $("#chkFilterKeyProject").prop("checked", false);
     $("#chkFilterFollowed").prop("checked", false);
+    $("#ApplyYear").val(new Date().getFullYear());
 
     var $employee = $("#EmployeeID, #SearchEmployeeID");
     $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
@@ -735,6 +737,8 @@ function exportDigitalSales() {
     if (customerID) qs.push("customerID=" + encodeURIComponent(customerID));
     if ($("#chkFilterKeyProject").is(":checked")) qs.push("isKeyProject=true");
     if ($("#chkFilterFollowed").is(":checked")) qs.push("isFollowed=true");
+    var applyYear = $("#SearchDigitalSales #ApplyYear").val() || $("#ApplyYear").val() || "";
+    if (applyYear) qs.push("applyYear=" + encodeURIComponent(applyYear));
 
     var statusIDs = typeof getSelectedStatusIDs === 'function' ? getSelectedStatusIDs() : '';
     if (statusIDs) qs.push("statusIDs=" + encodeURIComponent(statusIDs));

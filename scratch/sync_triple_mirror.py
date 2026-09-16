@@ -28,9 +28,17 @@ views_to_sync = [
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineModal.cshtml",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineDetailModal.cshtml",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_ImportTodoModal.cshtml",
-    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\DigitalSalesDetail.js"
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailDiscussions.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailOverview.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\Detail.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\DigitalSalesDetail.js",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_Search.cshtml",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\DigitalSales.js"
 ]
 css_files_to_sync = [
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DigitalSales.css",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailOverview.css",
+    r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailDiscussions.css",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_DetailTracking.css",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineModal.css",
     r"d:\SVN\crm\Modules.Cate\Areas\Cate\Views\DigitalSales\_StatusTimelineDetailModal.css",
@@ -60,9 +68,9 @@ for t in targets:
     # Copy DLLs
     dest_bin = os.path.join(t, "bin")
     os.makedirs(dest_bin, exist_ok=True)
-    shutil.copy2(r"d:\SVN\crm\Core.Cate\bin\Debug\Core.Cate.dll", os.path.join(dest_bin, "Core.Cate.dll"))
-    if os.path.exists(r"d:\SVN\crm\Core.Cate\bin\Debug\Core.Cate.pdb"):
-        shutil.copy2(r"d:\SVN\crm\Core.Cate\bin\Debug\Core.Cate.pdb", os.path.join(dest_bin, "Core.Cate.pdb"))
+    shutil.copy2(r"d:\SVN\crm\Core.Cate\bin\Release\Core.Cate.dll", os.path.join(dest_bin, "Core.Cate.dll"))
+    if os.path.exists(r"d:\SVN\crm\Core.Cate\bin\Release\Core.Cate.pdb"):
+        shutil.copy2(r"d:\SVN\crm\Core.Cate\bin\Release\Core.Cate.pdb", os.path.join(dest_bin, "Core.Cate.pdb"))
     shutil.copy2(r"d:\SVN\crm\Modules.Cate\bin\Modules.Cate.dll", os.path.join(dest_bin, "Modules.Cate.dll"))
     if os.path.exists(r"d:\SVN\crm\Modules.Cate\bin\Modules.Cate.pdb"):
         shutil.copy2(r"d:\SVN\crm\Modules.Cate\bin\Modules.Cate.pdb", os.path.join(dest_bin, "Modules.Cate.pdb"))

@@ -115,6 +115,22 @@
             </div>
         </div>
 
+        <!-- 3. Bộ lọc: Năm áp dụng (Mặc định năm hiện tại) -->
+        <div class="Search_Box" style="width: 140px; min-width: 120px;">
+            <label class="font-bold text-sm-right" for="ApplyYear">
+                @AppProcessor.Messagor.GetMessage("DigitalSalesSearch_ApplyYear_Label", "Năm áp dụng")
+            </label>
+            <div>
+                <select id="ApplyYear" name="ApplyYear" class="form-control" onchange="reloadSalesTable();">
+                    <option value="">-- Tất cả --</option>
+                    @for (int y = DateTime.Now.Year + 3; y >= DateTime.Now.Year - 5; y--)
+                    {
+                        <option value="@y" @((Model.ApplyYear.HasValue ? Model.ApplyYear.Value : DateTime.Now.Year) == y ? "selected" : "")>@y</option>
+                    }
+                </select>
+            </div>
+        </div>
+
         <!-- Vạch phân tách hàng chuẩn giao diện: Hàng 1 (Tìm kiếm & Tiêu chí) và Hàng 2 (Đơn vị & Thời gian & Nút bấm) -->
         <div class="w-100 d-none d-lg-block my-1"></div>
 

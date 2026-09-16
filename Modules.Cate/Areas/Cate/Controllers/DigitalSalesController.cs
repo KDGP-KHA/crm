@@ -44,6 +44,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_DigitalSalesWorkflowCache _workflowCache;
 
         private string _title => AppProcessor.Messagor.GetMessage("DigitalSales_Title");
+        private string CurrentUserName => User?.UserName ?? (User?.Identity?.Name ?? (HttpContext?.User?.Identity?.Name ?? ""));
         private readonly string _folderUpload = "/Contents/Uploads/DigitalSales";
         private string GetAppMessage(string labelKey, string defaultMessage = null)
         {
@@ -184,7 +185,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpGet]
         public ActionResult Export(string keyword, byte? businessType, int? statusID,
                                    int? departmentID, int? employeeID, string fromDate, string toDate, int? customerID,
-                                   bool? isKeyProject, bool? isFollowed, string statusIDs = null)
+                                   bool? isKeyProject, bool? isFollowed, string statusIDs = null, int? applyYear = null)
         {
             var searchModel = new RM_DigitalSalesSearchModel
             {
@@ -199,6 +200,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 CustomerID = customerID.GetValueOrDefault(0),
                 IsKeyProject = isKeyProject,
                 IsFollowed = isFollowed,
+                ApplyYear = applyYear,
                 PageNumber = 1,
                 PageSize = 999999,
                 UserName = User.UserName
@@ -339,26 +341,51 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [ActionType(Type = EnumActionType.Create)]
         public ActionResult Add(int? customerId, byte? businessType)
         {
-            var model = new RM_DigitalSalesModel
+            try
             {
-                Code = _salesCache.GenerateNextCode(),
-                BusinessType = businessType ?? 1,
-                StatusID = 1, // Default: Business status 1
-                CustomerID = customerId.GetValueOrDefault(0),
-                StartDate = DateTime.Today,
-                ExpectedDate = DateTime.Today.AddMonths(1),
-                ClosingProbability = 50
-            };
+                var model = new RM_DigitalSalesModel
+                {
+                    Code = _salesCache.GenerateNextCode(),
+                    BusinessType = businessType ?? 1,
+                    StatusID = 1, // Default: Business status 1
+                    CustomerID = customerId.GetValueOrDefault(0),
+                    StartDate = DateTime.Today,
+                    ExpectedDate = DateTime.Today.AddMonths(1),
+                    ClosingProbability = 50,
+                    ApplyYear = DateTime.Today.Year
+                };
 
-            var currentUser = _userCache.GetByUserName(User.UserName);
-            if (currentUser != null)
-            {
-                model.AssignedEmployeeID = currentUser.UserId;
-                model.DepartmentID = GetDepartmentIdByUserId(currentUser.UserId);
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var currentUser = _userCache.GetByUserName(uName);
+                    if (currentUser != null)
+                    {
+                        model.AssignedEmployeeID = currentUser.UserId;
+                        model.DepartmentID = GetDepartmentIdByUserId(currentUser.UserId);
+                    }
+                }
+
+                PrepareSalesDropdowns(model);
+                return PartialView("_Add", model);
             }
-
-            PrepareSalesDropdowns(model);
-            return PartialView("_Add", model);
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                var fallbackModel = new RM_DigitalSalesModel
+                {
+                    Code = "SPDV-" + DateTime.Now.Year + "-0001",
+                    BusinessType = businessType ?? 1,
+                    StatusID = 1,
+                    CustomerID = customerId.GetValueOrDefault(0),
+                    StartDate = DateTime.Today,
+                    ExpectedDate = DateTime.Today.AddMonths(1),
+                    ClosingProbability = 50,
+                    ApplyYear = DateTime.Now.Year
+                };
+                try { PrepareSalesDropdowns(fallbackModel); } catch { }
+                return PartialView("_Add", fallbackModel);
+            }
         }
 
         [AjaxOnly]
@@ -486,6 +513,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     status = false,
                     message = CreateMessage(_title, EnumProcessType.DataNotExist, EnumMsgIcon.Error)
                 }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (!model.ApplyYear.HasValue || model.ApplyYear.Value <= 0)
+            {
+                model.ApplyYear = model.CreatedDate.Year > 1900 ? model.CreatedDate.Year : DateTime.Today.Year;
             }
 
             model.Note = FormatHtmlContent(model.Note);
@@ -5099,8 +5131,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
         {
             try
             {
-                var list = _salesCache.GetAccessibleEmployees(User.UserName);
-                if (list != null && list.Count > 0) return list;
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var list = _salesCache.GetAccessibleEmployees(uName);
+                    if (list != null && list.Count > 0) return list;
+                }
             }
             catch { }
             return new List<RM_DigitalSalesUserModel>();
@@ -5133,16 +5169,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
         private List<MN_BoPhanModel> GetAccessibleDepartments()
         {
-            var currentUser = _userCache.GetByUserName(User.UserName);
             List<MN_BoPhanModel> list = null;
-            if (currentUser != null && !string.IsNullOrWhiteSpace(currentUser.Email))
+            try
             {
-                list = (_userBoPhanCache.GetByEmail(currentUser.Email) ?? new List<MN_BoPhanModel>())
-                    .GroupBy(x => x.BoPhan_ID)
-                    .Select(x => x.First())
-                    .OrderBy(x => x.TenBoPhanView)
-                    .ToList();
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var currentUser = _userCache.GetByUserName(uName);
+                    if (currentUser != null && !string.IsNullOrWhiteSpace(currentUser.Email))
+                    {
+                        list = (_userBoPhanCache.GetByEmail(currentUser.Email) ?? new List<MN_BoPhanModel>())
+                            .GroupBy(x => x.BoPhan_ID)
+                            .Select(x => x.First())
+                            .OrderBy(x => x.TenBoPhanView)
+                            .ToList();
+                    }
+                }
             }
+            catch { }
 
             if (list == null || list.Count == 0)
             {
@@ -5324,104 +5368,121 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
         private void PrepareSalesDropdowns(RM_DigitalSalesModel model)
         {
-            if (model.CustomerID > 0)
+            try
             {
-                var cus = _customerCache.GetById(model.CustomerID);
-                if (cus != null)
+                if (model.CustomerID > 0)
                 {
-                    model.ListCustomer = new List<SelectListItem>
+                    var cus = _customerCache.GetById(model.CustomerID);
+                    if (cus != null)
                     {
-                        new SelectListItem { Value = cus.CustomerID.ToString(), Text = cus.CustomerName, Selected = true }
-                    };
-                    model.CustomerName = cus.CustomerName;
+                        model.ListCustomer = new List<SelectListItem>
+                        {
+                            new SelectListItem { Value = cus.CustomerID.ToString(), Text = cus.CustomerName, Selected = true }
+                        };
+                        model.CustomerName = cus.CustomerName;
+                    }
+                    else
+                    {
+                        model.ListCustomer = new List<SelectListItem>();
+                    }
                 }
                 else
                 {
                     model.ListCustomer = new List<SelectListItem>();
                 }
-            }
-            else
-            {
-                model.ListCustomer = new List<SelectListItem>();
-            }
 
-            if (model.CustomerID > 0)
-            {
-                model.ListContactPerson = _contactPersonCache.GetByCustomerID(model.CustomerID)?.Select(c => new SelectListItem
+                if (model.CustomerID > 0)
                 {
-                    Value = c.ContactPerson_ID.ToString(),
-                    Text = $"{c.FullName} - {c.Position}"
+                    model.ListContactPerson = _contactPersonCache.GetByCustomerID(model.CustomerID)?.Select(c => new SelectListItem
+                    {
+                        Value = c.ContactPerson_ID.ToString(),
+                        Text = $"{c.FullName} - {c.Position}"
+                    }).ToList() ?? new List<SelectListItem>();
+                }
+                else
+                {
+                    model.ListContactPerson = new List<SelectListItem>();
+                }
+
+                model.ListStatus = _salesCache.GetStatusList(model.BusinessType)?.Select(s => new SelectListItem
+                {
+                    Value = s.StatusID.ToString(),
+                    Text = s.StatusName,
+                    Selected = (s.StatusID == model.StatusID)
+                }).ToList() ?? new List<SelectListItem>();
+
+                var accessibleUsers = GetAccessibleEmployees();
+
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var currentLoginUser = _userCache.GetByUserName(uName);
+                    if (currentLoginUser != null && currentLoginUser.UserId.HasValue && !accessibleUsers.Any(u => u.UserId == currentLoginUser.UserId.Value))
+                    {
+                        accessibleUsers.Add(new RM_DigitalSalesUserModel
+                        {
+                            UserId = currentLoginUser.UserId.Value,
+                            UserName = currentLoginUser.UserName,
+                            FullName = currentLoginUser.FullName
+                        });
+                    }
+                }
+
+                if (model.AssignedEmployeeID.HasValue && model.AssignedEmployeeID.Value > 0 && !accessibleUsers.Any(u => u.UserId == model.AssignedEmployeeID.Value))
+                {
+                    var assignedUser = _userCache.GetById(model.AssignedEmployeeID.Value);
+                    if (assignedUser != null && assignedUser.UserId.HasValue)
+                    {
+                        accessibleUsers.Add(new RM_DigitalSalesUserModel
+                        {
+                            UserId = assignedUser.UserId.Value,
+                            UserName = assignedUser.UserName,
+                            FullName = assignedUser.FullName
+                        });
+                    }
+                }
+
+                model.ListEmployee = accessibleUsers
+                    .Where(u => u.UserId > 0)
+                    .GroupBy(u => u.UserId)
+                    .Select(g => g.First())
+                    .OrderBy(u => u.FullName)
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.UserId.ToString(),
+                        Text = $"{u.FullName} ({u.UserName})",
+                        Selected = (model.AssignedEmployeeID.HasValue && u.UserId == model.AssignedEmployeeID.Value)
+                    }).ToList();
+
+                if ((!model.DepartmentID.HasValue || model.DepartmentID.Value <= 0) && model.AssignedEmployeeID.HasValue)
+                {
+                    model.DepartmentID = GetDepartmentIdByUserId(model.AssignedEmployeeID.Value);
+                }
+
+                model.ListDepartment = _departmentCache.GetAll()?.Select(d => new SelectListItem
+                {
+                    Value = d.BoPhan_ID.ToString(),
+                    Text = d.TenBoPhan,
+                    Selected = (model.DepartmentID.HasValue && d.BoPhan_ID == model.DepartmentID.Value)
+                }).ToList() ?? new List<SelectListItem>();
+
+                model.ListContract = _contractCache.GetAll()?.Select(ct => new SelectListItem
+                {
+                    Value = ct.ContractID.ToString(),
+                    Text = $"{ct.ContractCode} - {ct.ContractName}",
+                    Selected = (model.ContractID.HasValue && ct.ContractID == model.ContractID.Value)
                 }).ToList() ?? new List<SelectListItem>();
             }
-            else
+            catch (Exception ex)
             {
-                model.ListContactPerson = new List<SelectListItem>();
+                AppProcessor.Logger.Error(ex);
+                if (model.ListCustomer == null) model.ListCustomer = new List<SelectListItem>();
+                if (model.ListContactPerson == null) model.ListContactPerson = new List<SelectListItem>();
+                if (model.ListStatus == null) model.ListStatus = new List<SelectListItem>();
+                if (model.ListEmployee == null) model.ListEmployee = new List<SelectListItem>();
+                if (model.ListDepartment == null) model.ListDepartment = new List<SelectListItem>();
+                if (model.ListContract == null) model.ListContract = new List<SelectListItem>();
             }
-
-            model.ListStatus = _salesCache.GetStatusList(model.BusinessType)?.Select(s => new SelectListItem
-            {
-                Value = s.StatusID.ToString(),
-                Text = s.StatusName,
-                Selected = (s.StatusID == model.StatusID)
-            }).ToList() ?? new List<SelectListItem>();
-
-            var accessibleUsers = GetAccessibleEmployees();
-
-            var currentLoginUser = _userCache.GetByUserName(User.UserName);
-            if (currentLoginUser != null && currentLoginUser.UserId.HasValue && !accessibleUsers.Any(u => u.UserId == currentLoginUser.UserId.Value))
-            {
-                accessibleUsers.Add(new RM_DigitalSalesUserModel
-                {
-                    UserId = currentLoginUser.UserId.Value,
-                    UserName = currentLoginUser.UserName,
-                    FullName = currentLoginUser.FullName
-                });
-            }
-
-            if (model.AssignedEmployeeID.HasValue && model.AssignedEmployeeID.Value > 0 && !accessibleUsers.Any(u => u.UserId == model.AssignedEmployeeID.Value))
-            {
-                var assignedUser = _userCache.GetById(model.AssignedEmployeeID.Value);
-                if (assignedUser != null && assignedUser.UserId.HasValue)
-                {
-                    accessibleUsers.Add(new RM_DigitalSalesUserModel
-                    {
-                        UserId = assignedUser.UserId.Value,
-                        UserName = assignedUser.UserName,
-                        FullName = assignedUser.FullName
-                    });
-                }
-            }
-
-            model.ListEmployee = accessibleUsers
-                .Where(u => u.UserId > 0)
-                .GroupBy(u => u.UserId)
-                .Select(g => g.First())
-                .OrderBy(u => u.FullName)
-                .Select(u => new SelectListItem
-                {
-                    Value = u.UserId.ToString(),
-                    Text = $"{u.FullName} ({u.UserName})",
-                    Selected = (model.AssignedEmployeeID.HasValue && u.UserId == model.AssignedEmployeeID.Value)
-                }).ToList();
-
-            if ((!model.DepartmentID.HasValue || model.DepartmentID.Value <= 0) && model.AssignedEmployeeID.HasValue)
-            {
-                model.DepartmentID = GetDepartmentIdByUserId(model.AssignedEmployeeID.Value);
-            }
-
-            model.ListDepartment = _departmentCache.GetAll()?.Select(d => new SelectListItem
-            {
-                Value = d.BoPhan_ID.ToString(),
-                Text = d.TenBoPhan,
-                Selected = (model.DepartmentID.HasValue && d.BoPhan_ID == model.DepartmentID.Value)
-            }).ToList() ?? new List<SelectListItem>();
-
-            model.ListContract = _contractCache.GetAll()?.Select(ct => new SelectListItem
-            {
-                Value = ct.ContractID.ToString(),
-                Text = $"{ct.ContractCode} - {ct.ContractName}",
-                Selected = (model.ContractID.HasValue && ct.ContractID == model.ContractID.Value)
-            }).ToList() ?? new List<SelectListItem>();
         }
 
         private string SaveUploadedFile(HttpPostedFileBase file, int index = 0)

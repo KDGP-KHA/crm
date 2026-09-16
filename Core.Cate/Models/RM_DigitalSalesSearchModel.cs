@@ -39,6 +39,9 @@ namespace Core.Cate.Models
         public bool? IsKeyProject { get; set; }
         public bool? IsFollowed { get; set; }
 
+        [CustomDisplayName("DigitalSalesSearch_ApplyYear_Label")]
+        public int? ApplyYear { get; set; } = System.DateTime.Now.Year;
+
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;
         public string UserName { get; set; }

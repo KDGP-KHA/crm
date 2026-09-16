@@ -95,6 +95,14 @@
                         <span class="badge badge-success px-2 py-1"><i class="fa fa-check-circle mr-1"></i> @Model.StatusName</span>
                     </td>
                 </tr>
+                <tr>
+                    <td class="text-secondary font-weight-bold info-label" style="padding: 8px 4px;">Năm áp dụng:</td>
+                    <td style="padding: 8px 4px;">
+                        <span class="badge bgc-danger-l4 text-danger font-bolder border-1 brc-danger-m2 px-2 py-1 shadow-sm">
+                            <i class="fa fa-calendar-alt mr-1 text-danger"></i> Năm @(Model.ApplyYear.HasValue && Model.ApplyYear.Value > 0 ? Model.ApplyYear.Value : (Model.CreatedDate.Year > 1900 ? Model.CreatedDate.Year : DateTime.Now.Year))
+                        </span>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>

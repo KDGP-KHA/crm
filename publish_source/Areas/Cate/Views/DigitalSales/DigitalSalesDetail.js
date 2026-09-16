@@ -2385,14 +2385,7 @@ function initDiscussionCKEditor() {
     editor.on('instanceReady', function () {
         updateDiscussionWordCount();
 
-        editor.on('change', function () {
-            updateDiscussionWordCount();
-        });
-
-        editor.on('paste', function () {
-            setTimeout(updateDiscussionWordCount, 100);
-        });
-
+        // Keyboard navigation and shortcuts
         editor.on('key', function (evt) {
             setTimeout(updateDiscussionWordCount, 50);
 
@@ -2403,36 +2396,180 @@ function initDiscussionCKEditor() {
                 return;
             }
 
-            // '@' key to trigger mention
-            var key = evt.data.domEvent.$.key;
-            if (key === '@' || (evt.data.domEvent.$.shiftKey && (evt.data.domEvent.$.keyCode === 50 || evt.data.domEvent.$.which === 50))) {
-                if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
-                    var ed = CKEDITOR.instances['txtDiscussionContent'];
-                    var sel = ed.getSelection();
-                    if (sel) {
-                        try {
-                            window._mentionBookmarks = sel.createBookmarks(true);
-                        } catch (e) { }
+            var $dropdown = $("#dsMentionDropdown");
+            if ($dropdown.is(":visible")) {
+                var keyCode = evt.data.domEvent.$.keyCode || evt.data.domEvent.$.which;
+
+                if (keyCode === 40) { // ArrowDown
+                    evt.cancel();
+                    moveMentionActiveItem(1);
+                    return;
+                }
+                if (keyCode === 38) { // ArrowUp
+                    evt.cancel();
+                    moveMentionActiveItem(-1);
+                    return;
+                }
+                if (keyCode === 13 || keyCode === 9) { // Enter or Tab
+                    var $active = $("#dsMentionList .ds-mention-item.active");
+                    if ($active.length > 0) {
+                        evt.cancel();
+                        var user = $active.data("user");
+                        if (user) {
+                            selectMentionUser(user);
+                        }
+                        return;
                     }
                 }
-                setTimeout(function () {
-                    showMentionDropdown("");
-                }, 100);
+                if (keyCode === 27) { // Escape
+                    evt.cancel();
+                    hideMentionDropdown();
+                    return;
+                }
             }
+        });
+
+        // Real-time mention detection on editor change or keyup
+        editor.on('change', function () {
+            updateDiscussionWordCount();
+            setTimeout(function () {
+                checkAndHandleEditorMention(editor);
+            }, 30);
+        });
+
+        editor.on('contentDom', function () {
+            editor.document.on('keyup', function (evt) {
+                var keyCode = evt.data.getKeystroke();
+                // Skip arrow/enter/tab/escape which are already handled
+                if (keyCode === 40 || keyCode === 38 || keyCode === 13 || keyCode === 9 || keyCode === 27) return;
+                checkAndHandleEditorMention(editor);
+            });
         });
     });
 }
 
-function triggerMentionDropdown() {
-    showMentionDropdown("");
+function getMentionQueryFromEditor(editor) {
+    try {
+        var sel = editor.getSelection();
+        if (!sel) return null;
+        var ranges = sel.getRanges();
+        if (!ranges || !ranges.length) return null;
+        var range = ranges[0];
+        var node = range.startContainer;
+        if (!node || node.type !== CKEDITOR.NODE_TEXT) return null;
+        var text = node.getText();
+        var offset = range.startOffset;
+        var before = text.substring(0, offset);
+        var atPos = before.lastIndexOf('@');
+        if (atPos === -1) return null;
+        var query = before.substring(atPos + 1);
+        // If there's any whitespace after '@', mention is finished/cancelled
+        if (/[\s\u00A0\t\r\n]/.test(query)) return null;
+        return {
+            query: query,
+            atPos: atPos,
+            node: node,
+            range: range
+        };
+    } catch (e) {
+        return null;
+    }
 }
 
-function showMentionDropdown(query) {
+function getCaretOffset(editor) {
+    try {
+        var sel = editor.getSelection();
+        if (!sel) return null;
+        var ranges = sel.getRanges();
+        if (!ranges || !ranges.length) return null;
+
+        var dummy = editor.document.createElement('span');
+        dummy.setText('\u200b');
+        ranges[0].cloneRange().insertNode(dummy);
+        var rect = dummy.$.getBoundingClientRect();
+        dummy.remove();
+
+        var $iframe = $(editor.container.$).find('iframe');
+        if ($iframe.length) {
+            var iframeOffset = $iframe.offset();
+            var $parent = $(editor.container.$).parent();
+            var parentOffset = $parent.offset();
+
+            var top = (iframeOffset.top - parentOffset.top) + rect.bottom + 6;
+            var left = (iframeOffset.left - parentOffset.left) + rect.left;
+
+            var maxLeft = $parent.width() - 330;
+            if (left > maxLeft) left = Math.max(10, maxLeft);
+            if (left < 10) left = 10;
+
+            if (top > 160) {
+                top = Math.max(5, (iframeOffset.top - parentOffset.top) + rect.top - 240);
+            }
+
+            return { top: Math.round(top), left: Math.round(left) };
+        }
+    } catch (e) { }
+    return null;
+}
+
+function checkAndHandleEditorMention(editor) {
+    var info = getMentionQueryFromEditor(editor);
+    if (info !== null) {
+        var pos = getCaretOffset(editor);
+        showMentionDropdown(info.query, false, pos);
+    } else {
+        var $dropdown = $("#dsMentionDropdown");
+        if ($dropdown.is(":visible") && !$dropdown.data("opened-by-button")) {
+            hideMentionDropdown();
+        }
+    }
+}
+
+function moveMentionActiveItem(direction) {
+    var $items = $("#dsMentionList .ds-mention-item");
+    if (!$items.length) return;
+    var $current = $items.filter(".active");
+    var curIdx = $items.index($current);
+    var nextIdx = curIdx + direction;
+    if (nextIdx < 0) nextIdx = $items.length - 1;
+    if (nextIdx >= $items.length) nextIdx = 0;
+    $items.removeClass("active");
+    var $next = $items.eq(nextIdx).addClass("active");
+    if ($next.length && $next[0].scrollIntoView) {
+        $next[0].scrollIntoView({ block: "nearest" });
+    }
+}
+
+function triggerMentionDropdown(btn) {
+    var $dropdown = $("#dsMentionDropdown");
+    if ($dropdown.is(":visible") && $dropdown.data("opened-by-button")) {
+        hideMentionDropdown();
+        return;
+    }
+    showMentionDropdown("", true);
+}
+
+function showMentionDropdown(query, openedByButton, customPos) {
     var salesId = getEffectiveSalesId();
     loadProjectMembersForMention(salesId, function (members) {
         var $dropdown = $("#dsMentionDropdown");
         var $list = $("#dsMentionList");
+        var $searchBox = $("#boxMentionSearch");
         $list.empty();
+
+        $dropdown.data("opened-by-button", !!openedByButton);
+
+        if (openedByButton) {
+            $searchBox.removeClass("d-none");
+            $dropdown.css({ top: "auto", bottom: "48px", left: "10px" });
+        } else {
+            $searchBox.addClass("d-none");
+            if (customPos) {
+                $dropdown.css({ top: customPos.top + "px", left: customPos.left + "px", bottom: "auto" });
+            } else {
+                $dropdown.css({ top: "45px", left: "15px", bottom: "auto" });
+            }
+        }
 
         var filtered = members;
         if (query) {
@@ -2444,13 +2581,12 @@ function showMentionDropdown(query) {
         }
 
         if (filtered.length === 0) {
-            $list.html('<div class="p-2 text-muted text-80 text-center">Không tìm thấy nhân sự phù hợp</div>');
+            $list.html('<div class="p-3 text-muted text-80 text-center"><i class="fa fa-user-slash mr-1 opacity-75"></i>Không tìm thấy nhân sự phù hợp</div>');
         } else {
             filtered.forEach(function (m, idx) {
+                var initial = (m.fullName ? m.fullName.trim().charAt(0).toUpperCase() : 'U');
                 var $item = $('<div class="ds-mention-item' + (idx === 0 ? ' active' : '') + '">' +
-                    '<div class="w-3 h-3 radius-round bgc-primary-l3 text-primary d-flex align-items-center justify-content-center mr-2 font-bold text-80" style="width: 26px; height: 26px; border-radius: 50%;">' +
-                    (m.fullName ? m.fullName.charAt(0).toUpperCase() : 'U') +
-                    '</div>' +
+                    '<div class="ds-mention-avatar">' + initial + '</div>' +
                     '<div class="min-width-0 flex-grow-1">' +
                     '<div class="font-weight-bold text-85 text-dark text-truncate">' + m.fullName + '</div>' +
                     '<div class="text-75 text-secondary text-truncate">' + (m.roleTitle || m.userName) + '</div>' +
@@ -2470,61 +2606,50 @@ function showMentionDropdown(query) {
         }
 
         $dropdown.show();
-        setTimeout(function () {
-            $("#txtMentionSearch").focus();
-        }, 50);
+
+        // Chỉ focus ô tìm kiếm nếu mở qua click nút "@ Nhắc tên"
+        if (openedByButton) {
+            setTimeout(function () {
+                $("#txtMentionSearch").val(query || '').focus();
+            }, 50);
+        }
     });
 }
 
 function hideMentionDropdown() {
-    $("#dsMentionDropdown").hide();
+    var $dropdown = $("#dsMentionDropdown");
+    $dropdown.hide();
+    $dropdown.data("opened-by-button", false);
     $("#txtMentionSearch").val('');
 }
 
 function handleMentionSearchInput(val) {
-    showMentionDropdown(val);
+    showMentionDropdown(val, true);
 }
 
 function handleMentionSearchKeydown(e) {
     var $dropdown = $("#dsMentionDropdown");
     if (!$dropdown.is(":visible")) return;
 
-    var $items = $("#dsMentionList .ds-mention-item");
-    if ($items.length > 0) {
-        var $current = $items.filter(".active");
-        var currentIndex = $items.index($current);
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            var nextIndex = currentIndex < $items.length - 1 ? currentIndex + 1 : 0;
-            $items.removeClass("active");
-            var $next = $items.eq(nextIndex).addClass("active");
-            if ($next.length && $next[0].scrollIntoView) {
-                $next[0].scrollIntoView({ block: "nearest" });
-            }
-            return;
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            var prevIndex = currentIndex > 0 ? currentIndex - 1 : $items.length - 1;
-            $items.removeClass("active");
-            var $prev = $items.eq(prevIndex).addClass("active");
-            if ($prev.length && $prev[0].scrollIntoView) {
-                $prev[0].scrollIntoView({ block: "nearest" });
-            }
-            return;
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            if ($current.length > 0) {
-                var user = $current.data("user");
-                if (user) {
-                    selectMentionUser(user);
-                    return;
-                }
+    if (e.key === "ArrowDown") {
+        e.preventDefault();
+        moveMentionActiveItem(1);
+        return;
+    } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        moveMentionActiveItem(-1);
+        return;
+    } else if (e.key === "Enter") {
+        e.preventDefault();
+        var $active = $("#dsMentionList .ds-mention-item.active");
+        if ($active.length > 0) {
+            var user = $active.data("user");
+            if (user) {
+                selectMentionUser(user);
+                return;
             }
         }
-    }
-
-    if (e.key === "Escape") {
+    } else if (e.key === "Escape") {
         e.preventDefault();
         hideMentionDropdown();
         if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
@@ -2540,51 +2665,48 @@ function selectMentionUser(user) {
         var editor = CKEDITOR.instances['txtDiscussionContent'];
         editor.focus();
 
-        if (window._mentionBookmarks) {
+        var info = getMentionQueryFromEditor(editor);
+        var mentionHtml = '<span class="ds-mention-badge" data-user-id="' + user.userId + '" contenteditable="false">' + user.fullName + '</span>&nbsp;';
+
+        if (info) {
             try {
-                editor.getSelection().selectBookmarks(window._mentionBookmarks);
-                window._mentionBookmarks = null;
-            } catch (e) { }
-        }
+                var node = info.node;
+                var fullText = node.getText();
+                var beforeAt = fullText.substring(0, info.atPos);
+                var afterCaret = fullText.substring(info.atPos + 1 + info.query.length);
 
-        // 1. Tự động xóa ký tự '@' người dùng đã gõ trước đó để kích hoạt dropdown
-        try {
-            var selection = editor.getSelection();
-            if (selection) {
-                var ranges = selection.getRanges();
-                if (ranges && ranges.length > 0) {
-                    var range = ranges[0];
-                    var startNode = range.startContainer;
-                    if (startNode && startNode.type === CKEDITOR.NODE_TEXT) {
-                        var textVal = startNode.getText();
-                        var offset = range.startOffset;
-                        if (offset > 0 && textVal.charAt(offset - 1) === '@') {
-                            var updatedText = textVal.substring(0, offset - 1) + textVal.substring(offset);
-                            startNode.setText(updatedText);
-                            range.setStart(startNode, offset - 1);
-                            range.setEnd(startNode, offset - 1);
-                            selection.selectRanges([range]);
-                        }
-                    }
+                node.setText(beforeAt);
+
+                var range = editor.createRange();
+                range.setStart(node, beforeAt.length);
+                range.setEnd(node, beforeAt.length);
+                editor.getSelection().selectRanges([range]);
+
+                editor.insertHtml(mentionHtml);
+
+                if (afterCaret.length > 0) {
+                    editor.insertText(afterCaret);
+                    var sel = editor.getSelection();
+                    var r = sel.getRanges()[0];
+                    r.setStart(r.startContainer, r.startOffset - afterCaret.length);
+                    r.setEnd(r.startContainer, r.startOffset - afterCaret.length);
+                    sel.selectRanges([r]);
                 }
+            } catch (err) {
+                editor.insertHtml(mentionHtml);
             }
-        } catch (err) {
-            console.error("Error removing @ before mention:", err);
+        } else {
+            editor.insertHtml(mentionHtml);
         }
-
-        // 2. Chèn tag hiển thị sạch, không dư thừa ký tự/icon @ vì bản thân badge đã là tag hiển thị
-        var mentionHtml = '<span class="ds-mention-badge" data-user-id="' + user.userId + '">' + user.fullName + '</span>&nbsp;';
-        editor.insertHtml(mentionHtml);
     } else {
         var $textarea = $("#txtDiscussionContent");
         if ($textarea.length > 0) {
             var val = $textarea.val() || "";
-            // Xóa ký tự '@' cuối cùng nếu vừa gõ
-            if (val.trimEnd().endsWith('@')) {
-                var lastAt = val.lastIndexOf('@');
+            var lastAt = val.lastIndexOf('@');
+            if (lastAt !== -1) {
                 val = val.substring(0, lastAt);
             }
-            $textarea.val(val + " " + user.fullName + " ");
+            $textarea.val(val + user.fullName + " ");
         }
     }
 
