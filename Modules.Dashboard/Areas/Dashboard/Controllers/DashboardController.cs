@@ -1,4 +1,4 @@
-﻿using Core.Cate.Biz;
+using Core.Cate.Biz;
 using Core.Cate.Models;
 using Core.Cate.Caches;
 using Core.Sys.BaseApp;
@@ -26,6 +26,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         private readonly RM_OpportunityDashboardCache _biz;
         private readonly RM_DashboardCache _dashboardCache;
         private readonly SysUserCache _userCache;
+        private readonly RM_DigitalSalesCache _digitalSalesCache;
 
         private const string PERMISSION_CONTEXT_ITEM_KEY = "Dashboard.AppPermissionContext";
         private const string EXCEL_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -38,6 +39,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             _biz = new RM_OpportunityDashboardCache();
             _dashboardCache = new RM_DashboardCache();
             _userCache = new SysUserCache();
+            _digitalSalesCache = new RM_DigitalSalesCache();
         }
 
         /// <summary>
@@ -122,10 +124,42 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         }
 
         /// <summary>
-        /// Hiển thị màn hình dashboard tổng hợp với khoảng thời gian mặc định theo năm hiện tại.
+        /// Chuyển hướng Dashboard sang trang Dashboard Chart mới theo yêu cầu.
         /// </summary>
-        /// <returns>Màn hình dashboard tổng hợp.</returns>
+        [HttpGet]
         public ActionResult Index()
+        {
+            return Redirect("/Dashboard/Chart");
+        }
+
+        /// <summary>
+        /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh) và bộ lọc theo Năm áp dụng.
+        /// </summary>
+        [HttpGet]
+        public ActionResult Chart(int? applyYear)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year);
+            ViewBag.ApplyYear = year;
+            ViewBag.Title = "Dashboard";
+            return View("Chart", overviewModel);
+        }
+
+        /// <summary>
+        /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng.
+        /// </summary>
+        [HttpGet]
+        public ActionResult GetChartOverviewData(int? applyYear)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year);
+            return PartialView("_ChartOverview", overviewModel);
+        }
+
+        /// <summary>
+        /// Màn hình dashboard tổng hợp legacy.
+        /// </summary>
+        public ActionResult IndexLegacy()
         {
             var user = _userCache.GetByUserName(User.UserName);
             var search = BuildSearch();

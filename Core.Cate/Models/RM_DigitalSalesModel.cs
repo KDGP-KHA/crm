@@ -33,6 +33,10 @@ namespace Core.Cate.Models
         public int CustomerID { get; set; }
         public string CustomerName { get; set; }
 
+        [CustomRequired]
+        [CustomDisplayName("DigitalSales_ApplyYear_Label")]
+        public int? ApplyYear { get; set; } = DateTime.Now.Year;
+
         [CustomDisplayName("DigitalSales_ContactPerson_Label")]
         public int? ContactPerson_ID { get; set; }
         public string ContactPersonName { get; set; }
@@ -200,6 +204,37 @@ namespace Core.Cate.Models
         public int UserId { get; set; }
         public string UserName { get; set; }
         public string FullName { get; set; }
+    }
+
+    public class RM_DigitalSalesTimelineDetailViewModel
+    {
+        public int DigitalSalesID { get; set; }
+        public string SalesTitle { get; set; }
+        public string SalesCode { get; set; }
+        public string DigitalSalesCode { get; set; }
+        public string DigitalSalesName { get; set; }
+        public RM_DigitalSalesTimelineModel Timeline { get; set; }
+        public List<RM_DigitalSalesTrackingModel> Tasks { get; set; } = new List<RM_DigitalSalesTrackingModel>();
+        public List<TimelineAttachmentFileItem> TransitionFiles { get; set; } = new List<TimelineAttachmentFileItem>();
+        public List<TimelineTaskFileGroup> TaskFileGroups { get; set; } = new List<TimelineTaskFileGroup>();
+    }
+
+    public class TimelineTaskFileGroup
+    {
+        public int TrackingID { get; set; }
+        public string TrackingCode { get; set; }
+        public string TaskName { get; set; }
+        public List<TimelineAttachmentFileItem> Files { get; set; } = new List<TimelineAttachmentFileItem>();
+    }
+
+    public class TimelineAttachmentFileItem
+    {
+        public string FileName { get; set; }
+        public string FilePath { get; set; }
+        public string Extension { get; set; }
+        public string SourceTaskName { get; set; }
+        public string UploadedBy { get; set; }
+        public DateTime? UploadedDate { get; set; }
     }
 }
 

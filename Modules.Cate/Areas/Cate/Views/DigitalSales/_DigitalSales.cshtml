@@ -70,37 +70,32 @@
         <div id="customerInfoCard_Form" class="card border-1 brc-primary-m3 bgc-primary-l4 radius-1 p-2 mb-3 shadow-sm" style="display: none;"></div>
     </div>
 
-    <!-- 4. THÔNG TIN HỢP ĐỒNG (NẾU CÓ) -->
-    <div class="col-md-12 mb-3">
-        <div class="card border-1 brc-default-m4 radius-1 shadow-sm">
-            <div class="card-header bgc-secondary-l4 py-2 px-3 d-flex align-items-center">
-                <span class="font-weight-bold text-dark-m1 text-90">
-                    <i class="fa fa-file-contract text-primary mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_Contract_SectionTitle", "Thông tin Hợp đồng kinh tế (nếu có)")
-                </span>
+    <!-- 4. ÁP DỤNG (NĂM) -->
+    <div class="col-md-6 mb-3">
+        @Html.TitleFor(m => m.ApplyYear, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        <div class="input-group date" id="dpApplyYear_Form">
+            <div class="input-group-prepend">
+                <span class="input-group-text bg-white"><i class="fa fa-calendar-alt text-primary"></i></span>
             </div>
-            <div class="card-body p-2">
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <label class="font-bold text-secondary-d2 mb-1 d-block text-90">@AppProcessor.Messagor.GetMessage("DigitalSales_ContractNo_Label", "Số hợp đồng")</label>
-                        @Html.TextBoxFor(m => m.ContractNo, new { @class = "form-control form-control-sm", id = "ContractNo_Form", placeholder = "Nhập số HĐ..." })
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label class="font-bold text-secondary-d2 mb-1 d-block text-90">@AppProcessor.Messagor.GetMessage("DigitalSales_ContractValue_Label", "Giá trị hợp đồng (VNĐ)")</label>
-                        @Html.TextBoxFor(m => m.ContractValue, "{0:G0}", new { @class = "form-control form-control-sm text-right font-bold text-success", id = "ContractValue_Form", type = "number", min = "0", step = "any", placeholder = "0" })
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label class="font-bold text-secondary-d2 mb-1 d-block text-90">@AppProcessor.Messagor.GetMessage("DigitalSales_ContractSignDate_Label", "Ngày ký hợp đồng")</label>
-                        <div class="input-group input-group-sm date" id="dpContractSignDate_Form">
-                            <input type="text" name="ContractSignDate" id="ContractSignDate_Form" class="form-control form-control-sm date-picker" placeholder="dd/MM/yyyy" autocomplete="off" value="@(Model.ContractSignDate.HasValue ? Model.ContractSignDate.Value.ToString("dd/MM/yyyy") : "")" />
-                            <div class="input-group-append">
-                                <span class="input-group-text"><i class="fa fa-calendar"></i></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            @Html.TextBoxFor(m => m.ApplyYear, new { 
+                @class = "form-control form-control-sm font-bold text-primary-d2", 
+                type = "number", 
+                min = "1900", 
+                max = "2100", 
+                step = "1", 
+                oninput = "this.value = this.value.slice(0,4)", 
+                id = "ApplyYear_Form", 
+                value = (Model.ApplyYear.HasValue && Model.ApplyYear.Value > 0 ? Model.ApplyYear.Value : DateTime.Now.Year),
+                placeholder = AppProcessor.Messagor.GetMessage("DigitalSales_ApplyYear_Placeholder") 
+            })
         </div>
+        @Html.ValidationMessageFor(m => m.ApplyYear, "", new { @class = "text-danger text-85 font-weight-bold" })
     </div>
+
+    <!-- THÔNG TIN HỢP ĐỒNG ĐÃ ĐƯỢC ẨN KHỎI FORM -->
+    @Html.HiddenFor(m => m.ContractNo)
+    @Html.HiddenFor(m => m.ContractValue)
+    <input type="hidden" name="ContractSignDate" value="@(Model.ContractSignDate.HasValue ? Model.ContractSignDate.Value.ToString("dd/MM/yyyy") : "")" />
 
 
 
@@ -453,7 +448,20 @@
             });
         }
 
-        // 7. CKEditor
+        // 7. Khởi tạo datetimepicker cho ô Năm áp dụng
+        if ($('#ApplyYear_Form').length && typeof $.fn.datetimepicker === 'function') {
+            try {
+                $('#ApplyYear_Form').datetimepicker({
+                    format: 'YYYY',
+                    viewMode: 'years'
+                });
+                $('#dpApplyYear_Form .input-group-prepend').css('cursor', 'pointer').off('click').on('click', function () {
+                    $('#ApplyYear_Form').focus();
+                });
+            } catch (e) { }
+        }
+
+        // 8. CKEditor
         function initCK() {
             var ckBasePath = '@Url.Content("~/Contents/Modules/Major/ckeditor4/")';
             window.CKEDITOR_BASEPATH = ckBasePath;

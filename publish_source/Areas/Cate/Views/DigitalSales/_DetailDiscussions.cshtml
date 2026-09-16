@@ -181,16 +181,21 @@
                           placeholder="Nhập nội dung trao đổi, tiến độ, báo giá, yêu cầu khách hàng... (Gõ &#64; để nhắc tên thành viên)"></textarea>
 
                 <!-- DROPDOWN AUTOCOMPLETE @@MENTION -->
-                <div id="dsMentionDropdown" class="dropdown-menu shadow-lg border-1 brc-primary-m2 py-1 ds-mention-dropdown" style="display: none;">
-                    <div class="dropdown-header text-80 font-weight-bold text-uppercase text-secondary bgc-grey-l4 py-1 px-2 border-b-1 brc-grey-l2 d-flex align-items-center justify-content-between">
-                        <span><i class="fa fa-users text-primary mr-1"></i> Nhân sự trong dự án</span>
-                        <button type="button" class="btn btn-xs btn-link text-secondary p-0 border-0" onclick="hideMentionDropdown();"><i class="fa fa-times"></i></button>
+                <div id="dsMentionDropdown" class="dropdown-menu shadow-lg border-1 brc-primary-m2 p-0 ds-mention-dropdown" style="display: none;">
+                    <div class="ds-mention-header">
+                        <span><i class="fa fa-at mr-1 text-primary"></i> Nhắc tên nhân sự trong dự án</span>
+                        <button type="button" class="btn btn-xs btn-link text-secondary p-0 border-0" onclick="hideMentionDropdown();"><i class="fa fa-times text-110"></i></button>
                     </div>
-                    <div class="p-1 border-b-1 brc-grey-l3 bgc-white">
-                        <input type="text" id="txtMentionSearch" class="form-control form-control-sm text-85" placeholder="Tìm kiếm nhân sự..." oninput="handleMentionSearchInput(this.value);" onkeydown="handleMentionSearchKeydown(event);" autocomplete="off" />
+                    <div id="boxMentionSearch" class="p-15 border-b-1 brc-grey-l3 bgc-white d-none">
+                        <input type="text" id="txtMentionSearch" class="form-control form-control-sm text-85" placeholder="Tìm kiếm theo tên nhân sự..." oninput="handleMentionSearchInput(this.value);" onkeydown="handleMentionSearchKeydown(event);" autocomplete="off" />
                     </div>
                     <div id="dsMentionList" class="ds-mention-list-scroll">
                         <!-- Danh sách nạp động qua JavaScript -->
+                    </div>
+                    <div class="ds-mention-footer">
+                        <span><kbd>↑</kbd> <kbd>↓</kbd> để chọn</span>
+                        <span><kbd>Enter</kbd> chèn</span>
+                        <span><kbd>Esc</kbd> đóng</span>
                     </div>
                 </div>
             </div>
@@ -210,7 +215,7 @@
 
             <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-t-1 brc-grey-l3 flex-wrap" style="gap: 8px;">
                 <div class="d-inline-flex align-items-center flex-wrap" style="gap: 6px;">
-                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-secondary-d2 font-600 px-25 py-1 radius-1" onclick="triggerMentionDropdown();" title="Nhắc tên nhân sự trong dự án">
+                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-secondary-d2 font-600 px-25 py-1 radius-1" onclick="triggerMentionDropdown(this);" title="Nhắc tên nhân sự trong dự án">
                         <i class="fa fa-at text-primary mr-1"></i> Nhắc tên
                     </button>
                     <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-secondary-d2 font-600 px-25 py-1 radius-1" onclick="$('#discussionFileInput').click();" title="Đính kèm một hoặc nhiều tệp">

@@ -7,10 +7,10 @@
     var titleKey = Model.SalesProductID > 0 ? "DigitalSalesProduct_Edit_Title" : "DigitalSalesProduct_Add_Title";
 }
 <div class="modal fade" id="modalProduct" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width: 80%;" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="max-width: 800px;" role="document">
         @using (Html.BeginForm("SaveProduct", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmProductModal", @class = "modal-content border-0 shadow-lg radius-2 overflow-hidden" }))
         {
-            <div class="modal-header bgc-primary-d1 text-white">
+            <div class="modal-header bgc-purple-d1 text-white">
                 <h5 class="modal-title text-110"><i class="fa fa-cubes mr-1"></i>@AppProcessor.Messagor.GetMessage(titleKey)</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>

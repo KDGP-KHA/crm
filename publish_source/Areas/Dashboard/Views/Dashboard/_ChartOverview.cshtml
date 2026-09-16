@@ -1,0 +1,122 @@
+﻿@model Core.Cate.Models.DigitalSalesDashboardOverviewModel
+
+@functions {
+    public static string FormatRevenue(decimal value)
+    {
+        if (value == 0) return "0 đ";
+        if (Math.Abs(value) >= 1000000000m)
+        {
+            return (value / 1000000000m).ToString("#,##0.##") + " tỷ đ";
+        }
+        if (Math.Abs(value) >= 1000000m)
+        {
+            return (value / 1000000m).ToString("#,##0.##") + " tr đ";
+        }
+        return value.ToString("#,##0") + " đ";
+    }
+
+    public static string FormatMillions(decimal value)
+    {
+        var mil = value / 1000000m;
+        return mil.ToString("#,##0.##") + " tr";
+    }
+
+    public static string GetStatusBorderClass(string code)
+    {
+        switch ((code ?? "").ToUpper())
+        {
+            case "UNCAPTURED": return "border-status-uncaptured";
+            case "APPROACHING": return "border-status-approaching";
+            case "FORMATION": return "border-status-formation";
+            case "IMPLEMENTING": return "border-status-implementing";
+            case "CONTRACTED": return "border-status-contracted";
+            case "COMPLETED": return "border-status-completed";
+            case "LOST": return "border-status-lost";
+            default: return "";
+        }
+    }
+}
+
+<!-- 1. HỘP TỔNG CỘNG CÁC TRẠNG THÁI (Hero Summary Card) -->
+<div class="card-total-summary">
+    <div class="total-summary-title">
+        <i class="fa fa-layer-group"></i>
+        Tổng cộng các Trạng thái Kinh doanh Dịch vụ số - Năm @Model.ApplyYear
+    </div>
+    <div class="total-metric-row">
+        <div class="total-metric-item">
+            <div class="total-metric-label">Tổng số Cơ hội & Dự án</div>
+            <div class="total-metric-val">@Model.TotalCountAll.ToString("N0") <span style="font-size: 14px; font-weight: normal;">hồ sơ</span></div>
+            <div class="total-metric-sub">Tất cả trạng thái năm @Model.ApplyYear</div>
+        </div>
+        <div class="total-metric-item">
+            <div class="total-metric-label">Tổng Doanh thu Dự kiến</div>
+            <div class="total-metric-val text-yellow">@FormatRevenue(Model.TotalExpectedRevenueAll)</div>
+            <div class="total-metric-sub">Tương đương ~@FormatMillions(Model.TotalExpectedRevenueAll) VNĐ</div>
+        </div>
+        <div class="total-metric-item">
+            <div class="total-metric-label">Tổng Doanh thu Thực hiện (Ký HĐ)</div>
+            <div class="total-metric-val text-green">@FormatRevenue(Model.TotalActualRevenueAll)</div>
+            <div class="total-metric-sub">Tương đương ~@FormatMillions(Model.TotalActualRevenueAll) VNĐ</div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. DANH SÁCH BOX TRẠNG THÁI CỦA KINH DOANH DỊCH VỤ SỐ -->
+<div class="db-section-heading">
+    <h5>
+        <i class="fa fa-th-large"></i>
+        Chi tiết theo Trạng thái hồ sơ
+    </h5>
+    <span class="text-muted text-90">Hiển thị @Model.StatusList.Count trạng thái cấu hình</span>
+</div>
+
+<div class="row">
+    @foreach (var st in Model.StatusList)
+    {
+        var borderClass = GetStatusBorderClass(st.StatusCode);
+        var typeBadge = st.BusinessType == 1 ? "Cơ hội" : "Dự án";
+        var typeBadgeClass = st.BusinessType == 1 ? "badge-info" : "badge-primary";
+
+        <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+            <div class="stat-box-card @borderClass">
+                <div>
+                    <div class="stat-box-header">
+                        <div class="stat-box-name">
+                            <span class="badge @typeBadgeClass mr-1 text-80">@typeBadge</span>
+                            @st.StatusName
+                        </div>
+                        <span class="stat-count-badge @(st.TotalCount > 0 ? "has-records" : "")">
+                            @st.TotalCount hồ sơ
+                        </span>
+                    </div>
+
+                    <div class="stat-rev-row">
+                        <span class="stat-rev-label">
+                            <i class="fa fa-chart-bar text-primary mr-1 text-85"></i>DT Dự kiến:
+                        </span>
+                        <span class="stat-rev-val text-exp" title="@st.TotalExpectedRevenue.ToString("N0") VNĐ">
+                            @FormatRevenue(st.TotalExpectedRevenue)
+                        </span>
+                    </div>
+
+                    <div class="stat-rev-row">
+                        <span class="stat-rev-label">
+                            <i class="fa fa-file-signature text-success mr-1 text-85"></i>DT Thực tế:
+                        </span>
+                        <span class="stat-rev-val text-act" title="@st.TotalActualRevenue.ToString("N0") VNĐ">
+                            @FormatRevenue(st.TotalActualRevenue)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- 3. KHU VỰC CHỜ BIỂU ĐỒ (Charts Placeholder) -->
+<div class="charts-placeholder-card">
+    <i class="fa fa-chart-pie"></i>
+    <h6>Khu vực Biểu đồ Phân tích (Charts)</h6>
+    <p>Các biểu đồ trực quan (Biểu đồ tròn tỷ trọng trạng thái, Biểu đồ cột doanh thu theo thời gian, Xu hướng chốt hợp đồng...) sẽ được tích hợp tại đây theo yêu cầu tiếp theo.</p>
+</div>

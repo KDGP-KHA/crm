@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -14,6 +14,7 @@ public static class DigitalSalesWorkflowTests
     private static int _passed = 0;
     private static int _failed = 0;
     private static string _connectionString;
+    private static string _crmRoot;
 
     public static int Main(string[] args)
     {
@@ -25,6 +26,7 @@ public static class DigitalSalesWorkflowTests
 
         var crmBin = args[0];
         _connectionString = args[1];
+        _crmRoot = Directory.GetParent(Directory.GetParent(crmBin).FullName).FullName;
 
         AppDomain.CurrentDomain.AssemblyResolve += (s, e) =>
         {
@@ -41,6 +43,7 @@ public static class DigitalSalesWorkflowTests
         try
         {
             // Set Connection String in AppDomain configuration
+            RunClientPartialRefreshTests();
             RunDirectDatabaseTests();
             RunBizWorkflowTests();
             RunEdgeCaseAndErrorHandlingTests();
@@ -68,6 +71,62 @@ public static class DigitalSalesWorkflowTests
             Console.ResetColor();
             return 1;
         }
+    }
+
+    private static void RunClientPartialRefreshTests()
+    {
+        Console.WriteLine("\n[UI AJAX] Kiểm tra tải cục bộ Quy trình và Tiến trình:");
+
+        var scriptPath = Path.Combine(
+            _crmRoot,
+            "Modules.Cate",
+            "Areas",
+            "Cate",
+            "Views",
+            "DigitalSalesWorkflow",
+            "DigitalSalesWorkflow.js");
+        var indexPath = Path.Combine(
+            _crmRoot,
+            "Modules.Cate",
+            "Areas",
+            "Cate",
+            "Views",
+            "DigitalSalesWorkflow",
+            "Index.cshtml");
+
+        var script = File.ReadAllText(scriptPath);
+        var index = File.ReadAllText(indexPath);
+
+        Assert(!script.Contains("location.reload") && !script.Contains("window.location"),
+            "Chọn Trạng thái/Quy trình không được tải lại toàn bộ trang.");
+        Assert(script.Contains("loadProcesses(state.statusId);")
+            && script.Contains("function autoSelectFirstProcess()")
+            && script.Contains("selectProcess(firstItem.data(\"id\"), firstItem[0]);"),
+            "Chọn Trạng thái tải danh sách Quy trình và tự chọn Quy trình đầu tiên.");
+        Assert(script.Contains("loadProgresses(state.processId);"),
+            "Quy trình đầu tiên tải PartialView danh sách Tiến trình.");
+        Assert(CountOccurrences(script, "global: false") >= 3,
+            "Các request PartialView phải tắt global AJAX loader và chỉ hiển thị loading trong từng cột.");
+        Assert(script.Contains("replacePartial($container, html, \"#processListItems\")")
+            && script.Contains("replacePartial($container, html, \"#progressListItems\")"),
+            "Client chỉ chấp nhận đúng markup PartialView của từng cột.");
+        Assert(script.Contains("function resetProgressColumn()")
+            && script.Contains("abortPendingRequest(\"progresses\")"),
+            "Khi đổi Trạng thái, request Tiến trình cũ phải bị hủy để không ghi đè trạng thái chờ.");
+        Assert(index.Contains("DigitalSalesWorkflow.js?v=@DateTime.Now.Ticks"),
+            "Script DigitalSalesWorkflow phải có cache-busting để client nhận phiên bản mới.");
+    }
+
+    private static int CountOccurrences(string value, string search)
+    {
+        var count = 0;
+        var startIndex = 0;
+        while ((startIndex = value.IndexOf(search, startIndex, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            startIndex += search.Length;
+        }
+        return count;
     }
 
     private static void Assert(bool condition, string testName)

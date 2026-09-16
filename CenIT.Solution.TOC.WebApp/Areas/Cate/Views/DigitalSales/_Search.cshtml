@@ -40,7 +40,14 @@
 
         <div class="position-relative status-filter-wrapper Search_Box" style="min-width: 200px;">
             <label class="font-bold text-sm-right status-label">
-                @AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Status_Label", "Trạng thái")
+                @{
+                    var statusLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Status_Label");
+                    if (string.IsNullOrWhiteSpace(statusLabel) || statusLabel == "DigitalSalesSearch_Status_Label")
+                    {
+                        statusLabel = "Trạng thái";
+                    }
+                }
+                @statusLabel
             </label>
 
             <!-- BUTTON -->
@@ -112,6 +119,27 @@
                         Đang quan tâm
                     </label>
                 </div>
+            </div>
+        </div>
+
+        <!-- 3. Bộ lọc: Năm áp dụng (Mặc định năm hiện tại) -->
+        <div class="Search_Box" style="width: 140px; min-width: 120px;">
+            @{
+                var applyYearLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_ApplyYear_Label");
+                if (string.IsNullOrWhiteSpace(applyYearLabel) || applyYearLabel == "DigitalSalesSearch_ApplyYear_Label")
+                {
+                    applyYearLabel = "Năm áp dụng";
+                }
+            }
+            <label class="font-bold text-sm-right" for="ApplyYear">@applyYearLabel</label>
+            <div>
+                <select id="ApplyYear" name="ApplyYear" class="form-control" onchange="reloadSalesTable();">
+                    <option value="">-- Tất cả --</option>
+                    @for (int y = DateTime.Now.Year + 3; y >= DateTime.Now.Year - 5; y--)
+                    {
+                        <option value="@y" @((Model.ApplyYear.HasValue ? Model.ApplyYear.Value : DateTime.Now.Year) == y ? "selected" : "")>@y</option>
+                    }
+                </select>
             </div>
         </div>
 

@@ -33,6 +33,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_CustomerTypeCache _customerTypeCache;
         private readonly RM_ProductProjectCache _productProjectCache;
         private readonly RM_BillingCyclesCache _billingCyclesCache;
+        private readonly RM_DigitalSalesCache _digitalSalesCache;
         private readonly string _folderImage = ConfigurationManager.AppSettings["AppImageRoot_Path"] ?? "/Contents/imgs";
         private readonly string _ContractsTitle = AppProcessor.Messagor.GetMessage("Contracts_Title");
 
@@ -49,6 +50,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _customerTypeCache = new RM_CustomerTypeCache();
             _productProjectCache = new RM_ProductProjectCache();
             _billingCyclesCache = new RM_BillingCyclesCache();
+            _digitalSalesCache = new RM_DigitalSalesCache();
         }
 
         private void PopulateLists(RM_ContractsModel model)
@@ -140,10 +142,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [ActionType(Type = EnumActionType.Create)]
         [HttpGet]
-        public ActionResult Add(int? id)
+        public ActionResult Add(int? id, int? digitalSalesProductId)
         {
             var model = new RM_ContractsModel();
-            if (id.HasValue)
+            if (digitalSalesProductId.GetValueOrDefault() > 0)
+            {
+                model.DigitalSalesProductID = digitalSalesProductId;
+                model.ProductProjectID = 0;
+            }
+            else if (id.HasValue)
             {
                 var productProject = _productProjectCache.GetById(id.Value);
                 if (productProject == null)
@@ -228,7 +235,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             var result = _contractsCache.Save(model, ngayNhacs, User.UserName);
             if (result > 0)
+            {
                 SaveFiles(model.DinhKemFile, result);
+                if (model.DigitalSalesProductID.GetValueOrDefault() > 0)
+                {
+                    var linked = _digitalSalesCache.LinkProductContract(model.DigitalSalesProductID.Value, result, User.UserName);
+                    if (linked <= 0)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            message = CreateMessage(_ContractsTitle, EnumProcessType.NonFormat, EnumMsgIcon.Error)
+                        });
+                    }
+                }
+            }
 
             string response;
             if (result == 0) response = CreateMessage($"{_ContractsTitle} [{model.ContractName}]", EnumProcessType.Add, EnumMsgIcon.Error);
@@ -246,11 +267,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Edit)]
-        public ActionResult Edit(int id)
+        public ActionResult Edit(int id, int? digitalSalesProductId)
         {
             var model = _contractsCache.GetById(id);
             if (model == null)
                 return Json(new { status = true, message = CreateMessage($"{_ContractsTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error) });
+            model.DigitalSalesProductID = digitalSalesProductId;
             PopulateLists(model);
             model.ExistingFiles = _contractsBiz.GetFilePaths(id);
             model.ListContractReminders = _ContractRemindersCache.GetAll(id);
@@ -327,6 +349,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (result > 0)
             {
                 SaveFiles(model.DinhKemFile, model.ContractID);
+                if (model.DigitalSalesProductID.GetValueOrDefault() > 0)
+                {
+                    // Làm mới tổng doanh thu thực tế của hồ sơ DigitalSales sau khi sửa giá trị hợp đồng.
+                    _digitalSalesCache.LinkProductContract(model.DigitalSalesProductID.Value, model.ContractID, User.UserName);
+                }
                 if (model.DeletedFileIds != null && model.DeletedFileIds.Any())
                 {
                     foreach (var fileId in model.DeletedFileIds)
@@ -369,11 +396,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Delete)]
-        public ActionResult Delete(int id)
+        public ActionResult Delete(int id, int? digitalSalesProductId)
         {
             var model = _contractsCache.GetById(id);
             if (model == null)
                 return Json(new { status = true, message = CreateMessage($"{_ContractsTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error) });
+            model.DigitalSalesProductID = digitalSalesProductId;
             ViewBag.ConfirmMessage = string.Format(AppProcessor.Messagor.GetMessage("Message_Confirm_Delete"),
                 $"{_ContractsTitle} [{model.ContractName}]");
             return PartialView("_Delete", model);

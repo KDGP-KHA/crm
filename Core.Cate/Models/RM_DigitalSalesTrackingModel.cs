@@ -36,6 +36,8 @@ namespace Core.Cate.Models
         [CustomDisplayName("DigitalSalesTracking_Deadline_Label")]
         public DateTime? Deadline { get; set; }
         public DateTime? CompletedDate { get; set; }
+        public string CompletedBy { get; set; }
+        public string CompletedByName { get; set; }
         [CustomDisplayName("DigitalSalesTracking_Status_Label")]
         public byte Status { get; set; } // 1: Chưa làm, 2: Đang làm, 3: Hoàn thành, 4: Quá hạn
         public string TaskStatusName { get; set; }
@@ -49,6 +51,11 @@ namespace Core.Cate.Models
         public bool IsCustomTask { get; set; }
         public int SortOrder { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string CreatedBy { get; set; }
+        public string CreatedByName { get; set; }
+        public DateTime? LastModifiedDate { get; set; }
+        public string LastModifiedBy { get; set; }
+        public string LastModifiedByName { get; set; }
 
         // Helper computed properties
         public int EffectiveDurationDays => DurationDays.HasValue && DurationDays.Value > 0 ? DurationDays.Value : (DefaultDurationDays > 0 ? DefaultDurationDays : 3);
@@ -65,6 +72,7 @@ namespace Core.Cate.Models
         public string StartDateStr { get; set; }
         public DateTime? StartDate { get; set; }
         public int? DurationDays { get; set; }
+        public string DeadlineStr { get; set; }
         public DateTime? Deadline { get; set; }
         public string Note { get; set; }
         public string ErrorMessage { get; set; }
@@ -81,11 +89,13 @@ namespace Core.Cate.Models
         public string TaskName { get; set; }
         public string AssignedUserName { get; set; }
         public int? AssignedUserID { get; set; }
+        public byte? Status { get; set; }
+        public string StatusStr { get; set; }
         public string StartDateStr { get; set; }
         public DateTime? StartDate { get; set; }
+        public int? DurationDays { get; set; }
         public string DeadlineStr { get; set; }
         public DateTime? Deadline { get; set; }
-        public int? DurationDays { get; set; }
         public string Note { get; set; }
         public string ErrorMessage { get; set; }
         public bool IsValid => string.IsNullOrEmpty(ErrorMessage);

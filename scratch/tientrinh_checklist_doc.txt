@@ -1,0 +1,64 @@
+P0: PHẦN 1 – TỔNG QUAN
+P2: Màn hình Checklist
+P3: Những trường hợp Insert Vào checklist
+P4: Khi chuyển trạng thái
+P8: Bấm Xác nhận chuyển thì Quy trình, Tiến trình được Thêm vào Checklist
+P10: Lưu ý: Khi chuyển trạng thái thì Những Tiến trình và Công việc con của tiến trình trong Quy trình của Trạng thái trước đó đều được đánh dấu hoàn thành. 
+P11: Thời gian hoàn thành là thời gian thực hiện Xác nhận chuyển trạng thái.
+P12: Người hoàn thành là người thực hiện Xác nhận chuyển trạng thái.
+P13: Các nội dung này được lưu vào Audit Log của Tiến trình và công việc con.
+P15: Chức năng Import danh sách Tiến trình ở button Import Tiến Trình trên dòng Quy trình của danh sách Checklist
+P16: Khi Import sẽ mở ra modal -> Trong đó có file mẫu import, ng dùng tải file về và nhập dữ liệu vào để import lên hệ thống.
+P17: Ở modal có chức năng tải file mẫu, và import file.
+P19: Khi người dùng import sẽ hiển thị danh sách các dòng import, show lỗi tập trung ở cột Thông tin lỗi (nếu có). Ở đây sẽ kiểm tra valid dữ liệu, tên bị trùng, ngày tháng không đúng định dạng, số ngày thực hiện không đúng định dạng, Người thực hiện, Ghi chú.
+P21: Có 1 nút là Xóa dữ liệu Import, Xác nhận dữ liệu Import.
+Khi xóa dữ liệu thì dữ liệu được clear.
+P22: Khi xác nhận dữ liệu thì dữ liệu được lưu và đưa vào Checklist => Đúng vào Quy trình.
+P24: Chức năng Import danh sách Công việc ở button Import Công việc trên dòng Quy trình của danh sách Checklist
+P25: Khi click thì sẽ hiển thị ra modal -> Trong đó có file mẫu import. Khi bấm tải file mẫu thì file sẽ có 2 sheet.
+Sheet 1 là Dữ liệu Công việc.
+Gồm các thông tin công việc và Mã Tiến trình
+Sheet 2 là Danh sách tiến trình của Quy trình (Có chứa cột Mã tiến trình)
+P26: Khi thực hiện Import file thì xử lý giống như bước 2.
+P29: PHẦN 2 – XỬ LÝ LIÊN QUAN QUY TRÌNH VÀ TIẾN TRÌNH
+P32: Khối các button trên dòng Quy trình
+P33: Chuyển qua phải.
+P34: Đối với nút Import Công việc -> Chỉ hiển thị khi trong Quy trình có ít nhất 1 tiến trình
+P35: Text số lượng Tiến trình cho to lên 2px nữa
+P36: Đối với dòng thông tin Tiến trình:
+P37: Các text trên row bằng với tên tiến trình.
+P38: Thao tác bổ sung thêm 1 action là Log thao tác
+P39: Khi click vào log thao tác sẽ thấy được các Log liên quan đến tiến trình đó.
+P40: Bấm vào Edit thì hiển thị modal.
+P41: Tiêu đề: Cập nhật Tiến trình
+P42: Gồm Mã Tiến trình - readonly
+P43: Tên tiến trình * – Textarea
+P44: Người thực hiện * -> Load người đc gán trước đó nếu chưa có thì không chọn ai hết. Danh sách là những người được gán trong hồ sơ kd dvs
+P45: Ngày bắt đầu * – Datepicker
+P46: Số ngày xử lý * – Textinput number
+P47: Hạn xử lý – Readonly (được tính dựa vào Ngày bắt đầu + Số ngày xử lý)
+P48: Trạng thái *
+P49: Ngày hoàn thành: Được tính dựa vào ngày cập nhật Trạng thái: Hoàn thành
+P50: Nội dung thực hiện * – Ckeditor 
+P51: Tệp đính kèm – Cho phép upload nhiều file.
+Bấm Lưu tiến trình -> Lưu thông tin hiện tại và lưa 1 dòng Log thao tác để hiển thị bên Log thao tác.
+P53: Button Xóa -> Ẩn khi Tiến trình đã hoàn thành.
+P54: Hiển thị Button Mở khóa -> Khi click vào mở khóa -> Hiển thị modal Nhập lý do Mở khóa -> Lưu log 
+P55: Sau đó hiển thị modal Edit -> Cho người dùng cập nhật lại thông tin.
+P57: PHẦN 3 – VIỆC CẬP NHẬT TRẠNG THÁI VÀ CHECKLIST THAY ĐỔI RA SAO.
+P58: Trường hợp 1: Khi 1 cơ hội mới được khởi tạo và đang ở Trạng thái: CHƯA NẮM BẮT
+P59: Checklist:
+P60: Sẽ add Trạng thái CHƯA NẮM BẮT vào Checklist
+P61: Add QUY TRÌNH vào
+P62: Trường hợp 2: Khi thay đổi Trạng thái từ A sang B
+P63: THÌ TẤT CẢ TIẾN TRÌNH và CÔNG VIỆC của TRẠNG THÁI A đều phải Hoàn Thành, lưu Log rõ ràng do ai thực hiện, thời gian nào, lý do chuyển qua TRẠNG THÁI B
+P64: Các thông tin của TRẠNG THÁI mới được add vào Checklist
+P65: Đối với những Tiến trình nằm trong danh sách khi Chuyển trạng thái mới được add vào Checklist. Ví dụ như đã xóa hết thì ko add vào nữa.
+P66: Trường hợp 3: Nếu chuyển từ A -> B -> C -> D -> B
+P67: Thì Trạng thái B lại được add mới vào checklist.
+P69: Tất cả thao tác đều phải lưu log lại liên quan đến cập nhật Chuyển trạng thái, cập nhật Tiến trình, ….
+P70: Để áp dụng xây dựng cây timeline.
+P71: Trường hợp 4: Nếu như xóa hết tiến trình trên checklist thì vẫn giữ Trạng Thái và Quy Trình, chứ ko ẩn đi. Vì người dùng có thể thêm lại danh sách tiến trình mới.
+P73: PHẦN 4 – LIÊN QUAN ĐẾN QUẢN LÝ CÔNG VIỆC TRÊN TIẾN TRÌNH
+P74: Trên mỗi dòng Tiến trình sẽ có 1 nút + Thêm mới công việc.
+P75: Thông tin công việc giống như tiến trình => Các hành động tương tự.

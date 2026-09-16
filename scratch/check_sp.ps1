@@ -1,20 +1,15 @@
-$connStr = 'Server=10.57.30.10;Database=quanlydoanhthucenit;User Id=quanlydoanhthucenit;Password=Kdhe@543HE2;TrustServerCertificate=True;'
-$conn = New-Object System.Data.SqlClient.SqlConnection($connStr)
-$conn.Open()
-$cmd = $conn.CreateCommand()
-$cmd.CommandText = 'SELECT OBJECT_DEFINITION(OBJECT_ID(''RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments''))'
-$res = $cmd.ExecuteScalar()
-if ($res) {
-    Write-Host 'SP RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments exists! Length:' $res.Length
-} else {
-    Write-Host 'SP RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments DOES NOT EXIST!'
+try {
+    $conn = New-Object System.Data.SqlClient.SqlConnection 'Data Source=10.57.30.10;Initial Catalog=quanlydoanhthucenit;Persist Security Info=True;User Id=quanlydoanhthucenit;Password=Kdhe@543HE2;Connect Timeout=5;'
+    $conn.Open()
+    Write-Host 'DB Connected successfully!'
+    $cmd = $conn.CreateCommand()
+    $cmd.CommandText = "SELECT PARAMETER_NAME, DATA_TYPE, ORDINAL_POSITION FROM INFORMATION_SCHEMA.PARAMETERS WHERE SPECIFIC_NAME = 'RM_DigitalSalesReview_GetList' ORDER BY ORDINAL_POSITION"
+    $reader = $cmd.ExecuteReader()
+    while ($reader.Read()) {
+        Write-Host ($reader['ORDINAL_POSITION'].ToString() + ' : ' + $reader['PARAMETER_NAME'] + ' (' + $reader['DATA_TYPE'] + ')')
+    }
+    $reader.Close()
+    $conn.Close()
+} catch {
+    Write-Host 'Error:' $_.Exception.Message
 }
-
-$cmd.CommandText = 'SELECT OBJECT_DEFINITION(OBJECT_ID(''RM_DigitalSales_ChangeStatus''))'
-$res2 = $cmd.ExecuteScalar()
-if ($res2) {
-    Write-Host 'RM_DigitalSales_ChangeStatus exists! Length:' $res2.Length
-    Write-Host "Contains AttachmentPath:" ($res2.Contains('@AttachmentPath'))
-}
-
-$conn.Close()

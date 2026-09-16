@@ -52,7 +52,9 @@ namespace Core.Cate.Biz
                 search.OrderDir,
                 search.StartIndex,
                 search.PageSize,
-                model.UserName) ?? new List<RM_ReviewDigitalSalesModel>();
+                model.UserName,
+                model.ProcessID,
+                model.ProgressID) ?? new List<RM_ReviewDigitalSalesModel>();
 
             total = data.Count > 0 ? Convert.ToInt32(data.First().TotalRow) : 0;
             return data;

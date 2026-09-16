@@ -220,7 +220,9 @@ CREATE PROCEDURE dbo.RM_DigitalSalesReview_GetList
     @OrderDir VARCHAR(10) = 'ASC',
     @PageIndex INT = 0,
     @PageSize INT = 10,
-    @UserName VARCHAR(150)
+    @UserName VARCHAR(150),
+    @ProcessID INT = 0,
+    @ProgressID INT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -328,6 +330,33 @@ BEGIN
           AND (@Search IS NULL OR ds.Code LIKE '%' + @Search + '%' OR ds.Title LIKE N'%' + @Search + '%' OR c.CustomerName LIKE N'%' + @Search + '%')
           AND (@BusinessType = 0 OR ds.BusinessType = @BusinessType)
           AND (@StatusID = 0 OR ds.StatusID = @StatusID)
+          AND (
+                @ProcessID = 0
+                OR EXISTS
+                (
+                    SELECT 1
+                    FROM dbo.RM_DigitalSalesTracking t
+                    WHERE t.DigitalSalesID = ds.DigitalSalesID
+                      AND (
+                            t.ProcessID = @ProcessID
+                            OR EXISTS (SELECT 1 FROM dbo.RM_DigitalSalesProgress pg WHERE pg.ProgressID = t.ProgressID AND pg.ProcessID = @ProcessID)
+                          )
+                )
+                OR (
+                    NOT EXISTS (SELECT 1 FROM dbo.RM_DigitalSalesTracking t WHERE t.DigitalSalesID = ds.DigitalSalesID AND (t.ProcessID IS NOT NULL OR t.ProgressID IS NOT NULL))
+                    AND EXISTS (SELECT 1 FROM dbo.RM_DigitalSalesProcess pr WHERE pr.ProcessID = @ProcessID AND pr.StatusID = ds.StatusID)
+                )
+              )
+          AND (
+                @ProgressID = 0
+                OR EXISTS
+                (
+                    SELECT 1
+                    FROM dbo.RM_DigitalSalesTracking t
+                    WHERE t.DigitalSalesID = ds.DigitalSalesID
+                      AND t.ProgressID = @ProgressID
+                )
+              )
           AND (@DepartmentID = 0 OR ds.DepartmentID IN (SELECT BoPhan_ID FROM DepartmentTree))
           AND (
                 @EmployeeID = 0

@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -117,6 +117,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Areas\Dashboard\Controllers\DashboardController.cs" />
+    <Compile Include="Areas\Dashboard\Controllers\ChartController.cs" />
     <Compile Include="Areas\Dashboard\Controllers\ManagerController.cs" />
     <Compile Include="Areas\Dashboard\DashboardAreaRegistration.cs" />
     <Compile Include="Areas\Dashboard\Data\MenuListModel.cs" />
@@ -149,6 +150,10 @@
     <Content Include="Areas\Dashboard\Views\Dashboard\OpportunityBySuccessRate.cshtml" />
     <Content Include="Areas\Dashboard\Views\Dashboard\ProjectByGroupService.cshtml" />
     <Content Include="Areas\Dashboard\Views\Dashboard\OpportunityByGroupService.cshtml" />
+    <Content Include="Areas\Dashboard\Views\Dashboard\Chart.cshtml" />
+    <Content Include="Areas\Dashboard\Views\Dashboard\_ChartOverview.cshtml" />
+    <Content Include="Areas\Dashboard\Views\Dashboard\Chart.css" />
+    <Content Include="Areas\Dashboard\Views\Dashboard\Chart.js" />
     <None Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

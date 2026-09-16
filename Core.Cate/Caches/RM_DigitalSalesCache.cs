@@ -1,4 +1,4 @@
-﻿using Core.Cate.Biz;
+using Core.Cate.Biz;
 using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
@@ -104,6 +104,19 @@ namespace Core.Cate.Caches
             data = Api.GetProductsBySalesID(digitalSalesId);
             AddCacheItem(rawKey, data);
             return data;
+        }
+
+        public List<RM_ContractsModel> GetProductContracts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_ContractsModel>();
+            return Api.GetProductContracts(salesProductId);
+        }
+
+        public int LinkProductContract(int salesProductId, int contractId, string username)
+        {
+            var result = Api.LinkProductContract(salesProductId, contractId, username);
+            if (result > 0) InvalidateCache();
+            return result;
         }
 
         public int SaveProduct(RM_DigitalSalesProductModel model, string username)
@@ -294,6 +307,21 @@ namespace Core.Cate.Caches
             if (GetCacheItem(rawKey) is List<RM_DigitalSalesUserModel> cached) return cached;
 
             var data = Api.GetAccessibleEmployees(userName);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data;
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        {
+            if (applyYear <= 0) applyYear = DateTime.Now.Year;
+            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear);
+            var data = GetCacheItem(rawKey) as DigitalSalesDashboardOverviewModel;
+            if (data != null) return data;
+
+            data = Api.GetDashboardStatusStats(applyYear);
             if (data != null)
             {
                 AddCacheItem(rawKey, data);

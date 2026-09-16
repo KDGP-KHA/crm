@@ -1,0 +1,367 @@
+/* ==========================================================================
+   Dashboard Chart CSS - CenIT TOC CRM
+   Tuân thủ quy chuẩn Ace Admin v4 / Bootstrap 4
+   ========================================================================== */
+
+.dashboard-chart-wrapper {
+    padding: 0 5px;
+}
+
+/* Header & Filter */
+.db-header-bar {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.db-page-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.db-page-title i {
+    color: #2563eb;
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+.db-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.db-filter-label {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: #475569;
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.db-filter-select {
+    height: 36px;
+    min-width: 130px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 4px 10px;
+    background-color: #f8fafc;
+    transition: all 0.2s ease;
+}
+
+.db-filter-select:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Tabs Styling (Ace Admin Style) */
+.db-nav-tabs {
+    border-bottom: 2px solid #e2e8f0;
+    background: transparent;
+    padding: 0;
+}
+
+.db-nav-tabs .nav-link {
+    font-weight: 600;
+    font-size: 14.5px;
+    color: #64748b;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    padding: 10px 22px;
+    margin-bottom: -2px;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.db-nav-tabs .nav-link:hover {
+    color: #1e293b;
+    border-bottom-color: #cbd5e1;
+}
+
+.db-nav-tabs .nav-link.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: #ffffff;
+    font-weight: 700;
+}
+
+.db-tab-content {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 20px;
+    min-height: 480px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+/* Section Subtitle */
+.db-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.db-section-heading h5 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.db-section-heading h5 i {
+    margin-right: 8px;
+    color: #3b82f6;
+}
+
+/* Total Summary Card (Hero Box) */
+.card-total-summary {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-total-summary::after {
+    content: "\f080";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 20px;
+    bottom: -15px;
+    font-size: 90px;
+    color: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.total-summary-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.total-summary-title i {
+    margin-right: 8px;
+    color: #60a5fa;
+}
+
+.total-metric-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 24px;
+}
+
+.total-metric-item {
+    flex: 1;
+    min-width: 160px;
+}
+
+.total-metric-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #bfdbfe;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.total-metric-val {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.total-metric-val.text-yellow {
+    color: #fef08a !important;
+}
+
+.total-metric-val.text-green {
+    color: #86efac !important;
+}
+
+.total-metric-sub {
+    font-size: 11.5px;
+    color: #dbeafe;
+    margin-top: 2px;
+}
+
+/* Status Cards Grid */
+.stat-box-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 4px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 140px;
+}
+
+.stat-box-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Status Color Classes */
+.border-status-uncaptured { border-left-color: #64748b !important; }
+.border-status-approaching { border-left-color: #0ea5e9 !important; }
+.border-status-formation { border-left-color: #f59e0b !important; }
+.border-status-implementing { border-left-color: #8b5cf6 !important; }
+.border-status-contracted { border-left-color: #10b981 !important; }
+.border-status-completed { border-left-color: #059669 !important; }
+.border-status-lost { border-left-color: #ef4444 !important; }
+
+.stat-box-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.stat-box-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+    margin-right: 8px;
+    flex: 1;
+}
+
+.stat-count-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.stat-count-badge.has-records {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+/* Revenue Rows inside card */
+.stat-rev-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    padding: 4px 0;
+    border-bottom: 1px dashed #f1f5f9;
+}
+
+.stat-rev-row:last-child {
+    border-bottom: none;
+}
+
+.stat-rev-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.stat-rev-val {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.stat-rev-val.text-exp {
+    color: #2563eb;
+}
+
+.stat-rev-val.text-act {
+    color: #16a34a;
+}
+
+/* Charts Placeholder Container */
+.charts-placeholder-card {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 36px 20px;
+    text-align: center;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+.charts-placeholder-card i {
+    font-size: 40px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+
+.charts-placeholder-card h6 {
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.charts-placeholder-card p {
+    font-size: 13px;
+    color: #64748b;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Business Plan Tab Placeholder */
+.tab-plan-placeholder {
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.tab-plan-placeholder i {
+    font-size: 44px;
+    color: #8b5cf6;
+    margin-bottom: 14px;
+}
+
+.tab-plan-placeholder h5 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.tab-plan-placeholder p {
+    font-size: 13.5px;
+    color: #64748b;
+    max-width: 550px;
+    margin: 0 auto;
+}

@@ -39,22 +39,6 @@
             </div>
 
             <div class="Search_Box">
-                @Html.TitleFor(model => model.StatusID, new { @class = "font-bold" })
-                @Html.DropDownListFor(
-                    model => model.StatusID,
-                    Model.StatusOptions,
-                    "",
-                    new
-                    {
-                        id = "ReviewDigitalSalesStatusID",
-                        @class = "form-control",
-                        data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")
-                    })
-            </div>
-        </div>
-
-        <div class="d-flex flex-wrap align-items-end search-row">
-            <div class="Search_Box">
                 @Html.TitleFor(model => model.DepartmentID, new { @class = "font-bold" })
                 @Html.DropDownListFor(
                     model => model.DepartmentID,
@@ -77,6 +61,50 @@
                     new
                     {
                         id = "ReviewDigitalSalesEmployeeID",
+                        @class = "form-control",
+                        data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")
+                    })
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-end search-row">
+            <div class="Search_Box">
+                @Html.TitleFor(model => model.StatusID, new { @class = "font-bold" })
+                @Html.DropDownListFor(
+                    model => model.StatusID,
+                    Model.StatusOptions,
+                    "",
+                    new
+                    {
+                        id = "ReviewDigitalSalesStatusID",
+                        @class = "form-control",
+                        data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")
+                    })
+            </div>
+
+            <div class="Search_Box">
+                @Html.TitleFor(model => model.ProcessID, new { @class = "font-bold" })
+                @Html.DropDownListFor(
+                    model => model.ProcessID,
+                    Model.ProcessOptions,
+                    "",
+                    new
+                    {
+                        id = "ReviewDigitalSalesProcessID",
+                        @class = "form-control",
+                        data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")
+                    })
+            </div>
+
+            <div class="Search_Box">
+                @Html.TitleFor(model => model.ProgressID, new { @class = "font-bold" })
+                @Html.DropDownListFor(
+                    model => model.ProgressID,
+                    Model.ProgressOptions,
+                    "",
+                    new
+                    {
+                        id = "ReviewDigitalSalesProgressID",
                         @class = "form-control",
                         data_placeholder = AppProcessor.Messagor.GetMessage("Combobox_Select")
                     })
@@ -107,12 +135,12 @@
 
 <script type="text/javascript">
     (function () {
-        var employeeOption = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("Combobox_Select")))';
+        var comboboxSelect = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("Combobox_Select")))';
 
         function loadReviewEmployees(selectedEmployeeID) {
             var departmentID = $('#ReviewDigitalSalesDepartmentID').val() || 0;
             var $employee = $('#ReviewDigitalSalesEmployeeID');
-            $employee.empty().append($('<option>').val('').text(employeeOption));
+            $employee.empty().append($('<option>').val('').text(comboboxSelect));
             $.get('@Url.Action("GetEmployeesByDepartment", "DigitalSales", new { area = "Cate" })', { departmentId: departmentID })
                 .done(function (data) {
                     $.each(data || [], function (_, item) {
@@ -126,21 +154,82 @@
                 });
         }
 
+        function loadReviewProcesses(selectedProcessID, selectedProgressID) {
+            var statusID = $('#ReviewDigitalSalesStatusID').val() || 0;
+            var $process = $('#ReviewDigitalSalesProcessID');
+            var $progress = $('#ReviewDigitalSalesProgressID');
+            $process.empty().append($('<option>').val('').text(comboboxSelect));
+            $progress.empty().append($('<option>').val('').text(comboboxSelect));
+
+            if (!statusID || statusID === "0") {
+                return;
+            }
+
+            $.get('@Url.Action("GetProcessesByStatus", "ReviewBatchItem", new { area = "Cate" })', { statusId: statusID })
+                .done(function (data) {
+                    $.each(data || [], function (_, item) {
+                        $process.append($('<option>').val(item.Value).text(item.Text));
+                    });
+                    if (selectedProcessID) {
+                        $process.val(selectedProcessID);
+                        loadReviewProgresses(selectedProgressID);
+                    }
+                });
+        }
+
+        function loadReviewProgresses(selectedProgressID) {
+            var processID = $('#ReviewDigitalSalesProcessID').val() || 0;
+            var $progress = $('#ReviewDigitalSalesProgressID');
+            $progress.empty().append($('<option>').val('').text(comboboxSelect));
+
+            if (!processID || processID === "0") {
+                return;
+            }
+
+            $.get('@Url.Action("GetProgressesByProcess", "ReviewBatchItem", new { area = "Cate" })', { processId: processID })
+                .done(function (data) {
+                    $.each(data || [], function (_, item) {
+                        $progress.append($('<option>').val(item.Value).text(item.Text));
+                    });
+                    if (selectedProgressID) {
+                        $progress.val(selectedProgressID);
+                    }
+                });
+        }
+
         window.loadReviewEmployees = loadReviewEmployees;
+        window.loadReviewProcesses = loadReviewProcesses;
+        window.loadReviewProgresses = loadReviewProgresses;
 
         // Lưu ý: KHÔNG truyền thẳng định danh searchReviewDigitalSales làm handler,
         // vì hàm này được định nghĩa trong ReviewBatchItem.js (nạp ở section BottomScript,
         // tức là SAU script inline này). Nếu tham chiếu trực tiếp sẽ ném ReferenceError
         // ngay khi bind, làm hỏng toàn bộ IIFE và các bind phía sau không chạy được.
         // Bọc trong hàm ẩn danh để trì hoãn việc phân giải đến lúc sự kiện thực sự xảy ra.
-        $('#ReviewDigitalSalesDepartmentID').off('change.reviewDigitalSales').on('change.reviewDigitalSales', function () {
+        $('#ReviewDigitalSalesDepartmentID').off('change.reviewDigitalSalesDept').on('change.reviewDigitalSalesDept', function () {
             loadReviewEmployees(null);
             if (typeof window.searchReviewDigitalSales === 'function') window.searchReviewDigitalSales();
         });
-        $('#SearchReviewDigitalSales').off('change.reviewDigitalSales', 'select:not(#ReviewDigitalSalesDepartmentID), input[type=radio]')
-            .on('change.reviewDigitalSales', 'select:not(#ReviewDigitalSalesDepartmentID), input[type=radio]', function () {
+
+        $('#ReviewDigitalSalesStatusID').off('change.reviewDigitalSalesStatus').on('change.reviewDigitalSalesStatus', function () {
+            loadReviewProcesses(null, null);
+            if (typeof window.searchReviewDigitalSales === 'function') window.searchReviewDigitalSales();
+        });
+
+        $('#ReviewDigitalSalesProcessID').off('change.reviewDigitalSalesProcess').on('change.reviewDigitalSalesProcess', function () {
+            loadReviewProgresses(null);
+            if (typeof window.searchReviewDigitalSales === 'function') window.searchReviewDigitalSales();
+        });
+
+        $('#ReviewDigitalSalesProgressID').off('change.reviewDigitalSalesProgress').on('change.reviewDigitalSalesProgress', function () {
+            if (typeof window.searchReviewDigitalSales === 'function') window.searchReviewDigitalSales();
+        });
+
+        $('#SearchReviewDigitalSales').off('change.reviewDigitalSales', 'select:not(#ReviewDigitalSalesDepartmentID, #ReviewDigitalSalesStatusID, #ReviewDigitalSalesProcessID, #ReviewDigitalSalesProgressID), input[type=radio]')
+            .on('change.reviewDigitalSales', 'select:not(#ReviewDigitalSalesDepartmentID, #ReviewDigitalSalesStatusID, #ReviewDigitalSalesProcessID, #ReviewDigitalSalesProgressID), input[type=radio]', function () {
                 if (typeof window.searchReviewDigitalSales === 'function') window.searchReviewDigitalSales();
             });
+
         $('#SearchReviewDigitalSales').off('keydown.reviewDigitalSales', 'input, select').on('keydown.reviewDigitalSales', 'input, select', function (event) {
             if (event.key === 'Enter') {
                 event.preventDefault();

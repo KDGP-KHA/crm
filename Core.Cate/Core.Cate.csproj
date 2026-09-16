@@ -265,6 +265,7 @@
     <Compile Include="Models\RM_DigitalSalesTrackingModel.cs" />
     <Compile Include="Models\RM_DigitalSalesProcessModel.cs" />
     <Compile Include="Models\RM_DigitalSalesProgressModel.cs" />
+    <Compile Include="Models\RM_DigitalSalesDashboardStatusModel.cs" />
     <Compile Include="Models\RM_AnniversaryTypeModel.cs" />
     <Compile Include="Models\RM_BusinessOpportunityModel.cs" />
     <Compile Include="Models\RM_BusinessOpportunityOverviewModel.cs" />

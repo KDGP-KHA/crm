@@ -102,6 +102,9 @@
     <Procedure Name="RM_Contracts_Delete" Value="RM_Contracts_Delete" />
     <Procedure Name="RM_Contracts_GetByProjectID" Value="RM_Contracts_GetByProjectID" />
 	<Procedure Name="RM_Contracts_GetByProductProjectID" Value="RM_Contracts_GetByProductProjectID" />
+	<Procedure Name="RM_DigitalSalesProductContract_GetByProductID" Value="RM_DigitalSalesProductContract_GetByProductID" />
+	<Procedure Name="RM_DigitalSalesProductContract_Link" Value="RM_DigitalSalesProductContract_Link" />
+	<Procedure Name="RM_DigitalSalesProductContract_Unlink" Value="RM_DigitalSalesProductContract_Unlink" />
 
 		<!--RM_ExchangeHistory-->
     <Procedure Name="RM_ExchangeHistory_Save" Value="RM_ExchangeHistory_Save" />
@@ -400,6 +403,10 @@
 		<Procedure Name="RM_DigitalSalesProduct_GetBySalesID" Value="RM_DigitalSalesProduct_GetBySalesID" />
 		<Procedure Name="RM_DigitalSalesProduct_Save" Value="RM_DigitalSalesProduct_Save" />
 		<Procedure Name="RM_DigitalSalesProduct_Delete" Value="RM_DigitalSalesProduct_Delete" />
+		<Procedure Name="RM_DigitalSalesProduct_SaveDetail" Value="RM_DigitalSalesProduct_SaveDetail" />
+		<Procedure Name="RM_DigitalSalesProductCost_GetByProductID" Value="RM_DigitalSalesProductCost_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductRevenue_GetByProductID" Value="RM_DigitalSalesProductRevenue_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductMember_GetByProductID" Value="RM_DigitalSalesProductMember_GetByProductID" />
 
 		<!-- RM_DigitalSalesMember -->
 		<Procedure Name="RM_DigitalSalesMember_GetBySalesID" Value="RM_DigitalSalesMember_GetBySalesID" />

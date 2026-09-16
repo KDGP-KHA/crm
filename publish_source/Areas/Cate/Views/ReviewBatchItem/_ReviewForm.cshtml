@@ -99,17 +99,8 @@
         editor = CKEDITOR.replace('ReviewComment', {
             filebrowserWindowWidth: '1000',
             filebrowserWindowHeight: '350',
-            // Vùng soạn thảo thấp để toàn bộ form rà soát vừa một màn hình
-            height: 210,
-            toolbar: [
-                { name: 'clipboard', items: ['Undo', 'Redo'] },
-                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'RemoveFormat'] },
-                { name: 'paragraph', items: ['NumberedList', 'BulletedList', 'Outdent', 'Indent', 'JustifyLeft', 'JustifyCenter', 'JustifyRight'] },
-                { name: 'links', items: ['Link', 'Unlink'] },
-                { name: 'insert', items: ['Image', 'Table'] },
-                { name: 'styles', items: ['Format'] },
-                { name: 'tools', items: ['Maximize'] }
-            ],
+            // Modal không còn làm co giao diện chi tiết, dùng lại đầy đủ công cụ CKEditor.
+            height: 260
         });
         editor.on('change', function (e) {
             $("#ReviewComment").val(editor.getData());

@@ -23,6 +23,8 @@ namespace Core.Cate.Biz
         private readonly string _spProductCostGetByProductID = "RM_DigitalSalesProductCost_GetByProductID";
         private readonly string _spProductRevenueGetByProductID = "RM_DigitalSalesProductRevenue_GetByProductID";
         private readonly string _spProductMemberGetByProductID = "RM_DigitalSalesProductMember_GetByProductID";
+        private readonly string _spProductContractGetByProductID = "RM_DigitalSalesProductContract_GetByProductID";
+        private readonly string _spProductContractLink = "RM_DigitalSalesProductContract_Link";
         private readonly string _spChangeStatus = "RM_DigitalSales_ChangeStatus";
         private readonly string _spTrackingGetBySalesID = "RM_DigitalSalesTracking_GetBySalesID";
         private readonly string _spTrackingSave = "RM_DigitalSalesTracking_Save";
@@ -42,6 +44,27 @@ namespace Core.Cate.Biz
         private readonly string _spActivityUpdateLatestStatusChange = "RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments";
         private readonly string _spGetDepartmentByUserID = "RM_DigitalSales_GetDepartmentByUserID";
         private readonly string _spGetAccessibleEmployees = "RM_DigitalSales_GetAccessibleEmployees";
+        private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        {
+            if (applyYear <= 0) applyYear = DateTime.Now.Year;
+
+            var list = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesDashboardStatusModel>(
+                _spGetDashboardStatusStats,
+                DATA_PROVIDER_NAME,
+                applyYear
+            ) ?? new List<RM_DigitalSalesDashboardStatusModel>();
+
+            return new DigitalSalesDashboardOverviewModel
+            {
+                ApplyYear = applyYear,
+                StatusList = list,
+                TotalCountAll = list.Sum(x => x.TotalCount),
+                TotalExpectedRevenueAll = list.Sum(x => x.TotalExpectedRevenue),
+                TotalActualRevenueAll = list.Sum(x => x.TotalActualRevenue)
+            };
+        }
 
         public List<RM_DigitalSalesModel> LoadList(out int total, RM_DigitalSalesSearchModel model)
         {
@@ -78,7 +101,8 @@ namespace Core.Cate.Biz
                 model.UserName,
                 model.IsKeyProject.HasValue && model.IsKeyProject.Value ? 1 : 0,
                 model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0,
-                string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim()
+                string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim(),
+                model.ApplyYear.GetValueOrDefault(0)
             );
 
             if (data != null && data.Count > 0)
@@ -100,11 +124,46 @@ namespace Core.Cate.Biz
             var model = AppProcessor.ProcedureProvider.ExecuteScalarObject<RM_DigitalSalesModel>(_spGetByID, DATA_PROVIDER_NAME, id, userName);
             if (model != null)
             {
-                try { model.Products = GetProductsBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Products = new List<RM_DigitalSalesProductModel>(); }
+                try
+                {
+                    model.Products = GetProductsBySalesID(id);
+                    // Giá trị hợp đồng được nhập theo triệu VNĐ; TotalActualRevenue của hồ sơ dùng VNĐ.
+                    model.TotalActualRevenue = model.Products.Sum(item => item.ContractRevenueMillion) * 1000000m;
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                    model.Products = new List<RM_DigitalSalesProductModel>();
+                }
                 try { model.Members = GetMembersBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Members = new List<RM_DigitalSalesMemberModel>(); }
                 try { model.TrackingTasks = GetTrackingTasks(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.TrackingTasks = new List<RM_DigitalSalesTrackingModel>(); }
                 try { model.Timelines = GetTimeline(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Timelines = new List<RM_DigitalSalesTimelineModel>(); }
                 try { model.Activities = GetActivitiesBySalesID(id); } catch (Exception ex) { AppProcessor.Logger.Error(ex); model.Activities = new List<RM_DigitalSalesActivityModel>(); }
+                try { EnsureCurrentStatusTrackingPlaceholder(model); } catch (Exception ex) { AppProcessor.Logger.Error(ex); }
+                try
+                {
+                    var connStr = System.Configuration.ConfigurationManager.ConnectionStrings["TOC.Conn.Major"]?.ConnectionString;
+                    if (!string.IsNullOrEmpty(connStr))
+                    {
+                        using (var conn = new System.Data.SqlClient.SqlConnection(connStr))
+                        using (var cmd = new System.Data.SqlClient.SqlCommand("SELECT ApplyYear FROM dbo.RM_DigitalSales WHERE DigitalSalesID = @id", conn))
+                        {
+                            cmd.Parameters.AddWithValue("@id", id);
+                            conn.Open();
+                            var val = cmd.ExecuteScalar();
+                            if (val != null && val != DBNull.Value)
+                            {
+                                model.ApplyYear = Convert.ToInt32(val);
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                if (!model.ApplyYear.HasValue || model.ApplyYear.Value <= 0)
+                {
+                    model.ApplyYear = model.CreatedDate.Year > 1900 ? model.CreatedDate.Year : DateTime.Now.Year;
+                }
             }
             return model;
         }
@@ -215,7 +274,8 @@ namespace Core.Cate.Biz
                 model.DepartmentID,
                 model.Note,
                 model.FileAttach,
-                username
+                username,
+                model.ApplyYear.HasValue && model.ApplyYear.Value > 0 ? model.ApplyYear.Value : DateTime.Now.Year
             );
 
             return result.GetValueOrDefault(0);
@@ -229,7 +289,49 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 digitalSalesId
             );
-            return data ?? new List<RM_DigitalSalesProductModel>();
+            data = data ?? new List<RM_DigitalSalesProductModel>();
+            foreach (var product in data)
+            {
+                try
+                {
+                    product.Contracts = GetProductContracts(product.SalesProductID);
+                    product.ContractCount = product.Contracts.Count;
+                    // Contract TotalAmount is already stored in million VND, matching the product summary unit.
+                    product.ContractRevenueMillion = product.Contracts.Sum(item => Convert.ToDecimal(item.TotalAmount > 0 ? item.TotalAmount : item.ContractValue));
+                    product.ActualRevenue = product.ContractRevenueMillion * 1000000m;
+                }
+                catch (Exception ex)
+                {
+                    // A missing or not-yet-registered contract procedure must not hide the product list.
+                    AppProcessor.Logger.Error(ex);
+                    product.Contracts = new List<RM_ContractsModel>();
+                    product.ContractCount = 0;
+                    product.ContractRevenueMillion = 0m;
+                }
+            }
+            return data;
+        }
+
+        public List<RM_ContractsModel> GetProductContracts(int salesProductId)
+        {
+            if (salesProductId <= 0) return new List<RM_ContractsModel>();
+            return AppProcessor.ProcedureProvider.ExecuteTypedList<RM_ContractsModel>(
+                _spProductContractGetByProductID,
+                DATA_PROVIDER_NAME,
+                salesProductId
+            ) ?? new List<RM_ContractsModel>();
+        }
+
+        public int LinkProductContract(int salesProductId, int contractId, string username)
+        {
+            if (salesProductId <= 0 || contractId <= 0) return 0;
+            return AppProcessor.ProcedureProvider.Execute(
+                _spProductContractLink,
+                DATA_PROVIDER_NAME,
+                salesProductId,
+                contractId,
+                username
+            ).GetValueOrDefault(0);
         }
 
         public int SaveProduct(RM_DigitalSalesProductModel model, string username)
@@ -371,6 +473,108 @@ namespace Core.Cate.Biz
             return result.GetValueOrDefault(0);
         }
 
+        public void EnsureCurrentStatusTrackingPlaceholder(RM_DigitalSalesModel model)
+        {
+            if (model == null || model.DigitalSalesID <= 0) return;
+            if (model.TrackingTasks == null) model.TrackingTasks = new List<RM_DigitalSalesTrackingModel>();
+
+            var workflowBiz = new RM_DigitalSalesWorkflowBiz();
+
+            // 1. Duyệt toàn bộ các mốc chuyển trạng thái trong lịch sử Timelines
+            // Nếu một trạng thái từng được chuyển tới nhưng không có tiến trình nào (0 tiến trình),
+            // bắt buộc phải giữ lại placeholder cho mốc TimelineID đó để không bị biến mất khỏi Checklist!
+            if (model.Timelines != null && model.Timelines.Count > 0)
+            {
+                var transitions = model.Timelines
+                    .Where(tl => tl.ToStatusID > 0 && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderBy(tl => tl.ActionDate).ThenBy(tl => tl.TimelineID)
+                    .ToList();
+                var validTimelineIds = new HashSet<int>(transitions.Select(tl => tl.TimelineID));
+
+                // Chuẩn hóa TimelineID cho tất cả các tiến trình hiện tại:
+                // Nếu 1 task có TimelineID là null hoặc trỏ vào timeline không phải chuyển trạng thái,
+                // thì tự động map lại vào TimelineID chuyển trạng thái hợp lệ gần nhất của Status đó.
+                foreach (var t in model.TrackingTasks)
+                {
+                    if (t.StatusID.HasValue && t.StatusID.Value > 0)
+                    {
+                        if (!t.TimelineID.HasValue || !validTimelineIds.Contains(t.TimelineID.Value))
+                        {
+                            var matchingTl = transitions.Where(tl => tl.ToStatusID == t.StatusID.Value).LastOrDefault();
+                            if (matchingTl != null)
+                            {
+                                t.TimelineID = matchingTl.TimelineID;
+                            }
+                        }
+                    }
+                }
+
+                foreach (var tl in transitions)
+                {
+                    bool hasTaskForTimeline = model.TrackingTasks.Any(t => t.TimelineID == tl.TimelineID);
+                    if (!hasTaskForTimeline)
+                    {
+                        int totalProcs = 0;
+                        var procs = workflowBiz.GetProcesses(out totalProcs, statusId: tl.ToStatusID);
+                        var activeProcs = procs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                        var defaultProc = activeProcs?.FirstOrDefault();
+
+                        var placeholder = new RM_DigitalSalesTrackingModel
+                        {
+                            TrackingID = 0,
+                            DigitalSalesID = model.DigitalSalesID,
+                            ParentID = null,
+                            ProcessID = defaultProc?.ProcessID ?? 0,
+                            ProcessName = defaultProc?.ProcessName ?? "Quy trình thực hiện",
+                            StatusID = tl.ToStatusID,
+                            SalesStatusName = !string.IsNullOrEmpty(tl.ToStatusName) ? tl.ToStatusName : "Trạng thái",
+                            ProcessCountOfStatus = activeProcs?.Count ?? 0,
+                            ProgressID = null,
+                            TaskName = null,
+                            Status = 1,
+                            TimelineID = tl.TimelineID
+                        };
+                        model.TrackingTasks.Add(placeholder);
+                    }
+                }
+
+                // Xóa placeholder rỗng nếu đã có tiến trình thực tế cùng TimelineID
+                var timelineWithRealTasks = new HashSet<int>(model.TrackingTasks.Where(t => !string.IsNullOrWhiteSpace(t.TaskName) && t.TimelineID.HasValue).Select(t => t.TimelineID.Value));
+                model.TrackingTasks.RemoveAll(t => t.TrackingID == 0 && string.IsNullOrWhiteSpace(t.TaskName) && t.TimelineID.HasValue && timelineWithRealTasks.Contains(t.TimelineID.Value));
+            }
+
+            // 2. Đồng thời kiểm tra trạng thái hiện tại (model.StatusID) nếu chưa có trong TrackingTasks
+            if (model.StatusID > 0 && !model.TrackingTasks.Any(t => t.StatusID == model.StatusID))
+            {
+                int totalProcs = 0;
+                var procs = workflowBiz.GetProcesses(out totalProcs, statusId: model.StatusID);
+                var activeProcs = procs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
+                var defaultProc = activeProcs?.FirstOrDefault();
+
+                int? latestTimelineId = model.Timelines?
+                    .Where(tl => tl.ToStatusID == model.StatusID && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                    .FirstOrDefault()?.TimelineID;
+
+                var placeholder = new RM_DigitalSalesTrackingModel
+                {
+                    TrackingID = 0,
+                    DigitalSalesID = model.DigitalSalesID,
+                    ParentID = null,
+                    ProcessID = defaultProc?.ProcessID ?? 0,
+                    ProcessName = defaultProc?.ProcessName ?? "Quy trình thực hiện",
+                    StatusID = model.StatusID,
+                    SalesStatusName = !string.IsNullOrEmpty(model.StatusName) ? model.StatusName : "Trạng thái",
+                    ProcessCountOfStatus = activeProcs?.Count ?? 0,
+                    ProgressID = null,
+                    TaskName = null,
+                    Status = 1,
+                    TimelineID = latestTimelineId
+                };
+                model.TrackingTasks.Add(placeholder);
+            }
+        }
+
         public List<RM_DigitalSalesTrackingModel> GetTrackingTasks(int digitalSalesId)
         {
             if (digitalSalesId <= 0) return new List<RM_DigitalSalesTrackingModel>();
@@ -415,7 +619,10 @@ namespace Core.Cate.Biz
                 try
                 {
                     var existingTasks = GetTrackingTasks(model.DigitalSalesID);
-                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value && (!t.ParentID.HasValue || t.ParentID.Value <= 0) && string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                    var emptyPlaceholders = existingTasks.Where(t => t.ProcessID == model.ProcessID.Value 
+                        && (!t.ParentID.HasValue || t.ParentID.Value <= 0) 
+                        && string.IsNullOrWhiteSpace(t.TaskName)
+                        && (!model.TimelineID.HasValue || t.TimelineID == model.TimelineID.Value)).ToList();
                     foreach (var ep in emptyPlaceholders)
                     {
                         DeleteTracking(ep.TrackingID, username);
@@ -457,6 +664,16 @@ namespace Core.Cate.Biz
 
             var currentTasks = GetTrackingTasks(digitalSalesId);
             var oldTasks = currentTasks.Where(t => t.StatusID == statusId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+            int? currentTimelineId = oldTasks.FirstOrDefault(t => t.TimelineID.HasValue)?.TimelineID;
+            if (!currentTimelineId.HasValue)
+            {
+                var sales = GetByID(digitalSalesId, username);
+                currentTimelineId = sales?.Timelines?
+                    .Where(tl => tl.ToStatusID == statusId && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                    .FirstOrDefault()?.TimelineID;
+            }
+
             foreach (var ot in oldTasks)
             {
                 DeleteTracking(ot.TrackingID, username);
@@ -482,7 +699,8 @@ namespace Core.Cate.Biz
                         Deadline = DateTime.Now.AddDays(duration),
                         Status = 1,
                         IsCustomTask = false,
-                        SortOrder = sort++
+                        SortOrder = sort++,
+                        TimelineID = currentTimelineId
                     };
                     SaveTracking(task, username);
                 }
@@ -504,7 +722,8 @@ namespace Core.Cate.Biz
                     Deadline = DateTime.Now.AddDays(3),
                     Status = 1,
                     IsCustomTask = true,
-                    SortOrder = 1
+                    SortOrder = 1,
+                    TimelineID = currentTimelineId
                 };
                 SaveTracking(emptyTask, username);
             }
@@ -720,7 +939,22 @@ namespace Core.Cate.Biz
 
             if (list != null && list.Count > 0)
             {
-                list = list.Where(a => a.ReferenceID == trackingId).OrderByDescending(a => a.ActionDate).ToList();
+                var targetIds = new HashSet<int> { trackingId };
+                try
+                {
+                    var allTasks = GetTrackingTasks(digitalSalesId);
+                    var parentTask = allTasks.FirstOrDefault(t => t.TrackingID == trackingId);
+                    if (parentTask != null && parentTask.TodoList != null && parentTask.TodoList.Count > 0)
+                    {
+                        foreach (var child in parentTask.TodoList)
+                        {
+                            targetIds.Add(child.TrackingID);
+                        }
+                    }
+                }
+                catch { }
+
+                list = list.Where(a => a.ReferenceID.HasValue && targetIds.Contains(a.ReferenceID.Value)).OrderByDescending(a => a.ActionDate).ToList();
 
                 foreach (var item in list)
                 {

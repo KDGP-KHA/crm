@@ -44,6 +44,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_DigitalSalesWorkflowCache _workflowCache;
 
         private string _title => AppProcessor.Messagor.GetMessage("DigitalSales_Title");
+        private string CurrentUserName => User?.UserName ?? (User?.Identity?.Name ?? (HttpContext?.User?.Identity?.Name ?? ""));
         private readonly string _folderUpload = "/Contents/Uploads/DigitalSales";
         private string GetAppMessage(string labelKey, string defaultMessage = null)
         {
@@ -184,7 +185,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpGet]
         public ActionResult Export(string keyword, byte? businessType, int? statusID,
                                    int? departmentID, int? employeeID, string fromDate, string toDate, int? customerID,
-                                   bool? isKeyProject, bool? isFollowed, string statusIDs = null)
+                                   bool? isKeyProject, bool? isFollowed, string statusIDs = null, int? applyYear = null)
         {
             var searchModel = new RM_DigitalSalesSearchModel
             {
@@ -199,6 +200,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 CustomerID = customerID.GetValueOrDefault(0),
                 IsKeyProject = isKeyProject,
                 IsFollowed = isFollowed,
+                ApplyYear = applyYear,
                 PageNumber = 1,
                 PageSize = 999999,
                 UserName = User.UserName
@@ -339,26 +341,51 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [ActionType(Type = EnumActionType.Create)]
         public ActionResult Add(int? customerId, byte? businessType)
         {
-            var model = new RM_DigitalSalesModel
+            try
             {
-                Code = _salesCache.GenerateNextCode(),
-                BusinessType = businessType ?? 1,
-                StatusID = 1, // Default: Business status 1
-                CustomerID = customerId.GetValueOrDefault(0),
-                StartDate = DateTime.Today,
-                ExpectedDate = DateTime.Today.AddMonths(1),
-                ClosingProbability = 50
-            };
+                var model = new RM_DigitalSalesModel
+                {
+                    Code = _salesCache.GenerateNextCode(),
+                    BusinessType = businessType ?? 1,
+                    StatusID = 1, // Default: Business status 1
+                    CustomerID = customerId.GetValueOrDefault(0),
+                    StartDate = DateTime.Today,
+                    ExpectedDate = DateTime.Today.AddMonths(1),
+                    ClosingProbability = 50,
+                    ApplyYear = DateTime.Today.Year
+                };
 
-            var currentUser = _userCache.GetByUserName(User.UserName);
-            if (currentUser != null)
-            {
-                model.AssignedEmployeeID = currentUser.UserId;
-                model.DepartmentID = GetDepartmentIdByUserId(currentUser.UserId);
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var currentUser = _userCache.GetByUserName(uName);
+                    if (currentUser != null)
+                    {
+                        model.AssignedEmployeeID = currentUser.UserId;
+                        model.DepartmentID = GetDepartmentIdByUserId(currentUser.UserId);
+                    }
+                }
+
+                PrepareSalesDropdowns(model);
+                return PartialView("_Add", model);
             }
-
-            PrepareSalesDropdowns(model);
-            return PartialView("_Add", model);
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                var fallbackModel = new RM_DigitalSalesModel
+                {
+                    Code = "SPDV-" + DateTime.Now.Year + "-0001",
+                    BusinessType = businessType ?? 1,
+                    StatusID = 1,
+                    CustomerID = customerId.GetValueOrDefault(0),
+                    StartDate = DateTime.Today,
+                    ExpectedDate = DateTime.Today.AddMonths(1),
+                    ClosingProbability = 50,
+                    ApplyYear = DateTime.Now.Year
+                };
+                try { PrepareSalesDropdowns(fallbackModel); } catch { }
+                return PartialView("_Add", fallbackModel);
+            }
         }
 
         [AjaxOnly]
@@ -486,6 +513,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     status = false,
                     message = CreateMessage(_title, EnumProcessType.DataNotExist, EnumMsgIcon.Error)
                 }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (!model.ApplyYear.HasValue || model.ApplyYear.Value <= 0)
+            {
+                model.ApplyYear = model.CreatedDate.Year > 1900 ? model.CreatedDate.Year : DateTime.Today.Year;
             }
 
             model.Note = FormatHtmlContent(model.Note);
@@ -1660,6 +1692,40 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                             _salesCache.SaveTracking(trackingModel, User.UserName);
                         }
+                    }
+                    else
+                    {
+                        // QUAN TRỌNG: Khi chuyển trạng thái mà trạng thái đó KHÔNG có tiến trình nào (0 tiến trình)
+                        // Bắt buộc phải lưu 1 placeholder rỗng (TaskName = null) gắn với TimelineID mới này vào dbo.RM_DigitalSalesTracking!
+                        // Nhờ vậy, khi tiếp tục chuyển sang các trạng thái sau, trạng thái 0 tiến trình này
+                        // vẫn được lưu trữ vĩnh viễn trong CSDL và hiển thị đầy đủ trên cây Checklist theo lịch sử!
+                        int? defaultProcId = model.SelectedProcessID;
+                        if (!defaultProcId.HasValue || defaultProcId.Value <= 0)
+                        {
+                            int totalDefaultProcs = 0;
+                            var defaultProc = _workflowCache.GetProcesses(out totalDefaultProcs, statusId: model.NewStatusID)?.FirstOrDefault(p => p.IsActive);
+                            if (defaultProc != null) defaultProcId = defaultProc.ProcessID;
+                        }
+
+                        var emptyPlaceholder = new RM_DigitalSalesTrackingModel
+                        {
+                            TrackingID = 0,
+                            DigitalSalesID = model.DigitalSalesID,
+                            TimelineID = newTimelineId,
+                            ProcessID = defaultProcId ?? 0,
+                            ProgressID = null,
+                            TaskName = null,
+                            AssignedUserID = null,
+                            StartDate = DateTime.Today,
+                            DurationDays = 3,
+                            Deadline = null,
+                            Status = 1,
+                            IsCustomTask = false,
+                            SortOrder = 1,
+                            ResultNote = null,
+                            AttachmentFile = null
+                        };
+                        _salesCache.SaveTracking(emptyPlaceholder, User.UserName);
                     }
                 }
                 catch (Exception ex)
@@ -2884,11 +2950,27 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult AddTrackingModal(int digitalSalesId, int? processId = null)
+        public ActionResult AddTrackingModal(int digitalSalesId, int? processId = null, int? timelineId = null)
         {
             if (!HasDetailPermission(digitalSalesId, User.UserName))
             {
                 return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            if (!timelineId.HasValue || timelineId.Value <= 0)
+            {
+                var sales = _salesCache.GetByID(digitalSalesId, User.UserName);
+                int targetStatusId = sales?.StatusID ?? 0;
+                if (processId.HasValue && processId.Value > 0)
+                {
+                    var proc = _workflowCache.GetProcessByID(processId.Value);
+                    if (proc != null && proc.StatusID > 0) targetStatusId = proc.StatusID;
+                }
+                var curTl = sales?.Timelines?
+                    .Where(tl => tl.ToStatusID == targetStatusId && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                    .FirstOrDefault();
+                if (curTl != null) timelineId = curTl.TimelineID;
             }
 
             var model = new RM_DigitalSalesTrackingModel
@@ -2898,7 +2980,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 StartDate = DateTime.Today,
                 Deadline = DateTime.Today.AddDays(3),
                 Status = 1,
-                IsCustomTask = true
+                IsCustomTask = true,
+                TimelineID = timelineId
             };
 
             if (processId.HasValue && processId.Value > 0)
@@ -3024,6 +3107,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var isNew = model.TrackingID <= 0;
+            if (isNew && (!model.TimelineID.HasValue || model.TimelineID.Value <= 0))
+            {
+                var sales = _salesCache.GetByID(model.DigitalSalesID, User.UserName);
+                int targetStatusId = sales?.StatusID ?? 0;
+                if (model.ProcessID.HasValue && model.ProcessID.Value > 0)
+                {
+                    var proc = _workflowCache.GetProcessByID(model.ProcessID.Value);
+                    if (proc != null && proc.StatusID > 0) targetStatusId = proc.StatusID;
+                }
+                var curTl = sales?.Timelines?
+                    .Where(tl => tl.ToStatusID == targetStatusId && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                    .FirstOrDefault();
+                if (curTl != null) model.TimelineID = curTl.TimelineID;
+            }
             var id = _salesCache.SaveTracking(model, User.UserName);
             if (id > 0)
             {
@@ -3121,6 +3219,206 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_UpdateTaskFail") });
         }
 
+        private List<TimelineAttachmentFileItem> ParseAttachmentFiles(string rawFiles, string uploadedBy = null, DateTime? uploadedDate = null)
+        {
+            var list = new List<TimelineAttachmentFileItem>();
+            if (string.IsNullOrWhiteSpace(rawFiles)) return list;
+            var parts = rawFiles.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var p in parts)
+            {
+                var trimmed = p.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+                list.Add(new TimelineAttachmentFileItem
+                {
+                    FilePath = trimmed,
+                    FileName = System.IO.Path.GetFileName(trimmed),
+                    UploadedBy = uploadedBy,
+                    UploadedDate = uploadedDate
+                });
+            }
+            return list;
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        public ActionResult StatusTimelineModal(int digitalSalesId)
+        {
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var sales = _salesCache.GetByID(digitalSalesId);
+            if (sales == null)
+            {
+                return Content("<div class='alert alert-danger m-3'><i class='fa fa-exclamation-triangle'></i> Không tìm thấy thông tin cơ hội / dự án!</div>");
+            }
+
+            var rawTimelines = _salesCache.GetTimeline(digitalSalesId) ?? new List<RM_DigitalSalesTimelineModel>();
+
+            var statusTransitions = rawTimelines
+                .Where(tl => tl.ToStatusID > 0 && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                .OrderByDescending(tl => tl.ActionDate)
+                .ThenByDescending(tl => tl.TimelineID)
+                .ToList();
+
+            if (statusTransitions.Count == 0 && sales.StatusID > 0)
+            {
+                statusTransitions.Add(new RM_DigitalSalesTimelineModel
+                {
+                    TimelineID = 0,
+                    DigitalSalesID = digitalSalesId,
+                    ToStatusID = sales.StatusID,
+                    ToStatusName = sales.StatusName,
+                    ToBusinessType = sales.BusinessType,
+                    ToBusinessTypeName = sales.BusinessTypeName,
+                    ActionDate = sales.CreatedDate,
+                    ActionBy = sales.CreatedBy,
+                    ActionByName = sales.CreatedByName,
+                    Note = sales.Note
+                });
+            }
+
+            // Đảm bảo tên người thực hiện chuyển trạng thái luôn có FullName chuẩn xác từ SysUserCache
+            foreach (var tl in statusTransitions)
+            {
+                if (string.IsNullOrWhiteSpace(tl.ActionByName) && !string.IsNullOrWhiteSpace(tl.ActionBy))
+                {
+                    try
+                    {
+                        var u = _userCache.GetByUserName(tl.ActionBy);
+                        if (u != null && !string.IsNullOrWhiteSpace(u.FullName))
+                        {
+                            tl.ActionByName = u.FullName;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AppProcessor.Logger.Error(ex);
+                    }
+                }
+            }
+
+            ViewBag.DigitalSalesID = digitalSalesId;
+            ViewBag.DigitalSalesCode = sales.Code;
+            ViewBag.DigitalSalesName = sales.Title;
+
+            return PartialView("_StatusTimelineModal", statusTransitions);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        public ActionResult StatusTimelineDetailModal(int digitalSalesId, int timelineId)
+        {
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var sales = _salesCache.GetByID(digitalSalesId);
+            if (sales == null)
+            {
+                return Content("<div class='alert alert-danger m-3'><i class='fa fa-exclamation-triangle'></i> Không tìm thấy thông tin cơ hội / dự án!</div>");
+            }
+
+            List<RM_DigitalSalesTimelineModel> timelines = sales.Timelines ?? _salesCache.GetTimeline(digitalSalesId) ?? new List<RM_DigitalSalesTimelineModel>();
+            var timeline = timelines.FirstOrDefault(tl => tl.TimelineID == timelineId);
+            if (timeline == null && timelines.Count > 0)
+            {
+                timeline = timelines.OrderByDescending(tl => tl.ActionDate).FirstOrDefault();
+            }
+            if (timeline == null)
+            {
+                timeline = new RM_DigitalSalesTimelineModel
+                {
+                    TimelineID = 0,
+                    DigitalSalesID = digitalSalesId,
+                    ToStatusID = sales.StatusID,
+                    ToStatusName = sales.StatusName,
+                    ToBusinessType = sales.BusinessType,
+                    ToBusinessTypeName = sales.BusinessTypeName,
+                    ActionDate = sales.CreatedDate,
+                    ActionBy = sales.CreatedBy,
+                    ActionByName = sales.CreatedByName,
+                    Note = sales.Note
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(timeline.ActionByName) && !string.IsNullOrWhiteSpace(timeline.ActionBy))
+            {
+                try
+                {
+                    var u = _userCache.GetByUserName(timeline.ActionBy);
+                    if (u != null && !string.IsNullOrWhiteSpace(u.FullName))
+                    {
+                        timeline.ActionByName = u.FullName;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+            }
+
+            var allTasks = sales.TrackingTasks ?? new List<RM_DigitalSalesTrackingModel>();
+
+            var matchingTasks = allTasks
+                .Where(t => (!t.ParentID.HasValue || t.ParentID.Value <= 0)
+                         && !string.IsNullOrWhiteSpace(t.TaskName)
+                         && (t.TimelineID == timeline.TimelineID || (timeline.TimelineID == 0 && t.StatusID == timeline.ToStatusID) || (!t.TimelineID.HasValue && t.StatusID == timeline.ToStatusID)))
+                .OrderBy(t => t.StartDate)
+                .ThenBy(t => t.MaxDeadline)
+                .ThenBy(t => t.SortOrder)
+                .ThenBy(t => t.TrackingID)
+                .ToList();
+
+            var vm = new RM_DigitalSalesTimelineDetailViewModel
+            {
+                DigitalSalesID = digitalSalesId,
+                SalesCode = sales.Code,
+                SalesTitle = sales.Title,
+                DigitalSalesCode = sales.Code,
+                DigitalSalesName = sales.Title,
+                Timeline = timeline,
+                Tasks = matchingTasks
+            };
+
+            if (!string.IsNullOrWhiteSpace(timeline.AttachmentPath))
+            {
+                vm.TransitionFiles = ParseAttachmentFiles(timeline.AttachmentPath, timeline.ActionByName ?? timeline.ActionBy, timeline.ActionDate);
+            }
+
+            foreach (var task in matchingTasks)
+            {
+                var group = new TimelineTaskFileGroup
+                {
+                    TrackingID = task.TrackingID,
+                    TaskName = task.TaskName
+                };
+
+                if (!string.IsNullOrWhiteSpace(task.AttachmentFile))
+                {
+                    group.Files.AddRange(ParseAttachmentFiles(task.AttachmentFile, task.CreatedByName ?? task.CreatedBy, task.CreatedDate));
+                }
+
+                var childTodos = allTasks.Where(t => t.ParentID == task.TrackingID).ToList();
+                foreach (var todo in childTodos)
+                {
+                    if (!string.IsNullOrWhiteSpace(todo.AttachmentFile))
+                    {
+                        group.Files.AddRange(ParseAttachmentFiles(todo.AttachmentFile, todo.CreatedByName ?? todo.CreatedBy, todo.CreatedDate));
+                    }
+                }
+
+                if (group.Files.Count > 0)
+                {
+                    vm.TaskFileGroups.Add(group);
+                }
+            }
+
+            return PartialView("_StatusTimelineDetailModal", vm);
+        }
+
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
@@ -3133,6 +3431,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             var tasks = _salesCache.GetTrackingTasks(digitalSalesId);
             var parent = tasks.FirstOrDefault(t => t.TrackingID == parentTrackingId);
+
+            if (parent != null && parent.Status == 3)
+            {
+                return Content("<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> Tiến trình đã hoàn thành, không thể thêm mới công việc con!</div>");
+            }
 
             var model = new RM_DigitalSalesTrackingModel
             {
@@ -3215,9 +3518,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             // Xử lý file đính kèm (multiple upload)
+            var uploadedPaths = new List<string>();
             try
             {
-                var uploadedPaths = new List<string>();
                 if (Request.Files.Count > 0)
                 {
                     for (int i = 0; i < Request.Files.Count; i++)
@@ -3248,6 +3551,43 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var id = _salesCache.SaveTracking(model, User.UserName);
             if (id > 0)
             {
+                try
+                {
+                    string assignedName = null;
+                    if (model.AssignedUserID.HasValue && model.AssignedUserID.Value > 0)
+                    {
+                        assignedName = _userCache.GetById(model.AssignedUserID.Value)?.FullName;
+                    }
+
+                    string logContent;
+                    if (model.TrackingID <= 0)
+                    {
+                        logContent = $"Khởi tạo tiến trình: <b>{HttpUtility.HtmlEncode(model.TaskName)}</b>" +
+                                     (!string.IsNullOrEmpty(assignedName) ? $"<div class='text-secondary mt-1'><i class='fa fa-user-check text-success mr-1'></i>Người thực hiện: <b>{assignedName}</b></div>" : "") +
+                                     $"<div class='text-secondary'><i class='far fa-clock mr-1'></i>Thời gian: {model.StartDate:dd/MM/yyyy} - {model.Deadline:dd/MM/yyyy}</div>";
+                    }
+                    else
+                    {
+                        logContent = $"Cập nhật tiến trình: <b>{HttpUtility.HtmlEncode(model.TaskName)}</b>" +
+                                     (!string.IsNullOrEmpty(assignedName) ? $"<div class='text-secondary mt-1'><i class='fa fa-user-check text-success mr-1'></i>Người thực hiện: <b>{assignedName}</b></div>" : "") +
+                                     (!string.IsNullOrWhiteSpace(model.ResultNote) ? $"<div class='mt-1 p-2 bgc-grey-l4 border-1 brc-grey-l2 radius-1 text-85'><b>Nội dung kết quả:</b> {model.ResultNote}</div>" : "");
+                    }
+
+                    var act = new RM_DigitalSalesActivityModel
+                    {
+                        DigitalSalesID = model.DigitalSalesID,
+                        ActivityType = 5,
+                        Content = logContent,
+                        Attachments = uploadedPaths.Count > 0 ? string.Join(";", uploadedPaths) : (model.Status == 3 ? null : model.AttachmentFile),
+                        ReferenceID = id
+                    };
+                    _salesCache.AddActivity(act, User.UserName);
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+
                 return Json(new { status = true, id = id, message = GetAppMessage("DigitalSalesTracking_SaveSuccess") });
             }
 
@@ -3334,14 +3674,17 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") });
             }
 
-            // Ghi log hoạt động mở khóa tiến trình để cập nhật nội dung (giữ nguyên trạng thái Hoàn thành)
+            bool isSubTask = (task.ParentID.HasValue && task.ParentID.Value > 0) || (!string.IsNullOrEmpty(task.TrackingCode) && task.TrackingCode.StartsWith("CV"));
+            string itemTypeName = isSubTask ? "công việc" : "tiến trình";
+
+            // Ghi log hoạt động mở khóa tiến trình / công việc để cập nhật nội dung (giữ nguyên trạng thái Hoàn thành)
             try
             {
                 var act = new RM_DigitalSalesActivityModel
                 {
                     DigitalSalesID = digitalSalesId,
                     ActivityType = 5,
-                    Content = $"Mở khóa tiến trình: <b>{HttpUtility.HtmlEncode(task.TaskName)}</b><div class='mt-1 text-secondary'><b>Lý do mở khóa:</b> {HttpUtility.HtmlEncode(reason.Trim())}</div>",
+                    Content = $"Mở khóa {itemTypeName}: <b>{HttpUtility.HtmlEncode(task.TaskName)}</b><div class='mt-1 text-secondary'><b>Lý do mở khóa:</b> {HttpUtility.HtmlEncode(reason.Trim())}</div>",
                     ReferenceID = trackingId
                 };
                 _salesCache.AddActivity(act, User.UserName);
@@ -3356,7 +3699,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 status = true,
                 trackingId = trackingId,
                 digitalSalesId = digitalSalesId,
-                message = GetAppMessage("DigitalSalesTracking_UnlockSuccess", "Mở khóa tiến trình thành công! Đang mở màn hình cập nhật...")
+                isSubTask = isSubTask,
+                message = isSubTask 
+                    ? "Mở khóa công việc thành công! Đang mở màn hình cập nhật..." 
+                    : GetAppMessage("DigitalSalesTracking_UnlockSuccess", "Mở khóa tiến trình thành công! Đang mở màn hình cập nhật...")
             });
         }
 
@@ -3377,7 +3723,32 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidData") }, JsonRequestBehavior.AllowGet);
             }
 
-            var logs = _salesCache.GetActivitiesByTrackingID(digitalSalesId, trackingId);
+            if (string.IsNullOrEmpty(task.CreatedByName) && !string.IsNullOrEmpty(task.CreatedBy))
+            {
+                task.CreatedByName = _userCache.GetByUserName(task.CreatedBy)?.FullName ?? task.CreatedBy;
+            }
+            if (string.IsNullOrEmpty(task.AssignedUserName) && task.AssignedUserID.HasValue && task.AssignedUserID.Value > 0)
+            {
+                task.AssignedUserName = _userCache.GetById(task.AssignedUserID.Value)?.FullName;
+            }
+            if (string.IsNullOrEmpty(task.LastModifiedByName) && !string.IsNullOrEmpty(task.LastModifiedBy))
+            {
+                task.LastModifiedByName = _userCache.GetByUserName(task.LastModifiedBy)?.FullName ?? task.LastModifiedBy;
+            }
+
+            if (task.TodoList != null && task.TodoList.Count > 0)
+            {
+                foreach (var child in task.TodoList)
+                {
+                    if (string.IsNullOrEmpty(child.AssignedUserName) && child.AssignedUserID.HasValue && child.AssignedUserID.Value > 0)
+                    {
+                        child.AssignedUserName = _userCache.GetById(child.AssignedUserID.Value)?.FullName;
+                    }
+                }
+            }
+
+            var rawLogs = _salesCache.GetActivitiesByTrackingID(digitalSalesId, trackingId) ?? new List<RM_DigitalSalesActivityModel>();
+            var logs = rawLogs.OrderByDescending(l => l.ActionDate).ThenByDescending(l => l.ActivityID).ToList();
             ViewBag.Task = task;
             return PartialView("_TrackingLogsModal", logs);
         }
@@ -3440,6 +3811,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     if (!string.IsNullOrWhiteSpace(model.ResultNote))
                     {
                         logContent += $"<div class='mt-1 text-secondary'><b>Nội dung báo cáo:</b> {model.ResultNote}</div>";
+                    }
+
+                    if (newStatus == 3)
+                    {
+                        try
+                        {
+                            var allTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID);
+                            var parentItem = allTasks.FirstOrDefault(t => t.TrackingID == model.TrackingID);
+                            if (parentItem != null && parentItem.TodoList != null && parentItem.TodoList.Count > 0)
+                            {
+                                var autoCompletedCount = parentItem.TodoList.Count(c => c.Status == 3);
+                                if (autoCompletedCount > 0)
+                                {
+                                    logContent += $"<div class='mt-1 text-success'><i class='fa fa-check-double mr-1'></i>Đã chuyển hoàn thành {autoCompletedCount} công việc con trong tiến trình.</div>";
+                                }
+                            }
+                        }
+                        catch { }
                     }
 
                     var activity = new RM_DigitalSalesActivityModel
@@ -3679,8 +4068,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     "Mã tiến trình (*)",
                     "Tên công việc con (*)",
                     "Người thực hiện",
+                    "Trạng thái",
                     "Ngày bắt đầu (*)",
-                    "Hạn xử lý (Deadline) (*)",
+                    "Số ngày (*)",
                     "Ghi chú"
                 };
 
@@ -3703,8 +4093,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 var sampleTodos = new[]
                 {
-                    new { STT = 1, Code = sampleCode1, Name = "Chuẩn bị slide tài liệu trình diễn giải pháp", User = User.UserName, Start = DateTime.Today.ToString("dd/MM/yyyy"), Deadline = DateTime.Today.AddDays(2).ToString("dd/MM/yyyy"), Note = "Gửi AM duyệt trước" },
-                    new { STT = 2, Code = sampleCode2, Name = "Kiểm tra hạ tầng mạng demo", User = "", Start = DateTime.Today.ToString("dd/MM/yyyy"), Deadline = DateTime.Today.AddDays(1).ToString("dd/MM/yyyy"), Note = "Đảm bảo kết nối thông suốt" }
+                    new { STT = 1, Code = sampleCode1, Name = "Chuẩn bị slide tài liệu trình diễn giải pháp", User = User.UserName, Status = "Chưa thực hiện", Start = DateTime.Today.ToString("dd/MM/yyyy"), Days = 2, Note = "Gửi AM duyệt trước" },
+                    new { STT = 2, Code = sampleCode2, Name = "Kiểm tra hạ tầng mạng demo", User = "", Status = "Chưa thực hiện", Start = DateTime.Today.ToString("dd/MM/yyyy"), Days = 1, Note = "Đảm bảo kết nối thông suốt" }
                 };
 
                 for (int r = 0; r < sampleTodos.Length; r++)
@@ -3714,14 +4104,16 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     ws1.Cell(rowIdx, 2).Value = sampleTodos[r].Code;
                     ws1.Cell(rowIdx, 3).Value = sampleTodos[r].Name;
                     ws1.Cell(rowIdx, 4).Value = sampleTodos[r].User;
-                    ws1.Cell(rowIdx, 5).Value = sampleTodos[r].Start;
-                    ws1.Cell(rowIdx, 6).Value = sampleTodos[r].Deadline;
-                    ws1.Cell(rowIdx, 7).Value = sampleTodos[r].Note;
+                    ws1.Cell(rowIdx, 5).Value = sampleTodos[r].Status;
+                    ws1.Cell(rowIdx, 6).Value = sampleTodos[r].Start;
+                    ws1.Cell(rowIdx, 7).Value = sampleTodos[r].Days;
+                    ws1.Cell(rowIdx, 8).Value = sampleTodos[r].Note;
 
                     ws1.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     ws1.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     ws1.Cell(rowIdx, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                     ws1.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    ws1.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 }
 
                 var range1 = ws1.Range(1, 1, sampleTodos.Length + 1, headers1.Length);
@@ -3799,7 +4191,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult ImportProgressModal(int processId, int digitalSalesId)
+        public ActionResult ImportProgressModal(int processId, int digitalSalesId, int? timelineId = null)
         {
             if (!HasDetailPermission(digitalSalesId, User.UserName))
             {
@@ -3813,6 +4205,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             ViewBag.DigitalSalesID = digitalSalesId;
             ViewBag.ProcessName = proc?.ProcessName ?? "Quy trình";
             ViewBag.SalesTitle = sales?.Title ?? "";
+            ViewBag.TimelineID = timelineId;
 
             return PartialView("_ImportProgressModal");
         }
@@ -3977,6 +4370,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         if (dto.StartDate.HasValue && dto.DurationDays.HasValue)
                         {
                             dto.Deadline = dto.StartDate.Value.AddDays(dto.DurationDays.Value);
+                            dto.DeadlineStr = dto.Deadline.Value.ToString("dd/MM/yyyy");
                         }
 
                         if (errors.Count > 0)
@@ -4015,7 +4409,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult ConfirmImportProgress(int processId, int digitalSalesId, string validDataJson)
+        public ActionResult ConfirmImportProgress(int processId, int digitalSalesId, string validDataJson, int? timelineId = null)
         {
             if (!HasDetailPermission(digitalSalesId, User.UserName))
             {
@@ -4033,6 +4427,22 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 if (rows == null || rows.Count == 0)
                 {
                     return Json(new { status = false, message = "Danh sách dữ liệu import rỗng!" });
+                }
+
+                if (!timelineId.HasValue || timelineId.Value <= 0)
+                {
+                    var sales = _salesCache.GetByID(digitalSalesId, User.UserName);
+                    int targetStatusId = sales?.StatusID ?? 0;
+                    if (processId > 0)
+                    {
+                        var proc = _workflowCache.GetProcessByID(processId);
+                        if (proc != null && proc.StatusID > 0) targetStatusId = proc.StatusID;
+                    }
+                    var curTl = sales?.Timelines?
+                        .Where(tl => tl.ToStatusID == targetStatusId && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                        .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                        .FirstOrDefault();
+                    if (curTl != null) timelineId = curTl.TimelineID;
                 }
 
                 int savedCount = 0;
@@ -4055,7 +4465,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         Status = 1,
                         IsCustomTask = true,
                         SortOrder = sortIdx++,
-                        ResultNote = r.Note
+                        ResultNote = r.Note,
+                        TimelineID = timelineId
                     };
 
                     var id = _salesCache.SaveTracking(model, User.UserName);
@@ -4125,21 +4536,100 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         return Json(new { status = false, message = "Tệp Excel rỗng hoặc Sheet 1 không có dữ liệu!" });
                     }
 
+                    var headerRow = ws.Row(1);
+                    int colTrackingCode = 2;
+                    int colTaskName = 3;
+                    int colUser = 4;
+                    int colStatus = -1;
+                    int colStartDate = -1;
+                    int colDurationDays = -1;
+                    int colDeadline = -1;
+                    int colNote = -1;
+
+                    int lastCol = headerRow.LastCellUsed() != null ? headerRow.LastCellUsed().Address.ColumnNumber : 8;
+                    for (int c = 1; c <= lastCol; c++)
+                    {
+                        string h = GetCellString(headerRow.Cell(c)).Trim().ToLower();
+                        if (h.Contains("mã tiến trình") || h.Contains("mã tt")) colTrackingCode = c;
+                        else if (h.Contains("tên công việc")) colTaskName = c;
+                        else if (h.Contains("người thực hiện") || h.Contains("nhân sự")) colUser = c;
+                        else if (h.Contains("trạng thái")) colStatus = c;
+                        else if (h.Contains("ngày bắt đầu") || h.Contains("bắt đầu")) colStartDate = c;
+                        else if (h.Contains("số ngày")) colDurationDays = c;
+                        else if (h.Contains("hạn") || h.Contains("deadline")) colDeadline = c;
+                        else if (h.Contains("ghi chú")) colNote = c;
+                    }
+
+                    if (colStartDate == -1)
+                    {
+                        if (lastCol >= 9)
+                        {
+                            colTrackingCode = 2;
+                            colTaskName = 3;
+                            colUser = 4;
+                            colStatus = 5;
+                            colStartDate = 6;
+                            colDurationDays = 7;
+                            colDeadline = 8;
+                            colNote = 9;
+                        }
+                        else if (lastCol == 8)
+                        {
+                            colTrackingCode = 2;
+                            colTaskName = 3;
+                            colUser = 4;
+                            colStatus = 5;
+                            colStartDate = 6;
+                            colDurationDays = 7;
+                            colDeadline = -1;
+                            colNote = 8;
+                        }
+                        else
+                        {
+                            colTrackingCode = 2;
+                            colTaskName = 3;
+                            colUser = 4;
+                            colStatus = -1;
+                            colStartDate = 5;
+                            colDeadline = 6;
+                            colNote = 7;
+                        }
+                    }
+
                     var rowsUsed = ws.RowsUsed().Skip(1);
                     int rowIdx = 1;
 
                     foreach (var row in rowsUsed)
                     {
-                        string trackingCode = GetCellString(row.Cell(2));
-                        string taskName = GetCellString(row.Cell(3));
-                        string assignedUserText = GetCellString(row.Cell(4));
-                        string startDateText = GetCellString(row.Cell(5));
-                        string deadlineText = GetCellString(row.Cell(6));
-                        string note = GetCellString(row.Cell(7));
+                        string trackingCode = colTrackingCode > 0 ? GetCellString(row.Cell(colTrackingCode)) : "";
+                        string taskName = colTaskName > 0 ? GetCellString(row.Cell(colTaskName)) : "";
+                        string assignedUserText = colUser > 0 ? GetCellString(row.Cell(colUser)) : "";
+                        string statusText = colStatus > 0 ? GetCellString(row.Cell(colStatus)) : "";
+                        string startDateText = colStartDate > 0 ? GetCellString(row.Cell(colStartDate)) : "";
+                        string durationText = colDurationDays > 0 ? GetCellString(row.Cell(colDurationDays)) : "";
+                        string deadlineText = colDeadline > 0 ? GetCellString(row.Cell(colDeadline)) : "";
+                        string note = colNote > 0 ? GetCellString(row.Cell(colNote)) : "";
 
-                        if (string.IsNullOrWhiteSpace(trackingCode) && string.IsNullOrWhiteSpace(taskName) && string.IsNullOrWhiteSpace(deadlineText))
+                        if (string.IsNullOrWhiteSpace(trackingCode) && string.IsNullOrWhiteSpace(taskName) && string.IsNullOrWhiteSpace(deadlineText) && string.IsNullOrWhiteSpace(durationText))
                         {
                             continue;
+                        }
+
+                        byte parsedStatus = 1;
+                        string statusStr = "Chưa thực hiện";
+                        if (!string.IsNullOrWhiteSpace(statusText))
+                        {
+                            string stLower = statusText.Trim().ToLower();
+                            if (stLower.Contains("đang") || stLower.StartsWith("2"))
+                            {
+                                parsedStatus = 2;
+                                statusStr = "Đang thực hiện";
+                            }
+                            else if (stLower.Contains("xong") || stLower.Contains("hoàn thành") || stLower.StartsWith("3"))
+                            {
+                                parsedStatus = 3;
+                                statusStr = "Đã xong";
+                            }
                         }
 
                         var dto = new RM_DigitalSalesTodoImportRowDTO
@@ -4148,6 +4638,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             TrackingCode = trackingCode,
                             TaskName = taskName,
                             AssignedUserName = assignedUserText,
+                            Status = parsedStatus,
+                            StatusStr = statusStr,
                             StartDateStr = startDateText,
                             DeadlineStr = deadlineText,
                             Note = note
@@ -4198,7 +4690,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         }
 
                         // 4. Kiểm tra Ngày bắt đầu
-                        var parsedStart = ParseDateCell(row.Cell(5));
+                        var parsedStart = colStartDate > 0 ? ParseDateCell(row.Cell(colStartDate)) : null;
                         if (parsedStart.HasValue)
                         {
                             dto.StartDate = parsedStart.Value;
@@ -4219,8 +4711,52 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             dto.StartDateStr = DateTime.Today.ToString("dd/MM/yyyy");
                         }
 
-                        // 5. Kiểm tra Hạn xử lý (Deadline)
-                        var parsedDeadline = ParseDateCell(row.Cell(6));
+                        // 5. Kiểm tra Số ngày thực hiện
+                        int? parsedDuration = null;
+                        if (!string.IsNullOrWhiteSpace(durationText))
+                        {
+                            int d;
+                            if (int.TryParse(durationText, out d) && d > 0)
+                            {
+                                parsedDuration = d;
+                            }
+                            else
+                            {
+                                errors.Add("Số ngày thực hiện phải là số nguyên dương");
+                            }
+                        }
+                        else if (colDeadline <= 0 || string.IsNullOrWhiteSpace(deadlineText))
+                        {
+                            errors.Add("Số ngày thực hiện không được để trống");
+                        }
+
+                        // 6. Kiểm tra Hạn xử lý (Deadline)
+                        var parsedDeadline = colDeadline > 0 ? ParseDateCell(row.Cell(colDeadline)) : null;
+                        if (!parsedDeadline.HasValue && !string.IsNullOrWhiteSpace(deadlineText))
+                        {
+                            errors.Add("Hạn xử lý không đúng định dạng dd/MM/yyyy");
+                        }
+
+                        // Tính toán liên kết giữa Ngày bắt đầu, Số ngày và Hạn xử lý
+                        if (dto.StartDate.HasValue && parsedDuration.HasValue && !parsedDeadline.HasValue)
+                        {
+                            parsedDeadline = dto.StartDate.Value.AddDays(parsedDuration.Value);
+                        }
+                        else if (dto.StartDate.HasValue && parsedDeadline.HasValue && !parsedDuration.HasValue)
+                        {
+                            int diff = (int)(parsedDeadline.Value.Date - dto.StartDate.Value.Date).TotalDays;
+                            parsedDuration = diff > 0 ? diff : 1;
+                        }
+                        else if (!parsedDuration.HasValue && !parsedDeadline.HasValue)
+                        {
+                            parsedDuration = 3;
+                            if (dto.StartDate.HasValue)
+                            {
+                                parsedDeadline = dto.StartDate.Value.AddDays(3);
+                            }
+                        }
+
+                        dto.DurationDays = parsedDuration;
                         if (parsedDeadline.HasValue)
                         {
                             dto.Deadline = parsedDeadline.Value;
@@ -4232,18 +4768,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                 errors.Add($"Hạn xử lý ({dto.Deadline.Value:dd/MM/yyyy}) vượt quá hạn tối đa của tiến trình cha ({parentTask.MaxDeadline:dd/MM/yyyy})");
                             }
                         }
-                        else if (!string.IsNullOrWhiteSpace(deadlineText))
-                        {
-                            errors.Add("Hạn xử lý không đúng định dạng dd/MM/yyyy");
-                        }
                         else if (parentTask != null)
                         {
                             dto.Deadline = parentTask.MaxDeadline;
                             dto.DeadlineStr = parentTask.MaxDeadline.ToString("dd/MM/yyyy");
-                        }
-                        else
-                        {
-                            errors.Add("Hạn xử lý không được để trống");
                         }
 
                         if (errors.Count > 0)
@@ -4275,7 +4803,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             catch (Exception ex)
             {
                 AppProcessor.Logger.Error(ex);
-                return Json(new { status = false, message = "Lỗi khi đọc tệp Excel: " + ex.Message });
+                return Json(new { status = false, message = "Lỗi khi xử lý tệp Excel: " + ex.Message });
             }
         }
 
@@ -4304,10 +4832,13 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 int savedCount = 0;
                 int sortIdx = 100;
+                var allTasks = _salesCache.GetTrackingTasks(digitalSalesId);
 
                 foreach (var r in rows)
                 {
                     if (string.IsNullOrWhiteSpace(r.TaskName) || !r.ParentTrackingID.HasValue || r.ParentTrackingID.Value <= 0) continue;
+
+                    var parentTask = allTasks?.FirstOrDefault(pt => pt.TrackingID == r.ParentTrackingID.Value);
 
                     var model = new RM_DigitalSalesTrackingModel
                     {
@@ -4318,12 +4849,13 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         TaskName = r.TaskName.Trim(),
                         AssignedUserID = r.AssignedUserID,
                         StartDate = r.StartDate ?? DateTime.Today,
-                        Deadline = r.Deadline ?? (r.StartDate ?? DateTime.Today).AddDays(3),
+                        Deadline = r.Deadline ?? (r.StartDate ?? DateTime.Today).AddDays(r.DurationDays ?? 3),
                         DurationDays = r.DurationDays ?? 3,
-                        Status = 1,
+                        Status = r.Status.HasValue && r.Status.Value > 0 ? r.Status.Value : (byte)1,
                         IsCustomTask = true,
                         SortOrder = sortIdx++,
-                        ResultNote = r.Note
+                        ResultNote = r.Note,
+                        TimelineID = parentTask?.TimelineID
                     };
 
                     var id = _salesCache.SaveTracking(model, User.UserName);
@@ -4599,8 +5131,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
         {
             try
             {
-                var list = _salesCache.GetAccessibleEmployees(User.UserName);
-                if (list != null && list.Count > 0) return list;
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var list = _salesCache.GetAccessibleEmployees(uName);
+                    if (list != null && list.Count > 0) return list;
+                }
             }
             catch { }
             return new List<RM_DigitalSalesUserModel>();
@@ -4633,16 +5169,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
         private List<MN_BoPhanModel> GetAccessibleDepartments()
         {
-            var currentUser = _userCache.GetByUserName(User.UserName);
             List<MN_BoPhanModel> list = null;
-            if (currentUser != null && !string.IsNullOrWhiteSpace(currentUser.Email))
+            try
             {
-                list = (_userBoPhanCache.GetByEmail(currentUser.Email) ?? new List<MN_BoPhanModel>())
-                    .GroupBy(x => x.BoPhan_ID)
-                    .Select(x => x.First())
-                    .OrderBy(x => x.TenBoPhanView)
-                    .ToList();
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var currentUser = _userCache.GetByUserName(uName);
+                    if (currentUser != null && !string.IsNullOrWhiteSpace(currentUser.Email))
+                    {
+                        list = (_userBoPhanCache.GetByEmail(currentUser.Email) ?? new List<MN_BoPhanModel>())
+                            .GroupBy(x => x.BoPhan_ID)
+                            .Select(x => x.First())
+                            .OrderBy(x => x.TenBoPhanView)
+                            .ToList();
+                    }
+                }
             }
+            catch { }
 
             if (list == null || list.Count == 0)
             {
@@ -4824,104 +5368,121 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
         private void PrepareSalesDropdowns(RM_DigitalSalesModel model)
         {
-            if (model.CustomerID > 0)
+            try
             {
-                var cus = _customerCache.GetById(model.CustomerID);
-                if (cus != null)
+                if (model.CustomerID > 0)
                 {
-                    model.ListCustomer = new List<SelectListItem>
+                    var cus = _customerCache.GetById(model.CustomerID);
+                    if (cus != null)
                     {
-                        new SelectListItem { Value = cus.CustomerID.ToString(), Text = cus.CustomerName, Selected = true }
-                    };
-                    model.CustomerName = cus.CustomerName;
+                        model.ListCustomer = new List<SelectListItem>
+                        {
+                            new SelectListItem { Value = cus.CustomerID.ToString(), Text = cus.CustomerName, Selected = true }
+                        };
+                        model.CustomerName = cus.CustomerName;
+                    }
+                    else
+                    {
+                        model.ListCustomer = new List<SelectListItem>();
+                    }
                 }
                 else
                 {
                     model.ListCustomer = new List<SelectListItem>();
                 }
-            }
-            else
-            {
-                model.ListCustomer = new List<SelectListItem>();
-            }
 
-            if (model.CustomerID > 0)
-            {
-                model.ListContactPerson = _contactPersonCache.GetByCustomerID(model.CustomerID)?.Select(c => new SelectListItem
+                if (model.CustomerID > 0)
                 {
-                    Value = c.ContactPerson_ID.ToString(),
-                    Text = $"{c.FullName} - {c.Position}"
+                    model.ListContactPerson = _contactPersonCache.GetByCustomerID(model.CustomerID)?.Select(c => new SelectListItem
+                    {
+                        Value = c.ContactPerson_ID.ToString(),
+                        Text = $"{c.FullName} - {c.Position}"
+                    }).ToList() ?? new List<SelectListItem>();
+                }
+                else
+                {
+                    model.ListContactPerson = new List<SelectListItem>();
+                }
+
+                model.ListStatus = _salesCache.GetStatusList(model.BusinessType)?.Select(s => new SelectListItem
+                {
+                    Value = s.StatusID.ToString(),
+                    Text = s.StatusName,
+                    Selected = (s.StatusID == model.StatusID)
+                }).ToList() ?? new List<SelectListItem>();
+
+                var accessibleUsers = GetAccessibleEmployees();
+
+                var uName = CurrentUserName;
+                if (!string.IsNullOrEmpty(uName))
+                {
+                    var currentLoginUser = _userCache.GetByUserName(uName);
+                    if (currentLoginUser != null && currentLoginUser.UserId.HasValue && !accessibleUsers.Any(u => u.UserId == currentLoginUser.UserId.Value))
+                    {
+                        accessibleUsers.Add(new RM_DigitalSalesUserModel
+                        {
+                            UserId = currentLoginUser.UserId.Value,
+                            UserName = currentLoginUser.UserName,
+                            FullName = currentLoginUser.FullName
+                        });
+                    }
+                }
+
+                if (model.AssignedEmployeeID.HasValue && model.AssignedEmployeeID.Value > 0 && !accessibleUsers.Any(u => u.UserId == model.AssignedEmployeeID.Value))
+                {
+                    var assignedUser = _userCache.GetById(model.AssignedEmployeeID.Value);
+                    if (assignedUser != null && assignedUser.UserId.HasValue)
+                    {
+                        accessibleUsers.Add(new RM_DigitalSalesUserModel
+                        {
+                            UserId = assignedUser.UserId.Value,
+                            UserName = assignedUser.UserName,
+                            FullName = assignedUser.FullName
+                        });
+                    }
+                }
+
+                model.ListEmployee = accessibleUsers
+                    .Where(u => u.UserId > 0)
+                    .GroupBy(u => u.UserId)
+                    .Select(g => g.First())
+                    .OrderBy(u => u.FullName)
+                    .Select(u => new SelectListItem
+                    {
+                        Value = u.UserId.ToString(),
+                        Text = $"{u.FullName} ({u.UserName})",
+                        Selected = (model.AssignedEmployeeID.HasValue && u.UserId == model.AssignedEmployeeID.Value)
+                    }).ToList();
+
+                if ((!model.DepartmentID.HasValue || model.DepartmentID.Value <= 0) && model.AssignedEmployeeID.HasValue)
+                {
+                    model.DepartmentID = GetDepartmentIdByUserId(model.AssignedEmployeeID.Value);
+                }
+
+                model.ListDepartment = _departmentCache.GetAll()?.Select(d => new SelectListItem
+                {
+                    Value = d.BoPhan_ID.ToString(),
+                    Text = d.TenBoPhan,
+                    Selected = (model.DepartmentID.HasValue && d.BoPhan_ID == model.DepartmentID.Value)
+                }).ToList() ?? new List<SelectListItem>();
+
+                model.ListContract = _contractCache.GetAll()?.Select(ct => new SelectListItem
+                {
+                    Value = ct.ContractID.ToString(),
+                    Text = $"{ct.ContractCode} - {ct.ContractName}",
+                    Selected = (model.ContractID.HasValue && ct.ContractID == model.ContractID.Value)
                 }).ToList() ?? new List<SelectListItem>();
             }
-            else
+            catch (Exception ex)
             {
-                model.ListContactPerson = new List<SelectListItem>();
+                AppProcessor.Logger.Error(ex);
+                if (model.ListCustomer == null) model.ListCustomer = new List<SelectListItem>();
+                if (model.ListContactPerson == null) model.ListContactPerson = new List<SelectListItem>();
+                if (model.ListStatus == null) model.ListStatus = new List<SelectListItem>();
+                if (model.ListEmployee == null) model.ListEmployee = new List<SelectListItem>();
+                if (model.ListDepartment == null) model.ListDepartment = new List<SelectListItem>();
+                if (model.ListContract == null) model.ListContract = new List<SelectListItem>();
             }
-
-            model.ListStatus = _salesCache.GetStatusList(model.BusinessType)?.Select(s => new SelectListItem
-            {
-                Value = s.StatusID.ToString(),
-                Text = s.StatusName,
-                Selected = (s.StatusID == model.StatusID)
-            }).ToList() ?? new List<SelectListItem>();
-
-            var accessibleUsers = GetAccessibleEmployees();
-
-            var currentLoginUser = _userCache.GetByUserName(User.UserName);
-            if (currentLoginUser != null && currentLoginUser.UserId.HasValue && !accessibleUsers.Any(u => u.UserId == currentLoginUser.UserId.Value))
-            {
-                accessibleUsers.Add(new RM_DigitalSalesUserModel
-                {
-                    UserId = currentLoginUser.UserId.Value,
-                    UserName = currentLoginUser.UserName,
-                    FullName = currentLoginUser.FullName
-                });
-            }
-
-            if (model.AssignedEmployeeID.HasValue && model.AssignedEmployeeID.Value > 0 && !accessibleUsers.Any(u => u.UserId == model.AssignedEmployeeID.Value))
-            {
-                var assignedUser = _userCache.GetById(model.AssignedEmployeeID.Value);
-                if (assignedUser != null && assignedUser.UserId.HasValue)
-                {
-                    accessibleUsers.Add(new RM_DigitalSalesUserModel
-                    {
-                        UserId = assignedUser.UserId.Value,
-                        UserName = assignedUser.UserName,
-                        FullName = assignedUser.FullName
-                    });
-                }
-            }
-
-            model.ListEmployee = accessibleUsers
-                .Where(u => u.UserId > 0)
-                .GroupBy(u => u.UserId)
-                .Select(g => g.First())
-                .OrderBy(u => u.FullName)
-                .Select(u => new SelectListItem
-                {
-                    Value = u.UserId.ToString(),
-                    Text = $"{u.FullName} ({u.UserName})",
-                    Selected = (model.AssignedEmployeeID.HasValue && u.UserId == model.AssignedEmployeeID.Value)
-                }).ToList();
-
-            if ((!model.DepartmentID.HasValue || model.DepartmentID.Value <= 0) && model.AssignedEmployeeID.HasValue)
-            {
-                model.DepartmentID = GetDepartmentIdByUserId(model.AssignedEmployeeID.Value);
-            }
-
-            model.ListDepartment = _departmentCache.GetAll()?.Select(d => new SelectListItem
-            {
-                Value = d.BoPhan_ID.ToString(),
-                Text = d.TenBoPhan,
-                Selected = (model.DepartmentID.HasValue && d.BoPhan_ID == model.DepartmentID.Value)
-            }).ToList() ?? new List<SelectListItem>();
-
-            model.ListContract = _contractCache.GetAll()?.Select(ct => new SelectListItem
-            {
-                Value = ct.ContractID.ToString(),
-                Text = $"{ct.ContractCode} - {ct.ContractName}",
-                Selected = (model.ContractID.HasValue && ct.ContractID == model.ContractID.Value)
-            }).ToList() ?? new List<SelectListItem>();
         }
 
         private string SaveUploadedFile(HttpPostedFileBase file, int index = 0)

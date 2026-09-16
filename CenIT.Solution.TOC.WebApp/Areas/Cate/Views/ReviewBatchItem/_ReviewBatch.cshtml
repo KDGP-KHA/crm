@@ -22,84 +22,23 @@
     }
 
     <script type="text/javascript">
-        // Neo panel rà soát về bên phải màn hình.
-        // Khởi tạo với backdrop:false ngay trước khi framework gọi modal("show")
-        // để không sinh lớp phủ chặn thao tác với nội dung phía sau.
+        // Rà soát mở theo yêu cầu dưới dạng modal phủ lên trang chi tiết,
+        // không còn neo vào layout để tránh thu hẹp/vỡ giao diện hồ sơ.
         var $reviewDock = $('#modal_ReviewBatch');
-        var $reviewSplitView = $('#reviewSplitView');
-        var $reviewFormPane = $('#reviewFormPane');
 
-        // Panel rà soát là một phần của màn hình chi tiết, không cho đóng bằng
-        // nút X, nút Hủy hoặc phím Escape. Người dùng vẫn có thể thu gọn panel.
-        $reviewDock.find('.modal-header [data-dismiss="modal"], .modal-footer [data-dismiss="modal"]').remove();
-
-        function resizeReviewFormPane() {
-            if (!$reviewFormPane.length) return;
-            var paneTop = $reviewFormPane.data('fixedTop');
-            if (paneTop === undefined) {
-                paneTop = Math.max($reviewFormPane[0].getBoundingClientRect().top, 8);
-                $reviewFormPane.data('fixedTop', paneTop);
-            }
-            var availableHeight = Math.max(window.innerHeight - paneTop - 8, 180);
-            $reviewFormPane.css({
-                top: paneTop + 'px',
-                height: availableHeight + 'px',
-                maxHeight: availableHeight + 'px'
-            });
-        }
-
-        if (!$reviewDock.find('.review-dock-toggle').length) {
-            $reviewDock.find('.modal-header').append(
-                '<button type="button" class="review-dock-toggle btn btn-outline-white btn-h-primary btn-a-primary mr-2" ' +
-                'title="@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))" aria-label="@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))" aria-expanded="true">' +
-                '<i class="fas fa-chevron-right"></i></button>'
-            );
-        }
+        // Hiển thị nút đóng ở tiêu đề modal; nút Hủy ở footer vẫn được ẩn để
+        // các thao tác chính chỉ gồm Lưu và Lưu và tiếp tục.
+        $reviewDock.find('.modal-footer [data-dismiss="modal"]').remove();
 
         $reviewDock
             .addClass('review-dock-right')
             .removeClass('modal-lg modal-fs')
-            .modal({ backdrop: false, keyboard: false, show: false })
-            .on('show.bs.modal', function () {
-                if ($reviewFormPane.length) {
-                    $(this).appendTo($reviewFormPane);
-                    $reviewSplitView.addClass('review-split-active');
-                    resizeReviewFormPane();
-                }
-            })
+            .modal({ backdrop: true, keyboard: false, show: false })
             .on('shown.bs.modal', function () {
                 $('body').addClass('review-dock-open');
             })
             .on('hidden.bs.modal', function () {
                 $('body').removeClass('review-dock-open');
-                $(this).removeClass('review-dock-collapsed');
-                $reviewSplitView.removeClass('review-split-active review-split-collapsed');
-                $(this).find('.review-dock-toggle')
-                    .attr('title', '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
-                    .attr('aria-label', '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
-                    .attr('aria-expanded', 'true')
-                    .find('i')
-                    .removeClass('fa-chevron-left')
-                    .addClass('fa-chevron-right');
-            });
-
-        $(window)
-            .off('resize.reviewDockSize')
-            .on('resize.reviewDockSize', resizeReviewFormPane);
-
-        $reviewDock
-            .off('click.reviewDockToggle', '.review-dock-toggle')
-            .on('click.reviewDockToggle', '.review-dock-toggle', function () {
-                var isCollapsed = $reviewDock.toggleClass('review-dock-collapsed')
-                    .hasClass('review-dock-collapsed');
-                $reviewSplitView.toggleClass('review-split-collapsed', isCollapsed);
-                $(this)
-                    .attr('title', isCollapsed ? '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Expand")))' : '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
-                    .attr('aria-label', isCollapsed ? '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Expand")))' : '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Collapse")))')
-                    .attr('aria-expanded', (!isCollapsed).toString())
-                    .find('i')
-                    .toggleClass('fa-chevron-right', !isCollapsed)
-                    .toggleClass('fa-chevron-left', isCollapsed);
             });
     </script>
 

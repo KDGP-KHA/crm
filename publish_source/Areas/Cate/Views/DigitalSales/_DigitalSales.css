@@ -9,6 +9,9 @@
         display: inline-flex;
         align-items: center;
     }
+    #bodyForm .input-group > .input-group-prepend > .input-group-text {
+        height: 38px !important;
+    }
     #bodyForm .select2-container .select2-selection--single {
         height: 38px !important;
         border: 1px solid #ced4da;
