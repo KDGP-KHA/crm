@@ -104,6 +104,8 @@ namespace Core.Cate.Models
         public DateTime? LastModifiedDate { get; set; }
         public string LastModifiedBy { get; set; }
         public DateTime? ActionTime { get; set; }
+        public DateTime? LastActionTime { get; set; }
+        public int HoursSinceUpdate { get; set; }
 
         // Computed & Joined fields
         public string ProductServiceNames { get; set; }

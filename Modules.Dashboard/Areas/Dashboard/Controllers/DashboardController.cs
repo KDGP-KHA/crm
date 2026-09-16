@@ -139,7 +139,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         public ActionResult Chart(int? applyYear)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year);
+            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName);
             ViewBag.ApplyYear = year;
             ViewBag.Title = "Dashboard";
             return View("Chart", overviewModel);
@@ -152,7 +152,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         public ActionResult GetChartOverviewData(int? applyYear)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year);
+            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName);
             return PartialView("_ChartOverview", overviewModel);
         }
 

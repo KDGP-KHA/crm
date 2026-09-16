@@ -45,8 +45,9 @@ namespace Core.Cate.Biz
         private readonly string _spGetDepartmentByUserID = "RM_DigitalSales_GetDepartmentByUserID";
         private readonly string _spGetAccessibleEmployees = "RM_DigitalSales_GetAccessibleEmployees";
         private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
+        private readonly string _spGetStaleActionTime = "RM_DigitalSales_GetStaleActionTime";
 
-        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
 
@@ -65,6 +66,24 @@ namespace Core.Cate.Biz
                 PageSize = 50
             }) ?? new List<RM_DigitalSalesModel>();
 
+            int totalFollowed = 0;
+            var followedOpportunities = LoadList(out totalFollowed, new RM_DigitalSalesSearchModel
+            {
+                ApplyYear = applyYear,
+                IsFollowed = true,
+                UserName = !string.IsNullOrWhiteSpace(userName) ? userName : null,
+                PageNumber = 1,
+                PageSize = 50
+            }) ?? new List<RM_DigitalSalesModel>();
+
+            var staleSales = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesModel>(
+                _spGetStaleActionTime,
+                DATA_PROVIDER_NAME,
+                applyYear,
+                72,
+                0
+            ) ?? new List<RM_DigitalSalesModel>();
+
             return new DigitalSalesDashboardOverviewModel
             {
                 ApplyYear = applyYear,
@@ -72,7 +91,9 @@ namespace Core.Cate.Biz
                 TotalCountAll = list.Sum(x => x.TotalCount),
                 TotalExpectedRevenueAll = list.Sum(x => x.TotalExpectedRevenue),
                 TotalActualRevenueAll = list.Sum(x => x.TotalActualRevenue),
-                KeyProjects = keyProjects
+                KeyProjects = keyProjects,
+                FollowedOpportunities = followedOpportunities,
+                StaleActionTimeSales = staleSales
             };
         }
 

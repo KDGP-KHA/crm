@@ -347,8 +347,24 @@
     border-top: 1px solid #f1f5f9;
 }
 
-.db-keyprojects-table tbody tr:hover {
+.db-keyprojects-table tbody tr:hover,
+.db-custom-subtable tbody tr:hover {
     background-color: #f8faff;
+}
+
+.db-custom-subtable th {
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 10px 12px;
+    border-top: none;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.db-custom-subtable td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
 }
 
 /* Group Service Chart Card */

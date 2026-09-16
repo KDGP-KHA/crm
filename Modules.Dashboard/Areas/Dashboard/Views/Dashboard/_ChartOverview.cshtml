@@ -205,3 +205,164 @@
         </div>
     </div>
 </div>
+
+<!-- 4. KHU VỰC CƠ HỘI ĐANG QUAN TÂM VÀ CẢNH BÁO ACTIONTIME CHƯA CẬP NHẬT (> 72 TIẾNG) -->
+<div class="row mt-3">
+    <!-- Cột 1: Danh sách Cơ hội KD DVS Đang quan tâm -->
+    <div class="col-xl-6 col-12 mb-3">
+        <div class="card h-100 bcard shadow-sm db-card-custom">
+            <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
+                <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
+                    <i class="fa fa-heart text-danger mr-2"></i>Cơ hội KD DVS Đang quan tâm - Năm @Model.ApplyYear
+                </h6>
+                <span class="badge badge-pink font-weight-bold text-85 px-2 py-1 radius-1" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #f472b6;">
+                    @(Model.FollowedOpportunities != null ? Model.FollowedOpportunities.Count : 0) cơ hội
+                </span>
+            </div>
+            <div class="card-body p-0 table-responsive">
+                @if (Model.FollowedOpportunities != null && Model.FollowedOpportunities.Count > 0)
+                {
+                    <table class="table table-hover table-striped mb-0 text-90 align-middle db-custom-subtable">
+                        <thead class="bgc-secondary-l3 text-secondary-d2 text-uppercase text-80">
+                            <tr>
+                                <th class="text-center" style="width: 40px;">STT</th>
+                                <th>Mã & Tên cơ hội</th>
+                                <th>Khách hàng</th>
+                                <th>Trạng thái</th>
+                                <th class="text-right">DT Dự kiến</th>
+                                <th>Phụ trách</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int sttFollow = 1; }
+                            @foreach (var opp in Model.FollowedOpportunities)
+                            {
+                                <tr>
+                                    <td class="text-center font-weight-bold text-secondary">@(sttFollow++)</td>
+                                    <td>
+                                        <a href="/Cate/DigitalSales/Detail?id=@opp.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
+                                            @opp.Title
+                                        </a>
+                                        <div class="text-muted text-85 mt-05">
+                                            <span class="badge badge-secondary text-75 mr-1">@opp.Code</span>
+                                            <span class="badge badge-pink text-75 mr-1" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8;">
+                                                <i class="fa fa-heart mr-1"></i>Quan tâm
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark-m2 font-weight-500">@(string.IsNullOrWhiteSpace(opp.CustomerName) ? "—" : opp.CustomerName)</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm badge-info text-85 px-2 py-1">
+                                            @opp.StatusName
+                                        </span>
+                                    </td>
+                                    <td class="text-right font-weight-bold text-yellow">
+                                        @FormatRevenue(opp.TotalExpectedRevenue.GetValueOrDefault(0))
+                                    </td>
+                                    <td>
+                                        <span class="text-dark-m2">@(string.IsNullOrWhiteSpace(opp.AssignedEmployeeName) ? "—" : opp.AssignedEmployeeName)</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <div class="mb-2">
+                            <i class="fa fa-heart fa-3x" style="color: #f472b6;"></i>
+                        </div>
+                        <h6 class="text-secondary-d1 font-weight-bold">Chưa có cơ hội đang quan tâm nào trong năm @Model.ApplyYear</h6>
+                        <p class="text-muted text-90 mb-0">Nhấn biểu tượng <strong>Quan tâm</strong> tại chi tiết hồ sơ để theo dõi sát sao tiến độ tại đây.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột 2: Danh sách SP DVS có ActionTime chưa được cập nhật cách 72 tiếng -->
+    <div class="col-xl-6 col-12 mb-3">
+        <div class="card h-100 bcard shadow-sm db-card-custom">
+            <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
+                <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
+                    <i class="fa fa-clock text-danger mr-2"></i>SP DVS chưa cập nhật ActionTime (> 72h) - Năm @Model.ApplyYear
+                </h6>
+                <span class="badge badge-danger font-weight-bold text-85 px-2 py-1 radius-1">
+                    @(Model.StaleActionTimeSales != null ? Model.StaleActionTimeSales.Count : 0) hồ sơ
+                </span>
+            </div>
+            <div class="card-body p-0 table-responsive">
+                @if (Model.StaleActionTimeSales != null && Model.StaleActionTimeSales.Count > 0)
+                {
+                    <table class="table table-hover table-striped mb-0 text-90 align-middle db-custom-subtable">
+                        <thead class="bgc-secondary-l3 text-secondary-d2 text-uppercase text-80">
+                            <tr>
+                                <th class="text-center" style="width: 40px;">STT</th>
+                                <th>Mã & Tên hồ sơ</th>
+                                <th>Khách hàng</th>
+                                <th>Trạng thái</th>
+                                <th class="text-center">Chưa cập nhật</th>
+                                <th>Phụ trách</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int sttStale = 1; }
+                            @foreach (var s in Model.StaleActionTimeSales)
+                            {
+                                var hours = s.HoursSinceUpdate;
+                                var days = hours / 24;
+                                var timeText = days > 0 ? (hours + "h (~" + days + " ngày)") : (hours + " giờ");
+                                var lastActionStr = s.ActionTime.HasValue
+                                    ? s.ActionTime.Value.ToString("dd/MM/yyyy HH:mm")
+                                    : (s.CreatedDate.ToString("dd/MM/yyyy HH:mm"));
+
+                                <tr>
+                                    <td class="text-center font-weight-bold text-secondary">@(sttStale++)</td>
+                                    <td>
+                                        <a href="/Cate/DigitalSales/Detail?id=@s.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
+                                            @s.Title
+                                        </a>
+                                        <div class="text-muted text-85 mt-05">
+                                            <span class="badge badge-secondary text-75 mr-1">@s.Code</span>
+                                            <span class="badge @(s.BusinessType == 1 ? "badge-info" : "badge-primary") text-75 mr-1">@(s.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark-m2 font-weight-500">@(string.IsNullOrWhiteSpace(s.CustomerName) ? "—" : s.CustomerName)</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-sm @(s.BusinessType == 1 ? "badge-info" : "badge-success") text-85 px-2 py-1">
+                                            @s.StatusName
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge badge-danger text-85 px-2 py-1" title="Lần cuối hoạt động: @lastActionStr">
+                                            <i class="fa fa-exclamation-circle mr-1"></i>@timeText
+                                        </span>
+                                        <div class="text-muted text-75 mt-05">@lastActionStr</div>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark-m2">@(string.IsNullOrWhiteSpace(s.AssignedEmployeeName) ? "—" : s.AssignedEmployeeName)</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <div class="mb-2">
+                            <i class="fa fa-check-circle text-success fa-3x"></i>
+                        </div>
+                        <h6 class="text-secondary-d1 font-weight-bold">Tất cả hồ sơ năm @Model.ApplyYear đều đã được cập nhật</h6>
+                        <p class="text-muted text-90 mb-0">Không có hồ sơ sản phẩm dịch vụ số nào quá 72 tiếng chưa cập nhật ActionTime.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
