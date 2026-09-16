@@ -17,7 +17,7 @@ namespace Core.Cate.Caches
         private string BuildSearchCacheKey(RM_DigitalSalesSearchModel model)
         {
             if (model == null) return "RM_DigitalSales_GetList_Default";
-            return string.Concat("RM_DigitalSales_GetList_", model.Keyword, "_", model.BusinessType, "_", model.StatusID, "_", model.StatusIDs, "_", model.CustomerID, "_", model.ProductServiceID, "_", model.DepartmentID, "_", model.EmployeeID, "_", model.FromDate, "_", model.ToDate, "_", model.PageNumber, "_", model.PageSize, "_", model.UserName, "_", model.IsKeyProject, "_", model.IsFollowed);
+            return string.Concat("RM_DigitalSales_GetList_", model.Keyword, "_", model.BusinessType, "_", model.StatusID, "_", model.StatusIDs, "_", model.CustomerID, "_", model.ProductServiceID, "_", model.DepartmentID, "_", model.EmployeeID, "_", model.FromDate, "_", model.ToDate, "_", model.PageNumber, "_", model.PageSize, "_", model.UserName, "_", model.IsKeyProject, "_", model.IsFollowed, "_", model.ApplyYear);
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, true)]
