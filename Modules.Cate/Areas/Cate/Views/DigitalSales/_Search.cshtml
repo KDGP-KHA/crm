@@ -22,12 +22,12 @@
     <div class="card-body p-2 d-flex align-items-end flex-wrap">
         @Html.HiddenFor(model => model.CustomerID, new { id = "CustomerID" })
 
-        <div class="Search_Box keyWord" style="flex: 1 1 280px; max-width: 420px;">
+        <div class="Search_Box keyWord" style="flex: 1 1 200px; min-width: 170px; max-width: 320px;">
             @Html.TitleFor(model => model.Keyword, new { @class = "font-bold text-sm-right" })
             @Html.TextBoxFor(model => model.Keyword, new { @class = "form-control", id = "Keyword", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Keyword_Placeholder") })
         </div>
 
-        <div class="Search_Box" style="min-width: 140px;">
+        <div class="Search_Box" style="width: 120px; min-width: 110px;">
             @Html.TitleFor(model => model.BusinessType, new { @class = "font-bold text-sm-right" })
             <div>
                 <select id="BusinessType" name="BusinessType" class="form-control" onchange="filterStatusListByBusinessType(this.value);">
@@ -38,7 +38,28 @@
             </div>
         </div>
 
-        <div class="position-relative status-filter-wrapper Search_Box" style="min-width: 200px;">
+        <!-- Bộ lọc: Năm áp dụng (Mặc định năm hiện tại, đặt cạnh Loại hình) -->
+        <div class="Search_Box" style="width: 105px; min-width: 95px;">
+            @{
+                var applyYearLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_ApplyYear_Label");
+                if (string.IsNullOrWhiteSpace(applyYearLabel) || applyYearLabel == "DigitalSalesSearch_ApplyYear_Label")
+                {
+                    applyYearLabel = "Năm áp dụng";
+                }
+            }
+            <label class="font-bold text-sm-right" for="ApplyYear">@applyYearLabel</label>
+            <div>
+                <select id="ApplyYear" name="ApplyYear" class="form-control" onchange="reloadSalesTable();">
+                    <option value="">-- Tất cả --</option>
+                    @for (int y = DateTime.Now.Year + 3; y >= DateTime.Now.Year - 5; y--)
+                    {
+                        <option value="@y" @((Model.ApplyYear.HasValue ? Model.ApplyYear.Value : DateTime.Now.Year) == y ? "selected" : "")>@y</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="position-relative status-filter-wrapper Search_Box" style="width: 185px; min-width: 160px;">
             <label class="font-bold text-sm-right status-label">
                 @{
                     var statusLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Status_Label");
@@ -96,70 +117,42 @@
             </div>
         </div>
 
-        <!-- 1. Toggle: Trọng điểm (Tách riêng biệt, switch to hơn, text đen, không icon) -->
-        <div class="Search_Box" style="min-width: 140px;">
-            <label class="font-bold d-block text-sm-right" style="visibility: hidden; font-size: 13px; margin: 0; height: 18px;">&nbsp;</label>
-            <div class="d-flex align-items-center" style="height: 32px;">
+        <!-- Nhóm 2 Toggle: Trọng điểm & Đang quan tâm (Gom chung 1 container gọn gàng, không rớt dòng) -->
+        <div class="Search_Box search-switches-box" style="min-width: 220px; margin-bottom: 5px;">
+            <label class="font-bold d-block text-sm-right d-none d-md-block" style="visibility: hidden; font-size: 13px; margin: 0; height: 18px;">&nbsp;</label>
+            <div class="d-flex align-items-center flex-nowrap" style="height: 32px; gap: 14px;">
                 <div class="custom-control custom-switch custom-switch-lg" title="Lọc các dự án trọng điểm">
                     <input type="checkbox" class="custom-control-input cursor-pointer" id="chkFilterKeyProject">
-                    <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0" for="chkFilterKeyProject" id="lblFilterKeyProject">
+                    <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0 text-nowrap" for="chkFilterKeyProject" id="lblFilterKeyProject">
                         Trọng điểm
                     </label>
                 </div>
-            </div>
-        </div>
-
-        <!-- 2. Toggle: Đang quan tâm (Tách riêng biệt, switch to hơn, text đen, không icon) -->
-        <div class="Search_Box" style="min-width: 160px;">
-            <label class="font-bold d-block text-sm-right" style="visibility: hidden; font-size: 13px; margin: 0; height: 18px;">&nbsp;</label>
-            <div class="d-flex align-items-center" style="height: 32px;">
                 <div class="custom-control custom-switch custom-switch-lg" title="Lọc các cơ hội/dự án bạn đang quan tâm">
                     <input type="checkbox" class="custom-control-input cursor-pointer" id="chkFilterFollowed">
-                    <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0" for="chkFilterFollowed" id="lblFilterFollowed">
+                    <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0 text-nowrap" for="chkFilterFollowed" id="lblFilterFollowed">
                         Đang quan tâm
                     </label>
                 </div>
             </div>
         </div>
 
-        <!-- 3. Bộ lọc: Năm áp dụng (Mặc định năm hiện tại) -->
-        <div class="Search_Box" style="width: 140px; min-width: 120px;">
-            @{
-                var applyYearLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_ApplyYear_Label");
-                if (string.IsNullOrWhiteSpace(applyYearLabel) || applyYearLabel == "DigitalSalesSearch_ApplyYear_Label")
-                {
-                    applyYearLabel = "Năm áp dụng";
-                }
-            }
-            <label class="font-bold text-sm-right" for="ApplyYear">@applyYearLabel</label>
-            <div>
-                <select id="ApplyYear" name="ApplyYear" class="form-control" onchange="reloadSalesTable();">
-                    <option value="">-- Tất cả --</option>
-                    @for (int y = DateTime.Now.Year + 3; y >= DateTime.Now.Year - 5; y--)
-                    {
-                        <option value="@y" @((Model.ApplyYear.HasValue ? Model.ApplyYear.Value : DateTime.Now.Year) == y ? "selected" : "")>@y</option>
-                    }
-                </select>
-            </div>
-        </div>
-
         <!-- Vạch phân tách hàng chuẩn giao diện: Hàng 1 (Tìm kiếm & Tiêu chí) và Hàng 2 (Đơn vị & Thời gian & Nút bấm) -->
         <div class="w-100 d-none d-lg-block my-1"></div>
 
-        <div class="Search_Box Dropdown">
+        <div class="Search_Box Dropdown" style="flex: 1 1 140px; min-width: 130px; max-width: 200px;">
             @Html.TitleFor(model => model.DepartmentID, new { @class = "font-bold" })
             @Html.DropDownListFor(model => model.DepartmentID, Model.ListDepartment, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Department_Option"), new { @class = "form-control", id = "DepartmentID" })
         </div>
 
-        <div class="Search_Box Dropdown">
+        <div class="Search_Box Dropdown" style="flex: 1 1 140px; min-width: 130px; max-width: 200px;">
             @Html.TitleFor(model => model.EmployeeID, new { @class = "font-bold" })
             @Html.DropDownListFor(model => model.EmployeeID, Model.ListEmployee, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Employee_Option"), new { @class = "form-control", id = "EmployeeID" })
         </div>
 
-        <div class="d-flex">
+        <div class="d-flex flex-nowrap" style="gap: 5px;">
             <div class="Search_Box">
                 @Html.TitleFor(model => model.FromDate, new { @class = "font-bold text-sm-right" })
-                <div class="input-group date" id="dpFromDate" style="width: 135px">
+                <div class="input-group date" id="dpFromDate" style="width: 125px">
                     @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control", id = "FromDate", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Date_Placeholder"), autocomplete = "off" })
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="fa fa-calendar"></i></span>
@@ -169,7 +162,7 @@
 
             <div class="Search_Box">
                 @Html.TitleFor(model => model.ToDate, new { @class = "font-bold text-sm-right" })
-                <div class="input-group date" id="dpToDate" style="width: 135px">
+                <div class="input-group date" id="dpToDate" style="width: 125px">
                     @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control", id = "ToDate", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Date_Placeholder"), autocomplete = "off" })
                     <div class="input-group-append">
                         <span class="input-group-text"><i class="fa fa-calendar"></i></span>
@@ -178,21 +171,21 @@
             </div>
         </div>
 
-        <div class="Group Group_button d-inline-flex align-items-center flex-nowrap" style="padding-top: 10px; padding-left: 5px; flex-shrink: 0;">
-            <div class="Search_button mr-2">
-                <button type="button" class="btn btn-primary text-nowrap" onclick="reloadSalesTable();" style="min-width: 105px; width: auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
+        <div class="Group Group_button d-inline-flex align-items-center flex-wrap" style="padding-top: 10px; padding-left: 5px; gap: 6px; flex-shrink: 0;">
+            <div class="Search_button">
+                <button type="button" class="btn btn-primary text-nowrap" onclick="reloadSalesTable();" style="min-width: 95px; width: auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="fa fa-search-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("Label_Search")
                 </button>
             </div>
 
-            <div class="Search_button mr-2">
-                <button type="button" class="btn btn-default btn-outline-secondary text-nowrap" onclick="resetSalesSearch();" style="min-width: 95px; width: auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
+            <div class="Search_button">
+                <button type="button" class="btn btn-default btn-outline-secondary text-nowrap" onclick="resetSalesSearch();" style="min-width: 85px; width: auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center;">
                     <i class="fa fa-undo mr-1"></i>Đặt lại
                 </button>
             </div>
 
             <div class="Search_button">
-                <button type="button" class="btn btn-warning font-bold text-nowrap shadow-sm" id="btnExportDigitalSales" onclick="exportDigitalSales();" style="min-width: 140px; width: auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; padding: 2px 14px;" title="Tải danh sách theo điều kiện tìm kiếm">
+                <button type="button" class="btn btn-warning font-bold text-nowrap shadow-sm" id="btnExportDigitalSales" onclick="exportDigitalSales();" style="min-width: 125px; width: auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; padding: 2px 10px;" title="Tải danh sách theo điều kiện tìm kiếm">
                     <i class="fa fa-download mr-1"></i>Tải danh sách
                 </button>
             </div>
