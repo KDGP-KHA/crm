@@ -447,6 +447,7 @@
 		<!-- RM_DigitalSales Helpers -->
 		<Procedure Name="RM_DigitalSales_GetDepartmentByUserID" Value="RM_DigitalSales_GetDepartmentByUserID" />
 		<Procedure Name="RM_DigitalSales_GetAccessibleEmployees" Value="RM_DigitalSales_GetAccessibleEmployees" />
+		<Procedure Name="RM_DigitalSales_GetDashboardStatusStats" Value="RM_DigitalSales_GetDashboardStatusStats" />
 	</StoredProcedures>
 </Provider>
 
