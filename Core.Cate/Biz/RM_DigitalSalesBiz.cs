@@ -276,7 +276,7 @@ namespace Core.Cate.Biz
                     product.Contracts = GetProductContracts(product.SalesProductID);
                     product.ContractCount = product.Contracts.Count;
                     // Contract TotalAmount is already stored in million VND, matching the product summary unit.
-                    product.ContractRevenueMillion = product.Contracts.Sum(item => Convert.ToDecimal(item.TotalAmount));
+                    product.ContractRevenueMillion = product.Contracts.Sum(item => Convert.ToDecimal(item.TotalAmount > 0 ? item.TotalAmount : item.ContractValue));
                     product.ActualRevenue = product.ContractRevenueMillion * 1000000m;
                 }
                 catch (Exception ex)
