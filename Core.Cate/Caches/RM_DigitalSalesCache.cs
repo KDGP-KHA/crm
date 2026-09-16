@@ -314,14 +314,14 @@ namespace Core.Cate.Caches
             return data;
         }
 
-        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
-            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear);
+            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear, "_", userName ?? "ALL");
             var data = GetCacheItem(rawKey) as DigitalSalesDashboardOverviewModel;
             if (data != null) return data;
 
-            data = Api.GetDashboardStatusStats(applyYear);
+            data = Api.GetDashboardStatusStats(applyYear, userName);
             if (data != null)
             {
                 AddCacheItem(rawKey, data);

@@ -24,5 +24,7 @@ namespace Core.Cate.Models
         public decimal TotalExpectedRevenueAll { get; set; }
         public decimal TotalActualRevenueAll { get; set; }
         public List<RM_DigitalSalesModel> KeyProjects { get; set; } = new List<RM_DigitalSalesModel>();
+        public List<RM_DigitalSalesModel> FollowedOpportunities { get; set; } = new List<RM_DigitalSalesModel>();
+        public List<RM_DigitalSalesModel> StaleActionTimeSales { get; set; } = new List<RM_DigitalSalesModel>();
     }
 }
