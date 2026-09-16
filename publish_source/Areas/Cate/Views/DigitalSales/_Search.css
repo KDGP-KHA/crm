@@ -1,110 +1,154 @@
 .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom,
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-bottom,
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top,
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-top,
-    .datepicker.datepicker-dropdown {
-        z-index: 1060 !important;
-    }
-    /* Switch cỡ lớn hơn, chữ đen rõ nét, canh giữa hoàn hảo theo yêu cầu người dùng */
-    .custom-switch.custom-switch-lg {
-        padding-left: 56px !important;
-        min-height: 26px;
-        display: inline-flex;
-        align-items: center;
-        margin-bottom: 0;
-        cursor: pointer;
-    }
-    .custom-switch.custom-switch-lg .custom-control-label {
-        font-size: 14px !important;
-        color: #1a1a1a !important;
-        font-weight: 600 !important;
-        line-height: 26px !important;
-        cursor: pointer;
-        user-select: none;
-        white-space: nowrap;
-        display: inline-flex;
-        align-items: center;
-        min-height: 26px;
-        margin-bottom: 0;
-    }
-    .custom-switch.custom-switch-lg .custom-control-label::before {
-        position: absolute;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        left: -56px !important;
-        width: 46px !important;
-        height: 24px !important;
-        border-radius: 12px !important;
-        background-color: #ced4da;
-        border: 1px solid #adb5bd;
-        pointer-events: all;
-        cursor: pointer;
-    }
-    .custom-switch.custom-switch-lg .custom-control-label::after {
-        position: absolute;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        left: -54px !important;
-        width: 20px !important;
-        height: 20px !important;
-        border-radius: 50% !important;
-        background-color: #fff !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
-        cursor: pointer;
-    }
-    .custom-switch.custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after {
-        transform: translateY(-50%) translateX(22px) !important;
-    }
-    #chkFilterKeyProject:checked ~ .custom-control-label::before {
-        background-color: #f59f00 !important;
-        border-color: #f59f00 !important;
-    }
-    #chkFilterFollowed:checked ~ .custom-control-label::before {
-        background-color: #e03131 !important;
-        border-color: #e03131 !important;
-    }
+.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-bottom,
+.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top,
+.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-top,
+.datepicker.datepicker-dropdown {
+    z-index: 1060 !important;
+}
 
-    /* Checkbox cho nhỏ lại và hình vuông chuẩn, chống dãn chiều cao do .Search_Box input { height: 32px; } */
-    #statusDropdownMenu input[type="checkbox"],
-    .Search_Box input[type="checkbox"]:not(.custom-control-input) {
-        width: 14px !important;
-        height: 14px !important;
-        min-width: 14px !important;
-        min-height: 14px !important;
-        max-width: 14px !important;
-        max-height: 14px !important;
-        margin: 0 6px 0 0 !important;
-        padding: 0 !important;
-        border-radius: 2px !important;
-        vertical-align: middle !important;
-        cursor: pointer;
-        flex-shrink: 0 !important;
-        accent-color: #0284c7;
-    }
+/* Bootstrap Grid Gutter */
+#SearchDigitalSales .row {
+    margin-left: -5px;
+    margin-right: -5px;
+}
+#SearchDigitalSales .row > [class*="col-"] {
+    padding-left: 5px;
+    padding-right: 5px;
+}
 
-    #statusDropdownMenu label {
-        display: flex !important;
-        align-items: center !important;
-        margin-bottom: 0 !important;
-        cursor: pointer;
-        font-size: 13px;
-        line-height: 1.4 !important;
-    }
+/* Height standard 34px */
+#SearchDigitalSales .form-control {
+    height: 34px;
+    font-size: 13px;
+}
+#SearchDigitalSales #statusDropdownButton {
+    height: 34px;
+    font-size: 13px;
+}
+#SearchDigitalSales .search-switches-box .switches-wrapper {
+    height: 34px;
+}
 
-    /* Gom nhóm 2 switch Trọng điểm & Đang quan tâm */
-    .search-switches-box {
-        margin-bottom: 5px;
+/* Action buttons */
+#SearchDigitalSales .search-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 34px;
+}
+#SearchDigitalSales .search-action-buttons .btn {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+#SearchDigitalSales .search-action-buttons .btn .fa {
+    font-size: 12px;
+}
+
+@media (min-width: 992px) and (max-width: 1250px) {
+    #SearchDigitalSales .search-action-buttons .btn {
+        padding: 0 4px !important;
+        font-size: 12px !important;
     }
-    .search-switches-box .custom-switch.custom-switch-lg {
-        margin-right: 0 !important;
+    #SearchDigitalSales .search-action-buttons {
+        gap: 3px !important;
     }
-    @media (max-width: 991px) {
-        .Search_Box.keyWord {
-            flex: 1 1 100% !important;
-            max-width: 100% !important;
-        }
-        .search-switches-box {
-            width: 100%;
-        }
-    }
+}
+
+/* Custom switch */
+.custom-switch.custom-switch-lg {
+    padding-left: 56px !important;
+    min-height: 26px;
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+.custom-switch.custom-switch-lg .custom-control-label {
+    font-size: 14px !important;
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+    line-height: 26px !important;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    margin-bottom: 0;
+}
+.custom-switch.custom-switch-lg .custom-control-label::before {
+    position: absolute;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: -56px !important;
+    width: 46px !important;
+    height: 24px !important;
+    border-radius: 12px !important;
+    background-color: #ced4da;
+    border: 1px solid #adb5bd;
+    pointer-events: all;
+    cursor: pointer;
+}
+.custom-switch.custom-switch-lg .custom-control-label::after {
+    position: absolute;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: -54px !important;
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    background-color: #fff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+    cursor: pointer;
+}
+.custom-switch.custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after {
+    transform: translateY(-50%) translateX(22px) !important;
+}
+#chkFilterKeyProject:checked ~ .custom-control-label::before {
+    background-color: #f59f00 !important;
+    border-color: #f59f00 !important;
+}
+#chkFilterFollowed:checked ~ .custom-control-label::before {
+    background-color: #e03131 !important;
+    border-color: #e03131 !important;
+}
+
+/* Checkbox small */
+#statusDropdownMenu input[type="checkbox"],
+.Search_Box input[type="checkbox"]:not(.custom-control-input) {
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    min-height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+    margin: 0 6px 0 0 !important;
+    padding: 0 !important;
+    border-radius: 2px !important;
+    vertical-align: middle !important;
+    cursor: pointer;
+    flex-shrink: 0 !important;
+    accent-color: #0284c7;
+}
+
+#statusDropdownMenu label {
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 0 !important;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4 !important;
+}
+
+.search-switches-box {
+    margin-bottom: 5px;
+}
+.search-switches-box .custom-switch.custom-switch-lg {
+    margin-right: 0 !important;
+}
