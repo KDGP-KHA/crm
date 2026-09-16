@@ -136,7 +136,6 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh) và bộ lọc theo Năm áp dụng.
         /// </summary>
         [HttpGet]
-        [ActionType(Type = EnumActionType.View)]
         public ActionResult Chart(int? applyYear)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
@@ -150,7 +149,6 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng.
         /// </summary>
         [HttpGet]
-        [ActionType(Type = EnumActionType.View)]
         public ActionResult GetChartOverviewData(int? applyYear)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
