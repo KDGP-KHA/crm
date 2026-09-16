@@ -2,10 +2,31 @@
 @model List<Core.Cate.Models.RM_DigitalSalesActivityModel>
 @{
     var task = ViewBag.Task as Core.Cate.Models.RM_DigitalSalesTrackingModel;
+    bool isSubTask = task != null && ((task.ParentID.HasValue && task.ParentID.Value > 0) || (!string.IsNullOrEmpty(task.TrackingCode) && task.TrackingCode.StartsWith("CV")));
+    string itemTypeNameCapitalized = isSubTask ? "Công việc" : "Tiến trình";
     var logs = Model ?? new List<Core.Cate.Models.RM_DigitalSalesActivityModel>();
     string creatorName = task != null ? (!string.IsNullOrEmpty(task.CreatedByName) ? task.CreatedByName : (!string.IsNullOrEmpty(task.CreatedBy) ? task.CreatedBy : "Hệ thống")) : "—";
     string assigneeName = task != null ? (!string.IsNullOrEmpty(task.AssignedUserName) ? task.AssignedUserName : "Chưa phân công") : "—";
     string modifierName = task != null ? (!string.IsNullOrEmpty(task.LastModifiedByName) ? task.LastModifiedByName : (!string.IsNullOrEmpty(task.LastModifiedBy) ? task.LastModifiedBy : "—")) : "—";
+
+    var allLogs = new List<Core.Cate.Models.RM_DigitalSalesActivityModel>();
+    if (task != null)
+    {
+        allLogs.Add(new Core.Cate.Models.RM_DigitalSalesActivityModel
+        {
+            ActivityID = 0,
+            ActionDate = task.CreatedDate != DateTime.MinValue ? task.CreatedDate : DateTime.MinValue,
+            ActionByName = creatorName,
+            ReferenceID = task.TrackingID,
+            Content = $"<div>Khởi tạo <b>{task.TaskName}</b> trong quy trình <i>{(string.IsNullOrEmpty(task.ProcessName) ? "Quy trình thực hiện" : task.ProcessName)}</i>.</div>"
+                    + $"<div class=\"text-secondary mt-1 text-85\"><i class=\"fa fa-user-check text-success mr-1\"></i>Phân công người thực hiện: <b>{assigneeName}</b> <span class=\"mx-1\">•</span> <i class=\"far fa-calendar-alt text-warning-d2 mr-1\"></i>Kế hoạch: {task.StartDate:dd/MM/yyyy} đến {(task.Deadline.HasValue ? task.Deadline.Value.ToString("dd/MM/yyyy") : task.MaxDeadline.ToString("dd/MM/yyyy"))} ({task.EffectiveDurationDays} ngày)</div>"
+        });
+    }
+    if (logs != null && logs.Count > 0)
+    {
+        allLogs.AddRange(logs);
+    }
+    var sortedLogs = allLogs.OrderByDescending(l => l.ActionDate).ThenByDescending(l => l.ActivityID).ToList();
 }
 
 <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_TrackingLogsModal.css?v=@DateTime.Now.Ticks" />
@@ -15,7 +36,7 @@
         <div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">
             <div class="modal-header bgc-primary-d1 text-white py-25 px-3">
                 <h5 class="modal-title text-white mb-0 text-105 font-bold">
-                    <i class="fa fa-history mr-1"></i> Log thao tác tiến trình
+                    <i class="fa fa-history mr-1"></i> Log thao tác @itemTypeNameCapitalized.ToLower()
                 </h5>
                 <button type="button" class="close text-white opacity-2" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -28,7 +49,7 @@
                     <div class="card bcard border-1 brc-primary-m3 shadow-sm mb-3 radius-1 bgc-white">
                         <div class="card-header bgc-primary-l4 py-2 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 8px;">
                             <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
-                                <span class="badge bgc-primary-l1 text-white font-bold px-2 py-1 radius-1 text-85">
+                                <span class="badge badge-primary tracking-code-badge font-bold px-2 py-1 radius-1 text-85">
                                     <i class="fa fa-barcode mr-1"></i>@task.TrackingCode
                                 </span>
                                 <span class="font-bolder text-dark text-110">@task.TaskName</span>
@@ -171,46 +192,39 @@
                 <!-- TIÊU ĐỀ PHẦN NHẬT KÝ LỊCH SỬ THAO TÁC -->
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <h6 class="text-secondary-d2 font-bold mb-0 text-95">
-                        <i class="fa fa-stream mr-1 text-primary"></i> Nhật ký chi tiết các mốc thao tác (@(logs.Count + (task != null ? 1 : 0)) sự kiện)
+                        <i class="fa fa-stream mr-1 text-primary"></i> Nhật ký chi tiết các mốc thao tác (@sortedLogs.Count sự kiện)
                     </h6>
                 </div>
 
                 <div class="tracking-log-timeline">
-                    <!-- SỰ KIỆN CỘT MỐC 1: KHỞI TẠO TIẾN TRÌNH -->
-                    @if (task != null)
+                    @foreach (var log in sortedLogs)
                     {
-                        <div class="tracking-log-item">
-                            <div class="tracking-log-dot bgc-primary-d1"></div>
-                            <div class="tracking-log-card bgc-white border-1 brc-grey-l2 shadow-sm radius-1 p-3">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap mb-1" style="gap: 6px;">
-                                    <div class="d-flex align-items-center">
-                                        <span class="font-weight-bold text-primary-d2 mr-2 text-90">
-                                            <i class="fa fa-user-circle mr-1"></i>@creatorName
-                                        </span>
-                                        <span class="badge badge-light-primary border-1 brc-primary-m3 text-75">
-                                            @(task.ParentID.HasValue && task.ParentID.Value > 0 ? "Khởi tạo công việc con" : "Khởi tạo tiến trình")
+                        if (log.ActivityID == 0)
+                        {
+                            <!-- SỰ KIỆN CỘT MỐC KHỞI TẠO TIẾN TRÌNH / CÔNG VIỆC CON -->
+                            <div class="tracking-log-item">
+                                <div class="tracking-log-dot bgc-primary-d1"></div>
+                                <div class="tracking-log-card bgc-white border-1 brc-grey-l2 shadow-sm radius-1 p-3">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap mb-1" style="gap: 6px;">
+                                        <div class="d-flex align-items-center">
+                                            <span class="font-weight-bold text-primary-d2 mr-2 text-90">
+                                                <i class="fa fa-user-circle mr-1"></i>@creatorName
+                                            </span>
+                                            <span class="badge badge-light-primary border-1 brc-primary-m3 text-75">
+                                                @(isSubTask ? "Khởi tạo công việc con" : "Khởi tạo tiến trình")
+                                            </span>
+                                        </div>
+                                        <span class="text-muted text-80">
+                                            <i class="far fa-clock mr-1"></i>@(log.ActionDate != DateTime.MinValue ? log.ActionDate.ToString("dd/MM/yyyy HH:mm:ss") : "Ban đầu")
                                         </span>
                                     </div>
-                                    <span class="text-muted text-80">
-                                        <i class="far fa-clock mr-1"></i>@(task.CreatedDate != DateTime.MinValue ? task.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss") : "Ban đầu")
-                                    </span>
-                                </div>
-                                <div class="text-dark text-90 log-content">
-                                    <div>Khởi tạo <b>@task.TaskName</b> trong quy trình <i>@(string.IsNullOrEmpty(task.ProcessName) ? "Quy trình thực hiện" : task.ProcessName)</i>.</div>
-                                    <div class="text-secondary mt-1 text-85">
-                                        <i class="fa fa-user-check text-success mr-1"></i>Phân công người thực hiện: <b>@assigneeName</b>
-                                        <span class="mx-1">•</span>
-                                        <i class="far fa-calendar-alt text-warning-d2 mr-1"></i>Kế hoạch: @task.StartDate.ToString("dd/MM/yyyy") đến @(task.Deadline.HasValue ? task.Deadline.Value.ToString("dd/MM/yyyy") : task.MaxDeadline.ToString("dd/MM/yyyy")) (@task.EffectiveDurationDays ngày)
+                                    <div class="text-dark text-90 log-content">
+                                        @Html.Raw(log.Content)
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-
-                    <!-- CÁC SỰ KIỆN TIẾP THEO TRONG BẢNG LOGS -->
-                    @if (logs.Count > 0)
-                    {
-                        foreach (var log in logs)
+                        }
+                        else
                         {
                             bool isChildLog = task != null && log.ReferenceID.HasValue && log.ReferenceID.Value != task.TrackingID;
                             <div class="tracking-log-item">

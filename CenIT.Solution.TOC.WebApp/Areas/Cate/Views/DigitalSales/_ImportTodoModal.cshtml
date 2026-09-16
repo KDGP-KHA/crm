@@ -63,7 +63,7 @@
                                     <label class="custom-file-label text-truncate" for="fileTodoImport" id="lblTodoFileName">Chọn tệp Excel từ máy tính...</label>
                                 </div>
                                 <small class="text-muted d-block mt-1">
-                                    <i class="fa fa-info-circle mr-1 text-info"></i> Các cột bắt buộc: <strong>Mã tiến trình</strong>, <strong>Tên công việc con</strong>, <strong>Hạn xử lý</strong>.
+                                    <i class="fa fa-info-circle mr-1 text-info"></i> Các cột bắt buộc: <strong>Mã tiến trình</strong>, <strong>Tên công việc con</strong>, <strong>Ngày bắt đầu</strong>, <strong>Số ngày</strong> (Hạn xử lý sẽ được hệ thống tự động tính toán).
                                 </small>
                             </div>
                             <div class="col-md-4 text-md-right">
@@ -101,11 +101,13 @@
                                         <th style="width: 120px;" class="text-center">Mã tiến trình (*)</th>
                                         <th style="min-width: 180px;">Tiến trình cha</th>
                                         <th style="min-width: 200px;">Tên công việc con (*)</th>
-                                        <th style="width: 140px;">Người thực hiện</th>
-                                        <th class="text-center" style="width: 95px;">Bắt đầu</th>
+                                        <th style="width: 130px;">Người thực hiện</th>
+                                        <th style="width: 115px;" class="text-center">Trạng thái</th>
+                                        <th class="text-center" style="width: 95px;">Bắt đầu (*)</th>
+                                        <th class="text-center" style="width: 80px;">Số ngày (*)</th>
                                         <th class="text-center" style="width: 95px;">Hạn xử lý</th>
                                         <th style="min-width: 140px;">Ghi chú</th>
-                                        <th style="min-width: 220px;" class="text-center">Thông tin lỗi</th>
+                                        <th style="min-width: 200px;" class="text-center">Thông tin lỗi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyTodoPreview">

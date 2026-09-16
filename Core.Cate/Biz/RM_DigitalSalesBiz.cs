@@ -442,6 +442,25 @@ namespace Core.Cate.Biz
                     .Where(tl => tl.ToStatusID > 0 && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
                     .OrderBy(tl => tl.ActionDate).ThenBy(tl => tl.TimelineID)
                     .ToList();
+                var validTimelineIds = new HashSet<int>(transitions.Select(tl => tl.TimelineID));
+
+                // Chuẩn hóa TimelineID cho tất cả các tiến trình hiện tại:
+                // Nếu 1 task có TimelineID là null hoặc trỏ vào timeline không phải chuyển trạng thái,
+                // thì tự động map lại vào TimelineID chuyển trạng thái hợp lệ gần nhất của Status đó.
+                foreach (var t in model.TrackingTasks)
+                {
+                    if (t.StatusID.HasValue && t.StatusID.Value > 0)
+                    {
+                        if (!t.TimelineID.HasValue || !validTimelineIds.Contains(t.TimelineID.Value))
+                        {
+                            var matchingTl = transitions.Where(tl => tl.ToStatusID == t.StatusID.Value).LastOrDefault();
+                            if (matchingTl != null)
+                            {
+                                t.TimelineID = matchingTl.TimelineID;
+                            }
+                        }
+                    }
+                }
 
                 foreach (var tl in transitions)
                 {
@@ -471,6 +490,10 @@ namespace Core.Cate.Biz
                         model.TrackingTasks.Add(placeholder);
                     }
                 }
+
+                // Xóa placeholder rỗng nếu đã có tiến trình thực tế cùng TimelineID
+                var timelineWithRealTasks = new HashSet<int>(model.TrackingTasks.Where(t => !string.IsNullOrWhiteSpace(t.TaskName) && t.TimelineID.HasValue).Select(t => t.TimelineID.Value));
+                model.TrackingTasks.RemoveAll(t => t.TrackingID == 0 && string.IsNullOrWhiteSpace(t.TaskName) && t.TimelineID.HasValue && timelineWithRealTasks.Contains(t.TimelineID.Value));
             }
 
             // 2. Đồng thời kiểm tra trạng thái hiện tại (model.StatusID) nếu chưa có trong TrackingTasks
@@ -481,7 +504,10 @@ namespace Core.Cate.Biz
                 var activeProcs = procs?.Where(p => p.IsActive).OrderBy(p => p.SortOrder).ToList();
                 var defaultProc = activeProcs?.FirstOrDefault();
 
-                int? latestTimelineId = model.Timelines?.OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID).FirstOrDefault(tl => tl.ToStatusID == model.StatusID)?.TimelineID;
+                int? latestTimelineId = model.Timelines?
+                    .Where(tl => tl.ToStatusID == model.StatusID && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                    .FirstOrDefault()?.TimelineID;
 
                 var placeholder = new RM_DigitalSalesTrackingModel
                 {
@@ -591,6 +617,16 @@ namespace Core.Cate.Biz
 
             var currentTasks = GetTrackingTasks(digitalSalesId);
             var oldTasks = currentTasks.Where(t => t.StatusID == statusId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+            int? currentTimelineId = oldTasks.FirstOrDefault(t => t.TimelineID.HasValue)?.TimelineID;
+            if (!currentTimelineId.HasValue)
+            {
+                var sales = GetByID(digitalSalesId, username);
+                currentTimelineId = sales?.Timelines?
+                    .Where(tl => tl.ToStatusID == statusId && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
+                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
+                    .FirstOrDefault()?.TimelineID;
+            }
+
             foreach (var ot in oldTasks)
             {
                 DeleteTracking(ot.TrackingID, username);
@@ -616,7 +652,8 @@ namespace Core.Cate.Biz
                         Deadline = DateTime.Now.AddDays(duration),
                         Status = 1,
                         IsCustomTask = false,
-                        SortOrder = sort++
+                        SortOrder = sort++,
+                        TimelineID = currentTimelineId
                     };
                     SaveTracking(task, username);
                 }
@@ -638,7 +675,8 @@ namespace Core.Cate.Biz
                     Deadline = DateTime.Now.AddDays(3),
                     Status = 1,
                     IsCustomTask = true,
-                    SortOrder = 1
+                    SortOrder = 1,
+                    TimelineID = currentTimelineId
                 };
                 SaveTracking(emptyTask, username);
             }

@@ -1,0 +1,119 @@
+﻿@using Core.Cate.Models
+@model List<RM_DigitalSalesTimelineModel>
+@{
+    int salesId = ViewBag.DigitalSalesID != null ? (int)ViewBag.DigitalSalesID : 0;
+    string salesCode = ViewBag.DigitalSalesCode as string ?? "";
+    string salesName = ViewBag.DigitalSalesName as string ?? "";
+}
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_StatusTimelineModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="modalStatusTimeline" tabindex="-1" role="dialog" aria-labelledby="modalStatusTimelineTitle" aria-hidden="true">
+    <div class="modal-dialog timeline-modal-dialog" role="document">
+        <div class="modal-content shadow-lg border-0 radius-2">
+            <div class="modal-header timeline-modal-header align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="badge badge-success mr-2 px-2 py-1 radius-1">
+                        <i class="fa fa-stream"></i>
+                    </span>
+                    <h5 class="timeline-modal-title" id="modalStatusTimelineTitle">TIMELINE CẬP NHẬT CHUYỂN TRẠNG THÁI</h5>
+                    @if (!string.IsNullOrEmpty(salesCode))
+                    {
+                        <span class="badge badge-light-primary text-primary-d2 border-1 brc-primary-m3 font-bold ml-3 px-2 py-1">@salesCode</span>
+                    }
+                </div>
+                <button type="button" class="close text-secondary" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-0">
+                @if (Model == null || Model.Count == 0)
+                {
+                    <div class="timeline-empty-state">
+                        <i class="fa fa-info-circle fa-2x text-secondary mb-2"></i>
+                        <p class="mb-0">Chưa có dữ liệu cập nhật trạng thái trong hệ thống.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="timeline-container">
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var tl = Model[i];
+                            bool isRight = (i % 2 == 0); // Xen kẽ: mốc 0 bên phải, mốc 1 bên trái, mốc 2 bên phải...
+                            string authorName = !string.IsNullOrEmpty(tl.ActionByName) ? tl.ActionByName : (!string.IsNullOrEmpty(tl.ActionBy) ? tl.ActionBy : "HỆ THỐNG");
+                            bool isProject = tl.ToBusinessType == 2;
+                            string tagClass = isProject ? "timeline-tag-duan" : "timeline-tag-cohoi";
+                            string tagText = isProject ? "[DỰ ÁN]" : "[CƠ HỘI]";
+
+                            <div class="timeline-row @(isRight ? "timeline-row-right" : "timeline-row-left")">
+                                <!-- Node mốc thời gian ở giữa -->
+                                <div class="timeline-center-node">
+                                    <div class="timeline-node-date">@tl.ActionDate.ToString("dd/MM/yyyy")</div>
+                                    <div class="timeline-node-time">@tl.ActionDate.ToString("HH:mm")</div>
+                                </div>
+
+                                <!-- Nhánh kẻ ngang -->
+                                <div class="timeline-branch-line"></div>
+
+                                @if (!isRight)
+                                {
+                                    <!-- Thẻ bên trái -->
+                                    <div class="timeline-half timeline-half-left">
+                                        <div class="timeline-card">
+                                            <div class="timeline-card-author" title="Người thực hiện chuyển trạng thái: @authorName">
+                                                <i class="fa fa-user-check text-primary mr-1"></i>@authorName
+                                            </div>
+                                            <div class="timeline-card-status">
+                                                <span class="@tagClass">@tagText</span> – @tl.ToStatusName
+                                            </div>
+                                            @if (!string.IsNullOrWhiteSpace(tl.Note))
+                                            {
+                                                <div class="timeline-card-note">@tl.Note</div>
+                                            }
+                                            <div class="timeline-card-links">
+                                                <button type="button" class="timeline-link-detail" onclick="openStatusTimelineDetailModal(@salesId, @tl.TimelineID);">
+                                                    Xem chi tiết
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-half timeline-half-right"></div>
+                                }
+                                else
+                                {
+                                    <!-- Thẻ bên phải -->
+                                    <div class="timeline-half timeline-half-left"></div>
+                                    <div class="timeline-half timeline-half-right">
+                                        <div class="timeline-card">
+                                            <div class="timeline-card-author" title="Người thực hiện chuyển trạng thái: @authorName">
+                                                <i class="fa fa-user-check text-primary mr-1"></i>@authorName
+                                            </div>
+                                            <div class="timeline-card-status">
+                                                <span class="@tagClass">@tagText</span> – @tl.ToStatusName
+                                            </div>
+                                            @if (!string.IsNullOrWhiteSpace(tl.Note))
+                                            {
+                                                <div class="timeline-card-note">@tl.Note</div>
+                                            }
+                                            <div class="timeline-card-links">
+                                                <button type="button" class="timeline-link-detail" onclick="openStatusTimelineDetailModal(@salesId, @tl.TimelineID);">
+                                                    Xem chi tiết
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="modal-footer bg-light px-3 py-2">
+                <button type="button" class="btn btn-secondary btn-sm px-3 radius-1" data-dismiss="modal">
+                    <i class="fa fa-times mr-1"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

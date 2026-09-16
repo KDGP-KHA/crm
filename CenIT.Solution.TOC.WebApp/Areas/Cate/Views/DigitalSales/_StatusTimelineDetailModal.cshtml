@@ -1,0 +1,268 @@
+﻿@using Core.Cate.Models
+@model RM_DigitalSalesTimelineDetailViewModel
+@{
+    var timeline = Model.Timeline;
+    string statusTitle = timeline != null && !string.IsNullOrEmpty(timeline.ToStatusName)
+        ? timeline.ToStatusName
+        : "Chi tiết trạng thái";
+    bool isProject = timeline != null && timeline.ToBusinessType == 2;
+    string tagText = isProject ? "[DỰ ÁN]" : "[CƠ HỘI]";
+
+    int totalFilesCount = (Model.TransitionFiles?.Count ?? 0) + (Model.TaskFileGroups?.Sum(g => g.Files?.Count ?? 0) ?? 0);
+    bool hasAnyFiles = totalFilesCount > 0;
+}
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_StatusTimelineDetailModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="modalStatusTimelineDetail" tabindex="-1" role="dialog" aria-labelledby="modalStatusTimelineDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl timeline-detail-dialog" role="document">
+        <div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">
+            <!-- Modal Header chuẩn CRM Ace Admin -->
+            <div class="modal-header bgc-primary-d1 text-white py-25 px-3 d-flex align-items-center justify-content-between flex-wrap" style="gap: 8px;">
+                <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                    <span class="badge bgc-white text-primary-d2 font-bolder px-2 py-1 radius-1 text-85 shadow-sm">
+                        @tagText
+                    </span>
+                    <h5 class="modal-title text-white mb-0 text-110 font-bold" id="modalStatusTimelineDetailTitle">
+                        <i class="fa fa-info-circle mr-1"></i> Chi tiết Trạng thái: <span class="text-white">@statusTitle</span>
+                    </h5>
+                    @if (timeline != null && timeline.ActionDate != DateTime.MinValue)
+                    {
+                        <span class="badge bgc-white-tp9 text-white border-1 brc-white-tp4 px-2 py-1 font-bold text-85 ml-1">
+                            <i class="fa fa-clock mr-1"></i>@timeline.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    }
+                    @if (timeline != null && !string.IsNullOrEmpty(timeline.ActionByName))
+                    {
+                        <span class="badge bgc-white-tp9 text-white border-1 brc-white-tp4 px-2 py-1 font-bold text-85 ml-1" title="Người thực hiện chuyển trạng thái">
+                            <i class="fa fa-user-check mr-1 text-success-l3"></i>@timeline.ActionByName
+                        </span>
+                    }
+                </div>
+                <button type="button" class="close text-white opacity-2" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Modal Body chuẩn 2 Cột dạng Card Panel Ace Admin -->
+            <div class="modal-body p-3 bgc-grey-l5">
+                <div class="row">
+                    <!-- CỘT TRÁI: TIẾN TRÌNH TRONG TRẠNG THÁI -->
+                    <div class="col-lg-7 col-md-12 mb-3 mb-lg-0">
+                        <div class="card bcard border-1 brc-default-l1 shadow-sm radius-1 bgc-white h-100">
+                            <div class="card-header bgc-primary-l4 py-2 px-3 border-0 border-b-1 brc-primary-l2 d-flex align-items-center justify-content-between">
+                                <div class="font-bold text-primary-d2 text-95">
+                                    <i class="fa fa-clipboard-list mr-1"></i> NỘI DUNG THỰC HIỆN TRONG TRẠNG THÁI
+                                </div>
+                                <span class="badge badge-primary font-bold px-2 py-05 text-80 radius-1">
+                                    @(Model.Tasks?.Count ?? 0) tiến trình
+                                </span>
+                            </div>
+                            <div class="card-body p-0 timeline-detail-scroll-pane">
+                                @if (Model.Tasks == null || Model.Tasks.Count == 0)
+                                {
+                                    <div class="text-center py-5 text-secondary">
+                                        <i class="fa fa-info-circle fa-2x text-grey-l1 mb-2"></i>
+                                        <p class="mb-0 text-90">Không có công việc / tiến trình nào trong trạng thái này.</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="list-group list-group-flush">
+                                        @{
+                                            int taskIdx = 1;
+                                            var sortedTasks = (Model.Tasks ?? new List<RM_DigitalSalesTrackingModel>())
+                                                .OrderBy(t => t.StartDate)
+                                                .ThenBy(t => t.MaxDeadline)
+                                                .ThenBy(t => t.SortOrder)
+                                                .ThenBy(t => t.TrackingID)
+                                                .ToList();
+                                        }
+                                        @foreach (var task in sortedTasks)
+                                        {
+                                            string assignee = !string.IsNullOrEmpty(task.AssignedUserName) ? task.AssignedUserName : "Chưa phân công";
+                                            string startDateStr = task.StartDate != DateTime.MinValue ? task.StartDate.ToString("dd/MM/yyyy") : "—";
+                                            string deadlineStr = task.MaxDeadline != DateTime.MinValue ? task.MaxDeadline.ToString("dd/MM/yyyy") : "Chưa đặt hạn";
+                                            bool isOverdue = task.IsOverdue == 1;
+
+                                            <div class="list-group-item d-flex align-items-center justify-content-between p-25 border-b-1 brc-grey-l3 hover-bgc-light transition-base">
+                                                <div class="d-flex align-items-center flex-grow-1 pr-2 min-w-0">
+                                                    <span class="badge bgc-grey-l3 text-secondary mr-2 font-bold px-2 py-1 radius-round text-80 flex-shrink-0">
+                                                        @(taskIdx)
+                                                    </span>
+                                                    <div class="flex-grow-1 min-w-0">
+                                                        <div class="font-bold text-dark text-95 mb-1 text-truncate" title="@task.TaskName">
+                                                            @task.TaskName
+                                                        </div>
+                                                        <div class="text-secondary text-85 d-flex align-items-center flex-wrap" style="gap: 12px;">
+                                                            <span>
+                                                                <i class="fa fa-user-circle text-primary-m1 mr-1"></i>
+                                                                <span class="font-bold text-primary-d1">@assignee</span>
+                                                            </span>
+                                                            <span>
+                                                                <i class="far fa-calendar-alt text-primary-m2 mr-1"></i>
+                                                                <span class="text-secondary">Bắt đầu: <span class="font-bold text-dark-m2">@startDateStr</span></span>
+                                                            </span>
+                                                            <span>
+                                                                <i class="far fa-calendar-check text-warning-d2 mr-1"></i>
+                                                                <span class="@(isOverdue ? "text-danger font-bold" : "text-secondary")">Hạn: @deadlineStr</span>
+                                                            </span>
+                                                            <span>
+                                                                @if (task.Status == 3)
+                                                                {
+                                                                    <span class="badge badge-success font-bold px-2 py-05 text-80 radius-1">
+                                                                        <i class="fa fa-check mr-1"></i>Hoàn thành
+                                                                    </span>
+                                                                }
+                                                                else if (task.Status == 2)
+                                                                {
+                                                                    <span class="badge badge-warning font-bold px-2 py-05 text-80 radius-1">
+                                                                        <i class="fa fa-spinner fa-spin mr-1"></i>Đang làm
+                                                                    </span>
+                                                                }
+                                                                else if (isOverdue)
+                                                                {
+                                                                    <span class="badge badge-danger font-bold px-2 py-05 text-80 radius-1">
+                                                                        <i class="fa fa-exclamation-circle mr-1"></i>Quá hạn
+                                                                    </span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="badge badge-secondary font-bold px-2 py-05 text-80 radius-1">
+                                                                        <i class="fa fa-clock mr-1"></i>Chưa làm
+                                                                    </span>
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-2 flex-shrink-0">
+                                                    <button type="button" class="btn btn-xs btn-white btn-primary btn-bold radius-1 px-25 py-1 shadow-sm" onclick="openTrackingLogsModal(@task.TrackingID, @Model.DigitalSalesID);" title="Xem log thao tác">
+                                                        <i class="fa fa-history mr-1"></i>Log
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            taskIdx++;
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: FILE ĐÍNH KÈM LIÊN QUAN -->
+                    <div class="col-lg-5 col-md-12">
+                        <div class="card bcard border-1 brc-default-l1 shadow-sm radius-1 bgc-white h-100">
+                            <div class="card-header bgc-primary-l4 py-2 px-3 border-0 border-b-1 brc-primary-l2 d-flex align-items-center justify-content-between">
+                                <div class="font-bold text-primary-d2 text-95">
+                                    <i class="fa fa-paperclip mr-1"></i> FILE ĐÍNH KÈM LIÊN QUAN
+                                </div>
+                                @if (hasAnyFiles)
+                                {
+                                    <span class="badge badge-info font-bold px-2 py-05 text-80 radius-1">
+                                        @totalFilesCount tệp
+                                    </span>
+                                }
+                            </div>
+                            <div class="card-body p-2 timeline-detail-scroll-pane">
+                                @if (!hasAnyFiles)
+                                {
+                                    <div class="text-center py-5 text-secondary">
+                                        <i class="fa fa-folder-open fa-2x text-grey-l1 mb-2"></i>
+                                        <p class="mb-0 text-90">Không có file đính kèm trong trạng thái này.</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <!-- Nhóm 1: File chuyển trạng thái -->
+                                    if (Model.TransitionFiles != null && Model.TransitionFiles.Count > 0)
+                                    {
+                                        <div class="timeline-file-section mb-3">
+                                            <div class="timeline-file-group-header bgc-grey-l4 py-1 px-2 radius-1 mb-1 border-1 brc-grey-l2 d-flex align-items-center justify-content-between">
+                                                <span class="font-bold text-dark text-90">
+                                                    <i class="fa fa-exchange-alt text-warning-d2 mr-1"></i> File chuyển trạng thái
+                                                </span>
+                                                <span class="badge badge-light-warning text-dark font-bold text-75">@Model.TransitionFiles.Count tệp</span>
+                                            </div>
+                                            <div class="list-group list-group-flush border-1 brc-grey-l3 radius-1 overflow-hidden">
+                                                @foreach (var f in Model.TransitionFiles)
+                                                {
+                                                    string ext = System.IO.Path.GetExtension(f.FileName)?.ToLowerInvariant();
+                                                    string iconClass = "fa fa-file text-secondary";
+                                                    if (ext == ".pdf") { iconClass = "fa fa-file-pdf text-danger"; }
+                                                    else if (ext == ".doc" || ext == ".docx") { iconClass = "fa fa-file-word text-primary"; }
+                                                    else if (ext == ".xls" || ext == ".xlsx") { iconClass = "fa fa-file-excel text-success"; }
+                                                    else if (ext == ".jpg" || ext == ".png" || ext == ".jpeg") { iconClass = "fa fa-file-image text-purple"; }
+                                                    else if (ext == ".zip" || ext == ".rar") { iconClass = "fa fa-file-archive text-warning"; }
+
+                                                    <div class="list-group-item d-flex align-items-center justify-content-between p-2 hover-bgc-light border-b-1 brc-grey-l4 transition-base timeline-file-item">
+                                                        <div class="d-flex align-items-center min-w-0 flex-grow-1 pr-2">
+                                                            <i class="@iconClass timeline-file-icon mr-2 flex-shrink-0"></i>
+                                                            <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="timeline-file-name text-truncate" title="@f.FileName">
+                                                                @f.FileName
+                                                            </a>
+                                                        </div>
+                                                        <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download flex-shrink-0" title="Tải xuống">
+                                                            <i class="fa fa-download"></i>
+                                                        </a>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Nhóm 2: File theo từng tiến trình & todo list -->
+                                    if (Model.TaskFileGroups != null && Model.TaskFileGroups.Count > 0)
+                                    {
+                                        foreach (var grp in Model.TaskFileGroups)
+                                        {
+                                            <div class="timeline-file-section mb-3">
+                                                <div class="timeline-file-group-header bgc-grey-l4 py-1 px-2 radius-1 mb-1 border-1 brc-grey-l2 d-flex align-items-center justify-content-between">
+                                                    <span class="font-bold text-dark text-90 text-truncate pr-2" title="@grp.TaskName">
+                                                        <i class="fa fa-folder-open text-orange-d1 mr-1"></i> @grp.TaskName
+                                                    </span>
+                                                    <span class="badge badge-light-primary text-primary font-bold text-75 flex-shrink-0">@grp.Files.Count tệp</span>
+                                                </div>
+                                                <div class="list-group list-group-flush border-1 brc-grey-l3 radius-1 overflow-hidden">
+                                                    @foreach (var f in grp.Files)
+                                                    {
+                                                        string ext = System.IO.Path.GetExtension(f.FileName)?.ToLowerInvariant();
+                                                        string iconClass = "fa fa-file text-secondary";
+                                                        if (ext == ".pdf") { iconClass = "fa fa-file-pdf text-danger"; }
+                                                        else if (ext == ".doc" || ext == ".docx") { iconClass = "fa fa-file-word text-primary"; }
+                                                        else if (ext == ".xls" || ext == ".xlsx") { iconClass = "fa fa-file-excel text-success"; }
+                                                        else if (ext == ".jpg" || ext == ".png" || ext == ".jpeg") { iconClass = "fa fa-file-image text-purple"; }
+                                                        else if (ext == ".zip" || ext == ".rar") { iconClass = "fa fa-file-archive text-warning"; }
+
+                                                        <div class="list-group-item d-flex align-items-center justify-content-between p-2 hover-bgc-light border-b-1 brc-grey-l4 transition-base timeline-file-item">
+                                                            <div class="d-flex align-items-center min-w-0 flex-grow-1 pr-2">
+                                                                <i class="@iconClass timeline-file-icon mr-2 flex-shrink-0"></i>
+                                                                <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="timeline-file-name text-truncate" title="@f.FileName">
+                                                                    @f.FileName
+                                                                </a>
+                                                            </div>
+                                                            <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download flex-shrink-0" title="Tải xuống">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer chuẩn CRM source -->
+            <div class="modal-footer bgc-grey-l4 border-t-1 brc-grey-l2 px-3 py-2">
+                <button type="button" class="btn btn-secondary btn-sm px-3 radius-1 shadow-sm font-bold" data-dismiss="modal">
+                    <i class="fa fa-times mr-1"></i> Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

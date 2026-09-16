@@ -2,11 +2,13 @@
 @{
     int processId = ViewBag.ProcessID != null ? (int)ViewBag.ProcessID : 0;
     int digitalSalesId = ViewBag.DigitalSalesID != null ? (int)ViewBag.DigitalSalesID : 0;
+    int? timelineId = ViewBag.TimelineID != null ? (int?)ViewBag.TimelineID : null;
     string processName = ViewBag.ProcessName as string ?? "Quy trình";
     string salesTitle = ViewBag.SalesTitle as string ?? "";
 }
 
-<div class="modal fade" id="importProgressModal" tabindex="-1" role="dialog" aria-labelledby="importProgressModalTitle" aria-hidden="true" data_width="1024">
+<div class="modal fade" id="importProgressModal" tabindex="-1" role="dialog" aria-labelledby="importProgressModalTitle" aria-hidden="true" data_width="1024" data-timeline-id="@timelineId">
+    <input type="hidden" id="importProgress_TimelineID" value="@timelineId" />
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content border-0 radius-2 shadow-lg">
             <!-- MODAL HEADER -->
