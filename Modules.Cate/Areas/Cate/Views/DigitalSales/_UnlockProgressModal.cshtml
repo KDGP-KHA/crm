@@ -24,7 +24,7 @@
                     <div class="alert alert-light border-1 brc-warning-m2 py-2 px-3 mb-3 text-90 radius-1">
                         <div class="d-flex align-items-center mb-1">
                             <span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m1 font-bold mr-2">@Model.TrackingCode</span>
-                            <span class="font-weight-bold text-dark">@Model.TaskName</span>
+                            <span class="font-weight-bold text-dark">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(Model.TaskName)</span>
                         </div>
                         <small class="text-muted d-block">@(itemTypeNameCapitalized) này đang ở trạng thái <strong>Hoàn thành</strong>. Mở khóa cho phép mở lại màn hình Chỉnh sửa để cập nhật lại nội dung (trạng thái vẫn giữ nguyên là <strong>Hoàn thành</strong>).</small>
                     </div>

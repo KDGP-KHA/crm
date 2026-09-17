@@ -13,27 +13,54 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         private readonly RM_DigitalSalesCache _digitalSalesCache = new RM_DigitalSalesCache();
 
         [HttpGet]
-        public ActionResult Index(int? applyYear)
+        public ActionResult Index(int? applyYear, string keyword = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName);
+            Core.Cate.Models.DigitalSalesDashboardOverviewModel overviewModel;
+            try
+            {
+                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword);
+            }
+            catch (Exception ex)
+            {
+                TSFramework.Libs.Processors.AppProcessor.Logger.Error(ex);
+                overviewModel = new Core.Cate.Models.DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
+            }
             ViewBag.ApplyYear = year;
+            ViewBag.Keyword = keyword;
             ViewBag.Title = "Dashboard";
-            return View("~/Areas/Dashboard/Views/Dashboard/Chart.cshtml", overviewModel);
+            return View("~/Areas/Dashboard/Views/Dashboard/Chart.cshtml", overviewModel ?? new Core.Cate.Models.DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
         }
 
         [HttpGet]
-        public ActionResult Chart(int? applyYear)
+        public ActionResult Chart(int? applyYear, string keyword = null)
         {
-            return Index(applyYear);
+            return Index(applyYear, keyword);
         }
 
         [HttpGet]
-        public ActionResult GetChartOverviewData(int? applyYear)
+        public ActionResult GetChartOverviewData(int? applyYear, string keyword = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName);
-            return PartialView("~/Areas/Dashboard/Views/Dashboard/_ChartOverview.cshtml", overviewModel);
+            Core.Cate.Models.DigitalSalesDashboardOverviewModel overviewModel;
+            try
+            {
+                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword);
+            }
+            catch (Exception ex)
+            {
+                TSFramework.Libs.Processors.AppProcessor.Logger.Error(ex);
+                overviewModel = new Core.Cate.Models.DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
+            }
+            return PartialView("~/Areas/Dashboard/Views/Dashboard/_ChartOverview.cshtml", overviewModel ?? new Core.Cate.Models.DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
+        }
+
+        [HttpGet]
+        public ActionResult Export(int? applyYear, string keyword = null)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            string kw = string.IsNullOrWhiteSpace(keyword) ? "" : Server.UrlEncode(keyword.Trim());
+            return Redirect($"/Cate/DigitalSales/Export?applyYear={year}&keyword={kw}");
         }
     }
 }

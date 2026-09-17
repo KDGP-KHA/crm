@@ -30,42 +30,15 @@
         </div>
     </div>
 
-    <!-- 2. Hệ thống Tab (Tổng quát & Kế hoạch kinh doanh) -->
-    <ul class="nav db-nav-tabs" role="tablist" id="dashboardTabs">
-        <li class="nav-item">
-            <a class="nav-link active" id="tab-overview-btn" data-toggle="tab" href="#tab-overview" role="tab" aria-controls="tab-overview" aria-selected="true">
-                <i class="fa fa-chart-line text-primary mr-2"></i>Tổng quát
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="tab-plan-btn" data-toggle="tab" href="#tab-plan" role="tab" aria-controls="tab-plan" aria-selected="false">
-                <i class="fa fa-tasks text-purple mr-2"></i>Kế hoạch kinh doanh
-            </a>
-        </li>
-    </ul>
+    <!-- 2. Nội dung Dashboard -->
+    <div id="overview-content-container" class="db-overview-container">
+        @Html.Partial("_ChartOverview", Model)
+    </div>
 
-    <!-- 3. Nội dung các Tab -->
-    <div class="tab-content db-tab-content">
-        <!-- TAB 1: TỔNG QUÁT -->
-        <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" aria-labelledby="tab-overview-btn">
-            <div id="overview-content-container">
-                @Html.Partial("_ChartOverview", Model)
-            </div>
-        </div>
-
-        <!-- TAB 2: KẾ HOẠCH KINH DOANH -->
-        <div class="tab-pane fade" id="tab-plan" role="tabpanel" aria-labelledby="tab-plan-btn">
-            <div class="tab-plan-placeholder">
-                <i class="fa fa-calendar-check"></i>
-                <h5>Kế hoạch kinh doanh - Năm <span class="current-selected-year">@selectedYear</span></h5>
-                <p>Khu vực quản lý và theo dõi tiến độ thực hiện Kế hoạch kinh doanh đang được chuẩn bị. Bạn có thể chuyển về tab <strong>Tổng quát</strong> để theo dõi các chỉ số trạng thái và doanh thu.</p>
-            </div>
-        </div>
-    <!-- Hidden Buttons phục vụ kích hoạt Modal hệ thống -->
+    <!-- Hidden element phục vụ kích hoạt Modal hệ thống -->
     <div class="d-none">
-        @Html.Button(true, "OpportunityByGroupService",
-            Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" }),
-            "", "", new { @class = "d-none" })
+        <a data-modal="true" data-modal-id="OpportunityByGroupService" class="d-none" href="#"></a>
+        <a data-modal="true" data-modal-id="DigitalSalesByStatus" class="d-none" href="#"></a>
     </div>
 </div>
 
@@ -76,7 +49,8 @@
             getOverview: '@Url.Action("GetChartOverviewData", "Dashboard", new { area = "Dashboard" })',
             digitalSalesByStatus: '@Url.Action("DigitalSalesByStatus", "Dashboard", new { area = "Dashboard" })',
             getGroupServiceChart: '@Url.Action("GetGroupServiceChart", "Dashboard", new { area = "Dashboard" })',
-            opportunityByGroupService: '@Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" })'
+            opportunityByGroupService: '@Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" })',
+            export: '@Url.Action("Export", "DigitalSales", new { area = "Cate" })'
         };
     </script>
     <script src="~/Areas/Dashboard/Views/Dashboard/Chart.js?v=@DateTime.Now.Ticks"></script>

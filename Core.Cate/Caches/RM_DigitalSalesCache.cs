@@ -314,14 +314,29 @@ namespace Core.Cate.Caches
             return data;
         }
 
-        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null)
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null, string keyword = null)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
-            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear, "_", userName ?? "ALL");
+            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear, "_", userName ?? "ALL", "_", keyword ?? "ALL");
             var data = GetCacheItem(rawKey) as DigitalSalesDashboardOverviewModel;
             if (data != null) return data;
 
-            data = Api.GetDashboardStatusStats(applyYear, userName);
+            data = Api.GetDashboardStatusStats(applyYear, userName, keyword);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data;
+        }
+
+        public List<GroupServiceChartModel> GetGroupServiceChart(int? applyYear, string username, string employeeIds)
+        {
+            var year = applyYear.GetValueOrDefault(0);
+            var rawKey = string.Concat("RM_DigitalSales_GetGroupServiceChart_", year, "_", username ?? "ALL", "_", employeeIds ?? "ALL");
+            var data = GetCacheItem(rawKey) as List<GroupServiceChartModel>;
+            if (data != null) return data;
+
+            data = Api.GetGroupServiceChart(applyYear, username, employeeIds);
             if (data != null)
             {
                 AddCacheItem(rawKey, data);
@@ -330,4 +345,5 @@ namespace Core.Cate.Caches
         }
     }
 }
+
 

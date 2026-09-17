@@ -133,27 +133,57 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         }
 
         /// <summary>
-        /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh) và bộ lọc theo Năm áp dụng.
+        /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh), bộ lọc theo Năm áp dụng và tìm kiếm từ khóa.
         /// </summary>
         [HttpGet]
-        public ActionResult Chart(int? applyYear)
+        public ActionResult Chart(int? applyYear, string keyword = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName);
+            DigitalSalesDashboardOverviewModel overviewModel;
+            try
+            {
+                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                overviewModel = new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
+            }
             ViewBag.ApplyYear = year;
+            ViewBag.Keyword = keyword;
             ViewBag.Title = "Dashboard";
-            return View("Chart", overviewModel);
+            return View("Chart", overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
         }
 
         /// <summary>
-        /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng.
+        /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng hoặc tìm kiếm từ khóa.
         /// </summary>
         [HttpGet]
-        public ActionResult GetChartOverviewData(int? applyYear)
+        public ActionResult GetChartOverviewData(int? applyYear, string keyword = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName);
-            return PartialView("_ChartOverview", overviewModel);
+            DigitalSalesDashboardOverviewModel overviewModel;
+            try
+            {
+                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                overviewModel = new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
+            }
+            return PartialView("_ChartOverview", overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
+        }
+
+        /// <summary>
+        /// Tải danh sách xuất file Excel hồ sơ kinh doanh dịch vụ số theo Năm áp dụng và từ khóa tìm kiếm.
+        /// </summary>
+        [HttpGet]
+        public ActionResult Export(int? applyYear, string keyword = null)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            string kw = string.IsNullOrWhiteSpace(keyword) ? "" : Server.UrlEncode(keyword.Trim());
+            return Redirect($"/Cate/DigitalSales/Export?applyYear={year}&keyword={kw}");
         }
 
         /// <summary>
@@ -161,18 +191,19 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// </summary>
         [HttpGet]
         [ActionType(Type = EnumActionType.View)]
-        public ActionResult DigitalSalesByStatus(int? applyYear, int? statusId, string statusName)
+        public ActionResult DigitalSalesByStatus(int? applyYear, int? statusId, string statusName, string keyword = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
             var model = new RM_DigitalSalesSearchModel
             {
                 ApplyYear = year,
                 StatusID = statusId.GetValueOrDefault(0),
-                Keyword = statusName
+                Keyword = keyword
             };
             ViewBag.ApplyYear = year;
             ViewBag.StatusID = statusId.GetValueOrDefault(0);
             ViewBag.StatusName = string.IsNullOrEmpty(statusName) ? (statusId > 0 ? "Theo trạng thái" : "Tất cả trạng thái") : statusName;
+            ViewBag.Keyword = keyword;
             return PartialView("DigitalSalesByStatus", model);
         }
 
@@ -182,19 +213,28 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.View)]
-        public ActionResult GetDigitalSalesByStatus(int? applyYear, int? statusId)
+        public ActionResult GetDigitalSalesByStatus(int? applyYear, int? statusId, string keyword = null)
         {
-            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
-            var search = new RM_DigitalSalesSearchModel
+            try
             {
-                ApplyYear = year,
-                StatusID = statusId.GetValueOrDefault(0),
-                PageNumber = 1,
-                PageSize = 1000,
-                UserName = User.UserName
-            };
-            var data = _digitalSalesCache.LoadList(out var total, search);
-            return Json(new { recordsTotal = total, recordsFiltered = total, data }, JsonRequestBehavior.AllowGet);
+                int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+                var search = new RM_DigitalSalesSearchModel
+                {
+                    ApplyYear = year,
+                    StatusID = statusId.GetValueOrDefault(0),
+                    Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
+                    PageNumber = 1,
+                    PageSize = 1000,
+                    UserName = User?.UserName
+                };
+                var data = _digitalSalesCache.LoadList(out var total, search) ?? new List<RM_DigitalSalesModel>();
+                return Json(new { recordsTotal = total, recordsFiltered = total, data }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new { recordsTotal = 0, recordsFiltered = 0, data = new List<object>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         /// <summary>
@@ -921,16 +961,32 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         [ActionType(Type = EnumActionType.View)]
         public ActionResult GetGroupServiceChart(DashboardSearchModel model, int? applyYear)
         {
-            if (applyYear.HasValue && applyYear.Value > 0)
+            try
             {
-                model.FromDate = new DateTime(applyYear.Value, 1, 1);
-                model.ToDate = new DateTime(applyYear.Value, 12, 31, 23, 59, 59);
+                model = model ?? new DashboardSearchModel();
+                int? year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : (int?)null;
+                var employeeIds = GetPermissionContext()?.GetAllowedEmployeeIdsString();
+                var username = User?.UserName;
+
+                List<GroupServiceChartModel> data;
+                if (year.HasValue && year.Value > 0)
+                {
+                    // Lấy số liệu nhóm dịch vụ từ các sản phẩm dịch vụ của Danh sách kinh doanh sản phẩm dịch vụ số
+                    data = _digitalSalesCache.GetGroupServiceChart(year.Value, username, employeeIds) ?? new List<GroupServiceChartModel>();
+                }
+                else
+                {
+                    // Fallback cho Dashboard cũ nếu không truyền năm
+                    data = _dashboardCache.GetGroupServiceChart(model.Type, model) ?? new List<GroupServiceChartModel>();
+                }
+
+                return Json(new { data }, JsonRequestBehavior.AllowGet);
             }
-            // Cùng điều kiện quyền với popup chi tiết để số trên chart khớp danh sách
-            model.EmployeeIds = GetPermissionContext().GetAllowedEmployeeIdsString();
-            model.Username = User.UserName;
-            var data = _dashboardCache.GetGroupServiceChart(model.Type, model);
-            return Json(new { data }, JsonRequestBehavior.AllowGet);
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new { data = new List<object>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         /// <summary>
@@ -965,19 +1021,27 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         [ActionType(Type = EnumActionType.View)]
         public ActionResult GetOpportunityByGroupService(string fromDate, string toDate, int groupServiceId)
         {
-            var search = new DashboardSearchModel
+            try
             {
-                FromDate = ParseFromDateOrDefault(fromDate),
-                ToDate = ParseToDateOrDefault(toDate),
-                GroupServiceID = groupServiceId,
-                Username = User.UserName
-            };
+                var search = new DashboardSearchModel
+                {
+                    FromDate = ParseFromDateOrDefault(fromDate),
+                    ToDate = ParseToDateOrDefault(toDate),
+                    GroupServiceID = groupServiceId,
+                    Username = User?.UserName
+                };
 
-            var data = _dashboardCache.GetOpportunitiesByGroupService(out var total, search);
+                var data = _dashboardCache.GetOpportunitiesByGroupService(out var total, search) ?? new List<OpportunityDashboardModel>();
 
-            return Json(
-                new { recordsTotal = total, recordsFiltered = total, data },
-                JsonRequestBehavior.AllowGet);
+                return Json(
+                    new { recordsTotal = total, recordsFiltered = total, data },
+                    JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new { recordsTotal = 0, recordsFiltered = 0, data = new List<object>(), error = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         /// <summary>

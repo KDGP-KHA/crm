@@ -104,7 +104,7 @@
                             <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 8px;">
                                 <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                     <i class="fa fa-chevron-down tree-toggle-icon text-primary mr-2" id="icon_@statusNodeId"></i>
-                                    <span class="tree-status-title">@stGroup.Key.StatusName@occurrenceSuffix</span>
+                                    <span class="tree-status-title">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(stGroup.Key.StatusName)@occurrenceSuffix</span>
                                     <span class="badge badge-primary badge-pill ml-1 tree-status-task-count font-bold">@statusTaskCount tiến trình@(statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "")</span>
                                     @if (!string.IsNullOrEmpty(transitionUser) || transitionDate.HasValue)
                                     {
@@ -112,7 +112,7 @@
                                             @if (!string.IsNullOrEmpty(transitionUser))
                                             {
                                                 <span class="text-dark font-bold mr-2">
-                                                    <i class="fa fa-user-circle text-primary mr-1"></i>@transitionUser
+                                                    <i class="fa fa-user-circle text-primary mr-1"></i>@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(transitionUser)
                                                 </span>
                                             }
                                             @if (transitionDate.HasValue)
@@ -152,7 +152,7 @@
                                 <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 6px;">
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                         <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-1" id="icon_@procNodeId"></i>
-                                        <span class="tree-process-title">QUY TRÌNH: @(prGroup.Key.ProcessName.ToUpper())</span>
+                                        <span class="tree-process-title">QUY TRÌNH: @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(prGroup.Key.ProcessName).ToUpper())</span>
                                         @if (stGroup.Key.ProcessCountOfStatus >= 2 && canEdit && isCurrentStatus)
                                         {
                                             <a href="javascript:void(0);" class="btn-edit-process" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
@@ -217,7 +217,7 @@
                                                @(task.Status == 3 ? "checked" : "")
                                                onclick="return false;" onkeydown="return false;" tabindex="-1"
                                                title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
-                                        <span class="tree-progress-title">@taskIdx. @task.TaskName</span>
+                                        <span class="tree-progress-title">@taskIdx. @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
 
                                         @if (canEdit && isCurrentStatus && task.Status != 3)
                                         {
@@ -236,7 +236,7 @@
                                     </div>
                                 </td>
                                 <td class="text-center font-progress-cell"><span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@task.TrackingCode</span></td>
-                                <td class="font-progress-cell"><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : task.AssignedUserName)</span></td>
+                                <td class="font-progress-cell"><span class="text-dark">@(string.IsNullOrEmpty(task.AssignedUserName) ? "—" : Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.AssignedUserName))</span></td>
                                 <td class="text-center font-progress-cell">@task.StartDate.ToString("dd/MM/yyyy")</td>
                                 <td class="text-center font-progress-cell"><span class="@(isOverdue ? "text-danger font-bold" : "text-dark")">@task.MaxDeadline.ToString("dd/MM/yyyy")</span></td>
                                 <td class="text-center font-progress-cell"><span class="badge badge-light-secondary font-bold">@task.EffectiveDurationDays ngày</span></td>
@@ -261,7 +261,7 @@
                                 <td class="text-center font-progress-cell">
                                     @if (task.Status == 3)
                                     {
-                                        string completedUser = !string.IsNullOrEmpty(task.CompletedByName) ? task.CompletedByName : (!string.IsNullOrEmpty(task.LastModifiedByName) ? task.LastModifiedByName : (!string.IsNullOrEmpty(task.CreatedByName) ? task.CreatedByName : "—"));
+                                        string completedUser = !string.IsNullOrEmpty(task.CompletedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.CompletedByName) : (!string.IsNullOrEmpty(task.LastModifiedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.LastModifiedByName) : (!string.IsNullOrEmpty(task.CreatedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.CreatedByName) : "—"));
                                         DateTime? completedAt = task.CompletedDate.HasValue ? task.CompletedDate : (task.LastModifiedDate.HasValue ? task.LastModifiedDate : (DateTime?)task.CreatedDate);
                                         <div class="d-flex flex-column align-items-center">
                                             <span class="text-dark font-weight-bold text-85">@completedUser</span>
@@ -318,14 +318,14 @@
                                                        @(todo.Status == 3 ? "checked" : "")
                                                        onclick="return false;" onkeydown="return false;" tabindex="-1"
                                                        title="@(todo.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
-                                                <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@todo.TaskName</span>
+                                                <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
                                             </div>
                                         </td>
                                         <td class="text-center font-progress-cell">
                                             <span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@todo.TrackingCode</span>
                                         </td>
                                         <td class="font-progress-cell">
-                                            <span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : todo.AssignedUserName)</span>
+                                            <span class="text-dark">@(string.IsNullOrEmpty(todo.AssignedUserName) ? "—" : Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.AssignedUserName))</span>
                                         </td>
                                         <td class="text-center font-progress-cell">@todo.StartDate.ToString("dd/MM/yyyy")</td>
                                         <td class="text-center font-progress-cell">
@@ -357,7 +357,7 @@
                                         <td class="text-center font-progress-cell">
                                             @if (todo.Status == 3)
                                             {
-                                                string completedUser = !string.IsNullOrEmpty(todo.CompletedByName) ? todo.CompletedByName : (!string.IsNullOrEmpty(todo.LastModifiedByName) ? todo.LastModifiedByName : (!string.IsNullOrEmpty(todo.CreatedByName) ? todo.CreatedByName : "—"));
+                                                string completedUser = !string.IsNullOrEmpty(todo.CompletedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.CompletedByName) : (!string.IsNullOrEmpty(todo.LastModifiedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.LastModifiedByName) : (!string.IsNullOrEmpty(todo.CreatedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.CreatedByName) : "—"));
                                                 DateTime? completedAt = todo.CompletedDate.HasValue ? todo.CompletedDate : (todo.LastModifiedDate.HasValue ? todo.LastModifiedDate : (DateTime?)todo.CreatedDate);
                                                 <div class="d-flex flex-column align-items-center">
                                                     <span class="text-dark font-weight-bold text-85">@completedUser</span>

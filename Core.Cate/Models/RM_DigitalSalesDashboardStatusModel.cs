@@ -19,6 +19,7 @@ namespace Core.Cate.Models
     public class DigitalSalesDashboardOverviewModel : BaseModel
     {
         public int ApplyYear { get; set; }
+        public string Keyword { get; set; }
         public List<RM_DigitalSalesDashboardStatusModel> StatusList { get; set; } = new List<RM_DigitalSalesDashboardStatusModel>();
         public int TotalCountAll { get; set; }
         public decimal TotalExpectedRevenueAll { get; set; }

@@ -52,7 +52,7 @@
                                 <span class="badge badge-primary tracking-code-badge font-bold px-2 py-1 radius-1 text-85">
                                     <i class="fa fa-barcode mr-1"></i>@task.TrackingCode
                                 </span>
-                                <span class="font-bolder text-dark text-110">@task.TaskName</span>
+                                <span class="font-bolder text-dark text-110">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
                             </div>
                             <span class="badge @(task.Status == 3 ? "badge-success" : (task.Status == 2 ? "badge-warning" : (task.Status == 4 ? "badge-danger" : "badge-secondary"))) font-bold px-25 py-1 text-85">
                                 @(task.Status == 3 ? "Hoàn thành" : (task.Status == 2 ? "Đang làm" : (task.Status == 4 ? "Quá hạn" : "Chưa làm")))
@@ -62,7 +62,7 @@
                             <div class="row text-90" style="row-gap: 8px;">
                                 <div class="col-sm-6">
                                     <span class="text-secondary text-85 d-block"><i class="fa fa-user-check text-success mr-1"></i> Người thực hiện:</span>
-                                    <span class="font-bold text-dark-m1 text-95">@assigneeName</span>
+                                    <span class="font-bold text-dark-m1 text-95">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(assigneeName)</span>
                                 </div>
                                 <div class="col-sm-6">
                                     <span class="text-secondary text-85 d-block"><i class="fa fa-user-plus text-primary mr-1"></i> Người tạo:</span>
@@ -161,8 +161,8 @@
                                                 {
                                                     <tr>
                                                         <td class="text-center"><span class="text-secondary font-bold">@c.TrackingCode</span></td>
-                                                        <td><span class="@(c.Status == 3 ? "text-success font-bold" : "text-dark")">@c.TaskName</span></td>
-                                                        <td>@(string.IsNullOrEmpty(c.AssignedUserName) ? "—" : c.AssignedUserName)</td>
+                                                        <td><span class="@(c.Status == 3 ? "text-success font-bold" : "text-dark")">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(c.TaskName)</span></td>
+                                                        <td>@(string.IsNullOrEmpty(c.AssignedUserName) ? "—" : Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(c.AssignedUserName))</td>
                                                         <td class="text-center">@(c.Deadline.HasValue ? c.Deadline.Value.ToString("dd/MM/yyyy") : "—")</td>
                                                         <td class="text-center">
                                                             @if (c.Status == 3)
