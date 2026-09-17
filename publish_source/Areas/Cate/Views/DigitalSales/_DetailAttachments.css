@@ -1,0 +1,170 @@
+/* CSS TỆP ĐÍNH KÈM TỔNG QUAN & CHECKLIST */
+.attach-grid-8 {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -5px;
+    margin-right: -5px;
+}
+.attach-col-8 {
+    flex: 0 0 12.5%;
+    max-width: 12.5%;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: 12px;
+    transition: opacity .2s ease, transform .2s ease;
+}
+@media (max-width: 1400px) {
+    .attach-col-8 {
+        flex: 0 0 16.666%;
+        max-width: 16.666%;
+    }
+}
+@media (max-width: 1199px) {
+    .attach-col-8 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+}
+@media (max-width: 991px) {
+    .attach-col-8 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+}
+@media (max-width: 767px) {
+    .attach-col-8 {
+        flex: 0 0 33.333%;
+        max-width: 33.333%;
+    }
+}
+@media (max-width: 575px) {
+    .attach-col-8 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+.attach-card {
+    border-radius: 6px;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+.attach-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12) !important;
+    border-color: #3b82f6 !important;
+}
+
+.attach-thumb-box {
+    height: 72px;
+    cursor: pointer;
+    overflow: hidden;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.attach-file-name {
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 600;
+    color: #1e293b;
+    height: 28px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+    margin-bottom: 4px;
+}
+
+.attach-source-badge {
+    height: 20px;
+    margin-bottom: 4px;
+    overflow: hidden;
+}
+.attach-source-badge .badge {
+    font-size: 10px;
+    line-height: 1.3;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.attach-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 4px;
+    margin-top: auto;
+}
+
+/* Bộ lọc tệp đính kèm */
+.attach-filter-btn {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .15s ease;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+    font-weight: 600;
+}
+.attach-filter-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+.attach-filter-btn.active {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
+}
+.attach-filter-btn-checklist {
+    border-color: #f59e0b;
+    color: #b45309;
+}
+.attach-filter-btn-transition {
+    border-color: #10b981;
+    color: #047857;
+}
+
+.attach-header-wrap {
+    gap: 8px;
+}
+.attach-header-left {
+    gap: 8px;
+}
+.attach-filter-group {
+    gap: 4px;
+}
+.attach-actions-left {
+    gap: 3px;
+}
+
+.attach-thumb-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: cover;
+}
+.attach-thumb-zoom-badge {
+    bottom: 3px;
+    right: 3px;
+}
+
+/* Highlight row khi nhảy sang Checklist */
+@keyframes highlightRowPulse {
+    0% { background-color: #fef08a; }
+    50% { background-color: #fde047; }
+    100% { background-color: transparent; }
+}
+.highlight-tracking-target {
+    animation: highlightRowPulse 2.5s ease-out forwards;
+    outline: 2px solid #eab308;
+}
+

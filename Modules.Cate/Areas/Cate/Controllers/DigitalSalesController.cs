@@ -1069,6 +1069,14 @@ namespace Modules.Cate.Areas.Cate.Controllers
         {
             var model = _salesCache.GetByID(id, User.UserName);
             if (model == null) return HttpNotFound();
+            if (model.TrackingTasks == null || model.TrackingTasks.Count == 0)
+            {
+                try { model.TrackingTasks = _salesCache.GetTrackingTasks(id); } catch { }
+            }
+            if (model.Timelines == null || model.Timelines.Count == 0)
+            {
+                try { model.Timelines = _salesCache.GetTimeline(id); } catch { }
+            }
             ViewBag.CanEdit = HasDetailPermission(model, User.UserName);
             return PartialView("_DetailAttachments", model);
         }
@@ -3448,6 +3456,13 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            if (timeline != null)
+            {
+                timeline.ToStatusName = RM_DigitalSalesBiz.FixVietnameseMojibake(timeline.ToStatusName);
+                timeline.ActionByName = RM_DigitalSalesBiz.FixVietnameseMojibake(timeline.ActionByName);
+                timeline.Note = RM_DigitalSalesBiz.FixVietnameseMojibake(timeline.Note);
+            }
+
             var allTasks = sales.TrackingTasks ?? new List<RM_DigitalSalesTrackingModel>();
 
             var matchingTasks = allTasks
@@ -3459,6 +3474,13 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 .ThenBy(t => t.SortOrder)
                 .ThenBy(t => t.TrackingID)
                 .ToList();
+
+            foreach (var t in matchingTasks)
+            {
+                t.TaskName = RM_DigitalSalesBiz.FixVietnameseMojibake(t.TaskName);
+                t.AssignedUserName = RM_DigitalSalesBiz.FixVietnameseMojibake(t.AssignedUserName);
+                t.ResultNote = RM_DigitalSalesBiz.FixVietnameseMojibake(t.ResultNote);
+            }
 
             var vm = new RM_DigitalSalesTimelineDetailViewModel
             {

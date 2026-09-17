@@ -74,6 +74,26 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
+/* Card Header Search Box & Export Button Styling */
+.db-card-search .input-group-text {
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+    border-radius: 4px 0 0 4px;
+}
+
+.db-card-search .form-control {
+    border-color: #cbd5e1;
+    border-radius: 0 4px 4px 0;
+    font-size: 12.5px;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.db-card-search .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
 /* Tabs Styling (Ace Admin Style) */
 .db-nav-tabs {
     border-bottom: 2px solid #e2e8f0;
@@ -111,6 +131,15 @@
     border: 1px solid #e2e8f0;
     border-top: none;
     border-radius: 0 0 8px 8px;
+    padding: 20px;
+    min-height: 480px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.db-overview-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     padding: 20px;
     min-height: 480px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
@@ -455,3 +484,24 @@
     transform: translateY(-3px);
     filter: brightness(1.03);
 }
+
+/* Card Header Search & Action Controls */
+.db-card-search {
+    transition: all 0.2s ease;
+}
+
+.db-card-search .form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.db-card-search .input-group-text {
+    border-color: #ced4da;
+    color: #94a3b8;
+}
+
+.db-card-search .form-control {
+    border-color: #ced4da;
+    font-size: 12px;
+}
+

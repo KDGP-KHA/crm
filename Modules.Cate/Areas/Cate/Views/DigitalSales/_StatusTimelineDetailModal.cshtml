@@ -24,7 +24,7 @@
                         @tagText
                     </span>
                     <h5 class="modal-title text-white mb-0 text-110 font-bold" id="modalStatusTimelineDetailTitle">
-                        <i class="fa fa-info-circle mr-1"></i> Chi tiết Trạng thái: <span class="text-white">@statusTitle</span>
+                        <i class="fa fa-info-circle mr-1"></i> Chi tiết Trạng thái: <span class="text-white">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(statusTitle)</span>
                     </h5>
                     @if (timeline != null && timeline.ActionDate != DateTime.MinValue)
                     {
@@ -35,7 +35,7 @@
                     @if (timeline != null && !string.IsNullOrEmpty(timeline.ActionByName))
                     {
                         <span class="badge bgc-white-tp9 text-white border-1 brc-white-tp4 px-2 py-1 font-bold text-85 ml-1" title="Người thực hiện chuyển trạng thái">
-                            <i class="fa fa-user-check mr-1 text-success-l3"></i>@timeline.ActionByName
+                            <i class="fa fa-user-check mr-1 text-success-l3"></i>@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(timeline.ActionByName)
                         </span>
                     }
                 </div>
@@ -91,13 +91,13 @@
                                                         @(taskIdx)
                                                     </span>
                                                     <div class="flex-grow-1 min-w-0">
-                                                        <div class="font-bold text-dark text-95 mb-1 text-truncate" title="@task.TaskName">
-                                                            @task.TaskName
+                                                        <div class="font-bold text-dark text-95 mb-1 text-truncate" title="@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)">
+                                                            @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)
                                                         </div>
                                                         <div class="text-secondary text-85 d-flex align-items-center flex-wrap" style="gap: 12px;">
                                                             <span>
                                                                 <i class="fa fa-user-circle text-primary-m1 mr-1"></i>
-                                                                <span class="font-bold text-primary-d1">@assignee</span>
+                                                                <span class="font-bold text-primary-d1">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(assignee)</span>
                                                             </span>
                                                             <span>
                                                                 <i class="far fa-calendar-alt text-primary-m2 mr-1"></i>
@@ -218,8 +218,8 @@
                                         {
                                             <div class="timeline-file-section mb-3">
                                                 <div class="timeline-file-group-header bgc-grey-l4 py-1 px-2 radius-1 mb-1 border-1 brc-grey-l2 d-flex align-items-center justify-content-between">
-                                                    <span class="font-bold text-dark text-90 text-truncate pr-2" title="@grp.TaskName">
-                                                        <i class="fa fa-folder-open text-orange-d1 mr-1"></i> @grp.TaskName
+                                                    <span class="font-bold text-dark text-90 text-truncate pr-2" title="@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(grp.TaskName)">
+                                                        <i class="fa fa-folder-open text-orange-d1 mr-1"></i> @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(grp.TaskName)
                                                     </span>
                                                     <span class="badge badge-light-primary text-primary font-bold text-75 flex-shrink-0">@grp.Files.Count tệp</span>
                                                 </div>

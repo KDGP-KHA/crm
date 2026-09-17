@@ -37,12 +37,12 @@
             <table id="DSDigitalSalesByStatus" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
                 <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
                     <tr>
-                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
-                        <th>Thông tin cơ hội / dự án</th>
-                        <th>Doanh thu</th>
-                        <th>Thời gian</th>
-                        <th>Phụ trách</th>
-                        <th>Thao tác</th>
+                        <th class="text-center align-middle">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th class="align-middle">Thông tin cơ hội / dự án</th>
+                        <th class="align-middle">Doanh thu</th>
+                        <th class="align-middle">Thời gian</th>
+                        <th class="align-middle">Phụ trách</th>
+                        <th class="text-center align-middle text-nowrap">Thao tác</th>
                     </tr>
                 </thead>
             </table>
@@ -93,49 +93,68 @@
                     dataType: "JSON",
                     data: {
                         applyYear: '@Model.ApplyYear',
-                        statusId: '@Model.StatusID'
+                        statusId: '@Model.StatusID',
+                        keyword: '@(Html.Raw(HttpUtility.JavaScriptStringEncode(Model.Keyword ?? "")))'
                     }
                 },
                 columnDefs: [
-                    { targets: 0, width: "45px", className: "text-center", orderable: false },
-                    { targets: 1, minWidth: "240px" },
-                    { targets: 2, minWidth: "170px" },
-                    { targets: 3, minWidth: "130px" },
-                    { targets: 4, minWidth: "150px" },
-                    { targets: 5, width: "75px", className: "text-center", orderable: false }
+                    { targets: 0, width: "45px", className: "text-center align-middle", orderable: false },
+                    { targets: 1, minWidth: "260px", className: "align-middle" },
+                    { targets: 2, minWidth: "170px", className: "align-middle" },
+                    { targets: 3, minWidth: "130px", className: "align-middle" },
+                    { targets: 4, minWidth: "150px", className: "align-middle" },
+                    { targets: 5, width: "115px", className: "text-center align-middle text-nowrap", orderable: false }
                 ],
                 columns: [
                     {
                         data: null,
                         orderable: false,
+                        className: "text-center align-middle",
                         render: function (data, type, row, meta) {
                             return meta.row + 1 + meta.settings._iDisplayStart;
                         }
                     },
                     {
                         data: null,
+                        className: "align-middle",
                         render: function (data, type, row) {
-                            var typeBadge = row.BusinessType === 1
-                                ? '<span class="badge badge-info mr-1 text-80">Cơ hội</span>'
-                                : '<span class="badge badge-primary mr-1 text-80">Dự án</span>';
+                            var typeBadge = row.BusinessType === 2
+                                ? '<span class="badge badge-success px-2 py-1 mr-1 text-80"><i class="fa fa-project-diagram mr-1"></i>Dự án</span>'
+                                : '<span class="badge badge-primary px-2 py-1 mr-1 text-80"><i class="fa fa-lightbulb mr-1"></i>Cơ hội</span>';
 
                             var statusBadge = row.StatusName
-                                ? '<span class="badge badge-secondary mr-1 text-80">' + row.StatusName + '</span>'
+                                ? '<span class="badge badge-secondary px-2 py-1 mr-1 text-80">' + row.StatusName + '</span>'
                                 : '';
 
-                            var codeText = row.Code ? '[' + row.Code + '] ' : '';
-                            var titleHtml = '<a href="/Cate/DigitalSales/Detail/' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary">'
-                                + codeText + (row.Title || '') + '</a>';
+                            var codeBadge = row.Code
+                                ? '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-mono font-bold px-15 py-05 radius-1 text-80"><i class="fa fa-hashtag mr-1 opacity-75"></i>' + row.Code + '</span>'
+                                : '';
+
+                            var specialBadges = '';
+                            if (row.IsKeyProject) {
+                                specialBadges += '<span class="badge bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Dự án trọng điểm"><i class="fa fa-star text-warning mr-1"></i>Trọng điểm</span>';
+                            }
+                            if (row.IsFollowed) {
+                                specialBadges += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Cơ hội/dự án quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
+                            }
+
+                            var titleHtml = '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary text-95 d-block mt-1" title="Xem chi tiết 360 độ">'
+                                + (row.Title || '—') + '</a>';
 
                             var customerHtml = row.CustomerName
-                                ? '<div class="text-secondary small mt-1"><i class="fa fa-building mr-1 text-primary"></i>' + row.CustomerName + '</div>'
+                                ? '<div class="text-secondary text-85 mt-1"><i class="fa fa-building mr-1 text-primary"></i>' + row.CustomerName + '</div>'
                                 : '';
 
-                            return '<div>' + typeBadge + statusBadge + '</div>' + titleHtml + customerHtml;
+                            var productsHtml = row.ProductServiceNames
+                                ? '<div class="text-secondary text-85 mt-1"><i class="fa fa-tags mr-1 text-purple"></i>' + row.ProductServiceNames + '</div>'
+                                : '';
+
+                            return '<div class="d-flex align-items-center flex-wrap mb-1">' + typeBadge + statusBadge + codeBadge + specialBadges + '</div>' + titleHtml + customerHtml + productsHtml;
                         }
                     },
                     {
                         data: null,
+                        className: "align-middle",
                         render: function (data, type, row) {
                             var exp = row.TotalExpectedRevenue != null ? formatMoney(row.TotalExpectedRevenue) : '—';
                             var act = row.TotalActualRevenue != null ? formatMoney(row.TotalActualRevenue) : '—';
@@ -143,42 +162,63 @@
                                 ? ' <span class="badge badge-warning text-dark ml-1" title="Xác suất chốt">' + row.ClosingProbability + '%</span>'
                                 : '';
 
-                            return '<div class="small"><b>DT Dự kiến:</b> <span class="text-primary font-weight-bold">' + exp + '</span>' + prob + '</div>'
-                                 + '<div class="small mt-1"><b>DT Thực tế:</b> <span class="text-success font-weight-bold">' + act + '</span></div>';
+                            return '<div class="text-90"><b>DT Dự kiến:</b> <span class="text-primary font-weight-bold">' + exp + '</span>' + prob + '</div>'
+                                 + '<div class="text-90 mt-1"><b>DT Thực tế:</b> <span class="text-success font-weight-bold">' + act + '</span></div>';
                         }
                     },
                     {
                         data: null,
+                        className: "align-middle",
                         render: function (data, type, row) {
-                            var yearHtml = '<div class="small"><b>Năm:</b> ' + (row.ApplyYear || '@Model.ApplyYear') + '</div>';
+                            var yearHtml = '<div class="text-90"><b>Năm:</b> ' + (row.ApplyYear || '@Model.ApplyYear') + '</div>';
                             var expDate = formatDate(row.ExpectedDate);
                             var dateHtml = expDate
-                                ? '<div class="small text-muted mt-1"><i class="far fa-calendar-alt mr-1"></i>Dự kiến: ' + expDate + '</div>'
+                                ? '<div class="text-85 text-muted mt-1"><i class="far fa-calendar-alt mr-1"></i>Dự kiến: ' + expDate + '</div>'
                                 : '';
                             return yearHtml + dateHtml;
                         }
                     },
                     {
                         data: null,
+                        className: "align-middle",
                         render: function (data, type, row) {
-                            var leader = row.LeaderEmployeeName || '—';
+                            var leader = row.AssignedEmployeeName || row.LeaderEmployeeName || '—';
                             var dept = row.DepartmentName
-                                ? '<div class="small text-muted">' + row.DepartmentName + '</div>'
+                                ? '<div class="text-85 text-muted mt-1"><i class="fa fa-sitemap mr-1"></i>' + row.DepartmentName + '</div>'
                                 : '';
                             var contact = row.ContactPersonName
-                                ? '<div class="small text-secondary mt-1"><i class="fa fa-phone mr-1"></i>' + row.ContactPersonName + (row.ContactPersonPhone ? ' (' + row.ContactPersonPhone + ')' : '') + '</div>'
+                                ? '<div class="text-85 text-secondary mt-1"><i class="fa fa-phone mr-1"></i>' + row.ContactPersonName + (row.ContactPersonPhone ? ' (' + row.ContactPersonPhone + ')' : '') + '</div>'
                                 : '';
-                            return '<div class="small font-weight-bold text-dark-m1"><i class="fa fa-user mr-1 text-info"></i>' + leader + '</div>' + dept + contact;
+                            return '<div class="text-90 font-weight-bold text-dark-m1"><i class="fa fa-user-tie mr-1 text-success"></i>' + leader + '</div>' + dept + contact;
                         }
                     },
                     {
                         data: null,
+                        className: "text-center align-middle text-nowrap",
+                        orderable: false,
                         render: function (data, type, row) {
-                            return '<a href="/Cate/DigitalSales/Detail/' + row.DigitalSalesID + '" target="_blank" class="btn btn-xs btn-outline-primary" title="Xem chi tiết">'
+                            return '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="btn btn-xs btn-outline-primary btn-h-light-primary radius-1 px-2 py-1 text-nowrap font-bolder shadow-sm" title="Xem chi tiết 360 độ">'
                                  + '<i class="fa fa-eye mr-1"></i>Chi tiết</a>';
                         }
                     }
-                ]
+                ],
+                language: {
+                    processing: "Đang tải dữ liệu...",
+                    emptyTable: "Không có dữ liệu phù hợp",
+                    info: "Hiển thị từ _START_ đến _END_ trong tổng số _TOTAL_ hồ sơ",
+                    infoEmpty: "Không có hồ sơ nào",
+                    infoFiltered: "(lọc từ _MAX_ hồ sơ)",
+                    lengthMenu: "Hiển thị _MENU_ hồ sơ",
+                    paginate: {
+                        first: "Đầu",
+                        previous: "Trước",
+                        next: "Sau",
+                        last: "Cuối"
+                    }
+                },
+                initComplete: function () {
+                    $('#DSDigitalSalesByStatus_wrapper .dataTables_length select').addClass('none-select2');
+                }
             });
         }
     </script>

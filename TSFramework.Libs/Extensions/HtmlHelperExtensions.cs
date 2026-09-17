@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -246,10 +246,18 @@ namespace TSFramework.Libs.Extensions
 
             var factory = ControllerBuilder.Current.GetControllerFactory();
             var controller = factory.CreateController(tempRequestContext, controllerName) as ControllerBase;
+            if (controller == null)
+            {
+                return MvcHtmlString.Create(builder.ToString(TagRenderMode.Normal));
+            }
 
             var controllerContext = new ControllerContext(tempRequestContext, controller);
-            var controllerDescriptor = new ReflectedControllerDescriptor(controller?.GetType());
+            var controllerDescriptor = new ReflectedControllerDescriptor(controller.GetType());
             var actionDescriptor = controllerDescriptor.FindAction(controllerContext, actionName);
+            if (actionDescriptor == null)
+            {
+                return MvcHtmlString.Create(builder.ToString(TagRenderMode.Normal));
+            }
 
             var actionAllowAnyPermission =
                 actionDescriptor.GetCustomAttributes(typeof(AllowAnyPermissionAttribute), false);

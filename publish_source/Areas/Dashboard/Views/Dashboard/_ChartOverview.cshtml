@@ -28,27 +28,35 @@
     }
 }
 
+@{
+    var m = Model ?? new Core.Cate.Models.DigitalSalesDashboardOverviewModel { ApplyYear = DateTime.Now.Year };
+    var statusList = m.StatusList ?? new List<Core.Cate.Models.RM_DigitalSalesDashboardStatusModel>();
+    var keyProjects = m.KeyProjects ?? new List<Core.Cate.Models.RM_DigitalSalesModel>();
+    var followedOpps = m.FollowedOpportunities ?? new List<Core.Cate.Models.RM_DigitalSalesModel>();
+    var staleSales = m.StaleActionTimeSales ?? new List<Core.Cate.Models.RM_DigitalSalesModel>();
+}
+
 <!-- 1. HỘP TỔNG CỘNG CÁC TRẠNG THÁI (Hero Summary Card) -->
-<div class="card-total-summary stat-card-clickable" onclick="openDigitalSalesByStatus(0, 'Tất cả trạng thái')" role="button" title="Click để xem danh sách toàn bộ @Model.TotalCountAll hồ sơ năm @Model.ApplyYear">
+<div class="card-total-summary stat-card-clickable" onclick="openDigitalSalesByStatus(0, 'Tất cả trạng thái')" role="button" title="Click để xem danh sách toàn bộ @m.TotalCountAll hồ sơ năm @m.ApplyYear">
     <div class="total-summary-title">
         <i class="fa fa-layer-group"></i>
-        Tổng cộng các Trạng thái Kinh doanh Dịch vụ số - Năm @Model.ApplyYear
+        Tổng cộng các Trạng thái Kinh doanh Dịch vụ số - Năm @m.ApplyYear
     </div>
     <div class="total-metric-row">
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng số Cơ hội & Dự án</div>
-            <div class="total-metric-val">@Model.TotalCountAll.ToString("N0") <span style="font-size: 14px; font-weight: normal;">hồ sơ</span></div>
-            <div class="total-metric-sub">Tất cả trạng thái năm @Model.ApplyYear (Click để xem chi tiết)</div>
+            <div class="total-metric-val">@m.TotalCountAll.ToString("N0") <span style="font-size: 14px; font-weight: normal;">hồ sơ</span></div>
+            <div class="total-metric-sub">Tất cả trạng thái năm @m.ApplyYear (Click để xem chi tiết)</div>
         </div>
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng Doanh thu Dự kiến</div>
-            <div class="total-metric-val text-yellow">@FormatRevenue(Model.TotalExpectedRevenueAll)</div>
-            <div class="total-metric-sub">Nguyên tệ: @Model.TotalExpectedRevenueAll.ToString("N0") VNĐ</div>
+            <div class="total-metric-val text-yellow">@FormatRevenue(m.TotalExpectedRevenueAll)</div>
+            <div class="total-metric-sub">Nguyên tệ: @m.TotalExpectedRevenueAll.ToString("N0") VNĐ</div>
         </div>
         <div class="total-metric-item">
             <div class="total-metric-label">Tổng Doanh thu Thực hiện (Ký HĐ)</div>
-            <div class="total-metric-val text-green">@FormatRevenue(Model.TotalActualRevenueAll)</div>
-            <div class="total-metric-sub">Nguyên tệ: @Model.TotalActualRevenueAll.ToString("N0") VNĐ</div>
+            <div class="total-metric-val text-green">@FormatRevenue(m.TotalActualRevenueAll)</div>
+            <div class="total-metric-sub">Nguyên tệ: @m.TotalActualRevenueAll.ToString("N0") VNĐ</div>
         </div>
     </div>
 </div>
@@ -59,11 +67,11 @@
         <i class="fa fa-th-large"></i>
         Chi tiết theo Trạng thái hồ sơ
     </h5>
-    <span class="text-muted text-90">Hiển thị @Model.StatusList.Count trạng thái cấu hình (Click card để xem danh sách chi tiết)</span>
+    <span class="text-muted text-90">Hiển thị @statusList.Count trạng thái cấu hình (Click card để xem danh sách chi tiết)</span>
 </div>
 
 <div class="row">
-    @foreach (var st in Model.StatusList)
+    @foreach (var st in statusList)
     {
         var borderClass = GetStatusBorderClass(st.StatusCode);
         var typeBadge = st.BusinessType == 1 ? "Cơ hội" : "Dự án";
@@ -110,32 +118,47 @@
     <!-- Vị trí 1: Danh sách những dự án Trọng điểm -->
     <div class="col-xl-8 col-lg-7 col-12 mb-3">
         <div class="card h-100 bcard shadow-sm db-card-custom">
-            <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
-                <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
-                    <i class="fa fa-star text-warning mr-2"></i>Danh sách Dự án Trọng điểm - Năm @Model.ApplyYear
+            <div class="card-header bgc-white border-b-1 brc-default-l2 py-2 d-flex flex-wrap justify-content-between align-items-center">
+                <h6 class="card-title font-weight-bold text-dark-m1 mb-0 my-1">
+                    <i class="fa fa-star text-warning mr-2"></i>Danh sách Dự án Trọng điểm - Năm @m.ApplyYear
                 </h6>
-                <span class="badge badge-warning font-weight-bold text-85 px-2 py-1 radius-1">
-                    @(Model.KeyProjects != null ? Model.KeyProjects.Count : 0) dự án
-                </span>
+                <div class="d-flex align-items-center flex-wrap my-1">
+                    <div class="input-group input-group-sm mr-2 db-card-search" style="width: 220px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0 text-muted px-2 py-0">
+                                <i class="fa fa-search text-80"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control border-left-0 text-85 py-0" style="height: 30px;"
+                               placeholder="Tìm tên, khách hàng..." 
+                               onkeyup="filterCardTable(this, '#tableKeyProjects');" />
+                    </div>
+                    <button type="button" class="btn btn-xs btn-warning font-bold text-white shadow-sm mr-2 px-2 py-1 radius-1" 
+                            style="background-color: #f59e0b !important; border-color: #d97706 !important; height: 30px; display: inline-flex; align-items: center;"
+                            onclick="exportCardData('keyProject');" title="Tải danh sách Dự án Trọng điểm">
+                        <i class="fa fa-download mr-1"></i>Tải danh sách
+                    </button>
+                    <span class="badge badge-warning font-weight-bold text-85 px-2 py-1 radius-1" id="badgeKeyProjects">
+                        @keyProjects.Count dự án
+                    </span>
+                </div>
             </div>
             <div class="card-body p-0 table-responsive">
-                @if (Model.KeyProjects != null && Model.KeyProjects.Count > 0)
+                @if (keyProjects.Count > 0)
                 {
-                    <table class="table table-hover table-striped mb-0 text-90 align-middle db-keyprojects-table">
+                    <table id="tableKeyProjects" class="table table-hover table-striped mb-0 text-90 align-middle db-keyprojects-table">
                         <thead class="bgc-secondary-l3 text-secondary-d2 text-uppercase text-80">
                             <tr>
                                 <th class="text-center" style="width: 45px;">STT</th>
                                 <th>Mã & Tên dự án</th>
                                 <th>Khách hàng</th>
                                 <th>Trạng thái</th>
-                                <th class="text-right">DT Dự kiến</th>
-                                <th class="text-right">DT Thực tế</th>
                                 <th>Phụ trách</th>
                             </tr>
                         </thead>
                         <tbody>
                             @{ int stt = 1; }
-                            @foreach (var p in Model.KeyProjects)
+                            @foreach (var p in keyProjects)
                             {
                                 <tr>
                                     <td class="text-center font-weight-bold text-secondary">@(stt++)</td>
@@ -156,12 +179,6 @@
                                             @p.StatusName
                                         </span>
                                     </td>
-                                    <td class="text-right font-weight-bold text-yellow">
-                                        @FormatRevenue(p.TotalExpectedRevenue.GetValueOrDefault(0))
-                                    </td>
-                                    <td class="text-right font-weight-bold text-green">
-                                        @FormatRevenue(p.TotalActualRevenue.GetValueOrDefault(0))
-                                    </td>
                                     <td>
                                         <span class="text-dark-m2">@(string.IsNullOrWhiteSpace(p.AssignedEmployeeName) ? "—" : p.AssignedEmployeeName)</span>
                                     </td>
@@ -176,7 +193,7 @@
                         <div class="mb-2">
                             <i class="fa fa-star text-warning-m2 fa-3x"></i>
                         </div>
-                        <h6 class="text-secondary-d1 font-weight-bold">Chưa có dự án trọng điểm nào trong năm @Model.ApplyYear</h6>
+                        <h6 class="text-secondary-d1 font-weight-bold">Chưa có dự án trọng điểm nào trong năm @m.ApplyYear</h6>
                         <p class="text-muted text-90 mb-0">Các dự án được đánh dấu sao <strong>Trọng điểm</strong> trong danh mục Kinh doanh Dịch vụ số sẽ hiển thị tại đây.</p>
                     </div>
                 }
@@ -192,7 +209,7 @@
                     <i class="fa fa-cubes text-primary mr-2"></i>Cơ hội theo nhóm dịch vụ
                 </h6>
                 <span class="badge badge-light border-1 brc-secondary-l1 text-secondary-d2 font-weight-bold text-85 px-2 py-1">
-                    Năm @Model.ApplyYear
+                    Năm @m.ApplyYear
                 </span>
             </div>
             <div class="card-body p-2 d-flex flex-column align-items-center justify-content-center" style="min-height: 380px;">
@@ -211,31 +228,47 @@
     <!-- Cột 1: Danh sách Cơ hội KD DVS Đang quan tâm -->
     <div class="col-xl-6 col-12 mb-3">
         <div class="card h-100 bcard shadow-sm db-card-custom">
-            <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
-                <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
-                    <i class="fa fa-heart text-danger mr-2"></i>Cơ hội KD DVS Đang quan tâm - Năm @Model.ApplyYear
+            <div class="card-header bgc-white border-b-1 brc-default-l2 py-2 d-flex flex-wrap justify-content-between align-items-center">
+                <h6 class="card-title font-weight-bold text-dark-m1 mb-0 my-1">
+                    <i class="fa fa-heart text-danger mr-2"></i>Sản phẩm dịch vụ số đang quan tâm - Năm @m.ApplyYear
                 </h6>
-                <span class="badge badge-pink font-weight-bold text-85 px-2 py-1 radius-1" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #f472b6;">
-                    @(Model.FollowedOpportunities != null ? Model.FollowedOpportunities.Count : 0) cơ hội
-                </span>
+                <div class="d-flex align-items-center flex-wrap my-1">
+                    <div class="input-group input-group-sm mr-2 db-card-search" style="width: 190px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0 text-muted px-2 py-0">
+                                <i class="fa fa-search text-80"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control border-left-0 text-85 py-0" style="height: 30px;"
+                               placeholder="Tìm tên, KH..." 
+                               onkeyup="filterCardTable(this, '#tableFollowedOpps');" />
+                    </div>
+                    <button type="button" class="btn btn-xs btn-warning font-bold text-white shadow-sm mr-2 px-2 py-1 radius-1" 
+                            style="background-color: #f59e0b !important; border-color: #d97706 !important; height: 30px; display: inline-flex; align-items: center;"
+                            onclick="exportCardData('followed');" title="Tải danh sách Sản phẩm dịch vụ số đang quan tâm">
+                        <i class="fa fa-download mr-1"></i>Tải danh sách
+                    </button>
+                    <span class="badge badge-pink font-weight-bold text-85 px-2 py-1 radius-1" id="badgeFollowedOpps" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #f472b6;">
+                        @followedOpps.Count hồ sơ
+                    </span>
+                </div>
             </div>
             <div class="card-body p-0 table-responsive">
-                @if (Model.FollowedOpportunities != null && Model.FollowedOpportunities.Count > 0)
+                @if (followedOpps.Count > 0)
                 {
-                    <table class="table table-hover table-striped mb-0 text-90 align-middle db-custom-subtable">
+                    <table id="tableFollowedOpps" class="table table-hover table-striped mb-0 text-90 align-middle db-custom-subtable">
                         <thead class="bgc-secondary-l3 text-secondary-d2 text-uppercase text-80">
                             <tr>
                                 <th class="text-center" style="width: 40px;">STT</th>
-                                <th>Mã & Tên cơ hội</th>
+                                <th>Mã & Tên hồ sơ</th>
                                 <th>Khách hàng</th>
                                 <th>Trạng thái</th>
-                                <th class="text-right">DT Dự kiến</th>
                                 <th>Phụ trách</th>
                             </tr>
                         </thead>
                         <tbody>
                             @{ int sttFollow = 1; }
-                            @foreach (var opp in Model.FollowedOpportunities)
+                            @foreach (var opp in followedOpps)
                             {
                                 <tr>
                                     <td class="text-center font-weight-bold text-secondary">@(sttFollow++)</td>
@@ -258,9 +291,6 @@
                                             @opp.StatusName
                                         </span>
                                     </td>
-                                    <td class="text-right font-weight-bold text-yellow">
-                                        @FormatRevenue(opp.TotalExpectedRevenue.GetValueOrDefault(0))
-                                    </td>
                                     <td>
                                         <span class="text-dark-m2">@(string.IsNullOrWhiteSpace(opp.AssignedEmployeeName) ? "—" : opp.AssignedEmployeeName)</span>
                                     </td>
@@ -275,7 +305,7 @@
                         <div class="mb-2">
                             <i class="fa fa-heart fa-3x" style="color: #f472b6;"></i>
                         </div>
-                        <h6 class="text-secondary-d1 font-weight-bold">Chưa có cơ hội đang quan tâm nào trong năm @Model.ApplyYear</h6>
+                        <h6 class="text-secondary-d1 font-weight-bold">Chưa có sản phẩm dịch vụ số đang quan tâm nào trong năm @m.ApplyYear</h6>
                         <p class="text-muted text-90 mb-0">Nhấn biểu tượng <strong>Quan tâm</strong> tại chi tiết hồ sơ để theo dõi sát sao tiến độ tại đây.</p>
                     </div>
                 }
@@ -286,18 +316,35 @@
     <!-- Cột 2: Danh sách SP DVS có ActionTime chưa được cập nhật cách 72 tiếng -->
     <div class="col-xl-6 col-12 mb-3">
         <div class="card h-100 bcard shadow-sm db-card-custom">
-            <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
-                <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
-                    <i class="fa fa-clock text-danger mr-2"></i>SP DVS chưa cập nhật ActionTime (> 72h) - Năm @Model.ApplyYear
+            <div class="card-header bgc-white border-b-1 brc-default-l2 py-2 d-flex flex-wrap justify-content-between align-items-center">
+                <h6 class="card-title font-weight-bold text-dark-m1 mb-0 my-1">
+                    <i class="fa fa-clock text-danger mr-2"></i>Sản phẩm dịch vụ số chưa cập nhật (> 72h) - Năm @m.ApplyYear
                 </h6>
-                <span class="badge badge-danger font-weight-bold text-85 px-2 py-1 radius-1">
-                    @(Model.StaleActionTimeSales != null ? Model.StaleActionTimeSales.Count : 0) hồ sơ
-                </span>
+                <div class="d-flex align-items-center flex-wrap my-1">
+                    <div class="input-group input-group-sm mr-2 db-card-search" style="width: 190px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0 text-muted px-2 py-0">
+                                <i class="fa fa-search text-80"></i>
+                            </span>
+                        </div>
+                        <input type="text" class="form-control border-left-0 text-85 py-0" style="height: 30px;"
+                               placeholder="Tìm tên, KH..." 
+                               onkeyup="filterCardTable(this, '#tableStaleSales');" />
+                    </div>
+                    <button type="button" class="btn btn-xs btn-warning font-bold text-white shadow-sm mr-2 px-2 py-1 radius-1" 
+                            style="background-color: #f59e0b !important; border-color: #d97706 !important; height: 30px; display: inline-flex; align-items: center;"
+                            onclick="exportCardData('stale');" title="Tải danh sách Sản phẩm dịch vụ số chưa cập nhật (> 72h)">
+                        <i class="fa fa-download mr-1"></i>Tải danh sách
+                    </button>
+                    <span class="badge badge-danger font-weight-bold text-85 px-2 py-1 radius-1" id="badgeStaleSales">
+                        @staleSales.Count hồ sơ
+                    </span>
+                </div>
             </div>
             <div class="card-body p-0 table-responsive">
-                @if (Model.StaleActionTimeSales != null && Model.StaleActionTimeSales.Count > 0)
+                @if (staleSales.Count > 0)
                 {
-                    <table class="table table-hover table-striped mb-0 text-90 align-middle db-custom-subtable">
+                    <table id="tableStaleSales" class="table table-hover table-striped mb-0 text-90 align-middle db-custom-subtable">
                         <thead class="bgc-secondary-l3 text-secondary-d2 text-uppercase text-80">
                             <tr>
                                 <th class="text-center" style="width: 40px;">STT</th>
@@ -310,7 +357,7 @@
                         </thead>
                         <tbody>
                             @{ int sttStale = 1; }
-                            @foreach (var s in Model.StaleActionTimeSales)
+                            @foreach (var s in staleSales)
                             {
                                 var hours = s.HoursSinceUpdate;
                                 var days = hours / 24;
@@ -339,10 +386,12 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge badge-danger text-85 px-2 py-1" title="Lần cuối hoạt động: @lastActionStr">
+                                        <span class="badge badge-danger text-90 px-2 py-1 font-weight-bold" title="Lần cuối hoạt động: @lastActionStr">
                                             <i class="fa fa-exclamation-circle mr-1"></i>@timeText
                                         </span>
-                                        <div class="text-muted text-75 mt-05">@lastActionStr</div>
+                                        <div class="text-dark-m1 font-weight-bold text-90 mt-1">
+                                            <i class="far fa-clock text-secondary mr-1"></i>@lastActionStr
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="text-dark-m2">@(string.IsNullOrWhiteSpace(s.AssignedEmployeeName) ? "—" : s.AssignedEmployeeName)</span>
@@ -358,7 +407,7 @@
                         <div class="mb-2">
                             <i class="fa fa-check-circle text-success fa-3x"></i>
                         </div>
-                        <h6 class="text-secondary-d1 font-weight-bold">Tất cả hồ sơ năm @Model.ApplyYear đều đã được cập nhật</h6>
+                        <h6 class="text-secondary-d1 font-weight-bold">Tất cả hồ sơ năm @m.ApplyYear đều đã được cập nhật</h6>
                         <p class="text-muted text-90 mb-0">Không có hồ sơ sản phẩm dịch vụ số nào quá 72 tiếng chưa cập nhật ActionTime.</p>
                     </div>
                 }

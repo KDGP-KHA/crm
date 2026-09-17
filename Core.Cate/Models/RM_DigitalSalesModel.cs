@@ -46,8 +46,18 @@ namespace Core.Cate.Models
         [CustomDisplayName("DigitalSales_TotalExpectedRevenue_Label")]
         public decimal? TotalExpectedRevenue { get; set; }
 
+        public decimal? TotalExpectedRevenueMillion
+        {
+            get { return TotalExpectedRevenue.HasValue ? TotalExpectedRevenue.Value / 1000000m : (decimal?)null; }
+        }
+
         [CustomDisplayName("DigitalSales_TotalActualRevenue_Label")]
         public decimal? TotalActualRevenue { get; set; }
+
+        public decimal? TotalActualRevenueMillion
+        {
+            get { return TotalActualRevenue.HasValue ? TotalActualRevenue.Value / 1000000m : (decimal?)null; }
+        }
 
         [CustomDisplayName("DigitalSales_ClosingProbability_Label")]
         public decimal? ClosingProbability { get; set; }
@@ -237,6 +247,8 @@ namespace Core.Cate.Models
         public string SourceTaskName { get; set; }
         public string UploadedBy { get; set; }
         public DateTime? UploadedDate { get; set; }
+        public bool IsFromChecklist { get; set; }
+        public int? TrackingID { get; set; }
     }
 }
 

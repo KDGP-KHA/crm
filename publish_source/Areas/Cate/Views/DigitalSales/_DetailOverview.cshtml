@@ -193,7 +193,7 @@
                     </div>
                     <div class="col-md-4 mb-2">
                         <span class="text-secondary font-weight-bold">Giá trị hợp đồng:</span>
-                        <span class="ml-1 font-weight-bold text-success">@(Model.ContractValue.HasValue ? Model.ContractValue.Value.ToString("N0") + " VNĐ" : "—")</span>
+                        <span class="ml-1 font-weight-bold text-success">@(Model.ContractValue.HasValue ? (Model.ContractValue.Value >= 100000 ? ((Model.ContractValue.Value / 1000000m) % 1 == 0 ? (Model.ContractValue.Value / 1000000m).ToString("N0") : (Model.ContractValue.Value / 1000000m).ToString("#,##0.##")) + " triệu đồng" : Model.ContractValue.Value.ToString("N0") + " triệu đồng") : "—")</span>
                     </div>
                     <div class="col-md-4 mb-2">
                         <span class="text-secondary font-weight-bold">Ngày ký:</span>

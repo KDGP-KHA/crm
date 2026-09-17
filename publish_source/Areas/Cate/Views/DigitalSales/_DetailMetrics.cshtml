@@ -3,6 +3,11 @@
     var totalTasks = Model.TrackingTasks?.Count ?? 0;
     var completedTasks = Model.TrackingTasks?.Count(t => t.Status == 3) ?? 0;
     var progressPercent = totalTasks > 0 ? (int)Math.Round((double)completedTasks * 100 / totalTasks) : 0;
+
+    decimal expMil = (Model.TotalExpectedRevenue ?? 0) / 1000000m;
+    decimal actMil = (Model.TotalActualRevenue ?? 0) / 1000000m;
+    string expFormatted = expMil % 1 == 0 ? expMil.ToString("N0") : expMil.ToString("#,##0.##");
+    string actFormatted = actMil % 1 == 0 ? actMil.ToString("N0") : actMil.ToString("#,##0.##");
 }
 
 <!-- THẺ CHỈ SỐ NHANH (METRIC TILES) -->
@@ -15,8 +20,8 @@
                 </div>
                 <div class="flex-grow-1 min-width-0">
                     <div class="ds-metric-title text-truncate">Doanh thu dự kiến</div>
-                    <div class="ds-metric-value text-truncate">
-                        @((Model.TotalExpectedRevenue ?? 0).ToString("N0"))<span class="ds-metric-unit">VNĐ</span>
+                    <div class="ds-metric-value text-truncate" title="@((Model.TotalExpectedRevenue ?? 0).ToString("N0")) VNĐ">
+                        @expFormatted<span class="ds-metric-unit">triệu đồng</span>
                     </div>
                 </div>
             </div>
@@ -31,8 +36,8 @@
                 </div>
                 <div class="flex-grow-1 min-width-0">
                     <div class="ds-metric-title text-truncate">Doanh thu thực tế (Ký HĐ)</div>
-                    <div class="ds-metric-value text-truncate">
-                        @((Model.TotalActualRevenue ?? 0).ToString("N0"))<span class="ds-metric-unit">VNĐ</span>
+                    <div class="ds-metric-value text-truncate" title="@((Model.TotalActualRevenue ?? 0).ToString("N0")) VNĐ">
+                        @actFormatted<span class="ds-metric-unit">triệu đồng</span>
                     </div>
                 </div>
             </div>

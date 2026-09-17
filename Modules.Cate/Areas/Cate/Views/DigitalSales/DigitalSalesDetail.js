@@ -1,4 +1,4 @@
-﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -275,6 +275,7 @@ function reloadTrackingSection(salesId) {
             $("#badgeTabTracking").text($prog.data("completed") + "/" + $prog.data("total"));
         }
         reloadDiscussionsSection(salesId);
+        reloadAttachmentsSection(salesId);
     }).fail(function () {
         hideSectionLoading($tracking);
     });
@@ -2139,6 +2140,66 @@ function confirmDeleteAttachment(salesId, filePath, fileName) {
     });
 
     $modal.modal('show');
+}
+
+// Hàm lọc tệp đính kèm theo loại nguồn (Tất cả / Hồ sơ / Checklist / Chuyển trạng thái)
+function filterAttachmentCards(type, btn) {
+    var $grid = $('#attachGridList');
+    if ($grid.length === 0) return;
+
+    if (btn) {
+        $('#attachmentFilterContainer .attach-filter-btn').removeClass('active');
+        $(btn).addClass('active');
+    }
+
+    if (type === 'all') {
+        $grid.find('.attach-col-8').show();
+    } else {
+        $grid.find('.attach-col-8').hide();
+        $grid.find('.attach-col-8[data-source="' + type + '"]').fadeIn(150);
+    }
+}
+
+// Hàm chuyển sang tab Checklist và highlight tiến trình tương ứng
+function switchToTrackingTab(trackingId) {
+    var $tabLink = $('#tab-tracking-link');
+    if ($tabLink.length > 0) {
+        $tabLink.tab('show');
+    }
+
+    if (trackingId) {
+        setTimeout(function () {
+            var $target = $('tr[data-node*="_task_' + trackingId + '"], #chk_task_' + trackingId + ', #chk_todo_' + trackingId).closest('tr');
+            if ($target.length > 0) {
+                // Mở rộng cây cha nếu đang ẩn
+                var parentNode = $target.attr('data-parent');
+                if (parentNode) {
+                    $('tr[data-node="' + parentNode + '"]').each(function () {
+                        if ($(this).attr('data-expanded') === 'false') {
+                            toggleTreeNode(parentNode);
+                        }
+                    });
+                }
+                var rootNode = $target.attr('data-root');
+                if (rootNode) {
+                    $('tr[data-node="' + rootNode + '"]').each(function () {
+                        if ($(this).attr('data-expanded') === 'false') {
+                            toggleTreeNode(rootNode);
+                        }
+                    });
+                }
+
+                $target.show();
+                if ($target[0] && typeof $target[0].scrollIntoView === 'function') {
+                    $target[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                $target.addClass('highlight-tracking-target');
+                setTimeout(function () {
+                    $target.removeClass('highlight-tracking-target');
+                }, 3000);
+            }
+        }, 300);
+    }
 }
 
 function applyKeyProjectUI(isChecked) {

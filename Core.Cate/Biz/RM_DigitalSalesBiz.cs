@@ -47,7 +47,7 @@ namespace Core.Cate.Biz
         private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
         private readonly string _spGetStaleActionTime = "RM_DigitalSales_GetStaleActionTime";
 
-        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null)
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null, string keyword = null)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
 
@@ -61,6 +61,7 @@ namespace Core.Cate.Biz
             var keyProjects = LoadList(out totalKey, new RM_DigitalSalesSearchModel
             {
                 ApplyYear = applyYear,
+                Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
                 IsKeyProject = true,
                 PageNumber = 1,
                 PageSize = 50
@@ -70,6 +71,7 @@ namespace Core.Cate.Biz
             var followedOpportunities = LoadList(out totalFollowed, new RM_DigitalSalesSearchModel
             {
                 ApplyYear = applyYear,
+                Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
                 IsFollowed = true,
                 UserName = !string.IsNullOrWhiteSpace(userName) ? userName : null,
                 PageNumber = 1,
@@ -84,9 +86,20 @@ namespace Core.Cate.Biz
                 0
             ) ?? new List<RM_DigitalSalesModel>();
 
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim();
+                staleSales = staleSales.Where(x =>
+                    (x.Title != null && x.Title.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (x.CustomerName != null && x.CustomerName.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (x.Code != null && x.Code.IndexOf(kw, StringComparison.OrdinalIgnoreCase) >= 0)
+                ).ToList();
+            }
+
             return new DigitalSalesDashboardOverviewModel
             {
                 ApplyYear = applyYear,
+                Keyword = keyword,
                 StatusList = list,
                 TotalCountAll = list.Sum(x => x.TotalCount),
                 TotalExpectedRevenueAll = list.Sum(x => x.TotalExpectedRevenue),
@@ -616,6 +629,17 @@ namespace Core.Cate.Biz
             );
             if (list != null && list.Count > 0)
             {
+                foreach (var item in list)
+                {
+                    item.TaskName = FixVietnameseMojibake(item.TaskName);
+                    item.ResultNote = FixVietnameseMojibake(item.ResultNote);
+                    item.AssignedUserName = FixVietnameseMojibake(item.AssignedUserName);
+                    item.CompletedByName = FixVietnameseMojibake(item.CompletedByName);
+                    item.LastModifiedByName = FixVietnameseMojibake(item.LastModifiedByName);
+                    item.CreatedByName = FixVietnameseMojibake(item.CreatedByName);
+                    item.ProcessName = FixVietnameseMojibake(item.ProcessName);
+                    item.SalesStatusName = FixVietnameseMojibake(item.SalesStatusName);
+                }
                 var parents = list.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
                 var children = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
                 foreach (var p in parents)
@@ -628,6 +652,7 @@ namespace Core.Cate.Biz
 
         public int UpdateTrackingStatus(int trackingId, byte status, string resultNote, string attachmentFile, int? assignedUserId, DateTime? deadline, string username)
         {
+            resultNote = FixVietnameseMojibake(resultNote);
             var result = AppProcessor.ProcedureProvider.Execute(
                 _spTrackingUpdateStatus,
                 DATA_PROVIDER_NAME,
@@ -644,6 +669,11 @@ namespace Core.Cate.Biz
 
         public int SaveTracking(RM_DigitalSalesTrackingModel model, string username)
         {
+            if (model != null)
+            {
+                model.TaskName = FixVietnameseMojibake(model.TaskName);
+                model.ResultNote = FixVietnameseMojibake(model.ResultNote);
+            }
             // Nếu thêm tiến trình thực tế mới vào quy trình đang có placeholder rỗng, xóa placeholder đi
             if (model.TrackingID <= 0 && model.ProcessID.HasValue && model.ProcessID.Value > 0 && !string.IsNullOrWhiteSpace(model.TaskName) && (!model.ParentID.HasValue || model.ParentID.Value <= 0))
             {
@@ -833,6 +863,9 @@ namespace Core.Cate.Biz
                 foreach (var item in list)
                 {
                     item.Note = FixVietnameseMojibake(item.Note);
+                    item.ActionByName = FixVietnameseMojibake(item.ActionByName);
+                    item.FromStatusName = FixVietnameseMojibake(item.FromStatusName);
+                    item.ToStatusName = FixVietnameseMojibake(item.ToStatusName);
                 }
             }
             return list ?? new List<RM_DigitalSalesTimelineModel>();
@@ -1191,5 +1224,30 @@ namespace Core.Cate.Biz
                 return input;
             }
         }
+
+        private readonly string _spGetGroupServiceChart = "RM_DigitalSales_GetGroupServiceChart";
+
+        public List<GroupServiceChartModel> GetGroupServiceChart(int? applyYear, string username, string employeeIds)
+        {
+            try
+            {
+                var data = AppProcessor.ProcedureProvider.ExecuteTypedList<GroupServiceChartModel>(
+                    _spGetGroupServiceChart,
+                    DATA_PROVIDER_NAME,
+                    applyYear,
+                    null,
+                    null,
+                    employeeIds,
+                    username
+                );
+                return data ?? new List<GroupServiceChartModel>();
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return new List<GroupServiceChartModel>();
+            }
+        }
     }
 }
+

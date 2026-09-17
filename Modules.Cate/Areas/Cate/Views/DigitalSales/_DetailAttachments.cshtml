@@ -1,19 +1,164 @@
-﻿@model Core.Cate.Models.RM_DigitalSalesModel
+﻿@using Core.Cate.Biz
+@using Core.Cate.Models
+@model RM_DigitalSalesModel
 @{
     bool canEdit = ViewBag.CanEdit == true;
-    var attachedFiles = !string.IsNullOrEmpty(Model.FileAttach)
-        ? Model.FileAttach.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
-        : new string[0];
+
+    var allItems = new List<TimelineAttachmentFileItem>();
+
+    // 1. Tệp đính kèm chung của hồ sơ
+    if (!string.IsNullOrEmpty(Model.FileAttach))
+    {
+        var directParts = Model.FileAttach.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var p in directParts)
+        {
+            var trimmed = p.Trim();
+            if (string.IsNullOrEmpty(trimmed)) continue;
+            allItems.Add(new TimelineAttachmentFileItem
+            {
+                FilePath = trimmed,
+                FileName = System.IO.Path.GetFileName(trimmed),
+                Extension = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "",
+                SourceTaskName = "Hồ sơ chung",
+                UploadedBy = Model.CreatedByName ?? Model.CreatedBy,
+                UploadedDate = Model.CreatedDate,
+                IsFromChecklist = false
+            });
+        }
+    }
+
+    // 2. Tệp đính kèm từ Checklist (Tiến trình & Todo list)
+    var tasks = Model.TrackingTasks ?? new List<RM_DigitalSalesTrackingModel>();
+    var flattenedTasks = new List<RM_DigitalSalesTrackingModel>(tasks);
+    foreach (var t in tasks)
+    {
+        if (t.TodoList != null && t.TodoList.Count > 0)
+        {
+            foreach (var todo in t.TodoList)
+            {
+                if (!flattenedTasks.Any(x => x.TrackingID == todo.TrackingID))
+                {
+                    flattenedTasks.Add(todo);
+                }
+            }
+        }
+    }
+
+    foreach (var task in flattenedTasks)
+    {
+        if (!string.IsNullOrWhiteSpace(task.AttachmentFile))
+        {
+            var taskParts = task.AttachmentFile.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var p in taskParts)
+            {
+                var trimmed = p.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+
+                // Tránh lặp lại chính xác cùng một đường dẫn file
+                if (allItems.Any(x => string.Equals(x.FilePath, trimmed, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                string cleanTaskName = !string.IsNullOrWhiteSpace(task.TaskName)
+                    ? RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)
+                    : (!string.IsNullOrWhiteSpace(task.TrackingCode) ? "Tiến trình #" + task.TrackingCode : "Checklist");
+
+                allItems.Add(new TimelineAttachmentFileItem
+                {
+                    FilePath = trimmed,
+                    FileName = System.IO.Path.GetFileName(trimmed),
+                    Extension = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "",
+                    SourceTaskName = cleanTaskName,
+                    UploadedBy = RM_DigitalSalesBiz.FixVietnameseMojibake(task.CompletedByName ?? task.LastModifiedByName ?? task.CreatedByName ?? task.AssignedUserName),
+                    UploadedDate = task.CompletedDate ?? task.LastModifiedDate ?? (DateTime?)task.CreatedDate,
+                    IsFromChecklist = true,
+                    TrackingID = task.TrackingID
+                });
+            }
+        }
+    }
+
+    // 3. Tệp đính kèm biên bản / minh chứng khi Chuyển trạng thái
+    if (Model.Timelines != null && Model.Timelines.Count > 0)
+    {
+        foreach (var tl in Model.Timelines.Where(t => !string.IsNullOrWhiteSpace(t.AttachmentPath)))
+        {
+            var tlParts = tl.AttachmentPath.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var p in tlParts)
+            {
+                var trimmed = p.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+
+                if (allItems.Any(x => string.Equals(x.FilePath, trimmed, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                string stName = !string.IsNullOrWhiteSpace(tl.ToStatusName)
+                    ? RM_DigitalSalesBiz.FixVietnameseMojibake(tl.ToStatusName)
+                    : "Chuyển trạng thái";
+
+                allItems.Add(new TimelineAttachmentFileItem
+                {
+                    FilePath = trimmed,
+                    FileName = System.IO.Path.GetFileName(trimmed),
+                    Extension = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "",
+                    SourceTaskName = "Trạng thái: " + stName,
+                    UploadedBy = RM_DigitalSalesBiz.FixVietnameseMojibake(tl.ActionByName ?? tl.ActionBy),
+                    UploadedDate = tl.ActionDate,
+                    IsFromChecklist = false
+                });
+            }
+        }
+    }
+
+    int totalCount = allItems.Count;
+    int directCount = allItems.Count(x => !x.IsFromChecklist && !x.SourceTaskName.StartsWith("Trạng thái:"));
+    int checklistCount = allItems.Count(x => x.IsFromChecklist);
+    int transitionCount = allItems.Count(x => x.SourceTaskName.StartsWith("Trạng thái:"));
 }
 
-<span id="partialAttachmentsCount" class="d-none" data-count="@attachedFiles.Length"></span>
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_DetailAttachments.css?v=@DateTime.Now.Ticks" />
+
+<span id="partialAttachmentsCount" class="d-none" data-count="@totalCount"></span>
 
 <div class="card border-1 brc-grey-l2 p-3 p-lg-4 shadow-sm">
-    <div class="d-flex align-items-center justify-content-between border-b-1 brc-grey-l2 pb-2 mb-3">
-        <h6 class="text-primary font-weight-bold mb-0">
-            <i class="fa fa-paperclip mr-1"></i> Tệp đính kèm
-            <span class="badge badge-info badge-pill ml-1" id="badgeAttachmentCount">@attachedFiles.Length</span>
-        </h6>
+    <div class="d-flex align-items-center justify-content-between border-b-1 brc-grey-l2 pb-2 mb-3 flex-wrap attach-header-wrap">
+        <div class="d-flex align-items-center flex-wrap attach-header-left">
+            <h6 class="text-primary font-weight-bold mb-0 text-105">
+                <i class="fa fa-paperclip mr-1"></i> Tệp đính kèm
+                <span class="badge badge-info badge-pill ml-1" id="badgeAttachmentCount">@totalCount</span>
+            </h6>
+
+            @if (totalCount > 0 && (checklistCount > 0 || transitionCount > 0))
+            {
+                <div class="d-inline-flex align-items-center ml-2 flex-wrap attach-filter-group" id="attachmentFilterContainer">
+                    <button type="button" class="attach-filter-btn active" onclick="filterAttachmentCards('all', this);">
+                        Tất cả (@totalCount)
+                    </button>
+                    @if (directCount > 0)
+                    {
+                        <button type="button" class="attach-filter-btn" onclick="filterAttachmentCards('direct', this);">
+                            <i class="fa fa-folder text-secondary mr-1"></i>Hồ sơ chung (@directCount)
+                        </button>
+                    }
+                    @if (checklistCount > 0)
+                    {
+                        <button type="button" class="attach-filter-btn attach-filter-btn-checklist" onclick="filterAttachmentCards('checklist', this);">
+                            <i class="fa fa-tasks text-warning-d2 mr-1"></i>Checklist (@checklistCount)
+                        </button>
+                    }
+                    @if (transitionCount > 0)
+                    {
+                        <button type="button" class="attach-filter-btn attach-filter-btn-transition" onclick="filterAttachmentCards('transition', this);">
+                            <i class="fa fa-exchange-alt text-success mr-1"></i>Chuyển trạng thái (@transitionCount)
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+
         @if (canEdit)
         {
             <button type="button" class="btn btn-xs btn-primary font-bolder px-25 py-1 radius-1 shadow-sm" onclick="openUploadAttachmentModal(@Model.DigitalSalesID);">
@@ -22,24 +167,23 @@
         }
     </div>
 
-    @if (attachedFiles.Length > 0)
+    @if (totalCount > 0)
     {
-        <div class="attach-grid-8">
-            @foreach (var file in attachedFiles)
+        <div class="attach-grid-8" id="attachGridList">
+            @foreach (var item in allItems)
             {
-                var trimmedFile = file.Trim();
-                var fileName = System.IO.Path.GetFileName(trimmedFile);
-                var ext = System.IO.Path.GetExtension(trimmedFile)?.ToLowerInvariant() ?? "";
+                string ext = item.Extension;
                 bool isImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext);
-                var downloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmedFile });
+                var downloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = item.FilePath });
+                string cardSource = item.IsFromChecklist ? "checklist" : (item.SourceTaskName.StartsWith("Trạng thái:") ? "transition" : "direct");
 
-                <div class="attach-col-8">
+                <div class="attach-col-8" data-source="@cardSource">
                     <div class="card border-1 brc-grey-l2 radius-1 h-100 shadow-sm overflow-hidden attach-card">
                         @if (isImage)
                         {
-                            <div class="position-relative bgc-grey-l5 text-center d-flex align-items-center justify-content-center attach-thumb-box" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@HttpUtility.JavaScriptStringEncode(fileName)');" title="Bấm để xem ảnh lớn">
-                                <img src="@Url.Content(trimmedFile)" alt="@fileName" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='/Contents/assets/images/image-placeholder.png';" />
-                                <div class="position-absolute bgc-black-tp6 text-white text-70 px-1 radius-1" style="bottom: 3px; right: 3px;">
+                            <div class="position-relative text-center d-flex align-items-center justify-content-center attach-thumb-box" onclick="previewImageDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Bấm để xem ảnh lớn">
+                                <img src="@Url.Content(item.FilePath)" alt="@item.FileName" class="img-fluid attach-thumb-img" onerror="this.onerror=null; this.src='/Contents/assets/images/image-placeholder.png';" />
+                                <div class="position-absolute bgc-black-tp6 text-white text-70 px-1 radius-1 attach-thumb-zoom-badge">
                                     <i class="fa fa-search-plus"></i>
                                 </div>
                             </div>
@@ -70,14 +214,37 @@
                             </div>
                         }
                         <div class="card-body p-15 d-flex flex-column justify-content-between">
-                            <div class="attach-file-name" title="@fileName">
-                                @fileName
+                            <div class="attach-file-name" title="@item.FileName">
+                                @item.FileName
                             </div>
+
+                            <!-- Tag nguồn gốc tệp -->
+                            <div class="attach-source-badge">
+                                @if (item.IsFromChecklist)
+                                {
+                                    <span class="badge badge-light-warning text-warning-d3 border-1 brc-warning-m3 font-bold d-block text-truncate" title="Từ Checklist: @item.SourceTaskName">
+                                        <i class="fa fa-tasks mr-1"></i>@item.SourceTaskName
+                                    </span>
+                                }
+                                else if (item.SourceTaskName.StartsWith("Trạng thái:"))
+                                {
+                                    <span class="badge badge-light-success text-success-d2 border-1 brc-success-m3 font-bold d-block text-truncate" title="@item.SourceTaskName">
+                                        <i class="fa fa-exchange-alt mr-1"></i>@item.SourceTaskName
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-light-secondary text-secondary-d2 font-bold d-block text-truncate" title="Tệp đính kèm hồ sơ chung">
+                                        <i class="fa fa-folder mr-1"></i>Hồ sơ chung
+                                    </span>
+                                }
+                            </div>
+
                             <div class="attach-actions">
-                                <div class="d-inline-flex align-items-center" style="gap: 3px;">
+                                <div class="d-inline-flex align-items-center attach-actions-left">
                                     @if (isImage)
                                     {
-                                        <button type="button" class="btn btn-xs btn-outline-info radius-1 px-1 py-0" onclick="previewImageDirect('@Url.Content(trimmedFile)', '@HttpUtility.JavaScriptStringEncode(fileName)');" title="Xem ảnh">
+                                        <button type="button" class="btn btn-xs btn-outline-info radius-1 px-1 py-0" onclick="previewImageDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Xem ảnh">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     }
@@ -85,9 +252,22 @@
                                         <i class="fa fa-download"></i> Tải
                                     </a>
                                 </div>
-                                @if (canEdit)
+
+                                @if (item.IsFromChecklist && item.TrackingID.HasValue)
                                 {
-                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-1 py-0 ml-auto" onclick="confirmDeleteAttachment(@Model.DigitalSalesID, '@trimmedFile', '@fileName');" title="Xóa tệp khỏi hồ sơ">
+                                    <button type="button" class="btn btn-xs btn-outline-warning radius-1 px-1 py-0 ml-auto" onclick="switchToTrackingTab(@item.TrackingID.Value);" title="Chuyển đến tiến trình này trên Checklist">
+                                        <i class="fa fa-external-link-alt"></i>
+                                    </button>
+                                }
+                                else if (item.SourceTaskName.StartsWith("Trạng thái:"))
+                                {
+                                    <button type="button" class="btn btn-xs btn-outline-success radius-1 px-1 py-0 ml-auto" onclick="openStatusTimelineModal(@Model.DigitalSalesID);" title="Xem dòng thời gian chuyển trạng thái">
+                                        <i class="fa fa-history"></i>
+                                    </button>
+                                }
+                                else if (canEdit)
+                                {
+                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-1 py-0 ml-auto" onclick="confirmDeleteAttachment(@Model.DigitalSalesID, '@item.FilePath', '@item.FileName');" title="Xóa tệp khỏi hồ sơ">
                                         <i class="fa fa-trash-alt"></i>
                                     </button>
                                 }
@@ -102,7 +282,7 @@
     {
         <div class="text-center py-4 text-muted">
             <i class="fa fa-folder-open fa-2x text-secondary-l1 mb-2 d-block"></i>
-            Chưa đính kèm tệp tài liệu nào.@(canEdit ? " Bấm \"Tải lên tệp mới\" để đính kèm tệp cho hồ sơ." : "")
+            Chưa có tệp đính kèm nào (cả ở hồ sơ và checklist).@(canEdit ? " Bấm \"Tải lên tệp mới\" để đính kèm tệp cho hồ sơ." : "")
         </div>
     }
 </div>

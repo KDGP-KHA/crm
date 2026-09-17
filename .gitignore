@@ -34,4 +34,6 @@
 [Cc]ontents/[Uu]ploads/
 **/[Cc]ontents/[Uu]ploads/**
 .agents/scratch/
+scratch/
+
 
