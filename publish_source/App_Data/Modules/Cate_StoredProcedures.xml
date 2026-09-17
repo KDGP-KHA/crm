@@ -450,6 +450,7 @@
 		<Procedure Name="RM_DigitalSales_GetAccessibleEmployees" Value="RM_DigitalSales_GetAccessibleEmployees" />
 		<Procedure Name="RM_DigitalSales_GetDashboardStatusStats" Value="RM_DigitalSales_GetDashboardStatusStats" />
 		<Procedure Name="RM_DigitalSales_GetStaleActionTime" Value="RM_DigitalSales_GetStaleActionTime" />
+		<Procedure Name="RM_DigitalSales_GetGroupServiceChart" Value="RM_DigitalSales_GetGroupServiceChart" />
 	</StoredProcedures>
 </Provider>
 

@@ -47,7 +47,17 @@ namespace Core.Cate.Biz
         private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
         private readonly string _spGetStaleActionTime = "RM_DigitalSales_GetStaleActionTime";
 
-        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null, string keyword = null)
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        {
+            return GetDashboardStatusStats(applyYear, null, null);
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName)
+        {
+            return GetDashboardStatusStats(applyYear, userName, null);
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName, string keyword)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
 
