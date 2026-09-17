@@ -3223,6 +3223,38 @@ namespace Modules.Cate.Areas.Cate.Controllers
         {
             var list = new List<TimelineAttachmentFileItem>();
             if (string.IsNullOrWhiteSpace(rawFiles)) return list;
+
+            var content = rawFiles.Trim();
+            // Tệp của luồng chuyển trạng thái mới được lưu dưới dạng JSON array.
+            // Dữ liệu cũ vẫn là chuỗi path phân tách bằng dấu ; hoặc ,.
+            if (content.StartsWith("["))
+            {
+                try
+                {
+                    var attachments = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ActivityAttachmentItem>>(content)
+                                      ?? new List<ActivityAttachmentItem>();
+                    foreach (var attachment in attachments.Where(item => !string.IsNullOrWhiteSpace(item.FilePath)))
+                    {
+                        list.Add(new TimelineAttachmentFileItem
+                        {
+                            FilePath = attachment.FilePath,
+                            FileName = string.IsNullOrWhiteSpace(attachment.FileName)
+                                ? GetTimelineAttachmentFileName(attachment.FilePath)
+                                : attachment.FileName,
+                            Extension = attachment.Extension,
+                            UploadedBy = uploadedBy,
+                            UploadedDate = uploadedDate
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // File đính kèm lỗi không được làm hỏng toàn bộ modal Timeline.
+                    AppProcessor.Logger.Error(ex);
+                }
+                return list;
+            }
+
             var parts = rawFiles.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var p in parts)
             {
@@ -3231,12 +3263,25 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 list.Add(new TimelineAttachmentFileItem
                 {
                     FilePath = trimmed,
-                    FileName = System.IO.Path.GetFileName(trimmed),
+                    FileName = GetTimelineAttachmentFileName(trimmed),
                     UploadedBy = uploadedBy,
                     UploadedDate = uploadedDate
                 });
             }
             return list;
+        }
+
+        private static string GetTimelineAttachmentFileName(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath)) return string.Empty;
+            try
+            {
+                return System.IO.Path.GetFileName(filePath);
+            }
+            catch (ArgumentException)
+            {
+                return filePath;
+            }
         }
 
         [AjaxOnly]
