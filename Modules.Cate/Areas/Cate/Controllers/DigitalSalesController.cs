@@ -38,6 +38,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
         private readonly NotificationService _notificationService;
+        private readonly DigitalSalesMailService _digitalSalesMailService;
         private readonly RM_ReviewBatchItemCache _reviewBatchItemCache;
         private readonly RM_ReviewBatchItemBiz _reviewBatchItemBiz;
         private readonly SysConfigCache _sysConfigCache;
@@ -78,6 +79,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
             _notificationService = new NotificationService();
+            _digitalSalesMailService = new DigitalSalesMailService();
             _reviewBatchItemCache = new RM_ReviewBatchItemCache();
             _reviewBatchItemBiz = new RM_ReviewBatchItemBiz();
             _sysConfigCache = new SysConfigCache();
@@ -476,6 +478,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var id = _salesCache.Save(model, User.UserName);
             if (id > 0)
             {
+                var savedSales = _salesCache.GetByID(id);
+                var amUserName = GetUserNameByEmployeeId(savedSales?.AssignedEmployeeID);
+                _digitalSalesMailService.QueueCreated(id, amUserName,
+                    GetDigitalSalesMailCcUserNames(id, savedSales?.AssignedEmployeeID, amUserName), User.UserName);
                 return Json(new
                 {
                     status = true,
@@ -1734,6 +1740,20 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
 
                 var updated = _salesCache.GetByID(model.DigitalSalesID, User.UserName);
+                var memberUserNames = (updated?.Members ?? _salesCache.GetMembersBySalesID(model.DigitalSalesID))
+                    .Select(member => member.UserName)
+                    .Where(userName => !string.IsNullOrWhiteSpace(userName))
+                    .ToList();
+                var memberIds = (updated?.Members ?? _salesCache.GetMembersBySalesID(model.DigitalSalesID))
+                    .Select(member => member.UserID)
+                    .Where(userId => userId > 0)
+                    .ToList();
+                if (updated?.AssignedEmployeeID.HasValue == true)
+                {
+                    memberIds.Add(updated.AssignedEmployeeID.Value);
+                }
+                _digitalSalesMailService.QueueStatusChanged(model.DigitalSalesID, memberUserNames,
+                    GetUserNameByEmployeeId(updated?.AssignedEmployeeID), GetDigitalSalesMailCcUserNames(model.DigitalSalesID, updated?.AssignedEmployeeID, null), User.UserName);
                 return Json(new
                 {
                     status = true,
@@ -2650,10 +2670,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (!string.IsNullOrWhiteSpace(model.CustomRole)) roleNames.Add(model.CustomRole.Trim());
             var roleTitle = roleNames.Count > 0 ? string.Join(", ", roleNames.Distinct()) : GetAppMessage("DigitalSales_Role_Member");
             var savedCount = 0;
+            var addedEmployeeIds = new List<int>();
             foreach (var employeeId in model.EmployeeIDs.Distinct().Where(id => id > 0))
             {
                 var member = new RM_DigitalSalesMemberModel { DigitalSalesID = model.DigitalSalesID, UserID = employeeId, RoleTitle = roleTitle, IsAM = model.IsAM, Note = model.Note, IsActive = true };
-                if (_salesCache.SaveMember(member, User.UserName) > 0) savedCount++;
+                if (_salesCache.SaveMember(member, User.UserName) > 0)
+                {
+                    savedCount++;
+                    addedEmployeeIds.Add(employeeId);
+                }
+            }
+
+            if (savedCount > 0)
+            {
+                var sales = _salesCache.GetByID(model.DigitalSalesID);
+                _digitalSalesMailService.QueueMemberAdded(model.DigitalSalesID, GetUserNamesByEmployeeIds(addedEmployeeIds), GetUserNameByEmployeeId(sales?.AssignedEmployeeID), GetDigitalSalesMailCcUserNames(model.DigitalSalesID, sales?.AssignedEmployeeID, null), roleTitle, User.UserName);
             }
 
             return Json(new
@@ -2832,6 +2863,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 var existingMembersList = _salesCache.GetMembersBySalesID(model.DigitalSalesID) ?? new List<RM_DigitalSalesMemberModel>();
                 int savedCount = 0;
+                var addedEmployeeIds = new List<int>();
                 foreach (var empId in empIdList)
                 {
                     var existing = existingMembersList.FirstOrDefault(e => e.UserID == empId);
@@ -2867,11 +2899,20 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         IsActive = true
                     };
                     var id = _salesCache.SaveMember(m, User.UserName);
-                    if (id > 0) savedCount++;
+                    if (id > 0)
+                    {
+                        savedCount++;
+                        addedEmployeeIds.Add(empId);
+                    }
                 }
 
                 if (savedCount > 0)
                 {
+                    if (addedEmployeeIds.Count > 0)
+                    {
+                        var sales = _salesCache.GetByID(model.DigitalSalesID);
+                        _digitalSalesMailService.QueueMemberAdded(model.DigitalSalesID, GetUserNamesByEmployeeIds(addedEmployeeIds), GetUserNameByEmployeeId(sales?.AssignedEmployeeID), GetDigitalSalesMailCcUserNames(model.DigitalSalesID, sales?.AssignedEmployeeID, null), finalRoleTitle, User.UserName);
+                    }
                     return Json(new
                     {
                         status = true,
@@ -2920,6 +2961,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     {
                         _salesCache.DeleteMember(m.MemberID, User.UserName);
                     }
+                    var sales = _salesCache.GetByID(salesId.Value);
+                    _digitalSalesMailService.QueueMemberRemoved(salesId.Value, target.UserName, GetUserNameByEmployeeId(sales?.AssignedEmployeeID), GetDigitalSalesMailCcUserNames(salesId.Value, sales?.AssignedEmployeeID, null), target.RoleTitle, User.UserName);
                     return Json(new
                     {
                         status = true,
@@ -5155,6 +5198,59 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
             catch { }
             return null;
+        }
+
+        private string GetUserNameByEmployeeId(int? employeeId)
+        {
+            if (!employeeId.HasValue || employeeId.Value <= 0) return string.Empty;
+            try { return _userCache.GetById(employeeId.Value)?.UserName ?? string.Empty; }
+            catch (Exception ex) { AppProcessor.Logger.Error(ex); return string.Empty; }
+        }
+
+        private List<string> GetUserNamesByEmployeeIds(IEnumerable<int> employeeIds)
+        {
+            return (employeeIds ?? Enumerable.Empty<int>()).Where(id => id > 0).Distinct()
+                .Select(id => GetUserNameByEmployeeId(id)).Where(userName => !string.IsNullOrWhiteSpace(userName))
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        private List<string> GetManagementUserNames(IEnumerable<int?> employeeIds)
+        {
+            var ids = (employeeIds ?? Enumerable.Empty<int?>()).Where(id => id.HasValue && id.Value > 0)
+                .Select(id => id.Value).Distinct().ToList();
+            return GetManagementUserNames(ids);
+        }
+
+        private List<string> GetManagementUserNames(IEnumerable<int> employeeIds)
+        {
+            var ids = (employeeIds ?? Enumerable.Empty<int>()).Where(id => id > 0).Distinct().ToList();
+            if (ids.Count == 0) return new List<string>();
+            try
+            {
+                return (_userCache.GetManagement(string.Join(";", ids)) ?? new List<SysUserModel>())
+                    .Select(user => user.UserName).Where(userName => !string.IsNullOrWhiteSpace(userName))
+                    .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            catch (Exception ex) { AppProcessor.Logger.Error(ex); return new List<string>(); }
+        }
+
+        private List<string> GetDigitalSalesMailCcUserNames(int salesId, int? amEmployeeId, string amUserName)
+        {
+            var members = _salesCache.GetMembersBySalesID(salesId) ?? new List<RM_DigitalSalesMemberModel>();
+            var memberUserNames = members.Select(member => member.UserName).Where(userName => !string.IsNullOrWhiteSpace(userName));
+            var ccUserNames = memberUserNames.ToList();
+            bool sendMailToManager = bool.TryParse(
+                _sysConfigCache.GetViaKey("CONFIG_SEND_MAIL_TO_MANAGER")?.ConfigValue,
+                out bool enabled) && enabled;
+            if (sendMailToManager)
+            {
+                var managerIds = members.Select(member => member.UserID).Where(userId => userId > 0).ToList();
+                if (amEmployeeId.HasValue && amEmployeeId.Value > 0) managerIds.Add(amEmployeeId.Value);
+                ccUserNames.AddRange(GetManagementUserNames(managerIds));
+            }
+            return ccUserNames
+                .Where(userName => !string.Equals(userName, amUserName, StringComparison.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         [HttpGet]
