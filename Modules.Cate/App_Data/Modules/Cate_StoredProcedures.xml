@@ -444,10 +444,12 @@
 		<Procedure Name="RM_DigitalSalesActivity_Delete" Value="RM_DigitalSalesActivity_Delete" />
 		<Procedure Name="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" Value="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" />
 
-		<!-- RM_DigitalSales Helpers -->
+		<Procedure Name="RM_DigitalSalesProductContract_GetByProductID" Value="RM_DigitalSalesProductContract_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductContract_Link" Value="RM_DigitalSalesProductContract_Link" />
 		<Procedure Name="RM_DigitalSales_GetDepartmentByUserID" Value="RM_DigitalSales_GetDepartmentByUserID" />
 		<Procedure Name="RM_DigitalSales_GetAccessibleEmployees" Value="RM_DigitalSales_GetAccessibleEmployees" />
 		<Procedure Name="RM_DigitalSales_GetDashboardStatusStats" Value="RM_DigitalSales_GetDashboardStatusStats" />
+		<Procedure Name="RM_DigitalSales_GetStaleActionTime" Value="RM_DigitalSales_GetStaleActionTime" />
 	</StoredProcedures>
 </Provider>
 
