@@ -27,12 +27,12 @@ namespace Core.Cate.Services
 
         public void QueueMemberAdded(int salesId, IEnumerable<string> notificationUserNames, string amUserName, IEnumerable<string> ccUserNames, string roleNames, string actionUserName)
         {
-            Queue(delegate { Send(salesId, notificationUserNames, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_MEMBER_ADDED", roleNames, "Bạn được thêm vào Hồ sơ KD sản phẩm/dịch vụ số", "Bạn được thêm vào hồ sơ", "MailTemplate_DigitalSalesMemberAdded", "fa-user-plus", "text-success"); });
+            Queue(delegate { Send(salesId, notificationUserNames, notificationUserNames, null, actionUserName, "DIGITAL_SALES_MEMBER_ADDED", roleNames, "Bạn được thêm vào Hồ sơ KD sản phẩm/dịch vụ số", "Bạn được thêm vào hồ sơ", "MailTemplate_DigitalSalesMemberAdded", "fa-user-plus", "text-success"); });
         }
 
         public void QueueMemberRemoved(int salesId, string notificationUserName, string amUserName, IEnumerable<string> ccUserNames, string roleNames, string actionUserName)
         {
-            Queue(delegate { Send(salesId, new[] { notificationUserName }, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_MEMBER_REMOVED", roleNames, "Bạn bị xóa khỏi Hồ sơ KD sản phẩm/dịch vụ số", "Bạn bị xóa khỏi hồ sơ", "MailTemplate_DigitalSalesMemberRemoved", "fa-user-minus", "text-danger"); });
+            Queue(delegate { Send(salesId, new[] { notificationUserName }, new[] { notificationUserName }, null, actionUserName, "DIGITAL_SALES_MEMBER_REMOVED", roleNames, "Bạn bị xóa khỏi Hồ sơ KD sản phẩm/dịch vụ số", "Bạn bị xóa khỏi hồ sơ", "MailTemplate_DigitalSalesMemberRemoved", "fa-user-minus", "text-danger"); });
         }
 
         public void QueueStatusChanged(int salesId, IEnumerable<string> memberUserNames, string amUserName, IEnumerable<string> ccUserNames, string actionUserName)
