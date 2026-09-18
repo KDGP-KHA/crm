@@ -239,6 +239,7 @@
     <Compile Include="Areas\Sys\Controllers\SysNotificationsController.cs" />
     <Compile Include="Areas\Sys\Controllers\SysPermissionAPIController.cs" />
     <Compile Include="Areas\Sys\Controllers\SysToolController.cs" />
+    <Compile Include="Areas\Sys\Controllers\SharedDocumentController.cs" />
     <Compile Include="Areas\Sys\Controllers\UserController.cs" />
     <Compile Include="Areas\Sys\Data\AppConfigModel.cs" />
     <Compile Include="Areas\Sys\Data\ChangePasswordModel.cs" />

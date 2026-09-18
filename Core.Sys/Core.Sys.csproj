@@ -135,6 +135,10 @@
     <Compile Include="Models\Sys\SysUserModel.cs" />
     <Compile Include="Permissions\AppPermissionContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BLL\SharedDocumentBiz.cs" />
+    <Compile Include="Cache\SharedDocumentCache.cs" />
+    <Compile Include="Models\SharedDocumentCategoryModel.cs" />
+    <Compile Include="Models\SharedDocumentModel.cs" />
     <Compile Include="Services\SMSQueueService.cs" />
     <Compile Include="Services\SMSService.cs" />
   </ItemGroup>

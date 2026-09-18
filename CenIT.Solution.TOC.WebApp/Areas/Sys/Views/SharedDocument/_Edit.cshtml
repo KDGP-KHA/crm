@@ -1,0 +1,48 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("SharedDoc_Modal_Title_Edit");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType {
+    primary
+}
+
+@section FormIcon {
+    <i class="fa fa-edit"></i>
+}
+
+@section FormBody {
+    @using (Html.BeginForm("Edit", "SharedDocument", new { area = "Sys" }, FormMethod.Post,
+        new { encType = "multipart/form-data", id = "EditSharedDocument", @class = "form-horizontal" }))
+    {
+        <div id="bodyForm_Edit" class="bodyForm">
+            @Html.Partial("_EditDoc_View")
+        </div>
+    }
+
+    <script type="text/javascript">
+        (function () {
+            var $form = $('#EditSharedDocument'), $modal = $form.closest('.modal');
+            $modal.find('#btnSave').off('click.sharedDoc').on('click.sharedDoc', function (e) {
+                e.preventDefault();
+                $form.submit();
+            });
+            $form.ajaxForm({
+                beforeSubmit: function () {
+                    if ($form.valid && !$form.valid()) return false;
+                    $modal.find('#btnSave').prop('disabled', true);
+                    return true;
+                },
+                success: function (r) {
+                    $modal.find('#btnSave').prop('disabled', false);
+                    SharedDocument_OnProcessSuccess(r, 'EditSharedDocument');
+                },
+                error: function () {
+                    $modal.find('#btnSave').prop('disabled', false);
+                    toastr.error('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("Common_Message_Error")))');
+                }
+            });
+        })();
+    </script>
+}

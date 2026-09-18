@@ -1,0 +1,29 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.SharedDocumentModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("SharedDoc_Modal_Title_Delete");
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType {
+    danger
+}
+
+@section FormBody {
+    @using (Ajax.BeginForm("Delete", "SharedDocument", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "SharedDocument_OnProcessSuccess(data, 'DeleteSharedDocument')"
+    }, new { @class = "form-horizontal", id = "DeleteSharedDocument" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.DocumentId)
+        <div class="text-center py-3">
+            <i class="fa fa-exclamation-triangle text-warning text-200 mb-3"></i>
+            <h5 class="text-dark-m1 font-bold">
+                @Html.Raw(ViewBag.ConfirmMessage)
+            </h5>
+        </div>
+    }
+}

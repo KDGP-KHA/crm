@@ -1,0 +1,98 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.SharedDocumentModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("SharedDoc_Modal_Title_Detail"), Model.DocumentName);
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType {
+    info
+}
+
+@section FormIcon {
+    <i class="fa fa-info-circle"></i>
+}
+
+@section FormBody {
+    <div class="container-fluid px-0">
+        <div class="card border-0 shadow-none">
+            <div class="card-body p-2">
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-secondary text-sm-right font-bold">
+                        @AppProcessor.Messagor.GetMessage("SharedDoc_Name_Label"):
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="font-bold text-primary-d2 text-105">@Model.DocumentName</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-secondary text-sm-right font-bold">
+                        @AppProcessor.Messagor.GetMessage("SharedDoc_Category_Label"):
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="badge bgc-primary-l2 text-primary-d2 border-1 brc-primary-m3 px-2 py-1 radius-1">
+                            @(string.IsNullOrWhiteSpace(Model.CategoryName) ? "--" : Model.CategoryName)
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-secondary text-sm-right font-bold">
+                        @AppProcessor.Messagor.GetMessage("SharedDoc_File_Label"):
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="p-2 border-1 brc-grey-l2 radius-1 bgc-grey-l4 d-flex justify-content-between align-items-center">
+                            <div class="text-truncate mr-2">
+                                <i class="fa fa-file-alt text-primary mr-2"></i>
+                                <span class="font-bold">@Model.FileName</span>
+                                <span class="text-secondary ml-2">(@Model.FileSizeFormatted)</span>
+                            </div>
+                            <a href="@Url.Action("Download", "SharedDocument", new { area = "Sys", id = Model.DocumentId })" class="btn btn-xs btn-outline-primary flex-shrink-0" target="_blank">
+                                <i class="fa fa-download mr-1"></i> @AppProcessor.Messagor.GetMessage("SharedDoc_Button_Download")
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-secondary text-sm-right font-bold">
+                        @AppProcessor.Messagor.GetMessage("SharedDoc_DownloadCount_Label"):
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="badge badge-sm badge-pill bgc-secondary-l1 text-secondary-d2 font-bold px-2">
+                            @Model.DownloadCount
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-secondary text-sm-right font-bold">
+                        @AppProcessor.Messagor.GetMessage("SharedDoc_CreatedBy_Label"):
+                    </div>
+                    <div class="col-sm-9">
+                        <span class="font-bold text-dark-m2">@Model.CreatedBy</span>
+                        <span class="text-secondary text-90 ml-2">
+                            <i class="far fa-clock mr-1"></i>@(Model.CreatedDate.HasValue ? Model.CreatedDate.Value.ToString("dd/MM/yyyy HH:mm") : "--")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-3 text-secondary text-sm-right font-bold">
+                        @AppProcessor.Messagor.GetMessage("SharedDoc_Description_Label"):
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="p-2 border-1 brc-grey-l3 radius-1 bgc-light-blue-l4 text-dark-m2">
+                            @(string.IsNullOrWhiteSpace(Model.Description) ? "--" : Model.Description)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section SubmitControl {
+}
