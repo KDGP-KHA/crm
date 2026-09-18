@@ -1,0 +1,71 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Sys.Models.SharedDocumentSearchModel
+
+<div class="Search card bcard border-0 shadow-sm radius-0" id="SearchSharedDocument">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search mr-1"></i> @AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+    <div class="card-body p-3">
+        <div class="row align-items-end">
+            <!-- Tá»« khÃ³a tÃ¬m kiáº¿m -->
+            <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-2">
+                <label class="font-bold text-90 mb-1" for="Keyword_Search">
+                    @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+                </label>
+                @Html.TextBoxFor(m => m.Keyword, new { id = "Keyword_Search", @class = "form-control search-control-32", placeholder = AppProcessor.Messagor.GetMessage("SharedDoc_Search_Keyword") })
+            </div>
+
+            <!-- ChuyÃªn má»¥c tÃ i liá»‡u (Chuáº©n 32px) -->
+            <div class="col-xl-3 col-lg-3 col-md-6 col-12 mb-2">
+                <label class="font-bold text-90 mb-1" for="CategoryId_Search">
+                    @AppProcessor.Messagor.GetMessage("SharedDoc_Category_Label")
+                </label>
+                @Html.DropDownListFor(
+                    m => m.CategoryId,
+                    Model.Categories,
+                    new { id = "CategoryId_Search", @class = "form-control search-control-32" }
+                )
+            </div>
+
+            <!-- Khoáº£ng thá»i gian: Tá»« ngÃ y -->
+            <div class="col-xl-2 col-lg-2 col-md-6 col-6 mb-2">
+                <label class="font-bold text-90 mb-1" for="FromDate_Search">
+                    @AppProcessor.Messagor.GetMessage("Label_TuNgay")
+                </label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa fa-calendar-alt"></i></span>
+                    </div>
+                    @Html.TextBoxFor(m => m.FromDate, "{0:dd/MM/yyyy}", new { id = "FromDate_Search", @class = "form-control datepicker search-control-32", placeholder = AppProcessor.Messagor.GetMessage("SharedDoc_Search_FromDate"), autocomplete = "off" })
+                </div>
+            </div>
+
+            <!-- Khoáº£ng thá»i gian: Äáº¿n ngÃ y -->
+            <div class="col-xl-2 col-lg-2 col-md-6 col-6 mb-2">
+                <label class="font-bold text-90 mb-1" for="ToDate_Search">
+                    @AppProcessor.Messagor.GetMessage("Label_DenNgay")
+                </label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa fa-calendar-alt"></i></span>
+                    </div>
+                    @Html.TextBoxFor(m => m.ToDate, "{0:dd/MM/yyyy}", new { id = "ToDate_Search", @class = "form-control datepicker search-control-32", placeholder = AppProcessor.Messagor.GetMessage("SharedDoc_Search_ToDate"), autocomplete = "off" })
+                </div>
+            </div>
+        </div>
+
+        <!-- NhÃ³m nÃºt TÃ¬m kiáº¿m vÃ  LÃ m má»›i Ä‘áº·t gÃ³c dÆ°á»›i bÃªn trÃ¡i -->
+        <div class="row mt-2">
+            <div class="col-12 text-left">
+                <button type="button" class="btn btn-primary px-3 mr-2" id="btnSearchSharedDoc" onclick="SearchSharedDoc()">
+                    <i class="fa fa-search mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Search")
+                </button>
+                <button type="button" class="btn btn-secondary px-3" id="btnResetSharedDoc" onclick="ResetSearchSharedDoc()">
+                    <i class="fa fa-undo mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Reset")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

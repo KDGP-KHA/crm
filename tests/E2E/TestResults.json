@@ -1,0 +1,2312 @@
+﻿{
+    "Summary":  {
+                    "Total":  230,
+                    "Passed":  230,
+                    "Failed":  0,
+                    "Skipped":  0,
+                    "PassRate":  100
+                },
+    "GeneratedAt":  "2026-09-18 04:27:03",
+    "Results":  [
+                    {
+                        "TestId":  "TC-F01-01",
+                        "TestName":  "Category table exists with valid schema",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 1: Database Tables Schema",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0.62,
+                        "Timestamp":  "2026-09-18 04:27:02.501"
+                    },
+                    {
+                        "TestId":  "TC-F01-02",
+                        "TestName":  "Category table contains audit columns (CreatedDate, CreatedBy, IsDeleted)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 1: Database Tables Schema",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.515"
+                    },
+                    {
+                        "TestId":  "TC-F01-03",
+                        "TestName":  "Document table exists with valid schema",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 1: Database Tables Schema",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.515"
+                    },
+                    {
+                        "TestId":  "TC-F01-04",
+                        "TestName":  "Document table contains metadata columns (DocumentName, CategoryID, FilePath, FileName)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 1: Database Tables Schema",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.516"
+                    },
+                    {
+                        "TestId":  "TC-F01-05",
+                        "TestName":  "Document table contains atomic tracking fields (DownloadCount, LastDownloadDate, LastDownloadBy)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 1: Database Tables Schema",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.517"
+                    },
+                    {
+                        "TestId":  "TC-F02-01",
+                        "TestName":  "Seed category \u0027Biểu mẫu Hợp đồng\u0027 is configured and active",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 2: Category Seed Data",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.518"
+                    },
+                    {
+                        "TestId":  "TC-F02-02",
+                        "TestName":  "Seed category \u0027Quy trình ISO\u0027 is configured and active",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 2: Category Seed Data",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.519"
+                    },
+                    {
+                        "TestId":  "TC-F02-03",
+                        "TestName":  "Seed category \u0027Tài liệu kỹ thuật\u0027 is configured and active",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 2: Category Seed Data",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.520"
+                    },
+                    {
+                        "TestId":  "TC-F02-04",
+                        "TestName":  "Seed category \u0027Mẫu biểu hành chính\u0027 is configured and active",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 2: Category Seed Data",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.520"
+                    },
+                    {
+                        "TestId":  "TC-F02-05",
+                        "TestName":  "All categories possess positive OrderIndex and non-empty names",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 2: Category Seed Data",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.521"
+                    },
+                    {
+                        "TestId":  "TC-F03-01",
+                        "TestName":  "Stored Procedure Sys_DocumentCategory_GetList exists",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 3: Stored Procedures Suite",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.522"
+                    },
+                    {
+                        "TestId":  "TC-F03-02",
+                        "TestName":  "Stored Procedure Sys_SharedDocument_GetList exists",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 3: Stored Procedures Suite",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.523"
+                    },
+                    {
+                        "TestId":  "TC-F03-03",
+                        "TestName":  "Stored Procedure Sys_SharedDocument_GetById exists",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 3: Stored Procedures Suite",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.524"
+                    },
+                    {
+                        "TestId":  "TC-F03-04",
+                        "TestName":  "Stored Procedures for Document CRUD exist",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 3: Stored Procedures Suite",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.525"
+                    },
+                    {
+                        "TestId":  "TC-F03-05",
+                        "TestName":  "Stored Procedure Sys_SharedDocument_TrackDownload exists for atomic counter update",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 3: Stored Procedures Suite",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.525"
+                    },
+                    {
+                        "TestId":  "TC-F04-01",
+                        "TestName":  "Menu item registered in Sys_Menus table",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 4: QTHT Menu Integration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.527"
+                    },
+                    {
+                        "TestId":  "TC-F04-02",
+                        "TestName":  "Menu item configured under ParentId = 1 (QTHT/Hệ thống)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 4: QTHT Menu Integration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.528"
+                    },
+                    {
+                        "TestId":  "TC-F04-03",
+                        "TestName":  "Menu Link routes correctly to Sys area document controller",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 4: QTHT Menu Integration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.529"
+                    },
+                    {
+                        "TestId":  "TC-F04-04",
+                        "TestName":  "Menu item possesses valid positive display ordering",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 4: QTHT Menu Integration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.529"
+                    },
+                    {
+                        "TestId":  "TC-F04-05",
+                        "TestName":  "Menu item configured with valid FontAwesome icon",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 4: QTHT Menu Integration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.530"
+                    },
+                    {
+                        "TestId":  "TC-F05-01",
+                        "TestName":  "Title message Document_Title exists in Sys_Messages with vi-VN",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 5: Sys_Messages Localization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.531"
+                    },
+                    {
+                        "TestId":  "TC-F05-02",
+                        "TestName":  "Modal title message Document_Modal_Title_Add exists in Sys_Messages",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 5: Sys_Messages Localization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.532"
+                    },
+                    {
+                        "TestId":  "TC-F05-03",
+                        "TestName":  "Field label message Document_Label_Name exists in Sys_Messages",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 5: Sys_Messages Localization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.533"
+                    },
+                    {
+                        "TestId":  "TC-F05-04",
+                        "TestName":  "Validation message Document_Msg_NameRequired exists in Sys_Messages",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 5: Sys_Messages Localization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.534"
+                    },
+                    {
+                        "TestId":  "TC-F05-05",
+                        "TestName":  "Business response message Document_Msg_AddSuccess exists in Sys_Messages",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 5: Sys_Messages Localization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.534"
+                    },
+                    {
+                        "TestId":  "TC-F06-01",
+                        "TestName":  "SharedDocumentModel.cs exists and defines core document properties",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 6: C# Model Classes",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.536"
+                    },
+                    {
+                        "TestId":  "TC-F06-02",
+                        "TestName":  "SharedDocumentModel.DocumentName contains mandatory validation attribute",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 6: C# Model Classes",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.537"
+                    },
+                    {
+                        "TestId":  "TC-F06-03",
+                        "TestName":  "SharedDocumentModel.CategoryID property is defined",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 6: C# Model Classes",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.538"
+                    },
+                    {
+                        "TestId":  "TC-F06-04",
+                        "TestName":  "SharedDocumentModel properties use DisplayName attributes",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 6: C# Model Classes",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.538"
+                    },
+                    {
+                        "TestId":  "TC-F06-05",
+                        "TestName":  "Category model defines CategoryID, CategoryName, and OrderIndex",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 6: C# Model Classes",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.539"
+                    },
+                    {
+                        "TestId":  "TC-F07-01",
+                        "TestName":  "SharedDocumentBiz class exists in Core.Sys\\BLL",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 7: Data Access \u0026 Cache Layer",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.541"
+                    },
+                    {
+                        "TestId":  "TC-F07-02",
+                        "TestName":  "SharedDocumentCache class exists in Core.Sys\\Cache",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 7: Data Access \u0026 Cache Layer",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.541"
+                    },
+                    {
+                        "TestId":  "TC-F07-03",
+                        "TestName":  "SharedDocumentBiz implements Save method with validation",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 7: Data Access \u0026 Cache Layer",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.542"
+                    },
+                    {
+                        "TestId":  "TC-F07-04",
+                        "TestName":  "SharedDocumentBiz implements soft-delete method",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 7: Data Access \u0026 Cache Layer",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.543"
+                    },
+                    {
+                        "TestId":  "TC-F07-05",
+                        "TestName":  "SharedDocumentBiz implements atomic TrackDownload method",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 7: Data Access \u0026 Cache Layer",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.544"
+                    },
+                    {
+                        "TestId":  "TC-F08-01",
+                        "TestName":  "Tier 1: Authenticated regular users have View and Upload access",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 8: Two-Tier Authorization Engine",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.550"
+                    },
+                    {
+                        "TestId":  "TC-F08-02",
+                        "TestName":  "Tier 2: Document owner is granted Edit and Delete permission",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 8: Two-Tier Authorization Engine",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.555"
+                    },
+                    {
+                        "TestId":  "TC-F08-03",
+                        "TestName":  "Tier 2: Non-owner regular user is blocked from Edit and Delete",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 8: Two-Tier Authorization Engine",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.556"
+                    },
+                    {
+                        "TestId":  "TC-F08-04",
+                        "TestName":  "Tier 2: QTHT Admin is granted override permission to Edit and Delete any document",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 8: Two-Tier Authorization Engine",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.557"
+                    },
+                    {
+                        "TestId":  "TC-F08-05",
+                        "TestName":  "Dynamic action flags CanEdit/CanDelete differentiate owner vs non-owner",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 8: Two-Tier Authorization Engine",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.557"
+                    },
+                    {
+                        "TestId":  "TC-F09-01",
+                        "TestName":  "Upload whitelist accepts standard documents (.docx, .xlsx, .pdf, .pptx)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 9: Safe File Upload Pipeline",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.566"
+                    },
+                    {
+                        "TestId":  "TC-F09-02",
+                        "TestName":  "Upload blacklist rejects dangerous extensions (.exe, .bat, .dll, .ps1)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 9: Safe File Upload Pipeline",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.567"
+                    },
+                    {
+                        "TestId":  "TC-F09-03",
+                        "TestName":  "File size limit enforces strict 50MB threshold",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 9: Safe File Upload Pipeline",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.576"
+                    },
+                    {
+                        "TestId":  "TC-F09-04",
+                        "TestName":  "Safe file naming strips Vietnamese accents and ensures uniqueness",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 9: Safe File Upload Pipeline",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.604"
+                    },
+                    {
+                        "TestId":  "TC-F09-05",
+                        "TestName":  "Storage destination adheres to standard /Contents/Uploads/ repository",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 9: Safe File Upload Pipeline",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.605"
+                    },
+                    {
+                        "TestId":  "TC-F10-01",
+                        "TestName":  "Path traversal attempts are strictly intercepted and blocked",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 10: Secure File Download Handler",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.609"
+                    },
+                    {
+                        "TestId":  "TC-F10-02",
+                        "TestName":  "Atomic counter increments download count precisely by 1",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 10: Secure File Download Handler",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0.4,
+                        "Timestamp":  "2026-09-18 04:27:02.614"
+                    },
+                    {
+                        "TestId":  "TC-F10-03",
+                        "TestName":  "Download audit captures LastDownloadDate timestamp and LastDownloadBy",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 10: Secure File Download Handler",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.615"
+                    },
+                    {
+                        "TestId":  "TC-F10-04",
+                        "TestName":  "Download handler verifies physical file existence on disk",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 10: Secure File Download Handler",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.617"
+                    },
+                    {
+                        "TestId":  "TC-F10-05",
+                        "TestName":  "Download handler configures Content-Disposition attachment header",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 10: Secure File Download Handler",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  1.14,
+                        "Timestamp":  "2026-09-18 04:27:02.620"
+                    },
+                    {
+                        "TestId":  "TC-F11-01",
+                        "TestName":  "SharedDocumentController inherits from AppController",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 11: Backend Controller Actions",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.622"
+                    },
+                    {
+                        "TestId":  "TC-F11-02",
+                        "TestName":  "Index action configured to return main listing view",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 11: Backend Controller Actions",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.622"
+                    },
+                    {
+                        "TestId":  "TC-F11-03",
+                        "TestName":  "Get action accepts DataTable search and pagination parameters",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 11: Backend Controller Actions",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.623"
+                    },
+                    {
+                        "TestId":  "TC-F11-04",
+                        "TestName":  "Add and Edit actions validate ModelState and return JSON on success",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 11: Backend Controller Actions",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.624"
+                    },
+                    {
+                        "TestId":  "TC-F11-05",
+                        "TestName":  "Delete and Download actions enforce record-level permissions",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 11: Backend Controller Actions",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.624"
+                    },
+                    {
+                        "TestId":  "TC-F12-01",
+                        "TestName":  "Core.Sys.csproj exists in repository",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 12: Project File Registration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.626"
+                    },
+                    {
+                        "TestId":  "TC-F12-02",
+                        "TestName":  "Modules.Sys.csproj exists in repository",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 12: Project File Registration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.627"
+                    },
+                    {
+                        "TestId":  "TC-F12-03",
+                        "TestName":  "SharedDocumentModel.cs registered in Core.Sys.csproj",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 12: Project File Registration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.627"
+                    },
+                    {
+                        "TestId":  "TC-F12-04",
+                        "TestName":  "SharedDocumentController.cs registered in Modules.Sys.csproj",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 12: Project File Registration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.628"
+                    },
+                    {
+                        "TestId":  "TC-F12-05",
+                        "TestName":  "Views registered in Modules.Sys.csproj",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 12: Project File Registration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.629"
+                    },
+                    {
+                        "TestId":  "TC-F13-01",
+                        "TestName":  "Index.cshtml view exists in Modules.Sys",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 13: Ace Admin v4 Index Layout",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.630"
+                    },
+                    {
+                        "TestId":  "TC-F13-02",
+                        "TestName":  "@section PageTitle contains only @ViewBag.Title without nested tags",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 13: Ace Admin v4 Index Layout",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.631"
+                    },
+                    {
+                        "TestId":  "TC-F13-03",
+                        "TestName":  "@section PageAction contains category badge and Add button",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 13: Ace Admin v4 Index Layout",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.631"
+                    },
+                    {
+                        "TestId":  "TC-F13-04",
+                        "TestName":  "Add button specifies modal data_width = \u0027800px\u0027",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 13: Ace Admin v4 Index Layout",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.632"
+                    },
+                    {
+                        "TestId":  "TC-F13-05",
+                        "TestName":  "Index view references _PageContent.cshtml master layout",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 13: Ace Admin v4 Index Layout",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.633"
+                    },
+                    {
+                        "TestId":  "TC-F14-01",
+                        "TestName":  "_Search.cshtml partial view exists",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 14: Standard 32px Search Card",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.634"
+                    },
+                    {
+                        "TestId":  "TC-F14-02",
+                        "TestName":  "Search container uses class .Search.card.bcard.border-0.shadow-sm",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 14: Standard 32px Search Card",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.634"
+                    },
+                    {
+                        "TestId":  "TC-F14-03",
+                        "TestName":  "Search Card strictly prohibits Select2 usage to prevent height mismatch",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 14: Standard 32px Search Card",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.635"
+                    },
+                    {
+                        "TestId":  "TC-F14-04",
+                        "TestName":  "Date range filter controls use datepicker with dd/MM/yyyy format",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 14: Standard 32px Search Card",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.636"
+                    },
+                    {
+                        "TestId":  "TC-F14-05",
+                        "TestName":  "Search and Reset buttons positioned at bottom-left with primary/secondary styles",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 14: Standard 32px Search Card",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.636"
+                    },
+                    {
+                        "TestId":  "TC-F15-01",
+                        "TestName":  "_Add.cshtml inherits _Form.cshtml layout",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 15: Add / Upload Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.638"
+                    },
+                    {
+                        "TestId":  "TC-F15-02",
+                        "TestName":  "Form body is wrapped inside \u003cdiv id=\u0027bodyForm\u0027\u003e for AJAX validation",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 15: Add / Upload Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.639"
+                    },
+                    {
+                        "TestId":  "TC-F15-03",
+                        "TestName":  "Form controls strictly use @Html.* helpers (TitleFor, TextBoxFor, FileFor)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 15: Add / Upload Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.639"
+                    },
+                    {
+                        "TestId":  "TC-F15-04",
+                        "TestName":  "Modal controls employ distinct DOM IDs with *_Add suffix",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 15: Add / Upload Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.640"
+                    },
+                    {
+                        "TestId":  "TC-F15-05",
+                        "TestName":  "@Html.ValidationMessageFor spans rendered for all required fields",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 15: Add / Upload Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.641"
+                    },
+                    {
+                        "TestId":  "TC-F16-01",
+                        "TestName":  "_Edit.cshtml exists and inherits _Form.cshtml layout",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 16: Edit / Replace Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.642"
+                    },
+                    {
+                        "TestId":  "TC-F16-02",
+                        "TestName":  "_Edit view contains @Html.HiddenFor for DocumentID",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 16: Edit / Replace Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.642"
+                    },
+                    {
+                        "TestId":  "TC-F16-03",
+                        "TestName":  "Modal controls employ distinct DOM IDs with *_Edit suffix",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 16: Edit / Replace Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.644"
+                    },
+                    {
+                        "TestId":  "TC-F16-04",
+                        "TestName":  "Edit modal provides optional file replacement control",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 16: Edit / Replace Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.645"
+                    },
+                    {
+                        "TestId":  "TC-F16-05",
+                        "TestName":  "Edit modal displays existing file name and link for inspection",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 16: Edit / Replace Modal View",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.645"
+                    },
+                    {
+                        "TestId":  "TC-F17-01",
+                        "TestName":  "_Delete.cshtml confirmation modal exists",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 17: Delete \u0026 Detail Modal Views",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.647"
+                    },
+                    {
+                        "TestId":  "TC-F17-02",
+                        "TestName":  "_Delete modal displays confirmation prompt for deletion",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 17: Delete \u0026 Detail Modal Views",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.647"
+                    },
+                    {
+                        "TestId":  "TC-F17-03",
+                        "TestName":  "_Detail.cshtml document profile modal exists",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 17: Delete \u0026 Detail Modal Views",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.647"
+                    },
+                    {
+                        "TestId":  "TC-F17-04",
+                        "TestName":  "_Detail modal displays metadata (DownloadCount, FileSize, CreatedBy)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 17: Delete \u0026 Detail Modal Views",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.649"
+                    },
+                    {
+                        "TestId":  "TC-F17-05",
+                        "TestName":  "_Detail modal provides direct file download action",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 17: Delete \u0026 Detail Modal Views",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.649"
+                    },
+                    {
+                        "TestId":  "TC-F18-01",
+                        "TestName":  "SharedDocument.js exists in Modules.Sys\\Scripts",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 18: Safe Modal Lifecycle JS",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.651"
+                    },
+                    {
+                        "TestId":  "TC-F18-02",
+                        "TestName":  "Modal callback strictly awaits hidden.bs.modal before displaying Toastr",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 18: Safe Modal Lifecycle JS",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.651"
+                    },
+                    {
+                        "TestId":  "TC-F18-03",
+                        "TestName":  "Modal hide initiated prior to table reload",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 18: Safe Modal Lifecycle JS",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.652"
+                    },
+                    {
+                        "TestId":  "TC-F18-04",
+                        "TestName":  "DataTable reloaded safely without orphaned backdrops",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 18: Safe Modal Lifecycle JS",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.653"
+                    },
+                    {
+                        "TestId":  "TC-F18-05",
+                        "TestName":  "Script strictly avoids native alert() in favor of Toastr notifications",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 18: Safe Modal Lifecycle JS",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.653"
+                    },
+                    {
+                        "TestId":  "TC-F19-01",
+                        "TestName":  "DataTable configured with server-side processing",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 19: DataTable \u0026 Dynamic Action Buttons",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.669"
+                    },
+                    {
+                        "TestId":  "TC-F19-02",
+                        "TestName":  "View Detail and Download buttons rendered for all rows",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 19: DataTable \u0026 Dynamic Action Buttons",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.670"
+                    },
+                    {
+                        "TestId":  "TC-F19-03",
+                        "TestName":  "Edit button rendering strictly conditioned on row.CanEdit",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 19: DataTable \u0026 Dynamic Action Buttons",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.670"
+                    },
+                    {
+                        "TestId":  "TC-F19-04",
+                        "TestName":  "Delete button rendering strictly conditioned on row.CanDelete",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 19: DataTable \u0026 Dynamic Action Buttons",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.671"
+                    },
+                    {
+                        "TestId":  "TC-F19-05",
+                        "TestName":  "Action buttons use standard Ace Admin v4 utility classes",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 19: DataTable \u0026 Dynamic Action Buttons",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.671"
+                    },
+                    {
+                        "TestId":  "TC-F20-01",
+                        "TestName":  "Index.cshtml is synchronized across Modules.Sys, publish_source, and WebApp",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 20: Triple Mirroring Synchronization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.672"
+                    },
+                    {
+                        "TestId":  "TC-F20-02",
+                        "TestName":  "_Search.cshtml is synchronized across all 3 directories",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 20: Triple Mirroring Synchronization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.673"
+                    },
+                    {
+                        "TestId":  "TC-F20-03",
+                        "TestName":  "_Add.cshtml is synchronized across all 3 directories",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 20: Triple Mirroring Synchronization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.674"
+                    },
+                    {
+                        "TestId":  "TC-F20-04",
+                        "TestName":  "SharedDocument.js is synchronized across all 3 directories",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 20: Triple Mirroring Synchronization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.674"
+                    },
+                    {
+                        "TestId":  "TC-F20-05",
+                        "TestName":  "SharedDocument.css is synchronized across all 3 directories",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 20: Triple Mirroring Synchronization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.675"
+                    },
+                    {
+                        "TestId":  "TC-F21-01",
+                        "TestName":  "Index.cshtml starts with UTF-8 BOM (0xEF, 0xBB, 0xBF)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 21: UTF-8 with BOM Enforcement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.676"
+                    },
+                    {
+                        "TestId":  "TC-F21-02",
+                        "TestName":  "_Search.cshtml starts with UTF-8 BOM (0xEF, 0xBB, 0xBF)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 21: UTF-8 with BOM Enforcement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.677"
+                    },
+                    {
+                        "TestId":  "TC-F21-03",
+                        "TestName":  "SharedDocument.js starts with UTF-8 BOM (0xEF, 0xBB, 0xBF)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 21: UTF-8 with BOM Enforcement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.677"
+                    },
+                    {
+                        "TestId":  "TC-F21-04",
+                        "TestName":  "SharedDocument.css starts with UTF-8 BOM (0xEF, 0xBB, 0xBF)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 21: UTF-8 with BOM Enforcement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.679"
+                    },
+                    {
+                        "TestId":  "TC-F21-05",
+                        "TestName":  "SharedDocumentController.cs starts with UTF-8 BOM (0xEF, 0xBB, 0xBF)",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 21: UTF-8 with BOM Enforcement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.679"
+                    },
+                    {
+                        "TestId":  "TC-F22-01",
+                        "TestName":  "Layer 1: Solution compilation verification criteria established",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 22: 5-Layer QA Suite \u0026 E2E Acceptance",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.680"
+                    },
+                    {
+                        "TestId":  "TC-F22-02",
+                        "TestName":  "Layer 2: Triple Mirroring and UTF-8 BOM criteria established",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 22: 5-Layer QA Suite \u0026 E2E Acceptance",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.681"
+                    },
+                    {
+                        "TestId":  "TC-F22-03",
+                        "TestName":  "Layer 3: DOM ID Collision scanner detects 0 duplicated element IDs",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 22: 5-Layer QA Suite \u0026 E2E Acceptance",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.740"
+                    },
+                    {
+                        "TestId":  "TC-F22-04",
+                        "TestName":  "Layer 4: Sys_Messages DB coverage scanner criteria established",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 22: 5-Layer QA Suite \u0026 E2E Acceptance",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.741"
+                    },
+                    {
+                        "TestId":  "TC-F22-05",
+                        "TestName":  "Layer 5: Clean code scanner confirms 0 \u003cstyle\u003e tags and no inline hex colors",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 22: 5-Layer QA Suite \u0026 E2E Acceptance",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.745"
+                    },
+                    {
+                        "TestId":  "TC-F23-01",
+                        "TestName":  "Adversarial: 60MB oversized payload is intercepted and rejected",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 23: Adversarial Coverage Hardening",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.747"
+                    },
+                    {
+                        "TestId":  "TC-F23-02",
+                        "TestName":  "Adversarial: Double extension payload (payload.docx.exe) is blocked",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 23: Adversarial Coverage Hardening",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.748"
+                    },
+                    {
+                        "TestId":  "TC-F23-03",
+                        "TestName":  "Adversarial: Path traversal payload (../../boot.ini) is detected and blocked",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 23: Adversarial Coverage Hardening",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.749"
+                    },
+                    {
+                        "TestId":  "TC-F23-04",
+                        "TestName":  "Adversarial: SQL injection query string is parameterized without SQL corruption",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 23: Adversarial Coverage Hardening",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.750"
+                    },
+                    {
+                        "TestId":  "TC-F23-05",
+                        "TestName":  "Adversarial: Unauthorized edit request is intercepted and denied with 403",
+                        "Tier":  "Tier 1",
+                        "Feature":  "Feature 23: Adversarial Coverage Hardening",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.751"
+                    },
+                    {
+                        "TestId":  "TC-B01",
+                        "TestName":  "0-byte empty file is rejected",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Size Limits",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.774"
+                    },
+                    {
+                        "TestId":  "TC-B02",
+                        "TestName":  "1-byte minimal file is accepted",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Size Limits",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.775"
+                    },
+                    {
+                        "TestId":  "TC-B03",
+                        "TestName":  "52,428,799 bytes (50MB - 1 byte) is accepted",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Size Limits",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.776"
+                    },
+                    {
+                        "TestId":  "TC-B04",
+                        "TestName":  "Exact 50.00MB boundary (52,428,800 bytes) is accepted",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Size Limits",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.776"
+                    },
+                    {
+                        "TestId":  "TC-B05",
+                        "TestName":  "52,428,801 bytes (50MB + 1 byte) is strictly rejected",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Size Limits",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.777"
+                    },
+                    {
+                        "TestId":  "TC-B06",
+                        "TestName":  "Negative file size is strictly rejected",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Size Limits",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.779"
+                    },
+                    {
+                        "TestId":  "TC-B07",
+                        "TestName":  "Executable extension (.exe) is blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.780"
+                    },
+                    {
+                        "TestId":  "TC-B08",
+                        "TestName":  "Script extensions (.bat, .cmd, .ps1, .vbs, .sh) are blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.781"
+                    },
+                    {
+                        "TestId":  "TC-B09",
+                        "TestName":  "System library extension (.dll) is blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.782"
+                    },
+                    {
+                        "TestId":  "TC-B10",
+                        "TestName":  "Web execution extensions (.asp, .aspx, .php) are blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.783"
+                    },
+                    {
+                        "TestId":  "TC-B11",
+                        "TestName":  "Double extension evasion (BaoCao.docx.exe) is detected and blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.784"
+                    },
+                    {
+                        "TestId":  "TC-B12",
+                        "TestName":  "Mixed case double extension (HopDong.DOCX.EXE) is blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.785"
+                    },
+                    {
+                        "TestId":  "TC-B13",
+                        "TestName":  "Extension with trailing spaces and obfuscation is safely blocked",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: File Extension Security",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.786"
+                    },
+                    {
+                        "TestId":  "TC-B14",
+                        "TestName":  "Complex Vietnamese diacritics converted cleanly to unaccented characters",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Vietnamese Unicode \u0026 Filename Sanitization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.788"
+                    },
+                    {
+                        "TestId":  "TC-B15",
+                        "TestName":  "Complete Vietnamese vowel alphabet normalized without character loss",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Vietnamese Unicode \u0026 Filename Sanitization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.789"
+                    },
+                    {
+                        "TestId":  "TC-B16",
+                        "TestName":  "Emoji and non-ASCII symbols stripped from physical disk file name",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Vietnamese Unicode \u0026 Filename Sanitization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.790"
+                    },
+                    {
+                        "TestId":  "TC-B17",
+                        "TestName":  "Base filename exceeding 50 characters is safely truncated to 50",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Vietnamese Unicode \u0026 Filename Sanitization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.797"
+                    },
+                    {
+                        "TestId":  "TC-B18",
+                        "TestName":  "Identical original names produce distinct physical filenames",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Vietnamese Unicode \u0026 Filename Sanitization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0.33,
+                        "Timestamp":  "2026-09-18 04:27:02.821"
+                    },
+                    {
+                        "TestId":  "TC-B19",
+                        "TestName":  "Empty document name detected by validation",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Input Strings \u0026 Validation",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.824"
+                    },
+                    {
+                        "TestId":  "TC-B20",
+                        "TestName":  "Whitespace-only document name detected by validation",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Input Strings \u0026 Validation",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.824"
+                    },
+                    {
+                        "TestId":  "TC-B21",
+                        "TestName":  "Exactly 250 characters document name satisfies boundary",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Input Strings \u0026 Validation",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.826"
+                    },
+                    {
+                        "TestId":  "TC-B22",
+                        "TestName":  "251 characters document name exceeds maximum length boundary",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Input Strings \u0026 Validation",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.826"
+                    },
+                    {
+                        "TestId":  "TC-B23",
+                        "TestName":  "XSS script payload is HTML encoded before rendering",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Input Strings \u0026 Validation",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0.01,
+                        "Timestamp":  "2026-09-18 04:27:02.828"
+                    },
+                    {
+                        "TestId":  "TC-B24",
+                        "TestName":  "Rich text description with valid HTML markup accepted without crash",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Input Strings \u0026 Validation",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.829"
+                    },
+                    {
+                        "TestId":  "TC-B25",
+                        "TestName":  "Classic SQLi string safely escaped in SQL parameters",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: SQL Injection \u0026 Escaping",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0.47,
+                        "Timestamp":  "2026-09-18 04:27:02.831"
+                    },
+                    {
+                        "TestId":  "TC-B26",
+                        "TestName":  "Destructive SQL statement neutralized by parameterized execution",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: SQL Injection \u0026 Escaping",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.832"
+                    },
+                    {
+                        "TestId":  "TC-B27",
+                        "TestName":  "SQL comment sequence neutralized by parameter escaping",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: SQL Injection \u0026 Escaping",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.832"
+                    },
+                    {
+                        "TestId":  "TC-B28",
+                        "TestName":  "SQL LIKE meta-characters (%, _, [) properly escaped",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: SQL Injection \u0026 Escaping",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.833"
+                    },
+                    {
+                        "TestId":  "TC-B29",
+                        "TestName":  "Inverted date range (FromDate \u003e ToDate) detected by validation logic",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Date Range \u0026 Formats",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.840"
+                    },
+                    {
+                        "TestId":  "TC-B30",
+                        "TestName":  "Leap year date (29/02/2024) recognized as valid input",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Date Range \u0026 Formats",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.842"
+                    },
+                    {
+                        "TestId":  "TC-B31",
+                        "TestName":  "Invalid date (31/02/2026) rejected with parse exception",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Date Range \u0026 Formats",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.851"
+                    },
+                    {
+                        "TestId":  "TC-B32",
+                        "TestName":  "Distant date range boundaries within SQL Server DATETIME limits",
+                        "Tier":  "Tier 2",
+                        "Feature":  "Boundary: Date Range \u0026 Formats",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.857"
+                    },
+                    {
+                        "TestId":  "TC-C01",
+                        "TestName":  "Upload + Search: Keyword search retrieves matching document record",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 1: Upload + Search + Filter by Date",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.873"
+                    },
+                    {
+                        "TestId":  "TC-C02",
+                        "TestName":  "Upload + Filter: Category filter isolates document in target category",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 1: Upload + Search + Filter by Date",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.874"
+                    },
+                    {
+                        "TestId":  "TC-C03",
+                        "TestName":  "Upload + Date Filter: Date range filter encompasses document creation timestamp",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 1: Upload + Search + Filter by Date",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.879"
+                    },
+                    {
+                        "TestId":  "TC-C04",
+                        "TestName":  "New document initialized with DownloadCount = 0",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 2: Upload + Download Atomic Counter",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.881"
+                    },
+                    {
+                        "TestId":  "TC-C05",
+                        "TestName":  "First download increments counter to 1 and records UserA",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 2: Upload + Download Atomic Counter",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.889"
+                    },
+                    {
+                        "TestId":  "TC-C06",
+                        "TestName":  "Second download increments counter to 2 and updates LastDownloadBy to UserB",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 2: Upload + Download Atomic Counter",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.890"
+                    },
+                    {
+                        "TestId":  "TC-C07",
+                        "TestName":  "Document initially references v1 attachment",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 3: Edit File Replacement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.892"
+                    },
+                    {
+                        "TestId":  "TC-C08",
+                        "TestName":  "Edit successfully updates physical path and file name to v2",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 3: Edit File Replacement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.895"
+                    },
+                    {
+                        "TestId":  "TC-C09",
+                        "TestName":  "Primary key DocumentID remains preserved across file replacement",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 3: Edit File Replacement",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.897"
+                    },
+                    {
+                        "TestId":  "TC-C10",
+                        "TestName":  "Active document has IsDeleted = 0",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 4: Soft Delete \u0026 Search Exclusion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.898"
+                    },
+                    {
+                        "TestId":  "TC-C11",
+                        "TestName":  "Soft delete sets IsDeleted = 1 without physical database purge",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 4: Soft Delete \u0026 Search Exclusion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.899"
+                    },
+                    {
+                        "TestId":  "TC-C12",
+                        "TestName":  "Active search query strictly excludes soft-deleted records",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 4: Soft Delete \u0026 Search Exclusion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.900"
+                    },
+                    {
+                        "TestId":  "TC-C13",
+                        "TestName":  "Document successfully migrated from Category 1 to Category 2",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 5: Category Migration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.901"
+                    },
+                    {
+                        "TestId":  "TC-C14",
+                        "TestName":  "Filter query by Category 2 retrieves migrated document",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 5: Category Migration",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.902"
+                    },
+                    {
+                        "TestId":  "TC-C15",
+                        "TestName":  "Cross-feature integrity: Mirroring rule covers views, js, and css across 3 roots",
+                        "Tier":  "Tier 3",
+                        "Feature":  "Combo 6: Asset Mirroring \u0026 BOM Integrity",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.903"
+                    },
+                    {
+                        "TestId":  "TC-S01-01",
+                        "TestName":  "Scenario 1.1: Employee A successfully accesses document list interface",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 1: Regular User (Employee A)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.915"
+                    },
+                    {
+                        "TestId":  "TC-S01-02",
+                        "TestName":  "Scenario 1.2: Search by category \u0027Quy trình ISO\u0027 and keyword \u0027ISO 9001\u0027 succeeds",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 1: Regular User (Employee A)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.916"
+                    },
+                    {
+                        "TestId":  "TC-S01-03",
+                        "TestName":  "Scenario 1.3: Employee A downloads file, download count increments to 15 with audit log",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 1: Regular User (Employee A)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.918"
+                    },
+                    {
+                        "TestId":  "TC-S01-04",
+                        "TestName":  "Scenario 1.4: Employee A is restricted from Edit/Delete actions on Employee B\u0027s document",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 1: Regular User (Employee A)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.919"
+                    },
+                    {
+                        "TestId":  "TC-S02-01",
+                        "TestName":  "Scenario 2.1: Employee B uploads new Contract template v1",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 2: Document Owner (Employee B)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.920"
+                    },
+                    {
+                        "TestId":  "TC-S02-02",
+                        "TestName":  "Scenario 2.2: Employee B observes Edit and Delete action buttons enabled on own document",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 2: Document Owner (Employee B)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.920"
+                    },
+                    {
+                        "TestId":  "TC-S02-03",
+                        "TestName":  "Scenario 2.3: Employee B successfully updates description and replaces attachment with v2",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 2: Document Owner (Employee B)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.922"
+                    },
+                    {
+                        "TestId":  "TC-S02-04",
+                        "TestName":  "Scenario 2.4: Document profile retains identity and reflects updated metadata",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 2: Document Owner (Employee B)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.923"
+                    },
+                    {
+                        "TestId":  "TC-S03-01",
+                        "TestName":  "Scenario 3.1: Direct HTTP POST to Edit by non-owner is intercepted and rejected (403)",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 3: Unauthorized Access Security Gate",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.924"
+                    },
+                    {
+                        "TestId":  "TC-S03-02",
+                        "TestName":  "Scenario 3.2: Direct HTTP POST to Delete by non-owner is intercepted and rejected (403)",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 3: Unauthorized Access Security Gate",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.925"
+                    },
+                    {
+                        "TestId":  "TC-S03-03",
+                        "TestName":  "Scenario 3.3: Server gatekeeper returns localized error message from Sys_Messages",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 3: Unauthorized Access Security Gate",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0.01,
+                        "Timestamp":  "2026-09-18 04:27:02.926"
+                    },
+                    {
+                        "TestId":  "TC-S04-01",
+                        "TestName":  "Scenario 4.1: Administrator (RoleId 1) granted override Edit and Delete on any document",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 4: System Administrator (Admin QTHT)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.927"
+                    },
+                    {
+                        "TestId":  "TC-S04-02",
+                        "TestName":  "Scenario 4.2: Administrator successfully edits document metadata and records audit stamp",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 4: System Administrator (Admin QTHT)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.928"
+                    },
+                    {
+                        "TestId":  "TC-S04-03",
+                        "TestName":  "Scenario 4.3: Administrator deletes obsolete document with soft-delete flag",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 4: System Administrator (Admin QTHT)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.928"
+                    },
+                    {
+                        "TestId":  "TC-S04-04",
+                        "TestName":  "Scenario 4.4: Deletion audit records Administrator username in LastModifiedBy",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 4: System Administrator (Admin QTHT)",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.930"
+                    },
+                    {
+                        "TestId":  "TC-S05-01",
+                        "TestName":  "Scenario 5.1: Modal upload of invalid file is blocked by validation without closing modal",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 5: Safe Modal Lifecycle \u0026 Recovery",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.931"
+                    },
+                    {
+                        "TestId":  "TC-S05-02",
+                        "TestName":  "Scenario 5.2: User selects valid PDF file satisfying extension and size constraints",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 5: Safe Modal Lifecycle \u0026 Recovery",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.932"
+                    },
+                    {
+                        "TestId":  "TC-S05-03",
+                        "TestName":  "Scenario 5.3: Form submit triggers hidden.bs.modal, Toastr notification, and zero backdrop freeze",
+                        "Tier":  "Tier 4",
+                        "Feature":  "Scenario 5: Safe Modal Lifecycle \u0026 Recovery",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.933"
+                    },
+                    {
+                        "TestId":  "TC-ADV-01",
+                        "TestName":  "Multi-extension malware.exe.pdf with intermediate .exe is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.959"
+                    },
+                    {
+                        "TestId":  "TC-ADV-02",
+                        "TestName":  "Multi-extension script.ps1.docx with intermediate .ps1 is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.960"
+                    },
+                    {
+                        "TestId":  "TC-ADV-03",
+                        "TestName":  "Multi-extension exploit.dll.xlsx with intermediate .dll is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.961"
+                    },
+                    {
+                        "TestId":  "TC-ADV-04",
+                        "TestName":  "Multi-extension webshell.php.doc with intermediate .php is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.961"
+                    },
+                    {
+                        "TestId":  "TC-ADV-05",
+                        "TestName":  "Multi-extension virus.vbs.pptx with intermediate .vbs is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.962"
+                    },
+                    {
+                        "TestId":  "TC-ADV-06",
+                        "TestName":  "Multi-extension backdoor.cmd.pdf with intermediate .cmd is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.963"
+                    },
+                    {
+                        "TestId":  "TC-ADV-07",
+                        "TestName":  "Multi-extension trojan.bat.xls with intermediate .bat is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.964"
+                    },
+                    {
+                        "TestId":  "TC-ADV-08",
+                        "TestName":  "Multi-extension config.aspx.docx with intermediate .aspx is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.964"
+                    },
+                    {
+                        "TestId":  "TC-ADV-09",
+                        "TestName":  "Multi-extension payload.js.pdf with intermediate .js is strictly blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.965"
+                    },
+                    {
+                        "TestId":  "TC-ADV-10",
+                        "TestName":  "Final dangerous extension report.docx.exe is strictly blocked by whitelist",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.966"
+                    },
+                    {
+                        "TestId":  "TC-ADV-11",
+                        "TestName":  "Case-insensitive double extension MALWARE.EXE.PDF is blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.967"
+                    },
+                    {
+                        "TestId":  "TC-ADV-12",
+                        "TestName":  "Legitimate dot in version HopDong_v1.0.docx is safely permitted",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.967"
+                    },
+                    {
+                        "TestId":  "TC-ADV-13",
+                        "TestName":  "Legitimate date dot in BaoCao_2026.09.18.pdf is safely permitted",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Multi-Extension Evasion",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.968"
+                    },
+                    {
+                        "TestId":  "TC-ADV-14",
+                        "TestName":  "Direct relative path traversal ../../Web.config is detected and blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.970"
+                    },
+                    {
+                        "TestId":  "TC-ADV-15",
+                        "TestName":  "Windows backslash path traversal ..\\..\\Web.config is detected and blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.970"
+                    },
+                    {
+                        "TestId":  "TC-ADV-16",
+                        "TestName":  "Prefixed path traversal /Contents/Uploads/SharedDocuments/../../Web.config is blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.972"
+                    },
+                    {
+                        "TestId":  "TC-ADV-17",
+                        "TestName":  "Mixed backslash traversal /Contents/Uploads/SharedDocuments/..\\..\\Web.config is blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.972"
+                    },
+                    {
+                        "TestId":  "TC-ADV-18",
+                        "TestName":  "Unix system path /etc/passwd is detected as out-of-bounds and blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.974"
+                    },
+                    {
+                        "TestId":  "TC-ADV-19",
+                        "TestName":  "Absolute drive path C:\\inetpub\\wwwroot\\Web.config is blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.974"
+                    },
+                    {
+                        "TestId":  "TC-ADV-20",
+                        "TestName":  "UNC network share path is blocked",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.975"
+                    },
+                    {
+                        "TestId":  "TC-ADV-21",
+                        "TestName":  "Legitimate upload path within /Contents/Uploads/SharedDocuments/ is allowed",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Path Traversal Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.976"
+                    },
+                    {
+                        "TestId":  "TC-ADV-22",
+                        "TestName":  "0-byte empty file payload is strictly rejected",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.977"
+                    },
+                    {
+                        "TestId":  "TC-ADV-23",
+                        "TestName":  "Negative file size payload is strictly rejected",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.978"
+                    },
+                    {
+                        "TestId":  "TC-ADV-24",
+                        "TestName":  "1-byte minimal file payload is accepted",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.979"
+                    },
+                    {
+                        "TestId":  "TC-ADV-25",
+                        "TestName":  "Exact 50.00MB upper boundary (52,428,800 bytes) is accepted",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.979"
+                    },
+                    {
+                        "TestId":  "TC-ADV-26",
+                        "TestName":  "Off-by-one boundary 50MB + 1 byte (52,428,801 bytes) is rejected",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.980"
+                    },
+                    {
+                        "TestId":  "TC-ADV-27",
+                        "TestName":  "60MB oversized payload is intercepted and rejected",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:02.980"
+                    },
+                    {
+                        "TestId":  "TC-ADV-28",
+                        "TestName":  "100MB oversized payload is intercepted and rejected",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.014"
+                    },
+                    {
+                        "TestId":  "TC-ADV-29",
+                        "TestName":  "1GB massive payload is intercepted and rejected",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: File Size Boundaries",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.015"
+                    },
+                    {
+                        "TestId":  "TC-ADV-30",
+                        "TestName":  "Normal user bob can view and download alice\u0027s shared document",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.016"
+                    },
+                    {
+                        "TestId":  "TC-ADV-31",
+                        "TestName":  "Normal user bob can upload new documents to repository",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.017"
+                    },
+                    {
+                        "TestId":  "TC-ADV-32",
+                        "TestName":  "Document owner alice can edit and replace own document",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.021"
+                    },
+                    {
+                        "TestId":  "TC-ADV-33",
+                        "TestName":  "Document owner alice can delete own document",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.022"
+                    },
+                    {
+                        "TestId":  "TC-ADV-34",
+                        "TestName":  "Unauthorized user bob is strictly blocked from editing alice\u0027s document (403)",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.023"
+                    },
+                    {
+                        "TestId":  "TC-ADV-35",
+                        "TestName":  "Unauthorized user bob is strictly blocked from deleting alice\u0027s document (403)",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.023"
+                    },
+                    {
+                        "TestId":  "TC-ADV-36",
+                        "TestName":  "System Administrator admin overrides and edits alice\u0027s document successfully",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.024"
+                    },
+                    {
+                        "TestId":  "TC-ADV-37",
+                        "TestName":  "System Administrator admin overrides and deletes alice\u0027s document successfully",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.025"
+                    },
+                    {
+                        "TestId":  "TC-ADV-38",
+                        "TestName":  "System Administrator quantri username override succeeds without role 1",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.026"
+                    },
+                    {
+                        "TestId":  "TC-ADV-39",
+                        "TestName":  "Anonymous/Empty username request is strictly denied",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Two-Tier Authorization",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.026"
+                    },
+                    {
+                        "TestId":  "TC-ADV-40",
+                        "TestName":  "_Add.cshtml uses namespaced off(\u0027click.sharedDoc\u0027) to neutralize duplicate handlers",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Anti-Double-Click Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.029"
+                    },
+                    {
+                        "TestId":  "TC-ADV-41",
+                        "TestName":  "_Add.cshtml disables #btnSave upon submission start to prevent duplicate POSTs",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Anti-Double-Click Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.030"
+                    },
+                    {
+                        "TestId":  "TC-ADV-42",
+                        "TestName":  "_Add.cshtml restores #btnSave disabled state on both success and error responses",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Anti-Double-Click Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.031"
+                    },
+                    {
+                        "TestId":  "TC-ADV-43",
+                        "TestName":  "_Edit.cshtml uses namespaced off(\u0027click.sharedDoc\u0027) to neutralize duplicate handlers",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Anti-Double-Click Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.031"
+                    },
+                    {
+                        "TestId":  "TC-ADV-44",
+                        "TestName":  "_Edit.cshtml disables #btnSave upon submission start to prevent duplicate POSTs",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Anti-Double-Click Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.032"
+                    },
+                    {
+                        "TestId":  "TC-ADV-45",
+                        "TestName":  "_Edit.cshtml restores #btnSave disabled state on both success and error responses",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: Anti-Double-Click Defense",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.033"
+                    },
+                    {
+                        "TestId":  "TC-ADV-46",
+                        "TestName":  "escapeHtml function is defined in SharedDocument.js for XSS mitigation",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: XSS \u0026 Special Characters",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.034"
+                    },
+                    {
+                        "TestId":  "TC-ADV-47",
+                        "TestName":  "Script tag payload is successfully encoded to prevent execution",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: XSS \u0026 Special Characters",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.036"
+                    },
+                    {
+                        "TestId":  "TC-ADV-48",
+                        "TestName":  "Vietnamese filename produces safe sanitized file with valid extension",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: XSS \u0026 Special Characters",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.038"
+                    },
+                    {
+                        "TestId":  "TC-ADV-49",
+                        "TestName":  "Physical filename conforms to sanitized character set without special symbols",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: XSS \u0026 Special Characters",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.039"
+                    },
+                    {
+                        "TestId":  "TC-ADV-50",
+                        "TestName":  "Path traversal in uploaded filename neutralized by base filename extractor",
+                        "Tier":  "Tier 5",
+                        "Feature":  "Adversarial: XSS \u0026 Special Characters",
+                        "Status":  "PASS",
+                        "ErrorMessage":  "",
+                        "DurationMs":  0,
+                        "Timestamp":  "2026-09-18 04:27:03.040"
+                    }
+                ]
+}

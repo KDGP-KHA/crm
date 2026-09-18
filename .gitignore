@@ -35,5 +35,10 @@
 **/[Cc]ontents/[Uu]ploads/**
 .agents/scratch/
 scratch/
-
-
+.agents/*
+!.agents/rules/
+!.agents/rules/**
+!.agents/skills/
+!.agents/skills/**
+!.agents/agents/
+!.agents/agents/**

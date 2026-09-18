@@ -1,0 +1,63 @@
+﻿@using TSFramework.Libs.Processors
+@using TSFramework.Libs.Extensions
+@model Core.Sys.Models.SharedDocumentModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.DocumentId)
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.DocumentName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextBoxFor(m => m.DocumentName, new { id = "DocumentName_Edit", @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.DocumentName, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.CategoryId, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.DropDownListFor(
+            m => m.CategoryId,
+            Model.Categories,
+            new { id = "CategoryId_Edit", @class = "form-control" }
+        )
+        @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.Description, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.TextAreaFor(m => m.Description, new { id = "Description_Edit", @class = "form-control", rows = 3 })
+        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<!-- Tá»‡p hiá»‡n táº¡i -->
+<div class="form-group row">
+    @Html.TitleFor(m => m.FileName, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        <div class="p-2 border-1 brc-grey-l2 radius-1 bgc-grey-l4 d-flex justify-content-between align-items-center">
+            <div class="text-truncate mr-2">
+                <i class="fa fa-file-alt text-primary mr-2"></i>
+                <span class="font-bold">@Model.FileName</span>
+                <span class="text-secondary ml-2">(@Model.FileSizeFormatted)</span>
+            </div>
+            <a href="@Url.Action("Download", "SharedDocument", new { area = "Sys", id = Model.DocumentId })" class="btn btn-xs btn-outline-primary flex-shrink-0" target="_blank">
+                <i class="fa fa-download mr-1"></i> @AppProcessor.Messagor.GetMessage("SharedDoc_Button_Download")
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Táº£i tá»‡p thay tháº¿ -->
+<div class="form-group row">
+    @Html.TitleFor(m => m.FileUpload, new { @class = "col-sm-3 col-form-label text-sm-right pr-0 font-bold" })
+    <div class="col-sm-9">
+        @Html.FileFor(m => m.FileUpload, ".doc,.docx,.xls,.xlsx,.pdf,.ppt,.pptx", false, new { id = "FileUpload_Edit", @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.FileUpload, "", new { @class = "text-danger" })
+        <small class="text-muted mt-1 d-block">
+            <i class="fa fa-info-circle mr-1"></i> @AppProcessor.Messagor.GetMessage("SharedDoc_Placeholder_ChooseFile")
+        </small>
+    </div>
+</div>

@@ -314,7 +314,17 @@ namespace Core.Cate.Caches
             return data;
         }
 
-        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName = null, string keyword = null)
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
+        {
+            return GetDashboardStatusStats(applyYear, null, null);
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName)
+        {
+            return GetDashboardStatusStats(applyYear, userName, null);
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName, string keyword)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
             var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear, "_", userName ?? "ALL", "_", keyword ?? "ALL");
