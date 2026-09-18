@@ -352,3 +352,12 @@
     @media (max-width: 575.98px) {
         .ds-review-floating-trigger { top: auto; bottom: 16px; transform: none; }
     }
+
+    .ds-guide-overlay { position: fixed; inset: 0; z-index: 1060; background: rgba(12, 25, 43, .68); }
+    .ds-guide-highlight { position: relative !important; z-index: 1061 !important; border-radius: 4px; box-shadow: 0 0 0 4px #fff, 0 0 0 8px rgba(37, 145, 235, .9); }
+    .ds-guide-tooltip { position: fixed; z-index: 1062; padding: 20px; color: #334155; background: #fff; border-radius: 8px; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+    .ds-guide-close { position: absolute; top: 5px; right: 10px; color: #64748b; border: 0; background: transparent; font-size: 26px; line-height: 1; cursor: pointer; }
+    .ds-guide-title { padding-right: 24px; color: #1666b4; font-size: 1.05rem; font-weight: 700; }
+    .ds-guide-text { margin-top: 10px; min-height: 42px; line-height: 1.55; }
+    .ds-guide-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .ds-guide-counter { color: #64748b; font-size: .85rem; }

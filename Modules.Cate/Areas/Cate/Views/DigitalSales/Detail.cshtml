@@ -87,6 +87,9 @@
             <button type="button" class="btn btn-sm btn-white btn-h-light-default border-1 brc-grey-l1 text-secondary-d2 px-25 py-15 radius-1 shadow-sm flex-shrink-0 ml-2" onclick="refreshAllSections(@Model.DigitalSalesID);" title="Làm mới dữ liệu">
                 <i class="fa fa-sync-alt"></i>
             </button>
+            <button type="button" id="btnDigitalSalesGuide" class="btn btn-sm btn-white btn-h-light-info border-1 brc-info-m2 text-info-d2 px-25 py-15 radius-1 shadow-sm flex-shrink-0 ml-2" title="Xem hướng dẫn sử dụng">
+                <i class="fa fa-question-circle mr-1"></i> Hướng dẫn
+            </button>
         </div>
     </div>
 }
@@ -194,6 +197,12 @@
         var _currentDigitalSalesId = @Model.DigitalSalesID;
         var _reviewBatchID = @reviewBatchID;
         var _urlReloadReviewHistory = '@Url.Action("GetReviewHistoryPartial", "DigitalSales", new { area = "Cate" })';
+        var _digitalSalesGuide = {
+            screenCode: "Cate.DigitalSales.Detail",
+            autoStart: @(ViewBag.ShowDigitalSalesGuide == true ? "true" : "false"),
+            markViewedUrl: '@Url.Action("MarkGuideViewed", "DigitalSales", new { area = "Cate" })',
+            getStateUrl: '@Url.Action("GetGuideState", "DigitalSales", new { area = "Cate" })'
+        };
     </script>
     <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
     <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>

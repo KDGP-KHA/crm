@@ -13,7 +13,7 @@
         foreach (var p in directParts)
         {
             var trimmed = p.Trim();
-            if (string.IsNullOrEmpty(trimmed)) continue;
+            if (string.IsNullOrEmpty(trimmed)) { continue; }
             allItems.Add(new TimelineAttachmentFileItem
             {
                 FilePath = trimmed,
@@ -52,7 +52,7 @@
             foreach (var p in taskParts)
             {
                 var trimmed = p.Trim();
-                if (string.IsNullOrEmpty(trimmed)) continue;
+                if (string.IsNullOrEmpty(trimmed)) { continue; }
 
                 // Tránh lặp lại chính xác cùng một đường dẫn file
                 if (allItems.Any(x => string.Equals(x.FilePath, trimmed, StringComparison.OrdinalIgnoreCase)))
@@ -88,7 +88,7 @@
             foreach (var p in tlParts)
             {
                 var trimmed = p.Trim();
-                if (string.IsNullOrEmpty(trimmed)) continue;
+                if (string.IsNullOrEmpty(trimmed)) { continue; }
 
                 if (allItems.Any(x => string.Equals(x.FilePath, trimmed, StringComparison.OrdinalIgnoreCase)))
                 {

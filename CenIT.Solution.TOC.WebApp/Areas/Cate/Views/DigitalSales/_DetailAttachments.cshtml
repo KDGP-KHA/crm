@@ -13,7 +13,7 @@
         foreach (var p in directParts)
         {
             var trimmed = p.Trim();
-            if (string.IsNullOrEmpty(trimmed)) continue;
+            if (string.IsNullOrEmpty(trimmed)) { continue; }
             allItems.Add(new TimelineAttachmentFileItem
             {
                 FilePath = trimmed,
@@ -52,7 +52,7 @@
             foreach (var p in taskParts)
             {
                 var trimmed = p.Trim();
-                if (string.IsNullOrEmpty(trimmed)) continue;
+                if (string.IsNullOrEmpty(trimmed)) { continue; }
 
                 // Tránh lặp lại chính xác cùng một đường dẫn file
                 if (allItems.Any(x => string.Equals(x.FilePath, trimmed, StringComparison.OrdinalIgnoreCase)))
@@ -84,11 +84,20 @@
     {
         foreach (var tl in Model.Timelines.Where(t => !string.IsNullOrWhiteSpace(t.AttachmentPath)))
         {
+            if (tl.AttachmentPath.TrimStart().StartsWith("["))
+            {
+                var jsonFiles = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ActivityAttachmentItem>>(tl.AttachmentPath) ?? new List<ActivityAttachmentItem>();
+                foreach (var jsonFile in jsonFiles.Where(file => !string.IsNullOrWhiteSpace(file.FilePath)))
+                {
+                    allItems.Add(new TimelineAttachmentFileItem { FilePath = jsonFile.FilePath, FileName = jsonFile.FileName, Extension = jsonFile.Extension, SourceTaskName = "Trạng thái: " + (tl.ToStatusName ?? "Chuyển trạng thái"), UploadedBy = tl.ActionByName ?? tl.ActionBy, UploadedDate = tl.ActionDate, IsFromChecklist = false });
+                }
+                continue;
+            }
             var tlParts = tl.AttachmentPath.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var p in tlParts)
             {
                 var trimmed = p.Trim();
-                if (string.IsNullOrEmpty(trimmed)) continue;
+                if (string.IsNullOrEmpty(trimmed)) { continue; }
 
                 if (allItems.Any(x => string.Equals(x.FilePath, trimmed, StringComparison.OrdinalIgnoreCase)))
                 {

@@ -43,6 +43,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_ReviewBatchItemBiz _reviewBatchItemBiz;
         private readonly SysConfigCache _sysConfigCache;
         private readonly RM_DigitalSalesWorkflowCache _workflowCache;
+        private const string UserGuideDataProvider = "CenIT.Provider.Major";
+        private const string DigitalSalesDetailGuideCode = "Cate.DigitalSales.Detail";
 
         private string _title => AppProcessor.Messagor.GetMessage("DigitalSales_Title");
         private string CurrentUserName => User?.UserName ?? (User?.Identity?.Name ?? (HttpContext?.User?.Identity?.Name ?? ""));
@@ -934,6 +936,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 ViewBag.Title = $"{AppProcessor.Messagor.GetMessage("DigitalSales_RecordPrefix")}: {model.Code} - {model.Title}";
                 ViewBag.ReviewBatchID = reviewBatchID.GetValueOrDefault(0);
+                ViewBag.ShowDigitalSalesGuide = !HasViewedUserGuide(DigitalSalesDetailGuideCode);
                 try
                 {
                     ViewBag.CanEdit = HasDetailPermission(model, User.UserName);
@@ -3197,6 +3200,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 };
                 _salesCache.AddActivity(activity, User.UserName);
 
+                QueueTrackingUpdateMail(model.DigitalSalesID, model.TaskName, model.Status, model.ResultNote);
                 return Json(new
                 {
                     status = true,
@@ -3698,6 +3702,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     AppProcessor.Logger.Error(ex);
                 }
 
+                QueueTrackingUpdateMail(model.DigitalSalesID, model.TaskName, model.Status, model.ResultNote);
                 return Json(new { status = true, id = id, message = GetAppMessage("DigitalSalesTracking_SaveSuccess") });
             }
 
@@ -3956,6 +3961,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     AppProcessor.Logger.Error(ex);
                 }
 
+                QueueTrackingUpdateMail(model.DigitalSalesID, model.TaskName, newStatus, model.ResultNote);
                 return Json(new { status = true, message = GetAppMessage("DigitalSalesTracking_ReportSuccess") });
             }
 
@@ -5273,6 +5279,68 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return ccUserNames
                 .Where(userName => !string.Equals(userName, amUserName, StringComparison.OrdinalIgnoreCase))
                 .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        [HttpPost]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult MarkGuideViewed(string screenCode)
+        {
+            if (string.IsNullOrWhiteSpace(screenCode) || string.IsNullOrWhiteSpace(CurrentUserName))
+                return Json(new { status = false });
+
+            try
+            {
+                var result = AppProcessor.ProcedureProvider.Execute(
+                    "Sys_UserGuideState_MarkViewed", UserGuideDataProvider, CurrentUserName, screenCode.Trim());
+                return Json(new { status = result.GetValueOrDefault(0) > 0 });
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new { status = false });
+            }
+        }
+
+        [HttpGet]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetGuideState(string screenCode)
+        {
+            if (string.IsNullOrWhiteSpace(screenCode) || string.IsNullOrWhiteSpace(CurrentUserName))
+                return Json(new { status = false, isViewed = false }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { status = true, isViewed = HasViewedUserGuide(screenCode.Trim()) }, JsonRequestBehavior.AllowGet);
+        }
+
+        private bool HasViewedUserGuide(string screenCode)
+        {
+            if (string.IsNullOrWhiteSpace(CurrentUserName) || string.IsNullOrWhiteSpace(screenCode)) return false;
+            try
+            {
+                var result = AppProcessor.ProcedureProvider.ExecuteScalar(
+                    "Sys_UserGuideState_IsViewed", UserGuideDataProvider, CurrentUserName, screenCode);
+                return Convert.ToInt32(result ?? 0) == 1;
+            }
+            catch (Exception ex)
+            {
+                // Chưa có stored procedure khi triển khai DB mới: vẫn cho phép hiển thị hướng dẫn.
+                AppProcessor.Logger.Error(ex);
+                return false;
+            }
+        }
+
+        private void QueueTrackingUpdateMail(int salesId, string taskName, byte status, string resultNote)
+        {
+            var sales = _salesCache.GetByID(salesId);
+            if (sales == null) return;
+            var members = _salesCache.GetMembersBySalesID(salesId) ?? new List<RM_DigitalSalesMemberModel>();
+            var memberUserNames = members.Select(member => member.UserName).Where(userName => !string.IsNullOrWhiteSpace(userName)).ToList();
+            var amUserName = GetUserNameByEmployeeId(sales.AssignedEmployeeID);
+            var statusName = status == 3 ? "Hoàn thành" : status == 2 ? "Đang thực hiện" : status == 4 ? "Quá hạn" : "Chưa thực hiện";
+            var html = string.IsNullOrWhiteSpace(resultNote) ? string.Empty : HttpUtility.HtmlDecode(resultNote);
+            _digitalSalesMailService.QueueTrackingUpdated(salesId, memberUserNames, amUserName,
+                GetDigitalSalesMailCcUserNames(salesId, sales.AssignedEmployeeID, amUserName), taskName ?? "Tiến trình", statusName, html, User.UserName);
         }
 
         [HttpGet]

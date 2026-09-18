@@ -398,6 +398,8 @@
 		<Procedure Name="RM_DigitalSales_GetTimeline" Value="RM_DigitalSales_GetTimeline" />
 		<Procedure Name="RM_DigitalSales_ToggleKeyProject" Value="RM_DigitalSales_ToggleKeyProject" />
 		<Procedure Name="RM_DigitalSales_ToggleFollow" Value="RM_DigitalSales_ToggleFollow" />
+		<Procedure Name="Sys_UserGuideState_IsViewed" Value="Sys_UserGuideState_IsViewed" />
+		<Procedure Name="Sys_UserGuideState_MarkViewed" Value="Sys_UserGuideState_MarkViewed" />
 
 		<!-- RM_DigitalSalesProduct -->
 		<Procedure Name="RM_DigitalSalesProduct_GetBySalesID" Value="RM_DigitalSalesProduct_GetBySalesID" />

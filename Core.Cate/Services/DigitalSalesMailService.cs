@@ -40,7 +40,13 @@ namespace Core.Cate.Services
             Queue(delegate { Send(salesId, memberUserNames, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_STATUS_CHANGED", "", "Cập nhật trạng thái Hồ sơ KD sản phẩm/dịch vụ số", "Hồ sơ được chuyển trạng thái", "MailTemplate_DigitalSalesStatusChanged", "fa-exchange", "text-primary"); });
         }
 
-        private void Send(int salesId, IEnumerable<string> notificationUserNames, IEnumerable<string> toUserNames, IEnumerable<string> ccUserNames, string actionUserName, string notificationType, string roleNames, string notificationTitle, string actionLabel, string templateKey, string iconClass, string iconColor)
+        public void QueueTrackingUpdated(int salesId, IEnumerable<string> notificationUserNames, string amUserName, IEnumerable<string> ccUserNames, string taskName, string statusName, string resultHtml, string actionUserName)
+        {
+            var label = "Cập nhật tiến trình: " + taskName + " (" + statusName + ")";
+            Queue(delegate { Send(salesId, notificationUserNames, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_TRACKING_UPDATED", "", "Cập nhật tiến trình Hồ sơ KD sản phẩm/dịch vụ số", label, "MailTemplate_DigitalSalesTrackingUpdated", "fa-tasks", "text-primary", resultHtml); });
+        }
+
+        private void Send(int salesId, IEnumerable<string> notificationUserNames, IEnumerable<string> toUserNames, IEnumerable<string> ccUserNames, string actionUserName, string notificationType, string roleNames, string notificationTitle, string actionLabel, string templateKey, string iconClass, string iconColor, string descriptionHtml = null)
         {
             var sales = _salesCache.GetByID(salesId);
             var notificationRecipients = Normalize(notificationUserNames);
@@ -71,7 +77,7 @@ namespace Core.Cate.Services
                     { "ActualRevenue", sales.TotalActualRevenue.HasValue ? sales.TotalActualRevenue.Value.ToString("N0") + " triệu VNĐ" : string.Empty },
                     { "ExpectedDate", sales.ExpectedDate.HasValue ? sales.ExpectedDate.Value.ToString("dd/MM/yyyy") : string.Empty },
                     { "ActionByFullName", actionName ?? string.Empty }, { "ActionLabel", actionLabel },
-                    { "Description", StripHtml(sales.Note) }, { "SentAt", DateTime.Now.ToString("dd/MM/yyyy HH:mm") }
+                    { "Description", string.IsNullOrWhiteSpace(descriptionHtml) ? StripHtml(sales.Note) : descriptionHtml }, { "SentAt", DateTime.Now.ToString("dd/MM/yyyy HH:mm") }
                 };
                 _mailTemplateService.SendByConfigKey(templateKey, recipient.Email, JsonConvert.SerializeObject(data), actionUserName, pendingCc);
                 pendingCc = null; // CC chỉ đính kèm một email, không gửi lặp theo từng người nhận chính.
