@@ -599,88 +599,109 @@
                     }
                     else if (!string.IsNullOrEmpty(act.Attachments) && !act.Attachments.TrimStart().StartsWith("["))
                     {
-                        var singleFile = act.Attachments.Trim();
-                        var singleFileName = System.IO.Path.GetFileName(singleFile);
-                        var singleExt = System.IO.Path.GetExtension(singleFile)?.ToLowerInvariant() ?? "";
-                        var singleDownloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = singleFile });
-                        var singleExtLabel = singleExt.TrimStart('.').ToUpper();
-                        if (string.IsNullOrEmpty(singleExtLabel)) { singleExtLabel = "FILE"; }
-
-                        string singleIconClass = "fa-file-alt";
-                        string singleIconBg = "#f1f5f9";
-                        string singleIconColor = "#475569";
-                        string singleTypeDesc = "Tệp đính kèm";
-
-                        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
+                        var rawFileList = act.Attachments.Split(new[] { ';', ',', '|' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (rawFileList.Length > 0)
                         {
-                            singleIconClass = "fa-file-image";
-                            singleIconBg = "#e0f7fa";
-                            singleIconColor = "#00838f";
-                            singleTypeDesc = "Hình ảnh";
-                        }
-                        else if (singleExt == ".pdf")
-                        {
-                            singleIconClass = "fa-file-pdf";
-                            singleIconBg = "#ffebee";
-                            singleIconColor = "#c62828";
-                            singleTypeDesc = "Tài liệu PDF";
-                        }
-                        else if (singleExt == ".doc" || singleExt == ".docx")
-                        {
-                            singleIconClass = "fa-file-word";
-                            singleIconBg = "#e3f2fd";
-                            singleIconColor = "#1565c0";
-                            singleTypeDesc = "Tài liệu Word";
-                        }
-                        else if (singleExt == ".xls" || singleExt == ".xlsx" || singleExt == ".csv")
-                        {
-                            singleIconClass = "fa-file-excel";
-                            singleIconBg = "#e8f5e9";
-                            singleIconColor = "#2e7d32";
-                            singleTypeDesc = "Bảng tính Excel";
-                        }
-                        else if (singleExt == ".zip" || singleExt == ".rar" || singleExt == ".7z")
-                        {
-                            singleIconClass = "fa-file-archive";
-                            singleIconBg = "#fef3c7";
-                            singleIconColor = "#d97706";
-                            singleTypeDesc = "Tệp nén";
-                        }
-
-                        <div class="ds-activity-attachments mt-2 pt-2 border-t-1 brc-grey-l3">
-                            <div class="text-80 font-weight-bold text-secondary mb-15 d-flex align-items-center">
-                                <i class="fa fa-paperclip mr-15 text-primary"></i> 
-                                <span>Tệp đính kèm:</span>
-                            </div>
-                            <div class="ds-attachments-grid">
-                                <div class="ds-attachment-chip">
-                                    <div class="ds-attachment-icon-box mr-2" style="background-color: @singleIconBg;">
-                                        <i class="fa @singleIconClass fa-lg" style="color: @singleIconColor;"></i>
-                                    </div>
-                                    <div class="ds-attachment-info">
-                                        <a href="@singleDownloadUrl" class="ds-attachment-name" title="@singleFileName">
-                                            @singleFileName
-                                        </a>
-                                        <div class="ds-attachment-meta">
-                                            <span>@singleTypeDesc</span>
-                                            <span class="mx-1 opacity-50">•</span>
-                                            <span class="ds-ext-badge" style="background-color: @singleIconBg; color: @singleIconColor;">@singleExtLabel</span>
-                                        </div>
-                                    </div>
-                                    <div class="ds-attachment-actions">
-                                        @if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
+                            <div class="ds-activity-attachments mt-2 pt-2 border-t-1 brc-grey-l3">
+                                <div class="text-80 font-weight-bold text-secondary mb-15 d-flex align-items-center">
+                                    <i class="fa fa-paperclip mr-15 text-primary"></i> 
+                                    <span>Tệp đính kèm (@rawFileList.Length):</span>
+                                </div>
+                                <div class="ds-attachments-grid">
+                                    @foreach (var rawF in rawFileList)
+                                    {
+                                        var singleFile = rawF.Trim();
+                                        if (string.IsNullOrEmpty(singleFile)) { continue; }
+                                        string singleFileName = singleFile;
+                                        string singleExt = "";
+                                        try
                                         {
-                                            <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước">
-                                                <i class="fa fa-eye"></i>
-                                            </button>
+                                            singleFileName = System.IO.Path.GetFileName(singleFile);
+                                            singleExt = System.IO.Path.GetExtension(singleFile)?.ToLowerInvariant() ?? "";
                                         }
-                                        <a href="@singleDownloadUrl" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-primary radius-1 p-1 px-2 font-bold" title="Tải xuống tệp">
-                                            <i class="fa fa-download mr-1"></i> Tải về
-                                        </a>
-                                    </div>
+                                        catch
+                                        {
+                                            var lastSlash = singleFile.LastIndexOfAny(new[] { '/', '\\' });
+                                            if (lastSlash >= 0 && lastSlash < singleFile.Length - 1) { singleFileName = singleFile.Substring(lastSlash + 1); }
+                                            var lastDot = singleFileName.LastIndexOf('.');
+                                            if (lastDot >= 0) { singleExt = singleFileName.Substring(lastDot).ToLowerInvariant(); }
+                                        }
+
+                                        var singleDownloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = singleFile });
+                                        var singleExtLabel = singleExt.TrimStart('.').ToUpper();
+                                        if (string.IsNullOrEmpty(singleExtLabel)) { singleExtLabel = "FILE"; }
+
+                                        string singleIconClass = "fa-file-alt";
+                                        string singleIconBg = "#f1f5f9";
+                                        string singleIconColor = "#475569";
+                                        string singleTypeDesc = "Tệp đính kèm";
+
+                                        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
+                                        {
+                                            singleIconClass = "fa-file-image";
+                                            singleIconBg = "#e0f7fa";
+                                            singleIconColor = "#00838f";
+                                            singleTypeDesc = "Hình ảnh";
+                                        }
+                                        else if (singleExt == ".pdf")
+                                        {
+                                            singleIconClass = "fa-file-pdf";
+                                            singleIconBg = "#ffebee";
+                                            singleIconColor = "#c62828";
+                                            singleTypeDesc = "Tài liệu PDF";
+                                        }
+                                        else if (singleExt == ".doc" || singleExt == ".docx")
+                                        {
+                                            singleIconClass = "fa-file-word";
+                                            singleIconBg = "#e3f2fd";
+                                            singleIconColor = "#1565c0";
+                                            singleTypeDesc = "Tài liệu Word";
+                                        }
+                                        else if (singleExt == ".xls" || singleExt == ".xlsx" || singleExt == ".csv")
+                                        {
+                                            singleIconClass = "fa-file-excel";
+                                            singleIconBg = "#e8f5e9";
+                                            singleIconColor = "#2e7d32";
+                                            singleTypeDesc = "Bảng tính Excel";
+                                        }
+                                        else if (singleExt == ".zip" || singleExt == ".rar" || singleExt == ".7z")
+                                        {
+                                            singleIconClass = "fa-file-archive";
+                                            singleIconBg = "#fef3c7";
+                                            singleIconColor = "#d97706";
+                                            singleTypeDesc = "Tệp nén";
+                                        }
+
+                                        <div class="ds-attachment-chip">
+                                            <div class="ds-attachment-icon-box mr-2" style="background-color: @singleIconBg;">
+                                                <i class="fa @singleIconClass fa-lg" style="color: @singleIconColor;"></i>
+                                            </div>
+                                            <div class="ds-attachment-info">
+                                                <a href="@singleDownloadUrl" class="ds-attachment-name" title="@singleFileName">
+                                                    @singleFileName
+                                                </a>
+                                                <div class="ds-attachment-meta">
+                                                    <span>@singleTypeDesc</span>
+                                                    <span class="mx-1 opacity-50">•</span>
+                                                    <span class="ds-ext-badge" style="background-color: @singleIconBg; color: @singleIconColor;">@singleExtLabel</span>
+                                                </div>
+                                            </div>
+                                            <div class="ds-attachment-actions">
+                                                @if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
+                                                {
+                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                }
+                                                <a href="@singleDownloadUrl" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-primary radius-1 p-1 px-2 font-bold" title="Tải xuống tệp">
+                                                    <i class="fa fa-download mr-1"></i> Tải về
+                                                </a>
+                                            </div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
-                        </div>
+                        }
                     }
                 </div>
             </div>

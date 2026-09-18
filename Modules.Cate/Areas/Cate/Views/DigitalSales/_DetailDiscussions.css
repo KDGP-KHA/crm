@@ -20,6 +20,23 @@
         border-color: #3b82f6;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
+    .ds-activity-content {
+        font-family: inherit !important;
+        font-size: 13.5px !important;
+        line-height: 1.6 !important;
+        color: #334155;
+    }
+    .ds-activity-content * {
+        font-family: inherit !important;
+    }
+    .ds-activity-content p,
+    .ds-activity-content li,
+    .ds-activity-content span:not(.badge):not(.ds-mention-badge) {
+        font-size: 13.5px !important;
+        line-height: 1.6 !important;
+        font-family: inherit !important;
+        color: #334155;
+    }
     .ds-activity-content p {
         margin-bottom: 0.35rem;
     }
@@ -27,8 +44,34 @@
         margin-bottom: 0;
     }
     .ds-activity-content ul, .ds-activity-content ol {
-        padding-left: 22px;
-        margin-bottom: 0.35rem;
+        padding-left: 20px;
+        margin-top: 0.25rem;
+        margin-bottom: 0.4rem;
+    }
+    .ds-activity-content li {
+        margin-bottom: 0.25rem;
+    }
+    .ds-activity-content b, .ds-activity-content strong {
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .ds-migrated-task,
+    .ds-migrated-task-comment,
+    .ds-migrated-exchange {
+        width: 100%;
+    }
+    .ds-migrated-content {
+        font-size: 13.5px !important;
+        line-height: 1.6 !important;
+        color: #334155;
+    }
+    .ds-migrated-meta {
+        font-size: 12px !important;
+        color: #64748b;
+        font-style: italic;
+        padding-top: 6px;
+        margin-top: 8px;
+        border-top: 1px dashed #e2e8f0;
     }
     .ds-activity-content table {
         border-collapse: collapse;

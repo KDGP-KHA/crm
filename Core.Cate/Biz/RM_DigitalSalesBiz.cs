@@ -178,6 +178,11 @@ namespace Core.Cate.Biz
             var model = AppProcessor.ProcedureProvider.ExecuteScalarObject<RM_DigitalSalesModel>(_spGetByID, DATA_PROVIDER_NAME, id, userName);
             if (model != null)
             {
+                model.Title = FixVietnameseMojibake(model.Title);
+                model.CustomerName = FixVietnameseMojibake(model.CustomerName);
+                model.BusinessTypeName = FixVietnameseMojibake(model.BusinessTypeName);
+                model.StatusName = FixVietnameseMojibake(model.StatusName);
+                model.Note = FixVietnameseMojibake(model.Note);
                 try
                 {
                     model.Products = GetProductsBySalesID(id);
@@ -346,6 +351,9 @@ namespace Core.Cate.Biz
             data = data ?? new List<RM_DigitalSalesProductModel>();
             foreach (var product in data)
             {
+                product.ProductServiceName = FixVietnameseMojibake(product.ProductServiceName);
+                product.PackageName = FixVietnameseMojibake(product.PackageName);
+                product.Note = FixVietnameseMojibake(product.Note);
                 try
                 {
                     product.Contracts = GetProductContracts(product.SalesProductID);
@@ -826,6 +834,7 @@ namespace Core.Cate.Biz
             {
                 foreach (var item in list)
                 {
+                    item.FullName = FixVietnameseMojibake(item.FullName);
                     item.RoleTitle = FixVietnameseMojibake(item.RoleTitle);
                     item.Note = FixVietnameseMojibake(item.Note);
                 }
@@ -965,15 +974,28 @@ namespace Core.Cate.Biz
                             }
                             else
                             {
-                                var parts = item.Attachments.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                var parts = item.Attachments.Split(new[] { ';', ',', '|' }, StringSplitOptions.RemoveEmptyEntries);
                                 foreach (var p in parts)
                                 {
                                     var trimmed = p?.Trim();
                                     if (string.IsNullOrEmpty(trimmed)) continue;
-                                    var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                    string ext = "";
+                                    string fname = trimmed;
+                                    try
+                                    {
+                                        ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                        fname = System.IO.Path.GetFileName(trimmed);
+                                    }
+                                    catch
+                                    {
+                                        var lastSlash = trimmed.LastIndexOfAny(new[] { '/', '\\' });
+                                        if (lastSlash >= 0 && lastSlash < trimmed.Length - 1) fname = trimmed.Substring(lastSlash + 1);
+                                        var lastDot = fname.LastIndexOf('.');
+                                        if (lastDot >= 0) ext = fname.Substring(lastDot).ToLowerInvariant();
+                                    }
                                     item.AttachmentList.Add(new ActivityAttachmentItem
                                     {
-                                        FileName = System.IO.Path.GetFileName(trimmed),
+                                        FileName = fname,
                                         FilePath = trimmed,
                                         Extension = ext,
                                         IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)
@@ -1045,15 +1067,28 @@ namespace Core.Cate.Biz
                             }
                             else
                             {
-                                var parts = item.Attachments.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                                var parts = item.Attachments.Split(new[] { ';', ',', '|' }, StringSplitOptions.RemoveEmptyEntries);
                                 foreach (var p in parts)
                                 {
                                     var trimmed = p?.Trim();
                                     if (string.IsNullOrEmpty(trimmed)) continue;
-                                    var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                    string ext = "";
+                                    string fname = trimmed;
+                                    try
+                                    {
+                                        ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                        fname = System.IO.Path.GetFileName(trimmed);
+                                    }
+                                    catch
+                                    {
+                                        var lastSlash = trimmed.LastIndexOfAny(new[] { '/', '\\' });
+                                        if (lastSlash >= 0 && lastSlash < trimmed.Length - 1) fname = trimmed.Substring(lastSlash + 1);
+                                        var lastDot = fname.LastIndexOf('.');
+                                        if (lastDot >= 0) ext = fname.Substring(lastDot).ToLowerInvariant();
+                                    }
                                     item.AttachmentList.Add(new ActivityAttachmentItem
                                     {
-                                        FileName = System.IO.Path.GetFileName(trimmed),
+                                        FileName = fname,
                                         FilePath = trimmed,
                                         Extension = ext,
                                         IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext)

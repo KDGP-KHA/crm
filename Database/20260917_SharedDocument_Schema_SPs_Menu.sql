@@ -151,8 +151,76 @@ PRINT N'Seeded/Updated 4 initial document categories with clean Unicode.';
 GO
 
 -- ------------------------------------------------------------------------------
--- 4. MENU REGISTRATION: Sys_Menus (ParentId = 1, QTHT)
+-- 4. FUNCTION & MENU REGISTRATION: Sys_Functions, Sys_FunctionActions, Sys_Menus, Sys_Permissions
 -- ------------------------------------------------------------------------------
+DECLARE @DocFunctionId INT;
+DECLARE @DocModuleId INT = 1; -- Sys Module
+DECLARE @DocArea VARCHAR(255) = 'Sys';
+DECLARE @DocName NVARCHAR(255) = 'SharedDocument';
+DECLARE @DocDescription NVARCHAR(2500) = N'Quản lý tài liệu dùng chung';
+
+-- 4.1 Register Sys_Functions
+IF NOT EXISTS (SELECT 1 FROM dbo.Sys_Functions WHERE Area = @DocArea AND [Name] = @DocName)
+BEGIN
+    INSERT INTO dbo.Sys_Functions (ModuleId, Area, [Name], [Description], IsDeleted)
+    VALUES (@DocModuleId, @DocArea, @DocName, @DocDescription, 0);
+    SET @DocFunctionId = SCOPE_IDENTITY();
+    PRINT N'Registered Function "SharedDocument" with FunctionId = ' + CAST(@DocFunctionId AS VARCHAR(50));
+END
+ELSE
+BEGIN
+    SELECT @DocFunctionId = FunctionId FROM dbo.Sys_Functions WHERE Area = @DocArea AND [Name] = @DocName;
+    UPDATE dbo.Sys_Functions 
+    SET ModuleId = @DocModuleId, [Description] = @DocDescription, IsDeleted = 0 
+    WHERE FunctionId = @DocFunctionId;
+    PRINT N'Updated Function "SharedDocument" with FunctionId = ' + CAST(@DocFunctionId AS VARCHAR(50));
+END
+
+-- 4.2 Register Sys_FunctionActions (View, Create, Edit, Delete)
+DECLARE @DocActions TABLE (ActionName VARCHAR(50));
+INSERT INTO @DocActions (ActionName) VALUES ('View'), ('Create'), ('Edit'), ('Delete');
+
+DECLARE @curDocAction VARCHAR(50);
+DECLARE doc_act_cursor CURSOR FOR SELECT ActionName FROM @DocActions;
+OPEN doc_act_cursor;
+FETCH NEXT FROM doc_act_cursor INTO @curDocAction;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM dbo.Sys_FunctionActions WHERE FunctionId = @DocFunctionId AND [Action] = @curDocAction)
+    BEGIN
+        INSERT INTO dbo.Sys_FunctionActions (FunctionId, [Action], IsDeleted)
+        VALUES (@DocFunctionId, @curDocAction, 0);
+    END
+    ELSE
+    BEGIN
+        UPDATE dbo.Sys_FunctionActions SET IsDeleted = 0 WHERE FunctionId = @DocFunctionId AND [Action] = @curDocAction;
+    END
+    FETCH NEXT FROM doc_act_cursor INTO @curDocAction;
+END
+CLOSE doc_act_cursor;
+DEALLOCATE doc_act_cursor;
+
+-- 4.3 Get View FunctionActionId
+DECLARE @DocViewActionId INT;
+SELECT @DocViewActionId = FunctionActionId 
+FROM dbo.Sys_FunctionActions 
+WHERE FunctionId = @DocFunctionId AND [Action] = 'View';
+
+-- 4.4 Register / Update Sys_Menus (ParentId = 45: Nghiệp vụ)
+DECLARE @NghiepVuParentId INT;
+SELECT TOP 1 @NghiepVuParentId = MenuId 
+FROM dbo.Sys_Menus 
+WHERE (ParentId IS NULL OR ParentId = 0) 
+  AND (Name LIKE N'%Nghi%p v%' OR Icon = 'fas fa-laptop' OR MenuId = 45);
+
+IF @NghiepVuParentId IS NULL
+    SET @NghiepVuParentId = 45;
+
+DECLARE @DocMenuPos INT;
+SELECT @DocMenuPos = ISNULL(MAX(Position), 0) + 1 
+FROM dbo.Sys_Menus 
+WHERE ParentId = @NghiepVuParentId AND IsDelete = 0 AND Link <> '/Sys/SharedDocument';
+
 IF NOT EXISTS (SELECT 1 FROM dbo.Sys_Menus WHERE Link = '/Sys/SharedDocument' AND IsDelete = 0)
 BEGIN
     DECLARE @NewMenuId INT;
@@ -174,13 +242,13 @@ BEGIN
     VALUES 
     (
         N'Tài liệu chung', 
-        10, 
+        @DocMenuPos, 
         2, 
-        '1', 
-        1, 
+        CAST(@NghiepVuParentId AS VARCHAR(50)), 
+        @NghiepVuParentId, 
         '/Sys/SharedDocument', 
         'fas fa-folder-open', 
-        NULL, 
+        @DocViewActionId, 
         1, 
         0, 
         NULL, 
@@ -189,24 +257,37 @@ BEGIN
 
     SET @NewMenuId = SCOPE_IDENTITY();
     UPDATE dbo.Sys_Menus 
-    SET Depth = '1,' + CAST(@NewMenuId AS VARCHAR(50)) 
+    SET Depth = CAST(@NghiepVuParentId AS VARCHAR(50)) + ',' + CAST(@NewMenuId AS VARCHAR(50)) 
     WHERE MenuId = @NewMenuId;
 
-    PRINT N'Registered Menu "Tài liệu chung" in Sys_Menus under ParentId = 1 with MenuId = ' + CAST(@NewMenuId AS VARCHAR(50));
+    PRINT N'Registered Menu "Tài liệu chung" in Sys_Menus under ParentId = ' + CAST(@NghiepVuParentId AS VARCHAR(50)) + ' with MenuId = ' + CAST(@NewMenuId AS VARCHAR(50)) + ' and FunctionActionId = ' + CAST(ISNULL(@DocViewActionId, 0) AS VARCHAR(50));
 END
 ELSE
 BEGIN
     UPDATE dbo.Sys_Menus
     SET Name = N'Tài liệu chung',
-        Position = 10,
+        Position = @DocMenuPos,
         LevelMenu = 2,
-        ParentId = 1,
+        ParentId = @NghiepVuParentId,
+        Depth = CAST(@NghiepVuParentId AS VARCHAR(50)) + ',' + CAST(MenuId AS VARCHAR(50)),
         Icon = 'fas fa-folder-open',
+        FunctionActionId = @DocViewActionId,
         IsShow = 1,
         IsDelete = 0
     WHERE Link = '/Sys/SharedDocument';
-    PRINT N'Updated existing Menu "Tài liệu chung" in Sys_Menus.';
+    PRINT N'Updated existing Menu "Tài liệu chung" in Sys_Menus under ParentId = ' + CAST(@NghiepVuParentId AS VARCHAR(50)) + ' with FunctionActionId = ' + CAST(ISNULL(@DocViewActionId, 0) AS VARCHAR(50));
 END
+
+-- 4.5 Grant Full Permissions for QTHT (RoleId = 1)
+INSERT INTO dbo.Sys_Permissions (RoleId, FunctionId, [Action])
+SELECT 1, @DocFunctionId, fa.[Action]
+FROM dbo.Sys_FunctionActions fa
+WHERE fa.FunctionId = @DocFunctionId
+  AND NOT EXISTS (
+      SELECT 1 FROM dbo.Sys_Permissions p 
+      WHERE p.RoleId = 1 AND p.FunctionId = @DocFunctionId AND p.[Action] = fa.[Action]
+  );
+PRINT N'Granted permissions for QTHT (RoleId = 1) for SharedDocument.';
 GO
 
 -- ------------------------------------------------------------------------------
