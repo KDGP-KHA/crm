@@ -24,6 +24,8 @@
         }).ToList();
 }
 
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_DetailMembers.css?v=@DateTime.Now.Ticks" />
+
 <span id="partialMembersCount" class="d-none" data-count="@displayMembers.Count"></span>
 
 <div class="card border-1 brc-grey-l2 p-3 p-lg-4 shadow-sm">
@@ -46,59 +48,62 @@
             @foreach (var m in displayMembers)
             {
                 <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3">
-                    <div class="card h-100 border-1 brc-primary-l2 radius-2 p-3 shadow-sm hover-shadow bgc-white">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <div class="d-flex align-items-center min-width-0">
-                                <div class="w-4 h-4 radius-round bgc-primary-l3 text-primary-d1 d-flex align-items-center justify-content-center mr-2 font-bolder text-90 flex-shrink-0" style="width: 36px; height: 36px; border-radius: 50%;">
-                                    <i class="fa fa-user text-primary"></i>
-                                </div>
-                                <div class="min-width-0">
-                                    <div class="d-flex align-items-center">
-                                        <span class="font-weight-bold text-dark text-95 text-truncate" title="@m.FullName">
-                                            @m.FullName
-                                        </span>
-                                        @if (m.IsAM)
-                                        {
-                                            <span class="text-success ml-1 flex-shrink-0" title="@(TSFramework.Libs.Processors.AppProcessor.Messagor.GetMessage("DigitalSalesMember_IsAM_Label") ?? "Được phép cập nhật nội dung")" data-toggle="tooltip">
-                                                <i class="fa fa-check-circle text-110"></i>
-                                            </span>
-                                        }
-                                    </div>
-                                    <div class="text-secondary text-80 text-truncate font-mono">
-                                        @m.UserName
-                                    </div>
-                                </div>
+                    <div class="ds-member-card">
+                        <div class="ds-member-top">
+                            <!-- Avatar bên trái -->
+                            <div class="ds-member-avatar">
+                                <i class="fa fa-user"></i>
                             </div>
-                            @if (canEdit)
-                            {
-                                <div class="d-flex align-items-center ml-2 flex-shrink-0">
-                                    <button type="button" class="btn btn-xs btn-outline-primary radius-1 px-15 py-1 mr-1" title="Chỉnh sửa vai trò" onclick="openEditMemberModal(@m.MemberID, @Model.DigitalSalesID);">
-                                        <i class="fa fa-pencil-alt"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-15 py-1" title="Xóa thành viên" onclick="deleteMemberItem(@m.MemberID, @Model.DigitalSalesID);">
-                                        <i class="fa fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            }
-                        </div>
-                        <div class="pt-2 border-t-1 brc-grey-l3 mt-1">
-                            <div class="d-flex flex-wrap align-items-center" style="gap: 4px;">
-                                @if (m.Roles.Count > 0)
-                                {
-                                    foreach (var r in m.Roles)
+                            <!-- Khối thông tin bên phải (2 dòng) -->
+                            <div class="ds-member-main">
+                                <!-- Dòng 1: Tên thành viên + Icon AM -->
+                                <div class="ds-member-name-row">
+                                    <span class="ds-member-fullname" title="@m.FullName">
+                                        @m.FullName
+                                    </span>
+                                    @if (m.IsAM)
                                     {
-                                        <span class="badge bgc-purple-l3 text-purple-d2 border-1 brc-purple-m3 px-2 py-05 font-bold text-80" title="@r">
-                                            <i class="fa fa-id-badge mr-1 opacity-75"></i>@r
+                                        <span class="ds-member-am-badge" title="@(TSFramework.Libs.Processors.AppProcessor.Messagor.GetMessage("DigitalSalesMember_IsAM_Label") ?? "Được phép cập nhật nội dung")" data-toggle="tooltip">
+                                            <i class="fa fa-check-circle"></i>
                                         </span>
                                     }
-                                }
-                                else
+                                </div>
+                                <!-- Dòng 2: Dưới tên -> Username bên trái & 2 Icon [Sửa][Xóa] bên phải -->
+                                <div class="ds-member-sub-row">
+                                    <span class="ds-member-username" title="@m.UserName">
+                                        @m.UserName
+                                    </span>
+                                    @if (canEdit)
+                                    {
+                                        <div class="ds-member-actions">
+                                            <button type="button" class="ds-member-btn ds-member-btn-edit" title="Chỉnh sửa vai trò" onclick="openEditMemberModal(@m.MemberID, @Model.DigitalSalesID);">
+                                                <i class="fa fa-pencil-alt"></i>
+                                            </button>
+                                            <button type="button" class="ds-member-btn ds-member-btn-delete" title="Xóa thành viên" onclick="deleteMemberItem(@m.MemberID, @Model.DigitalSalesID);">
+                                                <i class="fa fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Danh sách vai trò -->
+                        <div class="ds-member-roles">
+                            @if (m.Roles.Count > 0)
+                            {
+                                foreach (var r in m.Roles)
                                 {
-                                    <span class="badge bgc-purple-l3 text-purple-d2 border-1 brc-purple-m3 px-2 py-05 font-bold text-80">
-                                        <i class="fa fa-id-badge mr-1 opacity-75"></i>Thành viên
+                                    <span class="ds-member-role-badge" title="@r">
+                                        <i class="fa fa-id-badge"></i>@r
                                     </span>
                                 }
-                            </div>
+                            }
+                            else
+                            {
+                                <span class="ds-member-role-badge" title="Thành viên">
+                                    <i class="fa fa-id-badge"></i>Thành viên
+                                </span>
+                            }
                         </div>
                     </div>
                 </div>

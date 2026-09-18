@@ -1,0 +1,286 @@
+/* CenIT TOC CRM - Data Migration Tool Styles */
+
+.dm-card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    border: 1px solid #e0e6ed;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+.dm-header {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.dm-header h5 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+}
+
+.dm-body {
+    padding: 18px;
+    font-size: 14px;
+}
+
+/* Source Type Selector */
+.source-type-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.source-type-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.source-type-option input[type="radio"] {
+    display: none;
+}
+
+.source-type-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+    background: #fdfdfd;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.source-type-card i {
+    font-size: 1.25rem;
+    margin-right: 8px;
+}
+
+.source-type-option input[type="radio"]:checked + .source-type-card.opt-bo {
+    border-color: #d97706;
+    background-color: #fffbeb;
+    color: #b45309;
+    box-shadow: 0 0 0 1px #d97706;
+}
+
+.source-type-option input[type="radio"]:checked + .source-type-card.opt-proj {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+/* Preset checklist pills */
+.preset-badge-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.preset-pill {
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background-color: #e2e8f0;
+    color: #334155;
+    transition: all 0.15s ease;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+.preset-pill:hover {
+    background-color: #0284c7;
+    color: #fff;
+}
+
+.preset-pill i {
+    margin-right: 4px;
+}
+
+/* Status Reference Tags */
+.status-ref-container {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.status-tag {
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    margin: 2px;
+    display: inline-block;
+    transition: all 0.15s ease;
+}
+
+.status-tag:hover {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border-color: #38bdf8;
+}
+
+/* Preview Box */
+.preview-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+}
+
+.preview-empty-state i {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    color: #cbd5e1;
+}
+
+.preview-info-box {
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.preview-stat-card {
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.preview-stat-val {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.preview-stat-lbl {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* Result Box */
+.result-success-box {
+    background-color: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.result-success-header {
+    display: flex;
+    align-items: center;
+    color: #166534;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.result-success-header i {
+    font-size: 1.5rem;
+    margin-right: 8px;
+    color: #15803d;
+}
+
+.result-detail-btn {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 18px;
+    background-color: #16a34a;
+    color: #fff !important;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
+    text-decoration: none !important;
+    margin-top: 10px;
+    transition: background 0.15s ease;
+}
+
+.result-detail-btn:hover {
+    background-color: #15803d;
+    color: #fff !important;
+}
+
+/* Warning list */
+.migration-warnings {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #92400e;
+}
+
+/* Spinner Overlay */
+.dm-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 6px;
+}
+
+.dm-overlay.active {
+    display: flex;
+}
+
+.dm-overlay-text {
+    margin-top: 12px;
+    font-weight: 600;
+    color: #334155;
+    font-size: 15px;
+}
+
+/* Table styling */
+#DSRecentMigrations th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    font-size: 13px;
+    border-bottom: 2px solid #cbd5e1;
+    padding: 8px 10px;
+}
+
+#DSRecentMigrations td {
+    padding: 8px 10px;
+    vertical-align: middle;
+    font-size: 13.5px;
+}

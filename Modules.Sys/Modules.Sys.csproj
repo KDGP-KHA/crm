@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -130,6 +130,8 @@
     <Content Include="Areas\Sys\Views\AppSetting\AppSetting.js" />
     <Content Include="Areas\Sys\Views\BillingCycles\BillingCycles.js" />
     <Content Include="Areas\Sys\Views\Department\Department.js" />
+    <Content Include="Areas\Sys\Views\DataMigration\DataMigration.css" />
+    <Content Include="Areas\Sys\Views\DataMigration\DataMigration.js" />
     <Content Include="Areas\Sys\Views\Function\Function.js" />
     <Content Include="Areas\Sys\Views\Instruct\Instruct.js" />
     <Content Include="Areas\Sys\Views\Job\Job.js" />
@@ -240,6 +242,7 @@
     <Compile Include="Areas\Sys\Controllers\SysPermissionAPIController.cs" />
     <Compile Include="Areas\Sys\Controllers\SysToolController.cs" />
     <Compile Include="Areas\Sys\Controllers\SharedDocumentController.cs" />
+    <Compile Include="Areas\Sys\Controllers\DataMigrationController.cs" />
     <Compile Include="Areas\Sys\Controllers\UserController.cs" />
     <Compile Include="Areas\Sys\Data\AppConfigModel.cs" />
     <Compile Include="Areas\Sys\Data\ChangePasswordModel.cs" />
@@ -305,6 +308,7 @@
     <Content Include="Areas\Sys\Views\AppSetting\_Delete.cshtml" />
     <Content Include="Areas\Sys\Views\AppSetting\_Edit.cshtml" />
     <Content Include="Areas\Sys\Views\Function\Index.cshtml" />
+    <Content Include="Areas\Sys\Views\DataMigration\Index.cshtml" />
     <Content Include="Areas\Sys\Views\Function\_Add.cshtml" />
     <Content Include="Areas\Sys\Views\Function\_Delete.cshtml" />
     <Content Include="Areas\Sys\Views\Function\_Edit.cshtml" />

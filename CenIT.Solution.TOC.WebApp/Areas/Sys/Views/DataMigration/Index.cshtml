@@ -1,0 +1,272 @@
+﻿@using Core.Cate.Models
+@{
+    ViewBag.Title = "Chuyển đổi dữ liệu sang SPDV Số";
+    var recentList = ViewBag.RecentMigrations as List<RecentMigrationItemModel> ?? new List<RecentMigrationItemModel>();
+    var statusList = ViewBag.ActiveStatuses as List<RM_DigitalSalesStatusModel> ?? new List<RM_DigitalSalesStatusModel>();
+}
+
+@section PageTitle {
+    @ViewBag.Title
+}
+
+@section PageAction {
+    <span class="badge badge-lg bgc-purple-l3 text-purple-d2 border-1 brc-purple-m3 mr-2">
+        <i class="fa fa-database mr-1"></i> Migration Tool CRM v2
+    </span>
+    <a href="/Cate/DigitalSales" class="btn btn-light-secondary btn-h-secondary btn-a-secondary border-0 radius-3 py-2 text-600 text-90">
+        <i class="fa fa-arrow-left mr-1"></i> Danh sách SPDV Số
+    </a>
+}
+
+<div class="row mt-2">
+    <!-- CỘT TRÁI: THIẾT LẬP NGUỒN & CHECKLIST TRẠNG THÁI -->
+    <div class="col-12 col-lg-6">
+        <div class="card dm-card position-relative">
+            <!-- Loading Overlay -->
+            <div id="LoadingOverlay" class="dm-overlay">
+                <i class="fa fa-spinner fa-spin fa-3x text-primary"></i>
+                <div id="LoadingOverlayText" class="dm-overlay-text">Đang xử lý...</div>
+            </div>
+
+            <div class="dm-header">
+                <h5><i class="fa fa-cogs mr-2 text-primary"></i> 1. Cấu hình nguồn dữ liệu & Lịch sử chuyển trạng thái</h5>
+            </div>
+            <div class="dm-body">
+                <!-- Chọn loại nguồn -->
+                <div class="form-group mb-3">
+                    <label class="font-bold text-dark mb-1">Loại nguồn chuyển đổi <span class="text-danger">*</span></label>
+                    <div class="source-type-group">
+                        <label class="source-type-option">
+                            <input type="radio" name="SourceType" value="1" checked />
+                            <div class="source-type-card opt-bo">
+                                <i class="fa fa-lightbulb"></i> Cơ hội kinh doanh
+                            </div>
+                        </label>
+                        <label class="source-type-option">
+                            <input type="radio" name="SourceType" value="2" />
+                            <div class="source-type-card opt-proj">
+                                <i class="fa fa-project-diagram"></i> Dự án
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nhập ID Nguồn -->
+                <div class="form-group mb-3">
+                    <label id="SourceIdLabel" for="SourceId" class="font-bold text-dark mb-1">ID Cơ hội <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input type="number" id="SourceId" name="SourceId" class="form-control" placeholder="Nhập ID cơ hội (ví dụ: 166)" min="1" autocomplete="off" />
+                        <div class="input-group-append">
+                            <button type="button" id="BtnPreview" class="btn btn-primary px-3">
+                                <i class="fa fa-search mr-1"></i> Xem trước dữ liệu
+                            </button>
+                        </div>
+                    </div>
+                    <small id="SourceIdHelp" class="form-text text-muted">ID lấy từ URL: /Cate/BusinessOpportunityOverview/Index/{ID}</small>
+                </div>
+
+                <!-- Khởi tạo Lịch sử Chuyển trạng thái -->
+                <div class="form-group mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="ChecklistInput" class="font-bold text-dark mb-0">Khởi tạo Lịch sử Chuyển trạng thái <span class="text-danger">*</span></label>
+                        <button type="button" id="BtnClearChecklist" class="btn btn-link btn-xs text-secondary p-0" title="Xóa trắng danh sách mã">
+                            <i class="fa fa-eraser mr-1"></i>Xóa trắng
+                        </button>
+                    </div>
+                    <input type="text" id="ChecklistInput" name="ChecklistInput" class="form-control font-600 text-primary-d2" placeholder="Dùng mã trạng thái. Nối nhau bằng dấu ; (Ví dụ: UNCAPTURED; APPROACHING)" value="UNCAPTURED; APPROACHING" autocomplete="off" />
+                    <small class="form-text text-muted"><i class="fa fa-info-circle mr-1 text-info"></i>Dùng mã trạng thái. Nối nhau bằng dấu <code>;</code>. Hệ thống sẽ tự động tạo các mốc lịch sử (RM_DigitalSalesTimeline) và quy trình đầu tiên của mỗi trạng thái (RM_DigitalSalesTracking).</small>
+                    
+                    <!-- Preset buttons -->
+                    <div class="mt-2">
+                        <div class="text-secondary text-85 mb-1 font-600">Gợi ý chèn nhanh lịch sử chuyển trạng thái chuẩn:</div>
+                        <div class="preset-badge-group">
+                            <span class="preset-pill" data-preset="UNCAPTURED; APPROACHING">
+                                <i class="fa fa-bolt"></i> Cơ hội chuẩn (UNCAPTURED; APPROACHING)
+                            </span>
+                            <span class="preset-pill" data-preset="UNCAPTURED; APPROACHING; FORMATION; IMPLEMENTING">
+                                <i class="fa fa-bolt"></i> Dự án chuẩn (UNCAPTURED; APPROACHING; FORMATION; IMPLEMENTING)
+                            </span>
+                            <span class="preset-pill" data-preset="UNCAPTURED; APPROACHING; FORMATION; IMPLEMENTING; CONTRACTED; COMPLETED">
+                                <i class="fa fa-bolt"></i> Đầy đủ các bước (UNCAPTURED; APPROACHING; FORMATION; IMPLEMENTING; CONTRACTED; COMPLETED)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bảng mã trạng thái tham khảo -->
+                    <div class="status-ref-container">
+                        <div class="text-secondary text-85 mb-1 font-600">Click mã trạng thái bên dưới để nối thêm (dấu ;):</div>
+                        <div>
+                            @if (statusList != null && statusList.Count > 0)
+                            {
+                                foreach (var st in statusList)
+                                {
+                                    <span class="status-tag" data-code="@st.StatusCode" title="@st.StatusName">
+                                        + @st.StatusCode <span class="text-muted">(@st.StatusName)</span>
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="status-tag" data-code="UNCAPTURED">+ UNCAPTURED (Chưa nắm bắt)</span>
+                                <span class="status-tag" data-code="APPROACHING">+ APPROACHING (Đang tiếp cận)</span>
+                                <span class="status-tag" data-code="FORMATION">+ FORMATION (Hình thành dự án)</span>
+                                <span class="status-tag" data-code="IMPLEMENTING">+ IMPLEMENTING (Triển khai dự án)</span>
+                                <span class="status-tag" data-code="CONTRACTED">+ CONTRACTED (Đã ký HĐ)</span>
+                                <span class="status-tag" data-code="COMPLETED">+ COMPLETED (Hoàn thành)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút thực hiện Chuyển đổi -->
+                <div class="pt-2 border-top border-200">
+                    <button type="button" id="BtnExecute" class="btn btn-success btn-block py-2 text-600 font-bold" disabled>
+                        <i class="fa fa-exchange-alt mr-2"></i> BẮT ĐẦU CHUYỂN ĐỔI DỮ LIỆU
+                    </button>
+                    <div class="text-muted text-center text-85 mt-2">
+                        <i class="fa fa-shield-alt mr-1"></i> Quá trình convert đảm bảo toàn vẹn giao dịch và đồng bộ tệp an toàn.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CỘT PHẢI: XEM TRƯỚC NGUỒN & KẾT QUẢ CHUYỂN ĐỔI -->
+    <div class="col-12 col-lg-6">
+        <div class="card dm-card">
+            <div class="dm-header">
+                <h5><i class="fa fa-eye mr-2 text-info"></i> 2. Thông tin xem trước & Kết quả</h5>
+            </div>
+            <div class="dm-body">
+                <!-- Trạng thái trống khi chưa bấm xem trước -->
+                <div id="PreviewEmpty" class="preview-empty-state">
+                    <i class="fa fa-search-plus d-block"></i>
+                    <div class="font-600 text-105 mb-1">Chưa có dữ liệu xem trước</div>
+                    <div>Vui lòng chọn loại nguồn, nhập ID và bấm nút <strong>"Xem trước dữ liệu"</strong></div>
+                </div>
+
+                <!-- Box thông tin xem trước khi có dữ liệu -->
+                <div id="PreviewContent" style="display: none;">
+                    <!-- Cảnh báo nếu đã convert -->
+                    <div id="PrevWarningConverted" class="alert alert-warning py-2 mb-3" style="display: none;">
+                        <i class="fa fa-exclamation-triangle mr-1"></i>
+                        <strong>Chú ý:</strong> Bản ghi này đã được chuyển đổi trước đó.
+                        <a id="PrevConvertedLink" href="#" target="_blank" class="font-bold ml-1 text-primary">Xem SPDV Số đã tạo</a>
+                    </div>
+
+                    <div class="preview-info-box">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <span class="badge badge-secondary mr-1" id="PrevCode">---</span>
+                                <span class="font-bold text-dark text-105" id="PrevName">Tên nguồn</span>
+                            </div>
+                            <span class="badge badge-info" id="PrevStatus">Trạng thái</span>
+                        </div>
+
+                        <div class="text-90 text-dark-m2 mb-1">
+                            <i class="fa fa-building text-secondary mr-1"></i> Khách hàng: <strong id="PrevCustomer">---</strong>
+                        </div>
+                        <div class="text-90 text-dark-m2">
+                            <i class="fa fa-user-tie text-secondary mr-1"></i> AM phụ trách: <strong id="PrevAM">---</strong>
+                        </div>
+
+                        <!-- Thống kê chi tiết các thành phần -->
+                        <div class="preview-grid">
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-val text-primary" id="StatMembers">0</div>
+                                <div class="preview-stat-lbl"><i class="fa fa-users mr-1"></i>Thành viên</div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-val text-success" id="StatProducts">0</div>
+                                <div class="preview-stat-lbl"><i class="fa fa-box mr-1"></i>Sản phẩm</div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-val text-warning" id="StatDiscussions">0</div>
+                                <div class="preview-stat-lbl"><i class="fa fa-comments mr-1"></i>Trao đổi</div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-val text-danger" id="StatFiles">0</div>
+                                <div class="preview-stat-lbl"><i class="fa fa-paperclip mr-1"></i>Tệp tin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Box kết quả thực hiện thành công -->
+                <div id="ResultContainer" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BẢNG LỊCH SỬ CÁC LẦN CHUYỂN ĐỔI GẦN ĐÂY -->
+<div class="card dm-card mt-2">
+    <div class="dm-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fa fa-history mr-2 text-secondary"></i> Lịch sử chuyển đổi dữ liệu gần đây</h5>
+        <button type="button" id="BtnRefreshRecent" class="btn btn-xs btn-light-secondary radius-2">
+            <i class="fa fa-sync-alt mr-1"></i> Tải lại
+        </button>
+    </div>
+    <div class="card-body p-2 table-responsive-md">
+        <table id="DSRecentMigrations" class="table table-hover table-striped table-bordered mb-0" width="100%">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width: 45px;">STT</th>
+                    <th style="width: 150px;">Mã SPDV Số</th>
+                    <th class="text-center" style="width: 100px;">Nguồn</th>
+                    <th class="text-center" style="width: 80px;">ID Nguồn</th>
+                    <th>Tên hồ sơ SPDV Số</th>
+                    <th>Khách hàng</th>
+                    <th class="text-center" style="width: 130px;">Thời gian</th>
+                    <th class="text-center" style="width: 110px;">Người thực hiện</th>
+                    <th class="text-center" style="width: 85px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (recentList.Count > 0)
+                {
+                    int idx = 1;
+                    foreach (var item in recentList)
+                    {
+                        <tr>
+                            <td class="text-center">@idx</td>
+                            <td><strong class="text-primary-d2">@item.DigitalSalesCode</strong></td>
+                            <td class="text-center">
+                                @if (item.SourceType == 1)
+                                {
+                                    <span class="badge badge-warning text-dark"><i class="fa fa-lightbulb mr-1"></i>Cơ hội</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-primary"><i class="fa fa-project-diagram mr-1"></i>Dự án</span>
+                                }
+                            </td>
+                            <td class="text-center">@item.SourceId</td>
+                            <td>@item.DigitalSalesName</td>
+                            <td>@item.CustomerName</td>
+                            <td class="text-center text-muted text-90">@item.CreatedDateStr</td>
+                            <td class="text-center text-90">@item.CreatedBy</td>
+                            <td class="text-center">
+                                <a href="/Cate/DigitalSales/Detail/@item.DigitalSalesID" target="_blank" class="btn btn-xs btn-outline-primary radius-2" title="Xem chi tiết">
+                                    <i class="fa fa-eye mr-1"></i>Xem
+                                </a>
+                            </td>
+                        </tr>
+                        idx++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-3">Chưa có dữ liệu chuyển đổi gần đây.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section BottomScript {
+    <link rel="stylesheet" href="~/Areas/Sys/Views/DataMigration/DataMigration.css?v=@DateTime.Now.Ticks" />
+    <script src="~/Areas/Sys/Views/DataMigration/DataMigration.js?v=@DateTime.Now.Ticks"></script>
+}

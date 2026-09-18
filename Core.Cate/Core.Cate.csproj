@@ -146,6 +146,7 @@
     <Compile Include="Biz\RM_TaskStatusBiz.cs" />
     <Compile Include="Biz\RM_TaskTypeBiz.cs" />
     <Compile Include="Biz\RM_DigitalSalesBiz.cs" />
+    <Compile Include="Biz\RM_DataMigrationBiz.cs" />
     <Compile Include="Biz\RM_DigitalSalesWorkflowBiz.cs" />
     <Compile Include="Caches\RM_DigitalSalesCache.cs" />
     <Compile Include="Caches\RM_DigitalSalesWorkflowCache.cs" />
@@ -256,6 +257,7 @@
     <Compile Include="Models\ProjectExportRow.cs" />
     <Compile Include="Models\ProjectOverviewModel.cs" />
     <Compile Include="Models\RM_DigitalSalesModel.cs" />
+    <Compile Include="Models\RM_DataMigrationModel.cs" />
     <Compile Include="Models\RM_DigitalSalesMemberModel.cs" />
     <Compile Include="Models\RM_DigitalSalesProductModel.cs" />
     <Compile Include="Models\RM_DigitalSalesSearchModel.cs" />

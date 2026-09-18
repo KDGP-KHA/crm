@@ -1,4 +1,4 @@
-﻿# HƯỚNG DẪN & QUY TRÌNH CHUYỂN ĐỔI DỮ LIỆU (CONVERT DATA SPECIFICATION)
+# HƯỚNG DẪN & QUY TRÌNH CHUYỂN ĐỔI DỮ LIỆU (CONVERT DATA SPECIFICATION)
 ## Chuyển đổi từ Quản lý Dự án & Cơ hội sang Kinh doanh Sản phẩm Dịch vụ số (CRM v2)
 
 ---
@@ -116,7 +116,7 @@ Trước khi insert dữ liệu vào `RM_DigitalSalesActivity.Content`, văn b�
 ### 5.1. Thu thập dữ liệu nguồn (Source Data Query)
 ```sql
 -- 1. Lấy trao đổi từ Cơ hội
-SELECT ExchangeHistoryID, ExchangeDate, CreatedBy, 
+SELECT ExchangeHistoryID, ExchangeDate, CreatedBy,
        ISNULL(u.FullName, e.CreatedBy) AS CreatedByName,
        ExchangeContent
 FROM RM_ExchangeHistory e
@@ -288,4 +288,39 @@ Tuyệt đối **KHÔNG gán cứng `Thành viên dự án`** cho toàn bộ nh�
    - Chuyển đổi toàn bộ 7 trao đổi từ `RM_ExchangeHistory` kèm người tạo và ngày trao đổi nguyên bản.
    - Di chuyển tệp báo giá an toàn: `bao-gia-phan-mem-dc-40-thon-loc-tho_24072026095229.xlsx` từ `Source_Prod/Contents/imgs/` sang `Contents/Uploads/DigitalSales/202609/`, đối chiếu toàn vẹn 29,896 bytes và xóa tệp cũ.
 
+---
 
+## 11. QUY CHUẨN KHỞI TẠO LỊCH SỬ CHUYỂN TRẠNG THÁI TRÊN CÔNG CỤ CHUYỂN ĐỔI (CRM v2)
+
+### 11.1. Cấu trúc nhập liệu: Dùng mã trạng thái, nối nhau bằng dấu `;`
+Trên giao diện Chuyển đổi dữ liệu (`/Sys/DataMigration`), trường **Khởi tạo Lịch sử Chuyển trạng thái** sử dụng các mã trạng thái (`StatusCode` từ `RM_DigitalSalesStatus`), được nối nhau bằng dấu chấm phẩy `;` theo đúng thứ tự thời gian chuyển đổi.
+
+1. **Cơ hội kinh doanh chuẩn:**
+   - Chuỗi mã: `UNCAPTURED; APPROACHING`
+   - Ý nghĩa: Bắt đầu từ mốc *Chưa nắm bắt* -> chuyển sang *Đang tiếp cận*.
+   - Mốc lịch sử (`RM_DigitalSalesTimeline`):
+     - Mốc 1: Khởi tạo Cơ hội (Chưa nắm bắt)
+     - Mốc 2: Chuyển trạng thái sang Đang tiếp cận
+   - Quy trình (`RM_DigitalSalesTracking`):
+     - Trạng thái 1 (`UNCAPTURED`): Quy trình đầu tiên (Process 4) -> Trạng thái: Hoàn thành.
+     - Trạng thái 2 (`APPROACHING`): Quy trình đầu tiên (Process 5) -> Trạng thái: Đang thực hiện. Không thêm tiến trình con.
+
+2. **Dự án chuẩn (chuyển từ Cơ hội lên Dự án):**
+   - Chuỗi mã: `UNCAPTURED; APPROACHING; FORMATION; IMPLEMENTING`
+   - Ý nghĩa: Cơ hội Chưa nắm bắt -> Cơ hội Đang tiếp cận -> Dự án Hình thành dự án -> Dự án Triển khai dự án.
+   - Mốc lịch sử (`RM_DigitalSalesTimeline`):
+     - Mốc 1: Khởi tạo hồ sơ ban đầu (Chưa nắm bắt)
+     - Mốc 2: Chuyển trạng thái sang Đang tiếp cận
+     - Mốc 3: Chuyển trạng thái sang Hình thành dự án (Chuyển sang Dự án)
+     - Mốc 4: Chuyển trạng thái sang Triển khai dự án
+   - Quy trình (`RM_DigitalSalesTracking`):
+     - Khởi tạo quy trình đầu tiên của mỗi trạng thái (Process 4, 5, 6, 7). Không thêm tiến trình con (`ProgressID = NULL`).
+
+3. **Danh mục mã trạng thái hợp lệ trong hệ thống:**
+   - `UNCAPTURED`: Chưa nắm bắt (BusinessType = 1)
+   - `APPROACHING`: Đang tiếp cận (BusinessType = 1)
+   - `FORMATION`: Giai đoạn Hình thành dự án (BusinessType = 2)
+   - `IMPLEMENTING`: Triển khai dự án (BusinessType = 2)
+   - `CONTRACTED`: Đã ký HĐ (BusinessType = 2)
+   - `COMPLETED`: Hoàn thành (BusinessType = 2)
+   - `CANCELLED`: Hủy (BusinessType = 2)

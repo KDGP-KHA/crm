@@ -1,0 +1,185 @@
+/* CenIT TOC CRM - Digital Sales Detail Member Cards Styles */
+
+.ds-member-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #dbeafe !important;
+    border-radius: 8px !important;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+    padding: 12px 14px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ds-member-card:hover {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+    border-color: #93c5fd !important;
+    transform: translateY(-1px);
+}
+
+/* Phần trên của Card: Avatar bên trái + Khối thông tin 2 dòng bên phải */
+.ds-member-top {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: 10px;
+}
+
+.ds-member-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    background-color: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    border: 1px solid #bfdbfe;
+}
+
+.ds-member-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Dòng 1: Tên thành viên + Tick AM (Được trọn vẹn bề ngang) */
+.ds-member-name-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 3px;
+}
+
+.ds-member-fullname {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 14.5px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.ds-member-am-badge {
+    color: #16a34a;
+    margin-left: 6px;
+    flex-shrink: 0;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Dòng 2: Ngay dưới tên -> Username bên trái & 2 Icon [Sửa][Xóa] bên phải */
+.ds-member-sub-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    gap: 6px;
+}
+
+.ds-member-username {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Cụm 2 nút thao tác Sửa / Xóa (Nằm gọn gàng dưới tên, bên cạnh username) */
+.ds-member-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    gap: 4px;
+}
+
+.ds-member-btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-size: 11px;
+    line-height: 1;
+    transition: all 0.15s ease-in-out;
+    border: 1px solid transparent;
+}
+
+.ds-member-btn-edit {
+    color: #2563eb;
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.ds-member-btn-edit:hover {
+    color: #ffffff;
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.ds-member-btn-delete {
+    color: #dc2626;
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
+.ds-member-btn-delete:hover {
+    color: #ffffff;
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
+
+/* Phần hiển thị danh sách vai trò (Tags/Badges) */
+.ds-member-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid #f1f5f9;
+    width: 100%;
+}
+
+.ds-member-role-badge {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ds-member-role-badge i {
+    opacity: 0.8;
+    margin-right: 4px;
+    font-size: 10.5px;
+    flex-shrink: 0;
+}
