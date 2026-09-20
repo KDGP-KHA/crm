@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -104,17 +104,30 @@ WHERE bo.BusinessOpportunityID = @ID AND bo.IsDeleted = 0";
                         using (var cmd = conn.CreateCommand())
                         {
                             cmd.CommandText = @"
-SELECT u.FullName, u.UserName, r.RoleName
-FROM RM_SalesTeamMembers stm
-INNER JOIN RM_Roles r ON stm.RoleID = r.RoleID
-INNER JOIN Sys_Users u ON stm.EmployeeID = u.UserID
-WHERE stm.BusinessOpportunityID = @ID AND stm.IsDeleted = 0";
+SELECT u.FullName, u.UserName,
+       STUFF((
+           SELECT DISTINCT ', ' + r.RoleName
+           FROM RM_SalesTeamMembers stm2
+           INNER JOIN RM_Roles r ON (';' + ISNULL(stm2.RoleID, '') + ';' LIKE '%;' + CAST(r.RoleID AS VARCHAR(10)) + ';%')
+           WHERE stm2.BusinessOpportunityID = @ID AND stm2.EmployeeID = u.UserID AND stm2.IsDeleted = 0 AND r.IsDeleted = 0
+           FOR XML PATH(''), TYPE
+       ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS RoleNames
+FROM (
+    SELECT DISTINCT stm.EmployeeID
+    FROM RM_SalesTeamMembers stm
+    WHERE stm.BusinessOpportunityID = @ID AND stm.IsDeleted = 0
+) m
+INNER JOIN Sys_Users u ON m.EmployeeID = u.UserID
+ORDER BY u.FullName";
                             cmd.Parameters.Add("@ID", SqlDbType.Int).Value = sourceId;
                             using (var r = cmd.ExecuteReader())
                             {
                                 while (r.Read())
                                 {
-                                    result.MembersSummary.Add($"{r["FullName"]} ({r["UserName"]}) - {r["RoleName"]}");
+                                    string roles = r["RoleNames"] != DBNull.Value && !string.IsNullOrWhiteSpace(r["RoleNames"].ToString())
+                                        ? r["RoleNames"].ToString()
+                                        : "Thành viên";
+                                    result.MembersSummary.Add($"{r["FullName"]} ({r["UserName"]}) - {roles}");
                                 }
                             }
                             result.MemberCount = result.MembersSummary.Count;
@@ -231,7 +244,7 @@ SELECT p.ProjectID, p.ProjectName, p.CustomerID, c.CustomerName,
        (SELECT TOP 1 u.FullName FROM RM_ProjectMember pm 
         INNER JOIN RM_ProductProject pp ON pm.ProductProjectID = pp.ProductProjectID 
         INNER JOIN Sys_Users u ON pm.Employee_ID = u.UserID 
-        WHERE pp.ProjectID = p.ProjectID AND pm.RoleID = '5' AND pm.IsDeleted = 0) AS AMName,
+        WHERE pp.ProjectID = p.ProjectID AND (';' + ISNULL(pm.RoleID, '') + ';' LIKE '%;5;%') AND pm.IsDeleted = 0) AS AMName,
        (SELECT ISNULL(SUM(pp.ExpectedRevenue), 0) FROM RM_ProductProject pp WHERE pp.ProjectID = p.ProjectID AND pp.IsDeleted = 0) AS ExpectedRevenue
 FROM RM_Project p
 LEFT JOIN RM_Customer c ON p.CustomerID = c.CustomerID
@@ -266,18 +279,32 @@ WHERE p.ProjectID = @ID AND p.IsDeleted = 0";
                         using (var cmd = conn.CreateCommand())
                         {
                             cmd.CommandText = @"
-SELECT DISTINCT u.FullName, u.UserName, r.RoleName
-FROM RM_ProjectMember pm
-INNER JOIN RM_ProductProject pp ON pm.ProductProjectID = pp.ProductProjectID
-INNER JOIN RM_Roles r ON pm.RoleID = r.RoleID
-INNER JOIN Sys_Users u ON pm.Employee_ID = u.UserID
-WHERE pp.ProjectID = @ID AND pm.IsDeleted = 0";
+SELECT u.FullName, u.UserName,
+       STUFF((
+           SELECT DISTINCT ', ' + r.RoleName
+           FROM RM_ProjectMember pm2
+           INNER JOIN RM_ProductProject pp2 ON pm2.ProductProjectID = pp2.ProductProjectID
+           INNER JOIN RM_Roles r ON (';' + ISNULL(pm2.RoleID, '') + ';' LIKE '%;' + CAST(r.RoleID AS VARCHAR(10)) + ';%')
+           WHERE pp2.ProjectID = @ID AND pm2.Employee_ID = u.UserID AND pm2.IsDeleted = 0 AND r.IsDeleted = 0
+           FOR XML PATH(''), TYPE
+       ).value('.', 'NVARCHAR(MAX)'), 1, 2, '') AS RoleNames
+FROM (
+    SELECT DISTINCT pm.Employee_ID
+    FROM RM_ProjectMember pm
+    INNER JOIN RM_ProductProject pp ON pm.ProductProjectID = pp.ProductProjectID
+    WHERE pp.ProjectID = @ID AND pm.IsDeleted = 0
+) m
+INNER JOIN Sys_Users u ON m.Employee_ID = u.UserID
+ORDER BY u.FullName";
                             cmd.Parameters.Add("@ID", SqlDbType.Int).Value = sourceId;
                             using (var r = cmd.ExecuteReader())
                             {
                                 while (r.Read())
                                 {
-                                    result.MembersSummary.Add($"{r["FullName"]} ({r["UserName"]}) - {r["RoleName"]}");
+                                    string roles = r["RoleNames"] != DBNull.Value && !string.IsNullOrWhiteSpace(r["RoleNames"].ToString())
+                                        ? r["RoleNames"].ToString()
+                                        : "Thành viên";
+                                    result.MembersSummary.Add($"{r["FullName"]} ({r["UserName"]}) - {roles}");
                                 }
                             }
                             result.MemberCount = result.MembersSummary.Count;
@@ -467,7 +494,7 @@ SELECT bo.OpportunityName, bo.CustomerID, bo.ContactPerson_ID,
        ISNULL(bo.ExpectedValue, 0) * 1000000.0 AS ExpectedRevenue,
        ISNULL(bo.ClosingProbability, 50.0) AS ClosingProb,
        bo.Description, bo.CreatedDate, bo.CreatedBy, bo.LastModifiedDate, bo.LastModifiedBy,
-       ISNULL(u.UserID, 0) AS AssignedUserID
+       ISNULL((SELECT TOP 1 stm.EmployeeID FROM RM_SalesTeamMembers stm WHERE stm.BusinessOpportunityID = bo.BusinessOpportunityID AND (';' + ISNULL(stm.RoleID, '') + ';' LIKE '%;5;%') AND stm.IsDeleted = 0), ISNULL(u.UserID, 0)) AS AssignedUserID
 FROM RM_BusinessOpportunity bo
 LEFT JOIN Sys_Users u ON bo.CreatedBy = u.UserName
 WHERE bo.BusinessOpportunityID = @ID";
@@ -542,19 +569,26 @@ SELECT SCOPE_IDENTITY();";
 INSERT INTO RM_DigitalSalesMember (DigitalSalesID, UserID, RoleTitle, IsAM, Note, IsActive, CreatedDate, CreatedBy)
 SELECT 
     @NewSalesID,
-    stm.EmployeeID,
-    r.RoleName,
-    CASE WHEN stm.RoleID = 5 THEN 1 ELSE 0 END,
-    CASE WHEN stm.RoleID = 5 THEN N'AM phụ trách' ELSE N'Chuyển từ Cơ hội ' + CAST(@SourceID AS VARCHAR(10)) END,
+    m.EmployeeID,
+    LEFT(ISNULL(STUFF((
+        SELECT DISTINCT ', ' + r.RoleName
+        FROM RM_SalesTeamMembers stm2
+        INNER JOIN RM_Roles r ON (';' + ISNULL(stm2.RoleID, '') + ';' LIKE '%;' + CAST(r.RoleID AS VARCHAR(10)) + ';%')
+        WHERE stm2.BusinessOpportunityID = @SourceID AND stm2.EmployeeID = m.EmployeeID AND stm2.IsDeleted = 0 AND r.IsDeleted = 0
+        FOR XML PATH(''), TYPE
+    ).value('.', 'NVARCHAR(MAX)'), 1, 2, ''), N'Thành viên'), 150),
+    MAX(CASE WHEN ';' + ISNULL(m.RoleID, '') + ';' LIKE '%;5;%' THEN 1 ELSE 0 END),
+    MAX(CASE WHEN ';' + ISNULL(m.RoleID, '') + ';' LIKE '%;5;%' THEN N'AM phụ trách' ELSE N'Chuyển từ Cơ hội ' + CAST(@SourceID AS VARCHAR(10)) END),
     1,
-    stm.CreatedDate,
-    stm.CreatedBy
-FROM RM_SalesTeamMembers stm
-INNER JOIN RM_Roles r ON stm.RoleID = r.RoleID
-WHERE stm.BusinessOpportunityID = @SourceID AND stm.IsDeleted = 0";
+    MIN(m.CreatedDate),
+    MIN(m.CreatedBy)
+FROM RM_SalesTeamMembers m
+WHERE m.BusinessOpportunityID = @SourceID AND m.IsDeleted = 0
+GROUP BY m.EmployeeID";
                                     cmd.Parameters.Add("@NewSalesID", SqlDbType.Int).Value = newSalesId;
                                     cmd.Parameters.Add("@SourceID", SqlDbType.Int).Value = model.SourceID;
                                     int memRows = cmd.ExecuteNonQuery();
+                                    result.MigratedMembers = memRows;
                                     result.StepLogs.Add($"[3/7] Đã ánh xạ {memRows} thành viên với vai trò chính xác từ RM_Roles");
                                 }
 
@@ -615,7 +649,7 @@ WHERE ps.ProductServiceID IN ({inClause})";
 SELECT p.ProjectName, p.CustomerID, bo.ContactPerson_ID,
        (SELECT ISNULL(SUM(pp.ExpectedRevenue), 0) FROM RM_ProductProject pp WHERE pp.ProjectID = p.ProjectID AND pp.IsDeleted = 0) AS ExpectedRevenue,
        p.Note AS Description, p.CreatedDate, p.CreatedBy, p.LastModifiedDate, p.LastModifiedBy,
-       ISNULL((SELECT TOP 1 pm.Employee_ID FROM RM_ProjectMember pm INNER JOIN RM_ProductProject pp ON pm.ProductProjectID = pp.ProductProjectID WHERE pp.ProjectID = p.ProjectID AND pm.RoleID = '5' AND pm.IsDeleted = 0), 0) AS AssignedUserID
+       ISNULL((SELECT TOP 1 pm.Employee_ID FROM RM_ProjectMember pm INNER JOIN RM_ProductProject pp ON pm.ProductProjectID = pp.ProductProjectID WHERE pp.ProjectID = p.ProjectID AND (';' + ISNULL(pm.RoleID, '') + ';' LIKE '%;5;%') AND pm.IsDeleted = 0), 0) AS AssignedUserID
 FROM RM_Project p
 LEFT JOIN RM_BusinessOpportunity bo ON p.BusinessOpportunityID = bo.BusinessOpportunityID
 WHERE p.ProjectID = @ID";
@@ -689,28 +723,30 @@ INSERT INTO RM_DigitalSalesMember (DigitalSalesID, UserID, RoleTitle, IsAM, Note
 SELECT 
     @NewSalesID,
     pm.Employee_ID,
-    STUFF((
-        SELECT ', ' + r2.RoleName
+    LEFT(ISNULL(STUFF((
+        SELECT DISTINCT ', ' + r2.RoleName
         FROM RM_ProjectMember pm2
-        INNER JOIN RM_Roles r2 ON pm2.RoleID = r2.RoleID
-        WHERE pm2.ProductProjectID = pm.ProductProjectID 
+        INNER JOIN RM_ProductProject pp2 ON pm2.ProductProjectID = pp2.ProductProjectID
+        INNER JOIN RM_Roles r2 ON (';' + ISNULL(pm2.RoleID, '') + ';' LIKE '%;' + CAST(r2.RoleID AS VARCHAR(10)) + ';%')
+        WHERE pp2.ProjectID = @SourceID 
           AND pm2.Employee_ID = pm.Employee_ID
           AND pm2.IsDeleted = 0
+          AND r2.IsDeleted = 0
         FOR XML PATH(''), TYPE
-    ).value('.', 'NVARCHAR(MAX)'), 1, 2, ''),
-    MAX(CASE WHEN pm.RoleID = '5' THEN 1 ELSE 0 END),
-    N'Chuyển từ Dự án ' + CAST(@SourceID AS VARCHAR(10)),
+    ).value('.', 'NVARCHAR(MAX)'), 1, 2, ''), N'Thành viên'), 150),
+    MAX(CASE WHEN ';' + ISNULL(pm.RoleID, '') + ';' LIKE '%;5;%' THEN 1 ELSE 0 END),
+    MAX(CASE WHEN ';' + ISNULL(pm.RoleID, '') + ';' LIKE '%;5;%' THEN N'AM phụ trách' ELSE N'Chuyển từ Dự án ' + CAST(@SourceID AS VARCHAR(10)) END),
     1,
     MIN(pm.CreatedDate),
     MIN(pm.CreatedBy)
 FROM RM_ProjectMember pm
 INNER JOIN RM_ProductProject pp ON pm.ProductProjectID = pp.ProductProjectID
-INNER JOIN RM_Roles r ON pm.RoleID = r.RoleID
 WHERE pp.ProjectID = @SourceID AND pm.IsDeleted = 0
-GROUP BY pm.ProductProjectID, pm.Employee_ID";
+GROUP BY pm.Employee_ID";
                                     cmd.Parameters.Add("@NewSalesID", SqlDbType.Int).Value = newSalesId;
                                     cmd.Parameters.Add("@SourceID", SqlDbType.Int).Value = model.SourceID;
                                     int memRows = cmd.ExecuteNonQuery();
+                                    result.MigratedMembers = memRows;
                                     result.StepLogs.Add($"[3/7] Đã ánh xạ {memRows} thành viên dự án và chuẩn hóa vai trò từ RM_Roles");
                                 }
 
