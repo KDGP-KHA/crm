@@ -1171,7 +1171,23 @@ VALUES (@SalesID, 1, @Content, @Attachments, @ActionDate, @ActionBy, @ActionByNa
                                 }
                             }
 
-                            result.StepLogs.Add($"[7/7] Đã chuyển đổi {migratedActs} hoạt động/trao đổi và di chuyển an toàn {migratedFiles} tệp đính kèm");
+                            // Cập nhật ActionTime của hồ sơ theo ngày trao đổi cuối cùng
+                            using (var cmdUpdateActionTime = conn.CreateCommand())
+                            {
+                                cmdUpdateActionTime.Transaction = tran;
+                                cmdUpdateActionTime.CommandText = @"
+UPDATE RM_DigitalSales
+SET ActionTime = ISNULL((
+    SELECT MAX(ActionDate)
+    FROM RM_DigitalSalesActivity
+    WHERE DigitalSalesID = @SalesID AND IsDeleted = 0
+), ActionTime)
+WHERE DigitalSalesID = @SalesID";
+                                cmdUpdateActionTime.Parameters.Add("@SalesID", SqlDbType.Int).Value = newSalesId;
+                                cmdUpdateActionTime.ExecuteNonQuery();
+                            }
+
+                            result.StepLogs.Add($"[7/7] Đã chuyển đổi {migratedActs} hoạt động/trao đổi và cập nhật mốc ActionTime theo trao đổi cuối cùng");
 
                             tran.Commit();
 
