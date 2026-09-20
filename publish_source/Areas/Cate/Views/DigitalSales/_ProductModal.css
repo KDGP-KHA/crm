@@ -1,16 +1,61 @@
 #modalProduct .select2-container--default .select2-selection--single {
-        height: 38px !important;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-    }
-    #modalProduct .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 36px !important;
-        font-size: 0.9rem;
-        padding-left: 0.75rem;
-    }
-    #modalProduct .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px !important;
-    }
-    #modalProduct .select2-container {
-        width: 100% !important;
-    }
+    height: 38px !important;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+#modalProduct .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px !important;
+    font-size: 0.9rem;
+    padding-left: 0.75rem;
+}
+
+#modalProduct .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+}
+
+#modalProduct .product-detail-select-sm + .select2-container .select2-selection--single {
+    height: 31px !important;
+}
+
+#modalProduct .product-detail-select-sm + .select2-container .select2-selection--single .select2-selection__rendered {
+    line-height: 29px !important;
+    font-size: 0.875rem;
+    padding-left: 0.5rem;
+}
+
+#modalProduct .product-detail-select-sm + .select2-container .select2-selection--single .select2-selection__arrow {
+    height: 29px !important;
+}
+
+#modalProduct .select2-container {
+    width: 100% !important;
+}
+
+#modalProduct .product-detail-select-container-sm .select2-selection--single {
+    height: 31px !important;
+}
+
+#modalProduct .product-detail-select-container-sm .select2-selection--single .select2-selection__rendered {
+    line-height: 29px !important;
+    font-size: 0.875rem;
+    padding-left: 0.5rem;
+}
+
+#modalProduct .product-detail-select-container-sm .select2-selection--single .select2-selection__arrow {
+    height: 29px !important;
+}
+
+#modalProduct .product-date-input {
+    padding-right: 2rem;
+    cursor: pointer;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 448 512'%3E%3Cpath fill='%236c757d' d='M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H64C28.7 64 0 92.7 0 128v16 48V448c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V192 144 128c0-35.3-28.7-64-64-64H344V24c0-13.3-10.7-24-24-24s-24 10.7-24 24V64H152V24zM48 192H400V448c0 8.8-7.2 16-16 16H64c-8.8 0-16-7.2-16-16V192z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 0.875rem 1rem;
+}
+
+.datepicker.datepicker-dropdown.dropdown-menu {
+    z-index: 1080 !important;
+}

@@ -29,10 +29,37 @@
 !dlls/**
 
 # ==========================================
-# Uploads and temporary agent files
+# Uploads, attachments, logs and temporary files
 # ==========================================
 [Cc]ontents/[Uu]ploads/
 **/[Cc]ontents/[Uu]ploads/**
+[Cc]ontents/[Ll]ogs/
+**/[Cc]ontents/[Ll]ogs/**
+[Cc]ontents/[Jj]ob[Ll]ogs/
+**/[Cc]ontents/[Jj]ob[Ll]ogs/**
+[Cc]ontents/[Ii]mport[Tt]emp/
+**/[Cc]ontents/[Ii]mport[Tt]emp/**
+[Cc]ontents/[Ff]iles/[Ee][Ff]orm/
+**/[Cc]ontents/[Ff]iles/[Ee][Ff]orm/**
+[Cc]ontents/[Ff]iles/[Nn]ew[Rr]egistrations/
+**/[Cc]ontents/[Ff]iles/[Nn]ew[Rr]egistrations/**
+[Cc]ontents/imgs/avatars/
+**/[Cc]ontents/imgs/avatars/**
+[Cc]ontents/imgs/news/
+**/[Cc]ontents/imgs/news/**
+[Cc]ontents/imgs/comment/
+**/[Cc]ontents/imgs/comment/**
+[Cc]ontents/imgs/log/
+**/[Cc]ontents/imgs/log/**
+[Cc]ontents/imgs/task/
+**/[Cc]ontents/imgs/task/**
+[Cc]ontents/imgs/banners/
+**/[Cc]ontents/imgs/banners/**
+[Cc]ontents/imgs/*.docx
+[Cc]ontents/imgs/*.xlsx
+[Cc]ontents/imgs/*.pdf
+**/ckfinder/core/connector/aspx/Images/**
+**/Contents/File/ListUC.xlsx
 .agents/scratch/
 scratch/
 .agents/*

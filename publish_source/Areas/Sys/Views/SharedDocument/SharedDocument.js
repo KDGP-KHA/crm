@@ -85,6 +85,18 @@ function escapeHtml(text) {
     return text.toString().replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 
+function formatSharedDocumentDate(value) {
+    if (!value) return "";
+
+    var millisecondsMatch = /\/Date\((-?\d+)/.exec(value.toString());
+    var date = millisecondsMatch ? new Date(parseInt(millisecondsMatch[1], 10)) : new Date(value);
+    if (isNaN(date.getTime())) return value.toString();
+
+    function pad(number) { return number < 10 ? "0" + number : number; }
+    return pad(date.getDate()) + "/" + pad(date.getMonth() + 1) + "/" + date.getFullYear() +
+        " " + pad(date.getHours()) + ":" + pad(date.getMinutes());
+}
+
 function initTableSharedDocument() {
     _tableSharedDocument = $("#DSSharedDocument").DataTable({
         "responsive": true,
@@ -163,7 +175,7 @@ function initTableSharedDocument() {
                 "className": "text-left",
                 "render": function (data, type, row) {
                     var safeUploader = escapeHtml(data || "");
-                    var safeDate = escapeHtml(row.CreatedDateFormatted || (row.CreatedDate ? row.CreatedDate : ""));
+                    var safeDate = escapeHtml(formatSharedDocumentDate(row.CreatedDateFormatted || row.CreatedDate));
                     return '<div><i class="fa fa-user text-grey-m1 mr-1"></i><span class="font-bold">' + safeUploader + '</span></div>' +
                            '<div class="text-secondary text-85"><i class="far fa-clock mr-1"></i>' + safeDate + '</div>';
                 }
@@ -203,6 +215,10 @@ function initTableSharedDocument() {
             }
         ],
         "drawCallback": function () {
+            $("#DSSharedDocument a[href*='/SharedDocument/Download/']").attr("title", "Tải về");
+            $("#DSSharedDocument [data-modal-id='DetailSharedDocument']").attr("title", "Chi tiết");
+            $("#DSSharedDocument [data-modal-id='EditSharedDocument']").attr("title", "Chỉnh sửa");
+            $("#DSSharedDocument [data-modal-id='DeleteSharedDocument']").attr("title", "Xóa");
             $("#DSSharedDocument [title]").each(function () {
                 var $item = $(this);
                 $item.attr("title", normalizeVietnameseText($item.attr("title")));

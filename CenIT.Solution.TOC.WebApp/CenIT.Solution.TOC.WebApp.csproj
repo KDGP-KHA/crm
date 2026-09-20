@@ -2992,12 +2992,7 @@
     <Content Include="Contents\Modules\Major\ckfinder\config.ascx" />
     <Content Include="Contents\Modules\Major\ckfinder\config.js" />
     <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\connector.aspx" />
-    <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\Images\1\04787a96-fb7d-48a5-a817-402d3ccc227d.jpg" />
-    <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\Images\1\063995ad-cb17-4f50-b2fb-483388b00d32.png" />
-    <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\Images\2\d8ea6dec-f6af-46e0-b021-b9b255159b81.png" />
-    <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\Images\6\1904f07b-627e-4f3b-9868-43534cfa8477.png" />
-    <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\Images\6\3f1c63cc-8e0e-447e-b130-296f49fab059.png" />
-    <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\Images\Testtt.png" />
+    <Content Include="Scripts\SharedDocument.js" />
     <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\lang\bg.xml" />
     <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\lang\ca.xml" />
     <Content Include="Contents\Modules\Major\ckfinder\core\connector\aspx\lang\cs.xml" />

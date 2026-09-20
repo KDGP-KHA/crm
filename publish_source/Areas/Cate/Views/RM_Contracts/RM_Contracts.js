@@ -44,6 +44,7 @@ function initTableContracts() {
             {
                 "data": "ContractCode",
                 "defaultContent": "",
+                "className": "text-left",
                 "render": function (data, type, row) {
                     var name = row.ContractName || "";
                     return '<div class="font-weight-bold text-primary">' + (data || "") + '</div>' +
@@ -53,6 +54,7 @@ function initTableContracts() {
             {
                 "data": "DigitalSalesName",
                 "defaultContent": "",
+                "className": "text-left",
                 "render": function (data, type, row) {
                     if (!data || !row.DigitalSalesID) return '<span class="text-secondary">—</span>';
                     var code = row.DigitalSalesCode ? '<small class="d-block text-secondary">' + row.DigitalSalesCode + '</small>' : '';
@@ -64,6 +66,7 @@ function initTableContracts() {
                 "data": "CustomerName",
                 "orderable": false,
                 "defaultContent": "",
+                "className": "text-left",
                 "render": function (data) {
                     return data ? '<i class="fa fa-building text-secondary mr-1"></i>' + data : '';
                 }

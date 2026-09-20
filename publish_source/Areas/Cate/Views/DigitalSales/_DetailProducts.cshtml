@@ -56,14 +56,14 @@
                                     @Html.Button(true, "AddDigitalSalesContract_" + product.SalesProductID,
                                         Url.Action("Add", "RM_Contracts", new { area = "Cate", digitalSalesProductId = product.SalesProductID }),
                                         "<i class='fa fa-plus'></i>", "Thêm hợp đồng",
-                                        new { @class = "btn btn-xs btn-primary", data_width = "1024px" })
+                                        new { @class = "btn btn-xs btn-success", data_width = "1024px" })
                                 }
                             </div>
                             @if (product.Contracts != null && product.Contracts.Count > 0)
                             {
                                 <div class="table-responsive">
                                     <table class="table table-sm table-bordered mb-0 text-85">
-                                        <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>Mã hợp đồng</th><th>Tên hợp đồng</th><th class="text-center">Ngày ký</th><th class="text-right">Giá trị</th><th class="text-center">Thao tác</th></tr></thead>
+                                        <thead class="bgc-secondary-l1 text-secondary-d2"><tr><th>Mã hợp đồng</th><th>Tên hợp đồng</th><th class="text-center">Ngày ký</th><th class="text-right">Giá trị (triệu VNĐ)</th><th class="text-center">Thao tác</th></tr></thead>
                                         <tbody>
                                         @foreach (var contract in product.Contracts)
                                         {
