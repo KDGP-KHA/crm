@@ -1,4 +1,4 @@
-using Core.Cate.Models;
+﻿using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -1180,41 +1180,52 @@ namespace Core.Cate.Biz
             { '\u0153', 0x9C }, { '\u017E', 0x9E }, { '\u0178', 0x9F }
         };
 
+        public static bool HasMojibakeSignature(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return false;
+            return input.Contains("áº") || input.Contains("á»") ||
+                   input.Contains("Ä‘") || input.Contains("Ä‚") || input.Contains("Äƒ") ||
+                   input.Contains("Æ°") || input.Contains("Æ¡") || input.Contains("Æ¯") || input.Contains("Æ") ||
+                   input.Contains("Ã¡") || input.Contains("Ã ") || input.Contains("Ã£") || input.Contains("Ã©") ||
+                   input.Contains("Ã¨") || input.Contains("Ã³") || input.Contains("Ã²") || input.Contains("Ãº") ||
+                   input.Contains("Ã¹") || input.Contains("Ã½") || input.Contains("Ã´") || input.Contains("Ãª") ||
+                   input.Contains("Ã¢") || input.Contains("CÆ") || input.Contains("Dá»") || input.Contains("Tráº") ||
+                   input.Contains("NgÆ") || input.Contains("Chuyá»") || input.Contains("Chá»§") || input.Contains("Bá» ");
+        }
+
         public static string FixVietnameseMojibake(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
-            if (input.Contains("Chuyá»") || input.Contains("Ä‘á»") || input.Contains("CÆ") || input.Contains("Dá»±") ||
-                input.Contains("Tráº¡ng") || input.Contains("Ä Ã¡nh") || input.Contains("ÄÃ¡nh") || input.Contains("Bá» ") ||
-                input.Contains("Chá»§") || input.Contains("Chá»") || input.Contains("NgÆ°") || input.Contains("AM ("))
+            if (!HasMojibakeSignature(input))
             {
-                input = input
-                    .Replace("AM (Chá»§ trÃ¬ kinh doanh)", "AM (Chủ trì kinh doanh)")
-                    .Replace("Chá»§ trÃ¬ kinh doanh", "Chủ trì kinh doanh")
-                    .Replace("Chá»§ trÃ¬", "Chủ trì")
-                    .Replace("NgÆ°á» i táº¡o há»“ sÆ¡ cÆ¡ há»™i", "Người tạo hồ sơ cơ hội")
-                    .Replace("NgÆ°á»\u009di táº¡o há»“ sÆ¡ cÆ¡ há»™i", "Người tạo hồ sơ cơ hội")
-                    .Replace("Ng\u00C6\u00B0\u00E1\u00BB\u009Di t\u00E1\u00BA\u00A1o h\u00E1\u00BB\u201C s\u00C6\u00A1 c\u00C6\u00A1 h\u00E1\u00BB\u2122i", "Người tạo hồ sơ cơ hội")
-                    .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
-                    .Replace("Chuyá»ƒn Ä'á»•i thÃ nh cÃ´ng tá»« CÆ  Há»™i sang Dá»± Ã¡N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
-                    .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Trạng thái mới:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
-                    .Replace("Chuyá»ƒn tráº¡ng thÃ¡i sang:", "Chuyển trạng thái sang:")
-                    .Replace("Chuyá»ƒn tráº¡ng thÃ¡i", "Chuyển trạng thái")
-                    .Replace("Ghi chÃº:", "Ghi chú:")
-                    .Replace("Ä Ã¡nh dáº¥u lÃ  Dá»± Ã¡n trá» ng Ä‘iá»ƒm", "Đánh dấu là Dự án trọng điểm")
-                    .Replace("ÄÃ¡nh dáº¥u lÃ  Dá»± Ã¡n trá»ng Ä'iá»ƒm", "Đánh dấu là Dự án trọng điểm")
-                    .Replace("Ä Ã¡nh dáº¥u lÃ  Dá»± Ã¡n", "Đánh dấu là Dự án")
-                    .Replace("Bá»  Ä‘Ã¡nh dáº¥u Dá»± Ã¡n trá» ng Ä‘iá»ƒm", "Bỏ đánh dấu Dự án trọng điểm")
-                    .Replace("Bá»  Ä‘Ã¡nh dáº¥u", "Bỏ đánh dấu")
-                    .Replace("Ä Ã£ hoÃ n thÃ nh cÃ´ng viá»‡c checklist:", "Đã hoàn thành công việc checklist:")
-                    .Replace("Ä Ã£ hoÃ n thÃ nh 100% cÃ¡c cÃ´ng viá»‡c trong quy trÃ¬nh:", "Đã hoàn thành 100% các công việc trong quy trình:")
-                    .Replace("Cáº­p nháº­t tiáº¿n Ä‘á»™ cÃ´ng viá»‡c", "Cập nhật tiến độ công việc")
-                    .Replace("Káº¿t quáº£:", "Kết quả:");
+                return input;
             }
 
-            if (!input.Contains("\u00C2") && !input.Contains("\u00C3") && !input.Contains("\u00C4") &&
-                !input.Contains("\u00C5") && !input.Contains("\u00C6") && !input.Contains("\u00E1\u00BA") &&
-                !input.Contains("\u00E1\u00BB") && !input.Contains("Ä") && !input.Contains("á»") && !input.Contains("Ã"))
+            input = input
+                .Replace("AM (Chá»§ trÃ¬ kinh doanh)", "AM (Chủ trì kinh doanh)")
+                .Replace("Chá»§ trÃ¬ kinh doanh", "Chủ trì kinh doanh")
+                .Replace("Chá»§ trÃ¬", "Chủ trì")
+                .Replace("NgÆ°á» i táº¡o há»“ sÆ¡ cÆ¡ há»™i", "Người tạo hồ sơ cơ hội")
+                .Replace("NgÆ°á»\u009di táº¡o há»“ sÆ¡ cÆ¡ há»™i", "Người tạo hồ sơ cơ hội")
+                .Replace("Ng\u00C6\u00B0\u00E1\u00BB\u009Di t\u00E1\u00BA\u00A1o h\u00E1\u00BB\u201C s\u00C6\u00A1 c\u00C6\u00A1 h\u00E1\u00BB\u2122i", "Người tạo hồ sơ cơ hội")
+                .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
+                .Replace("Chuyá»ƒn Ä'á»•i thÃ nh cÃ´ng tá»« CÆ  Há»™i sang Dá»± Ã¡N. Tráº¡ng thÃ¡i má»›i:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
+                .Replace("Chuyá»ƒn Ä‘á»•i thÃ nh cÃ´ng tá»« CÆ  Há»˜I sang Dá»° Ã N. Trạng thái mới:", "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới:")
+                .Replace("Chuyá»ƒn tráº¡ng thÃ¡i sang:", "Chuyển trạng thái sang:")
+                .Replace("Chuyá»ƒn tráº¡ng thÃ¡i", "Chuyển trạng thái")
+                .Replace("Ghi chÃº:", "Ghi chú:")
+                .Replace("Ä Ã¡nh dáº¥u lÃ  Dá»± Ã¡n trá» ng Ä‘iá»ƒm", "Đánh dấu là Dự án trọng điểm")
+                .Replace("ÄÃ¡nh dáº¥u lÃ  Dá»± Ã¡n trá»ng Ä'iá»ƒm", "Đánh dấu là Dự án trọng điểm")
+                .Replace("Ä Ã¡nh dáº¥u lÃ  Dá»± Ã¡n", "Đánh dấu là Dự án")
+                .Replace("Bá»  Ä‘Ã¡nh dáº¥u Dá»± Ã¡n trá» ng Ä‘iá»ƒm", "Bỏ đánh dấu Dự án trọng điểm")
+                .Replace("Bá»  Ä‘Ã¡nh dáº¥u", "Bỏ đánh dấu")
+                .Replace("Ä Ã£ hoÃ n thÃ nh cÃ´ng viá»‡c checklist:", "Đã hoàn thành công việc checklist:")
+                .Replace("Ä Ã£ hoÃ n thÃ nh 100% cÃ¡c cÃ´ng viá»‡c trong quy trÃ¬nh:", "Đã hoàn thành 100% các công việc trong quy trình:")
+                .Replace("Cáº­p nháº­t tiáº¿n Ä‘á»™ cÃ´ng viá»‡c", "Cập nhật tiến độ công việc")
+                .Replace("Káº¿t quáº£:", "Kết quả:");
+
+            if (!HasMojibakeSignature(input))
             {
                 return input;
             }
@@ -1262,6 +1273,10 @@ namespace Core.Cate.Biz
                 flushBytes();
 
                 var result = sb.ToString();
+                if (!string.IsNullOrEmpty(result) && result.Contains('\uFFFD') && !input.Contains('\uFFFD'))
+                {
+                    return input;
+                }
                 return string.IsNullOrEmpty(result) ? input : result;
             }
             catch

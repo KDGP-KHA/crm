@@ -11,19 +11,7 @@
         var text = content.Trim();
 
         // 1. Phục hồi lỗi font Mojibake nếu dữ liệu bị double-encoding UTF-8 sang Windows-1252
-        if (text.Contains("Ã") || text.Contains("Ä") || text.Contains("áº") || text.Contains("á»") || text.Contains("Â"))
-        {
-            try
-            {
-                byte[] bytes = System.Text.Encoding.GetEncoding(1252).GetBytes(text);
-                string fixedText = System.Text.Encoding.UTF8.GetString(bytes);
-                if (!string.IsNullOrEmpty(fixedText))
-                {
-                    text = fixedText;
-                }
-            }
-            catch { }
-        }
+        text = Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(text);
 
         // 2. Giải mã HTML Entities nếu bị encode (&lt;p&gt; -> <p>)
         if (text.Contains("&lt;") && text.Contains("&gt;"))
