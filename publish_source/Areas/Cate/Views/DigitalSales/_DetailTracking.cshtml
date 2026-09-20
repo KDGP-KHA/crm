@@ -202,7 +202,7 @@
                         if (realTaskCount > 0)
                         {
                             int taskIdx = 1;
-                            foreach (var task in realTasks.OrderBy(p => p.StartDate).ThenBy(p => p.SortOrder).ThenBy(p => p.TrackingID))
+                            foreach (var task in realTasks.OrderBy(p => p.SortOrder).ThenBy(p => p.StartDate).ThenBy(p => p.TrackingID))
                             {
                             string taskNodeId = $"{procNodeId}_task_{task.TrackingID}";
                             bool isOverdue = task.IsOverdue == 1;
@@ -307,7 +307,7 @@
                             <!-- ========================================================================= -->
                             if (task.TodoList != null && task.TodoList.Count > 0)
                             {
-                                foreach (var todo in task.TodoList)
+                                foreach (var todo in task.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
                                 {
                                     bool todoOverdue = todo.IsOverdue == 1;
                                     <tr class="tree-row tree-todo-row" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4">

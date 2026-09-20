@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+using System.Configuration;
 using TSFramework.Libs.BaseApps;
 using TSFramework.Libs.Providers;
 
@@ -15,8 +15,18 @@ namespace TSFramework.Libs.Processors
         private static NotificationProvider _notifider;
         private static MailProvider _mailer;
 
-        public static StoreProcedureProvider ProcedureProvider =>
-            _storeProceduror ?? (_storeProceduror = StoreProcedureProvider.Instance());
+        private static readonly object _lockProcedure = new object();
+        public static StoreProcedureProvider ProcedureProvider
+        {
+            get
+            {
+                if (_storeProceduror != null) return _storeProceduror;
+                lock (_lockProcedure)
+                {
+                    return _storeProceduror ?? (_storeProceduror = StoreProcedureProvider.Instance());
+                }
+            }
+        }
 
         public static AuthorityProvider Author => _author ?? (_author =
             AuthorityProvider.Instance(

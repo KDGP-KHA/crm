@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -3056,6 +3056,26 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 if (curTl != null) timelineId = curTl.TimelineID;
             }
 
+            int nextSortOrder = 1;
+            var existingTasks = _salesCache.GetTrackingTasks(digitalSalesId);
+            if (existingTasks != null && existingTasks.Count > 0)
+            {
+                var tasksInProcess = existingTasks.Where(t => t.ProcessID == processId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+                if (tasksInProcess.Count > 0)
+                {
+                    nextSortOrder = tasksInProcess.Max(t => t.SortOrder) + 1;
+                }
+                else
+                {
+                    var allParentTasks = existingTasks.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
+                    if (allParentTasks.Count > 0)
+                    {
+                        nextSortOrder = allParentTasks.Max(t => t.SortOrder) + 1;
+                    }
+                }
+            }
+            if (nextSortOrder <= 0) nextSortOrder = 1;
+
             var model = new RM_DigitalSalesTrackingModel
             {
                 DigitalSalesID = digitalSalesId,
@@ -3064,7 +3084,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 Deadline = DateTime.Today.AddDays(3),
                 Status = 1,
                 IsCustomTask = true,
-                TimelineID = timelineId
+                TimelineID = timelineId,
+                SortOrder = nextSortOrder
             };
 
             if (processId.HasValue && processId.Value > 0)
@@ -3097,6 +3118,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     status = false,
                     message = CreateMessage(AppProcessor.Messagor.GetMessage("DigitalSales_Task"), EnumProcessType.DataNotExist, EnumMsgIcon.Error)
                 }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (model.SortOrder <= 0)
+            {
+                model.SortOrder = 1;
             }
 
             ViewBag.UserList = GetProjectMemberSelectList(digitalSalesId, model?.AssignedUserID);
@@ -4591,7 +4617,22 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
 
                 int savedCount = 0;
-                int sortIdx = 100;
+                int nextSortOrder = 1;
+                var existingTasks = _salesCache.GetTrackingTasks(digitalSalesId);
+                if (existingTasks != null && existingTasks.Count > 0)
+                {
+                    var tasksInProcess = existingTasks.Where(t => t.ProcessID == processId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
+                    if (tasksInProcess.Count > 0)
+                    {
+                        nextSortOrder = tasksInProcess.Max(t => t.SortOrder) + 1;
+                    }
+                    else
+                    {
+                        nextSortOrder = existingTasks.Max(t => t.SortOrder) + 1;
+                    }
+                }
+                if (nextSortOrder <= 0) nextSortOrder = 1;
+                int sortIdx = nextSortOrder;
 
                 foreach (var r in rows)
                 {

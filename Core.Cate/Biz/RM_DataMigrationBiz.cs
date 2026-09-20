@@ -334,9 +334,19 @@ WHERE pp.ProjectID = @ID AND pp.IsDeleted = 0";
                         {
                             cmd.CommandText = @"
 SELECT 
-    (SELECT COUNT(*) FROM RM_TaskManagement tm INNER JOIN RM_ProductProject pp ON tm.ProductProjectID = pp.ProductProjectID WHERE pp.ProjectID = @ID) +
-    (SELECT COUNT(*) FROM RM_Comment c INNER JOIN RM_TaskManagement tm ON c.TaskManagementID = tm.TaskManagementID INNER JOIN RM_ProductProject pp ON tm.ProductProjectID = pp.ProductProjectID WHERE pp.ProjectID = @ID) AS ActCount,
-    (SELECT COUNT(*) FROM RM_LogTaskFilePath lf INNER JOIN RM_TaskManagement tm ON lf.TaskManagementID = tm.TaskManagementID INNER JOIN RM_ProductProject pp ON tm.ProductProjectID = pp.ProductProjectID WHERE pp.ProjectID = @ID) AS FileCount";
+    (SELECT COUNT(*) FROM RM_TaskManagement tm 
+     WHERE (tm.ProjectID = @ID OR tm.ProductProjectID IN (SELECT pp.ProductProjectID FROM RM_ProductProject pp WHERE pp.ProjectID = @ID))
+       AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)) +
+    (SELECT COUNT(*) FROM RM_Comment c 
+     INNER JOIN RM_TaskManagement tm ON c.TaskManagementID = tm.TaskManagementID 
+     WHERE (tm.ProjectID = @ID OR tm.ProductProjectID IN (SELECT pp.ProductProjectID FROM RM_ProductProject pp WHERE pp.ProjectID = @ID))
+       AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL)
+       AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)) AS ActCount,
+    (SELECT COUNT(*) FROM RM_LogTaskFilePath lf 
+     INNER JOIN RM_TaskManagement tm ON lf.TaskManagementID = tm.TaskManagementID 
+     WHERE (tm.ProjectID = @ID OR tm.ProductProjectID IN (SELECT pp.ProductProjectID FROM RM_ProductProject pp WHERE pp.ProjectID = @ID))
+       AND (lf.IsDeleted = 0 OR lf.IsDeleted IS NULL)
+       AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)) AS FileCount";
                             cmd.Parameters.Add("@ID", SqlDbType.Int).Value = sourceId;
                             using (var r = cmd.ExecuteReader())
                             {
@@ -344,6 +354,30 @@ SELECT
                                 {
                                     result.ActivityCount = Convert.ToInt32(r["ActCount"]);
                                     result.AttachmentCount = Convert.ToInt32(r["FileCount"]);
+                                }
+                            }
+                        }
+
+                        // Attachments summary for Project
+                        using (var cmd = conn.CreateCommand())
+                        {
+                            cmd.CommandText = @"
+SELECT lf.FilePath
+FROM RM_LogTaskFilePath lf
+INNER JOIN RM_TaskManagement tm ON lf.TaskManagementID = tm.TaskManagementID
+WHERE (tm.ProjectID = @ID OR tm.ProductProjectID IN (SELECT pp.ProductProjectID FROM RM_ProductProject pp WHERE pp.ProjectID = @ID))
+  AND (lf.IsDeleted = 0 OR lf.IsDeleted IS NULL)
+  AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)";
+                            cmd.Parameters.Add("@ID", SqlDbType.Int).Value = sourceId;
+                            using (var r = cmd.ExecuteReader())
+                            {
+                                while (r.Read())
+                                {
+                                    string fp = r["FilePath"]?.ToString();
+                                    if (!string.IsNullOrWhiteSpace(fp))
+                                    {
+                                        result.AttachmentsSummary.Add(Path.GetFileName(fp));
+                                    }
                                 }
                             }
                         }
@@ -931,12 +965,28 @@ VALUES (@SalesID, 1, @Content, @Attachments, @ActionDate, @ActionBy, @ActionByNa
                                     cmd.CommandText = @"
 SELECT tm.TaskManagementID, tm.TaskName, tm.Description, tm.CreatedDate, tm.CreatedBy,
        ISNULL(u.FullName, tm.CreatedBy) AS FullName,
-       lf.FilePath
+       uAssignee.FullName AS FirstAssigneeName,
+       p.PriorityName,
+       stuff((
+           SELECT '|' + convert(nvarchar(500), f.FilePath)
+           FROM RM_LogTaskFilePath f
+           WHERE f.TaskManagementID = tm.TaskManagementID 
+             AND (f.CommentID IS NULL OR f.CommentID = 0) 
+             AND (f.IsDeleted = 0 OR f.IsDeleted IS NULL)
+           FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)')
+       , 1, 1, '') AS FilePaths
 FROM RM_TaskManagement tm
-INNER JOIN RM_ProductProject pp ON tm.ProductProjectID = pp.ProductProjectID
-LEFT JOIN Sys_Users u ON tm.CreatedBy = u.UserName
-LEFT JOIN RM_LogTaskFilePath lf ON tm.TaskManagementID = lf.TaskManagementID AND (lf.CommentID IS NULL OR lf.CommentID = 0)
-WHERE pp.ProjectID = @ID AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)
+LEFT JOIN (
+    SELECT TaskManagementID, Employee_ID,
+           ROW_NUMBER() OVER(PARTITION BY TaskManagementID ORDER BY TaskAssigneeID ASC) AS rn
+    FROM RM_TaskAssignee
+    WHERE (IsDeleted = 0 OR IsDeleted IS NULL) AND Employee_ID > 0
+) ta_first ON tm.TaskManagementID = ta_first.TaskManagementID AND ta_first.rn = 1
+LEFT JOIN Sys_Users uAssignee ON ta_first.Employee_ID = uAssignee.UserId
+LEFT JOIN RM_Priority p ON tm.PriorityID = p.PriorityID
+LEFT JOIN Sys_Users u ON (tm.CreatedBy = u.UserName OR tm.CreatedBy = CAST(u.UserId AS NVARCHAR(50)))
+WHERE (tm.ProjectID = @ID OR tm.ProductProjectID IN (SELECT pp.ProductProjectID FROM RM_ProductProject pp WHERE pp.ProjectID = @ID))
+  AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)
 ORDER BY tm.CreatedDate ASC, tm.TaskManagementID ASC";
                                     cmd.Parameters.Add("@ID", SqlDbType.Int).Value = model.SourceID;
                                     using (var r = cmd.ExecuteReader())
@@ -953,21 +1003,35 @@ ORDER BY tm.CreatedDate ASC, tm.TaskManagementID ASC";
                                     DateTime cDate = (DateTime)row["CreatedDate"];
                                     string cBy = row["CreatedBy"].ToString();
                                     string cByName = row["FullName"].ToString();
-                                    string rawFile = row["FilePath"] != DBNull.Value ? row["FilePath"].ToString() : "";
+                                    string firstAssignee = row["FirstAssigneeName"] != DBNull.Value ? row["FirstAssigneeName"].ToString() : "";
+                                    string priority = row["PriorityName"] != DBNull.Value ? row["PriorityName"].ToString() : "";
+                                    string rawFiles = row["FilePaths"] != DBNull.Value ? row["FilePaths"].ToString() : "";
 
-                                    string cardHtml = $@"<div class=""ds-migrated-task""><div class=""d-flex align-items-center mb-2""><span class=""badge bgc-blue-l4 text-blue-d2 border-1 brc-blue-m3 px-2 py-05 radius-1 font-600""><i class=""fa fa-tasks mr-1""></i> Công việc Dự án</span><span class=""font-weight-bold text-primary-d1 ml-2 text-90"">#{taskId} - {tName}</span></div><div class=""ds-migrated-content"">{tDesc}</div><div class=""ds-migrated-meta""><i class=""far fa-clock mr-1""></i> Khởi tạo: {cDate:dd/MM/yyyy HH:mm} | Người tạo: {cByName}</div></div>";
+                                    string headerInfo = $"#{taskId} - {tName}";
+                                    if (!string.IsNullOrWhiteSpace(firstAssignee)) headerInfo += $" | {firstAssignee}";
+                                    if (!string.IsNullOrWhiteSpace(priority)) headerInfo += $" | {priority}";
+
+                                    string cardHtml = $@"<div class=""ds-migrated-task""><div class=""d-flex align-items-center mb-2""><span class=""badge bgc-blue-l4 text-blue-d2 border-1 brc-blue-m3 px-2 py-05 radius-1 font-600""><i class=""fa fa-tasks mr-1""></i> Công việc Dự án</span><span class=""font-weight-bold text-primary-d1 ml-2 text-90"">{headerInfo}</span></div>{(string.IsNullOrWhiteSpace(tDesc) ? "" : $@"<div class=""ds-migrated-content"">{tDesc}</div>")}<div class=""ds-migrated-meta""><i class=""far fa-clock mr-1""></i> Khởi tạo: {cDate:dd/MM/yyyy HH:mm} | Người tạo: {cByName}</div></div>";
 
                                     string attachJson = null;
-                                    if (!string.IsNullOrWhiteSpace(rawFile) && model.MoveAttachments)
+                                    if (!string.IsNullOrWhiteSpace(rawFiles) && model.MoveAttachments)
                                     {
-                                        string newRelPath = MoveFileSafely(rawFile);
-                                        if (!string.IsNullOrEmpty(newRelPath))
+                                        var fileList = new List<string>();
+                                        foreach (var singleFile in rawFiles.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
                                         {
-                                            string fileName = Path.GetFileName(newRelPath);
-                                            string ext = Path.GetExtension(newRelPath).ToLowerInvariant();
-                                            bool isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext);
-                                            attachJson = $"[{{\"FileName\":\"{fileName}\",\"FilePath\":\"{newRelPath}\",\"Extension\":\"{ext}\",\"IsImage\":{(isImg ? "true" : "false")}}}]";
-                                            migratedFiles++;
+                                            string newRelPath = MoveFileSafely(singleFile);
+                                            if (!string.IsNullOrEmpty(newRelPath))
+                                            {
+                                                string fileName = Path.GetFileName(newRelPath);
+                                                string ext = Path.GetExtension(newRelPath).ToLowerInvariant();
+                                                bool isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext);
+                                                fileList.Add($"{{\"FileName\":\"{fileName}\",\"FilePath\":\"{newRelPath}\",\"Extension\":\"{ext}\",\"IsImage\":{(isImg ? "true" : "false")}}}");
+                                                migratedFiles++;
+                                            }
+                                        }
+                                        if (fileList.Count > 0)
+                                        {
+                                            attachJson = $"[{string.Join(",", fileList)}]";
                                         }
                                     }
 
@@ -996,13 +1060,29 @@ VALUES (@SalesID, 1, @Content, @Attachments, @ActionDate, @ActionBy, @ActionByNa
                                     cmd.CommandText = @"
 SELECT c.CommentID, c.TaskManagementID, tm.TaskName, c.Content AS CommentText, c.CreatedDate, c.CreatedBy,
        ISNULL(u.FullName, c.CreatedBy) AS FullName,
-       lf.FilePath
+       uAssignee.FullName AS FirstAssigneeName,
+       p.PriorityName,
+       stuff((
+           SELECT '|' + convert(nvarchar(500), f.FilePath)
+           FROM RM_LogTaskFilePath f
+           WHERE f.CommentID = c.CommentID 
+             AND (f.IsDeleted = 0 OR f.IsDeleted IS NULL)
+           FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)')
+       , 1, 1, '') AS FilePaths
 FROM RM_Comment c
 INNER JOIN RM_TaskManagement tm ON c.TaskManagementID = tm.TaskManagementID
-INNER JOIN RM_ProductProject pp ON tm.ProductProjectID = pp.ProductProjectID
-LEFT JOIN Sys_Users u ON c.CreatedBy = u.UserName
-LEFT JOIN RM_LogTaskFilePath lf ON c.CommentID = lf.CommentID
-WHERE pp.ProjectID = @ID AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL)
+LEFT JOIN (
+    SELECT TaskManagementID, Employee_ID,
+           ROW_NUMBER() OVER(PARTITION BY TaskManagementID ORDER BY TaskAssigneeID ASC) AS rn
+    FROM RM_TaskAssignee
+    WHERE (IsDeleted = 0 OR IsDeleted IS NULL) AND Employee_ID > 0
+) ta_first ON tm.TaskManagementID = ta_first.TaskManagementID AND ta_first.rn = 1
+LEFT JOIN Sys_Users uAssignee ON ta_first.Employee_ID = uAssignee.UserId
+LEFT JOIN RM_Priority p ON tm.PriorityID = p.PriorityID
+LEFT JOIN Sys_Users u ON (c.Employee_ID > 0 AND c.Employee_ID = u.UserId) OR (c.CreatedBy = u.UserName)
+WHERE (tm.ProjectID = @ID OR tm.ProductProjectID IN (SELECT pp.ProductProjectID FROM RM_ProductProject pp WHERE pp.ProjectID = @ID))
+  AND (c.IsDeleted = 0 OR c.IsDeleted IS NULL)
+  AND (tm.IsDeleted = 0 OR tm.IsDeleted IS NULL)
 ORDER BY c.CreatedDate ASC, c.CommentID ASC";
                                     cmd.Parameters.Add("@ID", SqlDbType.Int).Value = model.SourceID;
                                     using (var r = cmd.ExecuteReader())
@@ -1019,21 +1099,35 @@ ORDER BY c.CreatedDate ASC, c.CommentID ASC";
                                     DateTime cDate = (DateTime)row["CreatedDate"];
                                     string cBy = row["CreatedBy"].ToString();
                                     string cByName = row["FullName"].ToString();
-                                    string rawFile = row["FilePath"] != DBNull.Value ? row["FilePath"].ToString() : "";
+                                    string firstAssignee = row["FirstAssigneeName"] != DBNull.Value ? row["FirstAssigneeName"].ToString() : "";
+                                    string priority = row["PriorityName"] != DBNull.Value ? row["PriorityName"].ToString() : "";
+                                    string rawFiles = row["FilePaths"] != DBNull.Value ? row["FilePaths"].ToString() : "";
 
-                                    string cardHtml = $@"<div class=""ds-migrated-task-comment""><div class=""d-flex align-items-center mb-2 flex-wrap"" style=""gap: 6px;""><span class=""badge bgc-blue-l4 text-blue-d2 border-1 brc-blue-m3 px-2 py-05 radius-1 font-600""><i class=""fa fa-tasks mr-1""></i> Công việc Dự án</span><span class=""font-weight-bold text-primary-d1 text-90"">#{taskId} - {tName}</span><span class=""badge bgc-grey-l3 text-secondary-d2 font-normal text-75 radius-1""><i class=""far fa-comment-dots mr-1""></i> Bình luận công việc</span></div><div class=""ds-migrated-content"">{cText}</div></div>";
+                                    string headerInfo = $"#{taskId} - {tName}";
+                                    if (!string.IsNullOrWhiteSpace(firstAssignee)) headerInfo += $" | {firstAssignee}";
+                                    if (!string.IsNullOrWhiteSpace(priority)) headerInfo += $" | {priority}";
+
+                                    string cardHtml = $@"<div class=""ds-migrated-task-comment""><div class=""d-flex align-items-center mb-2 flex-wrap"" style=""gap: 6px;""><span class=""badge bgc-blue-l4 text-blue-d2 border-1 brc-blue-m3 px-2 py-05 radius-1 font-600""><i class=""fa fa-tasks mr-1""></i> Công việc Dự án</span><span class=""font-weight-bold text-primary-d1 text-90"">{headerInfo}</span><span class=""badge bgc-grey-l3 text-secondary-d2 font-normal text-75 radius-1""><i class=""far fa-comment-dots mr-1""></i> Bình luận</span></div><div class=""ds-migrated-content"">{cText}</div></div>";
 
                                     string attachJson = null;
-                                    if (!string.IsNullOrWhiteSpace(rawFile) && model.MoveAttachments)
+                                    if (!string.IsNullOrWhiteSpace(rawFiles) && model.MoveAttachments)
                                     {
-                                        string newRelPath = MoveFileSafely(rawFile);
-                                        if (!string.IsNullOrEmpty(newRelPath))
+                                        var fileList = new List<string>();
+                                        foreach (var singleFile in rawFiles.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries))
                                         {
-                                            string fileName = Path.GetFileName(newRelPath);
-                                            string ext = Path.GetExtension(newRelPath).ToLowerInvariant();
-                                            bool isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext);
-                                            attachJson = $"[{{\"FileName\":\"{fileName}\",\"FilePath\":\"{newRelPath}\",\"Extension\":\"{ext}\",\"IsImage\":{(isImg ? "true" : "false")}}}]";
-                                            migratedFiles++;
+                                            string newRelPath = MoveFileSafely(singleFile);
+                                            if (!string.IsNullOrEmpty(newRelPath))
+                                            {
+                                                string fileName = Path.GetFileName(newRelPath);
+                                                string ext = Path.GetExtension(newRelPath).ToLowerInvariant();
+                                                bool isImg = new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext);
+                                                fileList.Add($"{{\"FileName\":\"{fileName}\",\"FilePath\":\"{newRelPath}\",\"Extension\":\"{ext}\",\"IsImage\":{(isImg ? "true" : "false")}}}");
+                                                migratedFiles++;
+                                            }
+                                        }
+                                        if (fileList.Count > 0)
+                                        {
+                                            attachJson = $"[{string.Join(",", fileList)}]";
                                         }
                                     }
 

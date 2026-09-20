@@ -49,6 +49,7 @@ namespace Core.Cate.Models
         [CustomDisplayName("DigitalSalesTracking_AttachmentFile_Label")]
         public string AttachmentFile { get; set; }
         public bool IsCustomTask { get; set; }
+        [CustomDisplayName("DigitalSalesWorkflow_ProgressSortOrder_Label")]
         public int SortOrder { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedBy { get; set; }
