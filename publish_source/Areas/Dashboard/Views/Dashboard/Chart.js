@@ -36,6 +36,7 @@ function onDashboardYearChange(year, keyword) {
             $container.html(html);
             // Sau khi cập nhật lại view tổng quát, tải lại biểu đồ Cơ hội theo nhóm dịch vụ
             loadGroupServiceChart(selectedYear);
+            initDashboardPaginations();
         },
         error: function (xhr, status, error) {
             console.error("Lỗi khi tải dữ liệu Dashboard theo năm:", error);
@@ -91,11 +92,24 @@ function liveFilterTables(term) {
     var query = (term || "").toLowerCase();
 
     // 1. Lọc bảng Dự án Trọng điểm
-    filterSingleTable(".db-keyprojects-table", query);
+    if (_tablePagination['#tableKeyProjects']) {
+        _tablePagination['#tableKeyProjects'].filterTerm = query;
+        _tablePagination['#tableKeyProjects'].currentPage = 1;
+        renderTablePage('#tableKeyProjects');
+    } else {
+        filterSingleTable(".db-keyprojects-table", query);
+    }
 
     // 2. Lọc các bảng con (Cơ hội đang quan tâm & Cảnh báo ActionTime)
     $(".db-custom-subtable").each(function () {
-        filterSingleTable(this, query);
+        var tid = "#" + $(this).attr("id");
+        if (_tablePagination[tid]) {
+            _tablePagination[tid].filterTerm = query;
+            _tablePagination[tid].currentPage = 1;
+            renderTablePage(tid);
+        } else {
+            filterSingleTable(this, query);
+        }
     });
 }
 
@@ -121,8 +135,189 @@ function filterSingleTable(tableSelector, query) {
 /**
  * Lọc bảng dữ liệu theo từng Card khi người dùng gõ từ khóa vào ô tìm kiếm của Card đó
  */
+/**
+ * Trạng thái phân trang cho các bảng dữ liệu Dashboard
+ */
+var _tablePagination = {};
+
+/**
+ * Khởi tạo đồng loạt phân trang cho cả 3 bảng trên Dashboard
+ */
+function initDashboardPaginations() {
+    initTablePagination('#tableKeyProjects', '#footerKeyProjects', 10);
+    initTablePagination('#tableFollowedOpps', '#footerFollowedOpps', 10);
+    initTablePagination('#tableStaleSales', '#footerStaleSales', 10);
+}
+
+
+function initTablePagination(tableId, footerId, defaultPageSize) {
+    var $table = $(tableId);
+    var $footer = $(footerId);
+    if (!$table.length || !$footer.length) return;
+
+    var pageSize = defaultPageSize || 10;
+    var $rows = $table.find("tbody tr");
+    if (!$rows.length) {
+        $footer.hide();
+        return;
+    }
+
+    $footer.show();
+    var currentSize = parseInt($footer.find(".db-page-size-select").val(), 10) || pageSize;
+
+    _tablePagination[tableId] = {
+        footerId: footerId,
+        pageSize: currentSize,
+        currentPage: 1,
+        filterTerm: ""
+    };
+
+    renderTablePage(tableId);
+}
+
+function changeTablePageSize(tableId, newSize) {
+    if (!_tablePagination[tableId]) return;
+    _tablePagination[tableId].pageSize = parseInt(newSize, 10) || 10;
+    _tablePagination[tableId].currentPage = 1;
+    renderTablePage(tableId);
+}
+
+function goToTablePage(tableId, pageNumber) {
+    if (!_tablePagination[tableId]) return;
+    _tablePagination[tableId].currentPage = parseInt(pageNumber, 10) || 1;
+    renderTablePage(tableId);
+}
+
+function renderTablePage(tableId) {
+    var state = _tablePagination[tableId];
+    if (!state) return;
+
+    var $table = $(tableId);
+    var $footer = $(state.footerId);
+    if (!$table.length || !$footer.length) return;
+
+    var $allRows = $table.find("tbody tr");
+    var filterTerm = (state.filterTerm || "").toLowerCase();
+
+    // Lọc các dòng khớp query
+    var $matchedRows = $allRows.filter(function () {
+        if (!filterTerm) return true;
+        return $(this).text().toLowerCase().indexOf(filterTerm) !== -1;
+    });
+
+    var totalRecords = $matchedRows.length;
+    var pageSize = state.pageSize;
+    var totalPages = Math.ceil(totalRecords / pageSize) || 1;
+
+    if (state.currentPage > totalPages) {
+        state.currentPage = totalPages;
+    }
+    if (state.currentPage < 1) {
+        state.currentPage = 1;
+    }
+    var currentPage = state.currentPage;
+
+    var startIndex = (currentPage - 1) * pageSize;
+    var endIndex = Math.min(startIndex + pageSize, totalRecords);
+
+    // Ẩn tất cả và chỉ hiện các dòng của trang hiện tại
+    $allRows.hide();
+    $matchedRows.slice(startIndex, endIndex).show();
+
+    var unit = tableId.indexOf("KeyProjects") !== -1 ? "dự án" : "hồ sơ";
+
+    // Cập nhật thông tin dòng hiển thị
+    var $info = $footer.find("[id^='info']");
+    if ($info.length) {
+        if (totalRecords === 0) {
+            $info.html("Hiển thị <strong>0</strong> " + unit);
+        } else {
+            $info.html("Hiển thị <strong>" + (startIndex + 1) + "</strong> - <strong>" + endIndex + "</strong> / <strong>" + totalRecords + "</strong> " + unit);
+        }
+    }
+
+    // Cập nhật badge số lượng ở card header
+    var $cardHeader = $table.closest(".card").find(".card-header");
+    var $badge = $cardHeader.find(".badge[id^='badge']");
+    if ($badge.length) {
+        $badge.text(totalRecords + " " + unit);
+    }
+
+    // Cập nhật thanh phân trang
+    var $pagination = $footer.find(".pagination");
+    if (!$pagination.length) return;
+
+    if (totalPages <= 1) {
+        $pagination.html('');
+        return;
+    }
+
+    var html = "";
+
+    // Nút Đầu & Trước
+    var isPrevDisabled = currentPage <= 1 ? " disabled" : "";
+    html += '<li class="page-item' + isPrevDisabled + '">';
+    html += '  <a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', 1)" title="Trang đầu">&laquo;</a>';
+    html += '</li>';
+    html += '<li class="page-item' + isPrevDisabled + '">';
+    html += '  <a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', ' + (currentPage - 1) + ')" title="Trang trước">&lsaquo;</a>';
+    html += '</li>';
+
+    // Dải số trang (tối đa 5 nút)
+    var maxButtons = 5;
+    var startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    var endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage + 1 < maxButtons) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+
+    if (startPage > 1) {
+        html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', 1)">1</a></li>';
+        if (startPage > 2) {
+            html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+    }
+
+    for (var p = startPage; p <= endPage; p++) {
+        var isActive = (p === currentPage) ? " active font-bold" : "";
+        html += '<li class="page-item' + isActive + '">';
+        html += '  <a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', ' + p + ')">' + p + '</a>';
+        html += '</li>';
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            html += '<li class="page-item disabled"><span class="page-link">...</span></li>';
+        }
+        html += '<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', ' + totalPages + ')">' + totalPages + '</a></li>';
+    }
+
+    // Nút Tiếp & Cuối
+    var isNextDisabled = currentPage >= totalPages ? " disabled" : "";
+    html += '<li class="page-item' + isNextDisabled + '">';
+    html += '  <a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', ' + (currentPage + 1) + ')" title="Trang sau">&rsaquo;</a>';
+    html += '</li>';
+    html += '<li class="page-item' + isNextDisabled + '">';
+    html += '  <a class="page-link" href="javascript:void(0)" onclick="goToTablePage(\'' + tableId + '\', ' + totalPages + ')" title="Trang cuối">&raquo;</a>';
+    html += '</li>';
+
+    $pagination.html(html);
+}
+
+/**
+ * Lọc bảng dữ liệu theo từng Card khi người dùng gõ từ khóa vào ô tìm kiếm của Card đó
+ */
 function filterCardTable(input, tableId) {
     var query = ($(input).val() || "").trim().toLowerCase();
+
+    // Nếu bảng có cấu hình phân trang, cập nhật filterTerm và render lại trang 1
+    if (_tablePagination[tableId]) {
+        _tablePagination[tableId].filterTerm = query;
+        _tablePagination[tableId].currentPage = 1;
+        renderTablePage(tableId);
+        return;
+    }
+
     var $table = $(tableId);
     if (!$table.length) return;
 
@@ -363,6 +558,9 @@ window.openDigitalSalesByStatus = function (statusId, statusName) {
 $(document).ready(function () {
     // Tải biểu đồ Cơ hội theo nhóm dịch vụ lần đầu
     loadGroupServiceChart($("#ApplyYear").val());
+
+    // Khởi tạo phân trang cho cả 3 bảng Dashboard
+    initDashboardPaginations();
 
     // Sự kiện chuyển tab
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {

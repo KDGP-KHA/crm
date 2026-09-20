@@ -198,6 +198,27 @@
                     </div>
                 }
             </div>
+            @if (keyProjects.Count > 0)
+            {
+                <div class="card-footer db-card-pagination d-flex flex-wrap justify-content-between align-items-center" id="footerKeyProjects">
+                    <div class="d-flex align-items-center my-1">
+                        <span class="text-muted text-85 mr-2">Hiển thị</span>
+                        <select class="db-page-size-select mr-2" id="pageSizeKeyProjects" onchange="changeTablePageSize('#tableKeyProjects', this.value);">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span class="text-secondary-d1 text-85" id="infoKeyProjects">
+                            Hiển thị <strong>1</strong> - <strong>@(Math.Min(10, keyProjects.Count))</strong> / <strong>@keyProjects.Count</strong> dự án
+                        </span>
+                    </div>
+                    <nav class="my-1">
+                        <ul class="pagination pagination-sm mb-0" id="paginationKeyProjects">
+                        </ul>
+                    </nav>
+                </div>
+            }
         </div>
     </div>
 
@@ -310,6 +331,27 @@
                     </div>
                 }
             </div>
+            @if (followedOpps.Count > 0)
+            {
+                <div class="card-footer db-card-pagination d-flex flex-wrap justify-content-between align-items-center" id="footerFollowedOpps">
+                    <div class="d-flex align-items-center my-1">
+                        <span class="text-muted text-85 mr-2">Hiển thị</span>
+                        <select class="db-page-size-select mr-2" id="pageSizeFollowedOpps" onchange="changeTablePageSize('#tableFollowedOpps', this.value);">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span class="text-secondary-d1 text-85" id="infoFollowedOpps">
+                            Hiển thị <strong>1</strong> - <strong>@(Math.Min(10, followedOpps.Count))</strong> / <strong>@followedOpps.Count</strong> hồ sơ
+                        </span>
+                    </div>
+                    <nav class="my-1">
+                        <ul class="pagination pagination-sm mb-0" id="paginationFollowedOpps">
+                        </ul>
+                    </nav>
+                </div>
+            }
         </div>
     </div>
 
@@ -412,6 +454,37 @@
                     </div>
                 }
             </div>
+            @if (staleSales.Count > 0)
+            {
+                <div class="card-footer db-card-pagination d-flex flex-wrap justify-content-between align-items-center" id="footerStaleSales">
+                    <div class="d-flex align-items-center my-1">
+                        <span class="text-muted text-85 mr-2">Hiển thị</span>
+                        <select class="db-page-size-select mr-2" id="pageSizeStaleSales" onchange="changeTablePageSize('#tableStaleSales', this.value);">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span class="text-secondary-d1 text-85" id="infoStaleSales">
+                            Hiển thị <strong>1</strong> - <strong>@(Math.Min(10, staleSales.Count))</strong> / <strong>@staleSales.Count</strong> hồ sơ
+                        </span>
+                    </div>
+                    <nav class="my-1">
+                        <ul class="pagination pagination-sm mb-0" id="paginationStaleSales">
+                        </ul>
+                    </nav>
+                </div>
+            }
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    if (typeof initDashboardPaginations === 'function') {
+        initDashboardPaginations();
+    } else if (typeof initTablePagination === 'function') {
+        initTablePagination('#tableKeyProjects', '#footerKeyProjects', 10);
+        initTablePagination('#tableFollowedOpps', '#footerFollowedOpps', 10);
+        initTablePagination('#tableStaleSales', '#footerStaleSales', 10);
+    }
+</script>

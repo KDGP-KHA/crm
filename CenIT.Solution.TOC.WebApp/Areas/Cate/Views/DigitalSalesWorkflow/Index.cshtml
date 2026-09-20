@@ -20,16 +20,16 @@
     <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSalesWorkflow/Index.css?v=@DateTime.Now.Ticks" />
 }
 
-<div class="row">
+<div class="row workflow-row">
     <!-- CỘT 1: TRẠNG THÁI (STATUS) -->
-    <div class="col-xl-4 col-lg-4 col-md-12 mb-3">
+    <div class="col-xl-4 col-lg-4 col-md-12 mb-3 workflow-col">
         <div class="card bcard h-100 border-1 brc-primary-m3 shadow-sm">
             <div class="card-header bgc-primary-d1 text-white">
                 <h5 class="card-title text-100 text-white font-bolder mb-0">
                     <i class="fa fa-tags mr-1"></i> 1. TRẠNG THÁI
                 </h5>
                 <div class="card-toolbar">
-                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary btn-a-light-primary font-bolder border-0" onclick="DigitalSalesWorkflow.openAddStatus()">
+                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary btn-a-light-primary font-bolder border-0 text-nowrap" onclick="DigitalSalesWorkflow.openAddStatus()">
                         <i class="fa fa-plus text-primary mr-1"></i>Thêm trạng thái
                     </button>
                 </div>
@@ -59,14 +59,14 @@
     </div>
 
     <!-- CỘT 2: QUY TRÌNH (PROCESS) -->
-    <div class="col-xl-4 col-lg-4 col-md-12 mb-3">
+    <div class="col-xl-4 col-lg-4 col-md-12 mb-3 workflow-col">
         <div class="card bcard h-100 border-1 brc-blue-m3 shadow-sm">
             <div class="card-header bgc-blue-d1 text-white">
                 <h5 class="card-title text-100 text-white font-bolder mb-0">
                     <i class="fa fa-project-diagram mr-1"></i> 2. QUY TRÌNH
                 </h5>
                 <div class="card-toolbar">
-                    <button type="button" id="btnAddProcess" class="btn btn-xs btn-white btn-h-light-blue btn-a-light-blue font-bolder border-0 disabled" disabled onclick="DigitalSalesWorkflow.openAddProcess()">
+                    <button type="button" id="btnAddProcess" class="btn btn-xs btn-white btn-h-light-blue btn-a-light-blue font-bolder border-0 disabled text-nowrap" disabled onclick="DigitalSalesWorkflow.openAddProcess()">
                         <i class="fa fa-plus text-blue mr-1"></i>Thêm quy trình
                     </button>
                 </div>
@@ -87,14 +87,14 @@
     </div>
 
     <!-- CỘT 3: TIẾN TRÌNH (PROGRESS) -->
-    <div class="col-xl-4 col-lg-4 col-md-12 mb-3">
+    <div class="col-xl-4 col-lg-4 col-md-12 mb-3 workflow-col">
         <div class="card bcard h-100 border-1 brc-success-m3 shadow-sm">
             <div class="card-header bgc-success-d1 text-white">
                 <h5 class="card-title text-100 text-white font-bolder mb-0">
                     <i class="fa fa-tasks mr-1"></i> 3. TIẾN TRÌNH
                 </h5>
                 <div class="card-toolbar">
-                    <button type="button" id="btnAddProgress" class="btn btn-xs btn-white btn-h-light-success btn-a-light-success font-bolder border-0 disabled" disabled onclick="DigitalSalesWorkflow.openAddProgress()">
+                    <button type="button" id="btnAddProgress" class="btn btn-xs btn-white btn-h-light-success btn-a-light-success font-bolder border-0 disabled text-nowrap" disabled onclick="DigitalSalesWorkflow.openAddProgress()">
                         <i class="fa fa-plus text-success mr-1"></i>Thêm tiến trình
                     </button>
                 </div>

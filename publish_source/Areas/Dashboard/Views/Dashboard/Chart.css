@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Dashboard Chart CSS - CenIT TOC CRM
    Tuân thủ quy chuẩn Ace Admin v4 / Bootstrap 4
    ========================================================================== */
@@ -505,3 +505,62 @@
     font-size: 12px;
 }
 
+
+/* ==========================================================================
+   Card Footer Pagination Styling
+   ========================================================================== */
+.db-card-pagination {
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 0 0 8px 8px;
+}
+
+.db-card-pagination .page-link {
+    color: #475569;
+    border-color: #e2e8f0;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 4px;
+    margin: 0 2px;
+    transition: all 0.15s ease;
+}
+
+.db-card-pagination .page-link:hover {
+    color: #2563eb;
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.db-card-pagination .page-item.active .page-link {
+    background-color: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+
+.db-card-pagination .page-item.disabled .page-link {
+    color: #cbd5e1;
+    background-color: #f8fafc;
+    border-color: #f1f5f9;
+    cursor: not-allowed;
+}
+
+.db-card-pagination .db-page-size-select {
+    height: 28px;
+    padding: 2px 8px;
+    font-size: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    color: #334155;
+    background-color: #f8fafc;
+}
+
+.db-card-pagination .db-page-size-select:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}

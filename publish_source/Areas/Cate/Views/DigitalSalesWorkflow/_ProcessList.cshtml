@@ -18,13 +18,13 @@
                  data-name="@item.ProcessName"
                  data-status-id="@item.StatusID"
                  onclick="return DigitalSalesWorkflow.selectProcess(@item.ProcessID, this, event)">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center text-truncate mr-2">
-                        <span class="badge badge-sm badge-pill mr-2 bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3">
+                <div class="d-flex justify-content-between align-items-center min-w-0">
+                    <div class="d-flex align-items-center flex-grow-1 min-w-0 mr-2">
+                        <span class="badge badge-sm badge-pill mr-2 bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3 flex-shrink-0">
                             <i class="fa fa-project-diagram"></i>
                         </span>
-                        <div class="text-truncate">
-                            <span class="font-bold text-dark-m1 process-name text-95">@item.ProcessName</span>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="font-bold text-dark-m1 process-name text-95 text-truncate" title="@item.ProcessName">@item.ProcessName</div>
                             <div class="text-secondary-m2 text-85 text-truncate">
                                 <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1">#@item.SortOrder</span>
                                 <code>@item.ProcessCode</code>
@@ -35,7 +35,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="process-actions action-buttons d-flex align-items-center">
+                    <div class="process-actions action-buttons flex-shrink-0 d-flex align-items-center">
                         <a href="/Cate/DigitalSalesWorkflow/EditProcess/@item.ProcessID"
                            onclick="return DigitalSalesWorkflow.openEditProcess(@item.ProcessID, event);"
                            data-modal="" data-modal-id="editProcess" data-width="700"

@@ -7,7 +7,7 @@
         foreach (var item in Model)
         {
             var activeClass = item.IsActive ? "" : "opacity-65";
-            var defaultBadge = item.IsDefault ? "<span class='badge bgc-yellow-l1 text-dark-m2 border-1 brc-yellow-m3 ml-1 text-80' title='Trạng thái mặc định'><i class='fa fa-star text-orange-d1 mr-1'></i>Default</span>" : "";
+            var defaultBadge = item.IsDefault ? "<span class='badge bgc-yellow-l1 text-dark-m2 border-1 brc-yellow-m3 ml-1 text-80 flex-shrink-0' title='Trạng thái mặc định'><i class='fa fa-star text-orange-d1 mr-1'></i>Default</span>" : "";
             var bgcClass = "bgc-blue-d1";
             var brcClass = "brc-blue-tp1";
             var iconClass = "fa-flag";
@@ -29,21 +29,23 @@
                  data-name="@item.StatusName"
                  data-type="@item.BusinessType"
                  onclick="return DigitalSalesWorkflow.selectStatus(@item.StatusID, this, event)">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center text-truncate mr-2">
-                        <span class="badge badge-sm badge-pill mr-2 text-white @bgcClass">
+                <div class="d-flex justify-content-between align-items-center min-w-0">
+                    <div class="d-flex align-items-center flex-grow-1 min-w-0 mr-2">
+                        <span class="badge badge-sm badge-pill mr-2 text-white flex-shrink-0 @bgcClass">
                             <i class="fa @iconClass"></i>
                         </span>
-                        <div class="text-truncate">
-                            <span class="font-bold text-dark-m1 status-name text-95">@item.StatusName</span>
-                            @Html.Raw(defaultBadge)
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex align-items-center min-w-0">
+                                <span class="font-bold text-dark-m1 status-name text-95 text-truncate" title="@item.StatusName">@item.StatusName</span>
+                                @Html.Raw(defaultBadge)
+                            </div>
                             <div class="text-secondary-m2 text-85 text-truncate">
                                 <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1">#@item.SortOrder</span>
                                 <code>@item.StatusCode</code>
                             </div>
                         </div>
                     </div>
-                    <div class="status-actions action-buttons d-flex align-items-center">
+                    <div class="status-actions action-buttons flex-shrink-0 d-flex align-items-center">
                         <a href="/Cate/DigitalSalesWorkflow/EditStatus/@item.StatusID"
                            onclick="return DigitalSalesWorkflow.openEditStatus(@item.StatusID, event);"
                            data-modal="" data-modal-id="editStatus" data-width="700"
