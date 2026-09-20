@@ -662,7 +662,7 @@ namespace Core.Cate.Biz
                 var children = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
                 foreach (var p in parents)
                 {
-                    p.TodoList = children.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.TrackingID).ToList();
+                    p.TodoList = children.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID).ToList();
                 }
             }
             return list ?? new List<RM_DigitalSalesTrackingModel>();

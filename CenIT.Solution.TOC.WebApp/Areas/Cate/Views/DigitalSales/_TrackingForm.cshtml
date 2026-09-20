@@ -11,7 +11,7 @@
 
 <div class="row">
     <!-- 1. Mã tiến trình (readonly) -->
-    <div class="col-md-4 form-group">
+    <div class="col-md-3 form-group">
         <label class="text-85 text-600 mb-1 d-block">Mã tiến trình</label>
         <div class="input-group">
             <div class="input-group-prepend">
@@ -23,7 +23,7 @@
     </div>
 
     <!-- 2. Quy trình (nếu có) -->
-    <div class="col-md-8 form-group">
+    <div class="col-md-6 form-group">
         <label class="text-85 text-600 mb-1 d-block">Quy trình</label>
         <div class="input-group">
             <div class="input-group-prepend">
@@ -31,6 +31,18 @@
             </div>
             <input type="text" class="form-control readonly-field" value="@(ViewBag.ProcessName as string ?? Model.ProcessName ?? "Quy trình chung")" readonly />
         </div>
+    </div>
+
+    <!-- 3. Số thứ tự (STT) -->
+    <div class="col-md-3 form-group">
+        <label class="text-85 text-600 mb-1 d-block">STT <span class="text-danger">*</span></label>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text bgc-grey-l4"><i class="fa fa-sort-numeric-down text-secondary"></i></span>
+            </div>
+            @Html.TextBoxFor(m => m.SortOrder, new { @class = "form-control font-bold text-center", id = "Tracking_SortOrder", type = "number", min = "1", step = "1", placeholder = "STT", required = "required" })
+        </div>
+        @Html.ValidationMessageFor(m => m.SortOrder, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
     </div>
 </div>
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -20,62 +20,68 @@ namespace TSFramework.Libs.Providers
 
         private static string _providerName { get; set; }
 
+        private static readonly object _lockObj = new object();
         private static XmlProviders _xmlProviders { get; set; }
 
         private static XmlProviders XmlProviders
         {
             get
             {
-                //if (_xmlProviders?.Procedures != null) return _xmlProviders;
-                var xmlProcedureFullPath = HostingEnvironment.MapPath(StoredProcedureConfigPath);
-                var allProcedureXmlFiles = Directory.GetFiles(xmlProcedureFullPath, "*.xml", SearchOption.AllDirectories);
-                foreach (var procedureXmlFile in allProcedureXmlFiles)
-                    using (var reader = XmlReader.Create(procedureXmlFile))
+                if (_xmlProviders?.Procedures != null) return _xmlProviders;
+                lock (_lockObj)
+                {
+                    if (_xmlProviders?.Procedures != null) return _xmlProviders;
+                    var xmlProcedureFullPath = HostingEnvironment.MapPath(StoredProcedureConfigPath);
+                    if (string.IsNullOrEmpty(xmlProcedureFullPath) || !Directory.Exists(xmlProcedureFullPath)) return new XmlProviders { Procedures = new List<XmlProcedure>() };
+
+                    var allProcedureXmlFiles = Directory.GetFiles(xmlProcedureFullPath, "*.xml", SearchOption.AllDirectories);
+                    var newXmlProviders = new XmlProviders { Procedures = new List<XmlProcedure>() };
+
+                    foreach (var procedureXmlFile in allProcedureXmlFiles)
                     {
-                        var serializer = new XmlSerializer(typeof(XmlProviders));
-                        var procedureXmlProvider = (XmlProviders)serializer.Deserialize(reader);
-                        if (procedureXmlProvider == null || procedureXmlProvider.Procedures.Count == 0) continue;
-                        if (_xmlProviders == null)
+                        using (var reader = XmlReader.Create(procedureXmlFile))
                         {
-                            _xmlProviders = procedureXmlProvider;
-                            continue;
-                        }
+                            var serializer = new XmlSerializer(typeof(XmlProviders));
+                            var procedureXmlProvider = (XmlProviders)serializer.Deserialize(reader);
+                            if (procedureXmlProvider == null || procedureXmlProvider.Procedures == null || procedureXmlProvider.Procedures.Count == 0) continue;
 
-                        procedureXmlProvider.Procedures.ForEach(p =>
-                        {
-                            var providerProcedure =
-                                _xmlProviders.Procedures.FirstOrDefault(e => e.ProviderName == p.ProviderName);
-                            if (providerProcedure == null)
+                            procedureXmlProvider.Procedures.ForEach(p =>
                             {
-                                _xmlProviders.Procedures.Add(new XmlProcedure
+                                var providerProcedure =
+                                    newXmlProviders.Procedures.FirstOrDefault(e => e.ProviderName == p.ProviderName);
+                                if (providerProcedure == null)
                                 {
-                                    ProviderName = p.ProviderName,
-                                    Procedures = p.Procedures != null ? p.Procedures.Clone() : new List<Procedure>()
-                                });
-                            }
-                            else
-                            {
-                                if (providerProcedure.Procedures == null)
-                                {
-                                    providerProcedure.Procedures = new List<Procedure>();
-                                }
-
-                                if (p.Procedures != null)
-                                {
-                                    p.Procedures.ForEach(sp =>
+                                    newXmlProviders.Procedures.Add(new XmlProcedure
                                     {
-                                        if (sp == null) return;
-                                        if (providerProcedure.Procedures.Exists(pp =>
-                                                pp != null && sp.Value == pp.Value && sp.Name == pp.Name)) return;
-                                        providerProcedure.Procedures.Add(sp);
+                                        ProviderName = p.ProviderName,
+                                        Procedures = p.Procedures != null ? p.Procedures.Clone() : new List<Procedure>()
                                     });
                                 }
-                            }
-                        });
+                                else
+                                {
+                                    if (providerProcedure.Procedures == null)
+                                    {
+                                        providerProcedure.Procedures = new List<Procedure>();
+                                    }
+
+                                    if (p.Procedures != null)
+                                    {
+                                        p.Procedures.ForEach(sp =>
+                                        {
+                                            if (sp == null) return;
+                                            if (providerProcedure.Procedures.Exists(pp =>
+                                                    pp != null && sp.Value == pp.Value && sp.Name == pp.Name)) return;
+                                            providerProcedure.Procedures.Add(sp);
+                                        });
+                                    }
+                                }
+                            });
+                        }
                     }
 
-
-                return _xmlProviders;
+                    _xmlProviders = newXmlProviders;
+                    return _xmlProviders;
+                }
             }
         }
 
@@ -89,7 +95,9 @@ namespace TSFramework.Libs.Providers
                     ConfigurationManager.AppSettings["App_LibraryProcPath"] ?? "Procedures");
 
             if (spProviders != null)
-                XmlProviders.Procedures.ForEach(xp =>
+            {
+                var procs = XmlProviders.Procedures?.ToList() ?? new List<XmlProcedure>();
+                procs.ForEach(xp =>
                 {
                     var dProvider = DataService.GetInstance(xp.ProviderName);
                     var libSpProvider =
@@ -103,6 +111,7 @@ namespace TSFramework.Libs.Providers
                     storeProceduresProvider.Add(xp.ProviderName,
                         libSpProvider.Instance(xp.ProviderName, dict));
                 });
+            }
 
             var nSpProviders = new StoreProcedureProvider { DicStoreProceduresProvider = storeProceduresProvider };
 
@@ -119,20 +128,22 @@ namespace TSFramework.Libs.Providers
             var dProvider = DataService.GetInstance(providerName);
 
             if (spProviders != null)
-                XmlProviders.Procedures.Where(xp => xp.ProviderName == providerName).ToList()
-                    .ForEach(xp =>
-                    {
-                        var libSpProvider =
-                            spProviders.ToList().FirstOrDefault(sp => sp.ProviderType == dProvider.GetType());
-                        if (libSpProvider == null) return;
-                        if (storeProceduresProvider.Keys.Contains(xp.ProviderName)) return;
-                        var dict = (xp.Procedures ?? new List<Procedure>())
-                            .Where(p => p != null && !string.IsNullOrEmpty(p.Name))
-                            .GroupBy(p => p.Name)
-                            .ToDictionary(g => g.Key, g => g.First().Value);
-                        storeProceduresProvider.Add(xp.ProviderName,
-                            libSpProvider.Instance(xp.ProviderName, dict));
-                    });
+            {
+                var procs = (XmlProviders.Procedures ?? new List<XmlProcedure>()).Where(xp => xp.ProviderName == providerName).ToList();
+                procs.ForEach(xp =>
+                {
+                    var libSpProvider =
+                        spProviders.ToList().FirstOrDefault(sp => sp.ProviderType == dProvider.GetType());
+                    if (libSpProvider == null) return;
+                    if (storeProceduresProvider.Keys.Contains(xp.ProviderName)) return;
+                    var dict = (xp.Procedures ?? new List<Procedure>())
+                        .Where(p => p != null && !string.IsNullOrEmpty(p.Name))
+                        .GroupBy(p => p.Name)
+                        .ToDictionary(g => g.Key, g => g.First().Value);
+                    storeProceduresProvider.Add(xp.ProviderName,
+                        libSpProvider.Instance(xp.ProviderName, dict));
+                });
+            }
 
             var nSpProviders = new StoreProcedureProvider { DicStoreProceduresProvider = storeProceduresProvider };
 
