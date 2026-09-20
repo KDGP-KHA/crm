@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
@@ -87,7 +87,11 @@ WHERE bo.BusinessOpportunityID = @ID AND bo.IsDeleted = 0";
                                 }
 
                                 result.SourceCode = r["CodeOpportunity"]?.ToString();
-                                result.Title = r["OpportunityName"]?.ToString();
+                                if (string.IsNullOrWhiteSpace(result.SourceCode)) result.SourceCode = $"BO{sourceId}";
+                                string rawOppName = r["OpportunityName"]?.ToString() ?? "";
+                                result.Title = !string.IsNullOrWhiteSpace(result.SourceCode) && !rawOppName.EndsWith($"({result.SourceCode})")
+                                    ? $"{rawOppName} ({result.SourceCode})".Trim()
+                                    : rawOppName;
                                 if (r["CustomerID"] != DBNull.Value) result.CustomerID = Convert.ToInt32(r["CustomerID"]);
                                 result.CustomerName = r["CustomerName"]?.ToString();
                                 if (r["ContactPerson_ID"] != DBNull.Value) result.ContactPersonID = Convert.ToInt32(r["ContactPerson_ID"]);
@@ -262,7 +266,10 @@ WHERE p.ProjectID = @ID AND p.IsDeleted = 0";
                                 }
 
                                 result.SourceCode = $"PRJ-{sourceId:D4}";
-                                result.Title = r["ProjectName"]?.ToString();
+                                string rawPrjName = r["ProjectName"]?.ToString() ?? "";
+                                result.Title = !string.IsNullOrWhiteSpace(result.SourceCode) && !rawPrjName.EndsWith($"({result.SourceCode})")
+                                    ? $"{rawPrjName} ({result.SourceCode})".Trim()
+                                    : rawPrjName;
                                 if (r["CustomerID"] != DBNull.Value) result.CustomerID = Convert.ToInt32(r["CustomerID"]);
                                 result.CustomerName = r["CustomerName"]?.ToString();
                                 if (r["ContactPerson_ID"] != DBNull.Value) result.ContactPersonID = Convert.ToInt32(r["ContactPerson_ID"]);
@@ -524,7 +531,7 @@ WHERE IsDeleted = 0 AND (
                                 {
                                     cmd.Transaction = tran;
                                     cmd.CommandText = @"
-SELECT bo.OpportunityName, bo.CustomerID, bo.ContactPerson_ID,
+SELECT bo.OpportunityName, bo.CodeOpportunity, bo.CustomerID, bo.ContactPerson_ID,
        ISNULL(bo.ExpectedValue, 0) * 1000000.0 AS ExpectedRevenue,
        ISNULL(bo.ClosingProbability, 50.0) AS ClosingProb,
        bo.Description, bo.CreatedDate, bo.CreatedBy, bo.LastModifiedDate, bo.LastModifiedBy,
@@ -538,7 +545,15 @@ WHERE bo.BusinessOpportunityID = @ID";
                                     {
                                         if (!r.Read()) throw new Exception($"Không tìm thấy Cơ hội với ID = {model.SourceID}");
 
-                                        string title = r["OpportunityName"]?.ToString();
+                                        string rawTitle = r["OpportunityName"]?.ToString() ?? "";
+                                        string oppCode = r["CodeOpportunity"]?.ToString();
+                                        if (string.IsNullOrWhiteSpace(oppCode)) oppCode = $"BO{model.SourceID}";
+                                        string title = rawTitle;
+                                        if (!string.IsNullOrWhiteSpace(oppCode) && !rawTitle.EndsWith($"({oppCode})"))
+                                        {
+                                            title = $"{rawTitle} ({oppCode})".Trim();
+                                        }
+                                        if (title.Length > 500) title = title.Substring(0, 500);
                                         int? customerId = r["CustomerID"] != DBNull.Value ? (int?)Convert.ToInt32(r["CustomerID"]) : null;
                                         int? contactId = r["ContactPerson_ID"] != DBNull.Value ? (int?)Convert.ToInt32(r["ContactPerson_ID"]) : null;
                                         decimal expRev = Convert.ToDecimal(r["ExpectedRevenue"]);
@@ -693,7 +708,14 @@ WHERE p.ProjectID = @ID";
                                     {
                                         if (!r.Read()) throw new Exception($"Không tìm thấy Dự án với ID = {model.SourceID}");
 
-                                        string title = r["ProjectName"]?.ToString();
+                                        string rawTitle = r["ProjectName"]?.ToString() ?? "";
+                                        string prjCode = $"PRJ-{model.SourceID:D4}";
+                                        string title = rawTitle;
+                                        if (!string.IsNullOrWhiteSpace(prjCode) && !rawTitle.EndsWith($"({prjCode})"))
+                                        {
+                                            title = $"{rawTitle} ({prjCode})".Trim();
+                                        }
+                                        if (title.Length > 500) title = title.Substring(0, 500);
                                         int? customerId = r["CustomerID"] != DBNull.Value ? (int?)Convert.ToInt32(r["CustomerID"]) : null;
                                         int? contactId = r["ContactPerson_ID"] != DBNull.Value ? (int?)Convert.ToInt32(r["ContactPerson_ID"]) : null;
                                         decimal expRev = Convert.ToDecimal(r["ExpectedRevenue"]);
