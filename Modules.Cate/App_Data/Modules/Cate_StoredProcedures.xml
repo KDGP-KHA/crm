@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 
 <Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<StoredProcedures ProviderName="CenIT.Provider.Major">
@@ -400,6 +400,13 @@
 		<Procedure Name="RM_DigitalSales_ToggleFollow" Value="RM_DigitalSales_ToggleFollow" />
 		<Procedure Name="Sys_UserGuideState_IsViewed" Value="Sys_UserGuideState_IsViewed" />
 		<Procedure Name="Sys_UserGuideState_MarkViewed" Value="Sys_UserGuideState_MarkViewed" />
+
+		<!-- Sys_UserGuideConfig -->
+		<Procedure Name="Sys_UserGuideConfig_GetByScreenCode" Value="Sys_UserGuideConfig_GetByScreenCode" />
+		<Procedure Name="Sys_UserGuideConfig_GetAll" Value="Sys_UserGuideConfig_GetAll" />
+		<Procedure Name="Sys_UserGuideConfig_SaveStep" Value="Sys_UserGuideConfig_SaveStep" />
+		<Procedure Name="Sys_UserGuideConfig_DeleteStep" Value="Sys_UserGuideConfig_DeleteStep" />
+		<Procedure Name="Sys_UserGuideConfig_DeleteByScreenCode" Value="Sys_UserGuideConfig_DeleteByScreenCode" />
 
 		<!-- RM_DigitalSalesProduct -->
 		<Procedure Name="RM_DigitalSalesProduct_GetBySalesID" Value="RM_DigitalSalesProduct_GetBySalesID" />

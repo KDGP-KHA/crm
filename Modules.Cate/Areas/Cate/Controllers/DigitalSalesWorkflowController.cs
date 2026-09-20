@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Principals;
 using TSFramework.Libs.Processors;
 using TSFramework.Libs.Utils;
 
@@ -26,17 +27,66 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _userCache = new SysUserCache();
         }
 
-        private bool IsUserQTHT(string userName)
+        private string CurrentUserName => User?.UserName ?? (User?.Identity?.Name ?? (HttpContext?.User?.Identity?.Name ?? (Session?["FrontEndUser"] as AppPrincipal)?.UserName ?? ""));
+        private int? CurrentUserId => (User?.UserId > 0 ? User?.UserId : null) ?? (Session?["FrontEndUser"] as AppPrincipal)?.UserId;
+
+        private bool IsUserQTHT(string userName = null, int? userId = null)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(userName)) return false;
-                if (userName.Equals("admin", StringComparison.OrdinalIgnoreCase) || userName.Equals("quantri", StringComparison.OrdinalIgnoreCase)) return true;
-
-                var u = _userCache.GetByUserName(userName);
-                if (u != null && u.UserId > 0)
+                if (!userId.HasValue || userId.Value <= 0)
                 {
-                    var roles = _userCache.GetRoles(u.UserId);
+                    userId = CurrentUserId;
+                }
+
+                if (string.IsNullOrWhiteSpace(userName))
+                {
+                    userName = CurrentUserName;
+                }
+                if (string.IsNullOrWhiteSpace(userName))
+                {
+                    userName = (Session?["FrontEndUser"] as AppPrincipal)?.UserName;
+                }
+
+                if (string.IsNullOrWhiteSpace(userName) && (!userId.HasValue || userId.Value <= 0))
+                {
+                    return false;
+                }
+
+                var rawName = (userName ?? "").Trim();
+                var cleanName = rawName;
+                if (cleanName.Contains("\\")) cleanName = cleanName.Substring(cleanName.LastIndexOf('\\') + 1);
+                if (cleanName.Contains("@")) cleanName = cleanName.Substring(0, cleanName.IndexOf('@'));
+
+                if (cleanName.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+                    cleanName.Equals("quantri", StringComparison.OrdinalIgnoreCase) ||
+                    rawName.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+                    rawName.Equals("quantri", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (!userId.HasValue || userId.Value <= 0)
+                {
+                    var u = _userCache.GetByUserName(cleanName) 
+                         ?? _userCache.GetByUserName(rawName)
+                         ?? _userCache.GetByUserName(cleanName.Replace('-', '.'))
+                         ?? _userCache.GetByUserName(cleanName.Replace('.', '-'));
+
+                    if (u == null && rawName.Contains("@"))
+                    {
+                        u = _userCache.GetByEmail(rawName);
+                    }
+                    if (u == null && !string.IsNullOrWhiteSpace(cleanName))
+                    {
+                        u = _userCache.GetByEmail(cleanName + "@vnpt.vn");
+                    }
+                    userId = u?.UserId;
+                }
+
+                if (userId.HasValue && userId.Value > 0)
+                {
+                    var roles = _userCache.GetRoles(userId.Value);
                     if (roles != null && roles.Any(r => r.RoleId == 1 || (r.Name != null && (r.Name.Equals("QTHT", StringComparison.OrdinalIgnoreCase) || UtilString.ConvertToUnSign(r.Name).IndexOf("quan tri", StringComparison.OrdinalIgnoreCase) >= 0))))
                     {
                         return true;
@@ -55,7 +105,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpGet]
         public ActionResult Index(byte? businessType)
         {
-            if (!IsUserQTHT(User.UserName))
+            if (!IsUserQTHT(CurrentUserName, CurrentUserId))
             {
                 return RedirectToAction("Index", "DigitalSales", new { area = "Cate" });
             }

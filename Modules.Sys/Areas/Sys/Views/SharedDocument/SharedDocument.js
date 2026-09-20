@@ -10,6 +10,7 @@ var _tableSharedDocument;
 
 $(document).ready(function () {
     initTableSharedDocument();
+    normalizeSharedDocumentSearchText();
 
     // Khá»Ÿi táº¡o datepicker chuáº©n tiáº¿ng Viá»‡t
     if ($.fn.datepicker) {
@@ -34,6 +35,19 @@ $(document).ready(function () {
         SearchSharedDoc();
     });
 });
+
+function normalizeSharedDocumentSearchText() {
+    $("#SearchSharedDocument label, #SearchSharedDocument .card-title, #SearchSharedDocument button").each(function () {
+        var $item = $(this);
+        $item.contents().filter(function () { return this.nodeType === 3; }).each(function () {
+            this.nodeValue = normalizeVietnameseText(this.nodeValue);
+        });
+    });
+    $("#SearchSharedDocument input").each(function () {
+        var $input = $(this);
+        $input.attr("placeholder", normalizeVietnameseText($input.attr("placeholder")));
+    });
+}
 
 function SearchSharedDoc() {
     if (_tableSharedDocument) {
@@ -60,6 +74,7 @@ function _docRenderButton(hasPerm, modalId, cssClass, url, iconHtml, title, data
 
 function escapeHtml(text) {
     if (!text) return "";
+    text = normalizeVietnameseText(text);
     var map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -68,6 +83,18 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.toString().replace(/[&<>"']/g, function (m) { return map[m]; });
+}
+
+function formatSharedDocumentDate(value) {
+    if (!value) return "";
+
+    var millisecondsMatch = /\/Date\((-?\d+)/.exec(value.toString());
+    var date = millisecondsMatch ? new Date(parseInt(millisecondsMatch[1], 10)) : new Date(value);
+    if (isNaN(date.getTime())) return value.toString();
+
+    function pad(number) { return number < 10 ? "0" + number : number; }
+    return pad(date.getDate()) + "/" + pad(date.getMonth() + 1) + "/" + date.getFullYear() +
+        " " + pad(date.getHours()) + ":" + pad(date.getMinutes());
 }
 
 function initTableSharedDocument() {
@@ -148,7 +175,7 @@ function initTableSharedDocument() {
                 "className": "text-left",
                 "render": function (data, type, row) {
                     var safeUploader = escapeHtml(data || "");
-                    var safeDate = escapeHtml(row.CreatedDateFormatted || (row.CreatedDate ? row.CreatedDate : ""));
+                    var safeDate = escapeHtml(formatSharedDocumentDate(row.CreatedDateFormatted || row.CreatedDate));
                     return '<div><i class="fa fa-user text-grey-m1 mr-1"></i><span class="font-bold">' + safeUploader + '</span></div>' +
                            '<div class="text-secondary text-85"><i class="far fa-clock mr-1"></i>' + safeDate + '</div>';
                 }
@@ -186,7 +213,17 @@ function initTableSharedDocument() {
                     return html;
                 }
             }
-        ]
+        ],
+        "drawCallback": function () {
+            $("#DSSharedDocument a[href*='/SharedDocument/Download/']").attr("title", "Tải về");
+            $("#DSSharedDocument [data-modal-id='DetailSharedDocument']").attr("title", "Chi tiết");
+            $("#DSSharedDocument [data-modal-id='EditSharedDocument']").attr("title", "Chỉnh sửa");
+            $("#DSSharedDocument [data-modal-id='DeleteSharedDocument']").attr("title", "Xóa");
+            $("#DSSharedDocument [title]").each(function () {
+                var $item = $(this);
+                $item.attr("title", normalizeVietnameseText($item.attr("title")));
+            });
+        }
     });
 }
 
@@ -232,5 +269,15 @@ function SharedDocument_OnProcessSuccess(response, formId) {
             $bodyForm = $("#ModalContent #modal_" + formId + " .bodyForm, #ModalContent #modal_" + formId + " #bodyForm");
         }
         $bodyForm.html(response);
+    }
+}
+
+function normalizeVietnameseText(text) {
+    var value = text == null ? "" : text.toString();
+    if (!/[ÃÂ]/.test(value)) return value;
+    try {
+        return decodeURIComponent(escape(value));
+    } catch (e) {
+        return value;
     }
 }

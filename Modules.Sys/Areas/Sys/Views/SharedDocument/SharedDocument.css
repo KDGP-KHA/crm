@@ -1,23 +1,5 @@
 ﻿/* CenIT TOC CRM - Shared Document Management Styles */
 
-/* Standard 32px height for all search card inputs and dropdowns */
-#SearchSharedDocument .form-control,
-#SearchSharedDocument .search-control-32,
-#SearchSharedDocument .input-group-text {
-    height: 32px !important;
-    font-size: 0.9rem !important;
-    padding-top: 4px !important;
-    padding-bottom: 4px !important;
-}
-
-#SearchSharedDocument .input-group {
-    height: 32px;
-}
-
-#SearchSharedDocument .input-group .input-group-prepend .input-group-text {
-    padding: 0.25rem 0.5rem;
-}
-
 /* Datepicker popup z-index for search card and modals */
 .datepicker.datepicker-dropdown {
     z-index: 1060 !important;

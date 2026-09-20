@@ -16,7 +16,7 @@
     @using (Html.BeginForm("Edit", "SharedDocument", new { area = "Sys" }, FormMethod.Post,
         new { encType = "multipart/form-data", id = "EditSharedDocument", @class = "form-horizontal" }))
     {
-        <div id="bodyForm_Edit" class="bodyForm">
+        <div id="bodyForm" class="bodyForm">
             @Html.Partial("_EditDoc_View")
         </div>
     }

@@ -3,6 +3,11 @@
 
 @{
     ViewBag.Title = "Danh sách kinh doanh sản phẩm dịch vụ số";
+    bool isQTHT = ViewBag.IsQTHT == true;
+    string guideBtnText = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Button");
+    if (string.IsNullOrEmpty(guideBtnText)) { guideBtnText = "Hướng dẫn"; }
+    string guideConfigTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_ConfigButton");
+    if (string.IsNullOrEmpty(guideConfigTitle)) { guideConfigTitle = "Cấu hình hướng dẫn"; }
 }
 
 @section PageTitle {
@@ -14,7 +19,7 @@
 }
 
 @section PageAction {
-    @if (ViewBag.IsQTHT == true)
+    @if (isQTHT)
     {
         <a href="@Url.Action("Index", "DigitalSalesWorkflow", new { area = "Cate" })" class="btn btn-sm btn-outline-purple mr-2">
             <i class="fa fa-sitemap mr-1"></i> Cấu hình Quy trình & Tiến trình
@@ -23,6 +28,17 @@
     <button type="button" class="btn btn-sm btn-primary" onclick="openAddSalesModal();">
         <i class="fa fa-plus-circle mr-1"></i> Khởi tạo Cơ hội mới
     </button>
+    <div class="btn-group ml-2 shadow-sm flex-shrink-0">
+        <button type="button" id="btnDigitalSalesGuide" class="btn btn-sm btn-white btn-h-light-info border-1 brc-info-m2 text-info-d2 px-25 py-15 @(isQTHT ? "radius-l-1 border-r-0" : "radius-1")" title="Xem hướng dẫn sử dụng" onclick="startDigitalSalesIndexGuide();">
+            <i class="fa fa-question-circle mr-1"></i> @guideBtnText
+        </button>
+        @if (isQTHT)
+        {
+            <button type="button" id="btnConfigGuide" class="btn btn-sm btn-white btn-h-light-info border-1 brc-info-m2 text-info-d2 px-2 py-15 radius-r-1" title="@guideConfigTitle" onclick="openGuideConfigModal('Cate.DigitalSales.Index');">
+                <i class="fa fa-cog"></i>
+            </button>
+        }
+    </div>
 }
 
 <div class="mb-3">
@@ -31,6 +47,7 @@
 
 @section HeadCss {
     <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Index.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Detail.css?v=@DateTime.Now.Ticks" />
 }
 
 <div class="card dcard">
@@ -58,5 +75,15 @@
 
 @section BottomScript {
     <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script>
+        window._digitalSalesGuide = {
+            screenCode: "Cate.DigitalSales.Index",
+            canConfig: @(isQTHT ? "true" : "false"),
+            getConfigUrl: "@Url.Action("GetGuideConfigModal", "DigitalSales", new { area = "Cate" })",
+            saveConfigUrl: "@Url.Action("SaveGuideConfig", "DigitalSales", new { area = "Cate" })",
+            resetConfigUrl: "@Url.Action("ResetGuideConfig", "DigitalSales", new { area = "Cate" })",
+            steps: @Html.Raw(ViewBag.GuideStepsJson ?? "{}")
+        };
+    </script>
     <script src="~/Areas/Cate/Views/DigitalSales/DigitalSales.js?v=@DateTime.Now.Ticks"></script>
 }

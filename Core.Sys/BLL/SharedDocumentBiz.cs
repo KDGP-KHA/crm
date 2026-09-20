@@ -97,9 +97,8 @@ namespace Core.Sys.BLL
         {
             EnsureProcedureMapping();
             if (model == null) return 0;
-            var result = AppProcessor.ProcedureProvider.Execute(
+            return ExecuteResult(
                 _spCategoryInsertUpdate,
-                DATA_PROVIDER_NAME,
                 model.CategoryId,
                 model.CategoryName,
                 model.Description,
@@ -107,19 +106,16 @@ namespace Core.Sys.BLL
                 model.IsActive,
                 userName
             );
-            return result.GetValueOrDefault(0);
         }
 
         public int DeleteCategory(int categoryId, string userName)
         {
             EnsureProcedureMapping();
-            var result = AppProcessor.ProcedureProvider.Execute(
+            return ExecuteResult(
                 _spCategoryDelete,
-                DATA_PROVIDER_NAME,
                 categoryId,
                 userName
             );
-            return result.GetValueOrDefault(0);
         }
 
         #endregion
@@ -181,9 +177,8 @@ namespace Core.Sys.BLL
 
             if (model.DocumentId == 0)
             {
-                var result = AppProcessor.ProcedureProvider.Execute(
+                return ExecuteResult(
                     _spDocumentInsert,
-                    DATA_PROVIDER_NAME,
                     model.CategoryId,
                     model.DocumentName,
                     model.Description,
@@ -194,13 +189,11 @@ namespace Core.Sys.BLL
                     model.FileExtension,
                     userName
                 );
-                return result.GetValueOrDefault(0);
             }
             else
             {
-                var result = AppProcessor.ProcedureProvider.Execute(
+                return ExecuteResult(
                     _spDocumentUpdate,
-                    DATA_PROVIDER_NAME,
                     model.DocumentId,
                     model.CategoryId,
                     model.DocumentName,
@@ -212,7 +205,6 @@ namespace Core.Sys.BLL
                     model.FileExtension,
                     userName
                 );
-                return result.GetValueOrDefault(0);
             }
         }
 
@@ -221,13 +213,11 @@ namespace Core.Sys.BLL
             EnsureProcedureMapping();
             if (documentId <= 0) return 0;
 
-            var result = AppProcessor.ProcedureProvider.Execute(
+            return ExecuteResult(
                 _spDocumentDelete,
-                DATA_PROVIDER_NAME,
                 documentId,
                 userName
             );
-            return result.GetValueOrDefault(0);
         }
 
         public int TrackDownload(int documentId, string downloadedBy)
@@ -235,13 +225,17 @@ namespace Core.Sys.BLL
             EnsureProcedureMapping();
             if (documentId <= 0) return 0;
 
-            var result = AppProcessor.ProcedureProvider.Execute(
+            return ExecuteResult(
                 _spDocumentTrackDownload,
-                DATA_PROVIDER_NAME,
                 documentId,
                 downloadedBy
             );
-            return result.GetValueOrDefault(0);
+        }
+
+        private static int ExecuteResult(string procedureName, params object[] parameters)
+        {
+            var result = AppProcessor.ProcedureProvider.ExecuteScalar(procedureName, DATA_PROVIDER_NAME, parameters);
+            return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
         }
 
         #endregion

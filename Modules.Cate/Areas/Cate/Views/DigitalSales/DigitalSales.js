@@ -1,4 +1,4 @@
-var _tableDigitalSales;
+﻿var _tableDigitalSales;
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -845,4 +845,313 @@ $(document).on('change', '.status-item', function () {
     updateStatusDropdownText();
     reloadSalesTable();
 });
+
+// ==========================================
+// HƯỚNG DẪN SỬ DỤNG & CẤU HÌNH HƯỚNG DẪN (INDEX)
+// ==========================================
+function executeResponseMessage(message) {
+    if (!message) return;
+    try {
+        if (typeof message === "string" && (message.indexOf("toastr") !== -1 || message.indexOf("alert") !== -1 || message.indexOf("showNotify") !== -1)) {
+            eval(message);
+        } else if (typeof toastr !== "undefined") {
+            toastr.info(message);
+        } else if (typeof $.aceToaster !== "undefined") {
+            $.aceToaster.add({ title: "Thông báo", body: message, placement: "tr", className: "bgc-info-d2 text-white" });
+        }
+    } catch (e) {
+        if (typeof toastr !== "undefined") {
+            toastr.info(message);
+        }
+    }
+}
+
+var DigitalSalesGuide = (function () {
+    var steps = [];
+    var current = 0;
+    var activeScreenCode = "";
+    var $overlay, $tooltip, $activeTarget, isOpen = false;
+
+    function clearHighlight() {
+        if ($activeTarget) $activeTarget.removeClass("ds-guide-highlight");
+        $activeTarget = null;
+    }
+    function close() {
+        clearHighlight();
+        if ($overlay) $overlay.remove();
+        if ($tooltip) $tooltip.remove();
+        $overlay = $tooltip = null;
+        isOpen = false;
+        $(window).off("resize.dsGuide scroll.dsGuide");
+    }
+    function position() {
+        if (!$tooltip || !$activeTarget || !$activeTarget.length) return;
+        var r = $activeTarget[0].getBoundingClientRect();
+        var tooltipWidth = Math.min(380, $(window).width() - 32);
+        var top = r.bottom + 14;
+        if (top + $tooltip.outerHeight() > $(window).height() - 12) top = Math.max(12, r.top - $tooltip.outerHeight() - 14);
+        var left = Math.max(16, Math.min(r.left, $(window).width() - tooltipWidth - 16));
+        $tooltip.css({ top: top + "px", left: left + "px", width: tooltipWidth + "px" });
+    }
+    function showStep(index) {
+        current = index;
+        clearHighlight();
+        var step = steps[current];
+        var $target = $(step.selector).filter(":visible").first();
+        if (!$target.length) { if (current < steps.length - 1) return showStep(current + 1); close(); return; }
+        $activeTarget = $target.addClass("ds-guide-highlight");
+        var isLast = current === steps.length - 1;
+        var canConfig = window._digitalSalesGuide && _digitalSalesGuide.canConfig;
+        var configBtnHtml = canConfig ? '<button type="button" class="btn btn-xs btn-outline-secondary ds-guide-edit-btn" title="Cấu hình hướng dẫn"><i class="fa fa-cog mr-1"></i>Cấu hình</button>' : '';
+
+        $tooltip.find(".ds-guide-body").html(
+            '<div class="ds-guide-title">' + step.title + '</div>' +
+            '<div class="ds-guide-text">' + step.text + '</div>' +
+            '<div class="ds-guide-footer">' +
+            '<span class="ds-guide-counter mr-2">' + (current + 1) + '/' + steps.length + '</span>' +
+            configBtnHtml +
+            '<div>' + (current > 0 ? '<button type="button" class="btn btn-sm btn-light ds-guide-prev">Quay lại</button>' : '') +
+            '<button type="button" class="btn btn-sm btn-primary ml-1 ds-guide-next">' + (isLast ? 'Đã hiểu' : 'Tiếp theo') + '</button></div></div>');
+        $target[0].scrollIntoView({ behavior: "smooth", block: "center" });
+        window.setTimeout(position, 250);
+    }
+    function start(tourSteps, markViewed, screenCode) {
+        if (!tourSteps || !tourSteps.length || isOpen) return;
+        steps = tourSteps;
+        activeScreenCode = screenCode || "";
+        close();
+        isOpen = true;
+        $overlay = $('<div class="ds-guide-overlay" aria-hidden="true"></div>').appendTo("body");
+        $tooltip = $('<section class="ds-guide-tooltip" role="dialog" aria-label="Hướng dẫn sử dụng"><button type="button" class="ds-guide-close" aria-label="Đóng hướng dẫn">&times;</button><div class="ds-guide-body"></div></section>').appendTo("body");
+        $tooltip.on("click", ".ds-guide-close", close)
+            .on("click", ".ds-guide-prev", function () { showStep(current - 1); })
+            .on("click", ".ds-guide-next", function () { if (current >= steps.length - 1) close(); else showStep(current + 1); })
+            .on("click", ".ds-guide-edit-btn", function () {
+                var sc = activeScreenCode;
+                close();
+                if (typeof window.openGuideConfigModal === "function") {
+                    window.openGuideConfigModal(sc);
+                }
+            });
+        $(window).on("resize.dsGuide scroll.dsGuide", position);
+        showStep(0);
+    }
+    return { start: start, close: close, isOpen: function () { return isOpen; } };
+}());
+
+function startDigitalSalesIndexGuide() {
+    var defaultIndexSteps = [
+        { selector: ".Search.card", title: "Bộ lọc tìm kiếm", text: "Tìm kiếm hồ sơ theo từ khóa, khách hàng, AM chủ trì, trạng thái, thời gian." },
+        { selector: "#tblDigitalSales", title: "Danh sách hồ sơ số", text: "Bảng hiển thị các cơ hội kinh doanh và dự án số đã khởi tạo kèm giá trị doanh thu." },
+        { selector: "button[onclick='openAddSalesModal();']", title: "Khởi tạo Cơ hội mới", text: "Bấm vào đây để tạo mới một hồ sơ cơ hội kinh doanh sản phẩm dịch vụ số." },
+        { selector: "#PageAction .btn-outline-purple", title: "Cấu hình Quy trình", text: "Dành riêng cho Quản trị hệ thống (QTHT) thiết lập quy trình và các tiến trình chuẩn." }
+    ];
+
+    var configuredSteps = window._digitalSalesGuide && _digitalSalesGuide.steps && _digitalSalesGuide.steps["Cate.DigitalSales.Index"];
+    var tourSteps = defaultIndexSteps;
+    if (configuredSteps && Array.isArray(configuredSteps) && configuredSteps.length > 0) {
+        var activeSteps = configuredSteps.filter(function (s) { return s.isActive !== false; });
+        if (activeSteps.length > 0) {
+            tourSteps = activeSteps.map(function (s) {
+                return { selector: s.selector, title: s.title, text: s.text };
+            });
+        }
+    }
+
+    DigitalSalesGuide.start(tourSteps, false, "Cate.DigitalSales.Index");
+}
+window.startDigitalSalesIndexGuide = startDigitalSalesIndexGuide;
+
+function openGuideConfigModal(screenCode) {
+    if (!screenCode) screenCode = "Cate.DigitalSales.Index";
+    var getConfigUrl = (window._digitalSalesGuide && _digitalSalesGuide.getConfigUrl) || "/Cate/DigitalSales/GetGuideConfigModal";
+    var url = getConfigUrl + "?screenCode=" + encodeURIComponent(screenCode);
+    $("#modalContainer").load(url, function () {
+        var $modal = $("#modal_GuideConfig");
+        initGuideConfigModalHandlers($modal);
+        $modal.modal("show");
+    });
+}
+window.openGuideConfigModal = openGuideConfigModal;
+
+function initGuideConfigModalHandlers($modal) {
+    function renumberTbody($tbody) {
+        $tbody.find(".guide-step-row").each(function (idx) {
+            var num = idx + 1;
+            $(this).find(".guide-order-num").text(num);
+            $(this).find(".guide-input-order").val(num);
+        });
+        var count = $tbody.find(".guide-step-row").length;
+        var screenCode = $tbody.data("screencode");
+        $('#guideConfigTabs a[data-screencode="' + screenCode + '"] .guide-badge-count').text(count);
+    }
+
+    // Di chuyển Lên
+    $modal.off("click", ".guide-btn-up").on("click", ".guide-btn-up", function () {
+        var $row = $(this).closest(".guide-step-row");
+        var $prev = $row.prev(".guide-step-row");
+        if ($prev.length) {
+            $row.insertBefore($prev);
+            renumberTbody($row.closest(".guide-steps-tbody"));
+        }
+    });
+
+    // Di chuyển Xuống
+    $modal.off("click", ".guide-btn-down").on("click", ".guide-btn-down", function () {
+        var $row = $(this).closest(".guide-step-row");
+        var $next = $row.next(".guide-step-row");
+        if ($next.length) {
+            $row.insertAfter($next);
+            renumberTbody($row.closest(".guide-steps-tbody"));
+        }
+    });
+
+    // Xóa bước
+    $modal.off("click", ".guide-btn-delete").on("click", ".guide-btn-delete", function () {
+        var $row = $(this).closest(".guide-step-row");
+        var $tbody = $row.closest(".guide-steps-tbody");
+        $row.remove();
+        if ($tbody.find(".guide-step-row").length === 0) {
+            $tbody.html('<tr class="guide-empty-row"><td colspan="6" class="text-center py-4 text-secondary-m2"><i class="fa fa-info-circle text-140 mb-1 opacity-50"></i><p class="mb-0 text-90">Chưa có bước hướng dẫn nào cho khu vực này.</p></td></tr>');
+        }
+        renumberTbody($tbody);
+    });
+
+    // Thêm bước mới
+    $modal.off("click", ".guide-btn-add").on("click", ".guide-btn-add", function () {
+        var screenCode = $(this).data("screencode");
+        var $pane = $modal.find('.guide-pane[data-screencode="' + screenCode + '"]');
+        var $tbody = $pane.find(".guide-steps-tbody");
+        $tbody.find(".guide-empty-row").remove();
+        var nextOrder = $tbody.find(".guide-step-row").length + 1;
+        var randomId = "chkActive_" + screenCode.replace(/\./g, "_") + "_" + Date.now();
+
+        var rowHtml = '<tr class="guide-step-row" data-step-id="0">' +
+            '<td class="text-center"><div class="d-flex align-items-center justify-content-center">' +
+            '<div class="d-flex flex-column mr-1">' +
+            '<button type="button" class="btn btn-2xs btn-outline-lightgrey border-0 guide-btn-up p-0" title="Di chuyển lên"><i class="fa fa-chevron-up text-secondary text-70"></i></button>' +
+            '<button type="button" class="btn btn-2xs btn-outline-lightgrey border-0 guide-btn-down p-0" title="Di chuyển xuống"><i class="fa fa-chevron-down text-secondary text-70"></i></button>' +
+            '</div>' +
+            '<span class="guide-order-num font-bolder text-primary-d1">' + nextOrder + '</span>' +
+            '<input type="hidden" class="guide-input-order" value="' + nextOrder + '" />' +
+            '</div></td>' +
+            '<td><input type="text" class="form-control form-control-sm guide-input-selector" placeholder="Bộ chọn CSS..." /></td>' +
+            '<td><input type="text" class="form-control form-control-sm guide-input-title font-bold text-primary-d2" placeholder="Tiêu đề bước..." /></td>' +
+            '<td><textarea class="form-control form-control-sm guide-input-text" rows="2" placeholder="Nội dung hướng dẫn..."></textarea></td>' +
+            '<td class="text-center"><div class="custom-control custom-checkbox custom-checkbox-primary">' +
+            '<input type="checkbox" class="custom-control-input guide-input-active" id="' + randomId + '" checked />' +
+            '<label class="custom-control-label" for="' + randomId + '"></label>' +
+            '</div></td>' +
+            '<td class="text-center"><button type="button" class="btn btn-xs btn-outline-danger btn-h-danger border-0 radius-1 guide-btn-delete" title="Xóa bước"><i class="fa fa-trash-alt"></i></button></td>' +
+            '</tr>';
+        $tbody.append(rowHtml);
+        renumberTbody($tbody);
+    });
+
+    // Khôi phục mặc định
+    $modal.off("click", ".guide-btn-reset").on("click", ".guide-btn-reset", function () {
+        var screenCode = $(this).data("screencode");
+        var resetConfigUrl = (window._digitalSalesGuide && _digitalSalesGuide.resetConfigUrl) || "/Cate/DigitalSales/ResetGuideConfig";
+        $.post(resetConfigUrl, { screenCode: screenCode }, function (response) {
+            if (response && response.status) {
+                if (!_digitalSalesGuide.steps) _digitalSalesGuide.steps = {};
+                _digitalSalesGuide.steps[screenCode] = response.steps || [];
+                executeResponseMessage(response.message);
+
+                var $activeTab = $modal.find("#guideConfigTabs .nav-link.active");
+                var activeCode = $activeTab.data("screencode") || screenCode;
+                openGuideConfigModal(activeCode);
+            } else {
+                executeResponseMessage(response ? response.message : null);
+            }
+        });
+    });
+
+    // Xem thử hướng dẫn
+    $modal.off("click", ".guide-btn-preview").on("click", ".guide-btn-preview", function () {
+        var screenCode = $(this).data("screencode");
+        var $pane = $modal.find('.guide-pane[data-screencode="' + screenCode + '"]');
+        var previewSteps = [];
+        $pane.find(".guide-step-row").each(function () {
+            var $row = $(this);
+            var isActive = $row.find(".guide-input-active").is(":checked");
+            if (isActive) {
+                previewSteps.push({
+                    selector: $row.find(".guide-input-selector").val(),
+                    title: $row.find(".guide-input-title").val(),
+                    text: $row.find(".guide-input-text").val()
+                });
+            }
+        });
+        if (previewSteps.length === 0) return;
+        $modal.modal("hide");
+        window.setTimeout(function () {
+            DigitalSalesGuide.start(previewSteps, false, screenCode);
+        }, 400);
+    });
+
+    // Lưu cấu hình
+    $modal.off("click", "#btnSaveGuideConfig").on("click", "#btnSaveGuideConfig", function () {
+        var $btn = $(this);
+        $btn.prop("disabled", true).prepend('<i class="fa fa-spinner fa-spin mr-1"></i>');
+
+        var $activeTab = $modal.find("#guideConfigTabs .nav-link.active");
+        var screenCode = $activeTab.data("screencode");
+        var $pane = $modal.find('.guide-pane[data-screencode="' + screenCode + '"]');
+
+        var stepsToSave = [];
+        $pane.find(".guide-step-row").each(function () {
+            var $row = $(this);
+            var order = parseInt($row.find(".guide-input-order").val(), 10) || 1;
+            var selector = ($row.find(".guide-input-selector").val() || "").trim();
+            var title = ($row.find(".guide-input-title").val() || "").trim();
+            var text = ($row.find(".guide-input-text").val() || "").trim();
+            var isActive = $row.find(".guide-input-active").is(":checked");
+
+            if (selector || title || text) {
+                stepsToSave.push({
+                    StepOrder: order,
+                    Selector: selector,
+                    Title: title,
+                    GuideText: text,
+                    IsActive: isActive
+                });
+            }
+        });
+
+        var payload = {
+            ScreenCode: screenCode,
+            Steps: stepsToSave
+        };
+
+        var saveConfigUrl = (window._digitalSalesGuide && _digitalSalesGuide.saveConfigUrl) || "/Cate/DigitalSales/SaveGuideConfig";
+        $.ajax({
+            url: saveConfigUrl,
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(payload),
+            dataType: "json",
+            success: function (response) {
+                $btn.prop("disabled", false).find(".fa-spinner").remove();
+                if (response && response.status) {
+                    if (!_digitalSalesGuide.steps) _digitalSalesGuide.steps = {};
+                    _digitalSalesGuide.steps[screenCode] = response.steps || [];
+
+                    $modal.modal("hide");
+                    $modal.one("hidden.bs.modal", function () {
+                        executeResponseMessage(response.message);
+                    });
+                } else {
+                    executeResponseMessage(response ? response.message : null);
+                }
+            },
+            error: function () {
+                $btn.prop("disabled", false).find(".fa-spinner").remove();
+                if (typeof toastr !== "undefined") {
+                    toastr.error("Có lỗi xảy ra khi lưu cấu hình hướng dẫn.");
+                }
+            }
+        });
+    });
+}
 

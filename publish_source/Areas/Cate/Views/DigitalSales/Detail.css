@@ -352,3 +352,26 @@
     @media (max-width: 575.98px) {
         .ds-review-floating-trigger { top: auto; bottom: 16px; transform: none; }
     }
+
+    .ds-guide-overlay { position: fixed; inset: 0; z-index: 1060; background: rgba(12, 25, 43, .68); }
+    .ds-guide-highlight { position: relative !important; z-index: 1061 !important; border-radius: 4px; box-shadow: 0 0 0 4px #fff, 0 0 0 8px rgba(37, 145, 235, .9); }
+    .ds-guide-tooltip { position: fixed; z-index: 1062; padding: 20px; color: #334155; background: #fff; border-radius: 8px; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+    .ds-guide-close { position: absolute; top: 5px; right: 10px; color: #64748b; border: 0; background: transparent; font-size: 26px; line-height: 1; cursor: pointer; }
+    .ds-guide-title { padding-right: 24px; color: #1666b4; font-size: 1.05rem; font-weight: 700; }
+    .ds-guide-text { margin-top: 10px; min-height: 42px; line-height: 1.55; }
+    .ds-guide-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .ds-guide-counter { color: #64748b; font-size: .85rem; }
+    .ds-guide-edit-btn { margin-right: auto; padding: 2px 8px; font-size: .8rem; }
+    .guide-config-dialog { max-width: 1024px; width: 95%; }
+    .guide-col-order { width: 85px; }
+    .guide-col-selector { width: 220px; }
+    .guide-col-title { width: 200px; }
+    .guide-col-status { width: 75px; }
+    .guide-col-action { width: 65px; }
+    .guide-table-wrapper { max-height: 520px; overflow-y: auto; }
+    .guide-steps-table td { vertical-align: middle; }
+    .guide-order-num { font-size: 1.05rem; min-width: 22px; text-align: center; }
+    .guide-btn-up, .guide-btn-down { line-height: 1; padding: 1px 3px !important; }
+    .guide-badge-count { font-size: .75rem; vertical-align: middle; }
+    .guide-config-tab-content { min-height: 350px; }
+

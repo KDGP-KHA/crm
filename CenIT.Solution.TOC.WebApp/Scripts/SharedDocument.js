@@ -10,6 +10,7 @@ var _tableSharedDocument;
 
 $(document).ready(function () {
     initTableSharedDocument();
+    normalizeSharedDocumentSearchText();
 
     // Khá»Ÿi táº¡o datepicker chuáº©n tiáº¿ng Viá»‡t
     if ($.fn.datepicker) {
@@ -34,6 +35,19 @@ $(document).ready(function () {
         SearchSharedDoc();
     });
 });
+
+function normalizeSharedDocumentSearchText() {
+    $("#SearchSharedDocument label, #SearchSharedDocument .card-title, #SearchSharedDocument button").each(function () {
+        var $item = $(this);
+        $item.contents().filter(function () { return this.nodeType === 3; }).each(function () {
+            this.nodeValue = normalizeVietnameseText(this.nodeValue);
+        });
+    });
+    $("#SearchSharedDocument input").each(function () {
+        var $input = $(this);
+        $input.attr("placeholder", normalizeVietnameseText($input.attr("placeholder")));
+    });
+}
 
 function SearchSharedDoc() {
     if (_tableSharedDocument) {
@@ -60,6 +74,7 @@ function _docRenderButton(hasPerm, modalId, cssClass, url, iconHtml, title, data
 
 function escapeHtml(text) {
     if (!text) return "";
+    text = normalizeVietnameseText(text);
     var map = {
         '&': '&amp;',
         '<': '&lt;',
@@ -186,7 +201,13 @@ function initTableSharedDocument() {
                     return html;
                 }
             }
-        ]
+        ],
+        "drawCallback": function () {
+            $("#DSSharedDocument [title]").each(function () {
+                var $item = $(this);
+                $item.attr("title", normalizeVietnameseText($item.attr("title")));
+            });
+        }
     });
 }
 
@@ -232,5 +253,15 @@ function SharedDocument_OnProcessSuccess(response, formId) {
             $bodyForm = $("#ModalContent #modal_" + formId + " .bodyForm, #ModalContent #modal_" + formId + " #bodyForm");
         }
         $bodyForm.html(response);
+    }
+}
+
+function normalizeVietnameseText(text) {
+    var value = text == null ? "" : text.toString();
+    if (!/[ÃÂ]/.test(value)) return value;
+    try {
+        return decodeURIComponent(escape(value));
+    } catch (e) {
+        return value;
     }
 }

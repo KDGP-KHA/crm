@@ -361,3 +361,17 @@
     .ds-guide-text { margin-top: 10px; min-height: 42px; line-height: 1.55; }
     .ds-guide-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
     .ds-guide-counter { color: #64748b; font-size: .85rem; }
+    .ds-guide-edit-btn { margin-right: auto; padding: 2px 8px; font-size: .8rem; }
+    .guide-config-dialog { max-width: 1024px; width: 95%; }
+    .guide-col-order { width: 85px; }
+    .guide-col-selector { width: 220px; }
+    .guide-col-title { width: 200px; }
+    .guide-col-status { width: 75px; }
+    .guide-col-action { width: 65px; }
+    .guide-table-wrapper { max-height: 520px; overflow-y: auto; }
+    .guide-steps-table td { vertical-align: middle; }
+    .guide-order-num { font-size: 1.05rem; min-width: 22px; text-align: center; }
+    .guide-btn-up, .guide-btn-down { line-height: 1; padding: 1px 3px !important; }
+    .guide-badge-count { font-size: .75rem; vertical-align: middle; }
+    .guide-config-tab-content { min-height: 350px; }
+

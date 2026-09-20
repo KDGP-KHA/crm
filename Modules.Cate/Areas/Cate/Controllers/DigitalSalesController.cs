@@ -19,6 +19,7 @@ using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
 using TSFramework.Libs.Models.Base;
+using TSFramework.Libs.Principals;
 using TSFramework.Libs.Processors;
 using TSFramework.Libs.Utils;
 
@@ -43,16 +44,40 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_ReviewBatchItemBiz _reviewBatchItemBiz;
         private readonly SysConfigCache _sysConfigCache;
         private readonly RM_DigitalSalesWorkflowCache _workflowCache;
+        private readonly SysUserGuideConfigBiz _userGuideConfigBiz;
         private const string UserGuideDataProvider = "CenIT.Provider.Major";
         private const string DigitalSalesDetailGuideCode = "Cate.DigitalSales.Detail";
 
         private string _title => AppProcessor.Messagor.GetMessage("DigitalSales_Title");
-        private string CurrentUserName => User?.UserName ?? (User?.Identity?.Name ?? (HttpContext?.User?.Identity?.Name ?? ""));
+        private string CurrentUserName => User?.UserName ?? (User?.Identity?.Name ?? (HttpContext?.User?.Identity?.Name ?? (Session?["FrontEndUser"] as AppPrincipal)?.UserName ?? ""));
+        private int? CurrentUserId => (User?.UserId > 0 ? User?.UserId : null) ?? (Session?["FrontEndUser"] as AppPrincipal)?.UserId;
         private readonly string _folderUpload = "/Contents/Uploads/DigitalSales";
         private string GetAppMessage(string labelKey, string defaultMessage = null)
         {
             var msg = AppProcessor.Messagor.GetMessage(labelKey);
             return !string.IsNullOrEmpty(msg) ? msg : (defaultMessage ?? labelKey);
+        }
+
+        private string GetGuideStepsJson(string screenPrefix)
+        {
+            try
+            {
+                var allGuideSteps = _userGuideConfigBiz.GetAllSteps(screenPrefix);
+                var stepsDict = (allGuideSteps ?? new List<SysUserGuideConfigModel>())
+                    .GroupBy(s => s.ScreenCode)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderBy(s => s.StepOrder)
+                              .Select(s => new { selector = s.Selector, title = s.Title, text = s.GuideText, isActive = s.IsActive })
+                              .ToList()
+                    );
+                return Newtonsoft.Json.JsonConvert.SerializeObject(stepsDict);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return "{}";
+            }
         }
 
 
@@ -86,6 +111,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _reviewBatchItemBiz = new RM_ReviewBatchItemBiz();
             _sysConfigCache = new SysConfigCache();
             _workflowCache = new RM_DigitalSalesWorkflowCache();
+            _userGuideConfigBiz = new SysUserGuideConfigBiz();
         }
 
         #region 1. List & Search
@@ -104,7 +130,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             PrepareSearchDropdowns(model);
             ViewBag.Title = _title;
-            ViewBag.IsQTHT = IsUserQTHT(User.UserName);
+            ViewBag.IsQTHT = IsUserQTHT(CurrentUserName, CurrentUserId);
+            ViewBag.GuideStepsJson = GetGuideStepsJson("Cate.DigitalSales.Index");
             return View(model);
         }
 
@@ -130,9 +157,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var data = _salesCache.LoadList(out int total, model);
 
             // Kiểm tra phân quyền sửa / xóa tối ưu: tránh lặp IsUserQTHT và N+1 queries
-            bool isQTHT = IsUserQTHT(User.UserName);
-            bool canSystemEdit = isQTHT || AppProcessor.Author.IsAllow(HttpContext, User.UserName, "Cate", "DigitalSales", "Edit");
-            bool canSystemDelete = isQTHT || AppProcessor.Author.IsAllow(HttpContext, User.UserName, "Cate", "DigitalSales", "Delete");
+            bool isQTHT = IsUserQTHT(CurrentUserName, CurrentUserId);
+            bool canSystemEdit = isQTHT || AppProcessor.Author.IsAllow(HttpContext, CurrentUserName, "Cate", "DigitalSales", "Edit");
+            bool canSystemDelete = isQTHT || AppProcessor.Author.IsAllow(HttpContext, CurrentUserName, "Cate", "DigitalSales", "Delete");
 
             if (data != null && data.Count > 0)
             {
@@ -939,12 +966,14 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ViewBag.ShowDigitalSalesGuide = !HasViewedUserGuide(DigitalSalesDetailGuideCode);
                 try
                 {
-                    ViewBag.CanEdit = HasDetailPermission(model, User.UserName);
+                    ViewBag.CanEdit = HasDetailPermission(model, CurrentUserName);
                 }
                 catch
                 {
                     ViewBag.CanEdit = false;
                 }
+                ViewBag.IsQTHT = IsUserQTHT(CurrentUserName, CurrentUserId);
+                ViewBag.GuideStepsJson = GetGuideStepsJson("Cate.DigitalSales.Detail");
 
                 return View(model);
             }
@@ -5330,6 +5359,199 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
         }
 
+        [HttpGet]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetGuideSteps(string screenCode)
+        {
+            if (string.IsNullOrWhiteSpace(screenCode))
+                return Json(new { status = false, steps = new List<object>() }, JsonRequestBehavior.AllowGet);
+
+            var steps = _userGuideConfigBiz.GetStepsByScreenCode(screenCode.Trim());
+            var formattedSteps = (steps ?? new List<SysUserGuideConfigModel>())
+                .OrderBy(s => s.StepOrder)
+                .Select(s => new
+                {
+                    selector = s.Selector,
+                    title = s.Title,
+                    text = s.GuideText,
+                    isActive = s.IsActive
+                })
+                .ToList();
+
+            return Json(new { status = true, steps = formattedSteps }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult GetGuideConfigModal(string screenCode)
+        {
+            if (!IsUserQTHT(CurrentUserName, CurrentUserId))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock mr-1'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            if (string.Equals(screenCode, "Cate.DigitalSales.Index", StringComparison.OrdinalIgnoreCase))
+            {
+                var indexSteps = _userGuideConfigBiz.GetAllSteps("Cate.DigitalSales.Index") ?? new List<SysUserGuideConfigModel>();
+                var indexGroups = new List<SysUserGuideScreenGroupModel>
+                {
+                    new SysUserGuideScreenGroupModel
+                    {
+                        ScreenCode = "Cate.DigitalSales.Index",
+                        ScreenTitle = "Danh sách hồ sơ số",
+                        IconClass = "fa fa-list-alt text-primary",
+                        Steps = indexSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Index").OrderBy(s => s.StepOrder).ToList()
+                    }
+                };
+                ViewBag.ActiveScreenCode = "Cate.DigitalSales.Index";
+                return PartialView("_GuideConfigModal", indexGroups);
+            }
+
+            var allSteps = _userGuideConfigBiz.GetAllSteps("Cate.DigitalSales.Detail") ?? new List<SysUserGuideConfigModel>();
+
+            var screenGroups = new List<SysUserGuideScreenGroupModel>
+            {
+                new SysUserGuideScreenGroupModel
+                {
+                    ScreenCode = "Cate.DigitalSales.Detail",
+                    ScreenTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Tab_Page"),
+                    IconClass = "fa fa-desktop text-primary",
+                    Steps = allSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Detail").OrderBy(s => s.StepOrder).ToList()
+                },
+                new SysUserGuideScreenGroupModel
+                {
+                    ScreenCode = "Cate.DigitalSales.Detail.Overview",
+                    ScreenTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Tab_Overview"),
+                    IconClass = "fa fa-info-circle text-primary",
+                    Steps = allSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Detail.Overview").OrderBy(s => s.StepOrder).ToList()
+                },
+                new SysUserGuideScreenGroupModel
+                {
+                    ScreenCode = "Cate.DigitalSales.Detail.Products",
+                    ScreenTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Tab_Products"),
+                    IconClass = "fa fa-cubes text-purple",
+                    Steps = allSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Detail.Products").OrderBy(s => s.StepOrder).ToList()
+                },
+                new SysUserGuideScreenGroupModel
+                {
+                    ScreenCode = "Cate.DigitalSales.Detail.Tracking",
+                    ScreenTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Tab_Tracking"),
+                    IconClass = "fa fa-tasks text-warning",
+                    Steps = allSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Detail.Tracking").OrderBy(s => s.StepOrder).ToList()
+                },
+                new SysUserGuideScreenGroupModel
+                {
+                    ScreenCode = "Cate.DigitalSales.Detail.Discussions",
+                    ScreenTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Tab_Discussions"),
+                    IconClass = "fa fa-comments text-primary",
+                    Steps = allSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Detail.Discussions").OrderBy(s => s.StepOrder).ToList()
+                },
+                new SysUserGuideScreenGroupModel
+                {
+                    ScreenCode = "Cate.DigitalSales.Detail.ReviewHistory",
+                    ScreenTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Tab_ReviewHistory"),
+                    IconClass = "fa fa-history text-success",
+                    Steps = allSteps.Where(s => s.ScreenCode == "Cate.DigitalSales.Detail.ReviewHistory").OrderBy(s => s.StepOrder).ToList()
+                }
+            };
+
+            ViewBag.ActiveScreenCode = !string.IsNullOrWhiteSpace(screenCode) ? screenCode.Trim() : "Cate.DigitalSales.Detail";
+            return PartialView("_GuideConfigModal", screenGroups);
+        }
+
+        [HttpPost]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult SaveGuideConfig(SysUserGuideSaveModel model)
+        {
+            var guideTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_ModalTitle");
+
+            if (!IsUserQTHT(CurrentUserName, CurrentUserId))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            if (model == null || string.IsNullOrWhiteSpace(model.ScreenCode))
+            {
+                try
+                {
+                    if (Request.InputStream != null && Request.InputStream.Length > 0)
+                    {
+                        Request.InputStream.Seek(0, SeekOrigin.Begin);
+                        using (var reader = new StreamReader(Request.InputStream))
+                        {
+                            var rawJson = reader.ReadToEnd();
+                            if (!string.IsNullOrWhiteSpace(rawJson))
+                            {
+                                model = Newtonsoft.Json.JsonConvert.DeserializeObject<SysUserGuideSaveModel>(rawJson);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
+            }
+
+            if (model == null || string.IsNullOrWhiteSpace(model.ScreenCode))
+            {
+                string errMsg = CreateMessage(guideTitle, EnumProcessType.Edit, EnumMsgIcon.Error);
+                return Json(new { status = false, message = errMsg });
+            }
+
+            bool success = _userGuideConfigBiz.SaveSteps(model.ScreenCode.Trim(), model.Steps, CurrentUserName);
+            if (!success)
+            {
+                string errMsg = CreateMessage(guideTitle, EnumProcessType.Edit, EnumMsgIcon.Error);
+                return Json(new { status = false, message = errMsg });
+            }
+
+            var updatedSteps = _userGuideConfigBiz.GetStepsByScreenCode(model.ScreenCode.Trim())
+                .OrderBy(s => s.StepOrder)
+                .Select(s => new { selector = s.Selector, title = s.Title, text = s.GuideText, isActive = s.IsActive })
+                .ToList();
+
+            string successMsg = CreateMessage(guideTitle, EnumProcessType.Edit, EnumMsgIcon.Success);
+            return Json(new { status = true, message = successMsg, screenCode = model.ScreenCode.Trim(), steps = updatedSteps });
+        }
+
+        [HttpPost]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult ResetGuideConfig(string screenCode)
+        {
+            var guideTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_ModalTitle");
+
+            if (!IsUserQTHT(CurrentUserName, CurrentUserId))
+            {
+                return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            if (string.IsNullOrWhiteSpace(screenCode))
+            {
+                string errMsg = CreateMessage(guideTitle, EnumProcessType.Edit, EnumMsgIcon.Error);
+                return Json(new { status = false, message = errMsg });
+            }
+
+            bool success = _userGuideConfigBiz.ResetDefaultSteps(screenCode.Trim(), CurrentUserName);
+            if (!success)
+            {
+                string errMsg = CreateMessage(guideTitle, EnumProcessType.Edit, EnumMsgIcon.Error);
+                return Json(new { status = false, message = errMsg });
+            }
+
+            var updatedSteps = _userGuideConfigBiz.GetStepsByScreenCode(screenCode.Trim())
+                .OrderBy(s => s.StepOrder)
+                .Select(s => new { selector = s.Selector, title = s.Title, text = s.GuideText, isActive = s.IsActive })
+                .ToList();
+
+            string successMsg = CreateMessage(guideTitle, EnumProcessType.Edit, EnumMsgIcon.Success);
+            return Json(new { status = true, message = successMsg, screenCode = screenCode.Trim(), steps = updatedSteps });
+        }
+
         private void QueueTrackingUpdateMail(int salesId, string taskName, byte status, string resultNote)
         {
             var sales = _salesCache.GetByID(salesId);
@@ -5431,19 +5653,65 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         #region Authorization Helpers
-        private bool IsUserQTHT(string userName, int? userId = null)
+        private bool IsUserQTHT(string userName = null, int? userId = null)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(userName)) return false;
-                if (userName.Equals("admin", StringComparison.OrdinalIgnoreCase) || userName.Equals("quantri", StringComparison.OrdinalIgnoreCase)) return true;
-
+                // 1. Lấy userId từ AppPrincipal hoặc Session nếu chưa truyền
                 if (!userId.HasValue || userId.Value <= 0)
                 {
-                    var u = _userCache.GetByUserName(userName);
+                    userId = CurrentUserId;
+                }
+
+                // 2. Lấy userName an toàn nếu chưa truyền
+                if (string.IsNullOrWhiteSpace(userName))
+                {
+                    userName = CurrentUserName;
+                }
+                if (string.IsNullOrWhiteSpace(userName))
+                {
+                    userName = (Session?["FrontEndUser"] as AppPrincipal)?.UserName;
+                }
+
+                if (string.IsNullOrWhiteSpace(userName) && (!userId.HasValue || userId.Value <= 0))
+                {
+                    return false;
+                }
+
+                // 3. Chuẩn hóa tên đăng nhập (bỏ tiền tố Domain và hậu tố Email)
+                var rawName = (userName ?? "").Trim();
+                var cleanName = rawName;
+                if (cleanName.Contains("\\")) cleanName = cleanName.Substring(cleanName.LastIndexOf('\\') + 1);
+                if (cleanName.Contains("@")) cleanName = cleanName.Substring(0, cleanName.IndexOf('@'));
+
+                if (cleanName.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+                    cleanName.Equals("quantri", StringComparison.OrdinalIgnoreCase) ||
+                    rawName.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
+                    rawName.Equals("quantri", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                // 4. Nếu chưa có userId, tìm qua cache người dùng với nhiều chiến lược
+                if (!userId.HasValue || userId.Value <= 0)
+                {
+                    var u = _userCache.GetByUserName(cleanName) 
+                         ?? _userCache.GetByUserName(rawName)
+                         ?? _userCache.GetByUserName(cleanName.Replace('-', '.'))
+                         ?? _userCache.GetByUserName(cleanName.Replace('.', '-'));
+
+                    if (u == null && rawName.Contains("@"))
+                    {
+                        u = _userCache.GetByEmail(rawName);
+                    }
+                    if (u == null && !string.IsNullOrWhiteSpace(cleanName))
+                    {
+                        u = _userCache.GetByEmail(cleanName + "@vnpt.vn");
+                    }
                     userId = u?.UserId;
                 }
 
+                // 5. Kiểm tra nhóm quyền từ CSDL
                 if (userId.HasValue && userId.Value > 0)
                 {
                     var roles = _userCache.GetRoles(userId.Value);
@@ -5540,7 +5808,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
             else
             {
-                if (IsUserQTHT(User.UserName))
+                if (IsUserQTHT(CurrentUserName, CurrentUserId))
                 {
                     var allActive = _userCache.GetAll();
                     users = allActive != null ? allActive.Where(u => u.IsActive).OrderBy(u => u.FullName).ToList() : new List<SysUserModel>();
@@ -5556,7 +5824,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             if (uInDept != null) deptUsers.AddRange(uInDept);
                         }
                     }
-                    var currentUser = _userCache.GetByUserName(User.UserName);
+                    var currentUser = _userCache.GetByUserName(CurrentUserName);
                     if (currentUser != null && !deptUsers.Any(u => u.UserId == currentUser.UserId))
                     {
                         deptUsers.Add(currentUser);

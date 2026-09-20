@@ -148,6 +148,7 @@
     <Compile Include="Biz\RM_DigitalSalesBiz.cs" />
     <Compile Include="Biz\RM_DataMigrationBiz.cs" />
     <Compile Include="Biz\RM_DigitalSalesWorkflowBiz.cs" />
+    <Compile Include="Biz\SysUserGuideConfigBiz.cs" />
     <Compile Include="Caches\RM_DigitalSalesCache.cs" />
     <Compile Include="Caches\RM_DigitalSalesWorkflowCache.cs" />
     <Compile Include="Caches\Cate_CustomerCache.cs" />
@@ -268,6 +269,7 @@
     <Compile Include="Models\RM_DigitalSalesProcessModel.cs" />
     <Compile Include="Models\RM_DigitalSalesProgressModel.cs" />
     <Compile Include="Models\RM_DigitalSalesDashboardStatusModel.cs" />
+    <Compile Include="Models\SysUserGuideConfigModel.cs" />
     <Compile Include="Services\DigitalSalesMailService.cs" />
     <Compile Include="Models\RM_AnniversaryTypeModel.cs" />
     <Compile Include="Models\RM_BusinessOpportunityModel.cs" />

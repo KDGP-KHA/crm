@@ -1,0 +1,150 @@
+﻿@model List<Core.Cate.Models.SysUserGuideScreenGroupModel>
+@using TSFramework.Libs.Processors
+@{
+    var activeCode = (ViewBag.ActiveScreenCode as string) ?? "Cate.DigitalSales.Detail";
+    int groupIndex = 0;
+}
+
+<div class="modal fade" id="modal_GuideConfig" tabindex="-1" role="dialog" aria-labelledby="modal_GuideConfig_Title" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered guide-config-dialog" role="document">
+        <div class="modal-content shadow-lg border-0 radius-2">
+            <div class="modal-header bgc-primary-d1 text-white px-3 py-25">
+                <h5 class="modal-title font-bold text-110" id="modal_GuideConfig_Title">
+                    <i class="fa fa-sliders-h mr-2"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_ModalTitle")
+                </h5>
+                <button type="button" class="close text-white opacity-75" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body p-0">
+                <!-- Nav Tabs 6 khu vực -->
+                <div class="bgc-grey-l4 border-b-1 brc-grey-l1 px-3 pt-2">
+                    <ul class="nav nav-tabs nav-tabs-simple border-0" role="tablist" id="guideConfigTabs">
+                        @foreach (var group in Model)
+                        {
+                            bool isActive = string.Equals(group.ScreenCode, activeCode, StringComparison.OrdinalIgnoreCase);
+                            string tabId = "guideTab_" + groupIndex++;
+                            <li class="nav-item">
+                                <a class="nav-link @(isActive ? "active" : "") font-bold py-2 text-90 text-blue-d2" data-toggle="tab" href="#@tabId" role="tab" data-screencode="@group.ScreenCode">
+                                    <i class="@group.IconClass mr-1"></i>@group.ScreenTitle
+                                    <span class="badge badge-sm badge-pill text-white bgc-primary-d1 ml-1 guide-badge-count">@group.Steps.Count</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content p-3 guide-config-tab-content">
+                    @{ groupIndex = 0; }
+                    @foreach (var group in Model)
+                    {
+                        bool isActive = string.Equals(group.ScreenCode, activeCode, StringComparison.OrdinalIgnoreCase);
+                        string tabId = "guideTab_" + groupIndex++;
+                        <div class="tab-pane fade @(isActive ? "show active" : "") guide-pane" id="@tabId" role="tabpanel" data-screencode="@group.ScreenCode">
+                            <!-- Toolbar -->
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
+                                <div class="text-secondary-d2 text-90 font-bold mb-2 mb-sm-0">
+                                    <i class="fa fa-info-circle mr-1 text-primary"></i>
+                                    <code>@group.ScreenCode</code>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button type="button" class="btn btn-xs btn-success font-bolder radius-1 px-25 py-1 guide-btn-add" data-screencode="@group.ScreenCode">
+                                        <i class="fa fa-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Btn_AddStep")
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary font-bolder radius-1 px-25 py-1 ml-2 guide-btn-reset" data-screencode="@group.ScreenCode">
+                                        <i class="fa fa-undo mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Btn_ResetDefault")
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-info font-bolder radius-1 px-25 py-1 ml-2 guide-btn-preview" data-screencode="@group.ScreenCode">
+                                        <i class="fa fa-play mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Btn_Preview")
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Bảng bước hướng dẫn -->
+                            <div class="table-responsive guide-table-wrapper">
+                                <table class="table table-bordered table-striped table-hover align-middle mb-0 guide-steps-table" data-screencode="@group.ScreenCode">
+                                    <thead class="bgc-primary-l4 text-primary-d2">
+                                        <tr>
+                                            <th class="text-center guide-col-order">@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Col_Order")</th>
+                                            <th class="guide-col-selector">@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Col_Selector")</th>
+                                            <th class="guide-col-title">@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Col_Title")</th>
+                                            <th>@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Col_Content")</th>
+                                            <th class="text-center guide-col-status">@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Col_Status")</th>
+                                            <th class="text-center guide-col-action">@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Col_Action")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="guide-steps-tbody">
+                                        @if (group.Steps != null && group.Steps.Count > 0)
+                                        {
+                                            for (int i = 0; i < group.Steps.Count; i++)
+                                            {
+                                                var step = group.Steps[i];
+                                                <tr class="guide-step-row" data-step-id="@step.GuideConfigID">
+                                                    <td class="text-center">
+                                                        <div class="d-flex align-items-center justify-content-center">
+                                                            <div class="d-flex flex-column mr-1">
+                                                                <button type="button" class="btn btn-2xs btn-outline-lightgrey border-0 guide-btn-up p-0" title="@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_MoveUp")">
+                                                                    <i class="fa fa-chevron-up text-secondary text-70"></i>
+                                                                </button>
+                                                                <button type="button" class="btn btn-2xs btn-outline-lightgrey border-0 guide-btn-down p-0" title="@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_MoveDown")">
+                                                                    <i class="fa fa-chevron-down text-secondary text-70"></i>
+                                                                </button>
+                                                            </div>
+                                                            <span class="guide-order-num font-bolder text-primary-d1">@(i + 1)</span>
+                                                            <input type="hidden" class="guide-input-order" value="@(i + 1)" />
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm guide-input-selector" value="@step.Selector" placeholder="ví dụ: #containerMetrics" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm guide-input-title font-bold text-primary-d2" value="@step.Title" placeholder="Tiêu đề bước..." />
+                                                    </td>
+                                                    <td>
+                                                        <textarea class="form-control form-control-sm guide-input-text" rows="2" placeholder="Nội dung hướng dẫn chi tiết...">@step.GuideText</textarea>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="custom-control custom-checkbox custom-checkbox-primary">
+                                                            <input type="checkbox" class="custom-control-input guide-input-active" id="chkActive_@(group.ScreenCode.Replace(".", "_"))_@i" @(step.IsActive ? "checked" : "") />
+                                                            <label class="custom-control-label" for="chkActive_@(group.ScreenCode.Replace(".", "_"))_@i"></label>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-xs btn-outline-danger btn-h-danger border-0 radius-1 guide-btn-delete" title="@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_DeleteStep")">
+                                                            <i class="fa fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr class="guide-empty-row">
+                                                <td colspan="6" class="text-center py-4 text-secondary-m2">
+                                                    <i class="fa fa-info-circle text-140 mb-1 opacity-50"></i>
+                                                    <p class="mb-0 text-90">Chưa có bước hướng dẫn nào cho khu vực này.</p>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer bgc-grey-l5 py-2 px-3">
+                <button type="button" class="btn btn-sm btn-primary font-bolder px-4 radius-1 shadow-sm guide-save-modal-btn">
+                    <i class="fa fa-save mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Btn_Save")
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary font-bolder px-3 radius-1 shadow-sm ml-2" data-dismiss="modal">
+                    @AppProcessor.Messagor.GetMessage("Button_Close")
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
