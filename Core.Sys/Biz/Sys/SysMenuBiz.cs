@@ -57,6 +57,10 @@ namespace Core.Sys.Biz.Sys
             var listMenus =
                 AppProcessor.ProcedureProvider.ExecuteTypedList<SysMenuModel>(_sysMenuGetByUserId, DATA_PROVIDER_NAME,
                     userId);
+            if (listMenus != null && listMenus.Count > 0)
+            {
+                listMenus = listMenus.GroupBy(m => m.MenuId).Select(g => g.First()).ToList();
+            }
             return listMenus;
         }
 
@@ -65,6 +69,10 @@ namespace Core.Sys.Biz.Sys
             var listMenus =
                 AppProcessor.ProcedureProvider.ExecuteTypedList<SysMenuModel>(_sysMenuGetByUserName, DATA_PROVIDER_NAME,
                     userName);
+            if (listMenus != null && listMenus.Count > 0)
+            {
+                listMenus = listMenus.GroupBy(m => m.MenuId).Select(g => g.First()).ToList();
+            }
             return listMenus;
         }
 

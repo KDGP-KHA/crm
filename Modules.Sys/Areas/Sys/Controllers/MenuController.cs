@@ -195,6 +195,10 @@ namespace Modules.Sys.Areas.Sys.Controllers
         public ActionResult Render()
         {
             var menusViaUser = _apiMenu.GetByUserName(User?.UserName);
+            if (menusViaUser != null && menusViaUser.Count > 0)
+            {
+                menusViaUser = menusViaUser.GroupBy(m => m.MenuId).Select(g => g.First()).ToList();
+            }
             var menuViews = GetViewMenus(menusViaUser);
             var htmlMenu = CreateViewMenu(menuViews);
 
@@ -209,6 +213,10 @@ namespace Modules.Sys.Areas.Sys.Controllers
         public ActionResult LoadTreeView()
         { 
             var menusViaUser = _apiMenu.GetByUserName(User?.UserName);
+            if (menusViaUser != null && menusViaUser.Count > 0)
+            {
+                menusViaUser = menusViaUser.GroupBy(m => m.MenuId).Select(g => g.First()).ToList();
+            }
             var menuViews = GetViewMenus(menusViaUser);
 
             return Json(new { status = true, message = "", data = menuViews });

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core.Cate.Models;
@@ -102,6 +102,7 @@ namespace Core.Cate.Biz
         {
             var screens = new[]
             {
+                "Cate.DigitalSales.Index",
                 "Cate.DigitalSales.Detail",
                 "Cate.DigitalSales.Detail.Overview",
                 "Cate.DigitalSales.Detail.Products",
@@ -122,6 +123,12 @@ namespace Core.Cate.Biz
             var result = new List<SysUserGuideConfigModel>();
             switch (screenCode)
             {
+                case "Cate.DigitalSales.Index":
+                    result.Add(new SysUserGuideConfigModel { StepOrder = 1, Selector = ".Search.card", Title = "Bộ lọc tìm kiếm", GuideText = "Tìm kiếm hồ sơ theo từ khóa, khách hàng, AM chủ trì, trạng thái, thời gian.", IsActive = true });
+                    result.Add(new SysUserGuideConfigModel { StepOrder = 2, Selector = "#tblDigitalSales", Title = "Danh sách hồ sơ số", GuideText = "Bảng hiển thị các cơ hội kinh doanh và dự án số đã khởi tạo kèm giá trị doanh thu.", IsActive = true });
+                    result.Add(new SysUserGuideConfigModel { StepOrder = 3, Selector = "button[onclick='openAddSalesModal();']", Title = "Khởi tạo Cơ hội mới", GuideText = "Bấm vào đây để tạo mới một hồ sơ cơ hội kinh doanh sản phẩm dịch vụ số.", IsActive = true });
+                    result.Add(new SysUserGuideConfigModel { StepOrder = 4, Selector = "#PageAction .btn-outline-purple", Title = "Cấu hình Quy trình", GuideText = "Dành riêng cho Quản trị hệ thống (QTHT) thiết lập quy trình và các tiến trình chuẩn.", IsActive = true });
+                    break;
                 case "Cate.DigitalSales.Detail":
                     result.Add(new SysUserGuideConfigModel { StepOrder = 1, Selector = ".ds-header-title-container", Title = "Thông tin hồ sơ", GuideText = "Hiển thị mã hồ sơ, tên khách hàng, mã số thuế, loại dịch vụ và nhân viên phụ trách chính của hồ sơ chuyển đổi số.", IsActive = true });
                     result.Add(new SysUserGuideConfigModel { StepOrder = 2, Selector = ".ds-header-action-bar", Title = "Thao tác hồ sơ", GuideText = "Các nút chức năng: Chuyển trạng thái quy trình, Chỉnh sửa thông tin hồ sơ, Làm mới dữ liệu và Mở hướng dẫn sử dụng.", IsActive = true });
