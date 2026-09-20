@@ -104,6 +104,9 @@
 
     function selectStatus(statusId, element, event) {
         if (event) {
+            if ($(event.target).closest(".action-buttons").length > 0) {
+                return false;
+            }
             event.preventDefault();
         }
 
@@ -181,6 +184,9 @@
 
     function selectProcess(processId, element, event) {
         if (event) {
+            if ($(event.target).closest(".action-buttons").length > 0) {
+                return false;
+            }
             event.preventDefault();
         }
 
@@ -299,6 +305,84 @@
         $("body").append(btn);
         btn.trigger("click");
         btn.remove();
+    }
+
+    function openEditStatus(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        var url = "/Cate/DigitalSalesWorkflow/EditStatus/" + id;
+        var btn = $('<a data-modal="" data-modal-id="editStatus" data-width="700" href="' + url + '"></a>');
+        $("body").append(btn);
+        btn.trigger("click");
+        btn.remove();
+        return false;
+    }
+
+    function openDeleteStatus(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        var url = "/Cate/DigitalSalesWorkflow/DeleteStatus/" + id;
+        var btn = $('<a data-modal="" data-modal-id="deleteStatus" data-width="500" href="' + url + '"></a>');
+        $("body").append(btn);
+        btn.trigger("click");
+        btn.remove();
+        return false;
+    }
+
+    function openEditProcess(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        var url = "/Cate/DigitalSalesWorkflow/EditProcess/" + id;
+        var btn = $('<a data-modal="" data-modal-id="editProcess" data-width="700" href="' + url + '"></a>');
+        $("body").append(btn);
+        btn.trigger("click");
+        btn.remove();
+        return false;
+    }
+
+    function openDeleteProcess(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        var url = "/Cate/DigitalSalesWorkflow/DeleteProcess/" + id;
+        var btn = $('<a data-modal="" data-modal-id="deleteProcess" data-width="500" href="' + url + '"></a>');
+        $("body").append(btn);
+        btn.trigger("click");
+        btn.remove();
+        return false;
+    }
+
+    function openEditProgress(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        var url = "/Cate/DigitalSalesWorkflow/EditProgress/" + id;
+        var btn = $('<a data-modal="" data-modal-id="editProgress" data-width="700" href="' + url + '"></a>');
+        $("body").append(btn);
+        btn.trigger("click");
+        btn.remove();
+        return false;
+    }
+
+    function openDeleteProgress(id, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        var url = "/Cate/DigitalSalesWorkflow/DeleteProgress/" + id;
+        var btn = $('<a data-modal="" data-modal-id="deleteProgress" data-width="500" href="' + url + '"></a>');
+        $("body").append(btn);
+        btn.trigger("click");
+        btn.remove();
+        return false;
     }
 
     function renderValidationResponse(response) {
@@ -455,8 +539,14 @@
         selectStatus: selectStatus,
         selectProcess: selectProcess,
         openAddStatus: openAddStatus,
+        openEditStatus: openEditStatus,
+        openDeleteStatus: openDeleteStatus,
         openAddProcess: openAddProcess,
+        openEditProcess: openEditProcess,
+        openDeleteProcess: openDeleteProcess,
         openAddProgress: openAddProgress,
+        openEditProgress: openEditProgress,
+        openDeleteProgress: openDeleteProgress,
         onStatusSaveSuccess: onStatusSaveSuccess,
         onProcessSaveSuccess: onProcessSaveSuccess,
         onProgressSaveSuccess: onProgressSaveSuccess,
@@ -466,4 +556,23 @@
 
 $(document).ready(function () {
     DigitalSalesWorkflow.init();
+
+    // Bắt sự kiện submit an toàn cho nút #btnSave và #btnConfirm trong modal footer
+    $(document).on("click", ".modal #btnSave", function (e) {
+        var $modal = $(this).closest(".modal");
+        var $form = $modal.find("form");
+        if ($form.length > 0) {
+            e.preventDefault();
+            $form.submit();
+        }
+    });
+
+    $(document).on("click", ".modal #btnConfirm", function (e) {
+        var $modal = $(this).closest(".modal");
+        var $form = $modal.find("form");
+        if ($form.length > 0) {
+            e.preventDefault();
+            $form.submit();
+        }
+    });
 });

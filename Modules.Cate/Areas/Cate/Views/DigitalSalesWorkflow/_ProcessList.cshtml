@@ -35,14 +35,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="process-actions action-buttons d-flex align-items-center" onclick="event.stopPropagation();">
+                    <div class="process-actions action-buttons d-flex align-items-center">
                         <a href="/Cate/DigitalSalesWorkflow/EditProcess/@item.ProcessID"
+                           onclick="return DigitalSalesWorkflow.openEditProcess(@item.ProcessID, event);"
                            data-modal="" data-modal-id="editProcess" data-width="700"
                            class="btn btn-xs btn-outline-primary btn-h-primary btn-a-primary border-0 mr-1 p-1"
                            title="Sửa quy trình" data-rel="tooltip">
                             <i class="fa fa-pencil-alt text-90"></i>
                         </a>
                         <a href="/Cate/DigitalSalesWorkflow/DeleteProcess/@item.ProcessID"
+                           onclick="return DigitalSalesWorkflow.openDeleteProcess(@item.ProcessID, event);"
                            data-modal="" data-modal-id="deleteProcess" data-width="500"
                            class="btn btn-xs btn-outline-danger btn-h-danger btn-a-danger border-0 p-1"
                            title="Xóa quy trình" data-rel="tooltip">

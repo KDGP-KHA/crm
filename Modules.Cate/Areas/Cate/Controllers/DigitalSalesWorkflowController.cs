@@ -128,7 +128,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_StatusList", data);
         }
 
-        [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
         public ActionResult AddStatus(byte? businessType)
@@ -142,7 +141,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_StatusModal", model);
         }
 
-        [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Edit)]
         public ActionResult EditStatus(int id)
@@ -248,7 +246,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_ProcessList", data);
         }
 
-        [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
         public ActionResult AddProcess(int statusId)
@@ -265,7 +262,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_ProcessModal", model);
         }
 
-        [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Edit)]
         public ActionResult EditProcess(int id)
@@ -378,7 +374,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_ProgressList", data);
         }
 
-        [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
         public ActionResult AddProgress(int processId)
@@ -395,7 +390,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_ProgressModal", model);
         }
 
-        [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Edit)]
         public ActionResult EditProgress(int id)

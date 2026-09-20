@@ -43,14 +43,16 @@
                             </div>
                         </div>
                     </div>
-                    <div class="status-actions action-buttons d-flex align-items-center" onclick="event.stopPropagation();">
+                    <div class="status-actions action-buttons d-flex align-items-center">
                         <a href="/Cate/DigitalSalesWorkflow/EditStatus/@item.StatusID"
+                           onclick="return DigitalSalesWorkflow.openEditStatus(@item.StatusID, event);"
                            data-modal="" data-modal-id="editStatus" data-width="700"
                            class="btn btn-xs btn-outline-primary btn-h-primary btn-a-primary border-0 mr-1 p-1"
                            title="Sửa trạng thái" data-rel="tooltip">
                             <i class="fa fa-pencil-alt text-90"></i>
                         </a>
                         <a href="/Cate/DigitalSalesWorkflow/DeleteStatus/@item.StatusID"
+                           onclick="return DigitalSalesWorkflow.openDeleteStatus(@item.StatusID, event);"
                            data-modal="" data-modal-id="deleteStatus" data-width="500"
                            class="btn btn-xs btn-outline-danger btn-h-danger btn-a-danger border-0 p-1"
                            title="Xóa trạng thái" data-rel="tooltip">

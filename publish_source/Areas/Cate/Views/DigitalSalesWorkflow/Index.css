@@ -1,4 +1,4 @@
-.workflow-scroll-container {
+﻿.workflow-scroll-container {
         overflow-y: auto;
         max-height: calc(100vh - 250px);
         min-height: 420px;
