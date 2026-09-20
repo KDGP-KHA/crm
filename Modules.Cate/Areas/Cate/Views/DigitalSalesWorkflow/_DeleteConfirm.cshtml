@@ -13,7 +13,9 @@
     @using (Ajax.BeginForm((string)ViewBag.DeleteAction, "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
     {
         HttpMethod = "POST",
-        OnSuccess = "DigitalSalesWorkflow.onDeleteSuccess(data, '" + ViewBag.TargetType + "')"
+        OnBegin = "DigitalSalesWorkflow.onFormBegin",
+        OnSuccess = "DigitalSalesWorkflow.onDeleteSuccess(data, '" + ViewBag.TargetType + "')",
+        OnComplete = "DigitalSalesWorkflow.onFormComplete"
     }, new { @class = "form-horizontal", id = "FormDelete" + ViewBag.TargetType }))
     {
         @Html.AntiForgeryToken()
@@ -23,4 +25,10 @@
             <h5 class="text-secondary-d2 font-normal">@Html.Raw(ViewBag.ConfirmMessage)</h5>
         </div>
     }
+
+    <script type="text/javascript">
+        if (typeof _initElement === "function") {
+            _initElement();
+        }
+    </script>
 }

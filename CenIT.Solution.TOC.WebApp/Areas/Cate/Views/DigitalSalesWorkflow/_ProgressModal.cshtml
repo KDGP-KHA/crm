@@ -19,11 +19,19 @@
     @using (Ajax.BeginForm("SaveProgress", "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
     {
         HttpMethod = "POST",
-        OnSuccess = "DigitalSalesWorkflow.onProgressSaveSuccess(data)"
+        OnBegin = "DigitalSalesWorkflow.onFormBegin",
+        OnSuccess = "DigitalSalesWorkflow.onProgressSaveSuccess(data)",
+        OnComplete = "DigitalSalesWorkflow.onFormComplete"
     }, new { @class = "form-horizontal", id = "formProgressModal" }))
     {
         <div id="bodyForm">
             @Html.Partial("_ProgressForm", Model)
         </div>
     }
+
+    <script type="text/javascript">
+        if (typeof _initElement === "function") {
+            _initElement();
+        }
+    </script>
 }

@@ -19,11 +19,19 @@
     @using (Ajax.BeginForm("SaveProcess", "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
     {
         HttpMethod = "POST",
-        OnSuccess = "DigitalSalesWorkflow.onProcessSaveSuccess(data)"
+        OnBegin = "DigitalSalesWorkflow.onFormBegin",
+        OnSuccess = "DigitalSalesWorkflow.onProcessSaveSuccess(data)",
+        OnComplete = "DigitalSalesWorkflow.onFormComplete"
     }, new { @class = "form-horizontal", id = "formProcessModal" }))
     {
         <div id="bodyForm">
             @Html.Partial("_ProcessForm", Model)
         </div>
     }
+
+    <script type="text/javascript">
+        if (typeof _initElement === "function") {
+            _initElement();
+        }
+    </script>
 }

@@ -385,12 +385,33 @@
         return false;
     }
 
+    function onFormBegin(xhr) {
+        var $form = $(this);
+        if ($form.data("submitting")) {
+            return false;
+        }
+        if ($form.valid && !$form.valid()) {
+            return false;
+        }
+        $form.data("submitting", true);
+        var $modal = $form.closest(".modal");
+        $modal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", true);
+        return true;
+    }
+
+    function onFormComplete() {
+        var $form = $(this);
+        $form.removeData("submitting");
+        var $modal = $form.closest(".modal");
+        $modal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", false);
+    }
+
     function renderValidationResponse(response) {
         if (typeof response !== "string") {
             return false;
         }
 
-        var activeModal = $(".modal.show").last();
+        var activeModal = $(".modal.show, .modal.in, .modal:visible").last();
         var bodyForm = activeModal.find("#bodyForm");
         if (bodyForm.length === 0) {
             return false;
@@ -409,6 +430,9 @@
             $.validator.unobtrusive.parse(form);
         }
 
+        activeModal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", false);
+        form.removeData("submitting");
+
         return true;
     }
 
@@ -418,8 +442,8 @@
             return;
         }
 
+        var activeModal = $(".modal.show, .modal.in, .modal:visible").last();
         if (response.status || response.success) {
-            var activeModal = $(".modal.show");
             if (activeModal.length > 0) {
                 activeModal.modal("hide");
                 activeModal.one("hidden.bs.modal", function () {
@@ -435,6 +459,8 @@
                 }
             }
         } else {
+            activeModal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", false);
+            activeModal.find("form").removeData("submitting");
             if (response.message) {
                 eval(response.message);
             }
@@ -446,8 +472,8 @@
             return;
         }
 
+        var activeModal = $(".modal.show, .modal.in, .modal:visible").last();
         if (response.status || response.success) {
-            var activeModal = $(".modal.show");
             if (activeModal.length > 0) {
                 activeModal.modal("hide");
                 activeModal.one("hidden.bs.modal", function () {
@@ -464,6 +490,8 @@
                 }
             }
         } else {
+            activeModal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", false);
+            activeModal.find("form").removeData("submitting");
             if (response.message) {
                 eval(response.message);
             }
@@ -475,8 +503,8 @@
             return;
         }
 
+        var activeModal = $(".modal.show, .modal.in, .modal:visible").last();
         if (response.status || response.success) {
-            var activeModal = $(".modal.show");
             if (activeModal.length > 0) {
                 activeModal.modal("hide");
                 activeModal.one("hidden.bs.modal", function () {
@@ -492,6 +520,8 @@
                 }
             }
         } else {
+            activeModal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", false);
+            activeModal.find("form").removeData("submitting");
             if (response.message) {
                 eval(response.message);
             }
@@ -499,8 +529,8 @@
     }
 
     function onDeleteSuccess(response, targetType) {
+        var activeModal = $(".modal.show, .modal.in, .modal:visible").last();
         if (response.status || response.success) {
-            var activeModal = $(".modal.show");
             if (activeModal.length > 0) {
                 activeModal.modal("hide");
                 activeModal.one("hidden.bs.modal", function () {
@@ -527,6 +557,8 @@
                 }
             }
         } else {
+            activeModal.find("#btnSave, #btnConfirm, button[type='submit']").prop("disabled", false);
+            activeModal.find("form").removeData("submitting");
             if (response.message) {
                 eval(response.message);
             }
@@ -547,6 +579,8 @@
         openAddProgress: openAddProgress,
         openEditProgress: openEditProgress,
         openDeleteProgress: openDeleteProgress,
+        onFormBegin: onFormBegin,
+        onFormComplete: onFormComplete,
         onStatusSaveSuccess: onStatusSaveSuccess,
         onProcessSaveSuccess: onProcessSaveSuccess,
         onProgressSaveSuccess: onProgressSaveSuccess,
@@ -556,23 +590,4 @@
 
 $(document).ready(function () {
     DigitalSalesWorkflow.init();
-
-    // Bắt sự kiện submit an toàn cho nút #btnSave và #btnConfirm trong modal footer
-    $(document).on("click", ".modal #btnSave", function (e) {
-        var $modal = $(this).closest(".modal");
-        var $form = $modal.find("form");
-        if ($form.length > 0) {
-            e.preventDefault();
-            $form.submit();
-        }
-    });
-
-    $(document).on("click", ".modal #btnConfirm", function (e) {
-        var $modal = $(this).closest(".modal");
-        var $form = $modal.find("form");
-        if ($form.length > 0) {
-            e.preventDefault();
-            $form.submit();
-        }
-    });
 });
