@@ -64,7 +64,8 @@ namespace Core.Cate.Biz
             var list = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesDashboardStatusModel>(
                 _spGetDashboardStatusStats,
                 DATA_PROVIDER_NAME,
-                applyYear
+                applyYear,
+                userName
             ) ?? new List<RM_DigitalSalesDashboardStatusModel>();
 
             int totalKey = 0;
@@ -73,6 +74,7 @@ namespace Core.Cate.Biz
                 ApplyYear = applyYear,
                 Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
                 IsKeyProject = true,
+                UserName = !string.IsNullOrWhiteSpace(userName) ? userName : null,
                 PageNumber = 1,
                 PageSize = 50
             }) ?? new List<RM_DigitalSalesModel>();
@@ -93,7 +95,8 @@ namespace Core.Cate.Biz
                 DATA_PROVIDER_NAME,
                 applyYear,
                 72,
-                0
+                0,
+                userName
             ) ?? new List<RM_DigitalSalesModel>();
 
             if (!string.IsNullOrWhiteSpace(keyword))
