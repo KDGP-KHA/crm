@@ -21,6 +21,11 @@ function buildReviewDigitalSalesUrl(row) {
 
 function renderReviewDigitalSalesRecord(row) {
     var url = buildReviewDigitalSalesUrl(row);
+    var businessTypeClass = row.BusinessType === 2
+        ? "bgc-primary-l3 text-primary-d3 border-1 brc-primary-m2"
+        : "bgc-success-l3 text-success-d3 border-1 brc-success-m2";
+    var businessTypeIcon = row.BusinessType === 2 ? "fa-briefcase" : "fa-lightbulb";
+    var businessTypeName = row.BusinessTypeName || (row.BusinessType === 2 ? "Dự án" : "Cơ hội");
     var badgeClass = "badge-secondary";
     if (row.StatusID === 2) badgeClass = "badge-info";
     else if (row.StatusID === 3 || row.StatusID === 6) badgeClass = "badge-danger";
@@ -29,6 +34,8 @@ function renderReviewDigitalSalesRecord(row) {
     else if (row.StatusID !== 1) badgeClass = "badge-warning text-dark";
 
     var html = '<div class="mb-1 d-flex align-items-center flex-wrap">'
+        + '<span class="badge ' + businessTypeClass + ' mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge">'
+        + '<i class="fa ' + businessTypeIcon + ' mr-1"></i>' + encodeReviewDigitalSales(businessTypeName) + '</span>'
         + '<span class="badge ' + badgeClass + ' px-2 py-1 sale-badge">' + encodeReviewDigitalSales(row.StatusName || "—") + '</span>'
         + '</div>';
     html += '<a class="font-weight-bold text-primary d-block sale-title" style="font-size:15px" title="Xem chi tiết 360 độ" href="' + url + '">'

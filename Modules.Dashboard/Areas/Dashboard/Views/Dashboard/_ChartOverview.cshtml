@@ -166,9 +166,9 @@
                                         <a href="/Cate/DigitalSales/Detail?id=@p.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
                                             @p.Title
                                         </a>
-                                        <div class="text-muted text-85 mt-05">
-                                            <span class="badge badge-secondary text-75 mr-1">@p.Code</span>
-                                            <span class="badge @(p.BusinessType == 1 ? "badge-info" : "badge-primary") text-75 mr-1">@(p.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                        <div class="mt-1 d-flex align-items-center flex-wrap">
+                                            <span class="badge badge-secondary db-code-badge mr-1">@p.Code</span>
+                                            <span class="badge @(p.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(p.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
                                         </div>
                                     </td>
                                     <td>
@@ -297,9 +297,10 @@
                                         <a href="/Cate/DigitalSales/Detail?id=@opp.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
                                             @opp.Title
                                         </a>
-                                        <div class="text-muted text-85 mt-05">
-                                            <span class="badge badge-secondary text-75 mr-1">@opp.Code</span>
-                                            <span class="badge badge-pink text-75 mr-1" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8;">
+                                        <div class="mt-1 d-flex align-items-center flex-wrap">
+                                            <span class="badge badge-secondary db-code-badge mr-1">@opp.Code</span>
+                                            <span class="badge @(opp.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(opp.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                            <span class="badge badge-pink db-interest-badge mr-1" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8;">
                                                 <i class="fa fa-heart mr-1"></i>Quan tâm
                                             </span>
                                         </div>
@@ -414,9 +415,9 @@
                                         <a href="/Cate/DigitalSales/Detail?id=@s.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
                                             @s.Title
                                         </a>
-                                        <div class="text-muted text-85 mt-05">
-                                            <span class="badge badge-secondary text-75 mr-1">@s.Code</span>
-                                            <span class="badge @(s.BusinessType == 1 ? "badge-info" : "badge-primary") text-75 mr-1">@(s.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                        <div class="mt-1 d-flex align-items-center flex-wrap">
+                                            <span class="badge badge-secondary db-code-badge mr-1">@s.Code</span>
+                                            <span class="badge @(s.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(s.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
                                         </div>
                                     </td>
                                     <td>

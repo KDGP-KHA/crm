@@ -24,19 +24,19 @@
                 default: bgcClass = "bgc-secondary-d1"; brcClass = "brc-secondary-tp1"; iconClass = "fa-flag"; break;
             }
 
-            <div class="list-group-item list-group-item-action status-item px-3 py-2 cursor-pointer border-1 brc-grey-l2 border-l-4 mb-2 radius-1 bgc-h-blue-l4 @brcClass @activeClass"
+            <div class="list-group-item list-group-item-action status-item px-2 py-2 cursor-pointer border-1 brc-grey-l2 border-l-4 mb-2 radius-1 bgc-h-blue-l4 @brcClass @activeClass"
                  data-id="@item.StatusID"
                  data-name="@item.StatusName"
                  data-type="@item.BusinessType"
                  onclick="return DigitalSalesWorkflow.selectStatus(@item.StatusID, this, event)">
                 <div class="d-flex justify-content-between align-items-center min-w-0">
-                    <div class="d-flex align-items-center flex-grow-1 min-w-0 mr-2">
+                    <div class="d-flex align-items-center flex-grow-1 min-w-0 mr-1">
                         <span class="badge badge-sm badge-pill mr-2 text-white flex-shrink-0 @bgcClass">
                             <i class="fa @iconClass"></i>
                         </span>
                         <div class="flex-grow-1 min-w-0">
                             <div class="d-flex align-items-center min-w-0">
-                                <span class="font-bold text-dark-m1 status-name text-95 text-truncate" title="@item.StatusName">@item.StatusName</span>
+                                <span class="font-bold text-dark-m1 status-name text-90 text-truncate" title="@item.StatusName">@item.StatusName</span>
                                 @Html.Raw(defaultBadge)
                             </div>
                             <div class="text-secondary-m2 text-85 text-truncate">

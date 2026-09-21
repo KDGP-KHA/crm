@@ -1,18 +1,39 @@
 ﻿/* Layout lưới 3 cột chống tràn ngang */
 .workflow-row {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
+    margin-left: -0.35rem !important;
+    margin-right: -0.35rem !important;
+    max-width: 100% !important;
 }
 
 .workflow-col {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    min-width: 0; /* Ngăn flex item co dãn quá 33.333% */
+    padding-left: 0.35rem !important;
+    padding-right: 0.35rem !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+@media (min-width: 992px) {
+    .workflow-col {
+        flex: 0 0 33.333333% !important;
+        max-width: 33.333333% !important;
+        width: 33.333333% !important;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .workflow-col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
 }
 
 .workflow-col > .card {
-    min-width: 0;
-    overflow: hidden;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 
 .workflow-col .card-header {
@@ -20,7 +41,8 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: nowrap;
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.5rem !important;
+    min-width: 0 !important;
 }
 
 .workflow-col .card-header .card-title {
@@ -29,15 +51,18 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.925rem;
 }
 
 .workflow-col .card-header .card-toolbar {
     flex-shrink: 0;
-    margin-left: 0.5rem;
+    margin-left: 0.25rem;
 }
 
 .workflow-col .card-header .card-toolbar .btn {
     white-space: nowrap;
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.8rem !important;
 }
 
 .workflow-scroll-container {
@@ -45,10 +70,12 @@
     overflow-x: hidden; /* Ngăn chặn cuộn ngang hoặc tràn thẻ con */
     max-height: calc(100vh - 250px);
     min-height: 420px;
+    padding: 0.4rem !important;
 }
 
 .status-item, .process-item, .progress-item {
-    min-width: 0;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     transition: all 0.15s ease-in-out;
 }
 
@@ -57,7 +84,8 @@
 }
 
 .action-buttons {
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
 }
 
 .action-buttons a {
@@ -66,10 +94,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0 !important;
 }
 
 .status-item:hover .action-buttons a,
 .process-item:hover .action-buttons a,
 .progress-item:hover .action-buttons a {
     opacity: 1;
+}
+
+/* Khóa chặt chiều ngang của container và main-content chống tràn màn hình */
+.page-content {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+.main-content {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
 }

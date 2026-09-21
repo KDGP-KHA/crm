@@ -13,28 +13,28 @@
         {
             var activeClass = item.IsActive ? "" : "opacity-65";
 
-            <div class="list-group-item progress-item px-3 py-2 border-1 brc-grey-l2 border-l-4 brc-success-tp1 mb-2 radius-1 bgc-h-green-l4 @activeClass"
+            <div class="list-group-item progress-item px-2 py-2 border-1 brc-grey-l2 border-l-4 brc-success-tp1 mb-2 radius-1 bgc-h-green-l4 @activeClass"
                  data-id="@item.ProgressID"
                  data-name="@item.ProgressName"
                  data-process-id="@item.ProcessID">
                 <div class="d-flex justify-content-between align-items-center min-w-0">
-                    <div class="d-flex align-items-center flex-grow-1 min-w-0 mr-2">
+                    <div class="d-flex align-items-center flex-grow-1 min-w-0 mr-1">
                         <span class="badge badge-sm badge-pill mr-2 bgc-green-l2 text-green-d2 border-1 brc-green-m3 flex-shrink-0">
                             <i class="fa fa-tasks"></i>
                         </span>
                         <div class="flex-grow-1 min-w-0">
-                            <div class="d-flex align-items-center justify-content-between min-w-0">
-                                <span class="font-bold text-dark-m1 progress-name text-95 text-truncate" title="@item.ProgressName">@item.ProgressName</span>
-                                <span class="badge bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3 px-1 text-80 flex-shrink-0 ml-1" title="Thời hạn tiêu chuẩn thực hiện">
+                            <div class="font-bold text-dark-m1 progress-name text-90 text-truncate" title="@item.ProgressName">
+                                @item.ProgressName
+                            </div>
+                            <div class="text-secondary-m2 text-80 text-truncate d-flex align-items-center mt-1">
+                                <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1 flex-shrink-0">#@item.SortOrder</span>
+                                <code class="mr-1 flex-shrink-0 text-75">@item.ProgressCode</code>
+                                <span class="badge bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3 px-1 text-75 flex-shrink-0 mr-1" title="Thời hạn tiêu chuẩn thực hiện">
                                     <i class="fa fa-stopwatch mr-1 text-blue"></i>@(item.DefaultDurationDays > 0 ? item.DefaultDurationDays : 3) ngày
                                 </span>
-                            </div>
-                            <div class="text-secondary-m2 text-85 text-truncate">
-                                <span class="badge bgc-secondary-l2 text-secondary-d2 mr-1">#@item.SortOrder</span>
-                                <code>@item.ProgressCode</code>
                                 @if (!string.IsNullOrEmpty(item.Description))
                                 {
-                                    <span class="text-muted ml-1" title="@item.Description">- @item.Description</span>
+                                    <span class="text-muted text-truncate" title="@item.Description">- @item.Description</span>
                                 }
                             </div>
                         </div>

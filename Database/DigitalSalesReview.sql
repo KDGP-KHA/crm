@@ -330,6 +330,9 @@ BEGIN
           AND (@Search IS NULL OR ds.Code LIKE '%' + @Search + '%' OR ds.Title LIKE N'%' + @Search + '%' OR c.CustomerName LIKE N'%' + @Search + '%')
           AND (@BusinessType = 0 OR ds.BusinessType = @BusinessType)
           AND (@StatusID = 0 OR ds.StatusID = @StatusID)
+          -- Không đưa Cơ hội đã bỏ mất vào danh sách rà soát định kỳ.
+          -- Chỉ áp dụng cho loại Cơ hội để không ảnh hưởng trạng thái "Mất dự án" của Dự án.
+          AND (ds.BusinessType <> 1 OR UPPER(ISNULL(st.StatusCode, '')) <> 'LOST')
           AND (
                 @ProcessID = 0
                 OR EXISTS
@@ -383,6 +386,10 @@ BEGIN
             ROW_NUMBER() OVER
             (
                 ORDER BY
+                    -- Thứ tự nghiệp vụ mặc định: Dự án, trọng điểm, tổng doanh thu dự kiến.
+                    CASE WHEN BusinessType = 2 THEN 0 ELSE 1 END ASC,
+                    IsKeyProject DESC,
+                    ISNULL(TotalExpectedRevenue, 0) DESC,
                     CASE WHEN @Order = '1' AND @OrderDir = 'ASC' THEN Title END ASC,
                     CASE WHEN @Order = '1' AND @OrderDir = 'DESC' THEN Title END DESC,
                     CASE WHEN @Order = '2' AND @OrderDir = 'ASC' THEN CustomerName END ASC,
