@@ -55,6 +55,29 @@
     background-color: #ffffff;
 }
 
+/* Màn hình hẹp hiển thị hai cột nối tiếp; vẫn dùng cuộn của modal để không
+   làm mất phần checklist phía dưới. */
+@media (max-width: 991.98px) {
+    #modalChangeStatus.has-progress-box .modal-body {
+        overflow-y: auto;
+    }
+}
+
+/* Từ desktop: mỗi cột có vùng cuộn riêng. Cột trạng thái không bị cuộn theo
+   khi người dùng xem nhiều tiến trình và ngược lại. */
+@media (min-width: 992px) {
+    #modalChangeStatus.has-progress-box .modal-body {
+        overflow-y: hidden;
+    }
+
+    #modalChangeStatus.has-progress-box #colStatusInfo {
+        max-height: calc(88vh - 120px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding-right: 10px;
+    }
+}
+
 #modalChangeStatus .modal-footer {
     background-color: #f8fafc;
     border-top: 1px solid #e2e8f0;
@@ -148,8 +171,9 @@
     color: #ef4444 !important;
 }
 
-/* Chống vỡ độ rộng: Dropdown container khi mở không bị ép 100% tràn modal */
-#modalChangeStatus .select2-container--open {
+/* Chống vỡ độ rộng cho riêng dropdown Trạng thái mới.
+   Không áp dụng cho Người thực hiện trong checklist vì sẽ che giá trị đã chọn. */
+#modalChangeStatus #colStatusInfo .select2-container--open {
     width: auto !important;
 }
 
@@ -193,11 +217,19 @@
 .ds-progress-card {
     display: flex;
     flex-direction: column;
-    height: 100%;
     min-height: 320px;
     border: 1px solid #d1fae5;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+#modalChangeStatus.has-progress-box .ds-progress-card {
+    max-height: calc(88vh - 120px);
+}
+
+.ds-progress-list-body {
+    min-height: 0;
+    overflow: hidden;
 }
 
 .ds-progress-card .card-header {
@@ -207,8 +239,14 @@
 }
 
 .ds-progress-items-container {
-    max-height: 480px;
+    /* Chiều cao phụ thuộc viewport để tránh cắt tại mốc cố định 480px.
+       Đây là vùng cuộn duy nhất của checklist. */
+    height: calc(88vh - 270px);
+    min-height: 250px;
+    max-height: 560px;
     overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
     padding-right: 6px;
 }
 
@@ -319,9 +357,12 @@
 }
 
 .ds-progress-row-item .select2-container--open {
-    width: auto !important;
-    min-width: 210px !important;
-    max-width: 320px !important;
+    /* Giữ nguyên chiều rộng ô đã chọn khi mở dropdown.
+       Không dùng width:auto vì Select2 sẽ mở rộng chính control và che phần
+       giá trị đã chọn bằng lớp tìm kiếm/kết quả. */
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 210px !important;
 }
 
 .ds-progress-row-item .select2-container .select2-selection--single {
@@ -381,10 +422,16 @@
 }
 
 /* Dropdown Select2 nổi tự do trên Modal - không bị giam cầm hay cắt xén bởi overflow */
+body.modal-open > .select2-container--open {
+    /* Popup Select2 được gắn trực tiếp vào body để tránh overflow của modal.
+       Lớp bao ngoài phải cao hơn modal và backdrop. */
+    z-index: 1061 !important;
+}
+
 .ds-select2-dropdown-assigned {
-    min-width: 240px !important;
-    max-width: 380px !important;
-    width: auto !important;
+    width: 210px !important;
+    min-width: 210px !important;
+    max-width: 210px !important;
     border: 1px solid #10b981 !important;
     border-radius: 6px !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22) !important;
@@ -417,6 +464,8 @@
     max-height: 220px !important;
     padding: 4px 0 !important;
     overflow-y: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
 }
 
 .ds-select2-dropdown-assigned .select2-results__option {

@@ -943,7 +943,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         #region 3. Detail 360
         [ActionType(Type = EnumActionType.View)]
         [HttpGet]
-        public ActionResult Detail(int id, int? reviewBatchID)
+        public ActionResult Detail(int id, int? reviewBatchID, string reviewFilter = null)
         {
             try
             {
@@ -963,6 +963,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 ViewBag.Title = $"{AppProcessor.Messagor.GetMessage("DigitalSales_RecordPrefix")}: {model.Code} - {model.Title}";
                 ViewBag.ReviewBatchID = reviewBatchID.GetValueOrDefault(0);
+                ViewBag.ReviewFilter = reviewFilter;
                 ViewBag.ShowDigitalSalesGuide = !HasViewedUserGuide(DigitalSalesDetailGuideCode);
                 try
                 {
@@ -1168,9 +1169,63 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 Activities = _salesCache.GetActivitiesBySalesID(id, activityType)
             };
 
+            NormalizeStatusChangeActivities(id, viewModel.Activities);
+
             ViewBag.CurrentFilter = activityType;
             ViewBag.CanEdit = HasDetailPermission(model, User.UserName);
             return PartialView("_DetailDiscussions", viewModel);
+        }
+
+        private static string BuildStatusChangeActionDescription(RM_DigitalSalesModel currentSales, RM_DigitalSalesStatusModel newStatus, string note)
+        {
+            var statusName = newStatus?.StatusName ?? string.Empty;
+            var isOpportunityToProject = currentSales != null
+                                         && currentSales.BusinessType == 1
+                                         && newStatus != null
+                                         && newStatus.BusinessType == 2;
+            var actionDescription = isOpportunityToProject
+                ? "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới: " + statusName
+                : "Chuyển trạng thái sang: " + statusName;
+
+            if (!string.IsNullOrWhiteSpace(note))
+            {
+                actionDescription += " | Ghi chú: " + note.Trim();
+            }
+
+            return actionDescription;
+        }
+
+        // Khôi phục các activity đã lưu sai trước đây: Content chỉ chứa ghi chú,
+        // còn trạng thái đúng vẫn nằm tại Timeline liên kết qua ReferenceID.
+        private void NormalizeStatusChangeActivities(int digitalSalesID, List<RM_DigitalSalesActivityModel> activities)
+        {
+            if (activities == null || activities.Count == 0) return;
+
+            var invalidActivities = activities.Where(a => a.ActivityType == 2
+                                                           && !string.IsNullOrWhiteSpace(a.Content)
+                                                           && !a.Content.TrimStart().StartsWith("Chuyển trạng thái sang:", StringComparison.OrdinalIgnoreCase)
+                                                           && !a.Content.TrimStart().StartsWith("Chuyển đổi thành công", StringComparison.OrdinalIgnoreCase))
+                                             .ToList();
+            if (invalidActivities.Count == 0) return;
+
+            var timelines = _salesCache.GetTimeline(digitalSalesID) ?? new List<RM_DigitalSalesTimelineModel>();
+            var statuses = _salesCache.GetStatusList(null) ?? new List<RM_DigitalSalesStatusModel>();
+
+            foreach (var activity in invalidActivities)
+            {
+                var timeline = timelines.FirstOrDefault(t => t.TimelineID == activity.ReferenceID);
+                if (timeline == null) continue;
+
+                var status = statuses.FirstOrDefault(s => s.StatusID == timeline.ToStatusID);
+                if (status == null) continue;
+
+                var isOpportunityToProject = timeline.FromBusinessType == 1 && timeline.ToBusinessType == 2;
+                var actionDescription = isOpportunityToProject
+                    ? "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới: " + status.StatusName
+                    : "Chuyển trạng thái sang: " + status.StatusName;
+
+                activity.Content = actionDescription + " | Ghi chú: " + activity.Content.Trim();
+            }
         }
 
         [AjaxOnly]
@@ -1543,7 +1598,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 attachmentPayload = Newtonsoft.Json.JsonConvert.SerializeObject(uploadedFiles);
             }
 
-            var code = _salesCache.ChangeStatus(model.DigitalSalesID, model.NewStatusID, model.Note, attachmentPayload, User.UserName);
+            // Stored nhận @ActionDesc (không phải riêng ghi chú). Tạo nội dung chuẩn để
+            // Activity/Timeline luôn có trạng thái mới, còn ghi chú được parser tách để hiển thị bên dưới.
+            var actionDescription = BuildStatusChangeActionDescription(currentSales, newStatus, model.Note);
+            var code = _salesCache.ChangeStatus(model.DigitalSalesID, model.NewStatusID, actionDescription, attachmentPayload, User.UserName);
 
             if (code > 0)
             {

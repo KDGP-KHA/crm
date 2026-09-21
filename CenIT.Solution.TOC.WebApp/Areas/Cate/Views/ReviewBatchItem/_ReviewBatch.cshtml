@@ -1,4 +1,5 @@
 ﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewFormModel
 @{
     ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Review"), AppProcessor.Messagor.GetMessage("DigitalSales_Entity_Name"));
     Layout = "~/Views/Shared/_Form.cshtml";
@@ -16,6 +17,7 @@
 @using (Html.BeginForm("ReviewBatch", "ReviewBatchItem", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "ReviewBatch", @class = "form-horizontal" }))
     {
         @Html.Hidden("ContinueReview", false, new { id = "ReviewBatchContinueReview" })
+        @Html.Hidden("ContinueReviewFilter", Model.ContinueReviewFilter ?? "", new { id = "ReviewBatchContinueReviewFilter" })
         <div id="bodyForm">
             @Html.Partial("_ReviewForm")
         </div>
@@ -50,7 +52,27 @@
             .on('click.reviewBatchSubmit', '#modal_ReviewBatch .js-review-batch-submit', function () {
                 reviewBatchSaveAndContinue = $(this).data('continue') === true;
                 $('#ReviewBatchContinueReview').val(reviewBatchSaveAndContinue ? 'true' : 'false');
+                if (!$('#ReviewBatchContinueReviewFilter').val()) {
+                    $('#ReviewBatchContinueReviewFilter').val(localStorage.getItem('review_digital_sales_filter') || '');
+                }
                 $('#modal_ReviewBatch form#ReviewBatch').trigger('submit');
+            });
+
+        $(document)
+            .off('click.reviewBatchBack', '#modal_ReviewBatch .js-review-batch-back')
+            .on('click.reviewBatchBack', '#modal_ReviewBatch .js-review-batch-back', function () {
+                // The filter is restored by ReviewBatchItem.js after navigating back.
+                // Keep the latest value when the review form is opened from the list.
+                if (typeof window.saveReviewDigitalSalesFilter === 'function') {
+                    window.saveReviewDigitalSalesFilter();
+                }
+                var batchId = parseInt($('#modal_ReviewBatch #ReviewBatchID').val() || 0, 10);
+                var targetUrl = batchId > 0
+                    ? '/Cate/ReviewBatchItem/Index/' + batchId
+                    : '/Cate/ReviewBatchItem';
+                $('#modal_ReviewBatch').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                    window.location.href = targetUrl;
+                }).modal('hide');
             });
 
         $('form#ReviewBatch').ajaxForm({
@@ -104,6 +126,9 @@
 }
 
 @section SubmitControl{
+    <button type="button" class="js-review-batch-back btn px-4 btn-outline-secondary mb-1">
+        <i class="fa fa-arrow-left"></i>&nbsp;Quay lại danh sách rà soát
+    </button>
     <button type="button" class="js-review-batch-submit btn px-4 btn-outline-primary mb-1" data-continue="false">
         <i class="fa fa-save"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Save")
     </button>

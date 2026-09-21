@@ -301,33 +301,39 @@
                         </div>
                     </div>
 
-                    <!-- THANH THÔNG BÁO PHẲNG (NOTIFICATION LABEL DẠNG THÔNG BÁO, KHÔNG LÀM CARD) -->
+                    <!-- Thông tin trạng thái ở dòng đầu; nội dung/lý do nằm tách riêng ở dòng dưới. -->
                     <div class="ds-status-notice radius-2 shadow-none"
                          style="border-left: 4px solid @statusInfo.BorderColor;">
-                        <span class="font-weight-bold text-dark-m1 text-90">
-                            @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
-                        </span>
-                        @if (!string.IsNullOrEmpty(act.ActionByDepartment))
-                        {
-                            <span class="text-secondary text-80 font-normal">(@act.ActionByDepartment)</span>
-                        }
-                        
-                        @if (statusInfo.IsConversion)
-                        {
-                            <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
-                                <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                        <div class="ds-status-summary">
+                            <span class="font-weight-bold text-dark-m1 text-90">
+                                @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName))
                             </span>
-                            <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
-                        }
-                        else
-                        {
-                            <span class="text-secondary font-italic text-85">@statusInfo.ActionText</span>
-                        }
+                            @if (!string.IsNullOrEmpty(act.ActionByDepartment))
+                            {
+                                <span class="text-secondary text-80 font-normal">(@act.ActionByDepartment)</span>
+                            }
 
-                        <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none" 
-                              style="background-color: @statusInfo.BgColor; color: @statusInfo.TextColor; border: 1px solid @statusInfo.BorderColor;">
-                            @statusInfo.StatusName
-                        </span>
+                            @if (statusInfo.IsConversion)
+                            {
+                                <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
+                                    <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                                </span>
+                                <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
+                            }
+                            else
+                            {
+                                <span class="text-secondary font-italic text-85">@statusInfo.ActionText</span>
+                            }
+
+                            <span class="badge font-bold px-2 py-1 radius-2 text-85 shadow-none"
+                                  style="background-color: @statusInfo.BgColor; color: @statusInfo.TextColor; border: 1px solid @statusInfo.BorderColor;">
+                                @statusInfo.StatusName
+                            </span>
+
+                            <span class="ds-status-date" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
+                                <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
+                            </span>
+                        </div>
 
                         @if (!string.IsNullOrEmpty(statusInfo.Note))
                         {
@@ -347,15 +353,13 @@
                             }
                             else
                             {
-                                <span class="ds-status-note radius-2" title="Ghi chú: @statusInfo.Note">
-                                    <i class="far fa-comment-dots text-secondary-m1 mr-1"></i>@statusInfo.Note
-                                </span>
+                                <div class="ds-status-note-block" title="Nội dung chuyển trạng thái">
+                                    <i class="far fa-comment-dots text-secondary-m1 mr-1"></i>
+                                    <span class="font-weight-bold text-secondary mr-1">Nội dung:</span>
+                                    @Html.Raw(System.Web.HttpUtility.HtmlEncode(statusInfo.Note).Replace("\n", "<br />"))
+                                </div>
                             }
                         }
-
-                        <span class="ds-status-date" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
-                            <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
-                        </span>
                     </div>
                 </div>
             }

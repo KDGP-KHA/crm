@@ -8,6 +8,7 @@
     bool canEdit = ViewBag.CanEdit == true;
     bool isQTHT = ViewBag.IsQTHT == true;
     int reviewBatchID = ViewBag.ReviewBatchID ?? 0;
+    string reviewFilter = ViewBag.ReviewFilter ?? string.Empty;
     string guideBtnText = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Button");
     if (string.IsNullOrEmpty(guideBtnText)) { guideBtnText = "Hướng dẫn"; }
     string guideConfigTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_ConfigButton");
@@ -119,7 +120,7 @@
        class="ds-review-floating-trigger"
        data-modal=""
        data-modal-id="ReviewBatch"
-       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID, digitalSalesID = Model.DigitalSalesID })"
+       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID, digitalSalesID = Model.DigitalSalesID, continueReviewFilter = reviewFilter })"
        title="Rà soát hồ sơ"
        aria-label="Rà soát hồ sơ">
         <i class="fa fa-clipboard-check"></i>

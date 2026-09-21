@@ -196,6 +196,7 @@ namespace Core.Cate.Models
         public List<HttpPostedFileBase> DinhKemFile { get; set; }
         public List<RM_ReviewBatchFilePathModel> ExistingFiles { get; set; }
         public List<int> DeletedFileIds { get; set; }
+        public string ContinueReviewFilter { get; set; }
     }
 
     public class RM_ReviewHistoryModel : BaseModel

@@ -486,7 +486,7 @@
             '<div class="d-flex align-items-center flex-wrap" style="gap: 10px;">' +
                 '<div class="ds-progress-assigned-wrapper position-relative" style="width: 210px; flex-shrink: 0;">' +
                     '<label class="text-75 text-secondary font-weight-bold mb-1 d-block"><i class="fa fa-user text-primary mr-1"></i> Người thực hiện:</label>' +
-                    '<select class="form-control form-control-sm cbo-assigned-user ignore-validation">' +
+                    '<select class="form-control form-control-sm cbo-assigned-user none-select2 ignore-validation">' +
                         memberOptionsHtml +
                     '</select>' +
                 '</div>' +
@@ -517,14 +517,13 @@
 
         $container.append($row);
 
-        // Khởi tạo Select2 cho Người thực hiện của dòng vừa thêm (gán dropdownParent vào Modal để không bị overflow/clip bởi card)
+        // Gắn popup trực tiếp vào body để không bị cắt bởi vùng cuộn của modal/card checklist.
         if ($.fn.select2) {
-            var $modalParent = $('#modalChangeStatus').length ? $('#modalChangeStatus') : $row.closest('.modal');
             $row.find('.cbo-assigned-user').select2({
                 allowClear: true,
                 placeholder: 'Chọn 1 giá trị',
                 width: '100%',
-                dropdownParent: $modalParent,
+                dropdownParent: $(document.body),
                 dropdownCssClass: 'ds-select2-dropdown-assigned',
                 dropdownAutoWidth: false,
                 language: 'vi'

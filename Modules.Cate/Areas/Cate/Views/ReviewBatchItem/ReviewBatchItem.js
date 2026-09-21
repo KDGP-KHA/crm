@@ -10,11 +10,24 @@ function getReviewDigitalSalesMessages() {
     return window.reviewDigitalSalesMessages || {};
 }
 
+function getReviewDigitalSalesFilter() {
+    return {
+        Keyword: $("#ReviewDigitalSalesKeyword").val(),
+        ReviewBatchID: $("#ReviewDigitalSalesBatchID").val(),
+        StatusID: $("#ReviewDigitalSalesStatusID").val(),
+        ProcessID: $("#ReviewDigitalSalesProcessID").val(),
+        ProgressID: $("#ReviewDigitalSalesProgressID").val(),
+        DepartmentID: $("#ReviewDigitalSalesDepartmentID").val(),
+        EmployeeID: $("#ReviewDigitalSalesEmployeeID").val(),
+        IsReviewed: $('input[name="IsReviewed"]:checked').val()
+    };
+}
+
 function buildReviewDigitalSalesUrl(row) {
     var url = "/Cate/DigitalSales/Detail/" + row.DigitalSalesID;
     var batchID = parseInt($("#ReviewDigitalSalesBatchID").val() || 0, 10);
     if (!row.IsReviewed && batchID > 0) {
-        url += "?reviewBatchID=" + batchID;
+        url += "?reviewBatchID=" + batchID + "&reviewFilter=" + encodeURIComponent(JSON.stringify(getReviewDigitalSalesFilter()));
     }
     return url;
 }
@@ -114,23 +127,11 @@ function getReviewDigitalSalesState() {
 }
 
 function saveReviewDigitalSalesFilter() {
-    var filter = {
-        Keyword: $("#ReviewDigitalSalesKeyword").val(),
-        ReviewBatchID: $("#ReviewDigitalSalesBatchID").val(),
-        StatusID: $("#ReviewDigitalSalesStatusID").val(),
-        ProcessID: $("#ReviewDigitalSalesProcessID").val(),
-        ProgressID: $("#ReviewDigitalSalesProgressID").val(),
-        DepartmentID: $("#ReviewDigitalSalesDepartmentID").val(),
-        EmployeeID: $("#ReviewDigitalSalesEmployeeID").val(),
-        IsReviewed: $('input[name="IsReviewed"]:checked').val()
-    };
-    localStorage.setItem(_reviewDigitalSalesFilterKey, JSON.stringify(filter));
+    localStorage.setItem(_reviewDigitalSalesFilterKey, JSON.stringify(getReviewDigitalSalesFilter()));
 }
 
 function restoreReviewDigitalSalesFilter() {
     var initialBatchID = $("#ReviewDigitalSalesBatchID").val();
-    if (initialBatchID && initialBatchID !== "0") return null;
-
     var filter;
     try {
         filter = JSON.parse(localStorage.getItem(_reviewDigitalSalesFilterKey));
@@ -140,7 +141,9 @@ function restoreReviewDigitalSalesFilter() {
     if (!filter) return null;
 
     $("#ReviewDigitalSalesKeyword").val(filter.Keyword || "");
-    $("#ReviewDigitalSalesBatchID").val(filter.ReviewBatchID || "");
+    // URL Index/{ReviewBatchID} only identifies the current review batch.  Do not
+    // discard the remaining saved search criteria when returning from Detail.
+    $("#ReviewDigitalSalesBatchID").val(initialBatchID && initialBatchID !== "0" ? initialBatchID : (filter.ReviewBatchID || ""));
     $("#ReviewDigitalSalesStatusID").val(filter.StatusID || "");
     $("#ReviewDigitalSalesDepartmentID").val(filter.DepartmentID || "");
     $('input[name="IsReviewed"][value="' + (filter.IsReviewed || "false") + '"]').prop("checked", true);

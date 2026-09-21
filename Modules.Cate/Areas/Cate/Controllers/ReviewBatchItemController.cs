@@ -17,6 +17,7 @@ using System.IO;
 using System.Configuration;
 using System.Linq;
 using Core.Sys.Caches.Sys;
+using Newtonsoft.Json;
 
 namespace Modules.Cate.Areas.Cate.Controllers
 {
@@ -33,6 +34,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly string _reviewBatchTitle = AppProcessor.Messagor.GetMessage("ReviewBatch_Title");
         private readonly string _reviewHistoryTitle = AppProcessor.Messagor.GetMessage("ReviewHistory_Title");
         private readonly string _folderImage = ConfigurationManager.AppSettings["AppImageRoot_Path"] ?? "/Contents/imgs";
+        private const string ReviewDigitalSalesFilterSessionPrefix = "ReviewDigitalSalesFilter_";
 
         public ReviewBatchItemController()
         {
@@ -85,6 +87,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var search = Request.Form.GetValues("search[value]")?[0];
 
             model.UserName = User.UserName;
+            SaveReviewDigitalSalesFilter(model);
             var dataSearch = new BaseSearchModel
             {
                 Search = string.IsNullOrEmpty(search) ? null : search,
@@ -227,7 +230,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult ReviewBatch(int? reviewBatchID, int? digitalSalesID)
+        public ActionResult ReviewBatch(int? reviewBatchID, int? digitalSalesID, string continueReviewFilter = null)
         {
             if (!reviewBatchID.HasValue || reviewBatchID.Value <= 0 || !digitalSalesID.HasValue || digitalSalesID.Value <= 0)
             {
@@ -243,6 +246,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ReviewBatchID = reviewBatchID.Value,
                 DigitalSalesID = digitalSalesID.Value,
                 IsConfirmed = true,
+                ContinueReviewFilter = continueReviewFilter,
                 ReviewConclusion = RM_ReviewConclusion.Accepted,
                 ReviewConclusionOptions = BuildReviewConclusionOptions()
             };
@@ -301,12 +305,37 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 PageSize = 1
             };
 
-            var digitalSalesSearch = new RM_ReviewDigitalSalesSearchModel
+            // Use the submitted filter first. The server-side copy is the reliable
+            // fallback when Detail/modal navigation loses the browser-side value.
+            var serializedFilter = model.ContinueReviewFilter;
+            if (string.IsNullOrWhiteSpace(serializedFilter))
+                serializedFilter = GetReviewDigitalSalesFilter(model.ReviewBatchID);
+            if (string.IsNullOrWhiteSpace(serializedFilter)) return null;
+
+            RM_ReviewDigitalSalesSearchModel digitalSalesSearch;
+            try
             {
-                ReviewBatchID = model.ReviewBatchID,
-                IsReviewed = false,
-                UserName = User.UserName
-            };
+                digitalSalesSearch = JsonConvert.DeserializeObject<RM_ReviewDigitalSalesSearchModel>(serializedFilter);
+            }
+            catch
+            {
+                serializedFilter = GetReviewDigitalSalesFilter(model.ReviewBatchID);
+                try
+                {
+                    digitalSalesSearch = string.IsNullOrWhiteSpace(serializedFilter)
+                        ? null
+                        : JsonConvert.DeserializeObject<RM_ReviewDigitalSalesSearchModel>(serializedFilter);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            if (digitalSalesSearch == null) return null;
+
+            digitalSalesSearch.ReviewBatchID = model.ReviewBatchID;
+            digitalSalesSearch.IsReviewed = false;
+            digitalSalesSearch.UserName = User.UserName;
             var digitalSales = _reviewBatchItemCache.LoadDigitalSales(out _, digitalSalesSearch, search);
             var nextDigitalSales = digitalSales?.FirstOrDefault();
             return nextDigitalSales == null
@@ -315,8 +344,26 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 {
                     area = "Cate",
                     id = nextDigitalSales.DigitalSalesID,
-                    reviewBatchID = model.ReviewBatchID
+                    reviewBatchID = model.ReviewBatchID,
+                    reviewFilter = serializedFilter
                 });
+        }
+
+        private string GetReviewDigitalSalesFilterSessionKey(int reviewBatchID)
+        {
+            return string.Concat(ReviewDigitalSalesFilterSessionPrefix, User.UserName, "_", reviewBatchID);
+        }
+
+        private void SaveReviewDigitalSalesFilter(RM_ReviewDigitalSalesSearchModel model)
+        {
+            if (model == null || model.ReviewBatchID <= 0 || Session == null) return;
+            Session[GetReviewDigitalSalesFilterSessionKey(model.ReviewBatchID)] = JsonConvert.SerializeObject(model);
+        }
+
+        private string GetReviewDigitalSalesFilter(int reviewBatchID)
+        {
+            if (reviewBatchID <= 0 || Session == null) return null;
+            return Session[GetReviewDigitalSalesFilterSessionKey(reviewBatchID)] as string;
         }
 
         private void QueueReviewCompletedNotification(RM_ReviewFormModel model)
