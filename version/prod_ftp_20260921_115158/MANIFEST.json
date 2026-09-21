@@ -1,0 +1,766 @@
+﻿[
+    {
+        "path":  "Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.js",
+        "status":  "Modified"
+    },
+    {
+        "path":  "Areas/Dashboard/Views/Dashboard/Chart.css",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/CenIT.Solution.TOC.WebApp.dll",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/CenIT.Solution.TOC.WebApp.dll.config",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/CenIT.Solution.TOC.WebApp.pdb",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Core.Cate.dll",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Core.Cate.pdb",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Modules.API.dll",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Modules.API.pdb",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Modules.Cate.dll",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Modules.Cate.dll.config",
+        "status":  "New"
+    },
+    {
+        "path":  "bin/Modules.Cate.pdb",
+        "status":  "New"
+    },
+    {
+        "path":  "bin/Modules.Dashboard.dll",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/Modules.Dashboard.pdb",
+        "status":  "New"
+    },
+    {
+        "path":  "bin/Modules.Sys.dll",
+        "status":  "Modified"
+    },
+    {
+        "path":  "bin/test_member_modal.exe",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/EForm/anhdaidien_20251127110122.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071200_ 31102025082949.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071200_ 31102025083623.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071200_ 31102025092705.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071200_ 31102025092821.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071206_ 31102025082949.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071206_ 31102025083623.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071206_ 31102025091717.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071206_ 31102025091824.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071206_ 31102025092042.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/20251027_071206_ 31102025094927.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/abc_ 30102025084032.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/abc_ 30102025093424.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/abc_ 30102025095638.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/abc_ 30102025110642.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/abc_ 31102025085042.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/abc_ 31102025110544.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/marissa-rodriguez-2mKYEVGA4jE-unsplash_ 05112025144601.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/vb2_ 30102025084032.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/vb2_ 30102025093424.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025095638.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025110642.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025162855.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025163150.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025163215.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025163259.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025164541.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 30102025165256.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 31102025085042.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Files/NewRegistrations/văn-bản-2_ 31102025110544.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/avatars/1/avartar.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/avatars/2/avatar.gif",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330104026-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330104052-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330110458-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330111634-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330111722-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330111918-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330112113-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330112212-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260330112452-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402142038-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402142304-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402142324-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402142944-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402145606-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402150202-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402151734-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402151904-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402152025-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402152243-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402153040-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402153207-8.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402153429-9.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402153914-10.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402154220-11.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402154815-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402160543-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402160617-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402161216-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402161559-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402161636-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402161850-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402161914-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402162731-8.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260402170426-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403081758-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403081828-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403092338-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403092759-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403093429-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403094630-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403094725-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403095500-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403095547-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403100303-8.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403100517-9.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403101654-10.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403102050-11.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403102226-12.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403102402-13.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403110227-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403110523-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403111926-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403112157-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403113259-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403113320-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403113348-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403141422-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403141531-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403141637-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403142210-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403143646-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403143826-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403160533-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403160642-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403160909-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260403165926-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152251-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152348-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152354-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152425-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152449-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152651-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260413152921-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415090711-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415091553-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415091606-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415092849-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415093013-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415093112-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415095311-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415095432-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415095450-8.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415095554-9.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415095640-10.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415095829-11.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415100334-12.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415100536-13.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415100730-14.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103316-15.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103322-16.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103448-17.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103650-18.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103657-19.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103715-20.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415103910-21.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415104518-22.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415105722-23.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415105824-24.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415110212-25.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415110607-26.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415111916-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415111935-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415111936-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112001-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112222-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112234-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112308-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112315-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112326-3.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112406-4.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112458-5.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112510-6.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112526-7.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112739-8.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112745-9.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112755-10.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415112804-11.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415134622-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415134859-1.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/image-20260415134949-2.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/Testtt.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/1/04787a96-fb7d-48a5-a817-402d3ccc227d.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/1/063995ad-cb17-4f50-b2fb-483388b00d32.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/15/9a54d995-1f9a-4a31-8969-d30184185571.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/15/ede7990d-4d13-42d7-aa9c-466fa292aa06.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/2/d8ea6dec-f6af-46e0-b021-b9b255159b81.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/6/1904f07b-627e-4f3b-9868-43534cfa8477.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/imgs/news/6/3f1c63cc-8e0e-447e-b130-296f49fab059.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesReviewCompleted.cshtml",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/Testtt.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/1/04787a96-fb7d-48a5-a817-402d3ccc227d.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/1/063995ad-cb17-4f50-b2fb-483388b00d32.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/2/d8ea6dec-f6af-46e0-b021-b9b255159b81.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/6/1904f07b-627e-4f3b-9868-43534cfa8477.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/6/3f1c63cc-8e0e-447e-b130-296f49fab059.png",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/DigitalSales/202609/-2147483648-210643_20260912010441557.webp",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/DigitalSales/202609/-2147483648-210647_20260912010441559.webp",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/DigitalSales/202609/-2147483648-210651_20260912010441560.webp",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/DigitalSales/202609/-2147483648-210653_20260912010441561.webp",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/DigitalSales/202609/-2147483648-210655_20260912010441561.webp",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/feedback/1.jpg",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/feedback/5.pdf",
+        "status":  "New"
+    },
+    {
+        "path":  "Contents/uploads/feedback/8.docx",
+        "status":  "New"
+    }
+]

@@ -69,7 +69,7 @@ if (-not (Test-Path $publishSourceDir)) {
 $excludeDirs = @("uploads", "Logs", "JobLogs", "ImportTemp", "EForm", "NewRegistrations", "avatars", "news", "Controllers", "Data", "Enums", "banners", "comment", "log", "task")
 $excludeFiles = @("*.log", "*.cs", "ListUC.xlsx")
 
-robocopy $packageTmpDir $publishSourceDir /MIR /XD $excludeDirs /XF $excludeFiles /NJH /NJS /NDL /NC /NS
+robocopy $packageTmpDir $publishSourceDir /E /XD $excludeDirs /XF $excludeFiles /NJH /NJS /NDL /NC /NS
 $roboExit = $LASTEXITCODE
 if ($roboExit -ge 8) {
     throw "Robocopy failed with exit code: $roboExit"
@@ -95,7 +95,9 @@ robocopy (Join-Path $webAppDir "Views") (Join-Path $publishSourceDir "Views") /E
 robocopy (Join-Path $webAppDir "Scripts") (Join-Path $publishSourceDir "Scripts") /E /NJH /NJS /NDL /NC /NS
 robocopy (Join-Path $webAppDir "Contents") (Join-Path $publishSourceDir "Contents") /E /XD $excludeDirs /XF $excludeFiles /NJH /NJS /NDL /NC /NS
 
-# Cleanup: Remove logs and attachments, preserve only important configuration files
+# Không xóa dữ liệu có sẵn trong publish_source khi đóng gói.
+$cleanupEnabled = $false
+if ($cleanupEnabled) {
 Write-Host "Purging any stray logs and attachment directories from publish_source..." -ForegroundColor Yellow
 $cleanupDirs = @(
     "Contents\JobLogs",
@@ -139,6 +141,7 @@ if (Test-Path $ckImagesDir) {
     Get-ChildItem -Path $ckImagesDir -Recurse -Directory | Remove-Item -Recurse -Force
 }
 Get-ChildItem -Path $publishSourceDir -Recurse -Filter "*.log" | Remove-Item -Force
+}
 
 $itemCount = (Get-ChildItem $publishSourceDir).Count
-Write-Host "`n[SUCCESS] Successfully published $itemCount items to $publishSourceDir (Cleaned of logs and attachments)!" -ForegroundColor Green
+Write-Host "`n[SUCCESS] Successfully published $itemCount items to $publishSourceDir (no delete)!" -ForegroundColor Green
