@@ -6,7 +6,8 @@ INSERT INTO @Templates VALUES
 (N'DIGITALSALES_THEMTHANHVIEN', N'Thêm thành viên Hồ sơ KD SPDV số', N'Bạn được thêm vào hồ sơ: {{DigitalSalesName}}'),
 (N'DIGITALSALES_XOATHANHVIEN', N'Xóa thành viên Hồ sơ KD SPDV số', N'Bạn bị xóa khỏi hồ sơ: {{DigitalSalesName}}'),
 (N'DIGITALSALES_CAPNHATTRANGTHAI', N'Cập nhật trạng thái Hồ sơ KD SPDV số', N'Cập nhật trạng thái hồ sơ: {{DigitalSalesName}}'),
-(N'DIGITALSALES_CAPNHATTIENTRINH', N'Cập nhật tiến trình/công việc Hồ sơ KD SPDV số', N'Cập nhật tiến trình: {{DigitalSalesName}}');
+(N'DIGITALSALES_CAPNHATTIENTRINH', N'Cập nhật tiến trình/công việc Hồ sơ KD SPDV số', N'Cập nhật tiến trình: {{DigitalSalesName}}'),
+(N'DIGITALSALES_RASOAT', N'Kết quả rà soát Hồ sơ KD SPDV số', N'Kết quả rà soát hồ sơ: {{DigitalSalesName}}');
 
 DECLARE @Code nvarchar(100), @Name nvarchar(250), @Subject nvarchar(500), @MailTemplateId int, @FilePath nvarchar(500);
 DECLARE template_cursor CURSOR LOCAL FAST_FORWARD FOR SELECT TemplateCode, TemplateName, SubjectTemplate FROM @Templates;
@@ -16,6 +17,8 @@ BEGIN
     SELECT @MailTemplateId = MailTemplateId FROM dbo.Sys_MailTemplate WHERE TemplateCode = @Code;
     SET @FilePath = CASE WHEN @Code = N'DIGITALSALES_CAPNHATTIENTRINH'
                          THEN N'Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesTrackingUpdated.cshtml'
+                         WHEN @Code = N'DIGITALSALES_RASOAT'
+                         THEN N'Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesReviewCompleted.cshtml'
                          ELSE N'Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesNotification.cshtml' END;
     EXEC dbo.Sys_MailTemplate_Save @MailTemplateId, @Code, @Name, @Subject,
         @FilePath, 1,

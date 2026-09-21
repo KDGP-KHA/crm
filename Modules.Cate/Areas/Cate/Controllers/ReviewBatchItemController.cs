@@ -1,6 +1,7 @@
 ﻿using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
+using Core.Cate.Services;
 using Core.Sys.BaseApp;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly SysUserCache _userCache;
         private readonly SysUserBoPhanCache _userBoPhanCache;
         private readonly RM_DigitalSalesWorkflowCache _workflowCache;
+        private readonly DigitalSalesMailService _digitalSalesMailService;
         private readonly string _reviewBatchTitle = AppProcessor.Messagor.GetMessage("ReviewBatch_Title");
         private readonly string _reviewHistoryTitle = AppProcessor.Messagor.GetMessage("ReviewHistory_Title");
         private readonly string _folderImage = ConfigurationManager.AppSettings["AppImageRoot_Path"] ?? "/Contents/imgs";
@@ -41,6 +43,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _userCache = new SysUserCache();
             _userBoPhanCache = new SysUserBoPhanCache();
             _workflowCache = new RM_DigitalSalesWorkflowCache();
+            _digitalSalesMailService = new DigitalSalesMailService();
         }
 
         public ActionResult Index(int? id)
@@ -266,7 +269,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
             var result = _reviewBatchItemCache.Save(model, User.UserName);
             if (result > 0)
+            {
                 SaveFiles(model.DinhKemFile, result);
+                QueueReviewCompletedNotification(model);
+            }
             string response;
             if (result == 0) response = CreateMessage($"{_reviewBatchTitle} [{model.ReviewBatchID}]", EnumProcessType.Add, EnumMsgIcon.Error);
             else if (result == -9) response = CreateMessage($"{_reviewBatchTitle} [{model.ReviewBatchID}]", EnumProcessType.DataExisted, EnumMsgIcon.Error);
@@ -311,6 +317,31 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     id = nextDigitalSales.DigitalSalesID,
                     reviewBatchID = model.ReviewBatchID
                 });
+        }
+
+        private void QueueReviewCompletedNotification(RM_ReviewFormModel model)
+        {
+            try
+            {
+                var sales = _digitalSalesCache.GetByID(model.DigitalSalesID);
+                if (sales == null) return;
+
+                var amUserName = sales.AssignedEmployeeID.HasValue
+                    ? _userCache.GetById(sales.AssignedEmployeeID.Value)?.UserName
+                    : null;
+                var memberUserNames = (_digitalSalesCache.GetMembersBySalesID(model.DigitalSalesID) ?? new List<RM_DigitalSalesMemberModel>())
+                    .Select(member => member.UserName)
+                    .Where(userName => !string.IsNullOrWhiteSpace(userName))
+                    .ToList();
+                var batchName = _reviewBatchCache.GetById(model.ReviewBatchID)?.BatchName;
+
+                _digitalSalesMailService.QueueReviewCompleted(model.DigitalSalesID, memberUserNames, amUserName,
+                    batchName, model.ReviewComment, model.IsConfirmed, model.ReviewConclusion, User.UserName);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+            }
         }
 
         /// <summary>

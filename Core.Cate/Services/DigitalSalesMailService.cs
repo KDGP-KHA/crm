@@ -46,7 +46,38 @@ namespace Core.Cate.Services
             Queue(delegate { Send(salesId, notificationUserNames, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_TRACKING_UPDATED", "", "Cập nhật tiến trình Hồ sơ KD sản phẩm/dịch vụ số", label, "MailTemplate_DigitalSalesTrackingUpdated", "fa-tasks", "text-primary", resultHtml); });
         }
 
-        private void Send(int salesId, IEnumerable<string> notificationUserNames, IEnumerable<string> toUserNames, IEnumerable<string> ccUserNames, string actionUserName, string notificationType, string roleNames, string notificationTitle, string actionLabel, string templateKey, string iconClass, string iconColor, string descriptionHtml = null)
+        /// <summary>Gửi kết quả rà soát một lần cho AM chủ trì, CC các thành viên còn lại và thông báo cho toàn bộ thành viên.</summary>
+        public void QueueReviewCompleted(int salesId, IEnumerable<string> memberUserNames, string amUserName,
+            string batchName, string reviewComment, bool isConfirmed, byte? conclusion, string actionUserName)
+        {
+            var members = Normalize(memberUserNames);
+            var notificationRecipients = Normalize(members.Concat(new[] { amUserName }));
+            var ccUserNames = members.Where(userName => !string.Equals(userName, amUserName, StringComparison.OrdinalIgnoreCase)).ToList();
+            var conclusionName = conclusion == RM_ReviewConclusion.Accepted ? "Chấp nhận"
+                : conclusion == RM_ReviewConclusion.Interested ? "Quan tâm" : "Không chấp nhận";
+            var reviewSummary = "Đợt rà soát: " + (batchName ?? string.Empty)
+                + "; Kết luận: " + conclusionName
+                + "; " + (isConfirmed ? "Đã xác nhận" : "Chưa xác nhận");
+            var extraData = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "ReviewBatchName", batchName ?? string.Empty },
+                { "ReviewConclusion", conclusionName },
+                { "ReviewConfirmed", isConfirmed ? "Đã xác nhận" : "Chưa xác nhận" },
+                { "ReviewComment", StripHtml(reviewComment) },
+                { "ReviewDate", DateTime.Now.ToString("dd/MM/yyyy HH:mm") }
+            };
+
+            Queue(delegate
+            {
+                Send(salesId, notificationRecipients, new[] { amUserName }, ccUserNames, actionUserName,
+                    "DIGITAL_SALES_REVIEW_COMPLETED", string.Empty,
+                    "Kết quả rà soát Hồ sơ KD sản phẩm/dịch vụ số", "Đã thực hiện rà soát hồ sơ",
+                    "MailTemplate_DigitalSalesReviewCompleted", "fa-clipboard-check", "text-success",
+                    reviewComment, extraData, reviewSummary);
+            });
+        }
+
+        private void Send(int salesId, IEnumerable<string> notificationUserNames, IEnumerable<string> toUserNames, IEnumerable<string> ccUserNames, string actionUserName, string notificationType, string roleNames, string notificationTitle, string actionLabel, string templateKey, string iconClass, string iconColor, string descriptionHtml = null, IDictionary<string, object> additionalData = null, string notificationDetail = null)
         {
             var sales = _salesCache.GetByID(salesId);
             var notificationRecipients = Normalize(notificationUserNames);
@@ -56,7 +87,7 @@ namespace Core.Cate.Services
             var actionUser = GetUser(actionUserName);
             var actionName = actionUser == null ? actionUserName : actionUser.FullName;
             _notificationService.Push(NotificationSourceType.DigitalSales, salesId, notificationTitle + ": " + sales.Title,
-                BuildContent(sales, roleNames, actionName), notificationRecipients, notificationType, actionUserName, actionName, iconClass, iconColor);
+                BuildContent(sales, roleNames, actionName, notificationDetail), notificationRecipients, notificationType, actionUserName, actionName, iconClass, iconColor);
 
             var toEmails = new HashSet<string>(emailRecipients.Select(GetUser).Where(CanSend).Select(x => x.Email.Trim()), StringComparer.OrdinalIgnoreCase);
             var ccEmails = Normalize(ccUserNames).Select(GetUser).Where(CanSend).Select(x => x.Email.Trim())
@@ -79,18 +110,26 @@ namespace Core.Cate.Services
                     { "ActionByFullName", actionName ?? string.Empty }, { "ActionLabel", actionLabel },
                     { "Description", string.IsNullOrWhiteSpace(descriptionHtml) ? StripHtml(sales.Note) : descriptionHtml }, { "SentAt", DateTime.Now.ToString("dd/MM/yyyy HH:mm") }
                 };
+                if (additionalData != null)
+                {
+                    foreach (var item in additionalData)
+                    {
+                        data[item.Key] = item.Value ?? string.Empty;
+                    }
+                }
                 _mailTemplateService.SendByConfigKey(templateKey, recipient.Email, JsonConvert.SerializeObject(data), actionUserName, pendingCc);
                 pendingCc = null; // CC chỉ đính kèm một email, không gửi lặp theo từng người nhận chính.
             }
         }
 
-        private static string BuildContent(RM_DigitalSalesModel sales, string roleNames, string actionName)
+        private static string BuildContent(RM_DigitalSalesModel sales, string roleNames, string actionName, string detail = null)
         {
             var parts = new List<string>();
             if (!string.IsNullOrWhiteSpace(sales.Code)) parts.Add(sales.Code);
             if (!string.IsNullOrWhiteSpace(sales.CustomerName)) parts.Add("Khách hàng: " + sales.CustomerName);
             if (!string.IsNullOrWhiteSpace(sales.StatusName)) parts.Add("Trạng thái: " + sales.StatusName);
             if (!string.IsNullOrWhiteSpace(roleNames)) parts.Add("Vai trò: " + roleNames);
+            if (!string.IsNullOrWhiteSpace(detail)) parts.Add(detail);
             if (!string.IsNullOrWhiteSpace(actionName)) parts.Add("Người thực hiện: " + actionName);
             return string.Join(" - ", parts);
         }
