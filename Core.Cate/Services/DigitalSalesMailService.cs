@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,7 +43,8 @@ namespace Core.Cate.Services
         public void QueueTrackingUpdated(int salesId, IEnumerable<string> notificationUserNames, string amUserName, IEnumerable<string> ccUserNames, string taskName, string statusName, string resultHtml, string actionUserName)
         {
             var label = "Cập nhật tiến trình: " + taskName + " (" + statusName + ")";
-            Queue(delegate { Send(salesId, notificationUserNames, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_TRACKING_UPDATED", "", "Cập nhật tiến trình Hồ sơ KD sản phẩm/dịch vụ số", label, "MailTemplate_DigitalSalesTrackingUpdated", "fa-tasks", "text-primary", resultHtml); });
+            var normalizedResultHtml = NormalizeMailHtml(resultHtml);
+            Queue(delegate { Send(salesId, notificationUserNames, new[] { amUserName }, ccUserNames, actionUserName, "DIGITAL_SALES_TRACKING_UPDATED", "", "Cập nhật tiến trình Hồ sơ KD sản phẩm/dịch vụ số", label, "MailTemplate_DigitalSalesTrackingUpdated", "fa-tasks", "text-primary", normalizedResultHtml); });
         }
 
         /// <summary>Gửi kết quả rà soát một lần cho AM chủ trì, CC các thành viên còn lại và thông báo cho toàn bộ thành viên.</summary>
@@ -137,6 +138,22 @@ namespace Core.Cate.Services
         private static List<string> Normalize(IEnumerable<string> values) => (values ?? Enumerable.Empty<string>()).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         private static bool CanSend(UserInfo user) => user != null && !string.IsNullOrWhiteSpace(user.Email) && UtilString.IsValidEmail(user.Email);
         private static string StripHtml(string value) => string.IsNullOrWhiteSpace(value) ? string.Empty : System.Text.RegularExpressions.Regex.Replace(System.Web.HttpUtility.HtmlDecode(value), "<.*?>", string.Empty).Trim();
+
+        /// <summary>Chuẩn hóa HTML từ CKEditor trước khi chèn trực tiếp vào email.</summary>
+        private static string NormalizeMailHtml(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+
+            var html = System.Web.HttpUtility.HtmlDecode(value).Trim();
+            // Không cho nội dung người dùng mang theo script/style vào email.
+            html = System.Text.RegularExpressions.Regex.Replace(html, @"(?is)<(script|style)\b[^>]*>.*?</\1\s*>", string.Empty);
+            // Giữ định dạng nội dung, nhưng bỏ cấu hình font riêng của CKEditor để email đồng nhất.
+            html = System.Text.RegularExpressions.Regex.Replace(html, "(?i)(font-family|font-size)\\s*:\\s*[^;'\\\"]+\\s*;?", string.Empty);
+            html = System.Text.RegularExpressions.Regex.Replace(html, @"(?is)<font\b[^>]*>", "<span>");
+            html = System.Text.RegularExpressions.Regex.Replace(html, @"(?is)</font\s*>", "</span>");
+            return html;
+        }
+
         private static void Queue(Action action) { if (action == null) return; HostingEnvironment.QueueBackgroundWorkItem(delegate { try { action(); } catch (Exception ex) { AppProcessor.Logger.Error(ex); } return Task.CompletedTask; }); }
         private static UserInfo GetUser(string userName)
         {

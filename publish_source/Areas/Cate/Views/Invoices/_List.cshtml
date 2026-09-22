@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = $"Danh sách hóa đơn thuộc hợp đồng [{Model.ContractCode} - {Model.ContractName}]";
     Layout = "~/Views/Shared/_Form.cshtml";
+    var canEdit = ViewBag.CanEdit == null || ViewBag.CanEdit == true;
 }
 
 @section FormType{
@@ -14,7 +15,10 @@
 }
 
 @section FormBody{
-    @Html.Button(true, "AddInvoices", Url.Action("Add", new { area = "Cate", ContractID = Model.ContractID }), "<i class='fa fa-plus'></i>", "Thêm " + AppProcessor.Messagor.GetMessage("Invoices_Title"), new { @class = "btn btn-light-green btn-h-green btn-a-green border-0 radius-3 py-2 text-600 text-90 pull-right" })
+    @if (canEdit)
+    {
+        @Html.Button(true, "AddInvoices", Url.Action("Add", "Invoices", new { area = "Cate", ContractID = Model.ContractID }), "<i class='fa fa-plus'></i>", "Thêm " + AppProcessor.Messagor.GetMessage("Invoices_Title"), new { @class = "btn btn-light-green btn-h-green btn-a-green border-0 radius-3 py-2 text-600 text-90 pull-right" })
+    }
 
     <div class="card dcard mt-3">
         <div class="col-sm-12 table-responsive-md p-2">
@@ -119,19 +123,21 @@
                                     '<i class="far fa-eye text-secondary text-120"></i>',
                                     "Xem chi tiết");
 
-                                html += _renderButton(true,
-                                    "EditInvoices",
-                                    "btn btn-lighter-primary mr-1",
-                                    "/Cate/Invoices/Edit/" + data,
-                                    '<i class="far fa-edit text-primary text-120"></i>',
-                                    "Cập nhật");
+                                if (@(canEdit ? "true" : "false")) {
+                                    html += _renderButton(true,
+                                        "EditInvoices",
+                                        "btn btn-lighter-primary mr-1",
+                                        "/Cate/Invoices/Edit/" + data,
+                                        '<i class="far fa-edit text-primary text-120"></i>',
+                                        "Cập nhật");
 
-                                html += _renderButton(true,
-                                    "DeleteInvoices",
-                                    "btn btn-lighter-danger mr-1",
-                                    "/Cate/Invoices/Delete/" + data,
-                                    '<i class="far fa-trash-alt text-danger text-120"></i>',
-                                    "Xoá");
+                                    html += _renderButton(true,
+                                        "DeleteInvoices",
+                                        "btn btn-lighter-danger mr-1",
+                                        "/Cate/Invoices/Delete/" + data,
+                                        '<i class="far fa-trash-alt text-danger text-120"></i>',
+                                        "Xoá");
+                                }
                             }
                             html += "</span>";
                             return html;

@@ -1,4 +1,4 @@
-using ClosedXML.Excel;
+﻿using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -34,6 +34,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly MN_BoPhanCache _departmentCache;
         private readonly RM_ContactPersonsCache _contactPersonCache;
         private readonly RM_ContractsCache _contractCache;
+        private readonly RM_InvoicesCache _invoicesCache;
         private readonly RM_RolesCache _rolesCache;
         private readonly RM_CostTypeCache _costTypeCache;
         private readonly SysUserCache _userCache;
@@ -101,6 +102,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _departmentCache = new MN_BoPhanCache();
             _contactPersonCache = new RM_ContactPersonsCache();
             _contractCache = new RM_ContractsCache();
+            _invoicesCache = new RM_InvoicesCache();
             _rolesCache = new RM_RolesCache();
             _costTypeCache = new RM_CostTypeCache();
             _userCache = new SysUserCache();
@@ -1125,6 +1127,31 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return PartialView("_DetailProducts", model);
         }
 
+        /// <summary>Hiển thị hóa đơn của hợp đồng thuộc hồ sơ DigitalSales hiện tại.</summary>
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult GetContractInvoices(int digitalSalesId, int contractId)
+        {
+            var sales = _salesCache.GetByID(digitalSalesId, User.UserName);
+            if (sales == null)
+            {
+                return HttpNotFound();
+            }
+
+            var contractBelongsToSales = (sales.Products ?? new List<RM_DigitalSalesProductModel>())
+                .Any(product => (product.Contracts ?? new List<RM_ContractsModel>())
+                    .Any(linkedContract => linkedContract.ContractID == contractId));
+            var contract = _contractCache.GetById(contractId);
+            if (!contractBelongsToSales || contract == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewBag.CanEdit = HasDetailPermission(sales, User.UserName);
+            return PartialView("~/Areas/Cate/Views/Invoices/_List.cshtml", contract);
+        }
+
         [AjaxOnly]
         [HttpGet]
         [ActionType(Type = EnumActionType.View)]
@@ -1538,6 +1565,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 });
             }
 
+            var completedValidationMessage = ValidateCompletedProjectDocuments(currentSales, newStatus);
+            if (!string.IsNullOrWhiteSpace(completedValidationMessage))
+            {
+                return Json(new { status = false, message = completedValidationMessage });
+            }
+
             string attachmentPath = null;
             var uploadedFiles = new List<ActivityAttachmentItem>();
 
@@ -1921,6 +1954,46 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
         }
         #endregion
+
+        /// <summary>
+        /// Trước khi hoàn thành dự án, toàn bộ hợp đồng của các sản phẩm phải có hóa đơn.
+        /// </summary>
+        private string ValidateCompletedProjectDocuments(RM_DigitalSalesModel sales, RM_DigitalSalesStatusModel newStatus)
+        {
+            if (sales == null || sales.BusinessType != 2 || newStatus == null ||
+                !string.Equals(newStatus.StatusCode, "COMPLETED", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            var products = sales.Products ?? new List<RM_DigitalSalesProductModel>();
+            var contracts = products
+                .SelectMany(product => product.Contracts ?? new List<RM_ContractsModel>())
+                .GroupBy(contract => contract.ContractID)
+                .Select(group => group.First())
+                .ToList();
+
+            if (contracts.Count == 0)
+            {
+                return "Không thể chuyển sang Hoàn thành dự án: hồ sơ chưa có hợp đồng.";
+            }
+
+            var contractsWithoutInvoices = contracts
+                .Where(contract => !(_invoicesCache.GetAll(contract.ContractID) ?? new List<RM_InvoicesModel>()).Any())
+                .Select(contract => string.IsNullOrWhiteSpace(contract.ContractCode)
+                    ? "#" + contract.ContractID
+                    : contract.ContractCode)
+                .ToList();
+
+            if (contractsWithoutInvoices.Count > 0)
+            {
+                return "Không thể chuyển sang Hoàn thành dự án: hợp đồng "
+                    + string.Join(", ", contractsWithoutInvoices)
+                    + " chưa có hóa đơn.";
+            }
+
+            return null;
+        }
 
         private void PrepareChangeStatusForm(RM_DigitalSalesChangeStatusViewModel model)
         {

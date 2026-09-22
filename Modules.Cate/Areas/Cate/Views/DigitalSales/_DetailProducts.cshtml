@@ -73,12 +73,20 @@
                                                 <td class="text-center">@(contract.SignDate.HasValue ? contract.SignDate.Value.ToString("dd/MM/yyyy") : "—")</td>
                                                 <td class="text-right">@contract.TotalAmount.ToString("N0")</td>
                                                 <td class="text-center">
+                                                    @Html.Button(true, "ListDigitalSalesInvoices_" + contract.ContractID,
+                                                        Url.Action("GetContractInvoices", "DigitalSales", new { area = "Cate", digitalSalesId = Model.DigitalSalesID, contractId = contract.ContractID }),
+                                                        "<i class='fas fa-file-invoice-dollar'></i>", string.Empty,
+                                                        new { @class = "btn btn-xs btn-outline-success mr-1", data_width = "1024px", title = "Danh sách hóa đơn", data_toggle = "tooltip", aria_label = "Danh sách hóa đơn" })
                                                     @if (canEdit)
                                                     {
                                                         @Html.Button(true, "EditDigitalSalesContract_" + contract.ContractID,
                                                             Url.Action("Edit", "RM_Contracts", new { area = "Cate", id = contract.ContractID, digitalSalesProductId = product.SalesProductID }),
-                                                            "<i class='fa fa-edit'></i>", "Sửa",
-                                                            new { @class = "btn btn-xs btn-outline-primary", data_width = "1024px" })
+                                                            "<i class='fa fa-edit'></i>", string.Empty,
+                                                            new { @class = "btn btn-xs btn-outline-primary", data_width = "1024px", title = "Sửa hợp đồng", data_toggle = "tooltip", aria_label = "Sửa hợp đồng" })
+                                                        @Html.Button(true, "DeleteDigitalSalesContract_" + contract.ContractID,
+                                                            Url.Action("Delete", "RM_Contracts", new { area = "Cate", id = contract.ContractID, digitalSalesProductId = product.SalesProductID }),
+                                                            "<i class='fa fa-trash-alt'></i>", string.Empty,
+                                                            new { @class = "btn btn-xs btn-outline-danger ml-1", title = "Xóa hợp đồng", data_toggle = "tooltip", aria_label = "Xóa hợp đồng" })
                                                     }
                                                 </td>
                                             </tr>

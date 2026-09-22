@@ -58,7 +58,7 @@
                 @Html.TitleFor(model => model.TotalAmount, new { @class = "font-bold" })
                 @Html.HiddenFor(model => model.TotalAmount)
                 <div class="input-group">
-                    @Html.TextBox("TotalAmount_View", Model.TotalAmount, new { @onchange = "fnTinhToan()", @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("TotalAmount_Label") })
+                    @Html.TextBox("TotalAmount_View", Model.TotalAmount, new { @onchange = "fnTinhToan()", @class = "form-control invoice-amount text-right", inputmode = "numeric", autocomplete = "off", placeholder = AppProcessor.Messagor.GetMessage("TotalAmount_Label") })
                     <div class="input-group-append">
                         <span class="input-group-text">VNĐ</span>
                     </div>
@@ -86,7 +86,7 @@
                 @Html.TitleFor(model => model.VAT_Amount, new { @class = "font-bold" })
                 @Html.HiddenFor(model => model.VAT_Amount)
                 <div class="input-group">
-                    @Html.TextBox("VAT_Amount_View", Model.VAT_Amount, new { @class = "form-control text-success-m2 bgc-white text-600 not-allowed", @readonly = "true", placeholder = AppProcessor.Messagor.GetMessage("VAT_Amount_Label") })
+                @Html.TextBox("VAT_Amount_View", Model.VAT_Amount, new { @class = "form-control text-right text-success-m2 bgc-white text-600 not-allowed", @readonly = "true", placeholder = AppProcessor.Messagor.GetMessage("VAT_Amount_Label") })
                     <div class="input-group-append">
                         <span class="input-group-text">VNĐ</span>
                     </div>
@@ -101,7 +101,7 @@
                 @Html.TitleFor(model => model.TotalPayment, new { @class = "font-bold" })
                 @Html.HiddenFor(model => model.TotalPayment)
                 <div class="input-group">
-                    @Html.TextBox("TotalPayment_View", Model.TotalPayment, new { @class = "form-control text-success-m2 bgc-white text-600 not-allowed", @readonly = "true", placeholder = AppProcessor.Messagor.GetMessage("TotalPayment_Label") })
+                @Html.TextBox("TotalPayment_View", Model.TotalPayment, new { @class = "form-control text-right text-success-m2 bgc-white text-600 not-allowed", @readonly = "true", placeholder = AppProcessor.Messagor.GetMessage("TotalPayment_Label") })
                     <div class="input-group-append">
                         <span class="input-group-text">VNĐ</span>
                     </div>
@@ -142,9 +142,9 @@
     var contractDataTransfer = new DataTransfer();
     jQuery(function ($) {
 
-        $('#TotalAmount_View').val(vnFormatter.format($('#TotalAmount_View').val()));
-        $('#VAT_Amount_View').val(vnFormatter.format($('#VAT_Amount_View').val()));
-        $('#TotalPayment_View').val(vnFormatter.format($('#TotalPayment_View').val()));
+        $('#TotalAmount_View').val(formatInvoiceAmount($('#TotalAmount_View').val()));
+        $('#VAT_Amount_View').val(formatInvoiceAmount($('#VAT_Amount_View').val()));
+        $('#TotalPayment_View').val(formatInvoiceAmount($('#TotalPayment_View').val()));
 
         // input spinner
         $("#VAT_Rate").TouchSpin({
@@ -170,6 +170,9 @@
 
     $(document).on("input", ".int-number", function (e) {
         this.value = this.value.replace(/[^0-9]/g, '');
+    });
+    $(document).on("input", "#Invoices .invoice-amount", function () {
+        this.value = removeNonNumericChars(this.value);
     });
     $(document).on("change", "#Files", function (e) {
         var newFiles = Array.from(e.target.files);
@@ -219,18 +222,17 @@
         contractRenderFileList();
     }
     function fnTinhToan() {
-        debugger
         var tienHang = $('#Invoices #TotalAmount_View').val() == '' ? 0 : parseFloat(removeNonNumericChars($('#Invoices #TotalAmount_View').val()));
         $('#Invoices #TotalAmount').val(tienHang);
-        $('#Invoices #TotalAmount_View').val(vnFormatter.format(tienHang));
+        $('#Invoices #TotalAmount_View').val(formatInvoiceAmount(tienHang));
 
         var phanTramThue = $('#Invoices #VAT_Rate').val() == '' ? 0 : parseFloat($('#Invoices #VAT_Rate').val());
         var tienThue = tienHang * phanTramThue / 100;
         $('#Invoices #VAT_Amount').val(tienThue);
-        $('#Invoices #VAT_Amount_View').val(vnFormatter.format(tienThue));
+        $('#Invoices #VAT_Amount_View').val(formatInvoiceAmount(tienThue));
         var tongCongThToan = tienHang + tienThue;
         $('#Invoices #TotalPayment').val(tongCongThToan);
-        $('#Invoices #TotalPayment_View').val(vnFormatter.format(tongCongThToan));
+        $('#Invoices #TotalPayment_View').val(formatInvoiceAmount(tongCongThToan));
     }
 
 
@@ -242,7 +244,11 @@
     //    $('#' + id).val(e_value)
     //}
     function removeNonNumericChars(inputString) {
-        return inputString.replace(/\D/g, ''); // \D khớp với tất cả các ký tự không phải số
+        return String(inputString || '').replace(/\D/g, ''); // \D khớp với tất cả các ký tự không phải số
+    }
+    function formatInvoiceAmount(value) {
+        var amount = parseFloat(removeNonNumericChars(value));
+        return isNaN(amount) ? '0' : amount.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
     }
     function ReloadListFileUploaded() {
         $.ajax({

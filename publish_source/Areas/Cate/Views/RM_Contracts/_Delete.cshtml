@@ -14,12 +14,23 @@
     @using (Ajax.BeginForm("Delete", "RM_Contracts", new { area = "Cate" }, new AjaxOptions
     {
         HttpMethod = "POST",
-        OnSuccess = "Contracts_OnProcessSuccess(data, 'DeleteContracts')"
+        OnSuccess = "Contracts_DeleteOnProcessSuccess(data)"
     }, new { @class = "form-horizontal", id = "DeleteContracts" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(model => model.ContractID)
         @Html.HiddenFor(model => model.ContractName)
+        @Html.HiddenFor(model => model.DigitalSalesProductID)
         <h5> @Html.Raw(ViewBag.ConfirmMessage)</h5>
     }
+
+    <script type="text/javascript">
+        function Contracts_DeleteOnProcessSuccess(response) {
+            if ($('#DeleteContracts #DigitalSalesProductID').val() && typeof DigitalSalesContract_OnProcessSuccess === 'function') {
+                DigitalSalesContract_OnProcessSuccess(response, 'DeleteContracts');
+            } else if (typeof Contracts_OnProcessSuccess === 'function') {
+                Contracts_OnProcessSuccess(response, 'DeleteContracts');
+            }
+        }
+    </script>
 }

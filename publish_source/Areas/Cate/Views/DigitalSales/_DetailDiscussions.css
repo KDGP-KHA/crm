@@ -26,15 +26,16 @@
         line-height: 1.6 !important;
         color: #334155;
     }
-    .ds-activity-content * {
+    /* Chuẩn hóa nội dung CKEditor: liên kết, đoạn, bảng và các thẻ lồng nhau
+       phải dùng cùng cỡ chữ; chỉ giữ cỡ riêng cho badge nghiệp vụ. */
+    .ds-activity-content *:not(.badge):not(.ds-mention-badge) {
         font-family: inherit !important;
+        font-size: 13.5px !important;
+        line-height: 1.6 !important;
     }
     .ds-activity-content p,
     .ds-activity-content li,
     .ds-activity-content span:not(.badge):not(.ds-mention-badge) {
-        font-size: 13.5px !important;
-        line-height: 1.6 !important;
-        font-family: inherit !important;
         color: #334155;
     }
     .ds-activity-content p {

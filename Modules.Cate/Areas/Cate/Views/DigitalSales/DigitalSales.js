@@ -148,13 +148,13 @@ function initTableDigitalSales() {
                     } else {
                         html += '<div class="text-muted">—</div>';
                     }
-                    if (row.ContactPersonName) {
-                        html += '<div class="sale-subtext text-secondary mt-1"><i class="fa fa-user-circle text-secondary mr-1"></i>' + row.ContactPersonName;
-                        if (row.ContactPersonPhone) {
-                            html += ' <span class="text-muted">(' + row.ContactPersonPhone + ')</span>';
-                        }
-                        html += '</div>';
-                    }
+                    //if (row.ContactPersonName) {
+                    //    html += '<div class="sale-subtext text-secondary mt-1"><i class="fa fa-user-circle text-secondary mr-1"></i>' + row.ContactPersonName;
+                    //    if (row.ContactPersonPhone) {
+                    //        html += ' <span class="text-muted">(' + row.ContactPersonPhone + ')</span>';
+                    //    }
+                    //    html += '</div>';
+                    //}
                     return html;
                 }
             },
