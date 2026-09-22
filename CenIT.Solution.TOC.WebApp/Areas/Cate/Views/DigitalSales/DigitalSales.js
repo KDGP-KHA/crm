@@ -52,6 +52,23 @@ function formatRevenueInMillions(value) {
     });
 }
 
+function formatActionTime(value) {
+    if (!value) return 'Chưa cập nhật';
+
+    var match = typeof value === 'string' ? value.match(/\/Date\((-?\d+)/) : null;
+    var date = match ? new Date(Number(match[1])) : new Date(value);
+    if (isNaN(date.getTime())) return 'Chưa cập nhật';
+
+    return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    }) + ' ' + date.toLocaleTimeString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 function initTableDigitalSales() {
     _tableDigitalSales = $("#tblDigitalSales").DataTable({
         responsive: true,
@@ -125,13 +142,16 @@ function initTableDigitalSales() {
                     html += '<a href="' + _digitalSalesUrls.detail + '/' + row.DigitalSalesID + '" class="font-weight-bold text-primary d-block sale-title" style="font-size: 15px;" title="Xem chi tiết 360 độ">' +
                         row.Title + '</a>';
 
-                    // Hàng 3: Mã hồ sơ & Các huy hiệu đặc biệt (Trọng điểm, Quan tâm)
+                    // Hàng 3: Mốc cập nhật gần nhất của hồ sơ
+                    html += '<div class="sale-subtext text-muted mt-1"><i class="fa fa-clock mr-1"></i>Ngày cập nhật gần nhất: <span class="text-secondary-d2">' + formatActionTime(row.ActionTime) + '</span></div>';
+
+                    // Hàng 4: Mã hồ sơ & Các huy hiệu đặc biệt (Trọng điểm, Quan tâm)
                     html += '<div class="mt-1 d-flex align-items-center flex-wrap">' +
                         '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-mono font-bold px-2 py-1 radius-1 shadow-sm sale-badge"><i class="fa fa-hashtag mr-1 opacity-75"></i>' + (row.Code || '—') + '</span>' +
                         badgeSpecial +
                         '</div>';
 
-                    // Hàng 4: Sản phẩm / dịch vụ số đính kèm (nếu có)
+                    // Hàng 5: Sản phẩm / dịch vụ số đính kèm (nếu có)
                     if (row.ProductServiceNames) {
                         html += '<div class="sale-subtext text-secondary mt-1"><i class="fa fa-tags text-purple mr-1"></i>' + row.ProductServiceNames + '</div>';
                     }
