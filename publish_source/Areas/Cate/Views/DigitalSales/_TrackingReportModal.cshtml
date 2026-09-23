@@ -1,12 +1,14 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesTrackingReportViewModel
 
-<div class="modal fade" id="trackingReportModal" tabindex="-1" role="dialog" aria-labelledby="trackingReportModalTitle" aria-hidden="true" data_width="600">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_TrackingReportModal.css?v=@DateTime.Now.Ticks" />
+
+<div class="modal fade" id="trackingReportModal" tabindex="-1" role="dialog" aria-labelledby="trackingReportModalTitle" aria-hidden="true" data_width="650">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 650px;">
         <div class="modal-content border-0 radius-2 shadow-lg">
             <div class="modal-header bgc-primary-d1 text-white px-3 py-25">
                 <h5 class="modal-title font-bold text-110" id="trackingReportModalTitle">
-                    <i class="fa fa-file-alt mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Report_Title")
+                    <i class="fa fa-clipboard-check mr-1"></i> Báo cáo tiến độ thực hiện
                 </h5>
                 <button type="button" class="close text-white opacity-2 text-130" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -20,41 +22,129 @@
                 @Html.HiddenFor(m => m.AttachmentFile, new { id = "Report_CurrentAttachmentFile" })
 
                 <div class="modal-body p-3 p-md-4">
-                    <div class="form-group mb-3">
-                        <label class="text-secondary-d2 font-bold mb-1">Công việc thực hiện:</label>
-                        <div class="font-bolder text-primary-d2 text-105 p-2 bgc-secondary-l4 border-1 brc-grey-l2 radius-1">
-                            @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(Model.TaskName)
+                    <!-- THÔNG TIN CÔNG VIỆC THỰC HIỆN -->
+                    <div class="card bgc-secondary-l4 border-1 brc-grey-l2 mb-3 radius-1 p-25 shadow-none">
+                        <div class="d-flex align-items-start">
+                            <div class="text-primary mr-2 text-130"><i class="fa fa-tasks"></i></div>
+                            <div class="flex-grow-1 min-width-0">
+                                <div class="d-flex align-items-center flex-wrap mb-1" style="gap: 6px;">
+                                    @if (!string.IsNullOrEmpty(Model.TrackingCode))
+                                    {
+                                        <span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-05 text-80">
+                                            @Model.TrackingCode
+                                        </span>
+                                    }
+                                    <strong class="text-dark-m1 text-105">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(Model.TaskName)</strong>
+                                </div>
+                                <div class="d-flex flex-wrap text-85 text-secondary-d1" style="gap: 15px;">
+                                    @if (!string.IsNullOrEmpty(Model.AssignedUserName))
+                                    {
+                                        <span><i class="fa fa-user-circle text-primary mr-1"></i>Phụ trách: <strong>@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(Model.AssignedUserName)</strong></span>
+                                    }
+                                    @if (Model.Deadline.HasValue)
+                                    {
+                                        <span><i class="fa fa-calendar-check text-danger mr-1"></i>Hạn hoàn thành: <strong class="text-danger-d1">@Model.Deadline.Value.ToString("dd/MM/yyyy")</strong></span>
+                                    }
+                                    <span><i class="fa fa-info-circle text-info mr-1"></i>Trạng thái hiện tại: 
+                                        <strong class="@(Model.Status == 3 ? "text-success" : (Model.Status == 2 ? "text-warning-d2" : "text-secondary"))">
+                                            @(Model.Status == 3 ? "Đã hoàn thành" : (Model.Status == 2 ? "Đang thực hiện" : "Chưa thực hiện"))
+                                        </strong>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- NỘI DUNG BÁO CÁO TIẾN ĐỘ -->
                     <div class="form-group mb-3">
                         <label class="font-bolder text-secondary-d2 mb-1" for="Report_ResultNote">
-                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_ResultNote_Label") <span class="text-danger">*</span>
+                            Nội dung báo cáo tiến độ <span class="text-danger">*</span>
                         </label>
-                        @Html.TextAreaFor(m => m.ResultNote, new { @class = "form-control radius-1 font-95", id = "Report_ResultNote", rows = "4", placeholder = "Nhập nội dung báo cáo kết quả thực hiện...", required = "required" })
+                        @Html.TextAreaFor(m => m.ResultNote, new { @class = "form-control radius-1 font-95", id = "Report_ResultNote", rows = "4", placeholder = "Nhập chi tiết nội dung tiến độ đã thực hiện...", required = "required" })
                     </div>
 
+                    <!-- TỆP ĐÍNH KÈM TIẾN ĐỘ -->
                     <div class="form-group mb-3">
-                        <label class="font-bolder text-secondary-d2 mb-1" for="Report_File">
-                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AttachmentFile_Label")
+                        <label class="font-bolder text-secondary-d2 mb-1" for="Report_Files">
+                            <i class="fa fa-paperclip text-primary mr-1"></i> Tệp đính kèm tiến độ / minh chứng
                         </label>
-                        <input type="file" name="reportFile" id="Report_File" class="form-control-file border-1 p-2 radius-1 bg-white" />
+                        <input type="file" name="reportFiles" id="Report_Files" class="form-control-file border-1 p-2 radius-1 bg-white" multiple />
+                        <small class="text-muted text-75 d-block mt-1">Cho phép chọn nhiều tệp (hỗ trợ PDF, Word, Excel, Hình ảnh, Zip...)</small>
+
                         @if (!string.IsNullOrWhiteSpace(Model.AttachmentFile))
                         {
-                            <div class="mt-2 text-85 text-secondary-d1">
-                                <i class="fa fa-paperclip mr-1 text-primary"></i> File hiện tại:
-                                <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = Model.AttachmentFile })" target="_blank" class="font-bold text-primary">
-                                    @System.IO.Path.GetFileName(Model.AttachmentFile)
-                                </a>
+                            var existingFiles = Model.AttachmentFile.Split(new[] { ';', ',', '|' }, StringSplitOptions.RemoveEmptyEntries);
+                            <div class="mt-2 p-2 bgc-grey-l4 border-1 brc-grey-l2 radius-1">
+                                <span class="text-85 text-secondary-d2 font-bold d-block mb-1">
+                                    <i class="fa fa-file-alt mr-1 text-primary"></i> Các tệp đã đính kèm trước đây:
+                                </span>
+                                <div class="d-flex flex-wrap" style="gap: 6px;">
+                                    @foreach (var f in existingFiles)
+                                    {
+                                        var trimmed = f.Trim();
+                                        if (string.IsNullOrEmpty(trimmed)) { continue; }
+                                        var fn = System.IO.Path.GetFileName(trimmed);
+                                        var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                                        bool isImg = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext);
+                                        bool isPdf = ext == ".pdf";
+
+                                        <span class="badge badge-light-primary border-1 brc-primary-m3 text-primary-d2 px-2 py-1 radius-1 d-inline-flex align-items-center">
+                                            <i class="fa @(isPdf ? "fa-file-pdf text-danger" : (isImg ? "fa-file-image text-info" : "fa-file text-secondary")) mr-1"></i>
+                                            <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmed })" target="_blank" class="text-primary-d2 mr-1" title="Tải xuống tệp">
+                                                @fn
+                                            </a>
+                                            @if (isImg)
+                                            {
+                                                <a href="javascript:void(0);" onclick="previewImageDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fn)');" class="text-info ml-1" title="Xem ảnh">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                            }
+                                            else if (isPdf)
+                                            {
+                                                <a href="javascript:void(0);" onclick="previewPdfDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fn)');" class="text-danger ml-1" title="Xem trước PDF">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                            }
+                                        </span>
+                                    }
+                                </div>
                             </div>
                         }
                     </div>
 
-                    <div class="custom-control custom-checkbox mt-2">
-                        <input type="checkbox" class="custom-control-input" id="Report_ChkCompleted" name="Status" value="3" @(Model.Status == 3 ? "checked" : "") />
-                        <label class="custom-control-label font-bold text-dark cursor-pointer select-none" for="Report_ChkCompleted">
-                            Đánh dấu công việc này đã hoàn thành
-                        </label>
+                    <!-- CHỌN TRẠNG THÁI & NGÀY HOÀN THÀNH -->
+                    <div class="row mt-3">
+                        <div class="col-12 col-md-6 form-group mb-2">
+                            <label class="font-bolder text-secondary-d2 mb-1" for="Report_Status">
+                                <i class="fa fa-toggle-on text-primary mr-1"></i> Trạng thái công việc <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control radius-1 font-95 font-bold" id="Report_Status" name="Status" onchange="toggleReportCompletedDate(this.value);">
+                                <option value="2" @(Model.Status == 2 || Model.Status == 0 ? "selected" : "")>Đang thực hiện</option>
+                                <option value="3" @(Model.Status == 3 ? "selected" : "")>Hoàn thành</option>
+                                <option value="1" @(Model.Status == 1 ? "selected" : "")>Chưa thực hiện</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 form-group mb-2" id="wrapReportCompletedDate" style="@(Model.Status == 3 ? "" : "display: none;")">
+                            <label class="font-bolder text-secondary-d2 mb-1" for="Report_CompletedDate">
+                                <i class="fa fa-calendar-check text-success mr-1"></i> Ngày hoàn thành <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control date-picker radius-1 font-95" id="Report_CompletedDate" name="CompletedDate"
+                                       value="@(Model.CompletedDate.HasValue ? Model.CompletedDate.Value.ToString("dd/MM/yyyy") : DateTime.Now.ToString("dd/MM/yyyy"))"
+                                       data-start-date="@(Model.StartDate.HasValue ? Model.StartDate.Value.ToString("dd/MM/yyyy") : "")"
+                                       placeholder="dd/MM/yyyy" autocomplete="off" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text bg-white"><i class="fa fa-calendar text-primary"></i></span>
+                                </div>
+                            </div>
+                            @if (Model.StartDate.HasValue)
+                            {
+                                <small class="text-muted text-75 mt-1 d-block">
+                                    Không được nhỏ hơn ngày bắt đầu: <strong class="text-dark">@Model.StartDate.Value.ToString("dd/MM/yyyy")</strong>
+                                </small>
+                                <input type="hidden" id="Report_StartDateVal" value="@Model.StartDate.Value.ToString("yyyy-MM-dd")" />
+                            }
+                        </div>
                     </div>
                 </div>
 
@@ -70,3 +160,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(function () {
+        if (typeof CKEDITOR !== "undefined" && $("#Report_ResultNote").length > 0) {
+            if (CKEDITOR.instances["Report_ResultNote"]) {
+                try { CKEDITOR.instances["Report_ResultNote"].destroy(true); } catch (e) { }
+            }
+            CKEDITOR.replace("Report_ResultNote", {
+                height: 130,
+                toolbar: [
+                    { name: "basicstyles", items: ["Bold", "Italic", "Underline", "Strike"] },
+                    { name: "paragraph", items: ["NumberedList", "BulletedList", "-", "Outdent", "Indent"] },
+                    { name: "links", items: ["Link", "Unlink"] }
+                ]
+            });
+        }
+    });
+</script>

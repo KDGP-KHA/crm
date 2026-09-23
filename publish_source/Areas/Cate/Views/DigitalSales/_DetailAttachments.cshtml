@@ -243,7 +243,7 @@
                         }
                         else
                         {
-                            <div class="bgc-primary-l4 text-center d-flex align-items-center justify-content-center attach-thumb-box">
+                            <div class="bgc-primary-l4 text-center d-flex align-items-center justify-content-center attach-thumb-box" @(ext == ".pdf" ? Html.Raw("style=\"cursor: pointer;\" onclick=\"previewPdfDirect('" + Url.Content(item.FilePath) + "', '" + HttpUtility.JavaScriptStringEncode(item.FileName) + "');\" title=\"Bấm để xem trước PDF\"") : Html.Raw(""))>
                                 @if (ext == ".pdf")
                                 {
                                     <i class="fa fa-file-pdf fa-2x text-danger"></i>
@@ -298,6 +298,12 @@
                                     @if (isImage)
                                     {
                                         <button type="button" class="btn btn-xs btn-outline-info radius-1 px-1 py-0" onclick="previewImageDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Xem ảnh">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    }
+                                    else if (ext == ".pdf")
+                                    {
+                                        <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-1 py-0" onclick="previewPdfDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Xem trước PDF">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     }

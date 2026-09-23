@@ -588,7 +588,13 @@
                                         <div class="ds-attachment-actions">
                                             @if (file.IsImage || new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(fileExt))
                                             {
-                                                <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trước">
+                                                <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trước hình ảnh">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            }
+                                            else if (fileExt == ".pdf")
+                                            {
+                                                <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l1 text-danger radius-1 p-1 px-15" onclick="previewPdfDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trước PDF">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
                                             }
@@ -693,7 +699,13 @@
                                             <div class="ds-attachment-actions">
                                                 @if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(singleExt))
                                                 {
-                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước">
+                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-info border-1 brc-grey-l1 text-info radius-1 p-1 px-15" onclick="previewImageDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước hình ảnh">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                }
+                                                else if (singleExt == ".pdf")
+                                                {
+                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l1 text-danger radius-1 p-1 px-15" onclick="previewPdfDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước PDF">
                                                         <i class="fa fa-eye"></i>
                                                     </button>
                                                 }

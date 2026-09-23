@@ -2,11 +2,14 @@
 @{
     int processId = ViewBag.ProcessID != null ? (int)ViewBag.ProcessID : 0;
     int digitalSalesId = ViewBag.DigitalSalesID != null ? (int)ViewBag.DigitalSalesID : 0;
+    int? timelineId = ViewBag.TimelineID != null ? (int?)ViewBag.TimelineID : null;
     string processName = ViewBag.ProcessName as string ?? "Quy trình";
     string salesTitle = ViewBag.SalesTitle as string ?? "";
+    string statusName = ViewBag.StatusName as string ?? "";
 }
 
-<div class="modal fade" id="importTodoModal" tabindex="-1" role="dialog" aria-labelledby="importTodoModalTitle" aria-hidden="true" data_width="1024">
+<div class="modal fade" id="importTodoModal" tabindex="-1" role="dialog" aria-labelledby="importTodoModalTitle" aria-hidden="true" data_width="1024" data-timeline-id="@timelineId">
+    <input type="hidden" id="importTodo_TimelineID" value="@timelineId" />
     <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
         <div class="modal-content border-0 radius-2 shadow-lg">
             <!-- MODAL HEADER -->
@@ -23,16 +26,22 @@
             <div class="modal-body p-3 bgc-grey-l4">
                 <!-- THÔNG TIN QUY TRÌNH & HỒ SƠ -->
                 <div class="ds-status-meta-box mb-3 bgc-white p-3 radius-1 border-1 brc-green-m3 shadow-sm">
-                    <div class="row">
-                        <div class="col-md-6 mb-1 mb-md-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-5 mb-1 mb-md-0">
                             <span class="text-secondary font-weight-bold text-85">Hồ sơ KDGP:</span>
                             <span class="text-primary-d2 font-bold text-90 ml-1">@salesTitle</span>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-7 d-flex align-items-center flex-wrap" style="gap: 6px;">
                             <span class="text-secondary font-weight-bold text-85">Quy trình áp dụng:</span>
                             <span class="badge bgc-green-l4 text-green-d2 border-1 brc-green-m3 font-bold text-85 ml-1 px-2 py-1">
                                 <i class="fa fa-project-diagram mr-1"></i>@processName
                             </span>
+                            @if (!string.IsNullOrEmpty(statusName))
+                            {
+                                <span class="badge bgc-blue-l4 text-blue-d2 border-1 brc-blue-m3 font-bold text-85 ml-1 px-2 py-1">
+                                    <i class="fa fa-flag mr-1"></i>@statusName
+                                </span>
+                            }
                         </div>
                     </div>
                 </div>
@@ -43,7 +52,7 @@
                         <span class="font-weight-bold text-dark text-90">
                             <i class="fa fa-upload text-success mr-1"></i> Chọn tệp Excel để Import (.xlsx, .xls)
                         </span>
-                        <a href="@Url.Action("DownloadTodoImportTemplate", "DigitalSales", new { area = "Cate", processId = processId, digitalSalesId = digitalSalesId })"
+                        <a href="@Url.Action("DownloadTodoImportTemplate", "DigitalSales", new { area = "Cate", processId = processId, digitalSalesId = digitalSalesId, timelineId = timelineId })"
                            class="btn btn-xs btn-white btn-h-light-success border-1 brc-green-m3 text-green-d2 font-bold radius-1 px-3 py-1 shadow-sm">
                             <i class="fa fa-download mr-1 text-110"></i> Tải file mẫu Excel (2 Sheet)
                         </a>
@@ -63,7 +72,7 @@
                                     <label class="custom-file-label text-truncate" for="fileTodoImport" id="lblTodoFileName">Chọn tệp Excel từ máy tính...</label>
                                 </div>
                                 <small class="text-muted d-block mt-1">
-                                    <i class="fa fa-info-circle mr-1 text-info"></i> Các cột bắt buộc: <strong>Mã tiến trình</strong>, <strong>Tên công việc con</strong>, <strong>Ngày bắt đầu</strong>, <strong>Số ngày</strong> (Hạn xử lý sẽ được hệ thống tự động tính toán).
+                                    <i class="fa fa-info-circle mr-1 text-info"></i> Các cột bắt buộc: <strong>Mã tiến trình</strong>, <strong>STT Phân cấp</strong> (dạng Text: 1, 1.1, 1.2), <strong>Tên công việc</strong>, <strong>Ngày bắt đầu</strong>, <strong>Hạn xử lý</strong> (Số ngày tự động tính).
                                 </small>
                             </div>
                             <div class="col-md-4 text-md-right">
@@ -99,13 +108,14 @@
                                     <tr>
                                         <th class="text-center" style="width: 45px;">STT</th>
                                         <th style="width: 120px;" class="text-center">Mã tiến trình (*)</th>
+                                        <th style="width: 110px;" class="text-center">STT Phân cấp</th>
                                         <th style="min-width: 180px;">Tiến trình cha</th>
-                                        <th style="min-width: 200px;">Tên công việc con (*)</th>
+                                        <th style="min-width: 200px;">Tên công việc / Việc con (*)</th>
                                         <th style="width: 130px;">Người thực hiện</th>
                                         <th style="width: 115px;" class="text-center">Trạng thái</th>
                                         <th class="text-center" style="width: 95px;">Bắt đầu (*)</th>
-                                        <th class="text-center" style="width: 80px;">Số ngày (*)</th>
-                                        <th class="text-center" style="width: 95px;">Hạn xử lý</th>
+                                        <th class="text-center" style="width: 95px;">Hạn xử lý (*)</th>
+                                        <th class="text-center" style="width: 80px;">Số ngày</th>
                                         <th style="min-width: 140px;">Ghi chú</th>
                                         <th style="min-width: 200px;" class="text-center">Thông tin lỗi</th>
                                     </tr>

@@ -1,0 +1,21 @@
+/* CSS cho Modal Báo cáo tiến độ thực hiện */
+#trackingReportModal {
+    z-index: 1085 !important;
+}
+
+#trackingReportModal .modal-dialog {
+    max-width: 650px;
+}
+
+.modal-backdrop.tracking-report-backdrop {
+    z-index: 1080 !important;
+}
+
+/* Đảm bảo Datepicker dropdown luôn hiển thị trên modal và backdrop */
+.datepicker.datepicker-dropdown {
+    z-index: 1100 !important;
+}
+
+#wrapReportCompletedDate {
+    transition: all 0.2s ease-in-out;
+}

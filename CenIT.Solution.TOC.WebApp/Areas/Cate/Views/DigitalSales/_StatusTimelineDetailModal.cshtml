@@ -202,9 +202,23 @@
                                                                 @f.FileName
                                                             </a>
                                                         </div>
-                                                        <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download flex-shrink-0" title="Tải xuống">
-                                                            <i class="fa fa-download"></i>
-                                                        </a>
+                                                        <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                                            @if (ext == ".pdf")
+                                                            {
+                                                                <button type="button" class="btn btn-xs btn-outline-danger radius-1 timeline-file-btn-download" onclick="previewPdfDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trước PDF">
+                                                                    <i class="fa fa-eye"></i>
+                                                                </button>
+                                                            }
+                                                            else if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+                                                            {
+                                                                <button type="button" class="btn btn-xs btn-outline-info radius-1 timeline-file-btn-download" onclick="previewImageDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem ảnh">
+                                                                    <i class="fa fa-eye"></i>
+                                                                </button>
+                                                            }
+                                                            <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download" title="Tải xuống">
+                                                                <i class="fa fa-download"></i>
+                                                            </a>
+                                                        </div>
                                                     </div>
                                                 }
                                             </div>
@@ -241,9 +255,23 @@
                                                                     @f.FileName
                                                                 </a>
                                                             </div>
-                                                            <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download flex-shrink-0" title="Tải xuống">
-                                                                <i class="fa fa-download"></i>
-                                                            </a>
+                                                            <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
+                                                                @if (ext == ".pdf")
+                                                                {
+                                                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 timeline-file-btn-download" onclick="previewPdfDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trước PDF">
+                                                                        <i class="fa fa-eye"></i>
+                                                                    </button>
+                                                                }
+                                                                else if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+                                                                {
+                                                                    <button type="button" class="btn btn-xs btn-outline-info radius-1 timeline-file-btn-download" onclick="previewImageDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem ảnh">
+                                                                        <i class="fa fa-eye"></i>
+                                                                    </button>
+                                                                }
+                                                                <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = f.FilePath })" target="_blank" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download" title="Tải xuống">
+                                                                    <i class="fa fa-download"></i>
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     }
                                                 </div>

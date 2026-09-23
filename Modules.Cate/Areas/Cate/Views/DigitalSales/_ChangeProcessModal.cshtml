@@ -20,8 +20,13 @@
 
                 <div class="modal-body p-3 p-md-4">
                     <div class="alert alert-info border-0 radius-1 shadow-none mb-3 text-95">
-                        <i class="fa fa-info-circle mr-1 text-primary-m1"></i>
-                        Trạng thái <strong>@Model.StatusName</strong> có <strong>@(Model.AvailableProcesses?.Count ?? 0) quy trình</strong> khả dụng. Hãy chọn quy trình phù hợp để áp dụng cho hồ sơ này:
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fa fa-info-circle mr-2 text-primary-m1 text-110"></i>
+                            <span>Trạng thái <strong>@Model.StatusName</strong> có <strong>@(Model.AvailableProcesses?.Count ?? 0) quy trình</strong> khả dụng. Hãy chọn quy trình phù hợp để áp dụng cho hồ sơ này:</span>
+                        </div>
+                        <div class="mt-2 pt-2 border-t-1 brc-default-l2 text-secondary-d2 text-90">
+                            <i class="fa fa-shield-alt text-success mr-1"></i> <strong>Lưu ý:</strong> Hệ thống sẽ cập nhật quy trình áp dụng mới, giữ nguyên vẹn toàn bộ danh sách tiến trình và công việc hiện có trong hồ sơ.
+                        </div>
                     </div>
 
                     <div class="form-group mb-0">

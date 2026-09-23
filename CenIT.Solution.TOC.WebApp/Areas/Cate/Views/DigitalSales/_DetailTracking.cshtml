@@ -2,6 +2,9 @@
 @model Core.Cate.Models.RM_DigitalSalesModel
 @{
     bool canEdit = ViewBag.CanEdit == true;
+    bool isQTHT = ViewBag.IsQTHT == true;
+    string currentUserName = User != null ? (User.UserName ?? "") : "";
+    int currentUserId = User != null ? User.UserId : 0;
     var allTasks = Model.TrackingTasks ?? new List<Core.Cate.Models.RM_DigitalSalesTrackingModel>();
     var parentTasks = allTasks.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
     var allTodoTasks = allTasks.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
@@ -189,7 +192,7 @@
                                             </button>
                                             if (realTaskCount > 0)
                                             {
-                                                <button type="button" class="btn btn-xs btn-info font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-import-todo-header" onclick="event.stopPropagation(); openImportTodoModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID);" title="Import danh sách công việc con vào tiến trình của quy trình này">
+                                                <button type="button" class="btn btn-xs btn-info font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-import-todo-header" onclick="event.stopPropagation(); openImportTodoModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, @stGroup.Key.TimelineID);" title="Import danh sách công việc con vào tiến trình của quy trình này">
                                                     <i class="fa fa-file-excel mr-1"></i> Import công việc
                                                 </button>
                                             }
@@ -277,27 +280,113 @@
                                 </td>
                                 @if (canEdit)
                                 {
+                                    bool canReportTask = canEdit && task.Status != 3 && (isQTHT || string.Equals(task.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase) || (task.AssignedUserID.HasValue && task.AssignedUserID.Value == currentUserId));
+                                    var taskActions = new List<Core.Cate.Models.RM_DigitalSalesActionItem>();
+
+                                    if (canReportTask)
+                                    {
+                                        taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                        {
+                                            Name = "Báo cáo tiến độ",
+                                            Icon = "fa fa-clipboard-check",
+                                            ItemClass = "item-report",
+                                            BtnClass = "ds-action-btn-report",
+                                            OnClick = $"openTrackingReportModal({task.TrackingID}, {Model.DigitalSalesID});"
+                                        });
+                                    }
+
+                                    if (canEdit && isCurrentStatus && task.Status != 3)
+                                    {
+                                        taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                        {
+                                            Name = "Thêm công việc con",
+                                            Icon = "fa fa-plus",
+                                            ItemClass = "item-add",
+                                            BtnClass = "ds-action-btn-add",
+                                            OnClick = $"openAddTodoModal({task.TrackingID}, {Model.DigitalSalesID});"
+                                        });
+
+                                        bool canEditTask = isQTHT || string.Equals(task.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase);
+                                        if (canEditTask)
+                                        {
+                                            taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                            {
+                                                Name = "Chỉnh sửa tiến trình",
+                                                Icon = "fa fa-pencil-alt",
+                                                ItemClass = "item-edit",
+                                                BtnClass = "ds-action-btn-edit",
+                                                OnClick = $"openEditTrackingModal({task.TrackingID}, {Model.DigitalSalesID});"
+                                            });
+                                        }
+                                    }
+
+                                    if (canEdit && task.Status == 3)
+                                    {
+                                        taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                        {
+                                            Name = "Mở khóa tiến trình",
+                                            Icon = "fa fa-unlock-alt",
+                                            ItemClass = "item-unlock",
+                                            BtnClass = "ds-action-btn-unlock",
+                                            OnClick = $"openUnlockProgressModal({task.TrackingID}, {Model.DigitalSalesID});"
+                                        });
+                                    }
+
+                                    if (canEdit)
+                                    {
+                                        taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                        {
+                                            Name = "Xem lịch sử log",
+                                            Icon = "fa fa-history",
+                                            ItemClass = "item-log",
+                                            BtnClass = "ds-action-btn-log",
+                                            OnClick = $"openTrackingLogsModal({task.TrackingID}, {Model.DigitalSalesID});"
+                                        });
+                                    }
+
+                                    bool canDeleteTask = (isQTHT || (task.Status != 3 && string.Equals(task.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase))) && isCurrentStatus;
+                                    if (canDeleteTask)
+                                    {
+                                        taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                        {
+                                            Name = "Xóa tiến trình",
+                                            Icon = "fa fa-trash-alt",
+                                            ItemClass = "item-delete",
+                                            BtnClass = "ds-action-btn-delete",
+                                            OnClick = $"actionDeleteTracking({task.TrackingID}, {Model.DigitalSalesID});"
+                                        });
+                                    }
+
                                     <td class="text-center text-nowrap font-progress-cell">
-                                        <div class="ds-action-group">
-                                            <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-log" onclick="openTrackingLogsModal(@task.TrackingID, @Model.DigitalSalesID);" title="Xem Log thao tác tiến trình">
-                                                <i class="fa fa-history"></i>
-                                            </a>
-                                            @if (task.Status == 3)
-                                            {
-                                                <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-unlock" onclick="openUnlockProgressModal(@task.TrackingID, @Model.DigitalSalesID);" title="Mở khóa tiến trình">
-                                                    <i class="fa fa-unlock-alt"></i>
+                                        @if (taskActions.Count == 1)
+                                        {
+                                            <div class="ds-action-group">
+                                                <a href="javascript:void(0);" class="ds-action-btn @taskActions[0].BtnClass" onclick="@taskActions[0].OnClick" title="@taskActions[0].Name">
+                                                    <i class="@taskActions[0].Icon"></i>
                                                 </a>
-                                            }
-                                            else if (isCurrentStatus)
-                                            {
-                                                <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-edit" onclick="openEditTrackingModal(@task.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa tiến trình">
-                                                    <i class="fa fa-pencil-alt"></i>
-                                                </a>
-                                                <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-delete" onclick="actionDeleteTracking(@task.TrackingID, @Model.DigitalSalesID);" title="Xóa tiến trình">
-                                                    <i class="fa fa-trash-alt"></i>
-                                                </a>
-                                            }
-                                        </div>
+                                            </div>
+                                        }
+                                        else if (taskActions.Count >= 2)
+                                        {
+                                            <div class="dropdown ds-action-dropdown">
+                                                <button type="button" class="btn btn-xs btn-white border-1 brc-grey-m2 text-secondary-d2 dropdown-toggle radius-round ds-action-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Thao tác (@taskActions.Count chức năng)">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right ds-action-dropdown-menu">
+                                                    @foreach (var act in taskActions)
+                                                    {
+                                                        <a class="dropdown-item ds-action-dropdown-item @act.ItemClass" href="javascript:void(0);" onclick="@act.OnClick">
+                                                            <i class="@act.Icon"></i>
+                                                            <span>@act.Name</span>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-secondary">—</span>
+                                        }
                                     </td>
                                 }
                             </tr>
@@ -309,16 +398,32 @@
                             {
                                 foreach (var todo in task.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
                                 {
+                                    string todoNodeId = $"{taskNodeId}_todo_{todo.TrackingID}";
                                     bool todoOverdue = todo.IsOverdue == 1;
-                                    <tr class="tree-row tree-todo-row" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4">
+                                    <tr class="tree-row tree-todo-row" data-node="@todoNodeId" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4" data-expanded="true">
                                         <td style="padding-left: 48px;" class="font-progress-cell">
                                             <div class="d-flex align-items-center flex-wrap">
                                                 <span class="tree-todo-branch mr-2">└─</span>
                                                 <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@todo.TrackingID"
                                                        @(todo.Status == 3 ? "checked" : "")
                                                        onclick="return false;" onkeydown="return false;" tabindex="-1"
-                                                       title="@(todo.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
+                                                       title="@(todo.Status == 3 ? "Công việc đã hoàn thành" : "Công việc chưa hoàn thành")" />
                                                 <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
+
+                                                @if (canEdit && isCurrentStatus && todo.Status != 3)
+                                                {
+                                                    <!-- DẤU (+) PHÍA SAU TÊN CÔNG VIỆC: THÊM CÔNG VIỆC CON (CẤP 5) -->
+                                                    <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con">
+                                                        <i class="fa fa-plus"></i>
+                                                    </a>
+                                                }
+
+                                                @if (todo.TodoList != null && todo.TodoList.Count > 0)
+                                                {
+                                                    <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@todoNodeId');">
+                                                        <i class="fa fa-list-ul mr-1"></i>@todo.TodoList.Count việc con
+                                                    </span>
+                                                }
                                             </div>
                                         </td>
                                         <td class="text-center font-progress-cell">
@@ -373,30 +478,289 @@
                                         </td>
                                         @if (canEdit)
                                         {
+                                            bool canReportTodo = canEdit && todo.Status != 3 && (isQTHT || string.Equals(todo.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase) || (todo.AssignedUserID.HasValue && todo.AssignedUserID.Value == currentUserId));
+                                            var todoActions = new List<Core.Cate.Models.RM_DigitalSalesActionItem>();
+
+                                            if (canReportTodo)
+                                            {
+                                                todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                {
+                                                    Name = "Báo cáo tiến độ",
+                                                    Icon = "fa fa-clipboard-check",
+                                                    ItemClass = "item-report",
+                                                    BtnClass = "ds-action-btn-report",
+                                                    OnClick = $"openTrackingReportModal({todo.TrackingID}, {Model.DigitalSalesID});"
+                                                });
+                                            }
+
+                                            if (canEdit && isCurrentStatus && todo.Status != 3)
+                                            {
+                                                todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                {
+                                                    Name = "Thêm công việc con",
+                                                    Icon = "fa fa-plus",
+                                                    ItemClass = "item-add",
+                                                    BtnClass = "ds-action-btn-add",
+                                                    OnClick = $"openAddTodoModal({todo.TrackingID}, {Model.DigitalSalesID});"
+                                                });
+
+                                                bool canEditTodo = isQTHT || string.Equals(todo.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase);
+                                                if (canEditTodo)
+                                                {
+                                                    todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                    {
+                                                        Name = "Chỉnh sửa công việc",
+                                                        Icon = "fa fa-pencil-alt",
+                                                        ItemClass = "item-edit",
+                                                        BtnClass = "ds-action-btn-edit",
+                                                        OnClick = $"openEditTodoModal({todo.TrackingID}, {Model.DigitalSalesID});"
+                                                    });
+                                                }
+                                            }
+
+                                            if (canEdit && todo.Status == 3)
+                                            {
+                                                todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                {
+                                                    Name = "Mở khóa công việc",
+                                                    Icon = "fa fa-unlock-alt",
+                                                    ItemClass = "item-unlock",
+                                                    BtnClass = "ds-action-btn-unlock",
+                                                    OnClick = $"openUnlockProgressModal({todo.TrackingID}, {Model.DigitalSalesID});"
+                                                });
+                                            }
+
+                                            if (canEdit)
+                                            {
+                                                todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                {
+                                                    Name = "Xem lịch sử log",
+                                                    Icon = "fa fa-history",
+                                                    ItemClass = "item-log",
+                                                    BtnClass = "ds-action-btn-log",
+                                                    OnClick = $"openTrackingLogsModal({todo.TrackingID}, {Model.DigitalSalesID});"
+                                                });
+                                            }
+
+                                            bool canDeleteTodo = (isQTHT || (todo.Status != 3 && string.Equals(todo.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase))) && isCurrentStatus;
+                                            if (canDeleteTodo)
+                                            {
+                                                todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                {
+                                                    Name = "Xóa công việc",
+                                                    Icon = "fa fa-trash-alt",
+                                                    ItemClass = "item-delete",
+                                                    BtnClass = "ds-action-btn-delete",
+                                                    OnClick = $"actionDeleteTracking({todo.TrackingID}, {Model.DigitalSalesID});"
+                                                });
+                                            }
+
                                             <td class="text-center text-nowrap font-progress-cell">
-                                                <div class="ds-action-group">
-                                                    <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-log" onclick="openTrackingLogsModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Xem Log thao tác công việc con">
-                                                        <i class="fa fa-history"></i>
-                                                    </a>
-                                                    @if (todo.Status == 3)
-                                                    {
-                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-unlock" onclick="openUnlockProgressModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Mở khóa công việc con">
-                                                            <i class="fa fa-unlock-alt"></i>
+                                                @if (todoActions.Count == 1)
+                                                {
+                                                    <div class="ds-action-group">
+                                                        <a href="javascript:void(0);" class="ds-action-btn @todoActions[0].BtnClass" onclick="@todoActions[0].OnClick" title="@todoActions[0].Name">
+                                                            <i class="@todoActions[0].Icon"></i>
                                                         </a>
-                                                    }
-                                                    else if (isCurrentStatus)
-                                                    {
-                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-edit" onclick="openEditTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Chỉnh sửa công việc con">
-                                                            <i class="fa fa-pencil-alt"></i>
-                                                        </a>
-                                                        <a href="javascript:void(0);" class="ds-action-btn ds-action-btn-delete" onclick="actionDeleteTracking(@todo.TrackingID, @Model.DigitalSalesID);" title="Xóa công việc con">
-                                                            <i class="fa fa-trash-alt"></i>
-                                                        </a>
-                                                    }
-                                                </div>
+                                                    </div>
+                                                }
+                                                else if (todoActions.Count >= 2)
+                                                {
+                                                    <div class="dropdown ds-action-dropdown">
+                                                        <button type="button" class="btn btn-xs btn-white border-1 brc-grey-m2 text-secondary-d2 dropdown-toggle radius-round ds-action-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Thao tác (@todoActions.Count chức năng)">
+                                                            <i class="fa fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right ds-action-dropdown-menu">
+                                                            @foreach (var act in todoActions)
+                                                            {
+                                                                <a class="dropdown-item ds-action-dropdown-item @act.ItemClass" href="javascript:void(0);" onclick="@act.OnClick">
+                                                                    <i class="@act.Icon"></i>
+                                                                    <span>@act.Name</span>
+                                                                </a>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-secondary">—</span>
+                                                }
                                             </td>
                                         }
                                     </tr>
+
+                                    <!-- ========================================================================= -->
+                                    <!-- CẤP 5: SUBTASK TRONG CÔNG VIỆC CON (INDENT 72PX, NHÁNH └─ └─)            -->
+                                    <!-- ========================================================================= -->
+                                    if (todo.TodoList != null && todo.TodoList.Count > 0)
+                                    {
+                                        foreach (var sub in todo.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
+                                        {
+                                            string subNodeId = $"{todoNodeId}_sub_{sub.TrackingID}";
+                                            bool subOverdue = sub.IsOverdue == 1;
+                                            <tr class="tree-row tree-subtask-row" data-node="@subNodeId" data-parent="@todoNodeId" data-superparent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="5">
+                                                <td style="padding-left: 72px;" class="font-progress-cell">
+                                                    <div class="d-flex align-items-center flex-wrap">
+                                                        <span class="tree-subtask-branch mr-2">└─ └─</span>
+                                                        <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@sub.TrackingID"
+                                                               @(sub.Status == 3 ? "checked" : "")
+                                                               onclick="return false;" onkeydown="return false;" tabindex="-1"
+                                                               title="@(sub.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
+                                                        <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center font-progress-cell">
+                                                    <span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@sub.TrackingCode</span>
+                                                </td>
+                                                <td class="font-progress-cell">
+                                                    <span class="text-dark">@(string.IsNullOrEmpty(sub.AssignedUserName) ? "—" : Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.AssignedUserName))</span>
+                                                </td>
+                                                <td class="text-center font-progress-cell">@sub.StartDate.ToString("dd/MM/yyyy")</td>
+                                                <td class="text-center font-progress-cell">
+                                                    <span class="@(subOverdue ? "text-danger font-bold" : "text-dark")">
+                                                        @(sub.Deadline.HasValue ? sub.Deadline.Value.ToString("dd/MM/yyyy") : "—")
+                                                    </span>
+                                                </td>
+                                                <td class="text-center font-progress-cell">
+                                                    <span class="badge badge-light-secondary font-bold">@sub.EffectiveDurationDays ngày</span>
+                                                </td>
+                                                <td class="text-center font-progress-cell">
+                                                    @if (sub.Status == 3)
+                                                    {
+                                                        <span class="badge badge-success px-2 font-bold">Hoàn thành</span>
+                                                    }
+                                                    else if (sub.Status == 2)
+                                                    {
+                                                        <span class="badge badge-warning px-2 font-bold">Đang làm</span>
+                                                    }
+                                                    else if (subOverdue)
+                                                    {
+                                                        <span class="badge badge-danger px-2 font-bold">Quá hạn</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-secondary px-2">Chưa làm</span>
+                                                    }
+                                                </td>
+                                                <td class="text-center font-progress-cell">
+                                                    @if (sub.Status == 3)
+                                                    {
+                                                        string completedUser = !string.IsNullOrEmpty(sub.CompletedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.CompletedByName) : (!string.IsNullOrEmpty(sub.LastModifiedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.LastModifiedByName) : (!string.IsNullOrEmpty(sub.CreatedByName) ? Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.CreatedByName) : "—"));
+                                                        DateTime? completedAt = sub.CompletedDate.HasValue ? sub.CompletedDate : (sub.LastModifiedDate.HasValue ? sub.LastModifiedDate : (DateTime?)sub.CreatedDate);
+                                                        <div class="d-flex flex-column align-items-center">
+                                                            <span class="text-dark font-weight-bold text-85">@completedUser</span>
+                                                            <span class="text-secondary text-80">
+                                                                <i class="fa fa-clock text-success mr-1"></i>@(completedAt.HasValue ? completedAt.Value.ToString("dd/MM/yyyy HH:mm") : "—")
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-secondary">—</span>
+                                                    }
+                                                </td>
+                                                @if (canEdit)
+                                                {
+                                                    bool canReportSub = canEdit && sub.Status != 3 && (isQTHT || string.Equals(sub.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase) || (sub.AssignedUserID.HasValue && sub.AssignedUserID.Value == currentUserId));
+                                                    var subActions = new List<Core.Cate.Models.RM_DigitalSalesActionItem>();
+
+                                                    if (canReportSub)
+                                                    {
+                                                        subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                        {
+                                                            Name = "Báo cáo tiến độ",
+                                                            Icon = "fa fa-clipboard-check",
+                                                            ItemClass = "item-report",
+                                                            BtnClass = "ds-action-btn-report",
+                                                            OnClick = $"openTrackingReportModal({sub.TrackingID}, {Model.DigitalSalesID});"
+                                                        });
+                                                    }
+
+                                                    bool canEditSub = isQTHT || string.Equals(sub.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase);
+                                                    if (canEdit && isCurrentStatus && sub.Status != 3 && canEditSub)
+                                                    {
+                                                        subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                        {
+                                                            Name = "Chỉnh sửa công việc",
+                                                            Icon = "fa fa-pencil-alt",
+                                                            ItemClass = "item-edit",
+                                                            BtnClass = "ds-action-btn-edit",
+                                                            OnClick = $"openEditTodoModal({sub.TrackingID}, {Model.DigitalSalesID});"
+                                                        });
+                                                    }
+
+                                                    if (canEdit && sub.Status == 3)
+                                                    {
+                                                        subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                        {
+                                                            Name = "Mở khóa công việc",
+                                                            Icon = "fa fa-unlock-alt",
+                                                            ItemClass = "item-unlock",
+                                                            BtnClass = "ds-action-btn-unlock",
+                                                            OnClick = $"openUnlockProgressModal({sub.TrackingID}, {Model.DigitalSalesID});"
+                                                        });
+                                                    }
+
+                                                    if (canEdit)
+                                                    {
+                                                        subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                        {
+                                                            Name = "Xem lịch sử log",
+                                                            Icon = "fa fa-history",
+                                                            ItemClass = "item-log",
+                                                            BtnClass = "ds-action-btn-log",
+                                                            OnClick = $"openTrackingLogsModal({sub.TrackingID}, {Model.DigitalSalesID});"
+                                                        });
+                                                    }
+
+                                                    bool canDeleteSub = (isQTHT || (sub.Status != 3 && string.Equals(sub.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase))) && isCurrentStatus;
+                                                    if (canDeleteSub)
+                                                    {
+                                                        subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
+                                                        {
+                                                            Name = "Xóa công việc",
+                                                            Icon = "fa fa-trash-alt",
+                                                            ItemClass = "item-delete",
+                                                            BtnClass = "ds-action-btn-delete",
+                                                            OnClick = $"actionDeleteTracking({sub.TrackingID}, {Model.DigitalSalesID});"
+                                                        });
+                                                    }
+
+                                                    <td class="text-center text-nowrap font-progress-cell">
+                                                        @if (subActions.Count == 1)
+                                                        {
+                                                            <div class="ds-action-group">
+                                                                <a href="javascript:void(0);" class="ds-action-btn @subActions[0].BtnClass" onclick="@subActions[0].OnClick" title="@subActions[0].Name">
+                                                                    <i class="@subActions[0].Icon"></i>
+                                                                </a>
+                                                            </div>
+                                                        }
+                                                        else if (subActions.Count >= 2)
+                                                        {
+                                                            <div class="dropdown ds-action-dropdown">
+                                                                <button type="button" class="btn btn-xs btn-white border-1 brc-grey-m2 text-secondary-d2 dropdown-toggle radius-round ds-action-dropdown-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Thao tác (@subActions.Count chức năng)">
+                                                                    <i class="fa fa-ellipsis-v"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu dropdown-menu-right ds-action-dropdown-menu">
+                                                                    @foreach (var act in subActions)
+                                                                    {
+                                                                        <a class="dropdown-item ds-action-dropdown-item @act.ItemClass" href="javascript:void(0);" onclick="@act.OnClick">
+                                                                            <i class="@act.Icon"></i>
+                                                                            <span>@act.Name</span>
+                                                                        </a>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-secondary">—</span>
+                                                        }
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    }
                                 }
                             }
                             taskIdx++;
@@ -410,17 +774,9 @@
             else
             {
                 <tr>
-                    <td colspan="@(canEdit ? 9 : 8)" class="text-center py-4 text-secondary-m1">
-                        <i class="fa fa-clipboard-list text-180 text-secondary-l1 mb-2 d-block"></i>
-                        <span>Chưa có tiến trình / checklist nào được khởi tạo cho hồ sơ này.</span>
-                        @if (canEdit)
-                        {
-                            <div class="mt-2">
-                                <button type="button" class="btn btn-xs btn-orange px-3 radius-1 font-bold" onclick="openAddTrackingModal(@Model.DigitalSalesID);">
-                                    <i class="fa fa-plus mr-1"></i> Thêm công việc đầu tiên
-                                </button>
-                            </div>
-                        }
+                    <td colspan="@(canEdit ? 9 : 8)" class="text-center py-4 text-muted">
+                        <i class="fa fa-folder-open fa-2x mb-2 text-secondary-m2"></i>
+                        <div>Chưa có dữ liệu tiến trình thực hiện cho hồ sơ này.</div>
                     </td>
                 </tr>
             }
@@ -478,11 +834,20 @@
         }
         // Tầng 3: Đóng/mở các Todo list con của tiến trình
         else if ($row.hasClass('tree-progress-row')) {
-            var $items = $('#treeTrackingBody tr[data-parent="' + nodeId + '"]');
+            var $items = $('#treeTrackingBody tr[data-parent="' + nodeId + '"], #treeTrackingBody tr[data-superparent="' + nodeId + '"]');
             if (newExpanded) {
                 $items.show();
             } else {
                 $items.hide();
+            }
+        }
+        // Tầng 4: Đóng/mở các Subtask cấp 5 con của Todo list cấp 4
+        else if ($row.hasClass('tree-todo-row')) {
+            var $subtasks = $('#treeTrackingBody tr[data-parent="' + nodeId + '"]');
+            if (newExpanded) {
+                $subtasks.show();
+            } else {
+                $subtasks.hide();
             }
         }
     }
@@ -496,7 +861,7 @@
             $body.find('tr[data-node]').attr('data-expanded', 'true');
         } else {
             // Chỉ giữ lại tầng 1 (Trạng thái)
-            $body.find('tr.tree-process-row, tr.tree-progress-row, tr.tree-todo-row').hide();
+            $body.find('tr.tree-process-row, tr.tree-progress-row, tr.tree-todo-row, tr.tree-subtask-row').hide();
             $body.find('.tree-toggle-icon').addClass('collapsed');
             $body.find('tr[data-node]').attr('data-expanded', 'false');
         }

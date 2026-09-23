@@ -1,4 +1,4 @@
-﻿using Core.Cate.Models;
+using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -30,6 +30,7 @@ namespace Core.Cate.Biz
         private readonly string _spTrackingSave = "RM_DigitalSalesTracking_Save";
         private readonly string _spTrackingDelete = "RM_DigitalSalesTracking_Delete";
         private readonly string _spTrackingUpdateStatus = "RM_DigitalSalesTracking_UpdateStatus";
+        private readonly string _spTrackingChangeProcessOfStatus = "RM_DigitalSalesTracking_ChangeProcessOfStatus";
         private readonly string _spMemberGetBySalesID = "RM_DigitalSalesMember_GetBySalesID";
         private readonly string _spMemberSave = "RM_DigitalSalesMember_Save";
         private readonly string _spMemberDelete = "RM_DigitalSalesMember_Delete";
@@ -662,10 +663,14 @@ namespace Core.Cate.Biz
                     item.SalesStatusName = FixVietnameseMojibake(item.SalesStatusName);
                 }
                 var parents = list.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
-                var children = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
+                var allChildren = list.Where(t => t.ParentID.HasValue && t.ParentID.Value > 0).ToList();
                 foreach (var p in parents)
                 {
-                    p.TodoList = children.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID).ToList();
+                    p.TodoList = allChildren.Where(c => c.ParentID == p.TrackingID).OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID).ToList();
+                    foreach (var todo in p.TodoList)
+                    {
+                        todo.TodoList = allChildren.Where(sub => sub.ParentID == todo.TrackingID).OrderBy(sub => sub.SortOrder).ThenBy(sub => sub.StartDate).ThenBy(sub => sub.TrackingID).ToList();
+                    }
                 }
             }
             return list ?? new List<RM_DigitalSalesTrackingModel>();
@@ -744,73 +749,17 @@ namespace Core.Cate.Biz
         {
             if (digitalSalesId <= 0 || statusId <= 0 || newProcessId <= 0) return 0;
 
-            var currentTasks = GetTrackingTasks(digitalSalesId);
-            var oldTasks = currentTasks.Where(t => t.StatusID == statusId && (!t.ParentID.HasValue || t.ParentID.Value <= 0)).ToList();
-            int? currentTimelineId = oldTasks.FirstOrDefault(t => t.TimelineID.HasValue)?.TimelineID;
-            if (!currentTimelineId.HasValue)
-            {
-                var sales = GetByID(digitalSalesId, username);
-                currentTimelineId = sales?.Timelines?
-                    .Where(tl => tl.ToStatusID == statusId && (!tl.FromStatusID.HasValue || tl.FromStatusID.Value != tl.ToStatusID))
-                    .OrderByDescending(tl => tl.ActionDate).ThenByDescending(tl => tl.TimelineID)
-                    .FirstOrDefault()?.TimelineID;
-            }
+            // AC 8.2: Chỉ đổi quy trình áp dụng, KHÔNG xóa tiến trình cũ, KHÔNG add thêm tiến trình mẫu
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spTrackingChangeProcessOfStatus,
+                DATA_PROVIDER_NAME,
+                digitalSalesId,
+                statusId,
+                newProcessId,
+                username
+            );
 
-            foreach (var ot in oldTasks)
-            {
-                DeleteTracking(ot.TrackingID, username);
-            }
-
-            var progressList = new RM_DigitalSalesWorkflowBiz().GetProgressesByProcess(newProcessId);
-            if (progressList != null && progressList.Count > 0)
-            {
-                int sort = 1;
-                foreach (var pg in progressList.OrderBy(p => p.SortOrder))
-                {
-                    int duration = pg.DefaultDurationDays > 0 ? pg.DefaultDurationDays : 3;
-                    var task = new RM_DigitalSalesTrackingModel
-                    {
-                        TrackingID = 0,
-                        DigitalSalesID = digitalSalesId,
-                        ProcessID = newProcessId,
-                        ProgressID = pg.ProgressID,
-                        TaskName = pg.ProgressName,
-                        DurationDays = duration,
-                        DefaultDurationDays = duration,
-                        StartDate = DateTime.Now,
-                        Deadline = DateTime.Now.AddDays(duration),
-                        Status = 1,
-                        IsCustomTask = false,
-                        SortOrder = sort++,
-                        TimelineID = currentTimelineId
-                    };
-                    SaveTracking(task, username);
-                }
-            }
-            else
-            {
-                // Nếu quy trình được chọn chưa có tiến trình mẫu nào, lưu 1 bản ghi tiến trình rỗng
-                // để giữ quy trình hiển thị trên bảng Checklist và cho phép bấm "Thêm tiến trình"
-                var emptyTask = new RM_DigitalSalesTrackingModel
-                {
-                    TrackingID = 0,
-                    DigitalSalesID = digitalSalesId,
-                    ProcessID = newProcessId,
-                    ProgressID = null,
-                    TaskName = string.Empty,
-                    DurationDays = 3,
-                    DefaultDurationDays = 3,
-                    StartDate = DateTime.Now,
-                    Deadline = DateTime.Now.AddDays(3),
-                    Status = 1,
-                    IsCustomTask = true,
-                    SortOrder = 1,
-                    TimelineID = currentTimelineId
-                };
-                SaveTracking(emptyTask, username);
-            }
-
-            return 1;
+            return result.GetValueOrDefault(0);
         }
 
         public int DeleteTracking(int trackingId, string username)

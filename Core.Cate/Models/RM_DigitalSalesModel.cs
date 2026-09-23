@@ -205,8 +205,14 @@ namespace Core.Cate.Models
     {
         public int TrackingID { get; set; }
         public int DigitalSalesID { get; set; }
+        public string TrackingCode { get; set; }
         public string TaskName { get; set; }
+        public string AssignedUserName { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? Deadline { get; set; }
+        public DateTime? CompletedDate { get; set; }
         public byte Status { get; set; }
+        [AllowHtml]
         public string ResultNote { get; set; }
         public string AttachmentFile { get; set; }
     }
@@ -249,6 +255,15 @@ namespace Core.Cate.Models
         public DateTime? UploadedDate { get; set; }
         public bool IsFromChecklist { get; set; }
         public int? TrackingID { get; set; }
+    }
+
+    public class RM_DigitalSalesActionItem
+    {
+        public string Name { get; set; }
+        public string Icon { get; set; }
+        public string ItemClass { get; set; }
+        public string BtnClass { get; set; }
+        public string OnClick { get; set; }
     }
 }
 

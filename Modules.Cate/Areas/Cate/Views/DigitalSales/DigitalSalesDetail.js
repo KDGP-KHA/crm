@@ -1,4 +1,4 @@
-﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -41,6 +41,8 @@ var _detailUrls = {
 
     uploadAttachment: "/Cate/DigitalSales/UploadAttachment",
     deleteAttachment: "/Cate/DigitalSales/DeleteAttachment",
+    viewAttachment: "/Cate/DigitalSales/ViewAttachment",
+    downloadAttachment: "/Cate/DigitalSales/DownloadAttachment",
     toggleKeyProject: "/Cate/DigitalSales/ToggleKeyProject",
     toggleFollow: "/Cate/DigitalSales/ToggleFollow",
     statusTimelineModal: "/Cate/DigitalSales/StatusTimelineModal",
@@ -1315,6 +1317,14 @@ function deleteMemberItem(id, salesId) {
 
 /* ================= 5. Tiến trình & Checklist (Tab 4) ================= */
 function initTrackingModalBehavior($modal, salesId) {
+    if (!$modal || $modal.length === 0) {
+        $modal = $("#modalTracking");
+    }
+    var $form = $modal.find("#frmTrackingModal");
+    if ($form.length === 0) {
+        $form = $("#frmTrackingModal");
+    }
+
     if ($.fn.select2) {
         $modal.find(".select2").select2({ width: "100%", dropdownParent: $modal });
     }
@@ -1367,6 +1377,15 @@ function initTrackingModalBehavior($modal, salesId) {
         }
     };
 
+    if ($.fn.datepicker) {
+        $form.find("#Tracking_CompletedDate").datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true,
+            todayHighlight: true,
+            language: 'vi'
+        });
+    }
+
     window.onTrackingStatusChange = function (select) {
         var val = $(select).val();
         if (val === "3") {
@@ -1374,7 +1393,9 @@ function initTrackingModalBehavior($modal, salesId) {
             var d = ("0" + now.getDate()).slice(-2);
             var m = ("0" + (now.getMonth() + 1)).slice(-2);
             var y = now.getFullYear();
-            $("#Tracking_CompletedDate").val(d + "/" + m + "/" + y);
+            if (!$("#Tracking_CompletedDate").val()) {
+                $("#Tracking_CompletedDate").val(d + "/" + m + "/" + y);
+            }
             $("#groupCompletedDate").show();
         } else {
             $("#Tracking_CompletedDate").val("");
@@ -1382,7 +1403,6 @@ function initTrackingModalBehavior($modal, salesId) {
         }
     };
 
-    var $form = $("#frmTrackingModal");
     if ($.validator && $.validator.unobtrusive) {
         $.validator.unobtrusive.parse($form);
     }
@@ -1418,6 +1438,32 @@ function initTrackingModalBehavior($modal, salesId) {
                    .addClass("field-validation-error text-danger text-85 font-weight-bold d-block mt-1");
             $form.find("#txtTrackingTaskName").addClass("input-validation-error border-danger").focus();
             return false;
+        }
+
+        var statusVal = $form.find("#Tracking_Status").val();
+        if (statusVal === "3") {
+            var compDateStr = ($form.find("#Tracking_CompletedDate").val() || "").trim();
+            if (!compDateStr) {
+                $form.find("#Tracking_CompletedDate").addClass("is-invalid border-danger").focus();
+                toastr.warning("Vui lòng chọn ngày hoàn thành khi chuyển trạng thái Hoàn thành!");
+                return false;
+            }
+            $form.find("#Tracking_CompletedDate").removeClass("is-invalid border-danger");
+
+            var startDateStr = ($form.find("#Tracking_StartDate").val() || "").trim();
+            if (startDateStr && compDateStr) {
+                var compParts = compDateStr.split('/');
+                var startParts = startDateStr.split('/');
+                if (compParts.length === 3 && startParts.length === 3) {
+                    var cDate = new Date(parseInt(compParts[2], 10), parseInt(compParts[1], 10) - 1, parseInt(compParts[0], 10));
+                    var sDate = new Date(parseInt(startParts[2], 10), parseInt(startParts[1], 10) - 1, parseInt(startParts[0], 10));
+                    if (cDate < sDate) {
+                        $form.find("#Tracking_CompletedDate").addClass("is-invalid border-danger").focus();
+                        toastr.warning("Ngày hoàn thành (" + compDateStr + ") không được nhỏ hơn ngày bắt đầu (" + startDateStr + ")!");
+                        return false;
+                    }
+                }
+            }
         }
 
         var $btnSubmit = $form.find("button[type='submit']");
@@ -1476,13 +1522,200 @@ function openAddProgressToProcessModal(salesId, processId, processName, timeline
 
 function openEditTrackingModal(id, salesId) {
     salesId = getEffectiveSalesId(salesId);
+    if (!id) return;
     if (typeof _onWaiting === "function") _onWaiting();
     $.get(_detailUrls.editTrackingModal, { id: id, digitalSalesId: salesId }, function (html) {
         if (typeof _endWaiting === "function") _endWaiting();
+        if (typeof html === "object" && html.status === false) {
+            executeResponseMessage(html.message || "Không thể tải thông tin tiến trình!", "Thông báo", false);
+            return;
+        }
         $("#modalContainer").html(html);
         var $modal = $("#modalTracking");
-        initTrackingModalBehavior($modal, salesId);
+        if ($modal.length > 0) {
+            initTrackingModalBehavior($modal, salesId);
+            $modal.modal("show");
+        }
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+function toggleReportCompletedDate(status) {
+    if (status === '3') {
+        $('#wrapReportCompletedDate').slideDown(200);
+        var $dp = $('#Report_CompletedDate');
+        if ($.fn.datepicker && !$dp.data('datepicker')) {
+            var startDateStr = $dp.data("start-date") || "";
+            var dpOptions = {
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'vi'
+            };
+            if (startDateStr) {
+                dpOptions.startDate = startDateStr;
+            }
+            $dp.datepicker(dpOptions);
+        }
+    } else {
+        $('#wrapReportCompletedDate').slideUp(200);
+    }
+}
+
+function openTrackingReportModal(trackingId, salesId) {
+    salesId = getEffectiveSalesId(salesId);
+    if (!trackingId) return;
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_detailUrls.reportTrackingModal, { trackingId: trackingId, digitalSalesId: salesId }, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalTrackingReportContainer").remove();
+        if ($('.modal.show').length === 0) {
+            $('.modal-backdrop').remove();
+        }
+        $("body").append('<div id="modalTrackingReportContainer">' + html + '</div>');
+        var $modal = $("#trackingReportModal");
+
+        $modal.css("z-index", 1085);
+
+        if ($.fn.datepicker) {
+            var startDateStr = $modal.find("#Report_CompletedDate").data("start-date") || "";
+            var dpOptions = {
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'vi'
+            };
+            if (startDateStr) {
+                dpOptions.startDate = startDateStr;
+            }
+            $modal.find("#Report_CompletedDate").datepicker(dpOptions);
+        }
+
+        if (typeof CKEDITOR !== "undefined" && $modal.find("#Report_ResultNote").length > 0) {
+            if (CKEDITOR.instances["Report_ResultNote"]) {
+                try { CKEDITOR.instances["Report_ResultNote"].destroy(true); } catch (e) { }
+            }
+            CKEDITOR.replace("Report_ResultNote", {
+                height: 130,
+                toolbar: [
+                    { name: "basicstyles", items: ["Bold", "Italic", "Underline", "Strike"] },
+                    { name: "paragraph", items: ["NumberedList", "BulletedList", "-", "Outdent", "Indent"] },
+                    { name: "links", items: ["Link", "Unlink"] }
+                ]
+            });
+        }
+
+        $modal.on("show.bs.modal", function () {
+            $(this).css("z-index", 1085);
+            setTimeout(function () {
+                $('.modal-backdrop:last').addClass('tracking-report-backdrop').css('z-index', 1080);
+            }, 0);
+        });
+
+        $modal.on("hidden.bs.modal", function () {
+            if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances["Report_ResultNote"]) {
+                try { CKEDITOR.instances["Report_ResultNote"].destroy(true); } catch (e) { }
+            }
+            $("#modalTrackingReportContainer").remove();
+            if ($('.modal.show').length > 0) {
+                $("body").addClass("modal-open");
+            } else {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+            }
+        });
+
         $modal.modal("show");
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
+    });
+}
+
+function submitTrackingReport() {
+    var $form = $("#frmTrackingReport");
+    if ($form.length === 0) return;
+
+    var resultNote = "";
+    if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances["Report_ResultNote"]) {
+        CKEDITOR.instances["Report_ResultNote"].updateElement();
+        resultNote = (CKEDITOR.instances["Report_ResultNote"].getData() || "").trim();
+    } else {
+        resultNote = ($("#Report_ResultNote").val() || "").trim();
+    }
+
+    var strippedText = $("<div>").html(resultNote).text().trim();
+    if (!resultNote || !strippedText) {
+        $("#Report_ResultNote").addClass("is-invalid border-danger");
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances["Report_ResultNote"]) {
+            CKEDITOR.instances["Report_ResultNote"].focus();
+        } else {
+            $("#Report_ResultNote").focus();
+        }
+        toastr.warning("Vui lòng nhập nội dung báo cáo tiến độ thực hiện!");
+        return;
+    }
+    $("#Report_ResultNote").removeClass("is-invalid border-danger");
+
+    var statusVal = $("#Report_Status").val();
+    if (statusVal === "3") {
+        var compDateStr = ($("#Report_CompletedDate").val() || "").trim();
+        if (!compDateStr) {
+            $("#Report_CompletedDate").addClass("is-invalid border-danger").focus();
+            toastr.warning("Vui lòng chọn ngày hoàn thành khi chuyển trạng thái Hoàn thành!");
+            return;
+        }
+        $("#Report_CompletedDate").removeClass("is-invalid border-danger");
+
+        var startDateVal = $("#Report_StartDateVal").val();
+        if (startDateVal && compDateStr) {
+            var parts = compDateStr.split('/');
+            if (parts.length === 3) {
+                var compDate = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+                var sParts = startDateVal.split('-');
+                if (sParts.length === 3) {
+                    var startDate = new Date(parseInt(sParts[0], 10), parseInt(sParts[1], 10) - 1, parseInt(sParts[2], 10));
+                    if (compDate < startDate) {
+                        $("#Report_CompletedDate").addClass("is-invalid border-danger").focus();
+                        toastr.warning("Ngày hoàn thành (" + compDateStr + ") không được nhỏ hơn ngày bắt đầu!");
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    var $btn = $("#btnSaveTrackingReport");
+    var origHtml = $btn.html();
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+    var formData = new FormData($form[0]);
+    var salesId = $("#Report_DigitalSalesID").val();
+
+    $.ajax({
+        url: _detailUrls.saveTrackingReport,
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            $btn.prop("disabled", false).html(origHtml);
+            if (res.status) {
+                $("#trackingReportModal").modal("hide");
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                executeResponseMessage(res.message, "Lưu báo cáo tiến độ thành công!", true);
+                reloadTrackingSection(salesId);
+            } else {
+                executeResponseMessage(res.message, "Không thể lưu báo cáo tiến độ!", false);
+            }
+        },
+        error: function () {
+            $btn.prop("disabled", false).html(origHtml);
+            executeResponseMessage("Lỗi kết nối máy chủ khi lưu báo cáo!", "Lỗi kết nối!", false);
+        }
     });
 }
 
@@ -1663,6 +1896,7 @@ function submitChangeProcess() {
             $('body').removeClass('modal-open').css('padding-right', '');
             executeResponseMessage(res.message, "Cập nhật quy trình thành công!", true);
             reloadTrackingSection(salesId);
+            if (typeof reloadDiscussionsSection === "function") reloadDiscussionsSection(salesId);
         } else {
             executeResponseMessage(res.message, "Không thể cập nhật quy trình!", false);
         }
@@ -1739,8 +1973,30 @@ function initTodoModalControls() {
             todayHighlight: true,
             endDate: endDateOpt
         });
+        $modal.find("#Todo_CompletedDate").datepicker({
+            format: "dd/mm/yyyy",
+            autoclose: true,
+            todayHighlight: true
+        });
     }
 }
+
+window.onTodoStatusChange = function (select) {
+    var val = $(select).val();
+    if (val === "3") {
+        var now = new Date();
+        var d = ("0" + now.getDate()).slice(-2);
+        var m = ("0" + (now.getMonth() + 1)).slice(-2);
+        var y = now.getFullYear();
+        if (!$("#Todo_CompletedDate").val()) {
+            $("#Todo_CompletedDate").val(d + "/" + m + "/" + y);
+        }
+        $("#todoGroupCompletedDate").slideDown(200);
+    } else {
+        $("#Todo_CompletedDate").val("");
+        $("#todoGroupCompletedDate").slideUp(200);
+    }
+};
 
 function submitTodoItem() {
     var $form = $("#frmTodoItem");
@@ -1777,6 +2033,28 @@ function submitTodoItem() {
     }
     $("#todoDeadlineError").addClass("d-none");
     $("#Todo_Deadline").removeClass("is-invalid border-danger");
+
+    var todoStatusVal = $("#Todo_Status").val();
+    if (todoStatusVal === "3") {
+        var compDateStr = ($("#Todo_CompletedDate").val() || "").trim();
+        if (!compDateStr) {
+            $("#Todo_CompletedDate").addClass("is-invalid border-danger").focus();
+            toastr.warning("Vui lòng chọn ngày hoàn thành khi chuyển trạng thái Đã xong!");
+            return false;
+        }
+        $("#Todo_CompletedDate").removeClass("is-invalid border-danger");
+
+        var startDateStr = ($("#Todo_StartDate").val() || "").trim();
+        if (startDateStr && compDateStr) {
+            var cDate = parseVnDate(compDateStr);
+            var sDate = parseVnDate(startDateStr);
+            if (cDate && sDate && cDate.getTime() < sDate.getTime()) {
+                $("#Todo_CompletedDate").addClass("is-invalid border-danger").focus();
+                toastr.warning("Ngày hoàn thành (" + compDateStr + ") không được nhỏ hơn ngày bắt đầu (" + startDateStr + ")!");
+                return false;
+            }
+        }
+    }
 
     var $btn = $("#btnSaveTodoItem");
     var origHtml = $btn.html();
@@ -1858,64 +2136,6 @@ function actionUnlockTracking(trackingId, salesId) {
         }
     }).fail(function () {
         executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
-    });
-}
-
-function openTrackingReportModal(trackingId, salesId) {
-    salesId = getEffectiveSalesId(salesId);
-    if (!trackingId) return;
-    if (typeof _onWaiting === "function") _onWaiting();
-    $.get(_detailUrls.reportTrackingModal, { trackingId: trackingId, digitalSalesId: salesId })
-        .done(function (html) {
-            if (typeof _endWaiting === "function") _endWaiting();
-            $("#modalContainer").html(html);
-            $("#trackingReportModal").modal("show");
-        })
-        .fail(function () {
-            if (typeof _endWaiting === "function") _endWaiting();
-            executeResponseMessage("Không thể tải form báo cáo!", "Lỗi kết nối!", false);
-        });
-}
-
-function submitTrackingReport() {
-    var $form = $("#frmTrackingReport");
-    var note = ($("#Report_ResultNote").val() || "").trim();
-    if (!note) {
-        $("#Report_ResultNote").addClass("is-invalid border-danger").focus();
-        executeResponseMessage("Vui lòng nhập nội dung báo cáo kết quả!", "Thiếu thông tin", false);
-        return false;
-    }
-    $("#Report_ResultNote").removeClass("is-invalid border-danger");
-
-    var $btn = $("#btnSaveTrackingReport");
-    var origHtml = $btn.html();
-    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
-
-    var formData = new FormData($form[0]);
-    var salesId = $("#Report_DigitalSalesID").val();
-
-    $.ajax({
-        url: _detailUrls.saveTrackingReport,
-        type: "POST",
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function (res) {
-            $btn.prop("disabled", false).html(origHtml);
-            if (res.status) {
-                $("#trackingReportModal").modal("hide");
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open').css('padding-right', '');
-                executeResponseMessage(res.message, "Lưu báo cáo tiến độ thành công!", true);
-                reloadTrackingSection(salesId);
-            } else {
-                executeResponseMessage(res.message, "Không thể lưu báo cáo!", false);
-            }
-        },
-        error: function () {
-            $btn.prop("disabled", false).html(origHtml);
-            executeResponseMessage("Lỗi kết nối máy chủ!", "Lỗi kết nối máy chủ!", false);
-        }
     });
 }
 
@@ -2091,11 +2311,13 @@ function executeConfirmProgressImport() {
     });
 }
 
-function openImportTodoModal(salesId, processId) {
+function openImportTodoModal(salesId, processId, timelineId) {
     salesId = getEffectiveSalesId(salesId);
     if (!salesId || !processId) return;
     if (typeof _onWaiting === "function") _onWaiting();
-    $.get(_detailUrls.importTodoModal, { processId: processId, digitalSalesId: salesId })
+    var params = { processId: processId, digitalSalesId: salesId };
+    if (timelineId) params.timelineId = timelineId;
+    $.get(_detailUrls.importTodoModal, params)
         .done(function (html) {
             if (typeof _endWaiting === "function") _endWaiting();
             $("#modalContainer").html(html);
@@ -2122,11 +2344,16 @@ function readTodoImportExcel() {
     var $modal = $("#importTodoModal");
     var downloadLink = $modal.find("a[href*='processId']").attr("href");
     var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+    var timelineId = downloadLink ? getDetailUrlParam(downloadLink, "timelineId") : "";
+    if (!timelineId) {
+        timelineId = $("#importTodo_TimelineID").val() || "";
+    }
 
     var formData = new FormData();
     formData.append("importFile", fileInput.files[0]);
     formData.append("processId", procId);
     formData.append("digitalSalesId", _currentDigitalSalesId);
+    if (timelineId) formData.append("timelineId", timelineId);
 
     var $btn = $("#btnReadTodoExcel");
     $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang đọc file...');
@@ -2162,7 +2389,7 @@ function renderTodoImportPreview(data) {
 
     var html = "";
     if (rows.length === 0) {
-        html = '<tr><td colspan="11" class="text-center text-muted py-3">Không có dữ liệu</td></tr>';
+        html = '<tr><td colspan="12" class="text-center text-muted py-3">Không có dữ liệu</td></tr>';
     } else {
         $.each(rows, function (idx, item) {
             var isValid = item.IsValid;
@@ -2178,16 +2405,21 @@ function renderTodoImportPreview(data) {
                 statusBadge = '<span class="badge badge-success px-2 py-05 text-80 radius-1">Đã xong</span>';
             }
 
+            var wbsBadge = item.WbsIndex ? '<span class="badge bgc-secondary-l3 text-secondary-d3 font-bold border-1">' + item.WbsIndex + '</span>' : '—';
+            var levelIndent = item.Level === 5 ? ' style="padding-left: 20px;"' : (item.Level > 5 ? ' style="padding-left: 32px;"' : '');
+            var levelBranch = item.Level === 5 ? '<span class="text-secondary-m1 mr-1">└─</span> ' : (item.Level > 5 ? '<span class="text-secondary-m1 mr-1">└─ └─</span> ' : '');
+
             html += '<tr class="' + trClass + '">' +
                 '<td class="text-center">' + item.RowIndex + '</td>' +
                 '<td class="text-center font-bold text-primary">' + (item.TrackingCode || "—") + '</td>' +
+                '<td class="text-center font-bold">' + wbsBadge + '</td>' +
                 '<td>' + (item.ParentTaskName || '<span class="text-danger font-italic">Không tìm thấy</span>') + '</td>' +
-                '<td class="font-bold">' + (item.TaskName || "") + '</td>' +
+                '<td class="font-bold"' + levelIndent + '>' + levelBranch + (item.TaskName || "") + '</td>' +
                 '<td>' + (item.AssignedUserName || "—") + '</td>' +
                 '<td class="text-center">' + statusBadge + '</td>' +
                 '<td class="text-center">' + (item.StartDateStr || "") + '</td>' +
-                '<td class="text-center font-bold">' + (item.DurationDays ? item.DurationDays + ' ngày' : "—") + '</td>' +
                 '<td class="text-center font-bold">' + (item.DeadlineStr || "") + '</td>' +
+                '<td class="text-center font-bold">' + (item.DurationDays ? item.DurationDays + ' ngày' : "—") + '</td>' +
                 '<td>' + (item.Note || "") + '</td>' +
                 '<td>' + errBadge + '</td>' +
                 '</tr>';
@@ -2198,7 +2430,7 @@ function renderTodoImportPreview(data) {
 
     if (data.validCount > 0) {
         $("#btnConfirmTodoImport").removeClass("d-none").html('<i class="fa fa-check mr-1"></i> Xác nhận Import (' + data.validCount + ' việc hợp lệ)');
-        $("#lblTodoFooterNote").html('Sẵn sàng import <strong>' + data.validCount + '</strong> công việc con hợp lệ vào tiến trình.');
+        $("#lblTodoFooterNote").html('Sẵn sàng import <strong>' + data.validCount + '</strong> công việc hợp lệ vào tiến trình.');
     } else {
         $("#btnConfirmTodoImport").addClass("d-none");
         $("#lblTodoFooterNote").html('<span class="text-danger font-bold">Tệp không có công việc nào hợp lệ để import. Vui lòng kiểm tra lại cột lỗi!</span>');
@@ -2231,6 +2463,10 @@ function executeConfirmTodoImport() {
 
     var downloadLink = $("#importTodoModal").find("a[href*='processId']").attr("href");
     var procId = downloadLink ? getDetailUrlParam(downloadLink, "processId") : "0";
+    var timelineId = downloadLink ? getDetailUrlParam(downloadLink, "timelineId") : "";
+    if (!timelineId) {
+        timelineId = $("#importTodo_TimelineID").val() || "";
+    }
 
     $.ajax({
         url: _detailUrls.confirmImportTodo,
@@ -2238,6 +2474,7 @@ function executeConfirmTodoImport() {
         data: {
             processId: parseInt(procId),
             digitalSalesId: _currentDigitalSalesId,
+            timelineId: timelineId ? parseInt(timelineId) : null,
             validDataJson: JSON.stringify(validRows)
         },
         success: function (res) {
@@ -2386,6 +2623,108 @@ function previewImageDirect(src, title) {
     });
 
     $img.attr('src', viewUrl);
+    $modal.modal('show');
+}
+
+function previewPdfDirect(src, title) {
+    var $modal = $('#modalPdfPreview');
+    if ($modal.length === 0) {
+        var modalHtml = '<div class="modal fade" id="modalPdfPreview" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1075;">' +
+            '<div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width: 95vw; height: 92vh; margin: 4vh auto;">' +
+            '<div class="modal-content border-0 shadow-lg radius-2 overflow-hidden bg-dark" style="height: 100%; display: flex; flex-direction: column;">' +
+            '<!-- MODAL HEADER -->' +
+            '<div class="modal-header bgc-dark text-white py-2 px-3 border-b-1 brc-grey-d1 d-flex align-items-center justify-content-between flex-shrink-0">' +
+            '<div class="d-flex align-items-center min-w-0 mr-2">' +
+            '<i class="fa fa-file-pdf text-danger fa-lg mr-2"></i>' +
+            '<h6 class="modal-title font-bold text-white mb-0 text-truncate" id="pdfPreviewTitle">Xem trước tài liệu PDF</h6>' +
+            '</div>' +
+            '<div class="d-flex align-items-center flex-shrink-0" style="gap: 6px;">' +
+            '<a id="btnPdfOpenNewTab" href="#" target="_blank" class="btn btn-xs btn-white btn-h-light-info text-info-d1 border-1 brc-grey-m2 radius-1 px-2 py-1 font-bold" title="Mở trong tab mới">' +
+            '<i class="fa fa-external-link-alt mr-1"></i> Mở tab mới' +
+            '</a>' +
+            '<a id="btnPdfDownload" href="#" class="btn btn-xs btn-primary radius-1 px-2 py-1 font-bold" title="Tải xuống tệp PDF">' +
+            '<i class="fa fa-download mr-1"></i> Tải về' +
+            '</a>' +
+            '<button type="button" class="close text-white opacity-75 btn-h-opacity-1 ml-2" data-dismiss="modal" aria-label="Close">' +
+            '<span aria-hidden="true">&times;</span>' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '<!-- MODAL BODY -->' +
+            '<div class="modal-body p-0 position-relative" style="flex: 1 1 auto; background-color: #525659; overflow: hidden; display: flex; flex-direction: column;">' +
+            '<div id="pdfPreviewLoading" class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background: rgba(30, 30, 30, 0.75); z-index: 10;">' +
+            '<i class="fa fa-spinner fa-spin fa-3x text-white mb-2"></i>' +
+            '<div class="text-white font-bold text-95">Đang tải tài liệu PDF...</div>' +
+            '</div>' +
+            '<div id="pdfPreviewError" class="text-center py-5 px-3 position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="display: none; background-color: #2c3034; z-index: 10;">' +
+            '<div class="w-6 h-6 radius-round bgc-danger-l3 text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; border-radius: 50%;">' +
+            '<i class="fa fa-exclamation-triangle fa-2x"></i>' +
+            '</div>' +
+            '<h6 class="text-white font-weight-bold mb-2">Không thể hiển thị tài liệu PDF trực tiếp</h6>' +
+            '<p class="text-white-tp3 text-85 mb-3" style="max-width: 480px;">Trình duyệt không hỗ trợ trình xem PDF nhúng hoặc tệp không tồn tại trên máy chủ.</p>' +
+            '<div class="d-flex justify-content-center" style="gap: 8px;">' +
+            '<a id="btnPdfErrorDownload" href="#" class="btn btn-sm btn-primary radius-1 px-3 font-bold"><i class="fa fa-download mr-1"></i> Tải về tệp PDF</a>' +
+            '<button type="button" class="btn btn-sm btn-outline-light radius-1 px-3" data-dismiss="modal">Đóng</button>' +
+            '</div>' +
+            '</div>' +
+            '<iframe id="pdfPreviewIframe" src="" style="width: 100%; height: 100%; border: 0; flex: 1 1 auto;" allowfullscreen></iframe>' +
+            '</div>' +
+            '<!-- MODAL FOOTER -->' +
+            '<div class="modal-footer py-15 px-3 bgc-dark border-t-1 brc-grey-d1 d-flex justify-content-between flex-shrink-0">' +
+            '<span class="text-white-tp2 text-85 font-italic text-truncate mr-2" id="pdfPreviewFileName" style="max-width: 60%;"></span>' +
+            '<div>' +
+            '<button type="button" class="btn btn-sm btn-secondary radius-1 px-3" data-dismiss="modal">Đóng</button>' +
+            '</div>' +
+            '</div>' +
+            '</div></div></div>';
+        $('body').append(modalHtml);
+        $modal = $('#modalPdfPreview');
+
+        $modal.on('hidden.bs.modal', function () {
+            $modal.find('#pdfPreviewIframe').attr('src', '');
+            if ($('.modal.show').length > 0) {
+                $('body').addClass('modal-open');
+            } else {
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+            }
+        });
+    }
+
+    var cleanSrc = (src || '').trim();
+    var viewUrl = cleanSrc;
+    var downloadUrl = cleanSrc;
+
+    if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
+        viewUrl = '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    }
+    if (cleanSrc.indexOf('/Cate/DigitalSales/DownloadAttachment') !== 0) {
+        downloadUrl = '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    }
+
+    var displayTitle = title || 'Tài liệu PDF';
+    $modal.find('#pdfPreviewTitle').text(displayTitle);
+    $modal.find('#pdfPreviewFileName').text(displayTitle);
+    $modal.find('#btnPdfOpenNewTab').attr('href', viewUrl);
+    $modal.find('#btnPdfDownload').attr('href', downloadUrl);
+    $modal.find('#btnPdfErrorDownload').attr('href', downloadUrl);
+
+    $modal.find('#pdfPreviewLoading').show();
+    $modal.find('#pdfPreviewError').hide();
+
+    var $iframe = $modal.find('#pdfPreviewIframe');
+    $iframe.off('load.pdf error.pdf');
+
+    $iframe.on('load.pdf', function () {
+        $modal.find('#pdfPreviewLoading').fadeOut(150);
+    });
+
+    $iframe.on('error.pdf', function () {
+        $modal.find('#pdfPreviewLoading').hide();
+        $modal.find('#pdfPreviewError').fadeIn(150);
+    });
+
+    $iframe.attr('src', viewUrl);
     $modal.modal('show');
 }
 
@@ -2552,6 +2891,14 @@ function switchToTrackingTab(trackingId) {
             var $target = $('tr[data-node*="_task_' + trackingId + '"], #chk_task_' + trackingId + ', #chk_todo_' + trackingId).closest('tr');
             if ($target.length > 0) {
                 // Mở rộng cây cha nếu đang ẩn
+                var superParentNode = $target.attr('data-superparent');
+                if (superParentNode) {
+                    $('tr[data-node="' + superParentNode + '"]').each(function () {
+                        if ($(this).attr('data-expanded') === 'false') {
+                            toggleTreeNode(superParentNode);
+                        }
+                    });
+                }
                 var parentNode = $target.attr('data-parent');
                 if (parentNode) {
                     $('tr[data-node="' + parentNode + '"]').each(function () {

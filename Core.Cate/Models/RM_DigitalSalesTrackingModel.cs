@@ -98,6 +98,9 @@ namespace Core.Cate.Models
         public string DeadlineStr { get; set; }
         public DateTime? Deadline { get; set; }
         public string Note { get; set; }
+        public string WbsIndex { get; set; }
+        public string ParentWbsIndex { get; set; }
+        public int Level { get; set; } = 4;
         public string ErrorMessage { get; set; }
         public bool IsValid => string.IsNullOrEmpty(ErrorMessage);
     }

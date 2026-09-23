@@ -15,7 +15,14 @@
             <div class="modal-header bgc-orange-d1 text-white px-3 py-25">
                 <h5 class="modal-title font-bold text-110" id="todoModalTitle">
                     <i class="fa @(isEdit ? "fa-edit" : "fa-plus-circle") mr-1"></i>
-                    @(isEdit ? AppProcessor.Messagor.GetMessage("DigitalSalesTracking_EditTodo_Title") : AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AddTodo_Title"))
+                    @if (isEdit)
+                    {
+                        @(Model.ParentID.HasValue && Model.ParentID.Value > 0 && parent != null && parent.ParentID.HasValue && parent.ParentID.Value > 0 ? "Chỉnh sửa công việc con" : AppProcessor.Messagor.GetMessage("DigitalSalesTracking_EditTodo_Title"))
+                    }
+                    else
+                    {
+                        @(parent != null && parent.ParentID.HasValue && parent.ParentID.Value > 0 ? "Thêm công việc con (Subtask)" : AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AddTodo_Title"))
+                    }
                 </h5>
                 <button type="button" class="close text-white opacity-2 text-130" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -35,13 +42,15 @@
                 <div class="modal-body p-3 p-md-4">
                     @if (parent != null)
                     {
-                        <!-- THÔNG TIN TIẾN TRÌNH CHA & RÀNG BUỘC THỜI HẠN -->
+                        bool isSubtaskParent = parent.ParentID.HasValue && parent.ParentID.Value > 0;
+                        <!-- THÔNG TIN TIẾN TRÌNH / CÔNG VIỆC CHA & RÀNG BUỘC THỜI HẠN -->
                         <div class="card bgc-warning-l4 border-1 brc-warning-m3 mb-3 radius-1 p-25 shadow-none">
                             <div class="d-flex align-items-start">
                                 <div class="text-orange-d2 mr-2 text-130"><i class="fa fa-info-circle"></i></div>
                                 <div class="flex-grow-1">
                                     <div class="text-90 text-secondary-d2">
-                                        Thuộc tiến trình: <strong class="text-dark">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(parent.TaskName)</strong>
+                                        @(isSubtaskParent ? "Thuộc công việc cha: " : "Thuộc tiến trình: ")
+                                        <strong class="text-dark">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(parent.TaskName)</strong>
                                         @if (!string.IsNullOrEmpty(parent.TrackingCode))
                                         {
                                             <span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-05 ml-1 text-75">@parent.TrackingCode</span>
@@ -95,12 +104,31 @@
                                 <label class="font-bolder text-secondary-d2 mb-1" for="Todo_Status">
                                     @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Status_Label")
                                 </label>
-                                <select name="Status" id="Todo_Status" class="form-control select2 radius-1">
+                                <select name="Status" id="Todo_Status" class="form-control select2 radius-1" onchange="onTodoStatusChange(this);">
                                     <option value="1" @(Model.Status == 1 ? "selected" : "")>1. Chưa thực hiện</option>
                                     <option value="2" @(Model.Status == 2 ? "selected" : "")>2. Đang thực hiện</option>
                                     <option value="3" @(Model.Status == 3 ? "selected" : "")>3. Đã xong</option>
                                 </select>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- NGÀY HOÀN THÀNH: Hiển thị khi trạng thái = Đã xong (3) (US-02 AC 2.3) -->
+                    <div class="row" id="todoGroupCompletedDate" style="@(Model.Status == 3 ? "" : "display:none;")">
+                        <div class="col-md-6 form-group mb-3">
+                            <label class="font-bolder text-secondary-d2 mb-1" for="Todo_CompletedDate">
+                                Ngày hoàn thành <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control date-picker radius-1" id="Todo_CompletedDate" name="CompletedDate"
+                                       value="@(Model.CompletedDate.HasValue ? Model.CompletedDate.Value.ToString("dd/MM/yyyy") : (Model.Status == 3 ? DateTime.Today.ToString("dd/MM/yyyy") : ""))"
+                                       data-date-format="dd/mm/yyyy" placeholder="dd/mm/yyyy" autocomplete="off" />
+                                <div class="input-group-append">
+                                    <span class="input-group-text bg-white"><i class="fa fa-calendar-check text-success"></i></span>
+                                </div>
+                            </div>
+                            <small class="text-muted text-75">Ngày hoàn thành phải lớn hơn hoặc bằng ngày bắt đầu.</small>
+                            <div class="text-danger text-85 font-weight-bold d-none mt-1" id="Todo_CompletedDate_Error"></div>
                         </div>
                     </div>
 
@@ -155,12 +183,12 @@
                         </div>
                     </div>
 
-                    <!-- GHI CHÚ / KẾT QUẢ -->
+                    <!-- NỘI DUNG CÔNG VIỆC -->
                     <div class="form-group mb-3">
                         <label class="font-bolder text-secondary-d2 mb-1" for="Todo_ResultNote">
-                            @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_ResultNote_Label")
+                            Nội dung công việc
                         </label>
-                        @Html.TextAreaFor(m => m.ResultNote, new { @class = "form-control radius-1", id = "Todo_ResultNote", rows = "3", placeholder = "Ghi chú tiến độ hoặc nội dung công việc..." })
+                        @Html.TextAreaFor(m => m.ResultNote, new { @class = "form-control radius-1", id = "Todo_ResultNote", rows = "3", placeholder = "Nhập nội dung / mô tả chi tiết công việc..." })
                     </div>
 
                     <!-- FILE ĐÍNH KÈM -->

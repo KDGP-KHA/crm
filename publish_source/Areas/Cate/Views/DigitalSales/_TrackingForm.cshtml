@@ -135,26 +135,27 @@
     </div>
 </div>
 
-<!-- 9. Ngày hoàn thành: Hiển thị khi trạng thái = Hoàn thành (3) -->
+<!-- 9. Ngày hoàn thành: Hiển thị khi trạng thái = Hoàn thành (3) (US-02 AC 2.3) -->
 <div class="row" id="groupCompletedDate" style="@(Model.Status == 3 ? "" : "display:none;")">
     <div class="col-md-6 form-group">
-        <label class="text-85 text-600 mb-1 d-block">Ngày hoàn thành</label>
+        <label class="text-85 text-600 mb-1 d-block">Ngày hoàn thành <span class="text-danger">*</span></label>
         <div class="input-group">
             <div class="input-group-prepend">
-                <span class="input-group-text bgc-success-l3 text-success"><i class="fa fa-check-circle"></i></span>
+                <span class="input-group-text bgc-success-l3 text-success"><i class="fa fa-calendar-check"></i></span>
             </div>
-            <input type="text" class="form-control readonly-field" id="Tracking_CompletedDate" name="CompletedDate" value="@(Model.CompletedDate.HasValue ? Model.CompletedDate.Value.ToString("dd/MM/yyyy") : (Model.Status == 3 ? DateTime.Now.ToString("dd/MM/yyyy") : ""))" readonly placeholder="Ngày hoàn thành" />
+            <input type="text" class="form-control date-picker" id="Tracking_CompletedDate" name="CompletedDate" value="@(Model.CompletedDate.HasValue ? Model.CompletedDate.Value.ToString("dd/MM/yyyy") : (Model.Status == 3 ? DateTime.Now.ToString("dd/MM/yyyy") : ""))" placeholder="dd/MM/yyyy" autocomplete="off" />
         </div>
-        <small class="text-muted text-75">Tự động ghi nhận theo thời điểm cập nhật trạng thái Hoàn thành.</small>
+        <small class="text-muted text-75">Ngày hoàn thành phải lớn hơn hoặc bằng ngày bắt đầu.</small>
+        <div class="text-danger text-85 font-weight-bold d-none mt-1" id="Tracking_CompletedDate_Error"></div>
     </div>
 </div>
 
-<!-- 10. Nội dung thực hiện * (CKEditor) -->
+<!-- 10. Nội dung / Mô tả tiến trình (CKEditor) -->
 <div class="form-group">
     <label class="text-85 text-600 mb-1 d-block">
-        Nội dung thực hiện <span class="text-danger">*</span>
+        Nội dung / Mô tả tiến trình
     </label>
-    @Html.TextAreaFor(m => m.ResultNote, 4, 50, new { @class = "form-control ckeditor", id = "Tracking_ResultNote", placeholder = "Nhập nội dung thực hiện tiến trình..." })
+    @Html.TextAreaFor(m => m.ResultNote, 4, 50, new { @class = "form-control ckeditor", id = "Tracking_ResultNote", placeholder = "Nhập nội dung / mô tả chi tiết tiến trình..." })
     @Html.ValidationMessageFor(m => m.ResultNote, "", new { @class = "text-danger text-85 font-weight-bold d-block mt-1" })
 </div>
 
@@ -171,9 +172,25 @@
                 {
                     var trimmed = f.Trim();
                     var fname = System.IO.Path.GetFileName(trimmed);
+                    var fext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
+                    bool isImg = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(fext);
+                    bool isPdf = fext == ".pdf";
+
                     <span class="badge badge-light-primary border-1 brc-primary-m3 text-primary-d2 px-2 py-1 radius-1 d-inline-flex align-items-center">
-                        <i class="fa fa-paperclip mr-1"></i>
+                        <i class="fa @(isPdf ? "fa-file-pdf text-danger" : (isImg ? "fa-file-image text-info" : "fa-paperclip text-secondary")) mr-1"></i>
                         <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmed })" target="_blank" class="text-primary-d2 mr-1">@fname</a>
+                        @if (isImg)
+                        {
+                            <a href="javascript:void(0);" onclick="previewImageDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fname)');" class="text-info ml-1" title="Xem ảnh">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                        }
+                        else if (isPdf)
+                        {
+                            <a href="javascript:void(0);" onclick="previewPdfDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fname)');" class="text-danger ml-1" title="Xem trước PDF">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                        }
                     </span>
                 }
             </div>
