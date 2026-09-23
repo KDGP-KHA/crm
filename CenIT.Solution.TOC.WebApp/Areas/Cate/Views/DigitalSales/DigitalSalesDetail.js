@@ -2591,7 +2591,9 @@ function previewImageDirect(src, title) {
     var viewUrl = cleanSrc;
     var downloadUrl = cleanSrc;
 
-    if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
+    if (cleanSrc.indexOf('/Contents/') === 0) {
+        viewUrl = cleanSrc;
+    } else if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
         viewUrl = '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
     }
     if (cleanSrc.indexOf('/Cate/DigitalSales/DownloadAttachment') !== 0) {
@@ -2695,9 +2697,12 @@ function previewPdfDirect(src, title) {
     var viewUrl = cleanSrc;
     var downloadUrl = cleanSrc;
 
-    if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
+    if (cleanSrc.indexOf('/Contents/') === 0) {
+        viewUrl = cleanSrc;
+    } else if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
         viewUrl = '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
     }
+
     if (cleanSrc.indexOf('/Cate/DigitalSales/DownloadAttachment') !== 0) {
         downloadUrl = '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(cleanSrc);
     }
@@ -2713,18 +2718,23 @@ function previewPdfDirect(src, title) {
     $modal.find('#pdfPreviewError').hide();
 
     var $iframe = $modal.find('#pdfPreviewIframe');
-    $iframe.off('load.pdf error.pdf');
+    $iframe.off('load.pdf');
+
+    var hideLoadingTimeout = setTimeout(function () {
+        $modal.find('#pdfPreviewLoading').fadeOut(150);
+    }, 2000);
 
     $iframe.on('load.pdf', function () {
+        clearTimeout(hideLoadingTimeout);
         $modal.find('#pdfPreviewLoading').fadeOut(150);
     });
 
-    $iframe.on('error.pdf', function () {
-        $modal.find('#pdfPreviewLoading').hide();
-        $modal.find('#pdfPreviewError').fadeIn(150);
-    });
-
-    $iframe.attr('src', viewUrl);
+    // Thêm #toolbar=1 để trình duyệt hiển thị thanh công cụ PDF chuẩn
+    var embedUrl = viewUrl;
+    if (embedUrl.indexOf('#') === -1) {
+        embedUrl += '#toolbar=1&navpanes=0';
+    }
+    $iframe.attr('src', embedUrl);
     $modal.modal('show');
 }
 
