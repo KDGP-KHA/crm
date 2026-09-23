@@ -205,7 +205,13 @@
                                                         <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
                                                             @if (ext == ".pdf")
                                                             {
-                                                                <button type="button" class="btn btn-xs btn-outline-danger radius-1 timeline-file-btn-download" onclick="previewPdfDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trước PDF">
+                                                                <button type="button" class="btn btn-xs btn-outline-danger radius-1 timeline-file-btn-download" onclick="previewPdfDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trước PDF (Mở tab mới)">
+                                                                    <i class="fa fa-eye"></i>
+                                                                </button>
+                                                            }
+                                                            else if (new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(ext))
+                                                            {
+                                                                <button type="button" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download" onclick="previewOfficeDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trực tuyến Office Online (Mở tab mới)">
                                                                     <i class="fa fa-eye"></i>
                                                                 </button>
                                                             }
@@ -258,7 +264,13 @@
                                                             <div class="d-flex align-items-center flex-shrink-0" style="gap: 4px;">
                                                                 @if (ext == ".pdf")
                                                                 {
-                                                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 timeline-file-btn-download" onclick="previewPdfDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trước PDF">
+                                                                    <button type="button" class="btn btn-xs btn-outline-danger radius-1 timeline-file-btn-download" onclick="previewPdfDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trước PDF (Mở tab mới)">
+                                                                        <i class="fa fa-eye"></i>
+                                                                    </button>
+                                                                }
+                                                                else if (new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(ext))
+                                                                {
+                                                                    <button type="button" class="btn btn-xs btn-outline-primary radius-1 timeline-file-btn-download" onclick="previewOfficeDirect('@Url.Content(f.FilePath)', '@HttpUtility.JavaScriptStringEncode(f.FileName)');" title="Xem trực tuyến Office Online (Mở tab mới)">
                                                                         <i class="fa fa-eye"></i>
                                                                     </button>
                                                                 }

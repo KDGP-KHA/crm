@@ -2628,114 +2628,44 @@ function previewImageDirect(src, title) {
     $modal.modal('show');
 }
 
-function previewPdfDirect(src, title) {
-    var $modal = $('#modalPdfPreview');
-    if ($modal.length === 0) {
-        var modalHtml = '<div class="modal fade" id="modalPdfPreview" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1075;">' +
-            '<div class="modal-dialog modal-xl modal-dialog-centered" role="document" style="max-width: 95vw; height: 92vh; margin: 4vh auto;">' +
-            '<div class="modal-content border-0 shadow-lg radius-2 overflow-hidden bg-dark" style="height: 100%; display: flex; flex-direction: column;">' +
-            '<!-- MODAL HEADER -->' +
-            '<div class="modal-header bgc-dark text-white py-2 px-3 border-b-1 brc-grey-d1 d-flex align-items-center justify-content-between flex-shrink-0">' +
-            '<div class="d-flex align-items-center min-w-0 mr-2">' +
-            '<i class="fa fa-file-pdf text-danger fa-lg mr-2"></i>' +
-            '<h6 class="modal-title font-bold text-white mb-0 text-truncate" id="pdfPreviewTitle">Xem trước tài liệu PDF</h6>' +
-            '</div>' +
-            '<div class="d-flex align-items-center flex-shrink-0" style="gap: 6px;">' +
-            '<a id="btnPdfOpenNewTab" href="#" target="_blank" class="btn btn-xs btn-white btn-h-light-info text-info-d1 border-1 brc-grey-m2 radius-1 px-2 py-1 font-bold" title="Mở trong tab mới">' +
-            '<i class="fa fa-external-link-alt mr-1"></i> Mở tab mới' +
-            '</a>' +
-            '<a id="btnPdfDownload" href="#" class="btn btn-xs btn-primary radius-1 px-2 py-1 font-bold" title="Tải xuống tệp PDF">' +
-            '<i class="fa fa-download mr-1"></i> Tải về' +
-            '</a>' +
-            '<button type="button" class="close text-white opacity-75 btn-h-opacity-1 ml-2" data-dismiss="modal" aria-label="Close">' +
-            '<span aria-hidden="true">&times;</span>' +
-            '</button>' +
-            '</div>' +
-            '</div>' +
-            '<!-- MODAL BODY -->' +
-            '<div class="modal-body p-0 position-relative" style="flex: 1 1 auto; background-color: #525659; overflow: hidden; display: flex; flex-direction: column;">' +
-            '<div id="pdfPreviewLoading" class="position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background: rgba(30, 30, 30, 0.75); z-index: 10;">' +
-            '<i class="fa fa-spinner fa-spin fa-3x text-white mb-2"></i>' +
-            '<div class="text-white font-bold text-95">Đang tải tài liệu PDF...</div>' +
-            '</div>' +
-            '<div id="pdfPreviewError" class="text-center py-5 px-3 position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="display: none; background-color: #2c3034; z-index: 10;">' +
-            '<div class="w-6 h-6 radius-round bgc-danger-l3 text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; border-radius: 50%;">' +
-            '<i class="fa fa-exclamation-triangle fa-2x"></i>' +
-            '</div>' +
-            '<h6 class="text-white font-weight-bold mb-2">Không thể hiển thị tài liệu PDF trực tiếp</h6>' +
-            '<p class="text-white-tp3 text-85 mb-3" style="max-width: 480px;">Trình duyệt không hỗ trợ trình xem PDF nhúng hoặc tệp không tồn tại trên máy chủ.</p>' +
-            '<div class="d-flex justify-content-center" style="gap: 8px;">' +
-            '<a id="btnPdfErrorDownload" href="#" class="btn btn-sm btn-primary radius-1 px-3 font-bold"><i class="fa fa-download mr-1"></i> Tải về tệp PDF</a>' +
-            '<button type="button" class="btn btn-sm btn-outline-light radius-1 px-3" data-dismiss="modal">Đóng</button>' +
-            '</div>' +
-            '</div>' +
-            '<iframe id="pdfPreviewIframe" src="" style="width: 100%; height: 100%; border: 0; flex: 1 1 auto;" allowfullscreen></iframe>' +
-            '</div>' +
-            '<!-- MODAL FOOTER -->' +
-            '<div class="modal-footer py-15 px-3 bgc-dark border-t-1 brc-grey-d1 d-flex justify-content-between flex-shrink-0">' +
-            '<span class="text-white-tp2 text-85 font-italic text-truncate mr-2" id="pdfPreviewFileName" style="max-width: 60%;"></span>' +
-            '<div>' +
-            '<button type="button" class="btn btn-sm btn-secondary radius-1 px-3" data-dismiss="modal">Đóng</button>' +
-            '</div>' +
-            '</div>' +
-            '</div></div></div>';
-        $('body').append(modalHtml);
-        $modal = $('#modalPdfPreview');
-
-        $modal.on('hidden.bs.modal', function () {
-            $modal.find('#pdfPreviewIframe').attr('src', '');
-            if ($('.modal.show').length > 0) {
-                $('body').addClass('modal-open');
-            } else {
-                $('.modal-backdrop').remove();
-                $('body').removeClass('modal-open').css('padding-right', '');
-            }
-        });
-    }
-
-    var cleanSrc = (src || '').trim();
-    var viewUrl = cleanSrc;
-    var downloadUrl = cleanSrc;
-
+function getDirectAttachmentViewUrl(src) {
+    var cleanSrc = (src || '').trim().replace(/^~/, '');
+    if (!cleanSrc) return '';
+    if (/^https?:\/\//i.test(cleanSrc)) return cleanSrc;
     if (cleanSrc.indexOf('/Contents/') === 0) {
-        viewUrl = cleanSrc;
-    } else if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') !== 0) {
-        viewUrl = '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
+        return cleanSrc;
+    }
+    if (cleanSrc.indexOf('/Cate/DigitalSales/ViewAttachment') === 0) {
+        return cleanSrc;
+    }
+    return '/Cate/DigitalSales/ViewAttachment?filePath=' + encodeURIComponent(cleanSrc);
+}
+
+function previewPdfDirect(src, title) {
+    var viewUrl = getDirectAttachmentViewUrl(src);
+    if (!viewUrl) return;
+    window.open(viewUrl, '_blank');
+}
+
+function previewOfficeDirect(src, title) {
+    var viewUrl = getDirectAttachmentViewUrl(src);
+    if (!viewUrl) return;
+
+    var fullUrl = viewUrl;
+    if (!/^https?:\/\//i.test(fullUrl)) {
+        fullUrl = window.location.origin + (fullUrl.indexOf('/') === 0 ? '' : '/') + fullUrl;
     }
 
-    if (cleanSrc.indexOf('/Cate/DigitalSales/DownloadAttachment') !== 0) {
-        downloadUrl = '/Cate/DigitalSales/DownloadAttachment?filePath=' + encodeURIComponent(cleanSrc);
+    var officeUrl = 'https://view.officeapps.live.com/op/view.aspx?src=' + encodeURIComponent(fullUrl);
+
+    var host = (window.location.hostname || '').toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)) {
+        if (typeof toastr !== 'undefined') {
+            toastr.info('Đang mở xem tài liệu qua Microsoft Office Online. Lưu ý: Dịch vụ cần tên miền công khai Internet để đọc nội dung tệp.', 'Xem trực tuyến Office', { timeOut: 5000 });
+        }
     }
 
-    var displayTitle = title || 'Tài liệu PDF';
-    $modal.find('#pdfPreviewTitle').text(displayTitle);
-    $modal.find('#pdfPreviewFileName').text(displayTitle);
-    $modal.find('#btnPdfOpenNewTab').attr('href', viewUrl);
-    $modal.find('#btnPdfDownload').attr('href', downloadUrl);
-    $modal.find('#btnPdfErrorDownload').attr('href', downloadUrl);
-
-    $modal.find('#pdfPreviewLoading').show();
-    $modal.find('#pdfPreviewError').hide();
-
-    var $iframe = $modal.find('#pdfPreviewIframe');
-    $iframe.off('load.pdf');
-
-    var hideLoadingTimeout = setTimeout(function () {
-        $modal.find('#pdfPreviewLoading').fadeOut(150);
-    }, 2000);
-
-    $iframe.on('load.pdf', function () {
-        clearTimeout(hideLoadingTimeout);
-        $modal.find('#pdfPreviewLoading').fadeOut(150);
-    });
-
-    // Thêm #toolbar=1 để trình duyệt hiển thị thanh công cụ PDF chuẩn
-    var embedUrl = viewUrl;
-    if (embedUrl.indexOf('#') === -1) {
-        embedUrl += '#toolbar=1&navpanes=0';
-    }
-    $iframe.attr('src', embedUrl);
-    $modal.modal('show');
+    window.open(officeUrl, '_blank');
 }
 
 function openUploadAttachmentModal(salesId) {

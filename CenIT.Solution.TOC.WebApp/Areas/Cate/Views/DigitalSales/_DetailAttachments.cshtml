@@ -227,6 +227,7 @@
             {
                 string ext = item.Extension;
                 bool isImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" }.Contains(ext);
+                bool isOffice = new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(ext);
                 var downloadUrl = Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = item.FilePath });
                 string cardSource = item.IsFromChecklist ? "checklist" : (item.SourceTaskName.StartsWith("Trạng thái:") ? "transition" : "direct");
 
@@ -243,7 +244,7 @@
                         }
                         else
                         {
-                            <div class="bgc-primary-l4 text-center d-flex align-items-center justify-content-center attach-thumb-box" @(ext == ".pdf" ? Html.Raw("style=\"cursor: pointer;\" onclick=\"previewPdfDirect('" + Url.Content(item.FilePath) + "', '" + HttpUtility.JavaScriptStringEncode(item.FileName) + "');\" title=\"Bấm để xem trước PDF\"") : Html.Raw(""))>
+                            <div class="bgc-primary-l4 text-center d-flex align-items-center justify-content-center attach-thumb-box" @(ext == ".pdf" ? Html.Raw("style=\"cursor: pointer;\" onclick=\"previewPdfDirect('" + Url.Content(item.FilePath) + "', '" + HttpUtility.JavaScriptStringEncode(item.FileName) + "');\" title=\"Bấm để xem trước PDF (mở tab mới)\"") : (isOffice ? Html.Raw("style=\"cursor: pointer;\" onclick=\"previewOfficeDirect('" + Url.Content(item.FilePath) + "', '" + HttpUtility.JavaScriptStringEncode(item.FileName) + "');\" title=\"Bấm để xem trực tuyến trên Office Online (mở tab mới)\"") : Html.Raw(""))) >
                                 @if (ext == ".pdf")
                                 {
                                     <i class="fa fa-file-pdf fa-2x text-danger"></i>
@@ -303,7 +304,13 @@
                                     }
                                     else if (ext == ".pdf")
                                     {
-                                        <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-1 py-0" onclick="previewPdfDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Xem trước PDF">
+                                        <button type="button" class="btn btn-xs btn-outline-danger radius-1 px-1 py-0" onclick="previewPdfDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Xem trước PDF (Mở tab mới)">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    }
+                                    else if (isOffice)
+                                    {
+                                        <button type="button" class="btn btn-xs btn-outline-primary radius-1 px-1 py-0" onclick="previewOfficeDirect('@Url.Content(item.FilePath)', '@HttpUtility.JavaScriptStringEncode(item.FileName)');" title="Xem trực tuyến Office Online (Mở tab mới)">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     }

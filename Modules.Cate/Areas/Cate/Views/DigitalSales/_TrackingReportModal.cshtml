@@ -87,9 +87,10 @@
                                         var ext = System.IO.Path.GetExtension(trimmed)?.ToLowerInvariant() ?? "";
                                         bool isImg = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }.Contains(ext);
                                         bool isPdf = ext == ".pdf";
+                                        bool isOffice = new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(ext);
 
                                         <span class="badge badge-light-primary border-1 brc-primary-m3 text-primary-d2 px-2 py-1 radius-1 d-inline-flex align-items-center">
-                                            <i class="fa @(isPdf ? "fa-file-pdf text-danger" : (isImg ? "fa-file-image text-info" : "fa-file text-secondary")) mr-1"></i>
+                                            <i class="fa @(isPdf ? "fa-file-pdf text-danger" : (isImg ? "fa-file-image text-info" : (isOffice ? (ext.Contains("xls") ? "fa-file-excel text-success" : "fa-file-word text-primary") : "fa-file text-secondary")))) mr-1"></i>
                                             <a href="@Url.Action("DownloadAttachment", "DigitalSales", new { area = "Cate", filePath = trimmed })" target="_blank" class="text-primary-d2 mr-1" title="Tải xuống tệp">
                                                 @fn
                                             </a>
@@ -101,7 +102,13 @@
                                             }
                                             else if (isPdf)
                                             {
-                                                <a href="javascript:void(0);" onclick="previewPdfDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fn)');" class="text-danger ml-1" title="Xem trước PDF">
+                                                <a href="javascript:void(0);" onclick="previewPdfDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fn)');" class="text-danger ml-1" title="Xem trước PDF (Mở tab mới)">
+                                                    <i class="fa fa-eye"></i>
+                                                </a>
+                                            }
+                                            else if (isOffice)
+                                            {
+                                                <a href="javascript:void(0);" onclick="previewOfficeDirect('@Url.Content(trimmed)', '@HttpUtility.JavaScriptStringEncode(fn)');" class="text-primary ml-1" title="Xem trực tuyến Office Online (Mở tab mới)">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
                                             }

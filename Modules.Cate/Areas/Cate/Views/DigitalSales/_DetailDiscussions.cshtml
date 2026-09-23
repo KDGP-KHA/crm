@@ -594,7 +594,13 @@
                                             }
                                             else if (fileExt == ".pdf")
                                             {
-                                                <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l1 text-danger radius-1 p-1 px-15" onclick="previewPdfDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trước PDF">
+                                                <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l1 text-danger radius-1 p-1 px-15" onclick="previewPdfDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trước PDF (Mở tab mới)">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            }
+                                            else if (new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(fileExt))
+                                            {
+                                                <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-primary radius-1 p-1 px-15" onclick="previewOfficeDirect('@Url.Content(file.FilePath)', '@HttpUtility.JavaScriptStringEncode(file.FileName)');" title="Xem trực tuyến Office (Word/Excel)">
                                                     <i class="fa fa-eye"></i>
                                                 </button>
                                             }
@@ -705,7 +711,13 @@
                                                 }
                                                 else if (singleExt == ".pdf")
                                                 {
-                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l1 text-danger radius-1 p-1 px-15" onclick="previewPdfDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước PDF">
+                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l1 text-danger radius-1 p-1 px-15" onclick="previewPdfDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trước PDF (Mở tab mới)">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                }
+                                                else if (new[] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx" }.Contains(singleExt))
+                                                {
+                                                    <button type="button" class="btn btn-xs btn-white btn-h-light-primary border-1 brc-grey-l1 text-primary radius-1 p-1 px-15" onclick="previewOfficeDirect('@Url.Content(singleFile)', '@HttpUtility.JavaScriptStringEncode(singleFileName)');" title="Xem trực tuyến Office (Word/Excel)">
                                                         <i class="fa fa-eye"></i>
                                                     </button>
                                                 }
