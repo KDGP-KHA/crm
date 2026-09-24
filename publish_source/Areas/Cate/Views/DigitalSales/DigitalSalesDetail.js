@@ -2008,6 +2008,15 @@ function submitTodoItem() {
     }
     $("#Todo_TaskName").removeClass("is-invalid border-danger");
 
+    // Validate số thứ tự (STT)
+    var sortOrder = parseInt($("#Todo_SortOrder").val()) || 0;
+    if (sortOrder < 1) {
+        $("#Todo_SortOrder").addClass("is-invalid border-danger").focus();
+        executeResponseMessage("Vui lòng nhập số thứ tự (STT >= 1)!", "Thiếu thông tin", false);
+        return false;
+    }
+    $("#Todo_SortOrder").removeClass("is-invalid border-danger");
+
     // Validate số ngày thực hiện
     var durationDays = parseInt($("#Todo_DurationDays").val()) || 0;
     if (durationDays < 1) {

@@ -3838,6 +3838,19 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Content("<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> Tiến trình đã hoàn thành, không thể thêm mới công việc con!</div>");
             }
 
+            int nextSortOrder = 1;
+            if (tasks != null && tasks.Count > 0)
+            {
+                var siblings = tasks.SelectMany(t => (t.TodoList ?? new List<RM_DigitalSalesTrackingModel>()).Concat(new[] { t }))
+                                    .Where(t => t.ParentID.HasValue && t.ParentID.Value == parentTrackingId)
+                                    .ToList();
+                if (siblings.Count > 0)
+                {
+                    nextSortOrder = siblings.Max(t => t.SortOrder) + 1;
+                }
+            }
+            if (nextSortOrder <= 0) nextSortOrder = 1;
+
             var model = new RM_DigitalSalesTrackingModel
             {
                 TrackingID = 0,
@@ -3849,10 +3862,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 Deadline = parent?.MaxDeadline ?? DateTime.Today.AddDays(3),
                 Status = 1,
                 IsCustomTask = true,
-                DurationDays = parent?.EffectiveDurationDays
+                DurationDays = parent?.EffectiveDurationDays,
+                SortOrder = nextSortOrder
             };
 
             ViewBag.ParentTask = parent;
+            ViewBag.NextSortOrder = nextSortOrder;
             ViewBag.UserList = GetProjectMemberSelectList(digitalSalesId);
 
             return PartialView("_TodoModal", model);
@@ -3875,8 +3890,14 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = CreateMessage(AppProcessor.Messagor.GetMessage("DigitalSales_Task"), EnumProcessType.DataNotExist, EnumMsgIcon.Error) }, JsonRequestBehavior.AllowGet);
             }
 
+            if (model.SortOrder <= 0)
+            {
+                model.SortOrder = 1;
+            }
+
             var parent = model.ParentID.HasValue ? tasks.FirstOrDefault(t => t.TrackingID == model.ParentID.Value) : null;
             ViewBag.ParentTask = parent;
+            ViewBag.NextSortOrder = model.SortOrder;
             ViewBag.UserList = GetProjectMemberSelectList(digitalSalesId, model?.AssignedUserID);
 
             return PartialView("_TodoModal", model);
@@ -3896,6 +3917,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            if (model.SortOrder <= 0)
+            {
+                model.SortOrder = 1;
             }
 
             // US-02 AC 2.2: Phân quyền backend - Chỉ người tạo hoặc QTHT mới có quyền chỉnh sửa đầu việc
@@ -4811,6 +4837,481 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
             }
+        }
+
+        /// <summary>
+        /// Tải toàn bộ cây Checklist (3 Sheet: Checklist phân cấp, Thành viên tham gia, Trạng thái) về file Excel.
+        /// </summary>
+        [HttpGet]
+        public ActionResult ExportChecklistExcel(int digitalSalesId)
+        {
+            if (!HasDetailPermission(digitalSalesId, User.UserName))
+            {
+                return Content($"<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> {AppProcessor.Messagor.GetMessage("DigitalSales_Msg_NoPermission")}</div>");
+            }
+
+            var model = _salesCache.GetByID(digitalSalesId, User.UserName);
+            if (model == null) return HttpNotFound();
+
+            if (model.TrackingTasks == null || model.TrackingTasks.Count == 0)
+            {
+                try { model.TrackingTasks = _salesCache.GetTrackingTasks(digitalSalesId); } catch { }
+            }
+            if (model.Timelines == null || model.Timelines.Count == 0)
+            {
+                try { model.Timelines = _salesCache.GetTimeline(digitalSalesId); } catch { }
+            }
+            if (model.Members == null || model.Members.Count == 0)
+            {
+                try { model.Members = _salesCache.GetMembersBySalesID(digitalSalesId); } catch { }
+            }
+
+            var allTasks = model.TrackingTasks ?? new List<RM_DigitalSalesTrackingModel>();
+            var parentTasks = allTasks.Where(t => !t.ParentID.HasValue || t.ParentID.Value <= 0).ToList();
+
+            using (var workbook = new XLWorkbook())
+            {
+                // =========================================================================
+                // SHEET 1: CHECKLIST (BẢNG CÂY PHÂN CẤP ĐẦY ĐỦ 5 TẦNG)
+                // =========================================================================
+                var wsChecklist = workbook.Worksheets.Add("Checklist");
+                wsChecklist.Column(1).Style.NumberFormat.Format = "@"; // STT / WBS
+                wsChecklist.Column(3).Style.NumberFormat.Format = "@"; // Mã tiến trình / Công việc
+                wsChecklist.Column(6).Style.NumberFormat.Format = "@"; // Bắt đầu
+                wsChecklist.Column(7).Style.NumberFormat.Format = "@"; // Hạn chót
+                wsChecklist.Column(8).Style.NumberFormat.Format = "#,##0"; // Tổng ngày
+
+                string[] headers1 = new[]
+                {
+                    "STT / WBS",
+                    "Phân loại",
+                    "Mã tiến trình / Công việc",
+                    "Tên công việc / Đầu mục",
+                    "Người thực hiện",
+                    "Ngày bắt đầu",
+                    "Hạn chót",
+                    "Tổng ngày",
+                    "Trạng thái",
+                    "Người hoàn thành / chuyển đổi",
+                    "Thời gian hoàn thành / chuyển đổi",
+                    "Ghi chú"
+                };
+
+                for (int i = 0; i < headers1.Length; i++)
+                {
+                    var cell = wsChecklist.Cell(1, i + 1);
+                    cell.Value = headers1[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontColor = XLColor.White;
+                    cell.Style.Fill.BackgroundColor = XLColor.FromArgb(31, 78, 120); // #1f4e78 (Navy Blue)
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                }
+                wsChecklist.Row(1).Height = 28;
+
+                int rowIdx = 2;
+                if (parentTasks.Count > 0)
+                {
+                    var allConfigStatuses = _workflowCache.GetAllStatuses() ?? new List<Core.Cate.Models.RM_DigitalSalesStatusModel>();
+                    var statusConfigDict = allConfigStatuses.GroupBy(s => s.StatusID).ToDictionary(g => g.Key, g => g.First());
+
+                    var rawStatusGroups = parentTasks.GroupBy(t => new
+                    {
+                        TimelineID = t.TimelineID ?? (t.StatusID ?? 0),
+                        StatusID = t.StatusID ?? 0,
+                        StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Trạng thái",
+                        ProcessCountOfStatus = t.ProcessCountOfStatus
+                    }).ToList();
+
+                    var statusGroups = rawStatusGroups
+                        .OrderBy(g => statusConfigDict.ContainsKey(g.Key.StatusID) ? statusConfigDict[g.Key.StatusID].BusinessType : (byte)255)
+                        .ThenBy(g => statusConfigDict.ContainsKey(g.Key.StatusID) ? statusConfigDict[g.Key.StatusID].SortOrder : 999)
+                        .ThenBy(g => {
+                            var tl = model.Timelines?.FirstOrDefault(x => x.TimelineID == g.Key.TimelineID);
+                            return tl != null ? tl.ActionDate : DateTime.MinValue;
+                        })
+                        .ThenBy(g => g.Key.TimelineID)
+                        .ToList();
+
+                    int statusNum = 1;
+                    foreach (var stGroup in statusGroups)
+                    {
+                        var occurrencesOfThisStatus = statusGroups.Where(g => g.Key.StatusID == stGroup.Key.StatusID).ToList();
+                        int occurrenceIndex = occurrencesOfThisStatus.IndexOf(stGroup) + 1;
+                        string occurrenceSuffix = occurrencesOfThisStatus.Count > 1 ? $" (Lần {occurrenceIndex})" : "";
+
+                        var timeline = model.Timelines?.FirstOrDefault(tl => tl.TimelineID == stGroup.Key.TimelineID);
+                        if (timeline == null && stGroup.Key.StatusID > 0)
+                        {
+                            timeline = model.Timelines?.OrderBy(tl => tl.ActionDate).ThenBy(tl => tl.TimelineID)
+                                .Skip(occurrenceIndex - 1)
+                                .FirstOrDefault(tl => tl.ToStatusID == stGroup.Key.StatusID)
+                                ?? model.Timelines?.LastOrDefault(tl => tl.ToStatusID == stGroup.Key.StatusID);
+                        }
+
+                        string transitionUser = timeline != null
+                            ? (!string.IsNullOrEmpty(timeline.ActionByName) ? timeline.ActionByName : timeline.ActionBy)
+                            : (!string.IsNullOrEmpty(model.CreatedByName) ? model.CreatedByName : model.CreatedBy);
+                        DateTime? transitionDate = timeline != null ? (DateTime?)timeline.ActionDate : (DateTime?)model.CreatedDate;
+
+                        int statusTaskCount = stGroup.Count(t => !string.IsNullOrWhiteSpace(t.TaskName));
+                        int statusTodoCount = stGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).Sum(p => p.TodoList?.Count ?? 0);
+
+                        string statusRoman = ToRomanNumeral(statusNum);
+
+                        // ROW LEVEL 1: TRẠNG THÁI
+                        var rStatus = wsChecklist.Row(rowIdx);
+                        rStatus.Height = 24;
+                        wsChecklist.Cell(rowIdx, 1).SetValue<string>(statusRoman);
+                        wsChecklist.Cell(rowIdx, 2).Value = "Trạng thái";
+                        wsChecklist.Cell(rowIdx, 3).Value = "";
+                        wsChecklist.Cell(rowIdx, 4).Value = (RM_DigitalSalesBiz.FixVietnameseMojibake(stGroup.Key.StatusName) + occurrenceSuffix).ToUpper();
+                        wsChecklist.Cell(rowIdx, 5).Value = "";
+                        wsChecklist.Cell(rowIdx, 6).Value = "";
+                        wsChecklist.Cell(rowIdx, 7).Value = "";
+                        wsChecklist.Cell(rowIdx, 8).Value = "";
+                        wsChecklist.Cell(rowIdx, 9).Value = "";
+                        wsChecklist.Cell(rowIdx, 10).Value = RM_DigitalSalesBiz.FixVietnameseMojibake(transitionUser ?? "");
+                        wsChecklist.Cell(rowIdx, 11).Value = transitionDate.HasValue ? transitionDate.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                        wsChecklist.Cell(rowIdx, 12).Value = $"{statusTaskCount} tiến trình" + (statusTodoCount > 0 ? $", {statusTodoCount} việc nhỏ" : "");
+
+                        for (int col = 1; col <= headers1.Length; col++)
+                        {
+                            var cell = wsChecklist.Cell(rowIdx, col);
+                            cell.Style.Font.Bold = true;
+                            cell.Style.Font.FontColor = XLColor.FromArgb(27, 85, 226); // #1b55e2
+                            cell.Style.Fill.BackgroundColor = XLColor.FromArgb(217, 237, 247); // #d9edf7
+                        }
+                        wsChecklist.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        wsChecklist.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        wsChecklist.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        rowIdx++;
+
+                        // ROW LEVEL 2: QUY TRÌNH
+                        var procGroups = stGroup.GroupBy(t => new
+                        {
+                            ProcessID = t.ProcessID ?? 0,
+                            ProcessName = !string.IsNullOrEmpty(t.ProcessName) ? t.ProcessName : "Quy trình thực hiện"
+                        }).OrderBy(g => g.Key.ProcessID).ToList();
+
+                        int procNum = 1;
+                        foreach (var prGroup in procGroups)
+                        {
+                            var realTasks = prGroup.Where(t => !string.IsNullOrWhiteSpace(t.TaskName)).ToList();
+                            int realTaskCount = realTasks.Count;
+                            string procWbs = $"{statusRoman}.{procNum}";
+
+                            var rProc = wsChecklist.Row(rowIdx);
+                            rProc.Height = 22;
+                            wsChecklist.Cell(rowIdx, 1).SetValue<string>(procWbs);
+                            wsChecklist.Cell(rowIdx, 2).Value = "Quy trình";
+                            wsChecklist.Cell(rowIdx, 3).Value = "";
+                            wsChecklist.Cell(rowIdx, 4).Value = "QUY TRÌNH: " + RM_DigitalSalesBiz.FixVietnameseMojibake(prGroup.Key.ProcessName).ToUpper();
+                            wsChecklist.Cell(rowIdx, 5).Value = "";
+                            wsChecklist.Cell(rowIdx, 6).Value = "";
+                            wsChecklist.Cell(rowIdx, 7).Value = "";
+                            wsChecklist.Cell(rowIdx, 8).Value = "";
+                            wsChecklist.Cell(rowIdx, 9).Value = "";
+                            wsChecklist.Cell(rowIdx, 10).Value = "";
+                            wsChecklist.Cell(rowIdx, 11).Value = "";
+                            wsChecklist.Cell(rowIdx, 12).Value = $"{realTaskCount} tiến trình";
+
+                            for (int col = 1; col <= headers1.Length; col++)
+                            {
+                                var cell = wsChecklist.Cell(rowIdx, col);
+                                cell.Style.Font.Bold = true;
+                                cell.Style.Font.FontColor = XLColor.FromArgb(138, 109, 59); // #8a6d3b
+                                cell.Style.Fill.BackgroundColor = XLColor.FromArgb(252, 248, 227); // #fcf8e3
+                            }
+                            wsChecklist.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            wsChecklist.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                            rowIdx++;
+
+                            // ROW LEVEL 3: TIẾN TRÌNH
+                            int taskIdx = 1;
+                            foreach (var task in realTasks.OrderBy(p => p.SortOrder).ThenBy(p => p.StartDate).ThenBy(p => p.TrackingID))
+                            {
+                                string taskWbs = (task.SortOrder > 0 ? task.SortOrder.ToString() : taskIdx.ToString());
+                                string taskStatusText = task.Status == 3 ? "Hoàn thành" : (task.Status == 2 ? "Đang làm" : (task.IsOverdue == 1 ? "Quá hạn" : "Chưa làm"));
+                                string completedUser = !string.IsNullOrEmpty(task.CompletedByName) ? RM_DigitalSalesBiz.FixVietnameseMojibake(task.CompletedByName) : (!string.IsNullOrEmpty(task.LastModifiedByName) ? RM_DigitalSalesBiz.FixVietnameseMojibake(task.LastModifiedByName) : "");
+                                DateTime? completedAt = task.CompletedDate.HasValue ? task.CompletedDate : (task.Status == 3 ? task.LastModifiedDate : null);
+
+                                var rTask = wsChecklist.Row(rowIdx);
+                                rTask.Height = 20;
+                                wsChecklist.Cell(rowIdx, 1).SetValue<string>(taskWbs);
+                                wsChecklist.Cell(rowIdx, 2).Value = "Tiến trình";
+                                wsChecklist.Cell(rowIdx, 3).SetValue<string>(task.TrackingCode ?? task.TrackingID.ToString());
+                                wsChecklist.Cell(rowIdx, 4).Value = taskWbs + ". " + RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName ?? "");
+                                wsChecklist.Cell(rowIdx, 5).Value = RM_DigitalSalesBiz.FixVietnameseMojibake(task.AssignedUserName ?? "");
+                                wsChecklist.Cell(rowIdx, 6).Value = task.StartDate.ToString("dd/MM/yyyy");
+                                wsChecklist.Cell(rowIdx, 7).Value = task.MaxDeadline.ToString("dd/MM/yyyy");
+                                wsChecklist.Cell(rowIdx, 8).Value = task.EffectiveDurationDays;
+                                wsChecklist.Cell(rowIdx, 9).Value = taskStatusText;
+                                wsChecklist.Cell(rowIdx, 10).Value = completedUser;
+                                wsChecklist.Cell(rowIdx, 11).Value = completedAt.HasValue ? completedAt.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                                wsChecklist.Cell(rowIdx, 12).Value = task.ResultNote ?? "";
+
+                                for (int col = 1; col <= headers1.Length; col++)
+                                {
+                                    var cell = wsChecklist.Cell(rowIdx, col);
+                                    cell.Style.Font.Bold = true;
+                                    cell.Style.Fill.BackgroundColor = XLColor.FromArgb(249, 251, 253);
+                                }
+                                wsChecklist.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                wsChecklist.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                rowIdx++;
+
+                                // ROW LEVEL 4: CÔNG VIỆC CON (TODO LIST)
+                                if (task.TodoList != null && task.TodoList.Count > 0)
+                                {
+                                    int todoIdx = 1;
+                                    foreach (var todo in task.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
+                                    {
+                                        string todoWbs = $"{taskWbs}.{(todo.SortOrder > 0 ? todo.SortOrder : todoIdx)}";
+                                        string todoStatusText = todo.Status == 3 ? "Hoàn thành" : (todo.Status == 2 ? "Đang làm" : (todo.IsOverdue == 1 ? "Quá hạn" : "Chưa làm"));
+                                        string todoCompletedUser = !string.IsNullOrEmpty(todo.CompletedByName) ? RM_DigitalSalesBiz.FixVietnameseMojibake(todo.CompletedByName) : (!string.IsNullOrEmpty(todo.LastModifiedByName) ? RM_DigitalSalesBiz.FixVietnameseMojibake(todo.LastModifiedByName) : "");
+                                        DateTime? todoCompletedAt = todo.CompletedDate.HasValue ? todo.CompletedDate : (todo.Status == 3 ? todo.LastModifiedDate : null);
+
+                                        var rTodo = wsChecklist.Row(rowIdx);
+                                        rTodo.Height = 19;
+                                        wsChecklist.Cell(rowIdx, 1).SetValue<string>(todoWbs);
+                                        wsChecklist.Cell(rowIdx, 2).Value = "Công việc";
+                                        wsChecklist.Cell(rowIdx, 3).SetValue<string>(todo.TrackingCode ?? todo.TrackingID.ToString());
+                                        wsChecklist.Cell(rowIdx, 4).Value = "  └─ " + (todo.SortOrder > 0 ? $"{todo.SortOrder}. " : "") + RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName ?? "");
+                                        wsChecklist.Cell(rowIdx, 5).Value = RM_DigitalSalesBiz.FixVietnameseMojibake(todo.AssignedUserName ?? "");
+                                        wsChecklist.Cell(rowIdx, 6).Value = todo.StartDate.ToString("dd/MM/yyyy");
+                                        wsChecklist.Cell(rowIdx, 7).Value = todo.Deadline.HasValue ? todo.Deadline.Value.ToString("dd/MM/yyyy") : "";
+                                        wsChecklist.Cell(rowIdx, 8).Value = todo.EffectiveDurationDays;
+                                        wsChecklist.Cell(rowIdx, 9).Value = todoStatusText;
+                                        wsChecklist.Cell(rowIdx, 10).Value = todoCompletedUser;
+                                        wsChecklist.Cell(rowIdx, 11).Value = todoCompletedAt.HasValue ? todoCompletedAt.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                                        wsChecklist.Cell(rowIdx, 12).Value = todo.ResultNote ?? "";
+
+                                        wsChecklist.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        wsChecklist.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                        rowIdx++;
+
+                                        // ROW LEVEL 5: CÔNG VIỆC CON CỦA CÔNG VIỆC (SUB-TODO LIST)
+                                        if (todo.TodoList != null && todo.TodoList.Count > 0)
+                                        {
+                                            int subIdx = 1;
+                                            foreach (var subTodo in todo.TodoList.OrderBy(s => s.SortOrder).ThenBy(s => s.StartDate).ThenBy(s => s.TrackingID))
+                                            {
+                                                string subWbs = $"{todoWbs}.{(subTodo.SortOrder > 0 ? subTodo.SortOrder : subIdx)}";
+                                                string subStatusText = subTodo.Status == 3 ? "Hoàn thành" : (subTodo.Status == 2 ? "Đang làm" : (subTodo.IsOverdue == 1 ? "Quá hạn" : "Chưa làm"));
+                                                string subCompletedUser = !string.IsNullOrEmpty(subTodo.CompletedByName) ? RM_DigitalSalesBiz.FixVietnameseMojibake(subTodo.CompletedByName) : (!string.IsNullOrEmpty(subTodo.LastModifiedByName) ? RM_DigitalSalesBiz.FixVietnameseMojibake(subTodo.LastModifiedByName) : "");
+                                                DateTime? subCompletedAt = subTodo.CompletedDate.HasValue ? subTodo.CompletedDate : (subTodo.Status == 3 ? subTodo.LastModifiedDate : null);
+
+                                                var rSub = wsChecklist.Row(rowIdx);
+                                                rSub.Height = 19;
+                                                wsChecklist.Cell(rowIdx, 1).SetValue<string>(subWbs);
+                                                wsChecklist.Cell(rowIdx, 2).Value = "Công việc con";
+                                                wsChecklist.Cell(rowIdx, 3).SetValue<string>(subTodo.TrackingCode ?? subTodo.TrackingID.ToString());
+                                                wsChecklist.Cell(rowIdx, 4).Value = "    └─ " + (subTodo.SortOrder > 0 ? $"{subTodo.SortOrder}. " : "") + RM_DigitalSalesBiz.FixVietnameseMojibake(subTodo.TaskName ?? "");
+                                                wsChecklist.Cell(rowIdx, 5).Value = RM_DigitalSalesBiz.FixVietnameseMojibake(subTodo.AssignedUserName ?? "");
+                                                wsChecklist.Cell(rowIdx, 6).Value = subTodo.StartDate.ToString("dd/MM/yyyy");
+                                                wsChecklist.Cell(rowIdx, 7).Value = subTodo.Deadline.HasValue ? subTodo.Deadline.Value.ToString("dd/MM/yyyy") : "";
+                                                wsChecklist.Cell(rowIdx, 8).Value = subTodo.EffectiveDurationDays;
+                                                wsChecklist.Cell(rowIdx, 9).Value = subStatusText;
+                                                wsChecklist.Cell(rowIdx, 10).Value = subCompletedUser;
+                                                wsChecklist.Cell(rowIdx, 11).Value = subCompletedAt.HasValue ? subCompletedAt.Value.ToString("dd/MM/yyyy HH:mm") : "";
+                                                wsChecklist.Cell(rowIdx, 12).Value = subTodo.ResultNote ?? "";
+
+                                                wsChecklist.Cell(rowIdx, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                wsChecklist.Cell(rowIdx, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                                                rowIdx++;
+                                                subIdx++;
+                                            }
+                                        }
+
+                                        todoIdx++;
+                                    }
+                                }
+
+                                taskIdx++;
+                            }
+
+                            procNum++;
+                        }
+
+                        statusNum++;
+                    }
+                }
+
+                var rangeChecklist = wsChecklist.Range(1, 1, Math.Max(2, rowIdx - 1), headers1.Length);
+                rangeChecklist.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                rangeChecklist.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                wsChecklist.Columns().AdjustToContents();
+
+                // =========================================================================
+                // SHEET 2: THÀNH VIÊN THAM GIA HỒ SƠ
+                // =========================================================================
+                var wsMembers = workbook.Worksheets.Add("Thành viên tham gia");
+                string[] headers2 = new[]
+                {
+                    "STT",
+                    "Tài khoản (UserName)",
+                    "Họ và tên",
+                    "Vai trò trong hồ sơ",
+                    "Là AM chính?",
+                    "Email",
+                    "Số điện thoại",
+                    "Ghi chú"
+                };
+
+                for (int i = 0; i < headers2.Length; i++)
+                {
+                    var cell = wsMembers.Cell(1, i + 1);
+                    cell.Value = headers2[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontColor = XLColor.White;
+                    cell.Style.Fill.BackgroundColor = XLColor.FromArgb(46, 125, 50); // #2e7d32 (Forest Green)
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                }
+                wsMembers.Row(1).Height = 26;
+
+                int mRow = 2;
+                var memberList = model.Members ?? new List<RM_DigitalSalesMemberModel>();
+                if (memberList.Count > 0)
+                {
+                    int mIdx = 1;
+                    foreach (var mem in memberList)
+                    {
+                        wsMembers.Cell(mRow, 1).Value = mIdx;
+                        wsMembers.Cell(mRow, 2).SetValue<string>(mem.UserName ?? "");
+                        wsMembers.Cell(mRow, 3).Value = RM_DigitalSalesBiz.FixVietnameseMojibake(mem.FullName ?? "");
+                        wsMembers.Cell(mRow, 4).Value = mem.RoleTitle ?? "";
+                        wsMembers.Cell(mRow, 5).Value = mem.IsAM ? "Có" : "Không";
+                        wsMembers.Cell(mRow, 6).Value = mem.Email ?? "";
+                        wsMembers.Cell(mRow, 7).SetValue<string>(mem.Phone ?? "");
+                        wsMembers.Cell(mRow, 8).Value = mem.Note ?? "";
+
+                        wsMembers.Cell(mRow, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        wsMembers.Cell(mRow, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        wsMembers.Cell(mRow, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        wsMembers.Cell(mRow, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        mRow++;
+                        mIdx++;
+                    }
+                }
+                else
+                {
+                    wsMembers.Cell(mRow, 1).Value = 1;
+                    wsMembers.Cell(mRow, 2).SetValue<string>(model.CreatedBy ?? "");
+                    wsMembers.Cell(mRow, 3).Value = RM_DigitalSalesBiz.FixVietnameseMojibake(model.AssignedEmployeeName ?? model.CreatedByName ?? "");
+                    wsMembers.Cell(mRow, 4).Value = "Nhân sự phụ trách";
+                    wsMembers.Cell(mRow, 5).Value = "Có";
+                    wsMembers.Cell(mRow, 6).Value = "";
+                    wsMembers.Cell(mRow, 7).Value = "";
+                    wsMembers.Cell(mRow, 8).Value = "";
+
+                    wsMembers.Cell(mRow, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    wsMembers.Cell(mRow, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    wsMembers.Cell(mRow, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    mRow++;
+                }
+
+                var rangeMembers = wsMembers.Range(1, 1, Math.Max(2, mRow - 1), headers2.Length);
+                rangeMembers.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                rangeMembers.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                wsMembers.Columns().AdjustToContents();
+
+                // =========================================================================
+                // SHEET 3: CÁC TRẠNG THÁI CỦA TIẾN TRÌNH / CÔNG VIỆC
+                // =========================================================================
+                var wsStatuses = workbook.Worksheets.Add("Trạng thái");
+                string[] headers3 = new[]
+                {
+                    "Mã trạng thái (StatusID)",
+                    "Tên trạng thái",
+                    "Diễn giải & Quy định khi Import"
+                };
+
+                for (int i = 0; i < headers3.Length; i++)
+                {
+                    var cell = wsStatuses.Cell(1, i + 1);
+                    cell.Value = headers3[i];
+                    cell.Style.Font.Bold = true;
+                    cell.Style.Font.FontColor = XLColor.White;
+                    cell.Style.Fill.BackgroundColor = XLColor.FromArgb(230, 126, 34); // #e67e22 (Orange)
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                }
+                wsStatuses.Row(1).Height = 26;
+
+                var defaultStatuses = new[]
+                {
+                    new { Id = 1, Name = "Chưa làm", Desc = "Trạng thái mặc định khi tạo mới tiến trình hoặc công việc con. Chưa bắt đầu thực hiện." },
+                    new { Id = 2, Name = "Đang làm", Desc = "Tiến trình / công việc đang trong quá trình thực hiện." },
+                    new { Id = 3, Name = "Hoàn thành", Desc = "Tiến trình / công việc đã thực hiện xong và được hoàn thành/nghiệm thu." }
+                };
+
+                int sRow = 2;
+                foreach (var st in defaultStatuses)
+                {
+                    wsStatuses.Cell(sRow, 1).Value = st.Id;
+                    wsStatuses.Cell(sRow, 2).Value = st.Name;
+                    wsStatuses.Cell(sRow, 3).Value = st.Desc;
+
+                    wsStatuses.Cell(sRow, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    wsStatuses.Cell(sRow, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                    sRow++;
+                }
+
+                var rangeStatuses = wsStatuses.Range(1, 1, sRow - 1, headers3.Length);
+                rangeStatuses.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                rangeStatuses.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                wsStatuses.Columns().AdjustToContents();
+
+                // Lưu và xuất file
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    string safeCode = !string.IsNullOrEmpty(model.Code)
+                        ? string.Join("_", model.Code.Split(Path.GetInvalidFileNameChars()))
+                        : $"KDGP_{digitalSalesId}";
+                    string fileName = $"Checklist_{safeCode}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
+            }
+        }
+
+        private static string ToRomanNumeral(int number)
+        {
+            if (number < 1) return string.Empty;
+            if (number >= 1000) return "M" + ToRomanNumeral(number - 1000);
+            if (number >= 900) return "CM" + ToRomanNumeral(number - 900);
+            if (number >= 500) return "D" + ToRomanNumeral(number - 500);
+            if (number >= 400) return "CD" + ToRomanNumeral(number - 400);
+            if (number >= 100) return "C" + ToRomanNumeral(number - 100);
+            if (number >= 90) return "XC" + ToRomanNumeral(number - 90);
+            if (number >= 50) return "L" + ToRomanNumeral(number - 50);
+            if (number >= 40) return "XL" + ToRomanNumeral(number - 40);
+            if (number >= 10) return "X" + ToRomanNumeral(number - 10);
+            if (number >= 9) return "IX" + ToRomanNumeral(number - 9);
+            if (number >= 5) return "V" + ToRomanNumeral(number - 5);
+            if (number >= 4) return "IV" + ToRomanNumeral(number - 4);
+            if (number >= 1) return "I" + ToRomanNumeral(number - 1);
+            return string.Empty;
         }
 
         [AjaxOnly]
