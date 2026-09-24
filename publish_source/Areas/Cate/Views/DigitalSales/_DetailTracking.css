@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    CHECKLIST & TRACKING TREE TABLE - CSS DESIGN (4 LEVELS)
    ========================================================================== */
 
@@ -656,6 +656,17 @@ a.badge-can-change-process:hover {
     max-width: 650px !important;
 }
 
+/* ==========================================================================
+   NÚT TẢI CHECKLIST EXCEL
+   ========================================================================== */
+.btn-export-checklist {
+    transition: all 0.2s ease-in-out;
+}
 
-
-
+.btn-export-checklist:hover {
+    background-color: #e8f5e9 !important;
+    border-color: #4caf50 !important;
+    color: #2e7d32 !important;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2) !important;
+}

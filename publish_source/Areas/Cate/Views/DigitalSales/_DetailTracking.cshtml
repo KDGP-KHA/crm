@@ -28,6 +28,11 @@
         <button type="button" class="btn btn-xs btn-white border-1 brc-primary-m2 text-primary-d2 radius-1 px-2 py-1 ml-2 shadow-sm font-bold btn-view-timeline" onclick="openStatusTimelineModal(@Model.DigitalSalesID);" title="Xem timeline cập nhật chuyển trạng thái">
             <i class="fa fa-stream mr-1 text-primary"></i> Xem timeline
         </button>
+        <a href="@Url.Action("ExportChecklistExcel", "DigitalSales", new { area = "Cate", digitalSalesId = Model.DigitalSalesID })"
+           class="btn btn-xs btn-white border-1 brc-green-m2 text-green-d2 radius-1 px-2 py-1 ml-2 shadow-sm font-bold btn-export-checklist"
+           title="Tải toàn bộ cây Checklist (3 Sheet) về file Excel">
+            <i class="fa fa-file-excel mr-1 text-success"></i> Tải checklist
+        </a>
     </div>
     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
         <button type="button" class="btn btn-xs btn-white border-1 brc-grey-l1 text-secondary-d1 radius-1 px-2 py-1 shadow-sm font-bold" id="btnExpandAllChecklist" onclick="toggleAllChecklistTree(true);">

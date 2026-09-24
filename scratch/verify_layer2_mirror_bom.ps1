@@ -3,6 +3,8 @@ $files = @(
     "Areas\Cate\Views\DigitalSales\_ChangeStatusForm.cshtml",
     "Areas\Cate\Views\DigitalSales\_ChangeStatusModal.css",
     "Areas\Cate\Views\DigitalSales\_DetailDiscussions.cshtml",
+    "Areas\Cate\Views\DigitalSales\_DetailTracking.cshtml",
+    "Areas\Cate\Views\DigitalSales\_DetailTracking.css",
     "Areas\Cate\Views\DigitalSales\DigitalSales.js",
     "Areas\Cate\Views\DigitalSales\DigitalSalesDetail.js",
     "Areas\Cate\Views\ContactPersons\ContactPersons.css",

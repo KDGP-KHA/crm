@@ -27,6 +27,8 @@
 !Source_Prod/**
 !dlls/
 !dlls/**
+!**/Contents/Modules/Major/ckfinder/bin/
+!**/Contents/Modules/Major/ckfinder/bin/**
 
 # ==========================================
 # Uploads, attachments, logs and temporary files
