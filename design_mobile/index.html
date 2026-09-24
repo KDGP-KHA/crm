@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CenIT TOC CRM - Thiết Kế Giao Diện Mobile App (Interactive Prototype)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="prototype-wrapper">
+        <!-- SIDEBAR ĐIỀU KHIỂN & CHỌN MÀN HÌNH -->
+        <aside class="control-sidebar">
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-cloud-bolt"></i>
+                </div>
+                <div class="brand-info">
+                    <h2>VNPT CenIT CRM</h2>
+                    <span class="badge-role">Mobile App Suite v1.0</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">CHẾ ĐỘ HIỂN THỊ</div>
+                <div class="mode-switch-box">
+                    <button class="btn-mode-tab active" id="btnModeSimulator" onclick="switchViewMode('simulator')">
+                        <i class="fa-solid fa-mobile-screen"></i> Simulator
+                    </button>
+                    <button class="btn-mode-tab" id="btnModeGallery" onclick="switchViewMode('gallery')">
+                        <i class="fa-solid fa-images"></i> UI Gallery
+                    </button>
+                </div>
+                <div class="theme-toggles">
+                    <button class="btn-tool active" id="btnThemeDark" onclick="setAppTheme('dark')">
+                        <i class="fa-solid fa-moon"></i> Dark Theme
+                    </button>
+                    <button class="btn-tool" id="btnThemeLight" onclick="setAppTheme('light')">
+                        <i class="fa-solid fa-sun"></i> Light Theme
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-title">DANH MỤC 8 MÀN HÌNH MẪU CORE</div>
+                <nav class="screen-nav">
+                    <button class="screen-nav-item active" onclick="switchScreen('scr-dashboard', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-05: Trang chủ Dashboard</strong>
+                            <small>KPIs, Doanh thu, Cảnh báo >72h</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-sales-list', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-briefcase"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-08: Danh sách SPDV Số</strong>
+                            <small>Thẻ cơ hội, Bộ lọc, Trạng thái</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-sales-detail', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-folder-open"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-10: Chi tiết Hồ sơ 360°</strong>
+                            <small>Header tổng quan, Kế hoạch doanh thu</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-wbs-checklist', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-11: Cây Tiến trình WBS</strong>
+                            <small>Phân cấp Task & Subtask, Tiến độ</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-report-modal', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-camera"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-12: Báo cáo Kết quả (US-01)</strong>
+                            <small>Chụp ảnh hiện trường, đính kèm file</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-discussion', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-comments"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-14: Thảo luận & Nhật ký</strong>
+                            <small>Chat nội bộ, Xem trực tuyến PDF/Word</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-shared-docs', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-file-shield"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-24: Tài liệu Biểu mẫu Chung</strong>
+                            <small>Hợp đồng, ISO, Kỹ thuật, Hành chính</small>
+                        </div>
+                    </button>
+
+                    <button class="screen-nav-item" onclick="switchScreen('scr-login', this)">
+                        <div class="nav-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                        <div class="nav-text">
+                            <strong>SCR-02: Màn hình Đăng nhập</strong>
+                            <small>VNPT SSO, Face ID / Touch ID</small>
+                        </div>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="doc-link-box">
+                    <i class="fa-solid fa-book-open"></i>
+                    <div>
+                        <span>Tài liệu đặc tả:</span>
+                        <a href="../backlog_mobile_app.md" target="_blank">backlog_mobile_app.md</a>
+                    </div>
+                </div>
+                <div class="mockup-link-box">
+                    <i class="fa-solid fa-image"></i>
+                    <div>
+                        <span>Ảnh Mockup AI:</span>
+                        <a href="mockups/01_mobile_dashboard_ui.jpg" target="_blank">01_Dashboard</a> |
+                        <a href="mockups/02_mobile_pipeline_ui.jpg" target="_blank">02_Pipeline</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- KHUNG MÔ PHỎNG SMARTPHONE -->
+        <main class="device-stage" id="viewSimulator">
+            <div class="phone-frame theme-dark" id="phoneContainer">
+                <!-- Vỏ điện thoại Titanium -->
+                <div class="phone-notch">
+                    <div class="speaker"></div>
+                    <div class="camera"></div>
+                </div>
+
+                <!-- MÀN HÌNH NỘI DUNG SMARTPHONE -->
+                <div class="phone-screen">
+                    <!-- STATUS BAR (Giờ, Pin, Wifi) -->
+                    <div class="status-bar">
+                        <span class="status-time">9:41</span>
+                        <div class="dynamic-island">
+                            <span class="di-dot"></span>
+                            <span class="di-text">VNPT 5G</span>
+                        </div>
+                        <div class="status-icons">
+                            <i class="fa-solid fa-signal"></i>
+                            <i class="fa-solid fa-wifi"></i>
+                            <i class="fa-solid fa-battery-full"></i>
+                        </div>
+                    </div>
+
+                    <!-- CONTAINER CHỨA CÁC MÀN HÌNH CON -->
+                    <div class="screens-viewport">
+                        
+                        <!-- ============================================== -->
+                        <!-- SCREEN 1: SCR-05 DASHBOARD TRANG CHỦ -->
+                        <!-- ============================================== -->
+                        <div class="screen-page active" id="scr-dashboard">
+                            <!-- App Header -->
+                            <header class="app-header">
+                                <div class="user-greet">
+                                    <div class="avatar-box">
+                                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces" alt="Avatar">
+                                        <span class="online-indicator"></span>
+                                    </div>
+                                    <div>
+                                        <small>Xin chào,</small>
+                                        <h3>Trần Duy Tân</h3>
+                                    </div>
+                                </div>
+                                <div class="header-actions">
+                                    <button class="btn-icon-head"><i class="fa-solid fa-magnifying-glass"></i></button>
+                                    <button class="btn-icon-head badge-wrapper">
+                                        <i class="fa-solid fa-bell"></i>
+                                        <span class="dot-badge"></span>
+                                    </button>
+                                </div>
+                            </header>
+
+                            <!-- Nội dung cuộn của Dashboard -->
+                            <div class="app-scrollable-content">
+                                <!-- Card Tổng Quan Doanh Thu -->
+                                <div class="kpi-hero-card">
+                                    <div class="kpi-hero-top">
+                                        <span>DOANH THU THỰC TẾ (ĐÃ KÝ)</span>
+                                        <span class="kpi-badge-up"><i class="fa-solid fa-arrow-trend-up"></i> +18.4%</span>
+                                    </div>
+                                    <div class="kpi-hero-amount">
+                                        12.450 <span class="unit">Triệu VNĐ</span>
+                                    </div>
+                                    <div class="kpi-progress-bar">
+                                        <div class="kpi-progress-fill" style="width: 78%;"></div>
+                                    </div>
+                                    <div class="kpi-hero-footer">
+                                        <span>Đạt 78% Kế hoạch năm</span>
+                                        <span>Pipeline: 24.800 Tr.đ</span>
+                                    </div>
+                                </div>
+
+                                <!-- Thanh Tác Vụ Nhanh (Quick Actions) -->
+                                <div class="quick-action-grid">
+                                    <div class="qa-item" onclick="switchScreenById('scr-sales-list')">
+                                        <div class="qa-icon bg-blue"><i class="fa-solid fa-plus"></i></div>
+                                        <span>Tạo cơ hội</span>
+                                    </div>
+                                    <div class="qa-item" onclick="switchScreenById('scr-wbs-checklist')">
+                                        <div class="qa-icon bg-amber"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                        <span>Cảnh báo 72h</span>
+                                    </div>
+                                    <div class="qa-item" onclick="switchScreenById('scr-wbs-checklist')">
+                                        <div class="qa-icon bg-emerald"><i class="fa-solid fa-list-check"></i></div>
+                                        <span>Checklist</span>
+                                    </div>
+                                    <div class="qa-item" onclick="switchScreenById('scr-shared-docs')">
+                                        <div class="qa-icon bg-purple"><i class="fa-solid fa-file-lines"></i></div>
+                                        <span>Biểu mẫu</span>
+                                    </div>
+                                </div>
+
+                                <!-- Cảnh báo khẩn quá 72h chưa tương tác -->
+                                <div class="alert-banner">
+                                    <div class="alert-icon"><i class="fa-solid fa-bell-concierge"></i></div>
+                                    <div class="alert-info">
+                                        <h4>3 Cơ hội cần cập nhật (>72h)</h4>
+                                        <p>Dự án IOC Cam Ranh, CSDL Đất đai Ninh Hòa...</p>
+                                    </div>
+                                    <i class="fa-solid fa-chevron-right alert-arrow"></i>
+                                </div>
+
+                                <!-- Biểu đồ phân bổ SPDV Số (Donut Graphic) -->
+                                <div class="content-card">
+                                    <div class="card-head">
+                                        <h4>Phân bổ Doanh thu Nhóm DV Số</h4>
+                                        <span class="text-tag">2026</span>
+                                    </div>
+                                    <div class="donut-chart-demo">
+                                        <div class="donut-visual">
+                                            <div class="donut-circle">
+                                                <div class="donut-inner">
+                                                    <strong>100%</strong>
+                                                    <small>8 Nhóm</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="donut-legend">
+                                            <div class="leg-item"><span class="dot c-1"></span> Chính quyền số (42%)</div>
+                                            <div class="leg-item"><span class="dot c-2"></span> Y tế số (26%)</div>
+                                            <div class="leg-item"><span class="dot c-3"></span> Giáo dục số (18%)</div>
+                                            <div class="leg-item"><span class="dot c-4"></span> Doanh nghiệp (14%)</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Danh sách công việc hôm nay -->
+                                <div class="content-card">
+                                    <div class="card-head">
+                                        <h4>Nhiệm vụ trọng tâm hôm nay</h4>
+                                        <a href="javascript:void(0);" onclick="switchScreenById('scr-wbs-checklist')" class="link-more">Xem tất cả</a>
+                                    </div>
+                                    <div class="task-mini-list">
+                                        <div class="task-mini-item">
+                                            <input type="checkbox" class="task-chk">
+                                            <div class="task-meta">
+                                                <h5>Trình diễn giải pháp IOC Cam Ranh</h5>
+                                                <div class="task-tags">
+                                                    <span class="badge-tag red">Hạn 11:30</span>
+                                                    <span class="badge-tag gray">UBND TP Cam Ranh</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="task-mini-item">
+                                            <input type="checkbox" class="task-chk" checked>
+                                            <div class="task-meta">
+                                                <h5 class="done">Nộp dự toán phần mềm Bệnh viện Đa khoa</h5>
+                                                <div class="task-tags">
+                                                    <span class="badge-tag green">Đã xong</span>
+                                                    <span class="badge-tag gray">Sở Y tế Khánh Hòa</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 2: SCR-08 DANH SÁCH SPDV SỐ -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-sales-list">
+                            <header class="app-header sub-header">
+                                <div>
+                                    <small>Phân hệ Kinh doanh</small>
+                                    <h3>Hồ sơ SPDV Số</h3>
+                                </div>
+                                <div class="header-actions">
+                                    <button class="btn-icon-head"><i class="fa-solid fa-sliders"></i></button>
+                                    <button class="btn-icon-head"><i class="fa-solid fa-plus text-primary"></i></button>
+                                </div>
+                            </header>
+
+                            <!-- Thanh tìm kiếm & filter chips -->
+                            <div class="search-bar-wrap">
+                                <div class="input-search">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" placeholder="Tìm kiếm tên dự án, khách hàng...">
+                                </div>
+                            </div>
+
+                            <div class="filter-chips-strip">
+                                <button class="chip active">Tất cả (42)</button>
+                                <button class="chip">⭐ Trọng điểm (8)</button>
+                                <button class="chip">Đang theo dõi (12)</button>
+                                <button class="chip">Tiếp cận (15)</button>
+                                <button class="chip">Triển khai (9)</button>
+                            </div>
+
+                            <!-- Danh sách Cards cơ hội -->
+                            <div class="app-scrollable-content">
+                                <!-- Card 1 -->
+                                <div class="sales-card" onclick="switchScreenById('scr-sales-detail')">
+                                    <div class="sales-card-header">
+                                        <span class="badge-type opportunity">CƠ HỘI</span>
+                                        <span class="badge-status approaching">Tiếp cận</span>
+                                        <button class="btn-star active"><i class="fa-solid fa-star"></i></button>
+                                    </div>
+                                    <h4 class="sales-card-title">Hệ thống Điều hành Đô thị Thông minh IOC TP. Cam Ranh</h4>
+                                    <div class="sales-card-customer">
+                                        <i class="fa-regular fa-building"></i> UBND Thành phố Cam Ranh
+                                    </div>
+                                    <div class="sales-card-footer">
+                                        <div class="am-info">
+                                            <span class="am-avatar">TT</span>
+                                            <span>AM: Trần Duy Tân</span>
+                                        </div>
+                                        <div class="sales-val">
+                                            5.600 Tr.đ
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2 -->
+                                <div class="sales-card" onclick="switchScreenById('scr-sales-detail')">
+                                    <div class="sales-card-header">
+                                        <span class="badge-type project">DỰ ÁN</span>
+                                        <span class="badge-status contracted">Hợp đồng</span>
+                                        <button class="btn-star active"><i class="fa-solid fa-star"></i></button>
+                                    </div>
+                                    <h4 class="sales-card-title">Nâng cấp CSDL Hồ sơ Bệnh án Điện tử EMR 2026</h4>
+                                    <div class="sales-card-customer">
+                                        <i class="fa-regular fa-hospital"></i> Bệnh viện Đa khoa Tỉnh Khánh Hòa
+                                    </div>
+                                    <div class="sales-card-footer">
+                                        <div class="am-info">
+                                            <span class="am-avatar bg-indigo">HQ</span>
+                                            <span>AM: Hoàng Quyên</span>
+                                        </div>
+                                        <div class="sales-val text-green">
+                                            2.850 Tr.đ
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 3 (Chậm tương tác) -->
+                                <div class="sales-card warn-border" onclick="switchScreenById('scr-sales-detail')">
+                                    <div class="sales-card-header">
+                                        <span class="badge-type opportunity">CƠ HỘI</span>
+                                        <span class="badge-status formation">Hình thành</span>
+                                        <span class="badge-warn-72h"><i class="fa-solid fa-clock"></i> 76h</span>
+                                    </div>
+                                    <h4 class="sales-card-title">Phần mềm Quản lý Đất đai VBDLIS Huyện Diên Khánh</h4>
+                                    <div class="sales-card-customer">
+                                        <i class="fa-regular fa-landmark"></i> Phòng TN&MT Diên Khánh
+                                    </div>
+                                    <div class="sales-card-footer">
+                                        <div class="am-info">
+                                            <span class="am-avatar bg-teal">VA</span>
+                                            <span>AM: Vũ Anh</span>
+                                        </div>
+                                        <div class="sales-val">
+                                            1.400 Tr.đ
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 3: SCR-10 CHI TIẾT HỒ SƠ 360° -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-sales-detail">
+                            <header class="app-header detail-header">
+                                <button class="btn-icon-head" onclick="switchScreenById('scr-sales-list')">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <div class="header-center">
+                                    <small>Hồ sơ SPDV #CH-2026-089</small>
+                                    <span class="badge-status approaching">Đang tiếp cận</span>
+                                </div>
+                                <button class="btn-icon-head"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                            </header>
+
+                            <div class="app-scrollable-content">
+                                <!-- Banner thông tin dự án -->
+                                <div class="detail-banner-card">
+                                    <div class="detail-badges">
+                                        <span class="badge-tag gold"><i class="fa-solid fa-star"></i> Trọng điểm</span>
+                                        <span class="badge-tag cyan">Chính quyền số</span>
+                                    </div>
+                                    <h3 class="detail-proj-name">Hệ thống Điều hành Đô thị Thông minh IOC TP. Cam Ranh</h3>
+                                    <p class="detail-customer-name"><i class="fa-solid fa-building"></i> UBND Thành phố Cam Ranh</p>
+                                    
+                                    <!-- Tài chính -->
+                                    <div class="detail-financial-row">
+                                        <div class="fin-box">
+                                            <span>Dự kiến</span>
+                                            <h4>5.600 Tr.đ</h4>
+                                        </div>
+                                        <div class="fin-divider"></div>
+                                        <div class="fin-box">
+                                            <span>Đã ký HĐ</span>
+                                            <h4 class="text-green">0 Tr.đ</h4>
+                                        </div>
+                                        <div class="fin-divider"></div>
+                                        <div class="fin-box">
+                                            <span>Tiến độ</span>
+                                            <h4 class="text-primary">45%</h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thanh Tabs phụ điều hướng hồ sơ -->
+                                <div class="detail-nav-tabs">
+                                    <button class="d-tab active" onclick="switchScreenById('scr-wbs-checklist')">
+                                        <i class="fa-solid fa-list-check"></i> Checklist
+                                    </button>
+                                    <button class="d-tab" onclick="switchScreenById('scr-discussion')">
+                                        <i class="fa-solid fa-comments"></i> Thảo luận
+                                    </button>
+                                    <button class="d-tab" onclick="switchScreenById('scr-shared-docs')">
+                                        <i class="fa-solid fa-paperclip"></i> Tệp đính kèm
+                                    </button>
+                                </div>
+
+                                <!-- Tóm tắt tiến trình đang thực hiện -->
+                                <div class="content-card">
+                                    <div class="card-head">
+                                        <h4>Quy trình áp dụng: Tiếp cận & Trình diễn</h4>
+                                        <button class="btn-xs-link" onclick="switchScreenById('scr-wbs-checklist')">Mở WBS</button>
+                                    </div>
+                                    <div class="stepper-horizontal">
+                                        <div class="step-point done">
+                                            <div class="dot"><i class="fa-solid fa-check"></i></div>
+                                            <span>Khảo sát</span>
+                                        </div>
+                                        <div class="step-line active"></div>
+                                        <div class="step-point current">
+                                            <div class="dot">2</div>
+                                            <span>Trình diễn</span>
+                                        </div>
+                                        <div class="step-line"></div>
+                                        <div class="step-point">
+                                            <div class="dot">3</div>
+                                            <span>Đấu thầu</span>
+                                        </div>
+                                        <div class="step-line"></div>
+                                        <div class="step-point">
+                                            <div class="dot">4</div>
+                                            <span>Ký HĐ</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thao tác nhanh -->
+                                <div class="detail-actions-row">
+                                    <button class="btn-action-primary" onclick="switchScreenById('scr-report-modal')">
+                                        <i class="fa-solid fa-camera"></i> Báo cáo tiến độ
+                                    </button>
+                                    <button class="btn-action-outline">
+                                        <i class="fa-solid fa-arrows-spin"></i> Chuyển bước
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 4: SCR-11 CÂY TIẾN TRÌNH & WBS CHECKLIST -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-wbs-checklist">
+                            <header class="app-header sub-header">
+                                <button class="btn-icon-head" onclick="switchScreenById('scr-sales-detail')">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <div>
+                                    <small>Checklist công việc WBS</small>
+                                    <h3>IOC TP. Cam Ranh</h3>
+                                </div>
+                                <button class="btn-icon-head"><i class="fa-solid fa-plus"></i></button>
+                            </header>
+
+                            <div class="app-scrollable-content">
+                                <!-- Tiến trình 1: Khảo sát hiện trạng (Đã xong) -->
+                                <div class="wbs-progress-group done">
+                                    <div class="wbs-progress-head">
+                                        <i class="fa-solid fa-circle-check text-green"></i>
+                                        <div class="wbs-head-title">
+                                            <h5>1. Khảo sát hạ tầng & phòng máy chủ</h5>
+                                            <small>Hoàn thành 100% • 2 đầu việc</small>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Tiến trình 2: Trình diễn giải pháp Demo (Đang làm) -->
+                                <div class="wbs-progress-group active">
+                                    <div class="wbs-progress-head">
+                                        <div class="wbs-num-circle">2</div>
+                                        <div class="wbs-head-title">
+                                            <h5>2. Demo & Trình diễn giải pháp IOC</h5>
+                                            <small class="text-primary font-bold">Đang triển khai • 45%</small>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-up"></i>
+                                    </div>
+
+                                    <!-- Danh sách Task con -->
+                                    <div class="wbs-tasks-body">
+                                        <!-- Task 2.1 (Đã xong) -->
+                                        <div class="wbs-task-card done">
+                                            <input type="checkbox" checked class="wbs-chk">
+                                            <div class="wbs-task-content">
+                                                <h6>2.1 Chuẩn bị dữ liệu mẫu các phân hệ</h6>
+                                                <div class="wbs-task-meta">
+                                                    <span><i class="fa-solid fa-user"></i> Tuấn Anh (KT)</span>
+                                                    <span><i class="fa-solid fa-calendar"></i> Xong 22/09</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Task 2.2 (Đang làm - Cần báo cáo) -->
+                                        <div class="wbs-task-card active">
+                                            <input type="checkbox" class="wbs-chk">
+                                            <div class="wbs-task-content">
+                                                <h6>2.2 Thuyết trình trực tiếp trước Lãnh đạo UBND</h6>
+                                                <div class="wbs-task-meta">
+                                                    <span><i class="fa-solid fa-user"></i> Trần Duy Tân (AM)</span>
+                                                    <span class="text-danger font-bold"><i class="fa-solid fa-clock"></i> Hôm nay 14:00</span>
+                                                </div>
+                                                <div class="wbs-task-actions">
+                                                    <button class="btn-wbs-report" onclick="switchScreenById('scr-report-modal')">
+                                                        <i class="fa-solid fa-camera"></i> Báo cáo kết quả
+                                                    </button>
+                                                    <button class="btn-wbs-more"><i class="fa-solid fa-ellipsis"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Subtask 2.2.1 -->
+                                        <div class="wbs-subtask-card">
+                                            <div class="subtask-indent-line"></div>
+                                            <input type="checkbox" class="wbs-chk">
+                                            <div class="wbs-task-content">
+                                                <h6>2.2.1 In tài liệu giới thiệu & slide trình chiếu</h6>
+                                                <div class="wbs-task-meta">
+                                                    <span><i class="fa-solid fa-user"></i> Minh Thư</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Task 2.3 -->
+                                        <div class="wbs-task-card pending">
+                                            <input type="checkbox" class="wbs-chk">
+                                            <div class="wbs-task-content">
+                                                <h6>2.3 Ký biên bản ghi nhớ thử nghiệm giải pháp</h6>
+                                                <div class="wbs-task-meta">
+                                                    <span><i class="fa-solid fa-user"></i> Duy Tân</span>
+                                                    <span>Hạn 28/09</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 5: SCR-12 BÁO CÁO KẾT QUẢ CÔNG VIỆC -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-report-modal">
+                            <header class="app-header sub-header">
+                                <button class="btn-icon-head" onclick="switchScreenById('scr-wbs-checklist')">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                                <div>
+                                    <small>Nộp kết quả (US-01)</small>
+                                    <h3>Báo Cáo Tiến Độ</h3>
+                                </div>
+                                <button class="btn-text-head" onclick="alert('Báo cáo đã được lưu vào hệ thống thành công!')">Gửi</button>
+                            </header>
+
+                            <div class="app-scrollable-content">
+                                <!-- Box thông tin nhiệm vụ -->
+                                <div class="report-task-ref">
+                                    <span class="ref-code">TASK 2.2</span>
+                                    <h4>Thuyết trình trực tiếp trước Lãnh đạo UBND</h4>
+                                    <div class="ref-sub">UBND TP Cam Ranh • Hạn: 24/09/2026</div>
+                                </div>
+
+                                <!-- Form nộp kết quả -->
+                                <div class="report-form-group">
+                                    <label class="form-label">Nội dung báo cáo kết quả (*):</label>
+                                    <textarea class="form-textarea" rows="4" placeholder="Nhập tóm tắt buổi làm việc, ý kiến lãnh đạo, thỏa thuận bước tiếp theo..."></textarea>
+                                </div>
+
+                                <!-- Chụp ảnh & Đính kèm file minh chứng -->
+                                <div class="report-form-group">
+                                    <label class="form-label">Tệp minh chứng & Ảnh hiện trường:</label>
+                                    <div class="camera-attach-row">
+                                        <div class="btn-camera-upload">
+                                            <i class="fa-solid fa-camera"></i>
+                                            <span>Chụp ảnh</span>
+                                        </div>
+                                        <div class="btn-file-upload">
+                                            <i class="fa-solid fa-file-arrow-up"></i>
+                                            <span>Chọn tệp</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Danh sách file mẫu đã chụp đính kèm -->
+                                    <div class="attached-previews-list">
+                                        <div class="preview-item-chip">
+                                            <i class="fa-solid fa-image text-cyan"></i>
+                                            <span class="file-name">bien_ban_hop_ubnd.jpg</span>
+                                            <i class="fa-solid fa-xmark btn-del-file"></i>
+                                        </div>
+                                        <div class="preview-item-chip">
+                                            <i class="fa-solid fa-file-pdf text-danger"></i>
+                                            <span class="file-name">slide_thuyet_trinh_v2.pdf</span>
+                                            <i class="fa-solid fa-xmark btn-del-file"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Lịch sử các lần báo cáo trước đó -->
+                                <div class="history-report-box">
+                                    <div class="hr-title"><i class="fa-solid fa-clock-rotate-left"></i> Lịch sử báo cáo đã ghi nhận (1)</div>
+                                    <div class="hr-item">
+                                        <div class="hr-head">
+                                            <strong>Trần Duy Tân</strong>
+                                            <span>23/09 16:30</span>
+                                        </div>
+                                        <p>Đã gửi dự thảo tài liệu trước cho Chánh văn phòng UBND xem xét.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 6: SCR-14 THẢO LUẬN & NHẬT KÝ TƯƠNG TÁC -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-discussion">
+                            <header class="app-header sub-header">
+                                <button class="btn-icon-head" onclick="switchScreenById('scr-sales-detail')">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <div>
+                                    <small>Thảo luận nội bộ</small>
+                                    <h3>IOC TP. Cam Ranh</h3>
+                                </div>
+                                <button class="btn-icon-head"><i class="fa-solid fa-users"></i></button>
+                            </header>
+
+                            <!-- Khung tin nhắn chat -->
+                            <div class="chat-messages-container">
+                                <!-- Message 1 -->
+                                <div class="chat-msg-row other">
+                                    <span class="chat-avatar bg-indigo">HQ</span>
+                                    <div class="chat-bubble">
+                                        <div class="chat-sender">Hoàng Quyên (Pre-sales)</div>
+                                        <p>Em vừa hoàn thành xong bản demo bản đồ camera AI phân tích giao thông rồi nhé anh Tân.</p>
+                                        
+                                        <!-- File đính kèm trong chat -->
+                                        <div class="chat-file-card" onclick="alert('Đang mở file trực tuyến...')">
+                                            <i class="fa-solid fa-file-pdf text-danger"></i>
+                                            <div class="file-info">
+                                                <strong>Tai_lieu_Giai_phap_Camera_AI.pdf</strong>
+                                                <small>2.4 MB • Bấm để xem PDF</small>
+                                            </div>
+                                        </div>
+                                        <span class="chat-time">10:15</span>
+                                    </div>
+                                </div>
+
+                                <!-- Message 2 (Tôi gửi) -->
+                                <div class="chat-msg-row me">
+                                    <div class="chat-bubble">
+                                        <p>Tuyệt vời em! Chiều nay 14h anh thuyết trình trước Chủ tịch UBND sẽ dùng bản demo này.</p>
+                                        <span class="chat-time">10:20 <i class="fa-solid fa-check-double"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Thanh nhập chat đáy -->
+                            <div class="chat-input-bar">
+                                <button class="chat-btn-tool"><i class="fa-solid fa-paperclip"></i></button>
+                                <button class="chat-btn-tool"><i class="fa-solid fa-at"></i></button>
+                                <input type="text" class="chat-input" placeholder="Nhập trao đổi, nhắc @đồng nghiệp...">
+                                <button class="chat-btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 7: SCR-24 TÀI LIỆU BIỂU MẪU CHUNG -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-shared-docs">
+                            <header class="app-header sub-header">
+                                <div>
+                                    <small>Kho dữ liệu chuẩn</small>
+                                    <h3>Biểu Mẫu & Tài Liệu</h3>
+                                </div>
+                                <button class="btn-icon-head"><i class="fa-solid fa-cloud-arrow-up text-primary"></i></button>
+                            </header>
+
+                            <div class="search-bar-wrap">
+                                <div class="input-search">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" placeholder="Tìm hợp đồng mẫu, quy trình ISO...">
+                                </div>
+                            </div>
+
+                            <!-- Lưới 4 Chuyên mục chính (tương ứng Sys_DocumentCategory) -->
+                            <div class="doc-categories-grid">
+                                <div class="doc-cat-card active">
+                                    <i class="fa-solid fa-file-contract text-blue"></i>
+                                    <span>Hợp đồng</span>
+                                    <small>18 mẫu</small>
+                                </div>
+                                <div class="doc-cat-card">
+                                    <i class="fa-solid fa-award text-purple"></i>
+                                    <span>Quy trình ISO</span>
+                                    <small>12 mẫu</small>
+                                </div>
+                                <div class="doc-cat-card">
+                                    <i class="fa-solid fa-laptop-code text-cyan"></i>
+                                    <span>Kỹ thuật</span>
+                                    <small>35 mẫu</small>
+                                </div>
+                                <div class="doc-cat-card">
+                                    <i class="fa-solid fa-file-signature text-amber"></i>
+                                    <span>Hành chính</span>
+                                    <small>24 mẫu</small>
+                                </div>
+                            </div>
+
+                            <!-- Danh sách tài liệu biểu mẫu -->
+                            <div class="app-scrollable-content">
+                                <div class="doc-file-item">
+                                    <div class="doc-file-icon bg-blue-light">
+                                        <i class="fa-solid fa-file-word text-blue"></i>
+                                    </div>
+                                    <div class="doc-file-info">
+                                        <h5>Mau_Hop_dong_Cung_cap_SPDV_So_2026.docx</h5>
+                                        <div class="doc-meta">
+                                            <span>Word • 45 KB</span>
+                                            <span><i class="fa-solid fa-download"></i> 142 lượt tải</span>
+                                        </div>
+                                    </div>
+                                    <div class="doc-actions">
+                                        <button class="btn-doc-view" title="Xem trực tuyến Office Online" onclick="alert('Đang mở xem tài liệu qua Microsoft Office Online!')">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button class="btn-doc-download"><i class="fa-solid fa-download"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="doc-file-item">
+                                    <div class="doc-file-icon bg-red-light">
+                                        <i class="fa-solid fa-file-pdf text-danger"></i>
+                                    </div>
+                                    <div class="doc-file-info">
+                                        <h5>Quy_trinh_Khao_sat_Trien_khai_IOC_VNPT.pdf</h5>
+                                        <div class="doc-meta">
+                                            <span>PDF • 1.8 MB</span>
+                                            <span><i class="fa-solid fa-download"></i> 89 lượt tải</span>
+                                        </div>
+                                    </div>
+                                    <div class="doc-actions">
+                                        <button class="btn-doc-view" title="Xem trực tiếp PDF" onclick="alert('Đang mở xem trực tiếp PDF trên trình duyệt...')">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button class="btn-doc-download"><i class="fa-solid fa-download"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="doc-file-item">
+                                    <div class="doc-file-icon bg-green-light">
+                                        <i class="fa-solid fa-file-excel text-green"></i>
+                                    </div>
+                                    <div class="doc-file-info">
+                                        <h5>Bang_tinh_Dinh_muc_Gia_dich_vu_CNTT.xlsx</h5>
+                                        <div class="doc-meta">
+                                            <span>Excel • 120 KB</span>
+                                            <span><i class="fa-solid fa-download"></i> 310 lượt tải</span>
+                                        </div>
+                                    </div>
+                                    <div class="doc-actions">
+                                        <button class="btn-doc-view" onclick="alert('Đang mở xem bảng tính qua Excel Online!')">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button class="btn-doc-download"><i class="fa-solid fa-download"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ============================================== -->
+                        <!-- SCREEN 8: SCR-02 ĐĂNG NHẬP (LOGIN SCREEN) -->
+                        <!-- ============================================== -->
+                        <div class="screen-page" id="scr-login">
+                            <div class="login-view-body">
+                                <div class="login-logo-box">
+                                    <div class="vnpt-globe-icon">
+                                        <i class="fa-solid fa-globe"></i>
+                                    </div>
+                                    <h2>VNPT KHÁNH HÒA</h2>
+                                    <p>Trung Tâm Kinh Doanh Giải Pháp (TTKDGP)</p>
+                                </div>
+
+                                <div class="login-form-box">
+                                    <div class="login-input-group">
+                                        <i class="fa-regular fa-user"></i>
+                                        <input type="text" value="tan.td" placeholder="Tên đăng nhập / Email VNPT">
+                                    </div>
+                                    <div class="login-input-group">
+                                        <i class="fa-solid fa-lock"></i>
+                                        <input type="password" value="••••••••••••" placeholder="Mật khẩu">
+                                        <i class="fa-regular fa-eye-slash btn-show-pwd"></i>
+                                    </div>
+                                    <div class="login-options-row">
+                                        <label class="remember-chk"><input type="checkbox" checked> Ghi nhớ</label>
+                                        <a href="javascript:void(0);" class="forgot-link">Quên mật khẩu?</a>
+                                    </div>
+
+                                    <button class="btn-login-submit" onclick="switchScreenById('scr-dashboard')">
+                                        ĐĂNG NHẬP HỆ THỐNG
+                                    </button>
+
+                                    <div class="or-divider"><span>HOẶC</span></div>
+
+                                    <button class="btn-login-sso" onclick="switchScreenById('scr-dashboard')">
+                                        <i class="fa-solid fa-shield-halved"></i> Đăng nhập qua VNPT SSO
+                                    </button>
+
+                                    <!-- Nút sinh trắc học Face ID -->
+                                    <div class="biometric-login-box" onclick="switchScreenById('scr-dashboard')">
+                                        <div class="bio-icon-btn">
+                                            <i class="fa-solid fa-fingerprint"></i>
+                                        </div>
+                                        <small>Chạm để quét Face ID / Vân tay</small>
+                                    </div>
+                                </div>
+
+                                <div class="login-footer">
+                                    CenIT TOC CRM Mobile • v1.0.0 (Build 2026)
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- BOTTOM NAVIGATION BAR (5 TABS CHUẨN) -->
+                    <nav class="bottom-nav-bar">
+                        <button class="nav-tab active" onclick="switchScreenById('scr-dashboard')">
+                            <i class="fa-solid fa-house"></i>
+                            <span>Trang chủ</span>
+                        </button>
+                        <button class="nav-tab" onclick="switchScreenById('scr-sales-list')">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>Cơ hội</span>
+                        </button>
+                        <button class="nav-tab" onclick="switchScreenById('scr-wbs-checklist')">
+                            <i class="fa-solid fa-list-check"></i>
+                            <span>Việc tôi</span>
+                        </button>
+                        <button class="nav-tab" onclick="switchScreenById('scr-shared-docs')">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span>Biểu mẫu</span>
+                        </button>
+                        <button class="nav-tab" onclick="switchScreenById('scr-login')">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <span>Tài khoản</span>
+                        </button>
+                    </nav>
+
+                    <!-- HOME INDICATOR GẠCH DƯỚI (iOS chuẩn) -->
+                    <div class="home-indicator"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- KHU VỰC THƯ VIỆN BẢN VẼ UI THIẾT KẾ CHI TIẾT (UI GALLERY SHOWCASE) -->
+        <section class="gallery-showcase-view" id="viewGallery">
+            <div class="gallery-header-banner">
+                <h2><i class="fa-solid fa-palette"></i> BỘ THIẾT KẾ GIAO DIỆN CHI TIẾT (HIGH-FIDELITY MOBILE UI)</h2>
+                <p>
+                    Thiết kế chuẩn phong cách <strong>iOS 18 Glassmorphism</strong>, tối ưu cho <strong>VNPT Khánh Hòa – Trung Tâm Kinh Doanh Giải Pháp (TTKDGP)</strong>.
+                    Bao phủ toàn diện 6 trải nghiệm nòng cốt: Xác thực VNPT SSO/Sinh trắc học, Bảng điều hành số liệu lãnh đạo, Pipeline cơ hội SPDV Số, Quản lý tiến độ WBS hiện trường, Hồ sơ Khách hàng 360°, và Trình xem trực tiếp Hợp đồng/Biểu mẫu Office & PDF.
+                </p>
+            </div>
+
+            <div class="gallery-grid">
+                <!-- CARD 1: XÁC THỰC SSO & FACE ID -->
+                <div class="gallery-card">
+                    <div class="gallery-card-thumb" onclick="openImageModal('mockups/01_auth_login.jpg', 'SCR-02: Xác Thực & Đăng Nhập VNPT SSO', 'Giao diện đăng nhập hiện đại với nhận diện thương hiệu VNPT Khánh Hòa, tích hợp đăng nhập bảo mật SSO VNPT và nút mở khóa sinh trắc học Face ID / Touch ID vòng tròn phát sáng neon.')">
+                        <img src="mockups/01_auth_login.jpg" alt="SCR-02: Xác Thực & Đăng Nhập">
+                        <div class="thumb-overlay">
+                            <button class="btn-preview-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem Full HD</button>
+                        </div>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="screen-badge-row">
+                            <span class="badge-screen-id">SCR-02</span>
+                            <span class="badge-tag-module">Phân hệ Xác thực</span>
+                        </div>
+                        <h4 class="gallery-card-title">Đăng Nhập SSO & Sinh Trắc Học</h4>
+                        <p class="gallery-card-desc">Tích hợp xác thực một lần VNPT SSO, hỗ trợ mở khóa nhanh bằng khuôn mặt Face ID hoặc vân tay ngoài hiện trường.</p>
+                        <div class="gallery-card-specs">
+                            <span><i class="fa-solid fa-shield-halved"></i> Bảo mật: VNPT SSO + Biometrics JWT</span>
+                            <span><i class="fa-solid fa-paint-roller"></i> Phong cách: Frosted Dark Neon Blue</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: EXECUTIVE DASHBOARD -->
+                <div class="gallery-card">
+                    <div class="gallery-card-thumb" onclick="openImageModal('mockups/02_executive_dashboard.jpg', 'SCR-05: Bảng Điều Hành Giám Đốc TTKDGP', 'Bảng điều khiển số liệu kinh doanh dành cho Ban Giám Đốc: Doanh thu thực tế SPDV Số đạt 12.8 Tỷ (84.5% KPI), Biểu đồ cơ cấu doanh thu Donut Chart, và Băng cảnh báo đỏ khẩn cấp các dự án trễ cập nhật quá 72h.')">
+                        <img src="mockups/02_executive_dashboard.jpg" alt="SCR-05: Executive Dashboard">
+                        <div class="thumb-overlay">
+                            <button class="btn-preview-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem Full HD</button>
+                        </div>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="screen-badge-row">
+                            <span class="badge-screen-id">SCR-05</span>
+                            <span class="badge-tag-module">Phân hệ Điều hành</span>
+                        </div>
+                        <h4 class="gallery-card-title">Bảng Điều Hành Giám Đốc (KPIs)</h4>
+                        <p class="gallery-card-desc">Giám sát tổng doanh thu SPDV Số thực tế, cơ cấu dịch vụ (Chính quyền số, Y tế, Cloud), và cảnh báo trễ > 72h.</p>
+                        <div class="gallery-card-specs">
+                            <span><i class="fa-solid fa-chart-pie"></i> Visual: Donut Chart + Thẻ KPI nổi</span>
+                            <span><i class="fa-solid fa-bell"></i> Cảnh báo: Alert Banner trễ hạn 72h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: PIPELINE KANBAN -->
+                <div class="gallery-card">
+                    <div class="gallery-card-thumb" onclick="openImageModal('mockups/03_pipeline_kanban.jpg', 'SCR-08: Đường Ống Bán Hàng & Cơ Hội SPDV Số', 'Giao diện quản lý phễu cơ hội dạng thẻ Kanban di động: Phân loại theo các giai đoạn Tiếp cận (12), Khảo sát (8), Báo giá (15), Đã ký (7). Tích hợp tìm kiếm nhanh, gắn cờ cảnh báo đỏ cho dự án cần cập nhật và nút FAB thêm mới nhanh.')">
+                        <img src="mockups/03_pipeline_kanban.jpg" alt="SCR-08: Đường Ống Bán Hàng Pipeline">
+                        <div class="thumb-overlay">
+                            <button class="btn-preview-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem Full HD</button>
+                        </div>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="screen-badge-row">
+                            <span class="badge-screen-id">SCR-08</span>
+                            <span class="badge-tag-module">Phân hệ Bán hàng</span>
+                        </div>
+                        <h4 class="gallery-card-title">Đường Ống Bán Hàng & Pipeline</h4>
+                        <p class="gallery-card-desc">Quản lý trực quan toàn bộ các cơ hội giải pháp CNTT theo từng giai đoạn, theo dõi giá trị dự án và người phụ trách AM.</p>
+                        <div class="gallery-card-specs">
+                            <span><i class="fa-solid fa-layer-group"></i> Giao diện: Thẻ Kanban cuộn ngang</span>
+                            <span><i class="fa-solid fa-filter"></i> Bộ lọc: Phân loại giai đoạn tức thì</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: WBS CHECKLIST & DETAIL -->
+                <div class="gallery-card">
+                    <div class="gallery-card-thumb" onclick="openImageModal('mockups/04_opportunity_wbs_detail.jpg', 'SCR-10 & SCR-11: Chi Tiết Cơ Hội & Hạng Mục WBS', 'Màn hình chi tiết dự án (Trung tâm IOC Nha Trang - 1.850.000.000 đ) với thanh tiến trình bước (Timeline Step Indicator) phát sáng cyan, danh mục công việc khảo sát WBS có checkbox hoàn thành, và thanh thao tác nhanh: Chụp ảnh hiện trường, Trao đổi, Báo cáo, Đổi trạng thái.')">
+                        <img src="mockups/04_opportunity_wbs_detail.jpg" alt="SCR-10 / SCR-11: Chi Tiết WBS">
+                        <div class="thumb-overlay">
+                            <button class="btn-preview-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem Full HD</button>
+                        </div>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="screen-badge-row">
+                            <span class="badge-screen-id">SCR-10/11</span>
+                            <span class="badge-tag-module">Phân hệ Tiến trình</span>
+                        </div>
+                        <h4 class="gallery-card-title">Chi Tiết Cơ Hội & Tiến Trình WBS</h4>
+                        <p class="gallery-card-desc">Theo dõi tiến độ dự án từng bước, đánh dấu hoàn thành các hạng mục kỹ thuật khảo sát và ghi nhận kết quả tại hiện trường.</p>
+                        <div class="gallery-card-specs">
+                            <span><i class="fa-solid fa-list-check"></i> Checklist: Tương tác chạm tức thì</span>
+                            <span><i class="fa-solid fa-camera"></i> Hiện trường: Đính kèm ảnh & biên bản</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 5: KHÁCH HÀNG 360 ĐỘ -->
+                <div class="gallery-card">
+                    <div class="gallery-card-thumb" onclick="openImageModal('mockups/05_customer_360_profile.jpg', 'SCR-22: Hồ Sơ Khách Hàng 360 Độ', 'Màn hình thông tin khách hàng tổ chức (UBND Thành Phố Nha Trang): Nút gọi điện nhanh, gửi email công vụ, chỉ đường bản đồ. Danh bạ người liên hệ đầu mối trọng yếu, danh sách các hợp đồng và dự án CNTT đang phối hợp triển khai kèm thanh tiến độ.')">
+                        <img src="mockups/05_customer_360_profile.jpg" alt="SCR-22: Khách Hàng 360 Độ">
+                        <div class="thumb-overlay">
+                            <button class="btn-preview-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem Full HD</button>
+                        </div>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="screen-badge-row">
+                            <span class="badge-screen-id">SCR-22</span>
+                            <span class="badge-tag-module">Phân hệ Khách hàng</span>
+                        </div>
+                        <h4 class="gallery-card-title">Hồ Sơ Khách Hàng 360°</h4>
+                        <p class="gallery-card-desc">Cung cấp toàn cảnh về khách hàng cơ quan hành chính/doanh nghiệp: Đầu mối liên hệ, các hợp đồng dịch vụ và dự án đang chạy.</p>
+                        <div class="gallery-card-specs">
+                            <span><i class="fa-solid fa-address-book"></i> Thao tác: Gọi điện thoại / Email 1-chạm</span>
+                            <span><i class="fa-solid fa-folder-tree"></i> Liên kết: Lịch sử hợp đồng & Cơ hội</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 6: XEM TÀI LIỆU BIỂU MẪU OFFICE/PDF -->
+                <div class="gallery-card">
+                    <div class="gallery-card-thumb" onclick="openImageModal('mockups/06_document_office_preview.jpg', 'SCR-25: Xem Biểu Mẫu Hợp Đồng Office & PDF Trực Tiếp', 'Màn hình đọc và xem trước văn bản trực tiếp trên điện thoại (Hợp đồng cung cấp SPDV Số - VNPT Khánh Hòa), tích hợp công nghệ Office Online & PDF Viewer, công cụ chuyển trang, thu phóng, và nút Ký số / Phê duyệt điện tử.')">
+                        <img src="mockups/06_document_office_preview.jpg" alt="SCR-25: Xem Biểu Mẫu Trực Tuyến">
+                        <div class="thumb-overlay">
+                            <button class="btn-preview-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> Xem Full HD</button>
+                        </div>
+                    </div>
+                    <div class="gallery-card-body">
+                        <div class="screen-badge-row">
+                            <span class="badge-screen-id">SCR-25</span>
+                            <span class="badge-tag-module">Phân hệ Tài liệu</span>
+                        </div>
+                        <h4 class="gallery-card-title">Xem Trực Tiếp Hợp Đồng & Biểu Mẫu</h4>
+                        <p class="gallery-card-desc">Mở đọc hợp đồng mẫu, phụ lục kỹ thuật Word (.docx) và PDF mượt mà ngay trên smartphone, hỗ trợ phê duyệt và ký số từ xa.</p>
+                        <div class="gallery-card-specs">
+                            <span><i class="fa-solid fa-file-word"></i> Trình đọc: Office Online & PDF Viewer</span>
+                            <span><i class="fa-solid fa-signature"></i> Thao tác: Ký số / Phê duyệt trực tuyến</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Script tương tác -->
+    <script src="script.js"></script>
+</body>
+</html>

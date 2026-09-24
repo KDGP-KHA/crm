@@ -61,13 +61,27 @@
         <tbody id="treeTrackingBody">
             @if (parentTasks != null && parentTasks.Count > 0)
             {
-                var statusGroups = parentTasks.GroupBy(t => new
+                var workflowCache = new Core.Cate.Caches.RM_DigitalSalesWorkflowCache();
+                var allConfigStatuses = workflowCache.GetAllStatuses() ?? new List<Core.Cate.Models.RM_DigitalSalesStatusModel>();
+                var statusConfigDict = allConfigStatuses.GroupBy(s => s.StatusID).ToDictionary(g => g.Key, g => g.First());
+
+                var rawStatusGroups = parentTasks.GroupBy(t => new
                 {
                     TimelineID = t.TimelineID ?? (t.StatusID ?? 0),
                     StatusID = t.StatusID ?? 0,
                     StatusName = !string.IsNullOrEmpty(t.SalesStatusName) ? t.SalesStatusName : "Trạng thái",
                     ProcessCountOfStatus = t.ProcessCountOfStatus
-                }).OrderBy(g => g.Key.TimelineID).ToList();
+                }).ToList();
+
+                var statusGroups = rawStatusGroups
+                    .OrderBy(g => statusConfigDict.ContainsKey(g.Key.StatusID) ? statusConfigDict[g.Key.StatusID].BusinessType : (byte)255)
+                    .ThenBy(g => statusConfigDict.ContainsKey(g.Key.StatusID) ? statusConfigDict[g.Key.StatusID].SortOrder : 999)
+                    .ThenBy(g => {
+                        var tl = Model.Timelines?.FirstOrDefault(x => x.TimelineID == g.Key.TimelineID);
+                        return tl != null ? tl.ActionDate : DateTime.MinValue;
+                    })
+                    .ThenBy(g => g.Key.TimelineID)
+                    .ToList();
 
                 var latestCurrentStatusGroup = statusGroups.LastOrDefault(g => g.Key.StatusID == Model.StatusID);
 
@@ -220,7 +234,7 @@
                                                @(task.Status == 3 ? "checked" : "")
                                                onclick="return false;" onkeydown="return false;" tabindex="-1"
                                                title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
-                                        <span class="tree-progress-title">@taskIdx. @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
+                                        <span class="tree-progress-title">@(task.SortOrder > 0 ? $"{task.SortOrder}." : $"{taskIdx}.") @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
 
                                         @if (canEdit && isCurrentStatus && task.Status != 3)
                                         {
@@ -408,7 +422,7 @@
                                                        @(todo.Status == 3 ? "checked" : "")
                                                        onclick="return false;" onkeydown="return false;" tabindex="-1"
                                                        title="@(todo.Status == 3 ? "Công việc đã hoàn thành" : "Công việc chưa hoàn thành")" />
-                                                <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
+                                                <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(todo.SortOrder > 0 ? $"{todo.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
 
                                                 @if (canEdit && isCurrentStatus && todo.Status != 3)
                                                 {
@@ -606,7 +620,7 @@
                                                                @(sub.Status == 3 ? "checked" : "")
                                                                onclick="return false;" onkeydown="return false;" tabindex="-1"
                                                                title="@(sub.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
-                                                        <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
+                                                        <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(sub.SortOrder > 0 ? $"{sub.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
                                                     </div>
                                                 </td>
                                                 <td class="text-center font-progress-cell">

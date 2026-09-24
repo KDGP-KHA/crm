@@ -3838,6 +3838,19 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Content("<div class='alert alert-warning m-3'><i class='fa fa-lock'></i> Tiến trình đã hoàn thành, không thể thêm mới công việc con!</div>");
             }
 
+            int nextSortOrder = 1;
+            if (tasks != null && tasks.Count > 0)
+            {
+                var siblings = tasks.SelectMany(t => (t.TodoList ?? new List<RM_DigitalSalesTrackingModel>()).Concat(new[] { t }))
+                                    .Where(t => t.ParentID.HasValue && t.ParentID.Value == parentTrackingId)
+                                    .ToList();
+                if (siblings.Count > 0)
+                {
+                    nextSortOrder = siblings.Max(t => t.SortOrder) + 1;
+                }
+            }
+            if (nextSortOrder <= 0) nextSortOrder = 1;
+
             var model = new RM_DigitalSalesTrackingModel
             {
                 TrackingID = 0,
@@ -3849,10 +3862,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 Deadline = parent?.MaxDeadline ?? DateTime.Today.AddDays(3),
                 Status = 1,
                 IsCustomTask = true,
-                DurationDays = parent?.EffectiveDurationDays
+                DurationDays = parent?.EffectiveDurationDays,
+                SortOrder = nextSortOrder
             };
 
             ViewBag.ParentTask = parent;
+            ViewBag.NextSortOrder = nextSortOrder;
             ViewBag.UserList = GetProjectMemberSelectList(digitalSalesId);
 
             return PartialView("_TodoModal", model);
@@ -3875,8 +3890,14 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new { status = false, message = CreateMessage(AppProcessor.Messagor.GetMessage("DigitalSales_Task"), EnumProcessType.DataNotExist, EnumMsgIcon.Error) }, JsonRequestBehavior.AllowGet);
             }
 
+            if (model.SortOrder <= 0)
+            {
+                model.SortOrder = 1;
+            }
+
             var parent = model.ParentID.HasValue ? tasks.FirstOrDefault(t => t.TrackingID == model.ParentID.Value) : null;
             ViewBag.ParentTask = parent;
+            ViewBag.NextSortOrder = model.SortOrder;
             ViewBag.UserList = GetProjectMemberSelectList(digitalSalesId, model?.AssignedUserID);
 
             return PartialView("_TodoModal", model);
@@ -3896,6 +3917,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (!HasDetailPermission(model.DigitalSalesID, User.UserName))
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_NoPermission") });
+            }
+
+            if (model.SortOrder <= 0)
+            {
+                model.SortOrder = 1;
             }
 
             // US-02 AC 2.2: Phân quyền backend - Chỉ người tạo hoặc QTHT mới có quyền chỉnh sửa đầu việc

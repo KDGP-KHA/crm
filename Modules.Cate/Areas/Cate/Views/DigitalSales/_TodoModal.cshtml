@@ -89,7 +89,7 @@
 
                     <div class="row">
                         <!-- NGƯỜI THỰC HIỆN -->
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="form-group mb-3">
                                 <label class="font-bolder text-secondary-d2 mb-1" for="Todo_AssignedUserID">
                                     @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_AssignedUser_Label")
@@ -99,7 +99,7 @@
                         </div>
 
                         <!-- TRẠNG THÁI (3 option: Chưa thực hiện / Đang thực hiện / Đã xong) -->
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group mb-3">
                                 <label class="font-bolder text-secondary-d2 mb-1" for="Todo_Status">
                                     @AppProcessor.Messagor.GetMessage("DigitalSalesTracking_Status_Label")
@@ -109,6 +109,22 @@
                                     <option value="2" @(Model.Status == 2 ? "selected" : "")>2. Đang thực hiện</option>
                                     <option value="3" @(Model.Status == 3 ? "selected" : "")>3. Đã xong</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <!-- SỐ THỨ TỰ (STT) -->
+                        <div class="col-md-3">
+                            <div class="form-group mb-3">
+                                <label class="font-bolder text-secondary-d2 mb-1" for="Todo_SortOrder">
+                                    STT <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white"><i class="fa fa-sort-numeric-down text-secondary"></i></span>
+                                    </div>
+                                    <input type="number" class="form-control radius-1 text-center font-bold" id="Todo_SortOrder" name="SortOrder"
+                                           value="@(Model.SortOrder > 0 ? Model.SortOrder : (ViewBag.NextSortOrder ?? 1))" min="1" step="1" placeholder="STT" required />
+                                </div>
                             </div>
                         </div>
                     </div>
