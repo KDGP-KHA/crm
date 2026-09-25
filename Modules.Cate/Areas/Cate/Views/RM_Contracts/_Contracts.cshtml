@@ -91,12 +91,11 @@
     </div>
 
     <div class="form-group row">
-        <label class="col-sm-2 col-form-label text-sm-right pr-0 font-bold">
-            @AppProcessor.Messagor.GetMessage("FileAttach_Label")
-        </label>
+        @Html.TitleFor(model => model.DinhKemFile, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
         <div class="col-md-7">
             @Html.FileFor(model => model.DinhKemFile, ".pdf,.jpeg,.png,.gif,.jpg,.doc,.docx,.xlsx,.xls", true,
                      new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            @Html.ValidationMessageFor(model => model.DinhKemFile, "", new { @class = "text-danger d-block", id = "DinhKemFile_ValMsg" })
 
             <div id="contractFileList" class="mt-2"></div>
 

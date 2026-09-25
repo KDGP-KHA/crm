@@ -51,6 +51,8 @@
 **/[Cc]ontents/imgs/news/**
 [Cc]ontents/imgs/comment/
 **/[Cc]ontents/imgs/comment/**
+[Cc]ontents/imgs/[Ii]nvoices/
+**/[Cc]ontents/imgs/[Ii]nvoices/**
 **/Contents/File/ListUC.xlsx
 .agents/scratch/
 scratch/

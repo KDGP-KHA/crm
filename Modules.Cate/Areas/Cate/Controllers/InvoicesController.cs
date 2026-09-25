@@ -1,4 +1,4 @@
-﻿using CaptchaMvc.Interface;
+using CaptchaMvc.Interface;
 using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Cate.Services;
@@ -11,6 +11,7 @@ using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using System;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
@@ -123,6 +124,33 @@ namespace Modules.Cate.Areas.Cate.Controllers
         //[ValidateInput(false)]
         public ActionResult Add(RM_InvoicesModel model)
         {
+            if (model.TotalPayment > 0 && model.TotalAmount <= 0)
+            {
+                model.TotalAmount = Math.Round(model.TotalPayment / (1.0 + (model.VAT_Rate / 100.0)), 2);
+                model.VAT_Amount = model.TotalPayment - model.TotalAmount;
+            }
+
+            var requestFile = Request.Files;
+            bool hasNewFile = false;
+            if (requestFile != null && requestFile.Count > 0)
+            {
+                for (int i = 0; i < requestFile.Count; i++)
+                {
+                    if (requestFile[i] != null && !string.IsNullOrWhiteSpace(requestFile[i].FileName) && requestFile[i].ContentLength > 0)
+                    {
+                        hasNewFile = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasNewFile)
+            {
+                var fileLabel = AppProcessor.Messagor.GetMessage("FileAttach_Label");
+                var reqMsg = AppProcessor.Messagor.GetMessage("Common_RequiredMessage");
+                ModelState.AddModelError("Files", !string.IsNullOrEmpty(reqMsg) ? string.Format(reqMsg, fileLabel) : $"{fileLabel} không được để trống");
+            }
+
             if (!ModelState.IsValid)
             {
                 return PartialView("_Invoices", model);
@@ -133,8 +161,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             dt.Columns.Add("Val1", typeof(string));
             dt.Columns.Add("Val2", typeof(string));
             dt.Columns.Add("Val3", typeof(string));
-            var requestFile = Request.Files;
-            if (requestFile.Count != 0)
+            if (requestFile != null && requestFile.Count != 0)
             {
                 for (int i = 0; i < requestFile.Count; i++)
                 {
@@ -190,6 +217,37 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [ValidateInput(false)]
         public ActionResult Edit(RM_InvoicesModel model)
         {
+            if (model.TotalPayment > 0 && model.TotalAmount <= 0)
+            {
+                model.TotalAmount = Math.Round(model.TotalPayment / (1.0 + (model.VAT_Rate / 100.0)), 2);
+                model.VAT_Amount = model.TotalPayment - model.TotalAmount;
+            }
+
+            var requestFile = Request.Files;
+            bool hasNewFile = false;
+            if (requestFile != null && requestFile.Count > 0)
+            {
+                for (int i = 0; i < requestFile.Count; i++)
+                {
+                    if (requestFile[i] != null && !string.IsNullOrWhiteSpace(requestFile[i].FileName) && requestFile[i].ContentLength > 0)
+                    {
+                        hasNewFile = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasNewFile)
+            {
+                var existingFiles = _InvoicesCache.GetFilePaths(model.InvoiceID);
+                if (existingFiles == null || !existingFiles.Any())
+                {
+                    var fileLabel = AppProcessor.Messagor.GetMessage("FileAttach_Label");
+                    var reqMsg = AppProcessor.Messagor.GetMessage("Common_RequiredMessage");
+                    ModelState.AddModelError("Files", !string.IsNullOrEmpty(reqMsg) ? string.Format(reqMsg, fileLabel) : $"{fileLabel} không được để trống");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return PartialView("_Invoices", model);
@@ -201,8 +259,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             dt.Columns.Add("Val2", typeof(string));
             dt.Columns.Add("Val3", typeof(string));
 
-            var requestFile = Request.Files;
-            if (requestFile.Count != 0)
+            if (requestFile != null && requestFile.Count != 0)
             {
                 for (int i = 0; i < requestFile.Count; i++)
                 {

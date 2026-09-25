@@ -190,6 +190,31 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     ModelState.AddModelError("ReminderDayOfMonth", AppProcessor.Messagor.GetMessage("ReminderDayOfMonth_Label") + " không hợp lệ");
                 }
             }
+
+            var requestFile = Request.Files;
+            bool hasNewFile = false;
+            if (requestFile != null && requestFile.Count > 0)
+            {
+                for (int i = 0; i < requestFile.Count; i++)
+                {
+                    if (requestFile[i] != null && !string.IsNullOrWhiteSpace(requestFile[i].FileName) && requestFile[i].ContentLength > 0)
+                    {
+                        hasNewFile = true;
+                        break;
+                    }
+                }
+            }
+            bool hasModelFiles = model.DinhKemFile != null && model.DinhKemFile.Any(f => f != null && f.ContentLength > 0 && !string.IsNullOrWhiteSpace(f.FileName));
+            if (hasNewFile || hasModelFiles)
+            {
+                ModelState.Remove("DinhKemFile");
+            }
+            else
+            {
+                var fileLabel = AppProcessor.Messagor.GetMessage("FileAttach_Label");
+                var reqMsg = AppProcessor.Messagor.GetMessage("Common_RequiredMessage");
+                ModelState.AddModelError("DinhKemFile", !string.IsNullOrEmpty(reqMsg) ? string.Format(reqMsg, fileLabel) : $"{fileLabel} không được để trống");
+            }
             if (!ModelState.IsValid)
             {
                 PopulateLists(model);
@@ -307,6 +332,40 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 {
                     ModelState.AddModelError("ReminderDayOfMonth", AppProcessor.Messagor.GetMessage("ReminderDayOfMonth_Label") + " không hợp lệ");
                 }
+            }
+
+            var requestFileEdit = Request.Files;
+            bool hasNewFileEdit = false;
+            if (requestFileEdit != null && requestFileEdit.Count > 0)
+            {
+                for (int i = 0; i < requestFileEdit.Count; i++)
+                {
+                    if (requestFileEdit[i] != null && !string.IsNullOrWhiteSpace(requestFileEdit[i].FileName) && requestFileEdit[i].ContentLength > 0)
+                    {
+                        hasNewFileEdit = true;
+                        break;
+                    }
+                }
+            }
+            bool hasModelFilesEdit = model.DinhKemFile != null && model.DinhKemFile.Any(f => f != null && f.ContentLength > 0 && !string.IsNullOrWhiteSpace(f.FileName));
+            var existingFiles = _contractsBiz.GetFilePaths(model.ContractID);
+            var remainingOldFiles = existingFiles != null 
+                ? existingFiles.Count(f => model.DeletedFileIds == null || !model.DeletedFileIds.Contains(f.FilePathID)) 
+                : 0;
+
+            if (hasNewFileEdit || hasModelFilesEdit)
+            {
+                ModelState.Remove("DinhKemFile");
+            }
+            else if (remainingOldFiles > 0)
+            {
+                ModelState.Remove("DinhKemFile");
+            }
+            else
+            {
+                var fileLabel = AppProcessor.Messagor.GetMessage("FileAttach_Label");
+                var reqMsg = AppProcessor.Messagor.GetMessage("Common_RequiredMessage");
+                ModelState.AddModelError("DinhKemFile", !string.IsNullOrEmpty(reqMsg) ? string.Format(reqMsg, fileLabel) : $"{fileLabel} không được để trống");
             }
             if (!ModelState.IsValid)
             {

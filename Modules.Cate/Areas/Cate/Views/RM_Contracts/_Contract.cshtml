@@ -4,16 +4,7 @@
     int slNgayNhac = Model.ListContractReminders != null ? Model.ListContractReminders.Count : 0;
 }
 @Html.AntiForgeryToken()
-<style>
-    #hide_remove_select2-selection__clear button.select2-selection__clear {
-        display: none !important;
-    }
-
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom,
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top {
-        z-index: 9999 !important;
-    }
-</style>
+<link rel="stylesheet" href="@Url.Content("~/Areas/Cate/Views/RM_Contracts/RM_Contracts.css")?v=@DateTime.Now.Ticks" />
 <div id="CHKD">
     @Html.HiddenFor(model => model.ContractID)
     @Html.HiddenFor(model => model.ProjectID)
@@ -90,15 +81,15 @@
 
     <div class="row">
         <div class="col-md-9">
-            <label class="font-bold">
-                @AppProcessor.Messagor.GetMessage("FileAttach_Label")
-            </label>
+            @Html.TitleFor(model => model.DinhKemFile, new { @class = "font-bold" })
             @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            @Html.ValidationMessageFor(model => model.DinhKemFile, "", new { @class = "text-danger d-block", id = "DinhKemFile_ValMsg" })
             <div id="oldFileList" class="mt-2">
                 @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
                 {
                     foreach (var file in Model.ExistingFiles)
                     {
+                        if (Model.DeletedFileIds != null && Model.DeletedFileIds.Contains(file.FilePathID)) { continue; }
                         var fileName = Path.GetFileName(file.FilePath);
 
                         <div class="old-file d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
@@ -121,7 +112,15 @@
                 }
             </div>
             <div id="fileList" class="mt-2"></div>
-            <div id="deletedFilesContainer"></div>
+            <div id="deletedFilesContainer">
+                @if (Model.DeletedFileIds != null)
+                {
+                    foreach (var delId in Model.DeletedFileIds)
+                    {
+                        <input type="hidden" name="DeletedFileIds" value="@delId" />
+                    }
+                }
+            </div>
         </div>
     </div>
 
@@ -323,6 +322,9 @@
 
         syncInputFiles();
         renderFileList();
+        if (filesList.length > 0) {
+            $("#DinhKemFile_ValMsg").text("").hide();
+        }
     });
 
     // SYNC FILE VÀO INPUT
@@ -362,6 +364,10 @@
         filesList.splice(index, 1);
         syncInputFiles();
         renderFileList();
+        var hasOld = $("#oldFileList .old-file").length > 0;
+        if (filesList.length === 0 && !hasOld) {
+            $("#DinhKemFile_ValMsg").text('@Html.Raw(string.Format(AppProcessor.Messagor.GetMessage("Common_RequiredMessage"), AppProcessor.Messagor.GetMessage("FileAttach_Label")))').show();
+        }
     }
 
     // XÓA FILE CŨ (EDIT)
@@ -370,6 +376,11 @@
         $("#deletedFilesContainer").append(
             `<input type="hidden" name="DeletedFileIds" value="${fileId}" />`
         );
+        var hasOld = $("#oldFileList .old-file").length > 0;
+        var hasNew = (typeof filesList !== 'undefined' && filesList.length > 0);
+        if (!hasOld && !hasNew) {
+            $("#DinhKemFile_ValMsg").text('@Html.Raw(string.Format(AppProcessor.Messagor.GetMessage("Common_RequiredMessage"), AppProcessor.Messagor.GetMessage("FileAttach_Label")))').show();
+        }
     }
 
     function fnChonKieuNhac() {

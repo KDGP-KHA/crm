@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
@@ -69,6 +69,8 @@ namespace Core.Cate.Models
         [CustomDisplayName("ReminderDayOfMonth_Label")]
         public int ReminderDayOfMonth { get; set; }
         public string CycleName { get; set; }
+        [CustomRequired]
+        [CustomDisplayName("FileAttach_Label")]
         public List<HttpPostedFileBase> DinhKemFile { get; set; }
         public List<RM_ContractFilePathModel> ExistingFiles { get; set; }
         public List<int> DeletedFileIds { get; set; }

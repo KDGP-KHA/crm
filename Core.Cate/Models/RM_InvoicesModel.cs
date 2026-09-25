@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Web;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Models.Base;
@@ -31,11 +31,9 @@ namespace Core.Cate.Models
         [CustomDisplayName("VAT_Rate_Label")]
         public int VAT_Rate { get; set; } = 10;
         //TotalAmount 
-        [CustomRequired]
         [CustomDisplayName("TotalAmount_Label")]
         public double TotalAmount { get; set; }
         //VAT_Amount 
-        [CustomRequired]
         [CustomDisplayName("VAT_Amount_Label")]
         public double VAT_Amount { get; set; }
         //TotalPayment 
