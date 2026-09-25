@@ -1,4 +1,4 @@
-﻿using Core.Cate.Biz;
+using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Sys.BaseApp;
@@ -233,6 +233,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            if (model.TotalAmount <= 0 && model.ContractValue > 0)
+            {
+                model.TotalAmount = model.ContractValue;
+            }
+
             var result = _contractsCache.Save(model, ngayNhacs, User.UserName);
             if (result > 0)
             {
@@ -343,6 +348,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         });
                     }
                 }
+            }
+
+            if (model.TotalAmount <= 0 && model.ContractValue > 0)
+            {
+                model.TotalAmount = model.ContractValue;
             }
 
             var result = _contractsCache.Save(model, ngayNhacs, User.UserName);

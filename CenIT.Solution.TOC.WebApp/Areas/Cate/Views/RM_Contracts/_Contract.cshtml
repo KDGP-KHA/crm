@@ -20,6 +20,8 @@
     @Html.HiddenFor(model => model.ProductProjectID)
     @Html.HiddenFor(model => model.DigitalSalesProductID)
     @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.VAT)
+    @Html.HiddenFor(model => model.TotalAmount)
     @Html.Hidden("SLDeXuat", slNgayNhac)
 
     <div class="form-group row">
@@ -83,30 +85,6 @@
                 placeholder = "0"
             })
             @Html.ValidationMessageFor(model => model.ContractValue, "", new { @class = "text-danger" })
-        </div>
-        <div class="col-md-3">
-            @Html.TitleFor(model => model.VAT, new { @class = "font-bold" })
-            @Html.TextBoxFor(model => model.VAT, new
-            {
-                @class = "form-control",
-                type = "number",
-                min = "0",
-                max = "100",
-                step = "0.01",
-                placeholder = "0 – 100",
-                data_format = "percent"
-            })
-            @Html.ValidationMessageFor(model => model.VAT, "", new { @class = "text-danger" })
-        </div>
-        <div class="col-md-3">
-            @Html.TitleFor(model => model.TotalAmount, new { @class = "font-bold" })
-            @Html.TextBoxFor(model => model.TotalAmount, new
-            {
-                @class = "form-control text-right",
-
-                placeholder = "0"
-            })
-            @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
         </div>
     </div>
 
@@ -257,6 +235,11 @@
         }
     })();
     $(document).ready(function () {
+        $(document).on("input change", "#CHKD #ContractValue", function () {
+            var val = $(this).val();
+            $("#CHKD #TotalAmount").val(val);
+        });
+
         $(".dateinput").datetimepicker({
             format: "DD/MM/YYYY",
             icons: {

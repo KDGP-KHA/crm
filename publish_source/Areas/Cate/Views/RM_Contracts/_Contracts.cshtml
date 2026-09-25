@@ -6,6 +6,8 @@
     @Html.HiddenFor(model => model.ContractID)
     @Html.HiddenFor(model => model.ProjectID)
     @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.VAT)
+    @Html.HiddenFor(model => model.TotalAmount)
 
     <div class="form-group row">
         @Html.TitleFor(model => model.ContractCode, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
@@ -76,51 +78,15 @@
 
 
     <div class="form-group row">
-        <div class="col-md-4">
-            <div class="row">
-                @Html.TitleFor(model => model.ContractValue, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
-                <div class="col-md-6">
-                    @Html.TextBoxFor(model => model.ContractValue, new
-                    {
-                        @class = "form-control text-right",
+        @Html.TitleFor(model => model.ContractValue, new { @class = "col-sm-2 col-form-label text-sm-right pr-0 font-bold" })
+        <div class="col-md-5">
+            @Html.TextBoxFor(model => model.ContractValue, new
+            {
+                @class = "form-control text-right",
 
-                        placeholder = "0"
-                    })
-                    @Html.ValidationMessageFor(model => model.ContractValue, "", new { @class = "text-danger" })
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="row">
-                @Html.TitleFor(model => model.VAT, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
-                <div class="col-md-6">
-                    @Html.TextBoxFor(model => model.VAT, new
-                    {
-                        @class = "form-control",
-                        type = "number",
-                        min = "0",
-                        max = "100",
-                        step = "0.01",
-                        placeholder = "0 – 100",
-                        data_format = "percent"
-                    })
-                    @Html.ValidationMessageFor(model => model.VAT, "", new { @class = "text-danger" })
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="row">
-                @Html.TitleFor(model => model.TotalAmount, new { @class = "col-sm-6 col-form-label text-sm-right pr-0 font-bold" })
-                <div class="col-md-6">
-                    @Html.TextBoxFor(model => model.TotalAmount, new
-                    {
-                        @class = "form-control text-right",
-
-                        placeholder = "0"
-                    })
-                    @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
-                </div>
-            </div>
+                placeholder = "0"
+            })
+            @Html.ValidationMessageFor(model => model.ContractValue, "", new { @class = "text-danger" })
         </div>
     </div>
 

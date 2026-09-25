@@ -34,6 +34,16 @@
     var keyProjects = m.KeyProjects ?? new List<Core.Cate.Models.RM_DigitalSalesModel>();
     var followedOpps = m.FollowedOpportunities ?? new List<Core.Cate.Models.RM_DigitalSalesModel>();
     var staleSales = m.StaleActionTimeSales ?? new List<Core.Cate.Models.RM_DigitalSalesModel>();
+    var staleAssignedEmployees = staleSales
+        .Where(x => !string.IsNullOrWhiteSpace(x.AssignedEmployeeName))
+        .GroupBy(x => x.AssignedEmployeeName.Trim())
+        .Select(g => new {
+            Name = g.Key,
+            Id = g.First().AssignedEmployeeID
+        })
+        .OrderBy(x => x.Name)
+        .ToList();
+    var hasUnassignedStaleSales = staleSales.Any(x => string.IsNullOrWhiteSpace(x.AssignedEmployeeName));
 }
 
 <!-- 1. HỘP TỔNG CỘNG CÁC TRẠNG THÁI (Hero Summary Card) -->
@@ -160,7 +170,7 @@
                             @{ int stt = 1; }
                             @foreach (var p in keyProjects)
                             {
-                                <tr>
+                                <tr data-assigned-employee="@(p.AssignedEmployeeName ?? "")">
                                     <td class="text-center font-weight-bold text-secondary">@(stt++)</td>
                                     <td>
                                         <a href="/Cate/DigitalSales/Detail?id=@p.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
@@ -291,7 +301,7 @@
                             @{ int sttFollow = 1; }
                             @foreach (var opp in followedOpps)
                             {
-                                <tr>
+                                <tr data-assigned-employee="@(opp.AssignedEmployeeName ?? "")">
                                     <td class="text-center font-weight-bold text-secondary">@(sttFollow++)</td>
                                     <td>
                                         <a href="/Cate/DigitalSales/Detail?id=@opp.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
@@ -364,7 +374,7 @@
                     <i class="fa fa-clock text-danger mr-2"></i>Sản phẩm dịch vụ số chưa cập nhật (> 72h) - Năm @m.ApplyYear
                 </h6>
                 <div class="d-flex align-items-center flex-wrap my-1">
-                    <div class="input-group input-group-sm mr-2 db-card-search" style="width: 190px;">
+                    <div class="input-group input-group-sm mr-2 db-card-search" style="width: 170px;">
                         <div class="input-group-prepend">
                             <span class="input-group-text bg-white border-right-0 text-muted px-2 py-0">
                                 <i class="fa fa-search text-80"></i>
@@ -373,6 +383,28 @@
                         <input type="text" class="form-control border-left-0 text-85 py-0" style="height: 30px;"
                                placeholder="Tìm tên, KH..." 
                                onkeyup="filterCardTable(this, '#tableStaleSales');" />
+                    </div>
+                    <div class="input-group input-group-sm mr-2 db-card-search" style="width: 175px;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0 text-muted px-2 py-0">
+                                <i class="fa fa-user text-80"></i>
+                            </span>
+                        </div>
+                        <select id="selectAssignedStaleSales" 
+                                class="form-control border-left-0 text-85 py-0 none-select2"
+                                style="height: 30px; font-size: 12px; color: #334155; cursor: pointer;"
+                                onchange="filterCardTableByEmployee(this, '#tableStaleSales');"
+                                title="Lọc theo người phụ trách">
+                            <option value="">-- Người phụ trách --</option>
+                            @foreach (var emp in staleAssignedEmployees)
+                            {
+                                <option value="@emp.Name" data-emp-id="@(emp.Id?.ToString() ?? "")">@emp.Name</option>
+                            }
+                            @if (hasUnassignedStaleSales)
+                            {
+                                <option value="__UNASSIGNED__">-- Chưa có phụ trách --</option>
+                            }
+                        </select>
                     </div>
                     <button type="button" class="btn btn-xs btn-warning font-bold text-white shadow-sm mr-2 px-2 py-1 radius-1" 
                             style="background-color: #f59e0b !important; border-color: #d97706 !important; height: 30px; display: inline-flex; align-items: center;"
@@ -409,7 +441,7 @@
                                     ? s.ActionTime.Value.ToString("dd/MM/yyyy HH:mm")
                                     : (s.CreatedDate.ToString("dd/MM/yyyy HH:mm"));
 
-                                <tr>
+                                <tr data-assigned-employee="@(s.AssignedEmployeeName ?? "")">
                                     <td class="text-center font-weight-bold text-secondary">@(sttStale++)</td>
                                     <td>
                                         <a href="/Cate/DigitalSales/Detail?id=@s.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
