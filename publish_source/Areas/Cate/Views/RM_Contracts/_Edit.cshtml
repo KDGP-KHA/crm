@@ -33,6 +33,16 @@
             $form.ajaxForm({
             beforeSubmit: function () {
                 if ($form.valid && !$form.valid()) return false;
+                var hasNew = (typeof filesList !== 'undefined' && filesList.length > 0) ||
+                             (document.getElementById("DinhKemFile") && document.getElementById("DinhKemFile").files && document.getElementById("DinhKemFile").files.length > 0);
+                var hasOld = $('#oldFileList .old-file').length > 0;
+                if (!hasNew && !hasOld) {
+                    var $valMsg = $('#DinhKemFile_ValMsg');
+                    if ($valMsg.length > 0) {
+                        $valMsg.text('@Html.Raw(string.Format(AppProcessor.Messagor.GetMessage("Common_RequiredMessage"), AppProcessor.Messagor.GetMessage("FileAttach_Label")))').show();
+                    }
+                    return false;
+                }
                 $modal.find('#btnSave').prop('disabled', true);
                 return true;
             },

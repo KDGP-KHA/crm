@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dashboard Chart JS - CenIT TOC CRM
  * Xử lý tương tác chuyển đổi năm áp dụng, tìm kiếm từ khóa, xuất file Excel, render biểu đồ ApexCharts và mở modal chi tiết
  */
@@ -144,6 +144,9 @@ var _tablePagination = {};
  * Khởi tạo đồng loạt phân trang cho cả 3 bảng trên Dashboard
  */
 function initDashboardPaginations() {
+    if ($.fn.select2 && $('#selectAssignedStaleSales').hasClass('select2-hidden-accessible')) {
+        try { $('#selectAssignedStaleSales').select2('destroy'); } catch (e) { }
+    }
     initTablePagination('#tableKeyProjects', '#footerKeyProjects', 10);
     initTablePagination('#tableFollowedOpps', '#footerFollowedOpps', 10);
     initTablePagination('#tableStaleSales', '#footerStaleSales', 10);
@@ -198,11 +201,25 @@ function renderTablePage(tableId) {
 
     var $allRows = $table.find("tbody tr");
     var filterTerm = (state.filterTerm || "").toLowerCase();
+    var filterEmployee = (state.filterEmployee || "").toLowerCase();
 
-    // Lọc các dòng khớp query
+    // Lọc các dòng khớp query và filterEmployee
     var $matchedRows = $allRows.filter(function () {
-        if (!filterTerm) return true;
-        return $(this).text().toLowerCase().indexOf(filterTerm) !== -1;
+        var rowText = $(this).text().toLowerCase();
+        if (filterTerm && rowText.indexOf(filterTerm) === -1) {
+            return false;
+        }
+
+        if (filterEmployee) {
+            var rowEmp = ($(this).data("assigned-employee") || $(this).find("td:last-child").text() || "").trim().toLowerCase();
+            if (filterEmployee === "__unassigned__") {
+                if (rowEmp !== "" && rowEmp !== "—" && rowEmp !== "-") return false;
+            } else {
+                if (rowEmp.indexOf(filterEmployee) === -1) return false;
+            }
+        }
+
+        return true;
     });
 
     var totalRecords = $matchedRows.length;
@@ -222,7 +239,13 @@ function renderTablePage(tableId) {
 
     // Ẩn tất cả và chỉ hiện các dòng của trang hiện tại
     $allRows.hide();
-    $matchedRows.slice(startIndex, endIndex).show();
+    var $visiblePageRows = $matchedRows.slice(startIndex, endIndex);
+    $visiblePageRows.show();
+
+    // Cập nhật lại số thứ tự (STT) hiển thị liên tục
+    $visiblePageRows.each(function (idx) {
+        $(this).find("td:first-child").text(startIndex + idx + 1);
+    });
 
     var unit = tableId.indexOf("KeyProjects") !== -1 ? "dự án" : "hồ sơ";
 
@@ -324,10 +347,28 @@ function filterCardTable(input, tableId) {
     var $rows = $table.find("tbody tr");
     if (!$rows.length) return;
 
+    var emp = "";
+    var $empSelect = $(input).closest(".card-header").find("select[id^='selectAssigned']");
+    if ($empSelect.length) {
+        emp = ($empSelect.val() || "").trim().toLowerCase();
+    }
+
     var visibleCount = 0;
     $rows.each(function () {
         var text = $(this).text().toLowerCase();
-        if (!query || text.indexOf(query) !== -1) {
+        var rowEmp = ($(this).data("assigned-employee") || $(this).find("td:last-child").text() || "").trim().toLowerCase();
+
+        var matchQuery = !query || text.indexOf(query) !== -1;
+        var matchEmp = true;
+        if (emp) {
+            if (emp === "__unassigned__") {
+                matchEmp = (rowEmp === "" || rowEmp === "—" || rowEmp === "-");
+            } else {
+                matchEmp = rowEmp.indexOf(emp) !== -1;
+            }
+        }
+
+        if (matchQuery && matchEmp) {
             $(this).show();
             visibleCount++;
         } else {
@@ -337,6 +378,65 @@ function filterCardTable(input, tableId) {
 
     // Cập nhật số lượng hiển thị trên badge của Card
     var $badge = $(input).closest(".card-header").find(".badge[id^='badge']");
+    if ($badge.length) {
+        var unit = "hồ sơ";
+        if (tableId.indexOf("KeyProjects") !== -1) unit = "dự án";
+        else if (tableId.indexOf("Followed") !== -1) unit = "hồ sơ";
+        $badge.text(visibleCount + " " + unit);
+    }
+}
+
+/**
+ * Lọc bảng dữ liệu theo Người phụ trách khi chọn combobox trên header của Card
+ */
+function filterCardTableByEmployee(select, tableId) {
+    var emp = ($(select).val() || "").trim();
+
+    // Nếu bảng có cấu hình phân trang, cập nhật filterEmployee và render lại trang 1
+    if (_tablePagination[tableId]) {
+        _tablePagination[tableId].filterEmployee = emp;
+        _tablePagination[tableId].currentPage = 1;
+        renderTablePage(tableId);
+        return;
+    }
+
+    var $table = $(tableId);
+    if (!$table.length) return;
+
+    var $rows = $table.find("tbody tr");
+    if (!$rows.length) return;
+
+    var filterTerm = "";
+    var $search = $(select).closest(".card-header").find("input[type='text']");
+    if ($search.length) {
+        filterTerm = ($search.val() || "").trim().toLowerCase();
+    }
+
+    var empLower = emp.toLowerCase();
+    var visibleCount = 0;
+    $rows.each(function () {
+        var rowText = $(this).text().toLowerCase();
+        var rowEmp = ($(this).data("assigned-employee") || $(this).find("td:last-child").text() || "").trim().toLowerCase();
+
+        var matchQuery = !filterTerm || rowText.indexOf(filterTerm) !== -1;
+        var matchEmp = true;
+        if (empLower) {
+            if (empLower === "__unassigned__") {
+                matchEmp = (rowEmp === "" || rowEmp === "—" || rowEmp === "-");
+            } else {
+                matchEmp = rowEmp.indexOf(empLower) !== -1;
+            }
+        }
+
+        if (matchQuery && matchEmp) {
+            $(this).show();
+            visibleCount++;
+        } else {
+            $(this).hide();
+        }
+    });
+
+    var $badge = $(select).closest(".card-header").find(".badge[id^='badge']");
     if ($badge.length) {
         var unit = "hồ sơ";
         if (tableId.indexOf("KeyProjects") !== -1) unit = "dự án";
@@ -364,7 +464,15 @@ function exportCardData(type) {
         url += "&isFollowed=true" + (kw ? "&keyword=" + encodeURIComponent(kw.trim()) : "");
     } else if (type === 'stale') {
         var kw = $("#tableStaleSales").closest(".card").find("input").val() || "";
+        var empSelect = $("#tableStaleSales").closest(".card").find("select[id^='selectAssigned']");
+        var empId = empSelect.find("option:selected").data("emp-id");
+        var empName = empSelect.val() || "";
         url += (kw ? "&keyword=" + encodeURIComponent(kw.trim()) : "");
+        if (empId) {
+            url += "&employeeID=" + encodeURIComponent(empId);
+        } else if (empName && empName !== "__UNASSIGNED__") {
+            url += "&keyword=" + encodeURIComponent(empName.trim());
+        }
     }
 
     window.location.href = url;

@@ -25,14 +25,14 @@
             <table id="DSInvoices" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
                 <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
                     <tr>
-                        <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("Serial_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("Number_Label")</th>
+                        <th class="text-center" style="width: 50px;">@AppProcessor.Messagor.GetMessage("Column_No")</th>
+                        <th class="text-center">@AppProcessor.Messagor.GetMessage("Serial_Label")</th>
+                        <th class="text-center">@AppProcessor.Messagor.GetMessage("Number_Label")</th>
                         <th>@AppProcessor.Messagor.GetMessage("Buyer_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("TotalAmount_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("VAT_Amount_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("TotalPayment_Label")</th>
-                        <th>@AppProcessor.Messagor.GetMessage("Column_Action")</th>
+                        <th class="text-center">@AppProcessor.Messagor.GetMessage("TaxCode_Label")</th>
+                        <th class="text-center">@AppProcessor.Messagor.GetMessage("VAT_Rate_Label")</th>
+                        <th class="text-right">@AppProcessor.Messagor.GetMessage("TotalPayment_Label")</th>
+                        <th class="text-center" style="width: 120px;">@AppProcessor.Messagor.GetMessage("Column_Action")</th>
                     </tr>
                 </thead>
             </table>
@@ -69,49 +69,52 @@
                     {
                         "data": "",
                         "defaultContent": "1",
+                        "className": "text-center",
+                        "orderable": false,
                         "render": function (data, type, row, meta) {
                             return meta.settings._iDisplayStart + meta.row + 1;
                         }
                     },
                     {
                         "data": "Serial",
+                        "className": "text-center",
                         "defaultContent": "",
                     },
                     {
                         "data": "Number",
+                        "className": "text-center",
                         "defaultContent": "",
                     },
                     {
                         "data": "Buyer",
-                        "className":"text-left",
+                        "className": "text-left",
                         "defaultContent": "",
                     },
                     {
-                        "data": "TotalAmount",
+                        "data": "TaxCode",
+                        "className": "text-center",
                         "defaultContent": "",
-                        "render": function (data, type, row, meta) {
-                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`; ;
-                        },
                     },
                     {
-                        "data": "VAT_Amount",
+                        "data": "VAT_Rate",
+                        "className": "text-center",
                         "defaultContent": "",
                         "render": function (data, type, row, meta) {
-                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`;;
-                        },
-
+                            return (data != null && data !== '') ? `${data}%` : '';
+                        }
                     },
                     {
                         "data": "TotalPayment",
+                        "className": "text-right",
                         "defaultContent": "",
                         "render": function (data, type, row, meta) {
-                            return `<div class="text-right">${data.toLocaleString("vi")}</div>`;;
+                            var val = parseFloat(data || 0);
+                            return `<div class="text-right font-bold">${val.toLocaleString("vi-VN")} VNĐ</div>`;
                         },
                     },
                     {
                         "data": "InvoiceID",
-                        //"style": "width:100px;",
-                        "className":"text-nowrap",
+                        "className": "text-center text-nowrap",
                         "orderable": false,
                         "render": function (data, type, row, meta) {
                             var html = '<span class="">';
