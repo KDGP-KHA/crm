@@ -760,9 +760,9 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
 
             try
             {
-                string appTitle = "HỆ THỐNG CRM";
-                string appOwner = "Hệ thống CRM";
-                string emailSubject = $"[CRM] Mã OTP xác thực: {otp}";
+                string appTitle = "Hệ thống CRM Sở Khoa học và Công nghệ";
+                string appOwner = "Sở Khoa học và Công nghệ";
+                string emailSubject = $"[Sở KH&CN] Mã OTP xác thực: {otp}";
 
                 string emailBody = $@"
 <div style=""font-family: 'Segoe UI', Arial, sans-serif; max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);"">
