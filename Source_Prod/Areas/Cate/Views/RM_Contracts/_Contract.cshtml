@@ -4,21 +4,15 @@
     int slNgayNhac = Model.ListContractReminders != null ? Model.ListContractReminders.Count : 0;
 }
 @Html.AntiForgeryToken()
-<style>
-    #hide_remove_select2-selection__clear button.select2-selection__clear {
-        display: none !important;
-    }
-
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom,
-    .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top {
-        z-index: 9999 !important;
-    }
-</style>
+<link rel="stylesheet" href="@Url.Content("~/Areas/Cate/Views/RM_Contracts/RM_Contracts.css")?v=@DateTime.Now.Ticks" />
 <div id="CHKD">
     @Html.HiddenFor(model => model.ContractID)
     @Html.HiddenFor(model => model.ProjectID)
     @Html.HiddenFor(model => model.ProductProjectID)
+    @Html.HiddenFor(model => model.DigitalSalesProductID)
     @Html.HiddenFor(model => model.CustomerID)
+    @Html.HiddenFor(model => model.VAT)
+    @Html.HiddenFor(model => model.TotalAmount)
     @Html.Hidden("SLDeXuat", slNgayNhac)
 
     <div class="form-group row">
@@ -83,43 +77,27 @@
             })
             @Html.ValidationMessageFor(model => model.ContractValue, "", new { @class = "text-danger" })
         </div>
-        <div class="col-md-3">
-            @Html.TitleFor(model => model.VAT, new { @class = "font-bold" })
-            @Html.TextBoxFor(model => model.VAT, new
-            {
-                @class = "form-control",
-                type = "number",
-                min = "0",
-                max = "100",
-                step = "0.01",
-                placeholder = "0 – 100",
-                data_format = "percent"
-            })
-            @Html.ValidationMessageFor(model => model.VAT, "", new { @class = "text-danger" })
-        </div>
-        <div class="col-md-3">
-            @Html.TitleFor(model => model.TotalAmount, new { @class = "font-bold" })
-            @Html.TextBoxFor(model => model.TotalAmount, new
-            {
-                @class = "form-control text-right",
-
-                placeholder = "0"
-            })
-            @Html.ValidationMessageFor(model => model.TotalAmount, "", new { @class = "text-danger" })
-        </div>
     </div>
 
     <div class="row">
         <div class="col-md-9">
-            <label class="font-bold">
-                @AppProcessor.Messagor.GetMessage("FileAttach_Label")
-            </label>
-            @Html.FileFor(model => model.DinhKemFile, ".*", true, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("FileUpload") })
+            @Html.TitleFor(model => model.DinhKemFile, new { @class = "font-bold" })
+            <div class="input-group" id="inputFile_DinhKemFile">
+                <div class="input-group-prepend">
+                    <button class="btn btn-secondary input-group-text btn-choose" type="button" onclick="triggerContractFileInput();">
+                        <i class="fa fa-folder-open mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Choose")
+                    </button>
+                </div>
+                <input type="text" id="txtDinhKemFileName" class="form-control bg-white cursor-pointer" readonly placeholder="@AppProcessor.Messagor.GetMessage("FileUpload")" onclick="triggerContractFileInput();" />
+            </div>
+            <input type="file" id="DinhKemFile" name="DinhKemFile" multiple class="d-none" onchange="handleContractFileSelect(this);" />
+            @Html.ValidationMessageFor(model => model.DinhKemFile, "", new { @class = "text-danger d-block", id = "DinhKemFile_ValMsg" })
             <div id="oldFileList" class="mt-2">
                 @if (Model.ExistingFiles != null && Model.ExistingFiles.Any())
                 {
                     foreach (var file in Model.ExistingFiles)
                     {
+                        if (Model.DeletedFileIds != null && Model.DeletedFileIds.Contains(file.FilePathID)) { continue; }
                         var fileName = Path.GetFileName(file.FilePath);
 
                         <div class="old-file d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1">
@@ -142,7 +120,15 @@
                 }
             </div>
             <div id="fileList" class="mt-2"></div>
-            <div id="deletedFilesContainer"></div>
+            <div id="deletedFilesContainer">
+                @if (Model.DeletedFileIds != null)
+                {
+                    foreach (var delId in Model.DeletedFileIds)
+                    {
+                        <input type="hidden" name="DeletedFileIds" value="@delId" />
+                    }
+                }
+            </div>
         </div>
     </div>
 
@@ -256,6 +242,11 @@
         }
     })();
     $(document).ready(function () {
+        $(document).on("input change", "#CHKD #ContractValue", function () {
+            var val = $(this).val();
+            $("#CHKD #TotalAmount").val(val);
+        });
+
         $(".dateinput").datetimepicker({
             format: "DD/MM/YYYY",
             icons: {
@@ -323,40 +314,70 @@
 </script>
 <script>
     var filesList = [];
+    window.filesList = filesList;
     var dataTransfer = new DataTransfer();
     var kieuNhac;
 
-    // CHỌN FILE MỚI
-    $(document).on("change", "#DinhKemFile", function (e) {
-        let newFiles = Array.from(e.target.files);
+    function triggerContractFileInput() {
+        var el = document.getElementById("DinhKemFile");
+        if (el) {
+            el.click();
+        }
+    }
+    window.triggerContractFileInput = triggerContractFileInput;
 
-        newFiles.forEach(file => {
+    function handleContractFileSelect(input) {
+        if (!input || !input.files || input.files.length === 0) return;
+        var newFiles = Array.from(input.files);
+
+        newFiles.forEach(function (file) {
             // check trùng (name + size cho chắc)
-            if (!filesList.some(f => f.name === file.name && f.size === file.size)) {
+            if (!filesList.some(function (f) { return f.name === file.name && f.size === file.size; })) {
                 filesList.push(file);
             }
         });
 
         syncInputFiles();
         renderFileList();
-    });
+        if (filesList.length > 0) {
+            $("#DinhKemFile_ValMsg").text("").hide();
+        }
+    }
+    window.handleContractFileSelect = handleContractFileSelect;
 
     // SYNC FILE VÀO INPUT
     function syncInputFiles() {
-        dataTransfer = new DataTransfer();
+        try {
+            dataTransfer = new DataTransfer();
+            filesList.forEach(function (file) {
+                dataTransfer.items.add(file);
+            });
+            var fileInput = document.getElementById("DinhKemFile");
+            if (fileInput) {
+                fileInput.files = dataTransfer.files;
+            }
+        } catch (err) {
+            console.warn("DataTransfer sync error:", err);
+        }
 
-        filesList.forEach(file => {
-            dataTransfer.items.add(file);
-        });
-
-        document.getElementById("DinhKemFile").files = dataTransfer.files;
+        var $txt = $("#txtDinhKemFileName");
+        if ($txt.length) {
+            if (filesList.length === 0) {
+                $txt.val("");
+            } else if (filesList.length === 1) {
+                $txt.val(filesList[0].name);
+            } else {
+                $txt.val(filesList.length + " tệp được chọn");
+            }
+        }
     }
+    window.syncInputFiles = syncInputFiles;
 
     // RENDER FILE MỚI
     function renderFileList() {
-        let html = "";
+        var html = "";
 
-        filesList.forEach((file, index) => {
+        filesList.forEach(function (file, index) {
             html += `
                         <div class="d-flex justify-content-between align-items-center border rounded px-2 py-1 mb-1 new-file">
                             <span>
@@ -372,13 +393,19 @@
 
         $("#fileList").html(html);
     }
+    window.renderFileList = renderFileList;
 
     // XÓA FILE MỚI
     function removeFile(index) {
         filesList.splice(index, 1);
         syncInputFiles();
         renderFileList();
+        var hasOld = $("#oldFileList .old-file").length > 0;
+        if (filesList.length === 0 && !hasOld) {
+            $("#DinhKemFile_ValMsg").text('@Html.Raw(string.Format(AppProcessor.Messagor.GetMessage("Common_RequiredMessage"), AppProcessor.Messagor.GetMessage("FileAttach_Label")))').show();
+        }
     }
+    window.removeFile = removeFile;
 
     // XÓA FILE CŨ (EDIT)
     function removeOldFile(btn, fileId) {
@@ -386,7 +413,13 @@
         $("#deletedFilesContainer").append(
             `<input type="hidden" name="DeletedFileIds" value="${fileId}" />`
         );
+        var hasOld = $("#oldFileList .old-file").length > 0;
+        var hasNew = (typeof filesList !== 'undefined' && filesList.length > 0);
+        if (!hasOld && !hasNew) {
+            $("#DinhKemFile_ValMsg").text('@Html.Raw(string.Format(AppProcessor.Messagor.GetMessage("Common_RequiredMessage"), AppProcessor.Messagor.GetMessage("FileAttach_Label")))').show();
+        }
     }
+    window.removeOldFile = removeOldFile;
 
     function fnChonKieuNhac() {
         kieuNhac = $('#ReminderType').val();
@@ -396,12 +429,11 @@
         } else if (kieuNhac == 'SPECIFIC_DATE') {
             $('#div_ReminderDayOfMonth').addClass('d-none');
             $('#rowLichNhac').removeClass('d-none');
-            rowLichNhac
         } else if (kieuNhac == 'RECURRING') {
             $('#div_ReminderDayOfMonth').removeClass('d-none');
             $('#rowLichNhac').addClass('d-none');
         }
     }
-
+    window.fnChonKieuNhac = fnChonKieuNhac;
 </script>
 @Html.RenderScripts(ScriptPosition.BodyInside)

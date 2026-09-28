@@ -6,3 +6,7 @@
 .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top {
     z-index: 9999 !important;
 }
+
+.cursor-pointer {
+    cursor: pointer !important;
+}

@@ -157,7 +157,10 @@ namespace TSFramework.Libs.Extensions
             builderInputFile.Attributes.Add("class", "d-none");
             if (multiple) builderInputFile.Attributes.Add("multiple", "True");
 
-            builderInputFile.Attributes.Add("accept", accept);
+            if (!string.IsNullOrEmpty(accept) && accept != ".*" && accept != "*")
+            {
+                builderInputFile.Attributes.Add("accept", accept);
+            }
             var inputFileFile = builderInputFile.ToString(TagRenderMode.Normal);
 
             var builderInputText = new TagBuilder("input");

@@ -363,7 +363,7 @@ BEGIN
           AND (@StatusID = 0 OR ds.StatusID = @StatusID)
           AND (@CustomerID = 0 OR ds.CustomerID = @CustomerID)
           AND (@DepartmentID = 0 OR ds.DepartmentID = @DepartmentID)
-          AND (@EmployeeID = 0 OR ds.AssignedEmployeeID = @EmployeeID)
+          AND (@EmployeeID = 0 OR ds.AssignedEmployeeID = @EmployeeID OR EXISTS (SELECT 1 FROM dbo.RM_DigitalSalesMember member WHERE member.DigitalSalesID = ds.DigitalSalesID AND member.UserID = @EmployeeID AND ISNULL(member.IsActive, 0) = 1))
           AND (@FromDate IS NULL OR ds.CreatedDate >= @FromDate)
           AND (@ToDate IS NULL OR ds.CreatedDate <= DATEADD(day, 1, @ToDate))
           AND (
