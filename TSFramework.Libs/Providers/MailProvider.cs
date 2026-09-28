@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -188,8 +188,11 @@ namespace TSFramework.Libs.Providers
             var nMail = new MailMessage
             {
                 From = new MailAddress(mail.From ?? _config.UserCredential,
-                    mail.DisplayNameFrom ?? _config.UserCredentialName),
+                    mail.DisplayNameFrom ?? _config.UserCredentialName, System.Text.Encoding.UTF8),
                 Subject = mail.Subject,
+                SubjectEncoding = System.Text.Encoding.UTF8,
+                BodyEncoding = System.Text.Encoding.UTF8,
+                HeadersEncoding = System.Text.Encoding.UTF8,
                 DeliveryNotificationOptions = DeliveryNotificationOptions.OnFailure,
                 IsBodyHtml = mail.IsBodyHtml,
                 Body = finalBody

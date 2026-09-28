@@ -1,0 +1,403 @@
+/* ==========================================================================
+   Modern Creative Blue Login Layout (Inspired by Minimalist Rounded Card)
+   ========================================================================== */
+
+body.login-body-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(180deg, #9cbfe8 0%, #6fa5e6 35%, #2977df 70%, #1555b7 100%) no-repeat fixed center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-viewport-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    box-sizing: border-box;
+}
+
+/* Floating White Card with Ultra-Rounded Corners */
+.login-card {
+    width: 100%;
+    max-width: 390px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 36px;
+    box-shadow: 0 25px 65px rgba(11, 48, 105, 0.22), 0 8px 24px rgba(0, 0, 0, 0.06);
+    padding: 44px 38px 38px 38px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    animation: loginCardFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loginCardFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* User Avatar Circular Badge in Creative Blue Accent */
+.login-avatar-badge {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4ea3f8 0%, #1e70eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 24px rgba(30, 112, 235, 0.35);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-avatar-badge:hover {
+    transform: scale(1.04);
+    box-shadow: 0 12px 28px rgba(30, 112, 235, 0.42);
+}
+
+.login-avatar-badge svg {
+    width: 50px;
+    height: 50px;
+    display: block;
+}
+
+/* Screen Title */
+.login-main-title {
+    color: #1e3a63;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 26px 0;
+    text-align: center;
+}
+
+/* Form Container */
+.login-form-wrapper {
+    width: 100%;
+}
+
+/* Custom Input Groups - Pill Shaped */
+.login-field-group {
+    width: 100%;
+    margin-bottom: 18px;
+    box-sizing: border-box;
+}
+
+.login-input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    border-radius: 50px;
+    border: 1.5px solid #dce4ee;
+    background-color: #ffffff;
+    padding: 0 20px;
+    box-sizing: border-box;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.login-input-wrapper:hover {
+    border-color: #cbd5e1;
+}
+
+.login-input-wrapper:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.login-field-icon {
+    color: #64748b;
+    font-size: 15px;
+    margin-right: 14px;
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color 0.25s ease;
+}
+
+.login-input-wrapper:focus-within .login-field-icon {
+    color: #2563eb;
+}
+
+.login-field-control {
+    flex: 1;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #1e293b !important;
+    font-size: 14.5px !important;
+    font-weight: 400 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+}
+
+.login-field-control::placeholder {
+    color: #94a3b8 !important;
+    font-weight: 400;
+    opacity: 1;
+}
+
+.login-field-control:-webkit-autofill,
+.login-field-control:-webkit-autofill:hover, 
+.login-field-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: #1e293b !important;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.login-error-text {
+    font-size: 12px;
+    color: #dc2626;
+    margin-top: 5px;
+    padding-left: 18px;
+    display: block;
+    line-height: 1.3;
+}
+
+/* Submit Button - Pill Shaped with Creative Gradient */
+.login-submit-btn {
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(135deg, #4da1f7 0%, #1e70eb 100%);
+    border: none;
+    border-radius: 50px;
+    color: #ffffff;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 22px rgba(30, 112, 235, 0.35);
+    margin-top: 6px;
+}
+
+.login-submit-btn:hover {
+    background: linear-gradient(135deg, #3b92f0 0%, #1760cb 100%);
+    box-shadow: 0 10px 28px rgba(30, 112, 235, 0.45);
+    transform: translateY(-1px);
+}
+
+.login-submit-btn:active {
+    transform: translateY(1px);
+}
+
+.login-submit-btn:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Options Row: Remember Me & Forgot Password (Positioned under Button) */
+.login-options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.login-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: #64748b;
+    user-select: none;
+    margin: 0;
+    font-size: 13px;
+    transition: color 0.2s ease;
+}
+
+.login-checkbox-label:hover {
+    color: #1e293b;
+}
+
+.login-checkbox-label input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #94a3b8;
+    border-radius: 3px;
+    background-color: transparent;
+    cursor: pointer;
+    margin: 0 8px 0 0;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    outline: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.login-checkbox-label input[type="checkbox"]:checked {
+    background-color: #64748b;
+    border-color: #64748b;
+}
+
+.login-checkbox-label input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    left: 4.5px;
+    top: 1.5px;
+    width: 4px;
+    height: 8px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.login-forgot-link {
+    color: #64748b;
+    font-style: italic;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    font-size: 13px;
+}
+
+.login-forgot-link:hover {
+    color: #1e70eb;
+    text-decoration: underline;
+}
+
+/* Feedback / Alert Container */
+.login-feedback-area {
+    margin-top: 14px;
+    font-size: 13px;
+    color: #dc2626;
+    text-align: center;
+    width: 100%;
+    line-height: 1.4;
+}
+
+/* Forgot Password View Transition */
+.login-panel-box {
+    width: 100%;
+    transition: opacity 0.3s ease;
+}
+
+.login-panel-box.d-none-animated {
+    display: none !important;
+}
+
+.login-back-action {
+    display: inline-flex;
+    align-items: center;
+    color: #2563eb;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.login-back-action:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+.login-back-action i {
+    margin-right: 8px;
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        max-width: 330px;
+        padding: 36px 26px 30px 26px;
+        border-radius: 28px;
+    }
+    .login-avatar-badge {
+        width: 84px;
+        height: 84px;
+        margin-bottom: 18px;
+    }
+    .login-avatar-badge svg {
+        width: 44px;
+        height: 44px;
+    }
+    .login-main-title {
+        font-size: 17px;
+        letter-spacing: 1.5px;
+        margin-bottom: 22px;
+    }
+}
+
+/* Subtitle description under panel title */
+.login-sub-desc {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.45;
+    margin: -16px 0 20px 0;
+    text-align: center;
+}
+
+.login-sub-desc strong {
+    color: #1e3a63;
+}
+
+.login-otp-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 11.5px;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* OTP Input Special Styling */
+.otp-input-wrapper {
+    justify-content: center;
+    padding: 0 16px;
+    border-color: #93c5fd;
+    background-color: #f8fafc;
+}
+
+.otp-control {
+    text-align: center !important;
+    letter-spacing: 12px !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #1d4ed8 !important;
+    padding-left: 12px !important;
+}
+
+.otp-control::placeholder {
+    letter-spacing: 8px !important;
+    color: #94a3b8 !important;
+    font-weight: 500;
+}
+
+.login-options-center {
+    justify-content: center !important;
+    text-align: center !important;
+    margin-top: 14px;
+}

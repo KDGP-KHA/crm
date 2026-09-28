@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Sys.BaseApp;
@@ -18,15 +18,123 @@ namespace Modules.Sys.Areas.Sys.Controllers
 {
     public class PositionController : AppController
     {
-        private readonly string _positionTitle = AppProcessor.Messagor.GetMessage("Position_Title");
+        private readonly string _positionTitle = AppProcessor.Messagor.GetMessage("Position_Title") ?? "Chức vụ";
         private readonly MN_ChucVuCache _positionCache = new MN_ChucVuCache();
 
         [ActionType(Type = EnumActionType.View)]
         [HttpGet]
         public ActionResult Index()
         {
+            ViewBag.Title = _positionTitle;
             return View();
         }
+
+        #region Position - CRUD
+
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Create)]
+        [HttpGet]
+        public ActionResult Add()
+        {
+            var model = new MN_ChucVuModel();
+            return PartialView("_Add", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionType(Type = EnumActionType.Create)]
+        [ValidateInput(false)]
+        public ActionResult Add(MN_ChucVuModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_Position", model);
+            }
+            string response;
+            var result = _positionCache.Save(model, User.UserName);
+            if (result == 0)
+                response = CreateMessage($"{_positionTitle} [{model.TenChucVu}]", EnumProcessType.Add, EnumMsgIcon.Error);
+            else if (result == -9)
+                response = CreateMessage($"{_positionTitle} [{model.MaChucVu}]", EnumProcessType.DataExisted, EnumMsgIcon.Error);
+            else
+                response = CreateMessage($"{_positionTitle} [{model.TenChucVu}]", EnumProcessType.Add, EnumMsgIcon.Success);
+
+            return Json(new { status = result > 0, message = response }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Edit)]
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            var model = _positionCache.GetById(id);
+            if (model == null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = CreateMessage($"{_positionTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+            }
+            return PartialView("_Edit", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionType(Type = EnumActionType.Edit)]
+        [ValidateInput(false)]
+        public ActionResult Edit(MN_ChucVuModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView("_Position", model);
+            }
+            string response;
+            var result = _positionCache.Save(model, User.UserName);
+            if (result == 0)
+                response = CreateMessage($"{_positionTitle} [{model.TenChucVu}]", EnumProcessType.Edit, EnumMsgIcon.Error);
+            else if (result == -9)
+                response = CreateMessage($"{_positionTitle} [{model.MaChucVu}]", EnumProcessType.DataExisted, EnumMsgIcon.Error);
+            else
+                response = CreateMessage($"{_positionTitle} [{model.TenChucVu}]", EnumProcessType.Edit, EnumMsgIcon.Success);
+
+            return Json(new { status = result > 0, message = response }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.Delete)]
+        public ActionResult Delete(int id)
+        {
+            var model = _positionCache.GetById(id);
+            if (model == null)
+                return Json(new
+                {
+                    status = true,
+                    message = CreateMessage($"{_positionTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+
+            ViewBag.ConfirmStatus = string.Format(AppProcessor.Messagor.GetMessage("Message_Confirm_Delete") ?? "Bạn muốn xoá {0}?",
+                $"{_positionTitle} [{model.TenChucVu}]");
+
+            return PartialView("_Delete", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionType(Type = EnumActionType.Delete)]
+        public ActionResult Delete(MN_ChucVuModel model)
+        {
+            var deleted = _positionCache.Delete(model, User.UserName);
+            var response = CreateMessage($"{_positionTitle} [{model.TenChucVu}]",
+                EnumProcessType.Delete, deleted > 0 ? EnumMsgIcon.Success : EnumMsgIcon.Error);
+            return Json(new { status = deleted > 0, message = response }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
 
         [AjaxOnly]
         [HttpPost]

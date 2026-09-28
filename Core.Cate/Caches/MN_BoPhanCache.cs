@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
@@ -21,25 +21,25 @@ namespace Core.Cate.Caches
         /// Xóa theo ID
         /// </summary>
         /// <returns>Kết quả thực hiện</returns>
-        //[DataObjectMethod(DataObjectMethodType.Delete, false)]
-        //public int Delete(MN_BoPhanModel model, string deletedBy)
-        //{
-        //    var isDeleted = Api.Delete(model.BoPhan_ID, deletedBy);
-        //    if (isDeleted > 0) InvalidateCache();
-        //    return isDeleted;
-        //}
+        [DataObjectMethod(DataObjectMethodType.Delete, false)]
+        public int Delete(MN_BoPhanModel model, string deletedBy)
+        {
+            var isDeleted = Api.Delete(model.BoPhan_ID, deletedBy);
+            if (isDeleted > 0) InvalidateCache();
+            return isDeleted;
+        }
 
         /// <summary>
         /// Lưu thông tin MN_BoPhan
         /// </summary>
         /// <returns>Kết quả thực hiện</returns>
-        //[DataObjectMethod(DataObjectMethodType.Insert, true)]
-        //public int Save(MN_BoPhanModel model, string savedBy)
-        //{
-        //    var isSaved = Api.Save(model, savedBy);
-        //    if (isSaved > 0) InvalidateCache();
-        //    return isSaved;
-        //}
+        [DataObjectMethod(DataObjectMethodType.Insert, true)]
+        public int Save(MN_BoPhanModel model, string savedBy)
+        {
+            var isSaved = Api.Save(model, savedBy);
+            if (isSaved > 0) InvalidateCache();
+            return isSaved;
+        }
 
         /// <summary>
         /// Lấy toàn bộ danh sách MN_BoPhan

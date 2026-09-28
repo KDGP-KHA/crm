@@ -139,6 +139,9 @@
 		<Procedure Name="MN_BoPhan_Get" Value="MN_BoPhan_Get" />
 		<Procedure Name="MN_BoPhan_Export" Value="MN_BoPhan_Export" />
 		<Procedure Name="MN_BoPhan_Sync" Value="MN_BoPhan_Sync" />
+		<Procedure Name="MN_BoPhan_Save" Value="MN_BoPhan_Save" />
+		<Procedure Name="MN_BoPhan_Delete" Value="MN_BoPhan_Delete" />
+		<Procedure Name="MN_BoPhan_GetByID" Value="MN_BoPhan_GetByID" />
 
 		<!--RM_ProjectMember-->
 		<Procedure Name="RM_ProjectMember_Save" Value="RM_ProjectMember_Save" />

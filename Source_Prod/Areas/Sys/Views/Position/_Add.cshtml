@@ -1,0 +1,26 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add") ?? "Thêm mới {0}", AppProcessor.Messagor.GetMessage("Position_Title") ?? "Chức vụ");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Add", "Position", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Position_OnProcessSuccess(data, 'AddPosition')"
+    }, new { @class = "form-horizontal", id = "AddPosition" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_Position")
+        </div>
+    }
+}

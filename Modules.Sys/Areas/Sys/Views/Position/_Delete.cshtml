@@ -1,0 +1,26 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Models
+@model MN_ChucVuModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete") ?? "Xoá {0}", AppProcessor.Messagor.GetMessage("Position_Title") ?? "Chức vụ");
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "Position", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Position_OnProcessSuccess(data, 'DeletePosition')"
+    }, new { @class = "form-horizontal", id = "DeletePosition" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.ChucVu_ID)
+        @Html.HiddenFor(model => model.TenChucVu)
+        <h5>@Html.Raw(ViewBag.ConfirmStatus)</h5>
+    }
+}

@@ -1,135 +1,127 @@
-﻿@using CaptchaMvc.HtmlHelpers
-@using TSFramework.Libs.Processors
+﻿@using TSFramework.Libs.Processors
 @model CenIT.Solution.TOC.WebApp.Models.LoginModel
+
 @Html.AntiForgeryToken()
 @Html.HiddenFor(m => m.URLLink)
-<style>
-    @@font-face {
-        font-family: 'password';
-        src: url(https://jsbin-user-assets.s3.amazonaws.com/rafaelcastrocouto/password.ttf);
-    }
 
-    input.key {
-        font-family: 'password';
-    }
-
-    input.key.show-password {
-        font-family: inherit !important;
-    }
-</style>
-
-
-<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2">
-    <div class="d-flex align-items-center input-floating-label text-blue brc-blue-m2">
-        @Html.TextBoxFor(model => model.UserName, new { @autocomplete = "off", @class = "form-control form-control-lg pr-4 shadow-none", placeholder = AppProcessor.Messagor.GetMessage("Authorize_UserName") })
-        @Html.LabelFor(model => model.UserName, new { @class = "floating-label text-grey-l1 ml-n3" })
-    </div>
-    @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "text-danger" })
-</div>
-
-<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-2 mt-md-1">
-    <div class="d-flex align-items-center input-floating-label text-blue brc-blue-m2">
-        @Html.TextBoxFor(model => model.Password, new { @autocomplete = "off", @class = "form-control form-control-lg pr-4 shadow-none key", placeholder = AppProcessor.Messagor.GetMessage("Authorize_Password"), @type = "password", @id = "Password" })
-        @Html.LabelFor(model => model.Password, new { @class = "floating-label text-grey-l1 ml-n3" })
-    </div>
-    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
-</div>
-
-<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2 mt-1">
-    <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="showPasswordCheckbox">
-        <label class="form-check-label" for="showPasswordCheckbox">
-            @AppProcessor.Messagor.GetMessage("Message_ShowPassword")
-        </label>
-    </div>
-</div>
-
-<div class="form-group col-sm-10 offset-sm-1 col-md-8 offset-md-2">
-    <button type="button" class="btn btn-primary px-2 btn-bold w-100" id="btnLogin" style="background: linear-gradient(to bottom, #239FF7, #0A6DB4); font-weight: bold; ">
-        @AppProcessor.Messagor.GetMessage("Button_Login")
-    </button>
-</div>
-
-<div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 text-left text-md-left mt-n2 mb-2" style="font-size: smaller;">
-    - Số điện thoại Hỗ trợ Email là: <b style="color: red">1800 1555 Nhánh 3</b>
-    <br>
-    - Địa chỉ Email hỗ trợ: <b style="color: red">hotro.email@vnpt.vn</b>
-    <br>
-    - Đối với quên mật khẩu, hết hạn mật khẩu soạn tin nhắn:<b>MK&lt;khoảng cách&gt;&lt;Tên truy nhập&gt;</b> gửi <b>293</b>
-    <br>
-    - Ví dụ:<b> MK nguyenvana.lcu</b> gửi <b>293</b>
-    <br>
-    - Để đổi mật khẩu, truy cập vào <a href="@Url.Action("ChangePassword", "Account")">
-        đường dẫn đây
-    </a>
-</div>
-
-@if (Model?.IsShowWarning ?? false)
-{
-    <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 text-left text-md-left mt-n2 mb-2">
-        <p class="text-500 text-danger-d2 mb-0">@Html.DisplayTextFor(model => model.MessageLoginFailCount)</p>
-        <p class="text-500 text-danger-d2 mb-0">@Html.DisplayTextFor(model => model.Warning)</p>
-    </div>
+@{
+    var accountPlaceholder = AppProcessor.Messagor.GetMessage("Login_Placeholder_Account");
+    if (string.IsNullOrEmpty(accountPlaceholder)) { accountPlaceholder = "Tài khoản"; }
+    var passwordPlaceholder = AppProcessor.Messagor.GetMessage("Login_Placeholder_Password");
+    if (string.IsNullOrEmpty(passwordPlaceholder)) { passwordPlaceholder = "Mật khẩu"; }
+    var showPasswordLabel = AppProcessor.Messagor.GetMessage("Message_ShowPassword");
+    if (string.IsNullOrEmpty(showPasswordLabel)) { showPasswordLabel = "Hiển thị mật khẩu"; }
 }
 
+<div class="login-field-group">
+    <div class="login-input-wrapper">
+        <i class="fa fa-user login-field-icon"></i>
+        @Html.TextBoxFor(model => model.UserName, new { @autocomplete = "off", @class = "login-field-control", placeholder = accountPlaceholder, id = "UserName" })
+    </div>
+    @Html.ValidationMessageFor(model => model.UserName, "", new { @class = "login-error-text" })
+</div>
+
+<div class="login-field-group">
+    <div class="login-input-wrapper">
+        <i class="fa fa-lock login-field-icon"></i>
+        @Html.PasswordFor(model => model.Password, new { @autocomplete = "off", @class = "login-field-control", placeholder = passwordPlaceholder, id = "Password" })
+    </div>
+    @Html.ValidationMessageFor(model => model.Password, "", new { @class = "login-error-text" })
+</div>
+
+<button type="button" class="login-submit-btn" id="btnLogin">
+    ĐĂNG NHẬP
+</button>
+
+<div class="login-options-row">
+    <label class="login-checkbox-label" for="showPasswordCheckbox">
+        <input type="checkbox" id="showPasswordCheckbox" />
+        <span>@showPasswordLabel</span>
+    </label>
+    <a href="javascript:void(0);" class="login-forgot-link" id="linkForgotPassword">Quên mật khẩu?</a>
+</div>
+
+<div id="loginFeedback" class="login-feedback-area">
+    @if (Model?.IsShowWarning ?? false)
+    {
+        <p class="mb-1 text-danger">@Html.DisplayTextFor(model => model.MessageLoginFailCount)</p>
+        <p class="mb-0 text-danger">@Html.DisplayTextFor(model => model.Warning)</p>
+    }
+</div>
+
 <script>
+    (function () {
+        function attachLoginFormEvents() {
+            $("#LoginForm input").off("keydown.login").on("keydown.login", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    _submitFormLogin();
+                }
+            });
 
-    document.querySelectorAll("#LoginForm input").forEach(input => {
-        input.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
+            $("#btnLogin").off("click.login").on("click.login", function () {
                 _submitFormLogin();
-            }
-        });
-    });
-
-    $('#btnLogin').click(function () {
-        _submitFormLogin();
-    });
-
-    function _submitFormLogin() {
-        var userName = $("form#LoginForm #UserName").val();
-        var password = $("form#LoginForm #Password").val();
-
-        var key = CryptoJS.enc.Utf8.parse(keyStr);
-        var iv = CryptoJS.enc.Utf8.parse(ivStr);
-
-        var encryptedlogin = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(userName), key,
-            {
-                keySize: 128 / 8,
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
             });
 
-        var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(password), key,
-            {
-                keySize: 128 / 8,
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7
+            $("#showPasswordCheckbox").off("change.showpwd").on("change.showpwd", function () {
+                var isChecked = $(this).is(":checked");
+                $("#Password").attr("type", isChecked ? "text" : "password");
             });
 
-        if (password == '' || password == 'undefined' || userName == '' || userName == 'undefined') {
-            $("#URLLink").val('');
-        } else {
-            $("form#LoginForm #Password").val('');
-            $("form#LoginForm #UserName").val('');
-            $("form#LoginForm #URLLink").val(keySplit + encryptedlogin + keySplit + encryptedpassword + keySplit + keyStr + keySplit + ivStr);
+            $("#linkForgotPassword").off("click.forgot").on("click.forgot", function (e) {
+                e.preventDefault();
+                if (typeof window.showForgotPanel === "function") {
+                    window.showForgotPanel();
+                }
+            });
         }
 
-        $("form#LoginForm").submit();
-    }
-    
-</script>
+        window._submitFormLogin = function () {
+            var userName = $.trim($("form#LoginForm #UserName").val());
+            var password = $("form#LoginForm #Password").val();
 
-<script>
-    $(document).off("change", "#showPasswordCheckbox")
-        .on("change", "#showPasswordCheckbox", function () {
-            const $input = $("#Password");
-            const isChecked = $(this).is(":checked");
+            if (!userName || !password) {
+                if (typeof toastr !== "undefined") {
+                    toastr.warning("Vui lòng nhập đầy đủ Tài khoản và Mật khẩu.");
+                }
+                if (!userName) $("form#LoginForm #UserName").focus();
+                else $("form#LoginForm #Password").focus();
+                return;
+            }
 
-            $input.attr("type", isChecked ? "text" : "password");
-            $input.toggleClass("show-password", isChecked);
+            var $btn = $("#btnLogin");
+            $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang đăng nhập...');
+
+            try {
+                if (typeof CryptoJS !== "undefined" && typeof keyStr !== "undefined" && typeof ivStr !== "undefined" && typeof keySplit !== "undefined") {
+                    var key = CryptoJS.enc.Utf8.parse(keyStr);
+                    var iv = CryptoJS.enc.Utf8.parse(ivStr);
+
+                    var encryptedlogin = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(userName), key, {
+                        keySize: 128 / 8,
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+
+                    var encryptedpassword = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(password), key, {
+                        keySize: 128 / 8,
+                        iv: iv,
+                        mode: CryptoJS.mode.CBC,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+
+                    $("form#LoginForm #URLLink").val(keySplit + encryptedlogin + keySplit + encryptedpassword + keySplit + keyStr + keySplit + ivStr);
+                }
+            } catch (err) {
+                console.error("Encryption error:", err);
+            }
+
+            $("form#LoginForm").submit();
+        };
+
+        $(document).ready(function () {
+            attachLoginFormEvents();
         });
+    })();
 </script>

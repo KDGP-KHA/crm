@@ -4041,6 +4041,7 @@
     <Content Include="Contents\Modules\Sys\plugins\fontawesome-iconpicker-3.0.0\src\less\popovers.less" />
     <Content Include="Contents\Modules\Sys\plugins\fontawesome-iconpicker-3.0.0\src\less\variables.less" />
     <Content Include="Views\Account\Login.cshtml" />
+    <Content Include="Views\Account\Login.css" />
     <Content Include="Views\Account\ResetPassword.cshtml" />
     <Content Include="Views\Account\_ChangePassword.cshtml" />
     <Content Include="Views\Account\_EditInfo.cshtml" />

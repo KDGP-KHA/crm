@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -71,11 +71,10 @@ namespace Core.Cate.Biz
         {
             var result = AppProcessor.ProcedureProvider.Execute(_mn_bophan_Save, DATA_PROVIDER_NAME
                , model.BoPhan_ID
-               , model.MaBoPhan
-               , model.MaBoPhanCha
                , model.TenBoPhan
-               , model.Da_Xoa
-            , savedBy);
+               , model.MaBoPhan
+               , model.BoPhanCha_ID ?? 0
+               , savedBy);
             return result.GetValueOrDefault(0);
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -44,25 +44,25 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         private const string VNPT_DEFAULT_ROLE_ID = "6";
         private const string VNPT_DEFAULT_MODULE_ID = "2";
         private readonly string _vnptAccountNotConfiguredMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_VNPTAccountNotConfigured");
+            AppProcessor.Messagor.GetMessage("Account_Message_VNPTAccountNotConfigured") ?? "Tài khoản VNPT chưa được thiết lập trong hệ thống.";
         private readonly string _loginSuccessMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_LoginSuccess");
+            AppProcessor.Messagor.GetMessage("Account_Message_LoginSuccess") ?? "Đăng nhập thành công.";
         private readonly string _currentPasswordIncorrectMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_CurrentPasswordIncorrect");
+            AppProcessor.Messagor.GetMessage("Account_Message_CurrentPasswordIncorrect") ?? "Mật khẩu hiện tại không đúng.";
         private readonly string _passwordPolicyInvalidMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_PasswordPolicyInvalid");
+            AppProcessor.Messagor.GetMessage("Account_Message_PasswordPolicyInvalid") ?? "Mật khẩu phải ít nhất có 1 chữ hoa, 1 chữ thường và một ký tự đặc biệt.";
         private readonly string _userNotFoundOrLockedMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_UserNotFoundOrLocked");
+            AppProcessor.Messagor.GetMessage("Account_Message_UserNotFoundOrLocked") ?? "Tài khoản không tồn tại hoặc đã khóa.";
         private readonly string _changePasswordSuccessAndForceLogoutMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_ChangePasswordSuccessAndForceLogout");
+            AppProcessor.Messagor.GetMessage("Account_Message_ChangePasswordSuccessAndForceLogout") ?? "Đổi mật khẩu thành công. Hệ thống sẽ thực hiện đăng xuất khỏi hệ thống.";
         private readonly string _emailRequiredMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_EmailRequired");
+            AppProcessor.Messagor.GetMessage("Account_Message_EmailRequired") ?? "Bạn chưa nhập Email.";
         private readonly string _emailInvalidMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_EmailInvalid");
+            AppProcessor.Messagor.GetMessage("Account_Message_EmailInvalid") ?? "Email không đúng định dạng.";
         private readonly string _userInfoNotFoundMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_UserInfoNotFound");
+            AppProcessor.Messagor.GetMessage("Account_Message_UserInfoNotFound") ?? "Thông tin tài khoản không tồn tại.";
         private readonly string _resetPasswordEmailSentMessage =
-            AppProcessor.Messagor.GetMessage("Account_Message_ResetPasswordEmailSent");
+            AppProcessor.Messagor.GetMessage("Account_Message_ResetPasswordEmailSent") ?? "Đã gửi yêu cầu đặt lại mật khẩu đến địa chỉ Email: <b>[{0}]</b>.";
         private readonly string appCode = ConfigurationManager.AppSettings["appCode"] ?? "";
         private readonly string _appHostUrl = ConfigurationManager.AppSettings["App_HostUrl"] ?? "";
 
@@ -154,7 +154,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
                         Session.Remove(key);
                 }
                 ViewBag.ReturnUrl = returnUrl;
-                ViewBag.UseSso = true;
+                ViewBag.UseSso = false;
                 ViewBag.SsoLoginUrl = Url.Action("Login", "Account", new { returnUrl, loginMode = "sso" });
                 FormsAuthentication.SignOut();
                 if (Request.IsAjaxRequest()) Response.StatusCode = 401;
@@ -230,6 +230,11 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
 
             if (!string.IsNullOrEmpty(model.URLLink))
             {
+                ApplyLoginCredentials(model);
+            }
+
+            if (!string.IsNullOrEmpty(model.UserName) && !string.IsNullOrEmpty(model.Password))
+            {
                 ModelState.Remove("Password");
                 ModelState.Remove("UserName");
             }
@@ -239,10 +244,17 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             if (!ModelState.IsValidField("UserName") || !ModelState.IsValidField("Password"))
             {
                 ViewBag.ReturnUrl = returnUrl;
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        message = CreateMessage("Vui lòng nhập đầy đủ Tài khoản và Mật khẩu.", EnumProcessType.NonFormat, EnumMsgIcon.Error)
+                    }, JsonRequestBehavior.AllowGet);
+                }
                 return PartialView("_LoginBody", model);
             }
 
-            ApplyLoginCredentials(model);
             model.SenderIP = Request.UserHostAddress;
             model.SenderHeader = string.Join(",", Request.Headers);
 
@@ -251,7 +263,15 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             string loginFailMessage;
             if (!TryAuthenticateUser(model, out isVNPTAccount, out vnptUser, out loginFailMessage))
             {
-                SendResponseNotify("MsgLoginFail", loginFailMessage, EnumProcessType.NonFormat, EnumMsgIcon.Error);
+                if (Request.IsAjaxRequest())
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        message = CreateMessage(loginFailMessage ?? "Tài khoản hoặc mật khẩu không đúng.", EnumProcessType.NonFormat, EnumMsgIcon.Error)
+                    }, JsonRequestBehavior.AllowGet);
+                }
+                SendResponseNotify("MsgLoginFail", loginFailMessage ?? "Tài khoản hoặc mật khẩu không đúng.", EnumProcessType.NonFormat, EnumMsgIcon.Error);
                 return PartialView("_LoginBody", model);
             }
 
@@ -259,7 +279,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             List<SysRoleModel> roles = _userCache.GetRoles(loginUser.UserId);
             if (roles == null || roles.Count <= 0)
             {
-                SendResponseNotify("MsgLoginFail", AppProcessor.Messagor.GetMessage("API_No_Right"),
+                SendResponseNotify("MsgLoginFail", AppProcessor.Messagor.GetMessage("API_No_Right") ?? "Tài khoản của bạn không có quyền",
                     EnumProcessType.NonFormat, EnumMsgIcon.Error);
                 Session[SESSION_VARIABLE_NAME] = 0;
                 model.LoginFailCount = 0;
@@ -267,7 +287,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
                 return PartialView("_LoginBody", model);
             }
 
-            SignInUser(loginUser);
+            SignInUser(loginUser, model.RememberMe);
             AppProcessor.Author.SaveLogin(loginUser.UserName, true, model.SenderIP, model.SenderHeader);
 
             if (!Url.IsLocalUrl(returnUrl))
@@ -277,7 +297,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             {
                 status = true,
                 returnUrl,
-                message = CreateMessage(_loginSuccessMessage, EnumProcessType.NonFormat,
+                message = CreateMessage(_loginSuccessMessage ?? "Đăng nhập thành công.", EnumProcessType.NonFormat,
                     EnumMsgIcon.Success, EnumMsgPlacement.TopCenter)
             }, JsonRequestBehavior.AllowGet);
         }
@@ -672,6 +692,287 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         }
 
         /// <summary>
+        /// Gửi mã xác thực OTP qua email để khôi phục mật khẩu.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult RequestPasswordOtp(string userName, string email)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_UserNameRequired") ?? "Vui lòng nhập Tài khoản."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_EmailRequired") ?? "Bạn chưa nhập Email."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (!UtilString.IsValidEmail(email.Trim()))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_EmailInvalid") ?? "Email không đúng định dạng."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            userName = userName.Trim();
+            email = email.Trim();
+
+            var user = _userCache.GetByUserName(userName);
+            if (user == null || !user.IsActive)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_UserNotFound") ?? "Tài khoản không tồn tại hoặc đã bị khóa."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (string.IsNullOrWhiteSpace(user.Email) || !string.Equals(user.Email.Trim(), email, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_UserEmailMismatch") ?? "Tài khoản và Email không khớp với thông tin đã đăng ký."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            var random = new Random();
+            var otp = random.Next(100000, 999999).ToString("D6");
+
+            Session["PWD_RESET_USER"] = user.UserName;
+            Session["PWD_RESET_EMAIL"] = user.Email.Trim();
+            Session["PWD_RESET_OTP"] = otp;
+            Session["PWD_RESET_EXPIRE"] = DateTime.Now.AddMinutes(5);
+            Session["PWD_RESET_VERIFIED"] = false;
+
+            AppProcessor.Logger.Message($"[OTP] RequestPasswordOtp for {user.UserName}: {otp}");
+
+            try
+            {
+                string appTitle = "HỆ THỐNG CRM";
+                string appOwner = "Hệ thống CRM";
+                string emailSubject = $"[CRM] Mã OTP xác thực: {otp}";
+
+                string emailBody = $@"
+<div style=""font-family: 'Segoe UI', Arial, sans-serif; max-width: 580px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);"">
+    <div style=""background: linear-gradient(135deg, #1e70eb 0%, #0d47a1 100%); padding: 24px; text-align: center;"">
+        <h2 style=""color: #ffffff; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 1px;"">{appTitle.ToUpper()}</h2>
+        <p style=""color: #dbeafe; margin: 6px 0 0 0; font-size: 13px;"">Xác thực yêu cầu đặt lại mật khẩu</p>
+    </div>
+    <div style=""padding: 30px 24px;"">
+        <p style=""font-size: 15px; color: #1e293b; margin: 0 0 16px 0;"">Xin chào <strong>{user.FullName ?? user.UserName}</strong>,</p>
+        <p style=""font-size: 14px; color: #475569; line-height: 1.6; margin: 0 0 20px 0;"">
+            Bạn vừa gửi yêu cầu đặt lại mật khẩu cho tài khoản <strong>{user.UserName}</strong> trên hệ thống CRM. Vui lòng sử dụng mã xác thực OTP dưới đây để hoàn tất quá trình đổi mật khẩu:
+        </p>
+        <div style=""text-align: center; margin: 28px 0;"">
+            <span style=""display: inline-block; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #1e70eb; background-color: #eff6ff; border: 2px dashed #3b82f6; border-radius: 10px; padding: 14px 28px;"">
+                {otp}
+            </span>
+        </div>
+        <p style=""font-size: 13.5px; color: #ef4444; margin: 0 0 16px 0; text-align: center;"">
+            * Mã OTP có hiệu lực trong vòng <strong>5 phút</strong>. Tuyệt đối không chia sẻ mã này cho bất kỳ ai.
+        </p>
+        <p style=""font-size: 13px; color: #64748b; line-height: 1.5; margin: 20px 0 0 0;"">
+            Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email hoặc liên hệ với quản trị viên hệ thống để được hỗ trợ.
+        </p>
+    </div>
+    <div style=""background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px 24px; text-align: center; font-size: 12px; color: #94a3b8;"">
+        &copy; {DateTime.Now.Year} {appTitle}. All rights reserved.
+    </div>
+</div>";
+
+                AppProcessor.Mailer.PushEmail(new List<MailModel>
+                {
+                    new MailModel
+                    {
+                        Subject = emailSubject,
+                        To = new List<string> { user.Email.Trim() },
+                        Body = emailBody,
+                        IsBodyHtml = true,
+                        DisplayNameFrom = appOwner
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+            }
+
+            string masked = MaskEmail(user.Email.Trim());
+            string templateMsg = AppProcessor.Messagor.GetMessage("Account_Message_OtpSent") ?? "Mã OTP đã được gửi đến địa chỉ email [{0}]. Vui lòng kiểm tra hòm thư của bạn.";
+
+            return Json(new
+            {
+                status = true,
+                userName = user.UserName,
+                email = masked,
+                message = string.Format(templateMsg, masked)
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Xác thực mã OTP người dùng nhập vào.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult VerifyPasswordOtp(string otp)
+        {
+            if (string.IsNullOrWhiteSpace(otp))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_OtpRequired") ?? "Vui lòng nhập mã OTP 6 số."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            otp = otp.Trim();
+            var sessionOtp = Session["PWD_RESET_OTP"] as string;
+            var sessionExpire = Session["PWD_RESET_EXPIRE"] as DateTime?;
+            var sessionUser = Session["PWD_RESET_USER"] as string;
+
+            if (string.IsNullOrEmpty(sessionOtp) || sessionExpire == null || string.IsNullOrEmpty(sessionUser))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_SessionExpired") ?? "Phiên xác thực đã hết hạn hoặc không tồn tại. Vui lòng yêu cầu lại mã OTP."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (DateTime.Now > sessionExpire.Value)
+            {
+                Session.Remove("PWD_RESET_OTP");
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_OtpExpired") ?? "Mã OTP đã hết hiệu lực (quá 5 phút). Vui lòng yêu cầu mã mới."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (!string.Equals(otp, sessionOtp))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_OtpInvalid") ?? "Mã OTP không chính xác. Vui lòng kiểm tra lại."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            Session["PWD_RESET_VERIFIED"] = true;
+
+            return Json(new
+            {
+                status = true,
+                userName = sessionUser,
+                message = AppProcessor.Messagor.GetMessage("Account_Message_OtpVerified") ?? "Xác thực mã OTP thành công. Vui lòng nhập mật khẩu mới."
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Đổi mật khẩu mới sau khi xác thực OTP thành công.
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        public ActionResult ResetPasswordWithOtp(string newPassword, string confirmPassword)
+        {
+            var isVerified = Session["PWD_RESET_VERIFIED"] as bool?;
+            var sessionUser = Session["PWD_RESET_USER"] as string;
+
+            if (isVerified != true || string.IsNullOrEmpty(sessionUser))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_SessionExpired") ?? "Phiên xác thực chưa hợp lệ hoặc đã hết hạn. Vui lòng thực hiện lại từ đầu."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (string.IsNullOrWhiteSpace(newPassword))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_NewPasswordRequired") ?? "Vui lòng nhập mật khẩu mới."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_ConfirmPasswordRequired") ?? "Vui lòng nhập xác nhận mật khẩu mới."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (!string.Equals(newPassword, confirmPassword))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_PasswordMismatch") ?? "Mật khẩu mới và xác nhận mật khẩu không trùng khớp."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            if (newPassword.Length < 6)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_PasswordLengthMin") ?? "Mật khẩu phải có độ dài tối thiểu từ 6 ký tự trở lên."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            var salt = UtilEncrypt.GenerateSalt();
+            var passwordHash = UtilEncrypt.GenerateCryptoPassword(newPassword, salt);
+            var userId = _userCache.ResetPassword(sessionUser, passwordHash, salt, "Đặt lại mật khẩu qua OTP", sessionUser);
+
+            if (userId == -1 || userId == 0)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = AppProcessor.Messagor.GetMessage("Account_Message_UserNotFound") ?? "Tài khoản không tồn tại hoặc đã bị khóa trong hệ thống."
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            Session.Remove("PWD_RESET_USER");
+            Session.Remove("PWD_RESET_EMAIL");
+            Session.Remove("PWD_RESET_OTP");
+            Session.Remove("PWD_RESET_EXPIRE");
+            Session.Remove("PWD_RESET_VERIFIED");
+
+            return Json(new
+            {
+                status = true,
+                userName = sessionUser,
+                message = AppProcessor.Messagor.GetMessage("Account_Message_ResetPasswordSuccess") ?? "Đổi mật khẩu thành công! Vui lòng đăng nhập lại với mật khẩu mới."
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        private static string MaskEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return string.Empty;
+            var atIndex = email.IndexOf('@');
+            if (atIndex <= 1) return email;
+            var prefix = email.Substring(0, 1);
+            var domain = email.Substring(atIndex);
+            return $"{prefix}***{domain}";
+        }
+
+        /// <summary>
         /// Render thông tin tài khoản hiện tại để hiển thị trên menu.
         /// </summary>
         /// <returns>Chuỗi HTML thông tin tài khoản.</returns>
@@ -707,19 +1008,30 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         {
             if (!string.IsNullOrEmpty(model.URLLink))
             {
-                string value = model.URLLink;
-                string key = value.Substring(0, 16);
-                value = value.Replace(key, ",");
-                string[] data = value.TrimStart(',').Split(',');
+                try
+                {
+                    string value = model.URLLink;
+                    if (value.Length > 16)
+                    {
+                        string key = value.Substring(0, 16);
+                        string[] data = value.Split(new[] { key }, StringSplitOptions.RemoveEmptyEntries);
+                        if (data.Length >= 4)
+                        {
+                            string userName = AESEncrytDecryProvider.DecryptStringAES(data[0], data[2], data[3]);
+                            string password = AESEncrytDecryProvider.DecryptStringAES(data[1], data[2], data[3]);
 
-                string userName = AESEncrytDecryProvider.DecryptStringAES(data[0], data[2], data[3]);
-                string password = AESEncrytDecryProvider.DecryptStringAES(data[1], data[2], data[3]);
-
-                model.UserName = userName.Trim();
-                model.Password = password.Trim();
+                            if (!string.IsNullOrWhiteSpace(userName))
+                                model.UserName = userName.Trim();
+                            if (!string.IsNullOrWhiteSpace(password))
+                                model.Password = password.Trim();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AppProcessor.Logger.Error(ex);
+                }
             }
-
-            model.UserName = NormalizeVNPTUsername(model.UserName);
         }
 
         private bool TryAuthenticateUser(
@@ -728,32 +1040,38 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             out SysUserModel vnptUser,
             out string loginFailMessage)
         {
+            isVNPTAccount = false;
             vnptUser = null;
-            loginFailMessage = AppProcessor.Messagor.GetMessage("Authorize_LoginIncorrect");
+            loginFailMessage = AppProcessor.Messagor.GetMessage("Authorize_LoginIncorrect") ?? "Tài khoản hoặc mật khẩu không đúng";
 
-            string emailFull = model.UserName.Trim().ToLower();
-            isVNPTAccount = emailFull.EndsWith(_vnptEmailExtension);
-
-            if (!isVNPTAccount)
+            if (string.IsNullOrWhiteSpace(model.UserName) || string.IsNullOrWhiteSpace(model.Password))
             {
-                return AppProcessor.Author.IsValidUser(model.UserName, model.Password);
+                return false;
             }
 
-            bool isAuthen = _vnptProvider.ValidateUser(emailFull, model.Password);
+            string inputAccount = model.UserName.Trim();
+            string inputPassword = model.Password.Trim();
+
+            // Xác thực trực tiếp qua CSDL bằng bảng Sys_Users
+            bool isAuthen = AppProcessor.Author.IsValidUser(inputAccount, inputPassword);
             if (!isAuthen)
             {
                 return false;
             }
 
-            vnptUser = _userCache.GetByEmail(emailFull);
-            if (vnptUser == null)
+            // Lấy thông tin tài khoản người dùng theo UserName hoặc Email
+            var user = _userCache.GetByUserName(inputAccount) ?? _userCache.GetByEmail(inputAccount);
+            if (user == null || !user.IsActive)
             {
-                loginFailMessage = _vnptAccountNotConfiguredMessage;
+                loginFailMessage = _userNotFoundOrLockedMessage ?? "Tài khoản không tồn tại hoặc đã khóa.";
                 return false;
             }
 
-            EnsureVNPTPermissions(vnptUser);
-            model.UserName = vnptUser.UserName;
+            // Đảm bảo phân quyền truy cập chức năng cho tài khoản
+            EnsureVNPTPermissions(user);
+
+            model.UserName = user.UserName;
+            vnptUser = user;
             return true;
         }
 
@@ -781,25 +1099,19 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             SysUserModel vnptUser)
         {
             string avatarFolderPath = ConfigurationManager.AppSettings["AppAvatarFolder_Path"];
+            var userOnline = vnptUser ?? _userCache.GetByUserName(userName) ?? _userCache.GetByEmail(userName);
 
-            if (isVNPTAccount && vnptUser != null)
+            if (userOnline == null)
             {
-                AppProcessor.Author.GetUserInfo(vnptUser.UserName);
-
                 return new AppPrincipalSerializeModel
                 {
-                    UserId = vnptUser.UserId ?? 0,
-                    FullName = vnptUser.FullName,
-                    UserName = vnptUser.UserName,
-                    Email = vnptUser.Email,
-                    Avatar = string.IsNullOrEmpty(vnptUser.Avatar)
-                        ? _defaultAvatar
-                        : string.Concat(avatarFolderPath, "/", vnptUser.UserId, "/", vnptUser.Avatar)
+                    UserId = 0,
+                    FullName = userName,
+                    UserName = userName,
+                    Email = string.Empty,
+                    Avatar = _defaultAvatar
                 };
             }
-
-            // Fix: Get SysUserModel from _userCache instead of AppProcessor.Author.GetUserInfo
-            SysUserModel userOnline = _userCache.GetByUserName(userName);
 
             return new AppPrincipalSerializeModel
             {
@@ -813,7 +1125,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             };
         }
 
-        private void SignInUser(AppPrincipalSerializeModel loginUser)
+        private void SignInUser(AppPrincipalSerializeModel loginUser, bool rememberMe = false)
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             string userData = serializer.Serialize(loginUser);
@@ -822,12 +1134,16 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
                 1,
                 loginUser.UserName,
                 DateTime.Now,
-                DateTime.Now.AddMinutes(30),
-                true,
+                rememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddMinutes(60),
+                rememberMe,
                 userData);
 
             string encTicket = FormsAuthentication.Encrypt(authTicket);
             HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encTicket);
+            if (rememberMe)
+            {
+                faCookie.Expires = authTicket.Expiration;
+            }
             Request.RequestContext.HttpContext.Response.Cookies.Add(faCookie);
         }
 

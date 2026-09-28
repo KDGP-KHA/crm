@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Sys.BaseApp;
@@ -18,7 +18,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
 {
     public class DepartmentController : AppController
     {
-        private readonly string _departmentTitle = AppProcessor.Messagor.GetMessage("Department_Title");
+        private readonly string _departmentTitle = AppProcessor.Messagor.GetMessage("Department_Title") ?? "Phòng ban";
         private readonly MN_BoPhanCache _departmentCache = new MN_BoPhanCache();
 
         public DepartmentController()
@@ -32,6 +32,146 @@ namespace Modules.Sys.Areas.Sys.Controllers
         {
             return View();
         }
+
+        #region Department - CRUD
+
+        private List<SelectListItem> GetDepartmentSelectList(int? currentId = null)
+        {
+            var list = _departmentCache.GetAll();
+            var items = new List<SelectListItem>
+            {
+                new SelectListItem
+                {
+                    Value = "0",
+                    Text = AppProcessor.Messagor.GetMessage("Department_Parent_Select_Option") ?? "-- Không chọn (Cấp cao nhất) --"
+                }
+            };
+            if (list != null)
+            {
+                foreach (var item in list)
+                {
+                    if (currentId.HasValue && item.BoPhan_ID == currentId.Value) continue;
+                    var prefix = item.Level > 0 ? new string('-', item.Level * 2) + " " : "";
+                    items.Add(new SelectListItem
+                    {
+                        Value = item.BoPhan_ID.ToString(),
+                        Text = prefix + item.TenBoPhan
+                    });
+                }
+            }
+            return items;
+        }
+
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Create)]
+        [HttpGet]
+        public ActionResult Add()
+        {
+            var model = new MN_BoPhanModel
+            {
+                ListBoPhanCha = GetDepartmentSelectList()
+            };
+            return PartialView("_Add", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionType(Type = EnumActionType.Create)]
+        [ValidateInput(false)]
+        public ActionResult Add(MN_BoPhanModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.ListBoPhanCha = GetDepartmentSelectList();
+                return PartialView("_Department", model);
+            }
+            string response;
+            var result = _departmentCache.Save(model, User.UserName);
+            if (result == 0)
+                response = CreateMessage($"{_departmentTitle} [{model.TenBoPhan}]", EnumProcessType.Add, EnumMsgIcon.Error);
+            else if (result == -9)
+                response = CreateMessage($"{_departmentTitle} [{model.MaBoPhan}]", EnumProcessType.DataExisted, EnumMsgIcon.Error);
+            else
+                response = CreateMessage($"{_departmentTitle} [{model.TenBoPhan}]", EnumProcessType.Add, EnumMsgIcon.Success);
+
+            return Json(new { status = result > 0, message = response }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Edit)]
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            var model = _departmentCache.GetById(id);
+            if (model == null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = CreateMessage($"{_departmentTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+            }
+            model.ListBoPhanCha = GetDepartmentSelectList(id);
+            return PartialView("_Edit", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionType(Type = EnumActionType.Edit)]
+        [ValidateInput(false)]
+        public ActionResult Edit(MN_BoPhanModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.ListBoPhanCha = GetDepartmentSelectList(model.BoPhan_ID);
+                return PartialView("_Department", model);
+            }
+            string response;
+            var result = _departmentCache.Save(model, User.UserName);
+            if (result == 0)
+                response = CreateMessage($"{_departmentTitle} [{model.TenBoPhan}]", EnumProcessType.Edit, EnumMsgIcon.Error);
+            else if (result == -9)
+                response = CreateMessage($"{_departmentTitle} [{model.MaBoPhan}]", EnumProcessType.DataExisted, EnumMsgIcon.Error);
+            else
+                response = CreateMessage($"{_departmentTitle} [{model.TenBoPhan}]", EnumProcessType.Edit, EnumMsgIcon.Success);
+
+            return Json(new { status = result > 0, message = response }, JsonRequestBehavior.AllowGet);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        [ActionType(Type = EnumActionType.Delete)]
+        public ActionResult Delete(int id)
+        {
+            var model = _departmentCache.GetById(id);
+            if (model == null)
+                return Json(new
+                {
+                    status = true,
+                    message = CreateMessage($"{_departmentTitle}", EnumProcessType.DataNotExist, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+
+            ViewBag.ConfirmStatus = string.Format(AppProcessor.Messagor.GetMessage("Message_Confirm_Delete") ?? "Bạn muốn xoá {0}?",
+                $"{_departmentTitle} [{model.TenBoPhan}]");
+
+            return PartialView("_Delete", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionType(Type = EnumActionType.Delete)]
+        public ActionResult Delete(MN_BoPhanModel model)
+        {
+            var deleted = _departmentCache.Delete(model, User.UserName);
+            var response = CreateMessage($"{_departmentTitle} [{model.TenBoPhan}]",
+                EnumProcessType.Delete, deleted > 0 ? EnumMsgIcon.Success : EnumMsgIcon.Error);
+            return Json(new { status = deleted > 0, message = response }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
 
         [AjaxOnly]
         [HttpPost]

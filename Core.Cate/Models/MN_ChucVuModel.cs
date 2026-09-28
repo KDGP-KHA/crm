@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,10 +12,14 @@ namespace Core.Cate.Models
     {
         public int RowIndex { get; set; }
         public int ChucVu_ID { get; set; }
+        [CustomRequired]
         [CustomDisplayName("Position_PositionName_Label")]
         public string TenChucVu { get; set; }
+
+        [CustomRequired]
         [CustomDisplayName("Position_PositionCode_Label")]
         public string MaChucVu { get; set; }
+
         public bool DaXoa { get; set; }
     }
 

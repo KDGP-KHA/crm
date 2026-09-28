@@ -1,0 +1,26 @@
+﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Models
+@model MN_BoPhanModel
+
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Delete") ?? "XoÃ¡ {0}", AppProcessor.Messagor.GetMessage("Department_Title") ?? "PhÃ²ng ban");
+    Layout = "~/Views/Shared/_FormConfirm.cshtml";
+}
+
+@section FormType{
+    danger
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("Delete", "Department", new { area = "Sys" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnSuccess = "Department_OnProcessSuccess(data, 'DeleteDepartment')"
+    }, new { @class = "form-horizontal", id = "DeleteDepartment" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.BoPhan_ID)
+        @Html.HiddenFor(model => model.TenBoPhan)
+        <h5>@Html.Raw(ViewBag.ConfirmStatus)</h5>
+    }
+}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -79,10 +79,9 @@ namespace Core.Cate.Biz
         {
             var result = AppProcessor.ProcedureProvider.Execute(_mn_chucvu_Save, DATA_PROVIDER_NAME
                , model.ChucVu_ID
-               , model.MaChucVu
                , model.TenChucVu
-               , model.DaXoa
-            , savedBy);
+               , model.MaChucVu
+               , savedBy);
             return result.GetValueOrDefault(0);
         }
         private object[] BuildExportParams(MN_ChucVuSearchModel model)

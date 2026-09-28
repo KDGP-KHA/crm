@@ -1,10 +1,26 @@
-﻿@using TSFramework.Libs.Processors
-
+﻿@using TSFramework.Libs.Extensions
+@using TSFramework.Libs.Processors
 @{
-    ViewBag.Title = AppProcessor.Messagor.GetMessage("Department_Title");
+    ViewBag.Title = Title = AppProcessor.Messagor.GetMessage("Department_Title") ?? "PhÃ²ng ban";
 }
 
-@section PageTitle { @ViewBag.Title }
+@section PageTitle
+{
+    @Title
+}
+
+@section PageAction
+{
+    @Html.Button(true,
+    "AddDepartment",
+    Url.Action("Add", new { area = "Sys" }),
+    "<i class='fa fa-plus'></i>",
+    AppProcessor.Messagor.GetMessage("Button_Add") ?? "ThÃªm",
+    new {
+        data_width = "800px",
+        @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90 pull-right"
+    })
+}
 
 @Html.Partial("_Search")
 
@@ -18,6 +34,7 @@
                     <tr>
                         <th>@AppProcessor.Messagor.GetMessage("Deparment_Name_Label")</th>
                         <th>@AppProcessor.Messagor.GetMessage("Deparment_Code_Label")</th>
+                        <th class="text-center">@AppProcessor.Messagor.GetMessage("Column_Action")</th>
                     </tr>
                 </thead>
 
@@ -29,5 +46,5 @@
 
 @section BottomScript
 {
-    <script src="@Url.Content("~/Areas/Sys/Views/Department/Department.js")"></script>
+    <script src="@Url.Content("~/Areas/Sys/Views/Department/Department.js?v=" + DateTime.Now.Ticks)"></script>
 }

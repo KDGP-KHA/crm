@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <Provider xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<StoredProcedures ProviderName="CenIT.Provider.Major">
@@ -102,6 +102,9 @@
     <Procedure Name="RM_Contracts_Delete" Value="RM_Contracts_Delete" />
     <Procedure Name="RM_Contracts_GetByProjectID" Value="RM_Contracts_GetByProjectID" />
 	<Procedure Name="RM_Contracts_GetByProductProjectID" Value="RM_Contracts_GetByProductProjectID" />
+	<Procedure Name="RM_DigitalSalesProductContract_GetByProductID" Value="RM_DigitalSalesProductContract_GetByProductID" />
+	<Procedure Name="RM_DigitalSalesProductContract_Link" Value="RM_DigitalSalesProductContract_Link" />
+	<Procedure Name="RM_DigitalSalesProductContract_Unlink" Value="RM_DigitalSalesProductContract_Unlink" />
 
 		<!--RM_ExchangeHistory-->
     <Procedure Name="RM_ExchangeHistory_Save" Value="RM_ExchangeHistory_Save" />
@@ -136,6 +139,9 @@
 		<Procedure Name="MN_BoPhan_Get" Value="MN_BoPhan_Get" />
 		<Procedure Name="MN_BoPhan_Export" Value="MN_BoPhan_Export" />
 		<Procedure Name="MN_BoPhan_Sync" Value="MN_BoPhan_Sync" />
+		<Procedure Name="MN_BoPhan_Save" Value="MN_BoPhan_Save" />
+		<Procedure Name="MN_BoPhan_Delete" Value="MN_BoPhan_Delete" />
+		<Procedure Name="MN_BoPhan_GetByID" Value="MN_BoPhan_GetByID" />
 
 		<!--RM_ProjectMember-->
 		<Procedure Name="RM_ProjectMember_Save" Value="RM_ProjectMember_Save" />
@@ -353,6 +359,9 @@
 		<!--ReviewBatchItem-->
 		<Procedure Name="RM_ReviewBatchItem_Save"		Value="RM_ReviewBatchItem_Save" />
 		<Procedure Name="RM_ReviewBatch_GetHistory"		Value="RM_ReviewBatch_GetHistory" />
+		<Procedure Name="RM_DigitalSalesReview_GetList" Value="RM_DigitalSalesReview_GetList" />
+		<Procedure Name="RM_DigitalSalesReview_Save" Value="RM_DigitalSalesReview_Save" />
+		<Procedure Name="RM_DigitalSalesReview_GetHistory" Value="RM_DigitalSalesReview_GetHistory" />
 		<Procedure Name="RM_ReviewHistory_Save"			Value="RM_ReviewHistory_Save" />
 		<Procedure Name="RM_ReviewHistory_GetByID"			Value="RM_ReviewHistory_GetByID" />
 
@@ -382,5 +391,79 @@
 		
 		<Procedure Name="Project_Opportunity_GetReminder"	Value="Project_Opportunity_GetReminder" />
 		<Procedure Name="Project_Opportunity_GetBotData"	Value="Project_Opportunity_GetBotData" />
+
+		<!-- RM_DigitalSales & Workflow -->
+		<Procedure Name="RM_DigitalSales_GetList" Value="RM_DigitalSales_GetList" />
+		<Procedure Name="RM_DigitalSales_GetByID" Value="RM_DigitalSales_GetByID" />
+		<Procedure Name="RM_DigitalSales_Save" Value="RM_DigitalSales_Save" />
+		<Procedure Name="RM_DigitalSales_Delete" Value="RM_DigitalSales_Delete" />
+		<Procedure Name="RM_DigitalSales_ChangeStatus" Value="RM_DigitalSales_ChangeStatus" />
+		<Procedure Name="RM_DigitalSales_GetTimeline" Value="RM_DigitalSales_GetTimeline" />
+		<Procedure Name="RM_DigitalSales_ToggleKeyProject" Value="RM_DigitalSales_ToggleKeyProject" />
+		<Procedure Name="RM_DigitalSales_ToggleFollow" Value="RM_DigitalSales_ToggleFollow" />
+		<Procedure Name="Sys_UserGuideState_IsViewed" Value="Sys_UserGuideState_IsViewed" />
+		<Procedure Name="Sys_UserGuideState_MarkViewed" Value="Sys_UserGuideState_MarkViewed" />
+
+		<!-- Sys_UserGuideConfig -->
+		<Procedure Name="Sys_UserGuideConfig_GetByScreenCode" Value="Sys_UserGuideConfig_GetByScreenCode" />
+		<Procedure Name="Sys_UserGuideConfig_GetAll" Value="Sys_UserGuideConfig_GetAll" />
+		<Procedure Name="Sys_UserGuideConfig_SaveStep" Value="Sys_UserGuideConfig_SaveStep" />
+		<Procedure Name="Sys_UserGuideConfig_DeleteStep" Value="Sys_UserGuideConfig_DeleteStep" />
+		<Procedure Name="Sys_UserGuideConfig_DeleteByScreenCode" Value="Sys_UserGuideConfig_DeleteByScreenCode" />
+
+		<!-- RM_DigitalSalesProduct -->
+		<Procedure Name="RM_DigitalSalesProduct_GetBySalesID" Value="RM_DigitalSalesProduct_GetBySalesID" />
+		<Procedure Name="RM_DigitalSalesProduct_Save" Value="RM_DigitalSalesProduct_Save" />
+		<Procedure Name="RM_DigitalSalesProduct_Delete" Value="RM_DigitalSalesProduct_Delete" />
+		<Procedure Name="RM_DigitalSalesProduct_SaveDetail" Value="RM_DigitalSalesProduct_SaveDetail" />
+		<Procedure Name="RM_DigitalSalesProductCost_GetByProductID" Value="RM_DigitalSalesProductCost_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductRevenue_GetByProductID" Value="RM_DigitalSalesProductRevenue_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductMember_GetByProductID" Value="RM_DigitalSalesProductMember_GetByProductID" />
+
+		<!-- RM_DigitalSalesMember -->
+		<Procedure Name="RM_DigitalSalesMember_GetBySalesID" Value="RM_DigitalSalesMember_GetBySalesID" />
+		<Procedure Name="RM_DigitalSalesMember_Save" Value="RM_DigitalSalesMember_Save" />
+		<Procedure Name="RM_DigitalSalesMember_Delete" Value="RM_DigitalSalesMember_Delete" />
+
+		<!-- RM_DigitalSalesTracking -->
+		<Procedure Name="RM_DigitalSalesTracking_GetBySalesID" Value="RM_DigitalSalesTracking_GetBySalesID" />
+		<Procedure Name="RM_DigitalSalesTracking_Save" Value="RM_DigitalSalesTracking_Save" />
+		<Procedure Name="RM_DigitalSalesTracking_Delete" Value="RM_DigitalSalesTracking_Delete" />
+		<Procedure Name="RM_DigitalSalesTracking_UpdateStatus" Value="RM_DigitalSalesTracking_UpdateStatus" />
+		<Procedure Name="RM_DigitalSalesTracking_ChangeProcessOfStatus" Value="RM_DigitalSalesTracking_ChangeProcessOfStatus" />
+
+		<!-- RM_DigitalSalesStatus -->
+		<Procedure Name="RM_DigitalSalesStatus_GetAll" Value="RM_DigitalSalesStatus_GetAll" />
+		<Procedure Name="RM_DigitalSalesStatus_Get" Value="RM_DigitalSalesStatus_Get" />
+		<Procedure Name="RM_DigitalSalesStatus_GetByID" Value="RM_DigitalSalesStatus_GetByID" />
+		<Procedure Name="RM_DigitalSalesStatus_Save" Value="RM_DigitalSalesStatus_Save" />
+		<Procedure Name="RM_DigitalSalesStatus_Delete" Value="RM_DigitalSalesStatus_Delete" />
+
+		<!-- RM_DigitalSalesProcess -->
+		<Procedure Name="RM_DigitalSalesProcess_Get" Value="RM_DigitalSalesProcess_Get" />
+		<Procedure Name="RM_DigitalSalesProcess_GetByID" Value="RM_DigitalSalesProcess_GetByID" />
+		<Procedure Name="RM_DigitalSalesProcess_Save" Value="RM_DigitalSalesProcess_Save" />
+		<Procedure Name="RM_DigitalSalesProcess_Delete" Value="RM_DigitalSalesProcess_Delete" />
+
+		<!-- RM_DigitalSalesProgress -->
+		<Procedure Name="RM_DigitalSalesProgress_GetByProcess" Value="RM_DigitalSalesProgress_GetByProcess" />
+		<Procedure Name="RM_DigitalSalesProgress_GetByID" Value="RM_DigitalSalesProgress_GetByID" />
+		<Procedure Name="RM_DigitalSalesProgress_Save" Value="RM_DigitalSalesProgress_Save" />
+		<Procedure Name="RM_DigitalSalesProgress_Delete" Value="RM_DigitalSalesProgress_Delete" />
+
+		<!-- RM_DigitalSalesActivity -->
+		<Procedure Name="RM_DigitalSalesActivity_GetList" Value="RM_DigitalSalesActivity_GetList" />
+		<Procedure Name="RM_DigitalSalesActivity_Add" Value="RM_DigitalSalesActivity_Add" />
+		<Procedure Name="RM_DigitalSalesActivity_Delete" Value="RM_DigitalSalesActivity_Delete" />
+		<Procedure Name="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" Value="RM_DigitalSalesActivity_UpdateLatestStatusChangeAttachments" />
+
+		<Procedure Name="RM_DigitalSalesProductContract_GetByProductID" Value="RM_DigitalSalesProductContract_GetByProductID" />
+		<Procedure Name="RM_DigitalSalesProductContract_Link" Value="RM_DigitalSalesProductContract_Link" />
+		<Procedure Name="RM_DigitalSales_GetDepartmentByUserID" Value="RM_DigitalSales_GetDepartmentByUserID" />
+		<Procedure Name="RM_DigitalSales_GetAccessibleEmployees" Value="RM_DigitalSales_GetAccessibleEmployees" />
+		<Procedure Name="RM_DigitalSales_GetDashboardStatusStats" Value="RM_DigitalSales_GetDashboardStatusStats" />
+		<Procedure Name="RM_DigitalSales_GetStaleActionTime" Value="RM_DigitalSales_GetStaleActionTime" />
+		<Procedure Name="RM_DigitalSales_GetGroupServiceChart" Value="RM_DigitalSales_GetGroupServiceChart" />
 	</StoredProcedures>
 </Provider>
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TSFramework.Libs.Attributes;
@@ -8,16 +8,27 @@ namespace Core.Cate.Models
 {
     public class MN_BoPhanModel : BaseSearchModel
     {
+        public int RowIndex { get; set; }
         public int BoPhan_ID { get; set; }
-        [CustomDisplayName("Deparment_Code_Label")]
+
+        [CustomRequired]
+        [CustomDisplayName("Department_Code_Label")]
         public string MaBoPhan { get; set; }
+
         public string TenBoPhanView { get; set; }
-        [CustomDisplayName("Deparment_ParentName_Label")]
+
+        [CustomDisplayName("Department_ParentName_Label")]
         public string TenBoPhanCha { get; set; }
+
         public int MaBoPhanCha { get; set; }
+
+        [CustomDisplayName("Department_ParentName_Label")]
         public int? BoPhanCha_ID { get; set; }
-        [CustomDisplayName("Deparment_Name_Label")]
+
+        [CustomRequired]
+        [CustomDisplayName("Department_Name_Label")]
         public string TenBoPhan { get; set; }
+
         public bool Da_Xoa { get; set; }
         public int Level { get; set; }
         public DateTime? NgayTao { get; set; }
@@ -26,6 +37,9 @@ namespace Core.Cate.Models
         public string Nguoi_CN { get; set; }
         public string Ma_DV_BCN { get; set; }
         public int CapQuanLy { get; set; }
+
+        public List<System.Web.Mvc.SelectListItem> ListBoPhanCha { get; set; }
+
         public string TenBoPhanDisplay
         {
             get
