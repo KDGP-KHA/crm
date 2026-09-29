@@ -1,0 +1,162 @@
+﻿@using TSFramework.Libs.Processors
+@{
+    string title = AppProcessor.Messagor.GetMessage("DigitalSales_Import_Title");
+    if (string.IsNullOrEmpty(title)) { title = "Import Cơ hội kinh doanh"; }
+}
+
+<div class="modal fade import-opp-modal" id="modalImportOpportunity" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" style="max-width: 1140px;" role="document">
+        <div class="modal-content border-0 shadow-lg radius-2 overflow-hidden">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa fa-file-excel text-success mr-2"></i> @title
+                </h5>
+                <button type="button" class="close text-secondary" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- BƯỚC 1: TẢI FILE & CHỌN TỆP EXCEL -->
+                <div id="stepOppUpload">
+                    <div class="import-opp-template-box mb-4">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap">
+                            <div>
+                                <h6 class="text-primary font-weight-bold mb-1">
+                                    <i class="fa fa-info-circle mr-1"></i> Tải về file mẫu Excel chuẩn để nhập dữ liệu
+                                </h6>
+                                <p class="text-secondary text-90 mb-0">
+                                    File mẫu gồm 3 sheet: <strong>Danh sách cơ hội</strong> (nhập liệu), <strong>Danh sách Khách Hàng</strong> (tra cứu), và <strong>Danh sách nhân sự</strong> (nhân sự của đơn vị bạn đang quản lý).
+                                </p>
+                            </div>
+                            <div class="mt-2 mt-sm-0">
+                                <a href="@Url.Action("DownloadImportOpportunityTemplate", "DigitalSales", new { area = "Cate" })" class="btn btn-outline-primary btn-sm font-weight-bold shadow-sm">
+                                    <i class="fa fa-download mr-1"></i> Tải file mẫu Excel (.xlsx)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-dark-m2">Chọn tệp Excel dữ liệu cơ hội (*):</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="importOppFileInput" accept=".xlsx">
+                            <label class="custom-file-label text-truncate" for="importOppFileInput" id="lblImportOppFile">Chọn tệp .xlsx từ máy tính...</label>
+                        </div>
+                        <small class="form-text text-muted">
+                            Hệ thống chỉ hỗ trợ định dạng file <code>.xlsx</code>. Vui lòng không thay đổi cấu trúc các cột trong Sheet 1 của file mẫu.
+                        </small>
+                    </div>
+
+                    <div id="uploadOppProgress" class="d-none mt-3">
+                        <div class="progress" style="height: 18px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success w-100" role="progressbar">
+                                Đang đọc và kiểm tra dữ liệu file Excel...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2: XEM TRƯỚC DỮ LIỆU & KIỂM TRA LỖI -->
+                <div id="stepOppPreview" class="d-none">
+                    <div class="row mb-3" id="importOppSummary"></div>
+
+                    <ul class="nav nav-tabs nav-tabs-simple" id="importOppTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active font-weight-bold text-success" id="tabOppValidLink" data-toggle="tab" href="#tabOppValid" role="tab">
+                                <i class="fa fa-check-circle mr-1"></i>
+                                Hợp lệ, sẵn sàng tạo
+                                <span class="badge badge-success ml-1" id="cntOppValid">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link font-weight-bold text-danger" id="tabOppErrorLink" data-toggle="tab" href="#tabOppError" role="tab">
+                                <i class="fa fa-exclamation-circle mr-1"></i>
+                                Dữ liệu lỗi (sẽ bỏ qua)
+                                <span class="badge badge-danger ml-1" id="cntOppError">0</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content import-opp-table-container">
+                        <!-- TAB HỢP LỆ -->
+                        <div class="tab-pane fade show active p-2" id="tabOppValid" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover table-bordered mb-0 import-opp-table">
+                                    <thead class="bgc-secondary-l3 text-secondary-d2">
+                                        <tr>
+                                            <th class="text-center" style="width: 45px;">STT</th>
+                                            <th>Tên cơ hội</th>
+                                            <th>Khách hàng</th>
+                                            <th>AM chủ trì</th>
+                                            <th class="text-center" style="width: 65px;">Năm</th>
+                                            <th class="text-center" style="width: 85px;">Trọng điểm</th>
+                                            <th class="text-center" style="width: 85px;">Quan tâm</th>
+                                            <th class="text-center" style="width: 75px;">Xác suất</th>
+                                            <th>Sản phẩm / Dịch vụ</th>
+                                            <th class="text-right" style="min-width: 140px;">Doanh thu dự kiến</th>
+                                            <th>Ghi chú</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyOppValid">
+                                        <tr><td colspan="11" class="text-center text-muted py-3">Không có dòng dữ liệu hợp lệ</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB LỖI -->
+                        <div class="tab-pane fade p-2" id="tabOppError" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover table-bordered mb-0 import-opp-table">
+                                    <thead class="bgc-danger-l3 text-danger-d2">
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;">Dòng</th>
+                                            <th>Tên cơ hội</th>
+                                            <th>Khách hàng (nhập)</th>
+                                            <th>AM (nhập)</th>
+                                            <th class="text-center" style="width: 65px;">Năm</th>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-right">Doanh thu</th>
+                                            <th style="min-width: 250px;">Lý do lỗi chi tiết</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyOppError">
+                                        <tr><td colspan="8" class="text-center text-muted py-3">Không có dòng lỗi</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bgc-light-l3">
+                <div id="footerOppUpload" class="w-100 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> Đóng
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm px-3" id="btnReadOppFile">
+                        <i class="fa fa-search mr-1"></i> Đọc & Kiểm tra file
+                    </button>
+                </div>
+
+                <div id="footerOppPreview" class="w-100 d-none d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="button" class="btn btn-outline-danger btn-sm d-none" id="btnExportOppErrorRows">
+                            <i class="fa fa-download mr-1"></i> Tải danh sách dòng lỗi (.xlsx)
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-secondary btn-sm mr-2" id="btnBackOppUpload">
+                            <i class="fa fa-arrow-left mr-1"></i> Chọn lại file
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm px-3 font-weight-bold" id="btnConfirmOppImport">
+                            <i class="fa fa-check mr-1"></i> Xác nhận tạo cơ hội
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

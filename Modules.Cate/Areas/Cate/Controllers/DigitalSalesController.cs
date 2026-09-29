@@ -6,9 +6,12 @@ using Core.Cate.Services;
 using Core.Sys.BaseApp;
 using Core.Sys.Caches.Sys;
 using Core.Sys.Models.Sys;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7110,6 +7113,856 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 return null;
             }
+        }
+        #endregion
+
+        #region 10. Import Opportunity
+        [HttpGet]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Create)]
+        public ActionResult ImportOpportunityModal()
+        {
+            return PartialView("_ImportOpportunityModal");
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult DownloadImportOpportunityTemplate()
+        {
+            var accessibleEmployees = GetAccessibleEmployees();
+            var currentUName = CurrentUserName;
+            if (!string.IsNullOrEmpty(currentUName) && !accessibleEmployees.Any(u => u.UserName.Equals(currentUName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var cur = _userCache.GetByUserName(currentUName);
+                if (cur != null && cur.UserId.HasValue)
+                {
+                    accessibleEmployees.Insert(0, new RM_DigitalSalesUserModel
+                    {
+                        UserId = cur.UserId.Value,
+                        UserName = cur.UserName,
+                        FullName = cur.FullName
+                    });
+                }
+            }
+
+            var allCustomers = _customerCache.GetAll()?.OrderBy(c => c.CustomerName).ToList() ?? new List<RM_CustomerModel>();
+            var allDepts = _departmentCache.GetAll() ?? new List<MN_BoPhanModel>();
+            var deptDict = allDepts.ToDictionary(d => d.BoPhan_ID, d => d.TenBoPhan);
+
+            var ms = new MemoryStream();
+            using (var package = new ExcelPackage())
+            {
+                // ==================== SHEET 1: DANH SÁCH CƠ HỘI (TEMPLATE) ====================
+                var wsOpportunity = package.Workbook.Worksheets.Add("Danh_Sach_Co_Hoi");
+                string[] oppHeaders = new[]
+                {
+                    "STT",
+                    "Tên cơ hội (*)",
+                    "Khách hàng (*)",
+                    "AM chủ trì (*)",
+                    "Năm áp dụng",
+                    "Trọng điểm (Có/Không)",
+                    "Đang quan tâm (Có/Không)",
+                    "Xác suất (%)",
+                    "Sản phẩm / Dịch vụ số",
+                    "Doanh thu dự kiến (VNĐ)",
+                    "Ghi chú"
+                };
+                int[] oppWidths = new[] { 8, 45, 35, 25, 14, 22, 24, 15, 32, 25, 35 };
+
+                ApplyExcelHeaderStyle(wsOpportunity, oppHeaders, oppWidths, GetColor("#1F4E79"));
+
+                // Dòng mẫu 1
+                string sampleAm1 = accessibleEmployees.FirstOrDefault()?.UserName ?? currentUName;
+                string sampleCustomer1 = allCustomers.FirstOrDefault()?.CustomerName ?? "Công an tỉnh Khánh Hòa";
+                string sampleCustomer2 = allCustomers.Skip(1).FirstOrDefault()?.CustomerName ?? "Sở Công Thương";
+                string sampleAm2 = accessibleEmployees.Skip(1).FirstOrDefault()?.UserName ?? sampleAm1;
+
+                int currentYear = DateTime.Today.Year;
+
+                wsOpportunity.Cells[2, 1].Value = 1;
+                wsOpportunity.Cells[2, 2].Value = "Trang bị tường lửa bảo đảm an ninh mạng các cơ quan (PRJ-0107)";
+                wsOpportunity.Cells[2, 3].Value = sampleCustomer1;
+                wsOpportunity.Cells[2, 4].Value = sampleAm1;
+                wsOpportunity.Cells[2, 5].Value = currentYear;
+                wsOpportunity.Cells[2, 6].Value = "Có";
+                wsOpportunity.Cells[2, 7].Value = "Có";
+                wsOpportunity.Cells[2, 8].Value = 70;
+                wsOpportunity.Cells[2, 9].Value = "Giải pháp tường lửa bảo mật";
+                wsOpportunity.Cells[2, 10].Value = 15443000000m;
+                wsOpportunity.Cells[2, 10].Style.Numberformat.Format = "#,##0";
+                wsOpportunity.Cells[2, 11].Value = "Cơ hội trọng điểm năm " + currentYear;
+                ApplyExcelRowStyle(wsOpportunity, 2, oppHeaders.Length, GetColor("#F2F7FA"));
+
+                // Dòng mẫu 2
+                wsOpportunity.Cells[3, 1].Value = 2;
+                wsOpportunity.Cells[3, 2].Value = "Xây dựng hệ sinh thái tương tác số và truyền thông số";
+                wsOpportunity.Cells[3, 3].Value = sampleCustomer2;
+                wsOpportunity.Cells[3, 4].Value = sampleAm2;
+                wsOpportunity.Cells[3, 5].Value = currentYear;
+                wsOpportunity.Cells[3, 6].Value = "Không";
+                wsOpportunity.Cells[3, 7].Value = "Có";
+                wsOpportunity.Cells[3, 8].Value = 50;
+                wsOpportunity.Cells[3, 9].Value = "Cổng thông tin điện tử";
+                wsOpportunity.Cells[3, 10].Value = 8000000000m;
+                wsOpportunity.Cells[3, 10].Style.Numberformat.Format = "#,##0";
+                wsOpportunity.Cells[3, 11].Value = "Đang tiếp cận giai đoạn đầu";
+                ApplyExcelRowStyle(wsOpportunity, 3, oppHeaders.Length, Color.White);
+
+                wsOpportunity.View.FreezePanes(2, 1);
+
+                // ==================== SHEET 2: DANH SÁCH KHÁCH HÀNG (TRA CỨU) ====================
+                var wsCustomer = package.Workbook.Worksheets.Add("Danh_Sach_Khach_Hang");
+                string[] cusHeaders = new[]
+                {
+                    "Mã KH (CustomerID)",
+                    "Mã viết tắt (ShortName)",
+                    "Tên khách hàng",
+                    "Mã số thuế",
+                    "Địa chỉ"
+                };
+                int[] cusWidths = new[] { 18, 24, 45, 20, 50 };
+                ApplyExcelHeaderStyle(wsCustomer, cusHeaders, cusWidths, GetColor("#0D6EFD"));
+                wsCustomer.Column(4).Style.Numberformat.Format = "@";
+
+                int cusRow = 2;
+                foreach (var cus in allCustomers)
+                {
+                    wsCustomer.Cells[cusRow, 1].Value = cus.CustomerID;
+                    wsCustomer.Cells[cusRow, 2].Value = cus.ShortName ?? string.Empty;
+                    wsCustomer.Cells[cusRow, 3].Value = cus.CustomerName ?? string.Empty;
+                    wsCustomer.Cells[cusRow, 4].Value = cus.TaxCode ?? string.Empty;
+                    wsCustomer.Cells[cusRow, 5].Value = cus.AddressCus ?? string.Empty;
+
+                    Color bg = (cusRow % 2 == 0) ? GetColor("#F8F9FA") : Color.White;
+                    ApplyExcelRowStyle(wsCustomer, cusRow, cusHeaders.Length, bg);
+                    cusRow++;
+                }
+                wsCustomer.View.FreezePanes(2, 1);
+
+                // ==================== SHEET 3: DANH SÁCH NHÂN SỰ ĐƠN VỊ QUẢN LÝ (TRA CỨU) ====================
+                var wsEmployee = package.Workbook.Worksheets.Add("Danh_Sach_Nhan_Su");
+                string[] empHeaders = new[]
+                {
+                    "Mã nhân sự (UserId)",
+                    "Tên tài khoản (UserName)",
+                    "Họ và tên nhân sự",
+                    "Phòng ban / Đơn vị"
+                };
+                int[] empWidths = new[] { 20, 26, 35, 35 };
+                ApplyExcelHeaderStyle(wsEmployee, empHeaders, empWidths, GetColor("#198754"));
+
+                int empRow = 2;
+                foreach (var emp in accessibleEmployees)
+                {
+                    int? dId = GetDepartmentIdByUserId(emp.UserId);
+                    string dName = (dId.HasValue && deptDict.ContainsKey(dId.Value)) ? deptDict[dId.Value] : string.Empty;
+
+                    wsEmployee.Cells[empRow, 1].Value = emp.UserId;
+                    wsEmployee.Cells[empRow, 2].Value = emp.UserName ?? string.Empty;
+                    wsEmployee.Cells[empRow, 3].Value = emp.FullName ?? string.Empty;
+                    wsEmployee.Cells[empRow, 4].Value = dName;
+
+                    Color bg = (empRow % 2 == 0) ? GetColor("#F8FDF9") : Color.White;
+                    ApplyExcelRowStyle(wsEmployee, empRow, empHeaders.Length, bg);
+                    empRow++;
+                }
+                wsEmployee.View.FreezePanes(2, 1);
+
+                package.SaveAs(ms);
+            }
+
+            ms.Seek(0, SeekOrigin.Begin);
+            string downloadName = $"Mau_Import_Co_Hoi_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            return new FileStreamResult(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            {
+                FileDownloadName = downloadName
+            };
+        }
+
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Create)]
+        public ActionResult ImportOpportunityPreview(HttpPostedFileBase importFile)
+        {
+            if (importFile == null || importFile.ContentLength == 0)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_ImportFileRequired", "Vui lòng chọn file Excel để import.")
+                });
+            }
+
+            string ext = Path.GetExtension(importFile.FileName)?.ToLowerInvariant();
+            if (ext != ".xlsx")
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_ImportOnlyXlsx", "Hệ thống chỉ chấp nhận định dạng file .xlsx.")
+                });
+            }
+
+            string tempDir = Server.MapPath(ConfigurationManager.AppSettings["ImportTempPath"] ?? "~/Contents/Uploads/Temp");
+            if (!Directory.Exists(tempDir))
+            {
+                Directory.CreateDirectory(tempDir);
+            }
+
+            string tempFileName = "ImportOpportunity_" + Guid.NewGuid().ToString("N") + ext;
+            string tempFilePath = Path.Combine(tempDir, tempFileName);
+            importFile.SaveAs(tempFilePath);
+            Session["ImportOpportunityFilePath"] = tempFilePath;
+
+            // Dữ liệu tham chiếu
+            var accessibleEmployees = GetAccessibleEmployees();
+            var currentUName = CurrentUserName;
+            if (!string.IsNullOrEmpty(currentUName) && !accessibleEmployees.Any(u => u.UserName.Equals(currentUName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var cur = _userCache.GetByUserName(currentUName);
+                if (cur != null && cur.UserId.HasValue)
+                {
+                    accessibleEmployees.Add(new RM_DigitalSalesUserModel
+                    {
+                        UserId = cur.UserId.Value,
+                        UserName = cur.UserName,
+                        FullName = cur.FullName
+                    });
+                }
+            }
+
+            var allCustomers = _customerCache.GetAll() ?? new List<RM_CustomerModel>();
+            var allProducts = _productServiceCache.GetAllChild() ?? _productServiceCache.GetAll() ?? new List<Cate_ProductServiceModel>();
+
+            // Lookup Dictionaries
+            var cusById = allCustomers.ToDictionary(c => c.CustomerID, c => c);
+            var cusByShortName = allCustomers.Where(c => !string.IsNullOrWhiteSpace(c.ShortName))
+                .GroupBy(c => c.ShortName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var cusByTaxCode = allCustomers.Where(c => !string.IsNullOrWhiteSpace(c.TaxCode))
+                .GroupBy(c => c.TaxCode.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var cusByName = allCustomers.Where(c => !string.IsNullOrWhiteSpace(c.CustomerName))
+                .GroupBy(c => c.CustomerName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var empById = accessibleEmployees.Where(e => e.UserId > 0).ToDictionary(e => e.UserId, e => e);
+            var empByUserName = accessibleEmployees.Where(e => !string.IsNullOrWhiteSpace(e.UserName))
+                .GroupBy(e => e.UserName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var empByFullName = accessibleEmployees.Where(e => !string.IsNullOrWhiteSpace(e.FullName))
+                .GroupBy(e => e.FullName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var prodByName = allProducts.Where(p => !string.IsNullOrWhiteSpace(p.NameProduct))
+                .GroupBy(p => p.NameProduct.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var prodByCode = allProducts.Where(p => !string.IsNullOrWhiteSpace(p.CodeProduct))
+                .GroupBy(p => p.CodeProduct.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var prodByShortName = allProducts.Where(p => !string.IsNullOrWhiteSpace(p.ShortNameProduct))
+                .GroupBy(p => p.ShortNameProduct.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var allErrorRows = new List<RM_DigitalSalesImportRowModel>();
+            var previewErrorRows = new List<RM_DigitalSalesImportRowModel>();
+            var previewValidRows = new List<RM_DigitalSalesImportRowModel>();
+            int validCount = 0;
+            int errorCount = 0;
+
+            try
+            {
+                var fileInfo = new FileInfo(tempFilePath);
+                using (var package = new ExcelPackage(fileInfo))
+                {
+                    var ws = package.Workbook.Worksheets.FirstOrDefault(w => w.Name == "Danh_Sach_Co_Hoi") ?? package.Workbook.Worksheets.FirstOrDefault();
+                    if (ws == null || ws.Dimension == null)
+                    {
+                        return Json(new
+                        {
+                            status = false,
+                            message = GetAppMessage("DigitalSales_Msg_ImportFileEmpty", "File Excel không có dữ liệu để kiểm tra.")
+                        });
+                    }
+
+                    int lastRow = ws.Dimension.End.Row;
+                    for (int r = 2; r <= lastRow; r++)
+                    {
+                        if (IsOpportunityImportRowEmpty(ws, r))
+                        {
+                            continue;
+                        }
+
+                        var row = ReadOpportunityImportRow(ws, r, cusById, cusByShortName, cusByTaxCode, cusByName,
+                            empById, empByUserName, empByFullName, prodByName, prodByCode, prodByShortName);
+
+                        if (row.Errors.Count > 0)
+                        {
+                            errorCount++;
+                            allErrorRows.Add(row);
+                            if (previewErrorRows.Count < 50)
+                            {
+                                previewErrorRows.Add(row);
+                            }
+                        }
+                        else
+                        {
+                            validCount++;
+                            if (previewValidRows.Count < 50)
+                            {
+                                previewValidRows.Add(row);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                try { if (System.IO.File.Exists(tempFilePath)) System.IO.File.Delete(tempFilePath); } catch { }
+                Session["ImportOpportunityFilePath"] = null;
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_ImportReadFailed", "Đọc file Excel thất bại. Vui lòng kiểm tra lại cấu trúc file.")
+                });
+            }
+
+            Session["ImportOpportunityErrorData"] = allErrorRows;
+
+            return Json(new
+            {
+                status = true,
+                totalValid = validCount,
+                totalError = errorCount,
+                errorRows = previewErrorRows,
+                validRows = previewValidRows,
+                hasMoreErrors = errorCount > 50,
+                hasMoreValid = validCount > 50
+            }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        [AjaxOnly]
+        [ActionType(Type = EnumActionType.Create)]
+        public ActionResult ImportOpportunityConfirm()
+        {
+            string tempFilePath = Session["ImportOpportunityFilePath"] as string;
+            if (string.IsNullOrEmpty(tempFilePath) || !System.IO.File.Exists(tempFilePath))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_ImportFileNotFound", "Không tìm thấy file tạm. Vui lòng chọn và kiểm tra file lại.")
+                });
+            }
+
+            // Dữ liệu tham chiếu
+            var accessibleEmployees = GetAccessibleEmployees();
+            var currentUName = CurrentUserName;
+            if (!string.IsNullOrEmpty(currentUName) && !accessibleEmployees.Any(u => u.UserName.Equals(currentUName, StringComparison.OrdinalIgnoreCase)))
+            {
+                var cur = _userCache.GetByUserName(currentUName);
+                if (cur != null && cur.UserId.HasValue)
+                {
+                    accessibleEmployees.Add(new RM_DigitalSalesUserModel
+                    {
+                        UserId = cur.UserId.Value,
+                        UserName = cur.UserName,
+                        FullName = cur.FullName
+                    });
+                }
+            }
+
+            var allCustomers = _customerCache.GetAll() ?? new List<RM_CustomerModel>();
+            var allProducts = _productServiceCache.GetAllChild() ?? _productServiceCache.GetAll() ?? new List<Cate_ProductServiceModel>();
+
+            var cusById = allCustomers.ToDictionary(c => c.CustomerID, c => c);
+            var cusByShortName = allCustomers.Where(c => !string.IsNullOrWhiteSpace(c.ShortName))
+                .GroupBy(c => c.ShortName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var cusByTaxCode = allCustomers.Where(c => !string.IsNullOrWhiteSpace(c.TaxCode))
+                .GroupBy(c => c.TaxCode.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var cusByName = allCustomers.Where(c => !string.IsNullOrWhiteSpace(c.CustomerName))
+                .GroupBy(c => c.CustomerName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var empById = accessibleEmployees.Where(e => e.UserId > 0).ToDictionary(e => e.UserId, e => e);
+            var empByUserName = accessibleEmployees.Where(e => !string.IsNullOrWhiteSpace(e.UserName))
+                .GroupBy(e => e.UserName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var empByFullName = accessibleEmployees.Where(e => !string.IsNullOrWhiteSpace(e.FullName))
+                .GroupBy(e => e.FullName.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var prodByName = allProducts.Where(p => !string.IsNullOrWhiteSpace(p.NameProduct))
+                .GroupBy(p => p.NameProduct.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var prodByCode = allProducts.Where(p => !string.IsNullOrWhiteSpace(p.CodeProduct))
+                .GroupBy(p => p.CodeProduct.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+            var prodByShortName = allProducts.Where(p => !string.IsNullOrWhiteSpace(p.ShortNameProduct))
+                .GroupBy(p => p.ShortNameProduct.Trim().ToLowerInvariant())
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var validRowsToImport = new List<RM_DigitalSalesImportRowModel>();
+
+            try
+            {
+                var fileInfo = new FileInfo(tempFilePath);
+                using (var package = new ExcelPackage(fileInfo))
+                {
+                    var ws = package.Workbook.Worksheets.FirstOrDefault(w => w.Name == "Danh_Sach_Co_Hoi") ?? package.Workbook.Worksheets.FirstOrDefault();
+                    if (ws != null && ws.Dimension != null)
+                    {
+                        int lastRow = ws.Dimension.End.Row;
+                        for (int r = 2; r <= lastRow; r++)
+                        {
+                            if (IsOpportunityImportRowEmpty(ws, r)) continue;
+
+                            var row = ReadOpportunityImportRow(ws, r, cusById, cusByShortName, cusByTaxCode, cusByName,
+                                empById, empByUserName, empByFullName, prodByName, prodByCode, prodByShortName);
+
+                            if (row.Errors.Count == 0)
+                            {
+                                validRowsToImport.Add(row);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_ImportReadFailed", "Đọc dữ liệu xác nhận import thất bại.")
+                });
+            }
+            finally
+            {
+                try { if (System.IO.File.Exists(tempFilePath)) System.IO.File.Delete(tempFilePath); } catch { }
+                Session["ImportOpportunityFilePath"] = null;
+            }
+
+            if (validRowsToImport.Count == 0)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = "Không có dòng hợp lệ nào để tạo cơ hội."
+                });
+            }
+
+            int successCount = 0;
+            int failCount = 0;
+
+            foreach (var row in validRowsToImport)
+            {
+                try
+                {
+                    int deptId = row.DepartmentID.HasValue && row.DepartmentID.Value > 0
+                        ? row.DepartmentID.Value
+                        : (GetDepartmentIdByUserId(row.AssignedEmployeeID) ?? 0);
+
+                    var salesModel = new RM_DigitalSalesModel
+                    {
+                        Code = _salesCache.GenerateNextCode(),
+                        Title = row.Title.Trim(),
+                        BusinessType = 1, // Cơ hội
+                        StatusID = 1, // Mặc định
+                        CustomerID = row.CustomerID,
+                        AssignedEmployeeID = row.AssignedEmployeeID,
+                        DepartmentID = deptId > 0 ? deptId : (int?)null,
+                        ApplyYear = row.ApplyYear.HasValue && row.ApplyYear.Value > 0 ? row.ApplyYear.Value : DateTime.Today.Year,
+                        ClosingProbability = row.ClosingProbability.HasValue ? row.ClosingProbability.Value : 50,
+                        StartDate = DateTime.Today,
+                        ExpectedDate = DateTime.Today.AddMonths(1),
+                        Note = !string.IsNullOrWhiteSpace(row.Note) ? FormatHtmlContent(row.Note) : null
+                    };
+
+                    int digitalSalesId = _salesCache.Save(salesModel, currentUName);
+                    if (digitalSalesId > 0)
+                    {
+                        if (row.IsKey)
+                        {
+                            try { _salesCache.ToggleKeyProject(digitalSalesId, true, currentUName); } catch { }
+                        }
+
+                        if (row.IsFocus)
+                        {
+                            try { _salesCache.ToggleFollow(digitalSalesId, true, currentUName); } catch { }
+                        }
+
+                        if ((row.ProductServiceID.HasValue && row.ProductServiceID.Value > 0) || (row.ExpectedRevenue.HasValue && row.ExpectedRevenue.Value > 0))
+                        {
+                            try
+                            {
+                                var productModel = new RM_DigitalSalesProductModel
+                                {
+                                    DigitalSalesID = digitalSalesId,
+                                    ProductServiceID = row.ProductServiceID.GetValueOrDefault(0),
+                                    PackageName = !string.IsNullOrWhiteSpace(row.ProductName) ? row.ProductName : row.ProductInput,
+                                    ExpectedRevenue = row.ExpectedRevenue,
+                                    Quantity = 1,
+                                    StartDate = DateTime.Today,
+                                    EndDate = DateTime.Today.AddYears(1)
+                                };
+                                _salesCache.SaveProductDetail(productModel, currentUName);
+                            }
+                            catch (Exception pEx)
+                            {
+                                AppProcessor.Logger.Error(pEx);
+                            }
+                        }
+
+                        successCount++;
+                    }
+                    else
+                    {
+                        failCount++;
+                    }
+                }
+                catch (Exception itemEx)
+                {
+                    AppProcessor.Logger.Error(itemEx);
+                    failCount++;
+                }
+            }
+
+            return Json(new
+            {
+                status = successCount > 0,
+                successCount = successCount,
+                failCount = failCount,
+                message = $"Đã tạo thành công {successCount} cơ hội kinh doanh!" + (failCount > 0 ? $" ({failCount} bản ghi lỗi khi lưu)" : "")
+            });
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportErrorOpportunityRows(string cookieName = null)
+        {
+            var errorRows = Session["ImportOpportunityErrorData"] as List<RM_DigitalSalesImportRowModel> ?? new List<RM_DigitalSalesImportRowModel>();
+            var ms = new MemoryStream();
+
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("Dong_Loi_Co_Hoi");
+                string[] headers = new[]
+                {
+                    "Dòng Excel",
+                    "Tên cơ hội",
+                    "Khách hàng",
+                    "AM chủ trì",
+                    "Năm áp dụng",
+                    "Trọng điểm",
+                    "Đang quan tâm",
+                    "Xác suất (%)",
+                    "Sản phẩm / Dịch vụ số",
+                    "Doanh thu dự kiến",
+                    "Ghi chú",
+                    "Lý do lỗi (không sửa cột này)"
+                };
+                int[] widths = new[] { 10, 40, 35, 25, 14, 15, 15, 14, 30, 24, 30, 50 };
+
+                ApplyExcelHeaderStyle(ws, headers, widths, GetColor("#C00000"));
+
+                for (int r = 0; r < errorRows.Count; r++)
+                {
+                    var row = errorRows[r];
+                    int excelRow = r + 2;
+
+                    ws.Cells[excelRow, 1].Value = row.RowNumber;
+                    ws.Cells[excelRow, 2].Value = row.Title ?? string.Empty;
+                    ws.Cells[excelRow, 3].Value = row.CustomerInput ?? string.Empty;
+                    ws.Cells[excelRow, 4].Value = row.AMInput ?? string.Empty;
+                    ws.Cells[excelRow, 5].Value = row.ApplyYear.HasValue ? row.ApplyYear.Value.ToString() : string.Empty;
+                    ws.Cells[excelRow, 6].Value = row.IsKey ? "Có" : "Không";
+                    ws.Cells[excelRow, 7].Value = row.IsFocus ? "Có" : "Không";
+                    ws.Cells[excelRow, 8].Value = row.ClosingProbability.HasValue ? row.ClosingProbability.Value.ToString() : string.Empty;
+                    ws.Cells[excelRow, 9].Value = row.ProductInput ?? string.Empty;
+                    ws.Cells[excelRow, 10].Value = row.ExpectedRevenue.HasValue ? row.ExpectedRevenue.Value.ToString("#,##0") : string.Empty;
+                    ws.Cells[excelRow, 11].Value = row.Note ?? string.Empty;
+
+                    var errorCell = ws.Cells[excelRow, 12];
+                    errorCell.Value = row.ErrorMessage;
+                    errorCell.Style.Font.Color.SetColor(Color.DarkRed);
+                    errorCell.Style.WrapText = true;
+
+                    ApplyExcelRowStyle(ws, excelRow, headers.Length, GetColor("#FFF2CC"));
+                }
+
+                ws.View.FreezePanes(2, 1);
+                package.SaveAs(ms);
+            }
+
+            if (!string.IsNullOrEmpty(cookieName))
+            {
+                Response.Cookies.Add(new HttpCookie(cookieName, "done")
+                {
+                    Path = "/",
+                    Expires = DateTime.Now.AddMinutes(1)
+                });
+            }
+
+            ms.Seek(0, SeekOrigin.Begin);
+            string fileName = $"DongLoi_Import_CoHoi_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+            return new FileStreamResult(ms, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            {
+                FileDownloadName = fileName
+            };
+        }
+
+        private static bool IsOpportunityImportRowEmpty(ExcelWorksheet ws, int rowNumber)
+        {
+            var title = ws.Cells[rowNumber, 2].Value?.ToString();
+            var customer = ws.Cells[rowNumber, 3].Value?.ToString();
+            var am = ws.Cells[rowNumber, 4].Value?.ToString();
+            return string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(customer) && string.IsNullOrWhiteSpace(am);
+        }
+
+        private RM_DigitalSalesImportRowModel ReadOpportunityImportRow(
+            ExcelWorksheet ws,
+            int rowNumber,
+            Dictionary<int, RM_CustomerModel> cusById,
+            Dictionary<string, RM_CustomerModel> cusByShortName,
+            Dictionary<string, RM_CustomerModel> cusByTaxCode,
+            Dictionary<string, RM_CustomerModel> cusByName,
+            Dictionary<int, RM_DigitalSalesUserModel> empById,
+            Dictionary<string, RM_DigitalSalesUserModel> empByUserName,
+            Dictionary<string, RM_DigitalSalesUserModel> empByFullName,
+            Dictionary<string, Cate_ProductServiceModel> prodByName,
+            Dictionary<string, Cate_ProductServiceModel> prodByCode,
+            Dictionary<string, Cate_ProductServiceModel> prodByShortName)
+        {
+            var row = new RM_DigitalSalesImportRowModel
+            {
+                RowNumber = rowNumber,
+                Title = ws.Cells[rowNumber, 2].Value?.ToString()?.Trim(),
+                CustomerInput = ws.Cells[rowNumber, 3].Value?.ToString()?.Trim(),
+                AMInput = ws.Cells[rowNumber, 4].Value?.ToString()?.Trim(),
+                Note = ws.Cells[rowNumber, 11].Value?.ToString()?.Trim()
+            };
+
+            // 1. Kiểm tra Tiêu đề
+            if (string.IsNullOrWhiteSpace(row.Title))
+            {
+                row.Errors.Add("Tên cơ hội không được để trống.");
+            }
+
+            // 2. Kiểm tra Khách hàng
+            if (string.IsNullOrWhiteSpace(row.CustomerInput))
+            {
+                row.Errors.Add("Khách hàng không được để trống.");
+            }
+            else
+            {
+                RM_CustomerModel cus = null;
+                string cleanCus = row.CustomerInput.Trim().ToLowerInvariant();
+
+                if (int.TryParse(row.CustomerInput, out int cusId) && cusById.TryGetValue(cusId, out cus))
+                {
+                }
+                else if (cusByShortName.TryGetValue(cleanCus, out cus))
+                {
+                }
+                else if (cusByTaxCode.TryGetValue(cleanCus, out cus))
+                {
+                }
+                else if (cusByName.TryGetValue(cleanCus, out cus))
+                {
+                }
+                else
+                {
+                    // Thử tìm kiếm gần đúng theo CustomerName
+                    cus = cusByName.Values.FirstOrDefault(c => (c.CustomerName ?? "").ToLowerInvariant().Contains(cleanCus));
+                }
+
+                if (cus != null)
+                {
+                    row.CustomerID = cus.CustomerID;
+                    row.CustomerName = cus.CustomerName;
+                    row.CustomerShortName = cus.ShortName;
+                    row.CustomerTaxCode = cus.TaxCode;
+                }
+                else
+                {
+                    row.Errors.Add($"Khách hàng '{row.CustomerInput}' không tìm thấy trong hệ thống.");
+                }
+            }
+
+            // 3. Kiểm tra AM chủ trì (bắt buộc thuộc nhân sự đơn vị quản lý)
+            if (string.IsNullOrWhiteSpace(row.AMInput))
+            {
+                row.Errors.Add("AM chủ trì không được để trống.");
+            }
+            else
+            {
+                RM_DigitalSalesUserModel am = null;
+                string cleanAm = row.AMInput.Trim().ToLowerInvariant();
+
+                if (int.TryParse(row.AMInput, out int uId) && empById.TryGetValue(uId, out am))
+                {
+                }
+                else if (empByUserName.TryGetValue(cleanAm, out am))
+                {
+                }
+                else if (empByFullName.TryGetValue(cleanAm, out am))
+                {
+                }
+
+                if (am != null)
+                {
+                    row.AssignedEmployeeID = am.UserId;
+                    row.AMUserName = am.UserName;
+                    row.AMFullName = am.FullName;
+                    row.DepartmentID = GetDepartmentIdByUserId(am.UserId);
+                }
+                else
+                {
+                    row.Errors.Add($"AM chủ trì '{row.AMInput}' không tồn tại hoặc không thuộc đơn vị quản lý của bạn.");
+                }
+            }
+
+            // 4. Năm áp dụng
+            var rawYear = ws.Cells[rowNumber, 5].Value?.ToString()?.Trim();
+            if (!string.IsNullOrWhiteSpace(rawYear))
+            {
+                if (int.TryParse(rawYear, out int year) && year >= 2000 && year <= 2100)
+                {
+                    row.ApplyYear = year;
+                }
+                else
+                {
+                    row.Errors.Add("Năm áp dụng không hợp lệ (phải từ 2000 đến 2100).");
+                }
+            }
+            else
+            {
+                row.ApplyYear = DateTime.Today.Year;
+            }
+
+            // 5. Trọng điểm
+            var rawKey = ws.Cells[rowNumber, 6].Value?.ToString()?.Trim()?.ToLowerInvariant();
+            row.IsKey = rawKey == "1" || rawKey == "có" || rawKey == "co" || rawKey == "yes" || rawKey == "true" || rawKey == "x";
+
+            // 6. Đang quan tâm
+            var rawFocus = ws.Cells[rowNumber, 7].Value?.ToString()?.Trim()?.ToLowerInvariant();
+            row.IsFocus = rawFocus == "1" || rawFocus == "có" || rawFocus == "co" || rawFocus == "yes" || rawFocus == "true" || rawFocus == "x";
+
+            // 7. Xác suất (%)
+            var rawProb = ws.Cells[rowNumber, 8].Value?.ToString()?.Trim()?.Replace("%", "");
+            if (!string.IsNullOrWhiteSpace(rawProb))
+            {
+                if (decimal.TryParse(rawProb, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal prob) && prob >= 0 && prob <= 100)
+                {
+                    row.ClosingProbability = prob;
+                }
+                else
+                {
+                    row.Errors.Add("Xác suất thành công phải là số từ 0% đến 100%.");
+                }
+            }
+
+            // 8. Sản phẩm / Dịch vụ số
+            var rawProd = ws.Cells[rowNumber, 9].Value?.ToString()?.Trim();
+            row.ProductInput = rawProd;
+            if (!string.IsNullOrWhiteSpace(rawProd))
+            {
+                string cleanProd = rawProd.ToLowerInvariant();
+                Cate_ProductServiceModel prod = null;
+
+                if (int.TryParse(rawProd, out int pId) && (prodByCode.Values.FirstOrDefault(p => p.ProductServiceID == pId) != null))
+                {
+                    prod = prodByCode.Values.FirstOrDefault(p => p.ProductServiceID == pId);
+                }
+                else if (prodByCode.TryGetValue(cleanProd, out prod))
+                {
+                }
+                else if (prodByName.TryGetValue(cleanProd, out prod))
+                {
+                }
+                else if (prodByShortName.TryGetValue(cleanProd, out prod))
+                {
+                }
+                else
+                {
+                    prod = prodByName.Values.FirstOrDefault(p => (p.NameProduct ?? "").ToLowerInvariant().Contains(cleanProd));
+                }
+
+                if (prod != null)
+                {
+                    row.ProductServiceID = prod.ProductServiceID > 0 ? prod.ProductServiceID : prod.pID;
+                    row.ProductName = prod.NameProduct;
+                }
+                else
+                {
+                    row.ProductName = rawProd;
+                }
+            }
+
+            // 9. Doanh thu dự kiến (VNĐ)
+            var rawRev = ws.Cells[rowNumber, 10].Value?.ToString()?.Trim()?.Replace(",", "")?.Replace(".", "")?.Replace(" ", "");
+            if (!string.IsNullOrWhiteSpace(rawRev))
+            {
+                if (decimal.TryParse(rawRev, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal rev) && rev >= 0)
+                {
+                    row.ExpectedRevenue = rev;
+                }
+                else
+                {
+                    row.Errors.Add("Doanh thu dự kiến phải là số không âm.");
+                }
+            }
+
+            return row;
+        }
+
+        private static Color GetColor(string htmlColor)
+        {
+            return ColorTranslator.FromHtml(htmlColor);
+        }
+
+        private static void ApplyExcelHeaderStyle(ExcelWorksheet ws, string[] headers, int[] widths, Color bgColor)
+        {
+            for (int c = 0; c < headers.Length; c++)
+            {
+                var cell = ws.Cells[1, c + 1];
+                cell.Value = headers[c];
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.Size = 11;
+                cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(bgColor);
+                cell.Style.Font.Color.SetColor(Color.White);
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                cell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                ws.Column(c + 1).Width = widths[c];
+            }
+            ws.Row(1).Height = 26;
+        }
+
+        private static void ApplyExcelRowStyle(ExcelWorksheet ws, int row, int colCount, Color bgColor)
+        {
+            for (int c = 1; c <= colCount; c++)
+            {
+                var cell = ws.Cells[row, c];
+                cell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(bgColor);
+                cell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                cell.Style.Font.Size = 10;
+            }
+            ws.Row(row).Height = 22;
         }
         #endregion
     }

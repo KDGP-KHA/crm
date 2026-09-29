@@ -258,6 +258,7 @@
     <Compile Include="Models\ProjectExportRow.cs" />
     <Compile Include="Models\ProjectOverviewModel.cs" />
     <Compile Include="Models\RM_DigitalSalesModel.cs" />
+    <Compile Include="Models\RM_DigitalSalesImportRowModel.cs" />
     <Compile Include="Models\RM_DataMigrationModel.cs" />
     <Compile Include="Models\RM_DigitalSalesMemberModel.cs" />
     <Compile Include="Models\RM_DigitalSalesProductModel.cs" />

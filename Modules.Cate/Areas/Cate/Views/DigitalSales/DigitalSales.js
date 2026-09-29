@@ -1,4 +1,4 @@
-﻿var _tableDigitalSales;
+var _tableDigitalSales;
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -8,12 +8,18 @@ var _digitalSalesUrls = {
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
     changeStatus: "/Cate/DigitalSales/ChangeStatus",
     getContactPersons: "/Cate/DigitalSales/GetContactPersons",
-    export: "/Cate/DigitalSales/Export"
+    export: "/Cate/DigitalSales/Export",
+    importOpportunityModal: "/Cate/DigitalSales/ImportOpportunityModal",
+    downloadImportOpportunityTemplate: "/Cate/DigitalSales/DownloadImportOpportunityTemplate",
+    importOpportunityPreview: "/Cate/DigitalSales/ImportOpportunityPreview",
+    importOpportunityConfirm: "/Cate/DigitalSales/ImportOpportunityConfirm",
+    exportErrorOpportunityRows: "/Cate/DigitalSales/ExportErrorOpportunityRows"
 };
 
 $(document).ready(function () {
     initSearchDatepicker();
     initTableDigitalSales();
+    initImportOpportunity();
 
     $("#chkFilterKeyProject").on("change", function () {
         reloadSalesTable();
@@ -1173,5 +1179,241 @@ function initGuideConfigModalHandlers($modal) {
             }
         });
     });
+}
+
+// =========================================================================
+// CHỨC NĂNG IMPORT CƠ HỘI KINH DOANH
+// =========================================================================
+function openImportOpportunityModal() {
+    if (typeof _onWaiting === "function") _onWaiting();
+    $.get(_digitalSalesUrls.importOpportunityModal, function (html) {
+        if (typeof _endWaiting === "function") _endWaiting();
+        $("#modalContainer").html(html);
+        var $modal = $("#modalImportOpportunity");
+        $modal.modal("show");
+    }).fail(function () {
+        if (typeof _endWaiting === "function") _endWaiting();
+        if (typeof toastr !== "undefined") {
+            toastr.error("Không thể mở cửa sổ Import Cơ hội. Vui lòng thử lại.");
+        }
+    });
+}
+
+function initImportOpportunity() {
+    $(document).on("change", "#importOppFileInput", function () {
+        var label = this.files.length > 0 ? this.files[0].name : "Chọn tệp .xlsx từ máy tính...";
+        $("#lblImportOppFile").text(label);
+    });
+
+    $(document).on("click", "#btnReadOppFile", function () {
+        var inputEl = document.getElementById("importOppFileInput");
+        if (!inputEl || !inputEl.files || inputEl.files.length === 0) {
+            toastr.warning("Vui lòng chọn tệp Excel trước khi tiếp tục.");
+            return;
+        }
+
+        var fd = new FormData();
+        fd.append("importFile", inputEl.files[0]);
+
+        var $btn = $(this);
+        var origHtml = $btn.html();
+        $("#uploadOppProgress").removeClass("d-none");
+        $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang đọc file...');
+
+        $.ajax({
+            url: _digitalSalesUrls.importOpportunityPreview,
+            type: "POST",
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                $("#uploadOppProgress").addClass("d-none");
+                $btn.prop("disabled", false).html(origHtml);
+
+                if (!res.status) {
+                    toastr.error(res.message || "Đọc file thất bại.");
+                    return;
+                }
+
+                renderOpportunityImportPreview(res);
+                $("#stepOppUpload").addClass("d-none");
+                $("#stepOppPreview").removeClass("d-none");
+                $("#footerOppUpload").addClass("d-none");
+                $("#footerOppPreview").removeClass("d-none");
+            },
+            error: function (xhr) {
+                $("#uploadOppProgress").addClass("d-none");
+                $btn.prop("disabled", false).html(origHtml);
+                toastr.error("Lỗi " + xhr.status + ": Không thể đọc file. Vui lòng kiểm tra lại định dạng.");
+            }
+        });
+    });
+
+    $(document).on("click", "#btnBackOppUpload", function () {
+        $("#stepOppPreview").addClass("d-none");
+        $("#stepOppUpload").removeClass("d-none");
+        $("#footerOppPreview").addClass("d-none");
+        $("#footerOppUpload").removeClass("d-none");
+        $("#importOppFileInput").val("");
+        $("#lblImportOppFile").text("Chọn tệp .xlsx từ máy tính...");
+        $("#btnConfirmOppImport").prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận tạo cơ hội');
+        $("#btnExportOppErrorRows").addClass("d-none");
+    });
+
+    $(document).on("click", "#btnConfirmOppImport", function () {
+        var $btn = $(this);
+        var origHtml = $btn.html();
+        $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang tạo cơ hội...');
+
+        $.ajax({
+            url: _digitalSalesUrls.importOpportunityConfirm,
+            type: "POST",
+            dataType: "json",
+            success: function (res) {
+                $btn.prop("disabled", false).html(origHtml);
+                if (res.status) {
+                    toastr.success(res.message || "Tạo cơ hội thành công!");
+                    reloadSalesTable();
+                    setTimeout(function () {
+                        $("#modalImportOpportunity").modal("hide");
+                        $(".modal-backdrop").remove();
+                        $("body").removeClass("modal-open").css("padding-right", "");
+                    }, 1200);
+                } else {
+                    toastr.error(res.message || "Không thể tạo cơ hội.");
+                }
+            },
+            error: function (xhr) {
+                $btn.prop("disabled", false).html(origHtml);
+                toastr.error("Lỗi " + xhr.status + ": Có sự cố xảy ra khi tạo cơ hội.");
+            }
+        });
+    });
+
+    $(document).on("click", "#btnExportOppErrorRows", function () {
+        _exportFileOpp($(this), _digitalSalesUrls.exportErrorOpportunityRows, "exportOppErrorDone_", "Tải danh sách dòng lỗi (.xlsx)");
+    });
+}
+
+function _exportFileOpp($btn, url, cookiePrefix, label) {
+    var cookieName = cookiePrefix + Date.now();
+    var origHtml = $btn.html();
+    $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang tải...');
+    var $iframe = $("<iframe>").hide().appendTo("body");
+    $iframe.attr("src", url + "?cookieName=" + encodeURIComponent(cookieName));
+    var checkTimer = setInterval(function () {
+        if (document.cookie.indexOf(cookieName + "=done") !== -1) {
+            clearInterval(checkTimer);
+            document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            $iframe.remove();
+            $btn.prop("disabled", false).html(origHtml);
+        }
+    }, 500);
+    setTimeout(function () {
+        clearInterval(checkTimer);
+        $iframe.remove();
+        $btn.prop("disabled", false).html(origHtml);
+    }, 180000);
+}
+
+function renderOpportunityImportPreview(res) {
+    var summaryHtml = '<div class="col-md-6 mb-2">' +
+        '<div class="import-opp-card-summary import-opp-card-valid shadow-sm">' +
+        '<i class="fa fa-check-circle fa-2x mr-3 text-success"></i>' +
+        '<div><strong>' + res.totalValid + '</strong> dòng dữ liệu hợp lệ, sẵn sàng tạo cơ hội</div>' +
+        '</div></div>' +
+        '<div class="col-md-6 mb-2">';
+    if (res.totalError > 0) {
+        summaryHtml += '<div class="import-opp-card-summary import-opp-card-error shadow-sm">' +
+            '<i class="fa fa-exclamation-triangle fa-2x mr-3 text-danger"></i>' +
+            '<div><strong>' + res.totalError + '</strong> dòng dữ liệu có lỗi (sẽ bỏ qua không tạo)</div>' +
+            '</div>';
+    } else {
+        summaryHtml += '<div class="import-opp-card-summary import-opp-card-error-empty shadow-sm">' +
+            '<i class="fa fa-shield-alt fa-2x mr-3 text-success"></i>' +
+            '<div><strong>0</strong> dòng lỗi. Toàn bộ file hợp lệ 100%!</div>' +
+            '</div>';
+    }
+    summaryHtml += '</div>';
+
+    $("#importOppSummary").html(summaryHtml);
+    $("#cntOppValid").text(res.totalValid);
+    $("#cntOppError").text(res.totalError);
+
+    // Bảng hợp lệ
+    var validRowsHtml = "";
+    if (res.validRows && res.validRows.length > 0) {
+        $.each(res.validRows, function (i, r) {
+            var revText = r.ExpectedRevenue ? Number(r.ExpectedRevenue).toLocaleString('vi-VN') + " đ" : "-";
+            var probText = (r.ClosingProbability != null) ? r.ClosingProbability + "%" : "-";
+            var keyBadge = r.IsKey ? '<span class="badge badge-warning text-dark font-weight-bold">Trọng điểm</span>' : '<span class="text-muted">-</span>';
+            var focusBadge = r.IsFocus ? '<span class="badge badge-info font-weight-bold">Quan tâm</span>' : '<span class="text-muted">-</span>';
+
+            validRowsHtml += '<tr>' +
+                '<td class="text-center">' + (i + 1) + '</td>' +
+                '<td class="font-weight-bold text-primary-d1">' + _escHtmlOpp(r.Title) + '</td>' +
+                '<td>' + _escHtmlOpp(r.CustomerName || r.CustomerInput) + '</td>' +
+                '<td><span class="badge badge-light border-1 brc-secondary-m3 text-dark">' + _escHtmlOpp(r.AMFullName || r.AMUserName || r.AMInput) + '</span></td>' +
+                '<td class="text-center">' + (r.ApplyYear || "-") + '</td>' +
+                '<td class="text-center">' + keyBadge + '</td>' +
+                '<td class="text-center">' + focusBadge + '</td>' +
+                '<td class="text-center">' + probText + '</td>' +
+                '<td>' + _escHtmlOpp(r.ProductName || r.ProductInput || "-") + '</td>' +
+                '<td class="text-right font-weight-bold text-success">' + revText + '</td>' +
+                '<td><small class="text-muted">' + _escHtmlOpp(r.Note || "-") + '</small></td>' +
+                '</tr>';
+        });
+    } else {
+        validRowsHtml = '<tr><td colspan="11" class="text-center text-muted py-3">Không có dòng dữ liệu hợp lệ</td></tr>';
+    }
+    $("#tbodyOppValid").html(validRowsHtml);
+
+    // Bảng lỗi
+    var errorRowsHtml = "";
+    if (res.errorRows && res.errorRows.length > 0) {
+        $.each(res.errorRows, function (i, r) {
+            var errList = r.Errors || [];
+            var errHtml = "";
+            if (Array.isArray(errList) && errList.length > 0) {
+                errHtml = '<ul class="mb-0 pl-3">';
+                $.each(errList, function (j, e) {
+                    errHtml += '<li class="import-opp-error-item">' + _escHtmlOpp(e) + '</li>';
+                });
+                errHtml += '</ul>';
+            } else if (r.ErrorMessage) {
+                errHtml = '<span class="import-opp-error-item"><i class="fa fa-times-circle mr-1"></i>' + _escHtmlOpp(r.ErrorMessage) + '</span>';
+            }
+
+            errorRowsHtml += '<tr class="bgc-danger-l4">' +
+                '<td class="text-center font-weight-bold text-danger">' + (r.RowNumber || "-") + '</td>' +
+                '<td>' + _escHtmlOpp(r.Title || "-") + '</td>' +
+                '<td>' + _escHtmlOpp(r.CustomerInput || "-") + '</td>' +
+                '<td>' + _escHtmlOpp(r.AMInput || "-") + '</td>' +
+                '<td class="text-center">' + (r.ApplyYear || "-") + '</td>' +
+                '<td>' + _escHtmlOpp(r.ProductInput || "-") + '</td>' +
+                '<td class="text-right">' + (r.ExpectedRevenue ? Number(r.ExpectedRevenue).toLocaleString('vi-VN') : "-") + '</td>' +
+                '<td>' + errHtml + '</td>' +
+                '</tr>';
+        });
+        $("#btnExportOppErrorRows").removeClass("d-none");
+    } else {
+        errorRowsHtml = '<tr><td colspan="8" class="text-center text-muted py-3">Không có dòng lỗi</td></tr>';
+        $("#btnExportOppErrorRows").addClass("d-none");
+    }
+    $("#tbodyOppError").html(errorRowsHtml);
+
+    // Nút xác nhận: Chỉ enable khi có ít nhất 1 dòng hợp lệ
+    if (res.totalValid > 0) {
+        $("#btnConfirmOppImport").prop("disabled", false).removeClass("disabled");
+        $('#importOppTabs a[href="#tabOppValid"]').tab('show');
+    } else {
+        $("#btnConfirmOppImport").prop("disabled", true).addClass("disabled");
+        $('#importOppTabs a[href="#tabOppError"]').tab('show');
+    }
+}
+
+function _escHtmlOpp(str) {
+    if (str == null || str === undefined) return "";
+    return $("<div>").text(str).html();
 }
 

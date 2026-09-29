@@ -19,6 +19,9 @@
 }
 
 @section PageAction {
+    <button type="button" class="btn btn-sm btn-success mr-2" onclick="openImportOpportunityModal();">
+        <i class="fa fa-file-excel mr-1"></i> Import Cơ hội
+    </button>
     @if (isQTHT)
     {
         <a href="@Url.Action("Index", "DigitalSalesWorkflow", new { area = "Cate" })" class="btn btn-sm btn-outline-purple mr-2">
@@ -48,6 +51,7 @@
 @section HeadCss {
     <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Index.css?v=@DateTime.Now.Ticks" />
     <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Detail.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_ImportOpportunityModal.css?v=@DateTime.Now.Ticks" />
 }
 
 <div class="card dcard">
