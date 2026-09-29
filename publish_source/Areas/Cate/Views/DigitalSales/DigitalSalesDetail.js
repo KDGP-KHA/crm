@@ -1,4 +1,4 @@
-﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
