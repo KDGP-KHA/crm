@@ -221,7 +221,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpGet]
         public ActionResult Export(string keyword, byte? businessType, int? statusID,
                                    int? departmentID, int? employeeID, string fromDate, string toDate, int? customerID,
-                                   bool? isKeyProject, bool? isFollowed, string statusIDs = null, int? applyYear = null)
+                                   bool? isKeyProject, bool? isFollowed, string statusIDs = null, int? applyYear = null,
+                                   string memberRole = null)
         {
             var searchModel = new RM_DigitalSalesSearchModel
             {
@@ -231,6 +232,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 StatusIDs = statusIDs,
                 DepartmentID = departmentID.GetValueOrDefault(0),
                 EmployeeID = employeeID.GetValueOrDefault(0),
+                MemberRole = memberRole,
                 FromDate = fromDate,
                 ToDate = toDate,
                 CustomerID = customerID.GetValueOrDefault(0),
@@ -247,6 +249,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
             string fileName = $"Danh_sach_SPDV_So_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
 
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [AjaxOnly]
+        [HttpGet]
+        public ActionResult GetMemberRolesByEmployee(int? employeeId)
+        {
+            var empId = employeeId.GetValueOrDefault(0);
+            if (empId <= 0)
+            {
+                return Json(new { success = true, data = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+
+            var roles = _salesCache.GetMemberRolesByEmployee(empId) ?? new List<string>();
+            var data = roles.Select(r => new { id = r, name = r }).ToList();
+            return Json(new { success = true, data = data }, JsonRequestBehavior.AllowGet);
         }
 
         private byte[] BuildExportWorkbook(List<RM_DigitalSalesModel> data)
@@ -6948,6 +6965,20 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 new SelectListItem { Value = "1", Text = GetAppMessage("DigitalSalesSearch_FilterSpecial_KeyProject") },
                 new SelectListItem { Value = "2", Text = GetAppMessage("DigitalSalesSearch_FilterSpecial_Followed") }
             };
+
+            if (model.EmployeeID > 0)
+            {
+                var roles = _salesCache.GetMemberRolesByEmployee(model.EmployeeID);
+                if (roles != null && roles.Count > 0)
+                {
+                    model.ListMemberRole = roles.Select(r => new SelectListItem
+                    {
+                        Value = r,
+                        Text = r,
+                        Selected = !string.IsNullOrEmpty(model.MemberRole) && model.MemberRole.Equals(r, StringComparison.OrdinalIgnoreCase)
+                    }).ToList();
+                }
+            }
         }
 
         private void PrepareSalesDropdowns(RM_DigitalSalesModel model)

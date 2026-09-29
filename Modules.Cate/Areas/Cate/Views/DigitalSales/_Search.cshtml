@@ -140,22 +140,41 @@
             </div>
         </div>
 
-        <!-- HÀNG 2: PHÒNG BAN, NHÂN VIÊN, THỜI GIAN & CỤM NÚT BẤM -->
+        <!-- HÀNG 2: PHÒNG BAN, NHÂN VIÊN, VAI TRÒ, THỜI GIAN & CỤM NÚT BẤM -->
         <div class="row align-items-end">
             <!-- 6. Phòng ban -->
-            <div class="col-xl-3 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
+            <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
                 @Html.TitleFor(model => model.DepartmentID, new { @class = "font-bold" })
                 @Html.DropDownListFor(model => model.DepartmentID, Model.ListDepartment, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Department_Option"), new { @class = "form-control", id = "DepartmentID" })
             </div>
 
             <!-- 7. Nhân viên -->
-            <div class="col-xl-2 col-lg-2 col-md-6 col-12 mb-2 Search_Box Dropdown">
+            <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
                 @Html.TitleFor(model => model.EmployeeID, new { @class = "font-bold" })
                 @Html.DropDownListFor(model => model.EmployeeID, Model.ListEmployee, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Employee_Option"), new { @class = "form-control", id = "EmployeeID" })
             </div>
 
+            <!-- 7b. Vai trò thành viên trong dự án -->
+            <div class="col-xl-2 col-lg-2 col-md-4 col-12 mb-2 Search_Box Dropdown">
+                @Html.TitleFor(model => model.MemberRole, new { @class = "font-bold" })
+                @{
+                    var hasEmp = Model.EmployeeID > 0;
+                    var defaultRoleOption = hasEmp
+                        ? AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option")
+                        : AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Empty");
+                }
+                @if (hasEmp)
+                {
+                    @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, defaultRoleOption, new { @class = "form-control", id = "MemberRole" })
+                }
+                else
+                {
+                    @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, defaultRoleOption, new { @class = "form-control", id = "MemberRole", disabled = "disabled" })
+                }
+            </div>
+
             <!-- 8. Từ ngày -->
-            <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 Search_Box">
+            <div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-6 mb-2 Search_Box">
                 @Html.TitleFor(model => model.FromDate, new { @class = "font-bold text-sm-right" })
                 <div class="input-group date w-100" id="dpFromDate">
                     @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control", id = "FromDate", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Date_Placeholder"), autocomplete = "off" })
@@ -166,7 +185,7 @@
             </div>
 
             <!-- 9. Đến ngày -->
-            <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 Search_Box">
+            <div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-6 mb-2 Search_Box">
                 @Html.TitleFor(model => model.ToDate, new { @class = "font-bold text-sm-right" })
                 <div class="input-group date w-100" id="dpToDate">
                     @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control", id = "ToDate", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Date_Placeholder"), autocomplete = "off" })
@@ -177,7 +196,7 @@
             </div>
 
             <!-- 10. Cụm nút bấm thao tác -->
-            <div class="col-xl-3 col-lg-3 col-md-6 col-12 mb-2 search-action-col">
+            <div class="col-xl-2 col-lg-12 col-md-12 col-12 mb-2 search-action-col">
                 <label class="font-bold d-block text-sm-right d-none d-lg-block invisible" style="height: 18px; margin-bottom: 0.5rem;">&nbsp;</label>
                 <div class="search-action-buttons">
                     <button type="button" class="btn btn-primary text-nowrap" onclick="reloadSalesTable();">
@@ -197,6 +216,8 @@
 
 <script>
     window._excludedStatusIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(excludedStatusIds));
+    window._msgSelectRoleOption = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option")))';
+    window._msgSelectRoleEmpty = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Empty")))';
 
     $(document).ready(function () {
         if (typeof updateStatusDropdownText === 'function') {
@@ -227,7 +248,7 @@
             }
         });
 
-        $('#SearchDigitalSales').on('change', 'select:not(#DepartmentID):not(#BusinessType):not(#ApplyYear)', function () {
+        $('#SearchDigitalSales').on('change', 'select:not(#DepartmentID):not(#EmployeeID):not(#BusinessType):not(#ApplyYear)', function () {
             if (typeof reloadSalesTable === 'function') {
                 reloadSalesTable();
             }
@@ -241,12 +262,28 @@
             }
         });
 
+        // Khi chọn Nhân viên -> tải động vai trò thành viên
+        $('#EmployeeID').change(function () {
+            var empId = $(this).val();
+            if (typeof loadMemberRolesByEmployee === 'function') {
+                loadMemberRolesByEmployee(empId);
+            }
+        });
+
         // Load danh sách nhân sự phụ trách (AM) theo phòng ban thuộc TTKDGP
         $('#DepartmentID').change(function () {
             var departmentId = $(this).val();
             var $employee = $('#EmployeeID');
 
             $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+            // Reset danh sách vai trò về trạng thái chưa chọn nhân viên
+            var $memberRole = $('#MemberRole');
+            $memberRole.empty().append($('<option>').val('').text(window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --')).prop('disabled', true);
+            $memberRole.trigger("chosen:updated");
+            if ($.fn.select2) {
+                $memberRole.trigger("change.select2");
+            }
 
             $.get('/Cate/DigitalSales/GetEmployeesByDepartment', {
                 departmentId: departmentId ? departmentId : 0

@@ -96,6 +96,7 @@ function initTableDigitalSales() {
                 d.CustomerID = $("#CustomerID").val() || 0;
                 d.ProductServiceID = 0;
                 d.EmployeeID = $("#EmployeeID").val() || $("#SearchEmployeeID").val() || "";
+                d.MemberRole = $("#MemberRole").val() || "";
                 d.DepartmentID = $("#DepartmentID").val() || $("#SearchDepartmentID").val() || "";
                 d.FromDate = $("#FromDate").val() || $("#SearchFromDate").val() || "";
                 d.ToDate = $("#ToDate").val() || $("#SearchToDate").val() || "";
@@ -381,6 +382,16 @@ function resetSalesSearch() {
 
     var $employee = $("#EmployeeID, #SearchEmployeeID");
     $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+    var $memberRole = $("#MemberRole");
+    var defaultEmptyRoleText = window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --';
+    $memberRole.empty().append($('<option>').val('').text(defaultEmptyRoleText)).prop('disabled', true);
+    $memberRole.val('');
+    $memberRole.trigger("chosen:updated");
+    if ($.fn.select2) {
+        $memberRole.trigger("change.select2");
+    }
+
     $.get('/Cate/DigitalSales/GetEmployeesByDepartment', { departmentId: 0 }, function (data) {
         if (data && data.length > 0) {
             $.each(data, function (i, item) {
@@ -412,6 +423,62 @@ function resetSalesSearch() {
     }
 
     reloadSalesTable();
+}
+
+function loadMemberRolesByEmployee(employeeId, selectedRole) {
+    var $memberRole = $('#MemberRole');
+    var defaultEmptyText = window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --';
+    var defaultSelectText = window._msgSelectRoleOption || '-- Chọn vai trò --';
+
+    if (!employeeId || parseInt(employeeId) <= 0) {
+        $memberRole.empty().append($('<option>').val('').text(defaultEmptyText)).prop('disabled', true);
+        $memberRole.val('');
+        $memberRole.trigger("chosen:updated");
+        if ($.fn.select2) {
+            $memberRole.trigger("change.select2");
+        }
+        if (typeof reloadSalesTable === 'function') {
+            reloadSalesTable();
+        }
+        return;
+    }
+
+    $.get('/Cate/DigitalSales/GetMemberRolesByEmployee', { employeeId: employeeId }, function (res) {
+        $memberRole.empty();
+        $memberRole.append($('<option>').val('').text(defaultSelectText));
+        var hasSelected = false;
+        if (res && res.success && res.data && res.data.length > 0) {
+            $.each(res.data, function (i, item) {
+                var opt = $('<option>').val(item.id).text(item.name);
+                if (selectedRole && item.id === selectedRole) {
+                    opt.prop('selected', true);
+                    hasSelected = true;
+                }
+                $memberRole.append(opt);
+            });
+        }
+        if (!hasSelected) {
+            $memberRole.val('');
+        }
+        $memberRole.prop('disabled', false);
+        $memberRole.trigger("chosen:updated");
+        if ($.fn.select2) {
+            $memberRole.trigger("change.select2");
+        }
+        if (typeof reloadSalesTable === 'function') {
+            reloadSalesTable();
+        }
+    }).fail(function () {
+        $memberRole.empty().append($('<option>').val('').text(defaultSelectText)).prop('disabled', false);
+        $memberRole.val('');
+        $memberRole.trigger("chosen:updated");
+        if ($.fn.select2) {
+            $memberRole.trigger("change.select2");
+        }
+        if (typeof reloadSalesTable === 'function') {
+            reloadSalesTable();
+        }
+    });
 }
 
 function DigitalSales_OnProcessSuccess(response, formId) {
@@ -751,6 +818,7 @@ function exportDigitalSales() {
     var statusID = $("#SearchDigitalSales #StatusID").val() || $("#StatusID").val() || "";
     var departmentID = $("#SearchDigitalSales #DepartmentID").val() || $("#DepartmentID").val() || "";
     var employeeID = $("#SearchDigitalSales #EmployeeID").val() || $("#EmployeeID").val() || "";
+    var memberRole = $("#SearchDigitalSales #MemberRole").val() || $("#MemberRole").val() || "";
     var fromDate = $("#SearchDigitalSales #FromDate").val() || $("#FromDate").val() || "";
     var toDate = $("#SearchDigitalSales #ToDate").val() || $("#ToDate").val() || "";
     var customerID = $("#SearchDigitalSales #CustomerID").val() || $("#CustomerID").val() || "";
@@ -761,6 +829,7 @@ function exportDigitalSales() {
     if (statusID) qs.push("statusID=" + encodeURIComponent(statusID));
     if (departmentID) qs.push("departmentID=" + encodeURIComponent(departmentID));
     if (employeeID) qs.push("employeeID=" + encodeURIComponent(employeeID));
+    if (memberRole) qs.push("memberRole=" + encodeURIComponent(memberRole));
     if (fromDate) qs.push("fromDate=" + encodeURIComponent(fromDate));
     if (toDate) qs.push("toDate=" + encodeURIComponent(toDate));
     if (customerID) qs.push("customerID=" + encodeURIComponent(customerID));
