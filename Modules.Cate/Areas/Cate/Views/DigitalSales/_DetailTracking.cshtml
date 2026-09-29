@@ -242,7 +242,7 @@
                                                    title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
                                         </div>
                                         <div class="tree-node-content">
-                                            <span class="tree-progress-title">@(task.SortOrder > 0 ? $"{task.SortOrder}." : $"{taskIdx}.") @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
+                                            <span class="tree-progress-title">@($"{taskIdx}.") @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
 
                                             @if (canEdit && isCurrentStatus && task.Status != 3)
                                             {
@@ -419,6 +419,7 @@
                             <!-- ========================================================================= -->
                             if (task.TodoList != null && task.TodoList.Count > 0)
                             {
+                                int todoIdx = 1;
                                 foreach (var todo in task.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
                                 {
                                     string todoNodeId = $"{taskNodeId}_todo_{todo.TrackingID}";
@@ -434,7 +435,7 @@
                                                            title="@(todo.Status == 3 ? "Công việc đã hoàn thành" : "Công việc chưa hoàn thành")" />
                                                 </div>
                                                 <div class="tree-node-content">
-                                                    <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(todo.SortOrder > 0 ? $"{todo.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
+                                                    <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@($"{todoIdx}. ")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
 
                                                     @if (canEdit && isCurrentStatus && todo.Status != 3)
                                                     {
@@ -621,6 +622,7 @@
                                     <!-- ========================================================================= -->
                                     if (todo.TodoList != null && todo.TodoList.Count > 0)
                                     {
+                                        int subIdx = 1;
                                         foreach (var sub in todo.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
                                         {
                                             string subNodeId = $"{todoNodeId}_sub_{sub.TrackingID}";
@@ -636,7 +638,7 @@
                                                                    title="@(sub.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
                                                         </div>
                                                         <div class="tree-node-content">
-                                                            <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(sub.SortOrder > 0 ? $"{sub.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
+                                                            <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@($"{subIdx}. ")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -790,8 +792,10 @@
                                                     </td>
                                                 }
                                             </tr>
+                                            subIdx++;
                                         }
                                     }
+                                    todoIdx++;
                                 }
                             }
                             taskIdx++;
