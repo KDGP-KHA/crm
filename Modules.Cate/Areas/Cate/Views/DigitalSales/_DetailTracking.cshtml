@@ -234,27 +234,31 @@
                             <!-- ========================================================================= -->
                             <tr class="tree-row tree-progress-row" data-node="@taskNodeId" data-parent="@procNodeId" data-root="@statusNodeId" data-level="3" data-expanded="true">
                                 <td class="pl-4 font-progress-cell">
-                                    <div class="d-flex align-items-center flex-wrap">
-                                        <input type="checkbox" class="tree-checkbox chk-task mr-2" id="chk_task_@task.TrackingID"
-                                               @(task.Status == 3 ? "checked" : "")
-                                               onclick="return false;" onkeydown="return false;" tabindex="-1"
-                                               title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
-                                        <span class="tree-progress-title">@(task.SortOrder > 0 ? $"{task.SortOrder}." : $"{taskIdx}.") @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
+                                    <div class="tree-node-wrapper">
+                                        <div class="tree-node-prefix">
+                                            <input type="checkbox" class="tree-checkbox chk-task" id="chk_task_@task.TrackingID"
+                                                   @(task.Status == 3 ? "checked" : "")
+                                                   onclick="return false;" onkeydown="return false;" tabindex="-1"
+                                                   title="@(task.Status == 3 ? "Tiến trình đã hoàn thành" : "Tiến trình chưa hoàn thành")" />
+                                        </div>
+                                        <div class="tree-node-content">
+                                            <span class="tree-progress-title">@(task.SortOrder > 0 ? $"{task.SortOrder}." : $"{taskIdx}.") @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
 
-                                        @if (canEdit && isCurrentStatus && task.Status != 3)
-                                        {
-                                            <!-- DẤU (+) PHÍA SAU TÊN TIẾN TRÌNH: THÊM TODO LIST -->
-                                            <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con (Todo list)">
-                                                <i class="fa fa-plus"></i>
-                                            </a>
-                                        }
+                                            @if (canEdit && isCurrentStatus && task.Status != 3)
+                                            {
+                                                <!-- DẤU (+) PHÍA SAU TÊN TIẾN TRÌNH: THÊM TODO LIST -->
+                                                <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con (Todo list)">
+                                                    <i class="fa fa-plus"></i>
+                                                </a>
+                                            }
 
-                                        @if (task.TodoList != null && task.TodoList.Count > 0)
-                                        {
-                                            <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@taskNodeId');">
-                                                <i class="fa fa-list-ul mr-1"></i>@task.TodoList.Count việc
-                                            </span>
-                                        }
+                                            @if (task.TodoList != null && task.TodoList.Count > 0)
+                                            {
+                                                <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@taskNodeId');">
+                                                    <i class="fa fa-list-ul mr-1"></i>@task.TodoList.Count việc
+                                                </span>
+                                            }
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="text-center font-progress-cell"><span class="badge bgc-primary-l4 text-primary-d2 border-1 brc-primary-m3 font-bold px-2 py-1">@task.TrackingCode</span></td>
@@ -421,28 +425,32 @@
                                     bool todoOverdue = todo.IsOverdue == 1;
                                     <tr class="tree-row tree-todo-row" data-node="@todoNodeId" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4" data-expanded="true">
                                         <td style="padding-left: 48px;" class="font-progress-cell">
-                                            <div class="d-flex align-items-center flex-wrap">
-                                                <span class="tree-todo-branch mr-2">└─</span>
-                                                <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@todo.TrackingID"
-                                                       @(todo.Status == 3 ? "checked" : "")
-                                                       onclick="return false;" onkeydown="return false;" tabindex="-1"
-                                                       title="@(todo.Status == 3 ? "Công việc đã hoàn thành" : "Công việc chưa hoàn thành")" />
-                                                <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(todo.SortOrder > 0 ? $"{todo.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
+                                            <div class="tree-node-wrapper">
+                                                <div class="tree-node-prefix">
+                                                    <span class="tree-todo-branch">└─</span>
+                                                    <input type="checkbox" class="tree-checkbox chk-todo" id="chk_todo_@todo.TrackingID"
+                                                           @(todo.Status == 3 ? "checked" : "")
+                                                           onclick="return false;" onkeydown="return false;" tabindex="-1"
+                                                           title="@(todo.Status == 3 ? "Công việc đã hoàn thành" : "Công việc chưa hoàn thành")" />
+                                                </div>
+                                                <div class="tree-node-content">
+                                                    <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(todo.SortOrder > 0 ? $"{todo.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
 
-                                                @if (canEdit && isCurrentStatus && todo.Status != 3)
-                                                {
-                                                    <!-- DẤU (+) PHÍA SAU TÊN CÔNG VIỆC: THÊM CÔNG VIỆC CON (CẤP 5) -->
-                                                    <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con">
-                                                        <i class="fa fa-plus"></i>
-                                                    </a>
-                                                }
+                                                    @if (canEdit && isCurrentStatus && todo.Status != 3)
+                                                    {
+                                                        <!-- DẤU (+) PHÍA SAU TÊN CÔNG VIỆC: THÊM CÔNG VIỆC CON (CẤP 5) -->
+                                                        <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con">
+                                                            <i class="fa fa-plus"></i>
+                                                        </a>
+                                                    }
 
-                                                @if (todo.TodoList != null && todo.TodoList.Count > 0)
-                                                {
-                                                    <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@todoNodeId');">
-                                                        <i class="fa fa-list-ul mr-1"></i>@todo.TodoList.Count việc con
-                                                    </span>
-                                                }
+                                                    @if (todo.TodoList != null && todo.TodoList.Count > 0)
+                                                    {
+                                                        <span class="badge badge-secondary badge-pill text-75 font-bold ml-2 cursor-pointer" onclick="toggleTreeNode('@todoNodeId');">
+                                                            <i class="fa fa-list-ul mr-1"></i>@todo.TodoList.Count việc con
+                                                        </span>
+                                                    }
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="text-center font-progress-cell">
@@ -619,13 +627,17 @@
                                             bool subOverdue = sub.IsOverdue == 1;
                                             <tr class="tree-row tree-subtask-row" data-node="@subNodeId" data-parent="@todoNodeId" data-superparent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="5">
                                                 <td style="padding-left: 72px;" class="font-progress-cell">
-                                                    <div class="d-flex align-items-center flex-wrap">
-                                                        <span class="tree-subtask-branch mr-2">└─ └─</span>
-                                                        <input type="checkbox" class="tree-checkbox chk-todo mr-2" id="chk_todo_@sub.TrackingID"
-                                                               @(sub.Status == 3 ? "checked" : "")
-                                                               onclick="return false;" onkeydown="return false;" tabindex="-1"
-                                                               title="@(sub.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
-                                                        <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(sub.SortOrder > 0 ? $"{sub.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
+                                                    <div class="tree-node-wrapper">
+                                                        <div class="tree-node-prefix">
+                                                            <span class="tree-subtask-branch">└─ └─</span>
+                                                            <input type="checkbox" class="tree-checkbox chk-todo" id="chk_todo_@sub.TrackingID"
+                                                                   @(sub.Status == 3 ? "checked" : "")
+                                                                   onclick="return false;" onkeydown="return false;" tabindex="-1"
+                                                                   title="@(sub.Status == 3 ? "Công việc con đã hoàn thành" : "Công việc con chưa hoàn thành")" />
+                                                        </div>
+                                                        <div class="tree-node-content">
+                                                            <span class="tree-subtask-title @(sub.Status == 3 ? "text-line-through text-secondary-m1" : "")">@(sub.SortOrder > 0 ? $"{sub.SortOrder}. " : "")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(sub.TaskName)</span>
+                                                        </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center font-progress-cell">

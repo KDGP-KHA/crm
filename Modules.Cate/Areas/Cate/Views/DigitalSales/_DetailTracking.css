@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    CHECKLIST & TRACKING TREE TABLE - CSS DESIGN (4 LEVELS)
    ========================================================================== */
 
@@ -130,6 +130,37 @@ a.badge-can-change-process:hover {
     background-color: #f8fafc;
 }
 
+/* ==========================================================================
+   TREE NODE FLEX LAYOUT (FIX CHECKBOX AT TOP LEFT, TEXT EXPANDS TO RIGHT)
+   ========================================================================== */
+.tree-node-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+}
+
+.tree-node-prefix {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.tree-node-content {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.tree-node-content .badge {
+    vertical-align: middle;
+    margin-left: 6px;
+    font-size: 0.78rem !important;
+}
+
 .tree-progress-title {
     font-weight: 600;
     color: #0f172a;
@@ -144,8 +175,9 @@ a.badge-can-change-process:hover {
     accent-color: #0284c7;
     width: 15px;
     height: 15px;
+    margin: 0 !important;
+    vertical-align: middle;
 }
-
 
 .tree-progress-row td,
 .font-progress-cell {
@@ -158,20 +190,22 @@ a.badge-can-change-process:hover {
     font-weight: 600;
 }
 
-/* Dấu (+) sau tên tiến trình */
+/* Dấu (+) sau tên tiến trình / công việc */
 .btn-add-todo {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     color: #ea580c;
     background-color: #ffedd5;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     transition: all 0.2s ease-in-out;
-    margin-left: 8px;
+    margin-left: 6px;
     vertical-align: middle;
+    position: relative;
+    top: -1px;
 }
 
 .btn-add-todo:hover {
@@ -196,8 +230,8 @@ a.badge-can-change-process:hover {
     color: #94a3b8;
     font-family: monospace;
     font-size: 1rem;
-    margin-right: 6px;
     user-select: none;
+    line-height: 1;
 }
 
 .tree-todo-title {
@@ -220,8 +254,8 @@ a.badge-can-change-process:hover {
     color: #94a3b8;
     font-family: monospace;
     font-size: 0.92rem;
-    margin-right: 6px;
     user-select: none;
+    line-height: 1;
 }
 
 .tree-subtask-title {
