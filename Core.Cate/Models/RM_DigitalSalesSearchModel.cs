@@ -28,6 +28,10 @@ namespace Core.Cate.Models
         [CustomDisplayName("DigitalSalesSearch_Employee_Label")]
         public int EmployeeID { get; set; }
 
+        [CustomDisplayName("DigitalSalesSearch_MemberRole_Label")]
+        public string MemberRole { get; set; }
+
+
         [CustomDisplayName("DigitalSalesSearch_FromDate_Label")]
         public string FromDate { get; set; }
 
@@ -52,11 +56,18 @@ namespace Core.Cate.Models
         public List<SelectListItem> ProductServices { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Employees { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> MemberRoles { get; set; } = new List<SelectListItem>();
 
         public List<SelectListItem> ListCustomer { get => Customers; set => Customers = value; }
         public List<SelectListItem> ListStatus { get => StatusList; set => StatusList = value; }
         public List<SelectListItem> ListProductService { get => ProductServices; set => ProductServices = value; }
         public List<SelectListItem> ListDepartment { get => Departments; set => Departments = value; }
         public List<SelectListItem> ListEmployee { get => Employees; set => Employees = value; }
+        public List<SelectListItem> ListMemberRole { get => MemberRoles; set => MemberRoles = value; }
+    }
+
+    public class RM_DigitalSalesRoleItemModel
+    {
+        public string RoleTitle { get; set; }
     }
 }

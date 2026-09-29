@@ -47,6 +47,7 @@ namespace Core.Cate.Biz
         private readonly string _spGetAccessibleEmployees = "RM_DigitalSales_GetAccessibleEmployees";
         private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
         private readonly string _spGetStaleActionTime = "RM_DigitalSales_GetStaleActionTime";
+        private readonly string _spGetMemberRolesByEmployee = "RM_DigitalSales_GetMemberRolesByEmployee";
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
         {
@@ -160,7 +161,8 @@ namespace Core.Cate.Biz
                 model.IsKeyProject.HasValue && model.IsKeyProject.Value ? 1 : 0,
                 model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0,
                 string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim(),
-                model.ApplyYear.GetValueOrDefault(0)
+                model.ApplyYear.GetValueOrDefault(0),
+                string.IsNullOrWhiteSpace(model.MemberRole) ? null : model.MemberRole.Trim()
             );
 
             if (data != null && data.Count > 0)
@@ -1258,6 +1260,35 @@ namespace Core.Cate.Biz
             {
                 AppProcessor.Logger.Error(ex);
                 return new List<GroupServiceChartModel>();
+            }
+        }
+
+        public List<string> GetMemberRolesByEmployee(int employeeId)
+        {
+            if (employeeId <= 0) return new List<string>();
+            try
+            {
+                var data = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesRoleItemModel>(
+                    _spGetMemberRolesByEmployee,
+                    DATA_PROVIDER_NAME,
+                    employeeId
+                );
+                if (data != null && data.Count > 0)
+                {
+                    return data
+                        .Where(x => !string.IsNullOrWhiteSpace(x.RoleTitle))
+                        .Select(x => FixVietnameseMojibake(x.RoleTitle.Trim()))
+                        .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct()
+                        .OrderBy(x => x)
+                        .ToList();
+                }
+                return new List<string>();
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return new List<string>();
             }
         }
     }
