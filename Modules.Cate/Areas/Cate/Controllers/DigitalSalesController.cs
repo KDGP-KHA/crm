@@ -3334,6 +3334,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            ModelState.Remove("CompletedDate");
             if (!ModelState.IsValid)
             {
                 PrepareTrackingForm(model.DigitalSalesID, model.AssignedUserID);
@@ -3351,9 +3352,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             string rawCompletedDate = Request.Form["CompletedDate"];
             if (!string.IsNullOrWhiteSpace(rawCompletedDate))
             {
-                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
+                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "dd/MM/yyyy HH:mm", "yyyy-MM-dd HH:mm" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
                 {
-                    completedDate = dt;
+                    completedDate = dt.TimeOfDay.TotalSeconds > 0 ? dt : dt.Date.Add(DateTime.Now.TimeOfDay);
                 }
             }
             if (!completedDate.HasValue && model.CompletedDate.HasValue)
@@ -3426,14 +3427,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 if (model.Status == 3 && model.CompletedDate.HasValue)
                 {
-                    try
-                    {
-                        AppProcessor.ProcedureProvider.Execute("UPDATE dbo.RM_DigitalSalesTracking SET CompletedDate = @p0 WHERE TrackingID = @p1", "CenIT.Provider.Major", model.CompletedDate.Value, id);
-                    }
-                    catch (Exception ex)
-                    {
-                        AppProcessor.Logger.Error(ex);
-                    }
+                    _salesCache.UpdateTrackingCompletedDate(id, model.CompletedDate.Value);
+                }
+                else if (model.Status != 3)
+                {
+                    _salesCache.UpdateTrackingCompletedDate(id, null);
                 }
 
                 // Bấm Lưu tiến trình: Lưu thông tin hiện tại và ghi 1 dòng Log thao tác để hiển thị bên Log thao tác
@@ -3960,6 +3958,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            ModelState.Remove("CompletedDate");
             if (string.IsNullOrWhiteSpace(model.TaskName))
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_TaskNameRequired") });
@@ -3970,9 +3969,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             string rawCompletedDate = Request.Form["CompletedDate"];
             if (!string.IsNullOrWhiteSpace(rawCompletedDate))
             {
-                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
+                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "dd/MM/yyyy HH:mm", "yyyy-MM-dd HH:mm" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
                 {
-                    completedDate = dt;
+                    completedDate = dt.TimeOfDay.TotalSeconds > 0 ? dt : dt.Date.Add(DateTime.Now.TimeOfDay);
                 }
             }
             if (!completedDate.HasValue && model.CompletedDate.HasValue)
@@ -4044,14 +4043,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 if (model.Status == 3 && model.CompletedDate.HasValue)
                 {
-                    try
-                    {
-                        AppProcessor.ProcedureProvider.Execute("UPDATE dbo.RM_DigitalSalesTracking SET CompletedDate = @p0 WHERE TrackingID = @p1", "CenIT.Provider.Major", model.CompletedDate.Value, id);
-                    }
-                    catch (Exception ex)
-                    {
-                        AppProcessor.Logger.Error(ex);
-                    }
+                    _salesCache.UpdateTrackingCompletedDate(id, model.CompletedDate.Value);
+                }
+                else if (model.Status != 3)
+                {
+                    _salesCache.UpdateTrackingCompletedDate(id, null);
                 }
 
                 try
@@ -4390,9 +4386,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
             string rawCompletedDate = Request.Form["CompletedDate"];
             if (!string.IsNullOrWhiteSpace(rawCompletedDate))
             {
-                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
+                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "dd/MM/yyyy HH:mm", "yyyy-MM-dd HH:mm" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
                 {
-                    completedDate = dt;
+                    completedDate = dt.TimeOfDay.TotalSeconds > 0 ? dt : dt.Date.Add(DateTime.Now.TimeOfDay);
                 }
             }
             if (!completedDate.HasValue && model.CompletedDate.HasValue)
@@ -4411,22 +4407,23 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     completedDate = DateTime.Now;
                 }
             }
+            else
+            {
+                completedDate = null;
+            }
 
             // Chú ý: Báo cáo tiến độ KHÔNG ghi đè Nội dung thực hiện và Tệp đính kèm của Tiến trình/công việc trong bảng RM_DigitalSalesTracking.
             // Truyền ResultNote = null, AttachmentFile = null vào UpdateTrackingStatus để giữ nguyên thông tin gốc của tiến trình.
-            var result = _salesCache.UpdateTrackingStatus(model.TrackingID, newStatus, null, null, task.AssignedUserID, task.Deadline, User.UserName);
+            var result = _salesCache.UpdateTrackingStatus(model.TrackingID, newStatus, null, null, task.AssignedUserID, task.Deadline, User.UserName, completedDate);
             if (result > 0)
             {
                 if (newStatus == 3 && completedDate.HasValue)
                 {
-                    try
-                    {
-                        AppProcessor.ProcedureProvider.Execute("UPDATE dbo.RM_DigitalSalesTracking SET CompletedDate = @p0 WHERE TrackingID = @p1", "CenIT.Provider.Major", completedDate.Value, model.TrackingID);
-                    }
-                    catch (Exception ex)
-                    {
-                        AppProcessor.Logger.Error(ex);
-                    }
+                    _salesCache.UpdateTrackingCompletedDate(model.TrackingID, completedDate.Value);
+                }
+                else if (newStatus != 3)
+                {
+                    _salesCache.UpdateTrackingCompletedDate(model.TrackingID, null);
                 }
 
                 // Ghi nhận nội dung báo cáo tiến độ và tệp đính kèm của báo cáo vào Lịch sử hoạt động (Activity Log)
@@ -4499,9 +4496,36 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 attachmentPath = SaveUploadedFile(attachmentFile);
             }
 
-            var result = _salesCache.UpdateTrackingStatus(trackingId, status, resultNote, attachmentPath, assignedUserId, deadline, User.UserName);
+            DateTime? completedDate = null;
+            string rawCompletedDate = Request.Form["CompletedDate"];
+            if (!string.IsNullOrWhiteSpace(rawCompletedDate))
+            {
+                if (DateTime.TryParseExact(rawCompletedDate.Trim(), new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "dd/MM/yyyy HH:mm", "yyyy-MM-dd HH:mm" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dt))
+                {
+                    completedDate = dt.TimeOfDay.TotalSeconds > 0 ? dt : dt.Date.Add(DateTime.Now.TimeOfDay);
+                }
+            }
+            if (status == 3 && !completedDate.HasValue)
+            {
+                completedDate = DateTime.Now;
+            }
+            else if (status != 3)
+            {
+                completedDate = null;
+            }
+
+            var result = _salesCache.UpdateTrackingStatus(trackingId, status, resultNote, attachmentPath, assignedUserId, deadline, User.UserName, completedDate);
             if (result > 0)
             {
+                if (status == 3 && completedDate.HasValue)
+                {
+                    _salesCache.UpdateTrackingCompletedDate(trackingId, completedDate.Value);
+                }
+                else if (status != 3)
+                {
+                    _salesCache.UpdateTrackingCompletedDate(trackingId, null);
+                }
+
                 if (salesId.HasValue && salesId.Value > 0)
                 {
                     try
@@ -7189,55 +7213,47 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 {
                     "STT",
                     "Tên cơ hội (*)",
-                    "Khách hàng (*)",
+                    "Mã khách hàng (*)",
                     "AM chủ trì (*)",
                     "Năm áp dụng",
                     "Trọng điểm (Có/Không)",
                     "Đang quan tâm (Có/Không)",
-                    "Xác suất (%)",
-                    "Sản phẩm / Dịch vụ số",
-                    "Doanh thu dự kiến (VNĐ)",
                     "Ghi chú"
                 };
-                int[] oppWidths = new[] { 8, 45, 35, 25, 14, 22, 24, 15, 32, 25, 35 };
+                int[] oppWidths = new[] { 8, 48, 28, 25, 14, 22, 24, 35 };
 
                 ApplyExcelHeaderStyle(wsOpportunity, oppHeaders, oppWidths, GetColor("#1F4E79"));
 
                 // Dòng mẫu 1
                 string sampleAm1 = accessibleEmployees.FirstOrDefault()?.UserName ?? currentUName;
-                string sampleCustomer1 = allCustomers.FirstOrDefault()?.CustomerName ?? "Công an tỉnh Khánh Hòa";
-                string sampleCustomer2 = allCustomers.Skip(1).FirstOrDefault()?.CustomerName ?? "Sở Công Thương";
-                string sampleAm2 = accessibleEmployees.Skip(1).FirstOrDefault()?.UserName ?? sampleAm1;
+                var sampleCus1 = allCustomers.FirstOrDefault();
+                string sampleCusCode1 = !string.IsNullOrWhiteSpace(sampleCus1?.ShortName) ? sampleCus1.ShortName : (sampleCus1?.TaxCode ?? "KHA-CAT");
 
+                var sampleCus2 = allCustomers.Skip(1).FirstOrDefault();
+                string sampleCusCode2 = !string.IsNullOrWhiteSpace(sampleCus2?.ShortName) ? sampleCus2.ShortName : (sampleCus2?.TaxCode ?? "VP_XUANHAI");
+
+                string sampleAm2 = accessibleEmployees.Skip(1).FirstOrDefault()?.UserName ?? sampleAm1;
                 int currentYear = DateTime.Today.Year;
 
                 wsOpportunity.Cells[2, 1].Value = 1;
                 wsOpportunity.Cells[2, 2].Value = "Trang bị tường lửa bảo đảm an ninh mạng các cơ quan (PRJ-0107)";
-                wsOpportunity.Cells[2, 3].Value = sampleCustomer1;
+                wsOpportunity.Cells[2, 3].Value = sampleCusCode1;
                 wsOpportunity.Cells[2, 4].Value = sampleAm1;
                 wsOpportunity.Cells[2, 5].Value = currentYear;
                 wsOpportunity.Cells[2, 6].Value = "Có";
                 wsOpportunity.Cells[2, 7].Value = "Có";
-                wsOpportunity.Cells[2, 8].Value = 70;
-                wsOpportunity.Cells[2, 9].Value = "Giải pháp tường lửa bảo mật";
-                wsOpportunity.Cells[2, 10].Value = 15443000000m;
-                wsOpportunity.Cells[2, 10].Style.Numberformat.Format = "#,##0";
-                wsOpportunity.Cells[2, 11].Value = "Cơ hội trọng điểm năm " + currentYear;
+                wsOpportunity.Cells[2, 8].Value = "Cơ hội trọng điểm năm " + currentYear;
                 ApplyExcelRowStyle(wsOpportunity, 2, oppHeaders.Length, GetColor("#F2F7FA"));
 
                 // Dòng mẫu 2
                 wsOpportunity.Cells[3, 1].Value = 2;
                 wsOpportunity.Cells[3, 2].Value = "Xây dựng hệ sinh thái tương tác số và truyền thông số";
-                wsOpportunity.Cells[3, 3].Value = sampleCustomer2;
+                wsOpportunity.Cells[3, 3].Value = sampleCusCode2;
                 wsOpportunity.Cells[3, 4].Value = sampleAm2;
                 wsOpportunity.Cells[3, 5].Value = currentYear;
                 wsOpportunity.Cells[3, 6].Value = "Không";
                 wsOpportunity.Cells[3, 7].Value = "Có";
-                wsOpportunity.Cells[3, 8].Value = 50;
-                wsOpportunity.Cells[3, 9].Value = "Cổng thông tin điện tử";
-                wsOpportunity.Cells[3, 10].Value = 8000000000m;
-                wsOpportunity.Cells[3, 10].Style.Numberformat.Format = "#,##0";
-                wsOpportunity.Cells[3, 11].Value = "Đang tiếp cận giai đoạn đầu";
+                wsOpportunity.Cells[3, 8].Value = "Đang tiếp cận giai đoạn đầu";
                 ApplyExcelRowStyle(wsOpportunity, 3, oppHeaders.Length, Color.White);
 
                 wsOpportunity.View.FreezePanes(2, 1);
@@ -7246,23 +7262,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 var wsCustomer = package.Workbook.Worksheets.Add("Danh_Sach_Khach_Hang");
                 string[] cusHeaders = new[]
                 {
-                    "Mã KH (CustomerID)",
-                    "Mã viết tắt (ShortName)",
+                    "Mã khách hàng (ShortName)",
                     "Tên khách hàng",
                     "Mã số thuế",
+                    "Mã ID hệ thống",
                     "Địa chỉ"
                 };
-                int[] cusWidths = new[] { 18, 24, 45, 20, 50 };
+                int[] cusWidths = new[] { 26, 45, 20, 18, 50 };
                 ApplyExcelHeaderStyle(wsCustomer, cusHeaders, cusWidths, GetColor("#0D6EFD"));
-                wsCustomer.Column(4).Style.Numberformat.Format = "@";
+                wsCustomer.Column(1).Style.Numberformat.Format = "@";
+                wsCustomer.Column(3).Style.Numberformat.Format = "@";
 
                 int cusRow = 2;
                 foreach (var cus in allCustomers)
                 {
-                    wsCustomer.Cells[cusRow, 1].Value = cus.CustomerID;
-                    wsCustomer.Cells[cusRow, 2].Value = cus.ShortName ?? string.Empty;
-                    wsCustomer.Cells[cusRow, 3].Value = cus.CustomerName ?? string.Empty;
-                    wsCustomer.Cells[cusRow, 4].Value = cus.TaxCode ?? string.Empty;
+                    wsCustomer.Cells[cusRow, 1].Value = cus.ShortName ?? cus.TaxCode ?? cus.CustomerID.ToString();
+                    wsCustomer.Cells[cusRow, 2].Value = cus.CustomerName ?? string.Empty;
+                    wsCustomer.Cells[cusRow, 3].Value = cus.TaxCode ?? string.Empty;
+                    wsCustomer.Cells[cusRow, 4].Value = cus.CustomerID;
                     wsCustomer.Cells[cusRow, 5].Value = cus.AddressCus ?? string.Empty;
 
                     Color bg = (cusRow % 2 == 0) ? GetColor("#F8F9FA") : Color.White;
@@ -7686,18 +7703,15 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 {
                     "Dòng Excel",
                     "Tên cơ hội",
-                    "Khách hàng",
+                    "Mã khách hàng",
                     "AM chủ trì",
                     "Năm áp dụng",
                     "Trọng điểm",
                     "Đang quan tâm",
-                    "Xác suất (%)",
-                    "Sản phẩm / Dịch vụ số",
-                    "Doanh thu dự kiến",
                     "Ghi chú",
                     "Lý do lỗi (không sửa cột này)"
                 };
-                int[] widths = new[] { 10, 40, 35, 25, 14, 15, 15, 14, 30, 24, 30, 50 };
+                int[] widths = new[] { 10, 40, 30, 25, 14, 15, 15, 30, 50 };
 
                 ApplyExcelHeaderStyle(ws, headers, widths, GetColor("#C00000"));
 
@@ -7713,12 +7727,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     ws.Cells[excelRow, 5].Value = row.ApplyYear.HasValue ? row.ApplyYear.Value.ToString() : string.Empty;
                     ws.Cells[excelRow, 6].Value = row.IsKey ? "Có" : "Không";
                     ws.Cells[excelRow, 7].Value = row.IsFocus ? "Có" : "Không";
-                    ws.Cells[excelRow, 8].Value = row.ClosingProbability.HasValue ? row.ClosingProbability.Value.ToString() : string.Empty;
-                    ws.Cells[excelRow, 9].Value = row.ProductInput ?? string.Empty;
-                    ws.Cells[excelRow, 10].Value = row.ExpectedRevenue.HasValue ? row.ExpectedRevenue.Value.ToString("#,##0") : string.Empty;
-                    ws.Cells[excelRow, 11].Value = row.Note ?? string.Empty;
+                    ws.Cells[excelRow, 8].Value = row.Note ?? string.Empty;
 
-                    var errorCell = ws.Cells[excelRow, 12];
+                    var errorCell = ws.Cells[excelRow, 9];
                     errorCell.Value = row.ErrorMessage;
                     errorCell.Style.Font.Color.SetColor(Color.DarkRed);
                     errorCell.Style.WrapText = true;
@@ -7769,13 +7780,17 @@ namespace Modules.Cate.Areas.Cate.Controllers
             Dictionary<string, Cate_ProductServiceModel> prodByCode,
             Dictionary<string, Cate_ProductServiceModel> prodByShortName)
         {
+            var header8 = ws.Cells[1, 8].Value?.ToString()?.Trim()?.ToLowerInvariant() ?? "";
+            bool isNewFormat = header8.Contains("ghi chú") || header8.Contains("note") || (ws.Dimension != null && ws.Dimension.End.Column < 10);
+
             var row = new RM_DigitalSalesImportRowModel
             {
                 RowNumber = rowNumber,
                 Title = ws.Cells[rowNumber, 2].Value?.ToString()?.Trim(),
                 CustomerInput = ws.Cells[rowNumber, 3].Value?.ToString()?.Trim(),
                 AMInput = ws.Cells[rowNumber, 4].Value?.ToString()?.Trim(),
-                Note = ws.Cells[rowNumber, 11].Value?.ToString()?.Trim()
+                Note = isNewFormat ? ws.Cells[rowNumber, 8].Value?.ToString()?.Trim() : ws.Cells[rowNumber, 11].Value?.ToString()?.Trim(),
+                ClosingProbability = 50
             };
 
             // 1. Kiểm tra Tiêu đề
@@ -7784,31 +7799,34 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 row.Errors.Add("Tên cơ hội không được để trống.");
             }
 
-            // 2. Kiểm tra Khách hàng
+            // 2. Kiểm tra Mã khách hàng
             if (string.IsNullOrWhiteSpace(row.CustomerInput))
             {
-                row.Errors.Add("Khách hàng không được để trống.");
+                row.Errors.Add("Mã khách hàng không được để trống.");
             }
             else
             {
                 RM_CustomerModel cus = null;
                 string cleanCus = row.CustomerInput.Trim().ToLowerInvariant();
 
-                if (int.TryParse(row.CustomerInput, out int cusId) && cusById.TryGetValue(cusId, out cus))
+                // Ưu tiên tìm theo Mã khách hàng (ShortName)
+                if (cusByShortName.TryGetValue(cleanCus, out cus))
                 {
                 }
-                else if (cusByShortName.TryGetValue(cleanCus, out cus))
-                {
-                }
+                // Hỗ trợ tìm theo Mã số thuế nếu nhập MST
                 else if (cusByTaxCode.TryGetValue(cleanCus, out cus))
                 {
                 }
+                // Hỗ trợ tìm theo Mã ID hệ thống nếu là số nguyên
+                else if (int.TryParse(row.CustomerInput, out int cusId) && cusById.TryGetValue(cusId, out cus))
+                {
+                }
+                // Hỗ trợ tìm theo Tên khách hàng
                 else if (cusByName.TryGetValue(cleanCus, out cus))
                 {
                 }
                 else
                 {
-                    // Thử tìm kiếm gần đúng theo CustomerName
                     cus = cusByName.Values.FirstOrDefault(c => (c.CustomerName ?? "").ToLowerInvariant().Contains(cleanCus));
                 }
 
@@ -7821,7 +7839,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
                 else
                 {
-                    row.Errors.Add($"Khách hàng '{row.CustomerInput}' không tìm thấy trong hệ thống.");
+                    row.Errors.Add($"Mã khách hàng '{row.CustomerInput}' không tìm thấy trong hệ thống.");
                 }
             }
 
@@ -7884,68 +7902,72 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var rawFocus = ws.Cells[rowNumber, 7].Value?.ToString()?.Trim()?.ToLowerInvariant();
             row.IsFocus = rawFocus == "1" || rawFocus == "có" || rawFocus == "co" || rawFocus == "yes" || rawFocus == "true" || rawFocus == "x";
 
-            // 7. Xác suất (%)
-            var rawProb = ws.Cells[rowNumber, 8].Value?.ToString()?.Trim()?.Replace("%", "");
-            if (!string.IsNullOrWhiteSpace(rawProb))
+            // Nếu file theo định dạng cũ (11 cột), vẫn đọc các trường mở rộng
+            if (!isNewFormat)
             {
-                if (decimal.TryParse(rawProb, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal prob) && prob >= 0 && prob <= 100)
+                // 7. Xác suất (%)
+                var rawProb = ws.Cells[rowNumber, 8].Value?.ToString()?.Trim()?.Replace("%", "");
+                if (!string.IsNullOrWhiteSpace(rawProb))
                 {
-                    row.ClosingProbability = prob;
-                }
-                else
-                {
-                    row.Errors.Add("Xác suất thành công phải là số từ 0% đến 100%.");
-                }
-            }
-
-            // 8. Sản phẩm / Dịch vụ số
-            var rawProd = ws.Cells[rowNumber, 9].Value?.ToString()?.Trim();
-            row.ProductInput = rawProd;
-            if (!string.IsNullOrWhiteSpace(rawProd))
-            {
-                string cleanProd = rawProd.ToLowerInvariant();
-                Cate_ProductServiceModel prod = null;
-
-                if (int.TryParse(rawProd, out int pId) && (prodByCode.Values.FirstOrDefault(p => p.ProductServiceID == pId) != null))
-                {
-                    prod = prodByCode.Values.FirstOrDefault(p => p.ProductServiceID == pId);
-                }
-                else if (prodByCode.TryGetValue(cleanProd, out prod))
-                {
-                }
-                else if (prodByName.TryGetValue(cleanProd, out prod))
-                {
-                }
-                else if (prodByShortName.TryGetValue(cleanProd, out prod))
-                {
-                }
-                else
-                {
-                    prod = prodByName.Values.FirstOrDefault(p => (p.NameProduct ?? "").ToLowerInvariant().Contains(cleanProd));
+                    if (decimal.TryParse(rawProb, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal prob) && prob >= 0 && prob <= 100)
+                    {
+                        row.ClosingProbability = prob;
+                    }
+                    else
+                    {
+                        row.Errors.Add("Xác suất thành công phải là số từ 0% đến 100%.");
+                    }
                 }
 
-                if (prod != null)
+                // 8. Sản phẩm / Dịch vụ số
+                var rawProd = ws.Cells[rowNumber, 9].Value?.ToString()?.Trim();
+                row.ProductInput = rawProd;
+                if (!string.IsNullOrWhiteSpace(rawProd))
                 {
-                    row.ProductServiceID = prod.ProductServiceID > 0 ? prod.ProductServiceID : prod.pID;
-                    row.ProductName = prod.NameProduct;
-                }
-                else
-                {
-                    row.ProductName = rawProd;
-                }
-            }
+                    string cleanProd = rawProd.ToLowerInvariant();
+                    Cate_ProductServiceModel prod = null;
 
-            // 9. Doanh thu dự kiến (VNĐ)
-            var rawRev = ws.Cells[rowNumber, 10].Value?.ToString()?.Trim()?.Replace(",", "")?.Replace(".", "")?.Replace(" ", "");
-            if (!string.IsNullOrWhiteSpace(rawRev))
-            {
-                if (decimal.TryParse(rawRev, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal rev) && rev >= 0)
-                {
-                    row.ExpectedRevenue = rev;
+                    if (int.TryParse(rawProd, out int pId) && (prodByCode.Values.FirstOrDefault(p => p.ProductServiceID == pId) != null))
+                    {
+                        prod = prodByCode.Values.FirstOrDefault(p => p.ProductServiceID == pId);
+                    }
+                    else if (prodByCode.TryGetValue(cleanProd, out prod))
+                    {
+                    }
+                    else if (prodByName.TryGetValue(cleanProd, out prod))
+                    {
+                    }
+                    else if (prodByShortName.TryGetValue(cleanProd, out prod))
+                    {
+                    }
+                    else
+                    {
+                        prod = prodByName.Values.FirstOrDefault(p => (p.NameProduct ?? "").ToLowerInvariant().Contains(cleanProd));
+                    }
+
+                    if (prod != null)
+                    {
+                        row.ProductServiceID = prod.ProductServiceID > 0 ? prod.ProductServiceID : prod.pID;
+                        row.ProductName = prod.NameProduct;
+                    }
+                    else
+                    {
+                        row.ProductName = rawProd;
+                    }
                 }
-                else
+
+                // 9. Doanh thu dự kiến (VNĐ)
+                var rawRev = ws.Cells[rowNumber, 10].Value?.ToString()?.Trim()?.Replace(",", "")?.Replace(".", "")?.Replace(" ", "");
+                if (!string.IsNullOrWhiteSpace(rawRev))
                 {
-                    row.Errors.Add("Doanh thu dự kiến phải là số không âm.");
+                    if (decimal.TryParse(rawRev, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal rev) && rev >= 0)
+                    {
+                        row.ExpectedRevenue = rev;
+                    }
+                    else
+                    {
+                        row.Errors.Add("Doanh thu dự kiến phải là số không âm.");
+                    }
                 }
             }
 

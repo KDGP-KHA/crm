@@ -1,6 +1,9 @@
 using Core.Cate.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -678,7 +681,7 @@ namespace Core.Cate.Biz
             return list ?? new List<RM_DigitalSalesTrackingModel>();
         }
 
-        public int UpdateTrackingStatus(int trackingId, byte status, string resultNote, string attachmentFile, int? assignedUserId, DateTime? deadline, string username)
+        public int UpdateTrackingStatus(int trackingId, byte status, string resultNote, string attachmentFile, int? assignedUserId, DateTime? deadline, string username, DateTime? completedDate = null)
         {
             resultNote = FixVietnameseMojibake(resultNote);
             var result = AppProcessor.ProcedureProvider.Execute(
@@ -690,9 +693,45 @@ namespace Core.Cate.Biz
                 attachmentFile,
                 assignedUserId.HasValue ? (object)assignedUserId.Value : DBNull.Value,
                 deadline.HasValue ? (object)deadline.Value : DBNull.Value,
-                username
+                username,
+                completedDate.HasValue ? (object)completedDate.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
+        }
+
+        public void UpdateTrackingCompletedDate(int trackingId, DateTime? completedDate)
+        {
+            if (trackingId <= 0) return;
+            try
+            {
+                var connStr = ConfigurationManager.ConnectionStrings["TOC.Conn.Major"]?.ConnectionString;
+                if (string.IsNullOrEmpty(connStr)) return;
+                using (var conn = new SqlConnection(connStr))
+                {
+                    conn.Open();
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"
+                            UPDATE dbo.RM_DigitalSalesTracking 
+                            SET CompletedDate = @compDate 
+                            WHERE TrackingID = @id;
+
+                            IF @compDate IS NOT NULL
+                            BEGIN
+                                UPDATE dbo.RM_DigitalSalesTracking
+                                SET CompletedDate = @compDate
+                                WHERE ParentID = @id AND Status = 3 AND (CompletedDate IS NULL OR CompletedDate > @compDate);
+                            END";
+                        cmd.Parameters.Add("@compDate", SqlDbType.DateTime).Value = completedDate.HasValue ? (object)completedDate.Value : DBNull.Value;
+                        cmd.Parameters.Add("@id", SqlDbType.Int).Value = trackingId;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+            }
         }
 
         public int SaveTracking(RM_DigitalSalesTrackingModel model, string username)
@@ -742,7 +781,8 @@ namespace Core.Cate.Biz
                 username,
                 model.ParentID.HasValue ? (object)model.ParentID.Value : DBNull.Value,
                 model.DurationDays.HasValue ? (object)model.DurationDays.Value : DBNull.Value,
-                model.TimelineID.HasValue ? (object)model.TimelineID.Value : DBNull.Value
+                model.TimelineID.HasValue ? (object)model.TimelineID.Value : DBNull.Value,
+                model.CompletedDate.HasValue ? (object)model.CompletedDate.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
         }

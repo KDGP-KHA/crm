@@ -1413,27 +1413,23 @@ function renderOpportunityImportPreview(res) {
     var validRowsHtml = "";
     if (res.validRows && res.validRows.length > 0) {
         $.each(res.validRows, function (i, r) {
-            var revText = r.ExpectedRevenue ? Number(r.ExpectedRevenue).toLocaleString('vi-VN') + " đ" : "-";
-            var probText = (r.ClosingProbability != null) ? r.ClosingProbability + "%" : "-";
             var keyBadge = r.IsKey ? '<span class="badge badge-warning text-dark font-weight-bold">Trọng điểm</span>' : '<span class="text-muted">-</span>';
             var focusBadge = r.IsFocus ? '<span class="badge badge-info font-weight-bold">Quan tâm</span>' : '<span class="text-muted">-</span>';
+            var cusDisplay = r.CustomerName ? (r.CustomerShortName ? '<span class="badge badge-light border-1 text-primary mr-1">' + _escHtmlOpp(r.CustomerShortName) + '</span>' + _escHtmlOpp(r.CustomerName) : _escHtmlOpp(r.CustomerName)) : _escHtmlOpp(r.CustomerInput);
 
             validRowsHtml += '<tr>' +
                 '<td class="text-center">' + (i + 1) + '</td>' +
                 '<td class="font-weight-bold text-primary-d1">' + _escHtmlOpp(r.Title) + '</td>' +
-                '<td>' + _escHtmlOpp(r.CustomerName || r.CustomerInput) + '</td>' +
+                '<td>' + cusDisplay + '</td>' +
                 '<td><span class="badge badge-light border-1 brc-secondary-m3 text-dark">' + _escHtmlOpp(r.AMFullName || r.AMUserName || r.AMInput) + '</span></td>' +
                 '<td class="text-center">' + (r.ApplyYear || "-") + '</td>' +
                 '<td class="text-center">' + keyBadge + '</td>' +
                 '<td class="text-center">' + focusBadge + '</td>' +
-                '<td class="text-center">' + probText + '</td>' +
-                '<td>' + _escHtmlOpp(r.ProductName || r.ProductInput || "-") + '</td>' +
-                '<td class="text-right font-weight-bold text-success">' + revText + '</td>' +
                 '<td><small class="text-muted">' + _escHtmlOpp(r.Note || "-") + '</small></td>' +
                 '</tr>';
         });
     } else {
-        validRowsHtml = '<tr><td colspan="11" class="text-center text-muted py-3">Không có dòng dữ liệu hợp lệ</td></tr>';
+        validRowsHtml = '<tr><td colspan="8" class="text-center text-muted py-3">Không có dòng dữ liệu hợp lệ</td></tr>';
     }
     $("#tbodyOppValid").html(validRowsHtml);
 
@@ -1456,17 +1452,15 @@ function renderOpportunityImportPreview(res) {
             errorRowsHtml += '<tr class="bgc-danger-l4">' +
                 '<td class="text-center font-weight-bold text-danger">' + (r.RowNumber || "-") + '</td>' +
                 '<td>' + _escHtmlOpp(r.Title || "-") + '</td>' +
-                '<td>' + _escHtmlOpp(r.CustomerInput || "-") + '</td>' +
+                '<td><span class="text-danger font-weight-bold">' + _escHtmlOpp(r.CustomerInput || "-") + '</span></td>' +
                 '<td>' + _escHtmlOpp(r.AMInput || "-") + '</td>' +
                 '<td class="text-center">' + (r.ApplyYear || "-") + '</td>' +
-                '<td>' + _escHtmlOpp(r.ProductInput || "-") + '</td>' +
-                '<td class="text-right">' + (r.ExpectedRevenue ? Number(r.ExpectedRevenue).toLocaleString('vi-VN') : "-") + '</td>' +
                 '<td>' + errHtml + '</td>' +
                 '</tr>';
         });
         $("#btnExportOppErrorRows").removeClass("d-none");
     } else {
-        errorRowsHtml = '<tr><td colspan="8" class="text-center text-muted py-3">Không có dòng lỗi</td></tr>';
+        errorRowsHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có dòng lỗi</td></tr>';
         $("#btnExportOppErrorRows").addClass("d-none");
     }
     $("#tbodyOppError").html(errorRowsHtml);
