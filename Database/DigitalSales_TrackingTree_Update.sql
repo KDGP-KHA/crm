@@ -90,7 +90,9 @@ CREATE PROCEDURE dbo.RM_DigitalSalesTracking_Save
     @SortOrder INT = 0,
     @UserName VARCHAR(150),
     @ParentID INT = NULL,
-    @DurationDays INT = NULL
+    @DurationDays INT = NULL,
+    @TimelineID INT = NULL,
+    @CompletedDate DATETIME = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -101,13 +103,15 @@ BEGIN
         (
             DigitalSalesID, ParentID, DurationDays, ProcessID, ProgressID, TaskName, AssignedUserID,
             StartDate, Deadline, Status, ResultNote, AttachmentFile, IsCustomTask, SortOrder,
-            CreatedDate, CreatedBy
+            CreatedDate, CreatedBy, TimelineID, CompletedDate, CompletedBy
         )
         VALUES
         (
             @DigitalSalesID, @ParentID, @DurationDays, @ProcessID, @ProgressID, @TaskName, @AssignedUserID,
             ISNULL(@StartDate, GETDATE()), @Deadline, ISNULL(@Status, 1), @ResultNote, @AttachmentFile, ISNULL(@IsCustomTask, 1), ISNULL(@SortOrder, 0),
-            GETDATE(), @UserName
+            GETDATE(), @UserName, @TimelineID,
+            CASE WHEN @Status = 3 THEN ISNULL(@CompletedDate, GETDATE()) ELSE NULL END,
+            CASE WHEN @Status = 3 THEN @UserName ELSE NULL END
         );
         DECLARE @NewTrackingID INT = SCOPE_IDENTITY();
         SELECT @NewTrackingID;
@@ -120,18 +124,38 @@ BEGIN
             ParentID = CASE WHEN @ParentID IS NOT NULL THEN @ParentID ELSE ParentID END,
             DurationDays = CASE WHEN @DurationDays IS NOT NULL THEN @DurationDays ELSE DurationDays END,
             ProcessID = CASE WHEN @ProcessID IS NOT NULL THEN @ProcessID ELSE ProcessID END,
+            TimelineID = CASE WHEN @TimelineID IS NOT NULL THEN @TimelineID ELSE TimelineID END,
             TaskName = ISNULL(@TaskName, TaskName),
             AssignedUserID = ISNULL(@AssignedUserID, AssignedUserID),
             StartDate = ISNULL(@StartDate, StartDate),
             Deadline = ISNULL(@Deadline, Deadline),
             Status = ISNULL(@Status, Status),
-            CompletedDate = CASE WHEN @Status = 3 THEN GETDATE() ELSE CompletedDate END,
+            CompletedDate = CASE 
+                WHEN @Status = 3 THEN ISNULL(@CompletedDate, ISNULL(CompletedDate, GETDATE())) 
+                ELSE NULL 
+            END,
+            CompletedBy = CASE 
+                WHEN @Status = 3 THEN ISNULL(NULLIF(CompletedBy, ''), @UserName) 
+                ELSE NULL 
+            END,
             ResultNote = ISNULL(@ResultNote, ResultNote),
             AttachmentFile = ISNULL(@AttachmentFile, AttachmentFile),
             SortOrder = ISNULL(@SortOrder, SortOrder),
             LastModifiedDate = GETDATE(),
             LastModifiedBy = @UserName
         WHERE TrackingID = @TrackingID;
+
+        IF @Status = 3
+        BEGIN
+            UPDATE dbo.RM_DigitalSalesTracking
+            SET
+                Status = 3,
+                CompletedDate = ISNULL(@CompletedDate, GETDATE()),
+                CompletedBy = @UserName,
+                LastModifiedDate = GETDATE(),
+                LastModifiedBy = @UserName
+            WHERE ParentID = @TrackingID AND Status <> 3;
+        END
 
         SELECT @TrackingID;
         RETURN @TrackingID;

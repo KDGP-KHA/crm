@@ -1,4 +1,12 @@
 var _tableDigitalSales;
+var _oppImportTempFileName = "";
+
+function _cleanCustomerNameOpp(name) {
+    if (!name) return "";
+    var cleaned = (name + "").replace(/^\s*[\(\[][^\)\]]+[\)\]]\s*/g, "").trim();
+    return cleaned || (name + "").trim();
+}
+
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -171,7 +179,7 @@ function initTableDigitalSales() {
                 render: function (data, type, row) {
                     var html = '';
                     if (row.CustomerName) {
-                        html += '<div class="font-weight-bold text-dark-m1 sale-customer"><i class="fa fa-building text-primary-m1 mr-1"></i>' + row.CustomerName + '</div>';
+                        html += '<div class="font-weight-bold text-dark-m1 sale-customer"><i class="fa fa-building text-primary-m1 mr-1"></i>' + _cleanCustomerNameOpp(row.CustomerName) + '</div>';
                     } else {
                         html += '<div class="text-muted">—</div>';
                     }
@@ -384,9 +392,8 @@ function resetSalesSearch() {
     $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
 
     var $memberRole = $("#MemberRole");
-    var defaultEmptyRoleText = window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --';
-    $memberRole.empty().append($('<option>').val('').text(defaultEmptyRoleText)).prop('disabled', true);
     $memberRole.val('');
+    $memberRole.prop('disabled', false);
     $memberRole.trigger("chosen:updated");
     if ($.fn.select2) {
         $memberRole.trigger("change.select2");
@@ -427,58 +434,17 @@ function resetSalesSearch() {
 
 function loadMemberRolesByEmployee(employeeId, selectedRole) {
     var $memberRole = $('#MemberRole');
-    var defaultEmptyText = window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --';
-    var defaultSelectText = window._msgSelectRoleOption || '-- Chọn vai trò --';
-
-    if (!employeeId || parseInt(employeeId) <= 0) {
-        $memberRole.empty().append($('<option>').val('').text(defaultEmptyText)).prop('disabled', true);
-        $memberRole.val('');
+    $memberRole.prop('disabled', false);
+    if (selectedRole !== undefined && selectedRole !== null) {
+        $memberRole.val(selectedRole);
         $memberRole.trigger("chosen:updated");
         if ($.fn.select2) {
             $memberRole.trigger("change.select2");
         }
-        if (typeof reloadSalesTable === 'function') {
-            reloadSalesTable();
-        }
-        return;
     }
-
-    $.get('/Cate/DigitalSales/GetMemberRolesByEmployee', { employeeId: employeeId }, function (res) {
-        $memberRole.empty();
-        $memberRole.append($('<option>').val('').text(defaultSelectText));
-        var hasSelected = false;
-        if (res && res.success && res.data && res.data.length > 0) {
-            $.each(res.data, function (i, item) {
-                var opt = $('<option>').val(item.id).text(item.name);
-                if (selectedRole && item.id === selectedRole) {
-                    opt.prop('selected', true);
-                    hasSelected = true;
-                }
-                $memberRole.append(opt);
-            });
-        }
-        if (!hasSelected) {
-            $memberRole.val('');
-        }
-        $memberRole.prop('disabled', false);
-        $memberRole.trigger("chosen:updated");
-        if ($.fn.select2) {
-            $memberRole.trigger("change.select2");
-        }
-        if (typeof reloadSalesTable === 'function') {
-            reloadSalesTable();
-        }
-    }).fail(function () {
-        $memberRole.empty().append($('<option>').val('').text(defaultSelectText)).prop('disabled', false);
-        $memberRole.val('');
-        $memberRole.trigger("chosen:updated");
-        if ($.fn.select2) {
-            $memberRole.trigger("change.select2");
-        }
-        if (typeof reloadSalesTable === 'function') {
-            reloadSalesTable();
-        }
-    });
+    if (typeof reloadSalesTable === 'function') {
+        reloadSalesTable();
+    }
 }
 
 function DigitalSales_OnProcessSuccess(response, formId) {
@@ -1304,6 +1270,10 @@ function initImportOpportunity() {
                     return;
                 }
 
+                if (res.tempFileName) {
+                    _oppImportTempFileName = res.tempFileName;
+                }
+
                 renderOpportunityImportPreview(res);
                 $("#stepOppUpload").addClass("d-none");
                 $("#stepOppPreview").removeClass("d-none");
@@ -1319,6 +1289,7 @@ function initImportOpportunity() {
     });
 
     $(document).on("click", "#btnBackOppUpload", function () {
+        _oppImportTempFileName = "";
         $("#stepOppPreview").addClass("d-none");
         $("#stepOppUpload").removeClass("d-none");
         $("#footerOppPreview").addClass("d-none");
@@ -1337,11 +1308,13 @@ function initImportOpportunity() {
         $.ajax({
             url: _digitalSalesUrls.importOpportunityConfirm,
             type: "POST",
+            data: { tempFileName: _oppImportTempFileName },
             dataType: "json",
             success: function (res) {
                 $btn.prop("disabled", false).html(origHtml);
                 if (res.status) {
                     toastr.success(res.message || "Tạo cơ hội thành công!");
+                    _oppImportTempFileName = "";
                     reloadSalesTable();
                     setTimeout(function () {
                         $("#modalImportOpportunity").modal("hide");
@@ -1413,27 +1386,25 @@ function renderOpportunityImportPreview(res) {
     var validRowsHtml = "";
     if (res.validRows && res.validRows.length > 0) {
         $.each(res.validRows, function (i, r) {
-            var revText = r.ExpectedRevenue ? Number(r.ExpectedRevenue).toLocaleString('vi-VN') + " đ" : "-";
-            var probText = (r.ClosingProbability != null) ? r.ClosingProbability + "%" : "-";
             var keyBadge = r.IsKey ? '<span class="badge badge-warning text-dark font-weight-bold">Trọng điểm</span>' : '<span class="text-muted">-</span>';
             var focusBadge = r.IsFocus ? '<span class="badge badge-info font-weight-bold">Quan tâm</span>' : '<span class="text-muted">-</span>';
+            var rawCus = r.CustomerName || r.CustomerInput;
+            var cleanCus = _cleanCustomerNameOpp(rawCus);
+            var cusDisplay = r.CustomerShortName ? ('<span class="badge badge-light border-1 text-primary mr-1">' + _escHtmlOpp(r.CustomerShortName) + '</span>' + _escHtmlOpp(cleanCus)) : _escHtmlOpp(cleanCus);
 
             validRowsHtml += '<tr>' +
                 '<td class="text-center">' + (i + 1) + '</td>' +
                 '<td class="font-weight-bold text-primary-d1">' + _escHtmlOpp(r.Title) + '</td>' +
-                '<td>' + _escHtmlOpp(r.CustomerName || r.CustomerInput) + '</td>' +
+                '<td>' + cusDisplay + '</td>' +
                 '<td><span class="badge badge-light border-1 brc-secondary-m3 text-dark">' + _escHtmlOpp(r.AMFullName || r.AMUserName || r.AMInput) + '</span></td>' +
                 '<td class="text-center">' + (r.ApplyYear || "-") + '</td>' +
                 '<td class="text-center">' + keyBadge + '</td>' +
                 '<td class="text-center">' + focusBadge + '</td>' +
-                '<td class="text-center">' + probText + '</td>' +
-                '<td>' + _escHtmlOpp(r.ProductName || r.ProductInput || "-") + '</td>' +
-                '<td class="text-right font-weight-bold text-success">' + revText + '</td>' +
                 '<td><small class="text-muted">' + _escHtmlOpp(r.Note || "-") + '</small></td>' +
                 '</tr>';
         });
     } else {
-        validRowsHtml = '<tr><td colspan="11" class="text-center text-muted py-3">Không có dòng dữ liệu hợp lệ</td></tr>';
+        validRowsHtml = '<tr><td colspan="8" class="text-center text-muted py-3">Không có dòng dữ liệu hợp lệ</td></tr>';
     }
     $("#tbodyOppValid").html(validRowsHtml);
 
@@ -1456,17 +1427,15 @@ function renderOpportunityImportPreview(res) {
             errorRowsHtml += '<tr class="bgc-danger-l4">' +
                 '<td class="text-center font-weight-bold text-danger">' + (r.RowNumber || "-") + '</td>' +
                 '<td>' + _escHtmlOpp(r.Title || "-") + '</td>' +
-                '<td>' + _escHtmlOpp(r.CustomerInput || "-") + '</td>' +
+                '<td><span class="text-danger font-weight-bold">' + _escHtmlOpp(r.CustomerInput || "-") + '</span></td>' +
                 '<td>' + _escHtmlOpp(r.AMInput || "-") + '</td>' +
                 '<td class="text-center">' + (r.ApplyYear || "-") + '</td>' +
-                '<td>' + _escHtmlOpp(r.ProductInput || "-") + '</td>' +
-                '<td class="text-right">' + (r.ExpectedRevenue ? Number(r.ExpectedRevenue).toLocaleString('vi-VN') : "-") + '</td>' +
                 '<td>' + errHtml + '</td>' +
                 '</tr>';
         });
         $("#btnExportOppErrorRows").removeClass("d-none");
     } else {
-        errorRowsHtml = '<tr><td colspan="8" class="text-center text-muted py-3">Không có dòng lỗi</td></tr>';
+        errorRowsHtml = '<tr><td colspan="6" class="text-center text-muted py-3">Không có dòng lỗi</td></tr>';
         $("#btnExportOppErrorRows").addClass("d-none");
     }
     $("#tbodyOppError").html(errorRowsHtml);

@@ -170,11 +170,17 @@ namespace Core.Cate.Caches
             return data;
         }
 
-        public int UpdateTrackingStatus(int trackingId, byte status, string resultNote, string attachmentFile, int? assignedUserId, DateTime? deadline, string username)
+        public int UpdateTrackingStatus(int trackingId, byte status, string resultNote, string attachmentFile, int? assignedUserId, DateTime? deadline, string username, DateTime? completedDate = null)
         {
-            var result = Api.UpdateTrackingStatus(trackingId, status, resultNote, attachmentFile, assignedUserId, deadline, username);
+            var result = Api.UpdateTrackingStatus(trackingId, status, resultNote, attachmentFile, assignedUserId, deadline, username, completedDate);
             if (result > 0) InvalidateCache();
             return result;
+        }
+
+        public void UpdateTrackingCompletedDate(int trackingId, DateTime? completedDate)
+        {
+            Api.UpdateTrackingCompletedDate(trackingId, completedDate);
+            InvalidateCache();
         }
 
         public int SaveTracking(RM_DigitalSalesTrackingModel model, string username)
