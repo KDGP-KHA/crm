@@ -157,20 +157,7 @@
             <!-- 7b. Vai trò thành viên trong dự án -->
             <div class="col-xl-2 col-lg-2 col-md-4 col-12 mb-2 Search_Box Dropdown">
                 @Html.TitleFor(model => model.MemberRole, new { @class = "font-bold" })
-                @{
-                    var hasEmp = Model.EmployeeID > 0;
-                    var defaultRoleOption = hasEmp
-                        ? AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option")
-                        : AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Empty");
-                }
-                @if (hasEmp)
-                {
-                    @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, defaultRoleOption, new { @class = "form-control", id = "MemberRole" })
-                }
-                else
-                {
-                    @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, defaultRoleOption, new { @class = "form-control", id = "MemberRole", disabled = "disabled" })
-                }
+                @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option"), new { @class = "form-control", id = "MemberRole" })
             </div>
 
             <!-- 8. Từ ngày -->
@@ -262,11 +249,10 @@
             }
         });
 
-        // Khi chọn Nhân viên -> tải động vai trò thành viên
+        // Khi chọn Nhân viên -> reload bảng dữ liệu
         $('#EmployeeID').change(function () {
-            var empId = $(this).val();
-            if (typeof loadMemberRolesByEmployee === 'function') {
-                loadMemberRolesByEmployee(empId);
+            if (typeof reloadSalesTable === 'function') {
+                reloadSalesTable();
             }
         });
 
@@ -276,14 +262,6 @@
             var $employee = $('#EmployeeID');
 
             $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
-
-            // Reset danh sách vai trò về trạng thái chưa chọn nhân viên
-            var $memberRole = $('#MemberRole');
-            $memberRole.empty().append($('<option>').val('').text(window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --')).prop('disabled', true);
-            $memberRole.trigger("chosen:updated");
-            if ($.fn.select2) {
-                $memberRole.trigger("change.select2");
-            }
 
             $.get('/Cate/DigitalSales/GetEmployeesByDepartment', {
                 departmentId: departmentId ? departmentId : 0

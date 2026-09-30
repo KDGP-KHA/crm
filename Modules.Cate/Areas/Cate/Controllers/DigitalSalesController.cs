@@ -252,17 +252,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         [HttpGet]
+        public ActionResult GetMemberRoles(int? employeeId = null)
+        {
+            var masterRoles = _rolesCache.GetAll() ?? new List<RM_RolesModel>();
+            var data = masterRoles
+                .Where(r => !r.IsDeleted && !string.IsNullOrWhiteSpace(r.RoleName))
+                .OrderBy(r => r.RoleID)
+                .Select(r => new { id = r.RoleName.Trim(), name = r.RoleName.Trim() })
+                .ToList();
+            return Json(new { success = true, data = data }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
         public ActionResult GetMemberRolesByEmployee(int? employeeId)
         {
-            var empId = employeeId.GetValueOrDefault(0);
-            if (empId <= 0)
-            {
-                return Json(new { success = true, data = new List<object>() }, JsonRequestBehavior.AllowGet);
-            }
-
-            var roles = _salesCache.GetMemberRolesByEmployee(empId) ?? new List<string>();
-            var data = roles.Select(r => new { id = r, name = r }).ToList();
-            return Json(new { success = true, data = data }, JsonRequestBehavior.AllowGet);
+            return GetMemberRoles(employeeId);
         }
 
         private byte[] BuildExportWorkbook(List<RM_DigitalSalesModel> data)
@@ -6987,19 +6991,16 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 new SelectListItem { Value = "2", Text = GetAppMessage("DigitalSalesSearch_FilterSpecial_Followed") }
             };
 
-            if (model.EmployeeID > 0)
-            {
-                var roles = _salesCache.GetMemberRolesByEmployee(model.EmployeeID);
-                if (roles != null && roles.Count > 0)
+            var masterRoles = _rolesCache.GetAll() ?? new List<RM_RolesModel>();
+            model.ListMemberRole = masterRoles
+                .Where(r => !r.IsDeleted && !string.IsNullOrWhiteSpace(r.RoleName))
+                .OrderBy(r => r.RoleID)
+                .Select(r => new SelectListItem
                 {
-                    model.ListMemberRole = roles.Select(r => new SelectListItem
-                    {
-                        Value = r,
-                        Text = r,
-                        Selected = !string.IsNullOrEmpty(model.MemberRole) && model.MemberRole.Equals(r, StringComparison.OrdinalIgnoreCase)
-                    }).ToList();
-                }
-            }
+                    Value = r.RoleName.Trim(),
+                    Text = r.RoleName.Trim(),
+                    Selected = !string.IsNullOrEmpty(model.MemberRole) && model.MemberRole.Equals(r.RoleName.Trim(), StringComparison.OrdinalIgnoreCase)
+                }).ToList();
         }
 
         private void PrepareSalesDropdowns(RM_DigitalSalesModel model)

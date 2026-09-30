@@ -392,9 +392,8 @@ function resetSalesSearch() {
     $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
 
     var $memberRole = $("#MemberRole");
-    var defaultEmptyRoleText = window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --';
-    $memberRole.empty().append($('<option>').val('').text(defaultEmptyRoleText)).prop('disabled', true);
     $memberRole.val('');
+    $memberRole.prop('disabled', false);
     $memberRole.trigger("chosen:updated");
     if ($.fn.select2) {
         $memberRole.trigger("change.select2");
@@ -435,58 +434,17 @@ function resetSalesSearch() {
 
 function loadMemberRolesByEmployee(employeeId, selectedRole) {
     var $memberRole = $('#MemberRole');
-    var defaultEmptyText = window._msgSelectRoleEmpty || '-- Chọn nhân viên trước --';
-    var defaultSelectText = window._msgSelectRoleOption || '-- Chọn vai trò --';
-
-    if (!employeeId || parseInt(employeeId) <= 0) {
-        $memberRole.empty().append($('<option>').val('').text(defaultEmptyText)).prop('disabled', true);
-        $memberRole.val('');
+    $memberRole.prop('disabled', false);
+    if (selectedRole !== undefined && selectedRole !== null) {
+        $memberRole.val(selectedRole);
         $memberRole.trigger("chosen:updated");
         if ($.fn.select2) {
             $memberRole.trigger("change.select2");
         }
-        if (typeof reloadSalesTable === 'function') {
-            reloadSalesTable();
-        }
-        return;
     }
-
-    $.get('/Cate/DigitalSales/GetMemberRolesByEmployee', { employeeId: employeeId }, function (res) {
-        $memberRole.empty();
-        $memberRole.append($('<option>').val('').text(defaultSelectText));
-        var hasSelected = false;
-        if (res && res.success && res.data && res.data.length > 0) {
-            $.each(res.data, function (i, item) {
-                var opt = $('<option>').val(item.id).text(item.name);
-                if (selectedRole && item.id === selectedRole) {
-                    opt.prop('selected', true);
-                    hasSelected = true;
-                }
-                $memberRole.append(opt);
-            });
-        }
-        if (!hasSelected) {
-            $memberRole.val('');
-        }
-        $memberRole.prop('disabled', false);
-        $memberRole.trigger("chosen:updated");
-        if ($.fn.select2) {
-            $memberRole.trigger("change.select2");
-        }
-        if (typeof reloadSalesTable === 'function') {
-            reloadSalesTable();
-        }
-    }).fail(function () {
-        $memberRole.empty().append($('<option>').val('').text(defaultSelectText)).prop('disabled', false);
-        $memberRole.val('');
-        $memberRole.trigger("chosen:updated");
-        if ($.fn.select2) {
-            $memberRole.trigger("change.select2");
-        }
-        if (typeof reloadSalesTable === 'function') {
-            reloadSalesTable();
-        }
-    });
+    if (typeof reloadSalesTable === 'function') {
+        reloadSalesTable();
+    }
 }
 
 function DigitalSales_OnProcessSuccess(response, formId) {
