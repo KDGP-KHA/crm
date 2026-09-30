@@ -171,6 +171,13 @@ namespace Core.Cate.Biz
             if (data != null && data.Count > 0)
             {
                 total = data.First().TotalCount.GetValueOrDefault(0);
+                foreach (var item in data)
+                {
+                    item.Title = FixVietnameseMojibake(item.Title);
+                    item.CustomerName = CleanCustomerName(FixVietnameseMojibake(item.CustomerName));
+                    item.BusinessTypeName = FixVietnameseMojibake(item.BusinessTypeName);
+                    item.StatusName = FixVietnameseMojibake(item.StatusName);
+                }
             }
 
             return data ?? new List<RM_DigitalSalesModel>();
@@ -188,7 +195,7 @@ namespace Core.Cate.Biz
             if (model != null)
             {
                 model.Title = FixVietnameseMojibake(model.Title);
-                model.CustomerName = FixVietnameseMojibake(model.CustomerName);
+                model.CustomerName = CleanCustomerName(FixVietnameseMojibake(model.CustomerName));
                 model.BusinessTypeName = FixVietnameseMojibake(model.BusinessTypeName);
                 model.StatusName = FixVietnameseMojibake(model.StatusName);
                 model.Note = FixVietnameseMojibake(model.Note);
@@ -1185,6 +1192,13 @@ namespace Core.Cate.Biz
                    input.Contains("Ã¹") || input.Contains("Ã½") || input.Contains("Ã´") || input.Contains("Ãª") ||
                    input.Contains("Ã¢") || input.Contains("CÆ") || input.Contains("Dá»") || input.Contains("Tráº") ||
                    input.Contains("NgÆ") || input.Contains("Chuyá»") || input.Contains("Chá»§") || input.Contains("Bá» ");
+        }
+
+        public static string CleanCustomerName(string customerName)
+        {
+            if (string.IsNullOrWhiteSpace(customerName)) return customerName;
+            var cleaned = System.Text.RegularExpressions.Regex.Replace(customerName.Trim(), @"^\s*[\(\[][^\)\]]+[\)\]]\s*", "").Trim();
+            return string.IsNullOrWhiteSpace(cleaned) ? customerName.Trim() : cleaned;
         }
 
         public static string FixVietnameseMojibake(string input)

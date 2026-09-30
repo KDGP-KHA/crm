@@ -6235,7 +6235,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
         #endregion
 
         #region 8. Ajax Helpers
-        [AjaxOnly]
         [HttpGet]
         public ActionResult SearchCustomers(string q, int page = 1, int pageSize = 20, int? customerId = null)
         {
@@ -6249,7 +6248,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         var cusItem = new
                         {
                             id = cus.CustomerID,
-                            text = cus.CustomerName,
+                            text = RM_DigitalSalesBiz.CleanCustomerName(cus.CustomerName),
                             shortName = cus.ShortName,
                             taxCode = cus.TaxCode,
                             phone = cus.Phone,
@@ -6286,7 +6285,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 var items = list?.Select(c => (object)new
                 {
                     id = c.CustomerID,
-                    text = c.CustomerName,
+                    text = RM_DigitalSalesBiz.CleanCustomerName(c.CustomerName),
                     shortName = c.ShortName,
                     taxCode = c.TaxCode,
                     phone = c.Phone,
@@ -6313,7 +6312,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
         }
 
-        [AjaxOnly]
         [HttpGet]
         public ActionResult GetCustomerDetail(int id)
         {
@@ -6325,7 +6323,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new
                 {
                     id = c.CustomerID,
-                    customerName = c.CustomerName,
+                    customerName = RM_DigitalSalesBiz.CleanCustomerName(c.CustomerName),
                     shortName = c.ShortName,
                     taxCode = c.TaxCode,
                     phone = c.Phone,
@@ -7480,6 +7478,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return Json(new
             {
                 status = true,
+                tempFileName = tempFileName,
                 totalValid = validCount,
                 totalError = errorCount,
                 errorRows = previewErrorRows,
@@ -7490,11 +7489,42 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         [HttpPost]
-        [AjaxOnly]
         [ActionType(Type = EnumActionType.Create)]
-        public ActionResult ImportOpportunityConfirm()
+        public ActionResult ImportOpportunityConfirm(string tempFileName = null)
         {
             string tempFilePath = Session["ImportOpportunityFilePath"] as string;
+
+            string tempDir = Server.MapPath(ConfigurationManager.AppSettings["ImportTempPath"] ?? "~/Contents/Uploads/Temp");
+
+            if ((string.IsNullOrEmpty(tempFilePath) || !System.IO.File.Exists(tempFilePath)) && !string.IsNullOrWhiteSpace(tempFileName))
+            {
+                string safeName = Path.GetFileName(tempFileName.Trim());
+                if (!string.IsNullOrEmpty(safeName) && safeName.StartsWith("ImportOpportunity_") && safeName.EndsWith(".xlsx"))
+                {
+                    string candidatePath = Path.Combine(tempDir, safeName);
+                    if (System.IO.File.Exists(candidatePath))
+                    {
+                        tempFilePath = candidatePath;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(tempFilePath) || !System.IO.File.Exists(tempFilePath))
+            {
+                if (Directory.Exists(tempDir))
+                {
+                    var latestFile = Directory.GetFiles(tempDir, "ImportOpportunity_*.xlsx")
+                        .Select(f => new FileInfo(f))
+                        .Where(f => f.LastWriteTime >= DateTime.Now.AddMinutes(-60))
+                        .OrderByDescending(f => f.LastWriteTime)
+                        .FirstOrDefault();
+                    if (latestFile != null && latestFile.Exists)
+                    {
+                        tempFilePath = latestFile.FullName;
+                    }
+                }
+            }
+
             if (string.IsNullOrEmpty(tempFilePath) || !System.IO.File.Exists(tempFilePath))
             {
                 return Json(new
@@ -7832,7 +7862,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 if (cus != null)
                 {
                     row.CustomerID = cus.CustomerID;
-                    row.CustomerName = cus.CustomerName;
+                    row.CustomerName = RM_DigitalSalesBiz.CleanCustomerName(cus.CustomerName);
                     row.CustomerShortName = cus.ShortName;
                     row.CustomerTaxCode = cus.TaxCode;
                 }

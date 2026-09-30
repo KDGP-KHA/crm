@@ -1,4 +1,12 @@
 var _tableDigitalSales;
+var _oppImportTempFileName = "";
+
+function _cleanCustomerNameOpp(name) {
+    if (!name) return "";
+    var cleaned = (name + "").replace(/^\s*[\(\[][^\)\]]+[\)\]]\s*/g, "").trim();
+    return cleaned || (name + "").trim();
+}
+
 var _digitalSalesUrls = {
     get: "/Cate/DigitalSales/Get",
     add: "/Cate/DigitalSales/Add",
@@ -171,7 +179,7 @@ function initTableDigitalSales() {
                 render: function (data, type, row) {
                     var html = '';
                     if (row.CustomerName) {
-                        html += '<div class="font-weight-bold text-dark-m1 sale-customer"><i class="fa fa-building text-primary-m1 mr-1"></i>' + row.CustomerName + '</div>';
+                        html += '<div class="font-weight-bold text-dark-m1 sale-customer"><i class="fa fa-building text-primary-m1 mr-1"></i>' + _cleanCustomerNameOpp(row.CustomerName) + '</div>';
                     } else {
                         html += '<div class="text-muted">—</div>';
                     }
@@ -1304,6 +1312,10 @@ function initImportOpportunity() {
                     return;
                 }
 
+                if (res.tempFileName) {
+                    _oppImportTempFileName = res.tempFileName;
+                }
+
                 renderOpportunityImportPreview(res);
                 $("#stepOppUpload").addClass("d-none");
                 $("#stepOppPreview").removeClass("d-none");
@@ -1319,6 +1331,7 @@ function initImportOpportunity() {
     });
 
     $(document).on("click", "#btnBackOppUpload", function () {
+        _oppImportTempFileName = "";
         $("#stepOppPreview").addClass("d-none");
         $("#stepOppUpload").removeClass("d-none");
         $("#footerOppPreview").addClass("d-none");
@@ -1337,11 +1350,13 @@ function initImportOpportunity() {
         $.ajax({
             url: _digitalSalesUrls.importOpportunityConfirm,
             type: "POST",
+            data: { tempFileName: _oppImportTempFileName },
             dataType: "json",
             success: function (res) {
                 $btn.prop("disabled", false).html(origHtml);
                 if (res.status) {
                     toastr.success(res.message || "Tạo cơ hội thành công!");
+                    _oppImportTempFileName = "";
                     reloadSalesTable();
                     setTimeout(function () {
                         $("#modalImportOpportunity").modal("hide");
@@ -1415,7 +1430,9 @@ function renderOpportunityImportPreview(res) {
         $.each(res.validRows, function (i, r) {
             var keyBadge = r.IsKey ? '<span class="badge badge-warning text-dark font-weight-bold">Trọng điểm</span>' : '<span class="text-muted">-</span>';
             var focusBadge = r.IsFocus ? '<span class="badge badge-info font-weight-bold">Quan tâm</span>' : '<span class="text-muted">-</span>';
-            var cusDisplay = r.CustomerName ? (r.CustomerShortName ? '<span class="badge badge-light border-1 text-primary mr-1">' + _escHtmlOpp(r.CustomerShortName) + '</span>' + _escHtmlOpp(r.CustomerName) : _escHtmlOpp(r.CustomerName)) : _escHtmlOpp(r.CustomerInput);
+            var rawCus = r.CustomerName || r.CustomerInput;
+            var cleanCus = _cleanCustomerNameOpp(rawCus);
+            var cusDisplay = r.CustomerShortName ? ('<span class="badge badge-light border-1 text-primary mr-1">' + _escHtmlOpp(r.CustomerShortName) + '</span>' + _escHtmlOpp(cleanCus)) : _escHtmlOpp(cleanCus);
 
             validRowsHtml += '<tr>' +
                 '<td class="text-center">' + (i + 1) + '</td>' +
