@@ -76,6 +76,9 @@
 
             $("#linkForgotPassword").off("click.forgot").on("click.forgot", function (e) {
                 e.preventDefault();
+                if ($(this).hasClass("disabled") || $("#btnLogin").hasClass("btn-loading") || $("#btnLogin").hasClass("btn-success") || $("#loginPanel").hasClass("form-locked")) {
+                    return false;
+                }
                 if (typeof window.showForgotPanel === "function") {
                     window.showForgotPanel();
                 }
@@ -97,7 +100,10 @@
 
             var $btn = $("#btnLogin");
             $btn.prop("disabled", true).addClass("btn-loading");
+            $("#loginPanel").addClass("form-locked");
             $("form#LoginForm input").prop("readonly", true);
+            $("form#LoginForm input[type='checkbox']").prop("disabled", true);
+            $("#linkForgotPassword").addClass("disabled");
 
             try {
                 if (typeof CryptoJS !== "undefined" && typeof keyStr !== "undefined" && typeof ivStr !== "undefined" && typeof keySplit !== "undefined") {

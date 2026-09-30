@@ -374,13 +374,43 @@ body.login-body-wrapper {
     color: #64748b;
     font-style: italic;
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, opacity 0.2s ease;
     font-size: 13px;
 }
 
 .login-forgot-link:hover {
     color: #1e70eb;
     text-decoration: underline;
+}
+
+/* Locked & Disabled state */
+.form-locked {
+    pointer-events: none !important;
+}
+
+.login-forgot-link.disabled,
+.login-forgot-link[disabled],
+.form-locked .login-forgot-link {
+    pointer-events: none !important;
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+    text-decoration: none !important;
+}
+
+.form-locked .login-checkbox-label {
+    pointer-events: none !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+.form-locked .login-field-control {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+}
+
+.form-locked .login-input-wrapper {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
 }
 
 /* Feedback / Alert Container */

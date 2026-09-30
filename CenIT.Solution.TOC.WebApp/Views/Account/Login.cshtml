@@ -178,6 +178,9 @@
         };
 
         window.showForgotPanel = function () {
+            if ($("#loginPanel").hasClass("form-locked") || $("#btnLogin").hasClass("btn-loading") || $("#btnLogin").hasClass("btn-success")) {
+                return false;
+            }
             window.showPanel("forgotPanel");
             var currentLoginUser = $.trim($("#UserName").val());
             if (currentLoginUser && !$("#ForgotUserName").val()) {
@@ -220,15 +223,21 @@
             // Ajax form login
             $('form#LoginForm').ajaxForm({
                 beforeSubmit: function () {
+                    $('#loginPanel').addClass('form-locked');
                     $('form#LoginForm input').prop('readonly', true);
+                    $('form#LoginForm input[type="checkbox"]').prop('disabled', true);
+                    $('#linkForgotPassword').addClass('disabled');
                     $("#btnLogin").prop("disabled", true).addClass("btn-loading");
                     return true;
                 },
                 success: function (response) {
                     if (response && response.status !== undefined) {
                         if (response.status) {
-                            // Khóa toàn bộ form và chuyển nút sang trạng thái thành công mượt mà
+                            // Khóa toàn bộ form, liên kết và chuyển nút sang trạng thái thành công
+                            $('#loginPanel, .login-card').addClass('form-locked');
                             $('form#LoginForm input, form#LoginForm button').prop('disabled', true);
+                            $('form#LoginForm input[type="checkbox"]').prop('disabled', true);
+                            $('#linkForgotPassword').addClass('disabled');
                             $("#btnLogin").removeClass("btn-loading").addClass("btn-success");
 
                             // Chuyển trang ngay lập tức (không chờ delay alert)
@@ -240,7 +249,10 @@
                             return;
                         } else {
                             // Đăng nhập thất bại: Mở lại form cho người dùng nhập lại
+                            $('#loginPanel, .login-card').removeClass('form-locked');
                             $('form#LoginForm input').prop('readonly', false).prop('disabled', false);
+                            $('form#LoginForm input[type="checkbox"]').prop('disabled', false);
+                            $('#linkForgotPassword').removeClass('disabled');
                             $("#btnLogin").prop("disabled", false).removeClass("btn-loading btn-success");
                             if (response.message) {
                                 try { eval(response.message); } catch (e) { }
@@ -248,11 +260,16 @@
                         }
                     } else {
                         $('form#LoginForm').html(response);
+                        $('#loginPanel, .login-card').removeClass('form-locked');
+                        $('#linkForgotPassword').removeClass('disabled');
                         $("#btnLogin").prop("disabled", false).removeClass("btn-loading btn-success");
                     }
                 },
                 error: function () {
+                    $('#loginPanel, .login-card').removeClass('form-locked');
                     $('form#LoginForm input').prop('readonly', false).prop('disabled', false);
+                    $('form#LoginForm input[type="checkbox"]').prop('disabled', false);
+                    $('#linkForgotPassword').removeClass('disabled');
                     $("#btnLogin").prop("disabled", false).removeClass("btn-loading btn-success");
                     if (typeof toastr !== "undefined") {
                         toastr.error("Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
