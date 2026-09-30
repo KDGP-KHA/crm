@@ -251,7 +251,6 @@ namespace Modules.Cate.Areas.Cate.Controllers
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
-        [AjaxOnly]
         [HttpGet]
         public ActionResult GetMemberRolesByEmployee(int? employeeId)
         {
