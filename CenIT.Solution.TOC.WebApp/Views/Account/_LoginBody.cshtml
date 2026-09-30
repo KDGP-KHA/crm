@@ -91,6 +91,7 @@
 
             var $btn = $("#btnLogin");
             $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang đăng nhập...');
+            $("form#LoginForm input").prop("readonly", true);
 
             try {
                 if (typeof CryptoJS !== "undefined" && typeof keyStr !== "undefined" && typeof ivStr !== "undefined" && typeof keySplit !== "undefined") {

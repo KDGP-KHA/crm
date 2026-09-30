@@ -290,8 +290,8 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             SignInUser(loginUser, model.RememberMe);
             AppProcessor.Author.SaveLogin(loginUser.UserName, true, model.SenderIP, model.SenderHeader);
 
-            if (!Url.IsLocalUrl(returnUrl))
-                returnUrl = Url.Action("Index", "Home");
+            if (!Url.IsLocalUrl(returnUrl) || string.Equals(returnUrl, "/", StringComparison.OrdinalIgnoreCase) || string.Equals(returnUrl, "/Home/Index", StringComparison.OrdinalIgnoreCase) || string.Equals(returnUrl, "/Home", StringComparison.OrdinalIgnoreCase))
+                returnUrl = Url.Action("Index", "Dashboard", new { area = "Dashboard" });
 
             return Json(new
             {

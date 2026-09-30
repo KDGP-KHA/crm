@@ -196,17 +196,33 @@
             // Ajax form login
             $('form#LoginForm').ajaxForm({
                 beforeSubmit: function () {
+                    $('form#LoginForm input').prop('readonly', true);
                     $("#btnLogin").prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang đăng nhập...');
                     return true;
                 },
                 success: function (response) {
-                    $("#btnLogin").prop("disabled", false).html("ĐĂNG NHẬP");
                     if (response && response.status !== undefined) {
-                        if (response.message) {
-                            try { eval(response.message); } catch (e) { }
-                        }
                         if (response.status) {
-                            window.location.href = window.location.origin + response.returnUrl;
+                            // Khóa toàn bộ form và đổi màu nút sang xanh lá thành công
+                            $('form#LoginForm input, form#LoginForm button').prop('disabled', true);
+                            $("#btnLogin").prop("disabled", true)
+                                .css({ 'background-color': '#16a34a', 'border-color': '#16a34a', 'color': '#ffffff' })
+                                .html('<i class="fa fa-spinner fa-spin mr-2"></i> Đăng nhập thành công! Đang vào hệ thống...');
+
+                            // Chuyển trang ngay lập tức (không chờ delay alert)
+                            var targetUrl = response.returnUrl || "/Dashboard/Dashboard";
+                            if (targetUrl && !targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+                                targetUrl = window.location.origin + (targetUrl.startsWith("/") ? "" : "/") + targetUrl;
+                            }
+                            window.location.replace(targetUrl);
+                            return;
+                        } else {
+                            // Đăng nhập thất bại: Mở lại form cho người dùng nhập lại
+                            $('form#LoginForm input').prop('readonly', false).prop('disabled', false);
+                            $("#btnLogin").prop("disabled", false).html("ĐĂNG NHẬP");
+                            if (response.message) {
+                                try { eval(response.message); } catch (e) { }
+                            }
                         }
                     } else {
                         $('form#LoginForm').html(response);
@@ -214,6 +230,7 @@
                     }
                 },
                 error: function () {
+                    $('form#LoginForm input').prop('readonly', false).prop('disabled', false);
                     $("#btnLogin").prop("disabled", false).html("ĐĂNG NHẬP");
                     if (typeof toastr !== "undefined") {
                         toastr.error("Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
