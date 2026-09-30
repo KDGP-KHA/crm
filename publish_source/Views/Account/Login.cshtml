@@ -1,8 +1,11 @@
 ﻿@using TSFramework.Libs.Processors
 @{
     Layout = "~/Views/Shared/_Login.cshtml";
-    var title = AppProcessor.Messagor.GetMessage("Login_CRM_System_Title");
-    ViewBag.Title = string.IsNullOrEmpty(title) ? "Hệ thống CRM" : title;
+    var titleLine1 = AppProcessor.Messagor.GetMessage("Login_Title_Line1");
+    if (string.IsNullOrEmpty(titleLine1)) { titleLine1 = "HỆ THỐNG CRM"; }
+    var titleLine2 = AppProcessor.Messagor.GetMessage("Login_Title_Line2");
+    if (string.IsNullOrEmpty(titleLine2)) { titleLine2 = "SỞ KHOA HỌC VÀ CÔNG NGHỆ"; }
+    ViewBag.Title = titleLine1 + " - " + titleLine2;
 }
 
 @section HeadCss{
@@ -21,7 +24,10 @@
 
         <!-- Login Form Panel -->
         <div id="loginPanel" class="login-panel-box">
-            <h1 class="login-main-title">@(string.IsNullOrEmpty(title) ? "HỆ THỐNG CRM" : title.ToUpper())</h1>
+            <h1 class="login-main-title">
+                <span class="login-title-crm">@titleLine1.ToUpper()</span>
+                <span class="login-title-org">@titleLine2.ToUpper()</span>
+            </h1>
             @Html.Partial("_Login")
         </div>
 
@@ -47,7 +53,13 @@
                     </div>
                 </div>
                 <button type="button" class="login-submit-btn" id="btnSendOtp">
-                    GỬI MÃ OTP
+                    <span class="btn-text">GỬI MÃ OTP</span>
+                    <span class="btn-spinner"></span>
+                    <span class="btn-success-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -67,7 +79,13 @@
                     </div>
                 </div>
                 <button type="button" class="login-submit-btn" id="btnVerifyOtp">
-                    XÁC NHẬN OTP
+                    <span class="btn-text">XÁC NHẬN OTP</span>
+                    <span class="btn-spinner"></span>
+                    <span class="btn-success-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
                 </button>
                 <div class="login-options-row login-options-center">
                     <a href="javascript:void(0);" id="btnResendOtp" class="login-forgot-link">Chưa nhận được mã? Gửi lại OTP</a>
@@ -103,7 +121,13 @@
                     </label>
                 </div>
                 <button type="button" class="login-submit-btn" id="btnSubmitNewPassword">
-                    ĐỔI MẬT KHẨU
+                    <span class="btn-text">ĐỔI MẬT KHẨU</span>
+                    <span class="btn-spinner"></span>
+                    <span class="btn-success-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -197,17 +221,15 @@
             $('form#LoginForm').ajaxForm({
                 beforeSubmit: function () {
                     $('form#LoginForm input').prop('readonly', true);
-                    $("#btnLogin").prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang đăng nhập...');
+                    $("#btnLogin").prop("disabled", true).addClass("btn-loading");
                     return true;
                 },
                 success: function (response) {
                     if (response && response.status !== undefined) {
                         if (response.status) {
-                            // Khóa toàn bộ form và đổi màu nút sang xanh lá thành công
+                            // Khóa toàn bộ form và chuyển nút sang trạng thái thành công mượt mà
                             $('form#LoginForm input, form#LoginForm button').prop('disabled', true);
-                            $("#btnLogin").prop("disabled", true)
-                                .css({ 'background-color': '#16a34a', 'border-color': '#16a34a', 'color': '#ffffff' })
-                                .html('<i class="fa fa-spinner fa-spin mr-2"></i> Đăng nhập thành công! Đang vào hệ thống...');
+                            $("#btnLogin").removeClass("btn-loading").addClass("btn-success");
 
                             // Chuyển trang ngay lập tức (không chờ delay alert)
                             var targetUrl = response.returnUrl || "/Dashboard/Dashboard";
@@ -219,19 +241,19 @@
                         } else {
                             // Đăng nhập thất bại: Mở lại form cho người dùng nhập lại
                             $('form#LoginForm input').prop('readonly', false).prop('disabled', false);
-                            $("#btnLogin").prop("disabled", false).html("ĐĂNG NHẬP");
+                            $("#btnLogin").prop("disabled", false).removeClass("btn-loading btn-success");
                             if (response.message) {
                                 try { eval(response.message); } catch (e) { }
                             }
                         }
                     } else {
                         $('form#LoginForm').html(response);
-                        $("#btnLogin").prop("disabled", false).html("ĐĂNG NHẬP");
+                        $("#btnLogin").prop("disabled", false).removeClass("btn-loading btn-success");
                     }
                 },
                 error: function () {
                     $('form#LoginForm input').prop('readonly', false).prop('disabled', false);
-                    $("#btnLogin").prop("disabled", false).html("ĐĂNG NHẬP");
+                    $("#btnLogin").prop("disabled", false).removeClass("btn-loading btn-success");
                     if (typeof toastr !== "undefined") {
                         toastr.error("Có lỗi xảy ra trong quá trình đăng nhập. Vui lòng thử lại.");
                     }
@@ -267,14 +289,14 @@
                 }
 
                 var $btn = $("#btnSendOtp");
-                $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang gửi mã OTP...');
+                $btn.prop("disabled", true).addClass("btn-loading");
 
                 $.ajax({
                     url: '@Url.Action("RequestPasswordOtp", "Account")',
                     type: 'POST',
                     data: { userName: userName, email: email },
                     success: function (res) {
-                        $btn.prop("disabled", false).html("GỬI MÃ OTP");
+                        $btn.prop("disabled", false).removeClass("btn-loading");
                         if (res && res.status) {
                             if (typeof toastr !== "undefined") toastr.success(res.message);
                             $("#lblOtpTargetEmail").text(res.email || email);
@@ -286,7 +308,7 @@
                         }
                     },
                     error: function () {
-                        $btn.prop("disabled", false).html("GỬI MÃ OTP");
+                        $btn.prop("disabled", false).removeClass("btn-loading");
                         if (typeof toastr !== "undefined") toastr.error("Không thể kết nối máy chủ. Vui lòng thử lại sau.");
                     }
                 });
@@ -308,14 +330,14 @@
                 }
 
                 var $btn = $("#btnVerifyOtp");
-                $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang xác thực...');
+                $btn.prop("disabled", true).addClass("btn-loading");
 
                 $.ajax({
                     url: '@Url.Action("VerifyPasswordOtp", "Account")',
                     type: 'POST',
                     data: { otp: otp },
                     success: function (res) {
-                        $btn.prop("disabled", false).html("XÁC NHẬN OTP");
+                        $btn.prop("disabled", false).removeClass("btn-loading");
                         if (res && res.status) {
                             if (typeof toastr !== "undefined") toastr.success(res.message);
                             if (res.userName) $("#lblResetTargetUser").text(res.userName);
@@ -329,7 +351,7 @@
                         }
                     },
                     error: function () {
-                        $btn.prop("disabled", false).html("XÁC NHẬN OTP");
+                        $btn.prop("disabled", false).removeClass("btn-loading");
                         if (typeof toastr !== "undefined") toastr.error("Có lỗi xảy ra khi xác thực OTP. Vui lòng thử lại.");
                     }
                 });
@@ -371,14 +393,14 @@
                 }
 
                 var $btn = $("#btnSubmitNewPassword");
-                $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang đổi mật khẩu...');
+                $btn.prop("disabled", true).addClass("btn-loading");
 
                 $.ajax({
                     url: '@Url.Action("ResetPasswordWithOtp", "Account")',
                     type: 'POST',
                     data: { newPassword: newPassword, confirmPassword: confirmPassword },
                     success: function (res) {
-                        $btn.prop("disabled", false).html("ĐỔI MẬT KHẨU");
+                        $btn.prop("disabled", false).removeClass("btn-loading");
                         if (res && res.status) {
                             if (typeof toastr !== "undefined") toastr.success(res.message);
                             // Clear form values
@@ -397,7 +419,7 @@
                         }
                     },
                     error: function () {
-                        $btn.prop("disabled", false).html("ĐỔI MẬT KHẨU");
+                        $btn.prop("disabled", false).removeClass("btn-loading");
                         if (typeof toastr !== "undefined") toastr.error("Có lỗi xảy ra trong quá trình đổi mật khẩu. Vui lòng thử lại.");
                     }
                 });

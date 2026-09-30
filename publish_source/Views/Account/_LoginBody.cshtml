@@ -30,7 +30,13 @@
 </div>
 
 <button type="button" class="login-submit-btn" id="btnLogin">
-    ĐĂNG NHẬP
+    <span class="btn-text">ĐĂNG NHẬP</span>
+    <span class="btn-spinner"></span>
+    <span class="btn-success-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    </span>
 </button>
 
 <div class="login-options-row">
@@ -90,7 +96,7 @@
             }
 
             var $btn = $("#btnLogin");
-            $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-2"></i> Đang đăng nhập...');
+            $btn.prop("disabled", true).addClass("btn-loading");
             $("form#LoginForm input").prop("readonly", true);
 
             try {
