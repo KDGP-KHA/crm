@@ -1,4 +1,4 @@
-﻿// ─── URLs ───────────────────────────────────────────────────────────────────
+// ─── URLs ───────────────────────────────────────────────────────────────────
 var _CustomerActionURLs = {
     Customer_GetData: "/Cate/Customer/Get"
 };
@@ -88,7 +88,7 @@ function initTableCustomer() {
                         html += '<i class="fa fa-ellipsis-h text-120"></i></button>';
                         html += '<div class="dropdown-menu dropdown-menu-right">';
                         html += _renderButton(true, "IndexAnniversary", "btn btn-lighter-warning mr-1 btn-a-outline-warning dropdown-item", "/Cate/Customer/IndexAnniversary/" + data, '<i class="fas fa-birthday-cake text-warning text-120 mr-1"></i> Ngày kỷ niệm', "Ngày kỷ niệm", 1024);
-                        html += _renderButton(false, "IndexBusinessOpportunity", "btn btn-lighter-success mr-1 btn-a-outline-success dropdown-item", "/Cate/RM_BusinessOpportunity?id=" + data, '<i class="fas fa-business-time text-success text-120 mr-1"></i> Cơ hội kinh doanh', "Cơ hội kinh doanh", 1024);
+                        html += _renderButton(false, "IndexBusinessOpportunity", "btn btn-lighter-success mr-1 btn-a-outline-success dropdown-item", "/Cate/RM_BusinessOpportunity?id=" + data, '<i class="fas fa-business-time text-success text-120 mr-1"></i> Kế hoạch', "Kế hoạch", 1024);
                         html += _renderButton(true, "EditCustomer", "btn btn-lighter-primary mr-1 btn-a-outline-primary dropdown-item", "/Cate/Customer/Edit/" + data, '<i class="far fa-edit text-primary text-120 mr-1"></i> Cập nhật', "Cập nhật", 1024);
                         html += _renderButton(true, "DeleteCustomer", "btn btn-lighter-danger mr-1 btn-a-outline-danger dropdown-item", "/Cate/Customer/Delete/" + data, '<i class="far fa-trash-alt text-danger text-120 mr-1"></i> Xoá', "Xoá");
                         html += '</div></div>';

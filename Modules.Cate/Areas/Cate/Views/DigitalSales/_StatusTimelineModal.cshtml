@@ -44,7 +44,7 @@
                             string authorName = !string.IsNullOrEmpty(tl.ActionByName) ? tl.ActionByName : (!string.IsNullOrEmpty(tl.ActionBy) ? tl.ActionBy : "HỆ THỐNG");
                             bool isProject = tl.ToBusinessType == 2;
                             string tagClass = isProject ? "timeline-tag-duan" : "timeline-tag-cohoi";
-                            string tagText = isProject ? "[DỰ ÁN]" : "[CƠ HỘI]";
+                            string tagText = isProject ? "[DỰ ÁN]" : "[KẾ HOẠCH]";
 
                             <div class="timeline-row @(isRight ? "timeline-row-right" : "timeline-row-left")">
                                 <!-- Node mốc thời gian ở giữa -->

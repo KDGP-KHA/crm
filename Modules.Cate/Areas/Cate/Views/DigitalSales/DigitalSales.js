@@ -128,7 +128,7 @@ function initTableDigitalSales() {
                 render: function (data, type, row) {
                     var badgeType = row.BusinessType === 2
                         ? '<span class="badge badge-success px-2 py-1 mr-1 sale-badge"><i class="fa fa-project-diagram mr-1"></i>Dự án</span>'
-                        : '<span class="badge badge-primary px-2 py-1 mr-1 sale-badge"><i class="fa fa-lightbulb mr-1"></i>Cơ hội</span>';
+                        : '<span class="badge badge-primary px-2 py-1 mr-1 sale-badge"><i class="fa fa-lightbulb mr-1"></i>Kế hoạch</span>';
 
                     var badgeClass = "badge-secondary";
                     if (row.StatusID === 1) badgeClass = "badge-secondary";
@@ -145,7 +145,7 @@ function initTableDigitalSales() {
                         badgeSpecial += '<span class="badge bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge" title="Dự án trọng điểm"><i class="fa fa-star text-warning mr-1"></i>Trọng điểm</span>';
                     }
                     if (row.IsFollowed) {
-                        badgeSpecial += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge" title="Cơ hội/dự án bạn đang quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
+                        badgeSpecial += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge" title="Kế hoạch/dự án bạn đang quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
                     }
 
                     // Hàng 1: Loại hình & Trạng thái
@@ -153,7 +153,7 @@ function initTableDigitalSales() {
                         badgeType + ' ' + badgeStatus +
                         '</div>';
 
-                    // Hàng 2: Tên cơ hội / Dự án
+                    // Hàng 2: Tên kế hoạch / Dự án
                     html += '<a href="' + _digitalSalesUrls.detail + '/' + row.DigitalSalesID + '" class="font-weight-bold text-primary d-block sale-title" style="font-size: 15px;" title="Xem chi tiết 360 độ">' +
                         row.Title + '</a>';
 
@@ -1003,8 +1003,8 @@ var DigitalSalesGuide = (function () {
 function startDigitalSalesIndexGuide() {
     var defaultIndexSteps = [
         { selector: ".Search.card", title: "Bộ lọc tìm kiếm", text: "Tìm kiếm hồ sơ theo từ khóa, khách hàng, AM chủ trì, trạng thái, thời gian." },
-        { selector: "#tblDigitalSales", title: "Danh sách hồ sơ số", text: "Bảng hiển thị các cơ hội kinh doanh và dự án số đã khởi tạo kèm giá trị doanh thu." },
-        { selector: "button[onclick='openAddSalesModal();']", title: "Khởi tạo Cơ hội mới", text: "Bấm vào đây để tạo mới một hồ sơ cơ hội kinh doanh sản phẩm dịch vụ số." },
+        { selector: "#tblDigitalSales", title: "Danh sách hồ sơ số", text: "Bảng hiển thị các kế hoạch và dự án số đã khởi tạo kèm giá trị doanh thu." },
+        { selector: "button[onclick='openAddSalesModal();']", title: "Khởi tạo Kế hoạch mới", text: "Bấm vào đây để tạo mới một hồ sơ kế hoạch sản phẩm dịch vụ số." },
         { selector: "#PageAction .btn-outline-purple", title: "Cấu hình Quy trình", text: "Dành riêng cho Quản trị hệ thống (QTHT) thiết lập quy trình và các tiến trình chuẩn." }
     ];
 
@@ -1229,7 +1229,7 @@ function openImportOpportunityModal() {
     }).fail(function () {
         if (typeof _endWaiting === "function") _endWaiting();
         if (typeof toastr !== "undefined") {
-            toastr.error("Không thể mở cửa sổ Import Cơ hội. Vui lòng thử lại.");
+            toastr.error("Không thể mở cửa sổ Import Kế hoạch. Vui lòng thử lại.");
         }
     });
 }
@@ -1296,14 +1296,14 @@ function initImportOpportunity() {
         $("#footerOppUpload").removeClass("d-none");
         $("#importOppFileInput").val("");
         $("#lblImportOppFile").text("Chọn tệp .xlsx từ máy tính...");
-        $("#btnConfirmOppImport").prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận tạo cơ hội');
+        $("#btnConfirmOppImport").prop("disabled", false).html('<i class="fa fa-check mr-1"></i> Xác nhận tạo kế hoạch');
         $("#btnExportOppErrorRows").addClass("d-none");
     });
 
     $(document).on("click", "#btnConfirmOppImport", function () {
         var $btn = $(this);
         var origHtml = $btn.html();
-        $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang tạo cơ hội...');
+        $btn.prop("disabled", true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang tạo kế hoạch...');
 
         $.ajax({
             url: _digitalSalesUrls.importOpportunityConfirm,
@@ -1313,7 +1313,7 @@ function initImportOpportunity() {
             success: function (res) {
                 $btn.prop("disabled", false).html(origHtml);
                 if (res.status) {
-                    toastr.success(res.message || "Tạo cơ hội thành công!");
+                    toastr.success(res.message || "Tạo kế hoạch thành công!");
                     _oppImportTempFileName = "";
                     reloadSalesTable();
                     setTimeout(function () {
@@ -1322,12 +1322,12 @@ function initImportOpportunity() {
                         $("body").removeClass("modal-open").css("padding-right", "");
                     }, 1200);
                 } else {
-                    toastr.error(res.message || "Không thể tạo cơ hội.");
+                    toastr.error(res.message || "Không thể tạo kế hoạch.");
                 }
             },
             error: function (xhr) {
                 $btn.prop("disabled", false).html(origHtml);
-                toastr.error("Lỗi " + xhr.status + ": Có sự cố xảy ra khi tạo cơ hội.");
+                toastr.error("Lỗi " + xhr.status + ": Có sự cố xảy ra khi tạo kế hoạch.");
             }
         });
     });
@@ -1362,7 +1362,7 @@ function renderOpportunityImportPreview(res) {
     var summaryHtml = '<div class="col-md-6 mb-2">' +
         '<div class="import-opp-card-summary import-opp-card-valid shadow-sm">' +
         '<i class="fa fa-check-circle fa-2x mr-3 text-success"></i>' +
-        '<div><strong>' + res.totalValid + '</strong> dòng dữ liệu hợp lệ, sẵn sàng tạo cơ hội</div>' +
+        '<div><strong>' + res.totalValid + '</strong> dòng dữ liệu hợp lệ, sẵn sàng tạo kế hoạch</div>' +
         '</div></div>' +
         '<div class="col-md-6 mb-2">';
     if (res.totalError > 0) {

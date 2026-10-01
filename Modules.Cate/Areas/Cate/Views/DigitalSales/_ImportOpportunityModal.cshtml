@@ -1,7 +1,7 @@
 ﻿@using TSFramework.Libs.Processors
 @{
     string title = AppProcessor.Messagor.GetMessage("DigitalSales_Import_Title");
-    if (string.IsNullOrEmpty(title)) { title = "Import Cơ hội kinh doanh"; }
+    if (string.IsNullOrEmpty(title)) { title = "Import Kế hoạch"; }
 }
 
 <div class="modal fade import-opp-modal" id="modalImportOpportunity" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
@@ -26,7 +26,7 @@
                                     <i class="fa fa-info-circle mr-1"></i> Tải về file mẫu Excel chuẩn để nhập dữ liệu
                                 </h6>
                                 <p class="text-secondary text-90 mb-0">
-                                    File mẫu gồm 3 sheet: <strong>Danh sách cơ hội</strong> (nhập liệu), <strong>Danh sách Khách Hàng</strong> (tra cứu), và <strong>Danh sách nhân sự</strong> (nhân sự của đơn vị bạn đang quản lý).
+                                    File mẫu gồm 3 sheet: <strong>Danh sách kế hoạch</strong> (nhập liệu), <strong>Danh sách Khách Hàng</strong> (tra cứu), và <strong>Danh sách nhân sự</strong> (nhân sự của đơn vị bạn đang quản lý).
                                 </p>
                             </div>
                             <div class="mt-2 mt-sm-0">
@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="font-weight-bold text-dark-m2">Chọn tệp Excel dữ liệu cơ hội (*):</label>
+                        <label class="font-weight-bold text-dark-m2">Chọn tệp Excel dữ liệu kế hoạch (*):</label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="importOppFileInput" accept=".xlsx">
                             <label class="custom-file-label text-truncate" for="importOppFileInput" id="lblImportOppFile">Chọn tệp .xlsx từ máy tính...</label>
@@ -86,7 +86,7 @@
                                     <thead class="bgc-secondary-l3 text-secondary-d2">
                                         <tr>
                                             <th class="text-center" style="width: 45px;">STT</th>
-                                            <th>Tên cơ hội</th>
+                                            <th>Tên kế hoạch</th>
                                             <th>Khách hàng</th>
                                             <th>AM chủ trì</th>
                                             <th class="text-center" style="width: 70px;">Năm</th>
@@ -109,7 +109,7 @@
                                     <thead class="bgc-danger-l3 text-danger-d2">
                                         <tr>
                                             <th class="text-center" style="width: 50px;">Dòng</th>
-                                            <th>Tên cơ hội</th>
+                                            <th>Tên kế hoạch</th>
                                             <th>Mã KH (nhập)</th>
                                             <th>AM (nhập)</th>
                                             <th class="text-center" style="width: 70px;">Năm</th>
@@ -147,7 +147,7 @@
                             <i class="fa fa-arrow-left mr-1"></i> Chọn lại file
                         </button>
                         <button type="button" class="btn btn-success btn-sm px-3 font-weight-bold" id="btnConfirmOppImport">
-                            <i class="fa fa-check mr-1"></i> Xác nhận tạo cơ hội
+                            <i class="fa fa-check mr-1"></i> Xác nhận tạo kế hoạch
                         </button>
                     </div>
                 </div>

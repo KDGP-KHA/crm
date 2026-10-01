@@ -6,7 +6,7 @@
         ? timeline.ToStatusName
         : "Chi tiết trạng thái";
     bool isProject = timeline != null && timeline.ToBusinessType == 2;
-    string tagText = isProject ? "[DỰ ÁN]" : "[CƠ HỘI]";
+    string tagText = isProject ? "[DỰ ÁN]" : "[KẾ HOẠCH]";
 
     int totalFilesCount = (Model.TransitionFiles?.Count ?? 0) + (Model.TaskFileGroups?.Sum(g => g.Files?.Count ?? 0) ?? 0);
     bool hasAnyFiles = totalFilesCount > 0;

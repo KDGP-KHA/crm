@@ -46,10 +46,11 @@
             content = content.Substring(0, noteIdx).Trim();
         }
 
-        if (content.IndexOf("Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN", StringComparison.OrdinalIgnoreCase) >= 0)
+        if (content.IndexOf("Chuyển đổi thành công từ KẾ HOẠCH sang DỰ ÁN", StringComparison.OrdinalIgnoreCase) >= 0
+            || content.IndexOf("Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN", StringComparison.OrdinalIgnoreCase) >= 0)
         {
             info.IsConversion = true;
-            info.ActionText = "đã chuyển đổi Cơ hội thành Dự án";
+            info.ActionText = "đã chuyển đổi Kế hoạch thành Dự án";
             int smIdx = content.IndexOf("Trạng thái mới:", StringComparison.OrdinalIgnoreCase);
             if (smIdx >= 0)
             {
@@ -164,7 +165,7 @@
 <div class="card border-1 brc-primary-m3 shadow-sm mb-4 bgc-white radius-2 ds-composer-card">
     <div class="card-header bgc-primary-l4 border-b-1 brc-primary-l2 py-25 px-3 d-flex align-items-center justify-content-between">
         <span class="font-weight-bold text-primary-d2 text-95">
-            <i class="fa fa-comments text-primary mr-1"></i> Trao đổi & Thảo luận cơ hội / dự án
+            <i class="fa fa-comments text-primary mr-1"></i> Trao đổi & Thảo luận kế hoạch / dự án
         </span>
         <span class="text-secondary text-80 d-none d-sm-inline">
             <i class="fa fa-info-circle mr-1"></i> Gõ <strong>@@</strong> để nhắc tên nhân sự đã gán vào dự án
@@ -316,7 +317,7 @@
                             @if (statusInfo.IsConversion)
                             {
                                 <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-80 px-15 py-05 radius-1 font-600">
-                                    <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                                    <i class="fa fa-level-up-alt mr-1"></i>Chuyển Kế hoạch sang Dự án
                                 </span>
                                 <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
                             }
@@ -471,7 +472,7 @@
                                 @if (statusInfoForCard.IsConversion)
                                 {
                                     <span class="badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 text-85 px-2 py-1 radius-1 font-600">
-                                        <i class="fa fa-level-up-alt mr-1"></i>Chuyển Cơ hội sang Dự án
+                                        <i class="fa fa-level-up-alt mr-1"></i>Chuyển Kế hoạch sang Dự án
                                     </span>
                                     <i class="fa fa-arrow-right text-secondary text-75 mx-05"></i>
                                 }

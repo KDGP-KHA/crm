@@ -153,7 +153,7 @@ $(function () {
         "#tab-overview": {
             code: "Cate.DigitalSales.Detail.Overview",
             steps: [
-                { selector: "#tab-overview .col-md-6:first-child .card", title: "Thông tin hồ sơ", text: "Chi tiết các thông tin pháp lý của khách hàng, người liên hệ, cơ hội kinh doanh và nguồn gốc hồ sơ." },
+                { selector: "#tab-overview .col-md-6:first-child .card", title: "Thông tin hồ sơ", text: "Chi tiết các thông tin pháp lý của khách hàng, người liên hệ, kế hoạch và nguồn gốc hồ sơ." },
                 { selector: "#tab-overview .col-md-6:nth-child(2) .card", title: "Phân công và quản lý", text: "Thông tin nhân sự phụ trách AM, cán bộ hỗ trợ giải pháp, quy trình và tiến trình hiện tại của hồ sơ." },
                 { selector: "#sectionMembers", title: "Thành viên tham gia", text: "Danh sách các cán bộ, chuyên viên thuộc đội ngũ phụ trách hồ sơ, hỗ trợ thêm/xóa thành viên tham gia." },
                 { selector: "#tab-overview .ds-html-note-view", title: "Mô tả nhu cầu", text: "Nội dung chi tiết về nhu cầu chuyển đổi số của khách hàng, phạm vi yêu cầu và ghi chú quan trọng." },
@@ -687,7 +687,7 @@ function updateHeaderInfo(businessType, statusName, title, code) {
                 $bTypeBadge
                     .removeClass("bgc-purple-l2 text-purple-d2 brc-purple-m3")
                     .addClass("bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3")
-                    .html('<i class="fa fa-lightbulb mr-1"></i>Cơ hội kinh doanh');
+                    .html('<i class="fa fa-lightbulb mr-1"></i>Kế hoạch');
             }
         }
         $("#lblKeyProject").text("Trọng điểm");

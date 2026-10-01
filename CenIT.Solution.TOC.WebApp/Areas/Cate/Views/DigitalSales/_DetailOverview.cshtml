@@ -43,12 +43,12 @@
     <div class="col-md-6 mb-4">
         <div class="card border-1 brc-grey-l2 p-3 p-lg-4 h-100 shadow-sm">
             <h6 class="text-primary font-weight-bold border-b-1 brc-grey-l2 pb-2 mb-3" style="font-size: 16px;">
-                <i class="fa fa-briefcase mr-1"></i> @(Model.BusinessType == 2 ? "Thông tin Dự án" : "Thông tin Cơ hội kinh doanh")
+                <i class="fa fa-briefcase mr-1"></i> @(Model.BusinessType == 2 ? "Thông tin Dự án" : "Thông tin Kế hoạch")
             </h6>
             <table class="table table-sm table-borderless overview-info-table mb-0">
                 <tr>
                     <td class="text-secondary font-weight-bold info-label" style="width: 145px; padding: 8px 4px;">
-                        @(Model.BusinessType == 2 ? "Tên dự án:" : "Tên cơ hội:")
+                        @(Model.BusinessType == 2 ? "Tên dự án:" : "Tên kế hoạch:")
                     </td>
                     <td class="font-weight-bold text-dark info-title-val" style="padding: 8px 4px;">@Model.Title</td>
                 </tr>
@@ -69,7 +69,7 @@
                     <td style="padding: 8px 4px;">
                         @if (Model.BusinessType == 1)
                         {
-                            <span class="badge badge-primary px-2 py-1"><i class="fa fa-lightbulb mr-1"></i> Cơ hội kinh doanh</span>
+                            <span class="badge badge-primary px-2 py-1"><i class="fa fa-lightbulb mr-1"></i> Kế hoạch</span>
                         }
                         else
                         {

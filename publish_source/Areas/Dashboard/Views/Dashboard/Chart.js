@@ -34,7 +34,7 @@ function onDashboardYearChange(year, keyword) {
         cache: false,
         success: function (html) {
             $container.html(html);
-            // Sau khi cập nhật lại view tổng quát, tải lại biểu đồ Cơ hội theo nhóm dịch vụ
+            // Sau khi cập nhật lại view tổng quát, tải lại biểu đồ Kế hoạch theo nhóm dịch vụ
             loadGroupServiceChart(selectedYear);
             initDashboardPaginations();
         },
@@ -100,7 +100,7 @@ function liveFilterTables(term) {
         filterSingleTable(".db-keyprojects-table", query);
     }
 
-    // 2. Lọc các bảng con (Cơ hội đang quan tâm & Cảnh báo ActionTime)
+    // 2. Lọc các bảng con (Kế hoạch đang quan tâm & Cảnh báo ActionTime)
     $(".db-custom-subtable").each(function () {
         var tid = "#" + $(this).attr("id");
         if (_tablePagination[tid]) {
@@ -446,7 +446,7 @@ function filterCardTableByEmployee(select, tableId) {
 }
 
 /**
- * Tải danh sách xuất file Excel theo từng Card (Dự án trọng điểm, Cơ hội quan tâm, SP DVS chưa cập nhật ActionTime)
+ * Tải danh sách xuất file Excel theo từng Card (Dự án trọng điểm, Kế hoạch quan tâm, SP DVS chưa cập nhật ActionTime)
  */
 function exportCardData(type) {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
@@ -490,7 +490,7 @@ function exportDashboardList() {
 }
 
 /**
- * Tải dữ liệu và vẽ biểu đồ Cơ hội theo nhóm dịch vụ (Pie Chart)
+ * Tải dữ liệu và vẽ biểu đồ Kế hoạch theo nhóm dịch vụ (Pie Chart)
  */
 function loadGroupServiceChart(year) {
     var el = document.querySelector('#gs-opp-chart');
@@ -547,7 +547,7 @@ function loadGroupServiceChart(year) {
             );
         },
         error: function (xhr, status, error) {
-            console.error("Lỗi khi tải biểu đồ Cơ hội theo nhóm dịch vụ:", error);
+            console.error("Lỗi khi tải biểu đồ Kế hoạch theo nhóm dịch vụ:", error);
             el.innerHTML = '<div class="text-center text-danger py-4">Không thể tải biểu đồ</div>';
         }
     });
@@ -618,7 +618,7 @@ function _renderApexPie(elementId, labels, series, onSelect) {
 }
 
 /**
- * Mở modal popup danh sách cơ hội kinh doanh theo nhóm dịch vụ (click lát cắt từ chart)
+ * Mở modal popup danh sách kế hoạch kinh doanh theo nhóm dịch vụ (click lát cắt từ chart)
  */
 window.detailOpportunityByGroupService = function (groupServiceId) {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
@@ -645,7 +645,7 @@ window.detailOpportunityByGroupService = function (groupServiceId) {
 };
 
 /**
- * Mở modal popup danh sách cơ hội / dự án kinh doanh dịch vụ số theo trạng thái
+ * Mở modal popup danh sách kế hoạch / dự án kinh doanh dịch vụ số theo trạng thái
  */
 window.openDigitalSalesByStatus = function (statusId, statusName) {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
@@ -664,7 +664,7 @@ window.openDigitalSalesByStatus = function (statusId, statusName) {
 };
 
 $(document).ready(function () {
-    // Tải biểu đồ Cơ hội theo nhóm dịch vụ lần đầu
+    // Tải biểu đồ Kế hoạch theo nhóm dịch vụ lần đầu
     loadGroupServiceChart($("#ApplyYear").val());
 
     // Khởi tạo phân trang cho cả 3 bảng Dashboard

@@ -1,4 +1,4 @@
-﻿using Core.Cate.Caches;
+using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Sys.BaseApp;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -251,7 +251,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             #region Header
 
             ws.Cells[row, 1].Value = "STT";
-            ws.Cells[row, 2].Value = "Tên dự án / cơ hội";
+            ws.Cells[row, 2].Value = "Tên dự án / kế hoạch";
             ws.Cells[row, 3].Value = "AM";
             ws.Cells[row, 4].Value = "Công việc gần nhất";
             ws.Cells[row, 5].Value = "Thông tin trao đổi";
@@ -354,7 +354,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             if (opportunities.Any())
             {
-                ws.Cells[row, 1].Value = "DANH SÁCH CƠ HỘI KINH DOANH";
+                ws.Cells[row, 1].Value = "DANH SÁCH KẾ HOẠCH";
                 ws.Cells[row, 1, row, 5].Merge = true;
 
                 ws.Cells[row, 1].Style.Font.Bold = true;

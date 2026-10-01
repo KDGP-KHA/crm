@@ -395,13 +395,13 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         {
             var headers = new[]
             {
-                "STT", "Mã cơ hội", "Tên cơ hội", "Khách hàng", "Trạng thái", "Dịch vụ",
+                "STT", "Mã kế hoạch", "Tên kế hoạch", "Khách hàng", "Trạng thái", "Dịch vụ",
                 "Giá trị dự kiến (triệu)", "Xác suất chốt (%)", "Ngày dự kiến", "Thành viên",
                 "Mô tả", "Cập nhật gần nhất", "Người cập nhật", "Nội dung cập nhật",
                 "Người liên hệ", "Đơn vị quản lý"
             };
 
-            BuildWorksheetHeading(worksheet, "DANH SÁCH CƠ HỘI KINH DOANH", fromDate, toDate, headers);
+            BuildWorksheetHeading(worksheet, "DANH SÁCH KẾ HOẠCH KINH DOANH", fromDate, toDate, headers);
 
             var row = 5;
             foreach (var item in items)
@@ -552,7 +552,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         {
             const int columnCount = 10;
 
-            worksheet.Cells[1, 1].Value = "DANH SÁCH CƠ HỘI VÀ DỰ ÁN CHƯA CẬP NHẬT";
+            worksheet.Cells[1, 1].Value = "DANH SÁCH KẾ HOẠCH VÀ DỰ ÁN CHƯA CẬP NHẬT";
             worksheet.Cells[1, 1, 1, columnCount].Merge = true;
             worksheet.Cells[1, 1].Style.Font.Bold = true;
             worksheet.Cells[1, 1].Style.Font.Size = 16;
@@ -564,7 +564,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
 
             var headers = new[]
             {
-                "STT", "Loại", "Mã", "Tên cơ hội / dự án", "Khách hàng",
+                "STT", "Loại", "Mã", "Tên kế hoạch / dự án", "Khách hàng",
                 "Đơn vị quản lý", "Phụ trách", "Trạng thái", "Cập nhật gần nhất", "Chưa cập nhật (ngày)"
             };
 
@@ -585,7 +585,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             foreach (var item in items)
             {
                 worksheet.Cells[row, 1].Value = row - 4;
-                worksheet.Cells[row, 2].Value = item.Type == 1 ? "Dự án" : "Cơ hội kinh doanh";
+                worksheet.Cells[row, 2].Value = item.Type == 1 ? "Dự án" : "Kế hoạch";
                 worksheet.Cells[row, 3].Value = item.ObjectCode;
                 worksheet.Cells[row, 4].Value = item.ObjectName;
                 worksheet.Cells[row, 5].Value = item.CustomerName;

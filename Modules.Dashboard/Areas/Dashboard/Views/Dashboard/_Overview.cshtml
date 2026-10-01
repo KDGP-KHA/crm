@@ -150,11 +150,11 @@
                     <div class="db-stat-head">
                         <span class="db-stat-icon bgc-warning-d1"><i class="fa fa-handshake"></i></span>
                         <div>
-                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách cơ hội kinh doanh"
+                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách kế hoạch kinh doanh"
                                  onclick="detailOpportunityBySuccessRate(0, true)">
                                 @((Model.Summary?.TotalOpportunities ?? 0).ToString("N0"))
                             </div>
-                            <div class="db-stat-label">Cơ hội KD</div>
+                            <div class="db-stat-label">Kế hoạch KD</div>
                         </div>
                     </div>
                     <div class="db-stat-revenues">
@@ -168,11 +168,11 @@
                     <div class="db-stat-head">
                         <span class="db-stat-icon bgc-blue-d1"><i class="fa fa-handshake"></i></span>
                         <div>
-                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách cơ hội kinh doanh (xác suất chốt ≥ 80%)"
+                            <div class="db-stat-value db-total-click" role="button" title="Xem danh sách kế hoạch kinh doanh (xác suất chốt ≥ 80%)"
                                  onclick="detailOpportunityBySuccessRate(80, true)">
                                 @((Model.FeasibilitySummary?.TotalOpportunities ?? 0).ToString("N0"))
                             </div>
-                            <div class="db-stat-label">Cơ hội ≥ 80%</div>
+                            <div class="db-stat-label">Kế hoạch ≥ 80%</div>
                         </div>
                     </div>
                     <div class="db-stat-revenues">
@@ -182,10 +182,10 @@
             </div>
         </div>
 
-        <!-- Cơ hội và dự án cần cập nhật -->
+        <!-- Kế hoạch và dự án cần cập nhật -->
         @Html.Partial("_StaleUpdates", Model.StaleUpdates)
 
-        <!-- Danh sách cơ hội kinh doanh -->
+        <!-- Danh sách kế hoạch kinh doanh -->
         <div id="opportunityOverviewTable">
             @Html.Partial("_OpportunityTable", Model.Opportunitys)
         </div>
@@ -213,7 +213,7 @@
         <div class="bcard card db-chart-card mb-2">
             <div class="card-header border-0 pb-1">
                 <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
-                    <i class="fa fa-chart-pie text-blue mr-2"></i>Cơ hội theo xác suất chốt
+                    <i class="fa fa-chart-pie text-blue mr-2"></i>Kế hoạch theo xác suất chốt
                 </h6>
             </div>
             <div class="card-body p-2 d-flex justify-content-center">
@@ -224,7 +224,7 @@
         <div class="bcard card db-chart-card mb-2">
             <div class="card-header border-0 pb-1">
                 <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
-                    <i class="fa fa-cubes text-primary mr-2"></i>Cơ hội theo nhóm dịch vụ
+                    <i class="fa fa-cubes text-primary mr-2"></i>Kế hoạch theo nhóm dịch vụ
                 </h6>
             </div>
             <div class="card-body p-2 d-flex justify-content-center">
@@ -246,7 +246,7 @@
         <div class="bcard card db-chart-card mb-2">
             <div class="card-header border-0 pb-1">
                 <h6 class="card-title font-weight-bold text-dark-m1 pl-1 mb-0">
-                    <i class="fa fa-chart-line text-success mr-2"></i>Cơ hội theo giai đoạn
+                    <i class="fa fa-chart-line text-success mr-2"></i>Kế hoạch theo giai đoạn
                 </h6>
             </div>
             <div class="card-body p-2">

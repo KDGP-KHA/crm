@@ -1242,7 +1242,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                                          && newStatus != null
                                          && newStatus.BusinessType == 2;
             var actionDescription = isOpportunityToProject
-                ? "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới: " + statusName
+                ? "Chuyển đổi thành công từ KẾ HOẠCH sang DỰ ÁN. Trạng thái mới: " + statusName
                 : "Chuyển trạng thái sang: " + statusName;
 
             if (!string.IsNullOrWhiteSpace(note))
@@ -1279,7 +1279,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 var isOpportunityToProject = timeline.FromBusinessType == 1 && timeline.ToBusinessType == 2;
                 var actionDescription = isOpportunityToProject
-                    ? "Chuyển đổi thành công từ CƠ HỘI sang DỰ ÁN. Trạng thái mới: " + status.StatusName
+                    ? "Chuyển đổi thành công từ KẾ HOẠCH sang DỰ ÁN. Trạng thái mới: " + status.StatusName
                     : "Chuyển trạng thái sang: " + status.StatusName;
 
                 activity.Content = actionDescription + " | Ghi chú: " + activity.Content.Trim();
@@ -3659,7 +3659,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var sales = _salesCache.GetByID(digitalSalesId);
             if (sales == null)
             {
-                return Content("<div class='alert alert-danger m-3'><i class='fa fa-exclamation-triangle'></i> Không tìm thấy thông tin cơ hội / dự án!</div>");
+                return Content("<div class='alert alert-danger m-3'><i class='fa fa-exclamation-triangle'></i> Không tìm thấy thông tin kế hoạch / dự án!</div>");
             }
 
             var rawTimelines = _salesCache.GetTimeline(digitalSalesId) ?? new List<RM_DigitalSalesTimelineModel>();
@@ -3726,7 +3726,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var sales = _salesCache.GetByID(digitalSalesId);
             if (sales == null)
             {
-                return Content("<div class='alert alert-danger m-3'><i class='fa fa-exclamation-triangle'></i> Không tìm thấy thông tin cơ hội / dự án!</div>");
+                return Content("<div class='alert alert-danger m-3'><i class='fa fa-exclamation-triangle'></i> Không tìm thấy thông tin kế hoạch / dự án!</div>");
             }
 
             List<RM_DigitalSalesTimelineModel> timelines = sales.Timelines ?? _salesCache.GetTimeline(digitalSalesId) ?? new List<RM_DigitalSalesTimelineModel>();
@@ -7210,7 +7210,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 string[] oppHeaders = new[]
                 {
                     "STT",
-                    "Tên cơ hội (*)",
+                    "Tên kế hoạch (*)",
                     "Mã khách hàng (*)",
                     "AM chủ trì (*)",
                     "Năm áp dụng",
@@ -7240,7 +7240,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 wsOpportunity.Cells[2, 5].Value = currentYear;
                 wsOpportunity.Cells[2, 6].Value = "Có";
                 wsOpportunity.Cells[2, 7].Value = "Có";
-                wsOpportunity.Cells[2, 8].Value = "Cơ hội trọng điểm năm " + currentYear;
+                wsOpportunity.Cells[2, 8].Value = "Kế hoạch trọng điểm năm " + currentYear;
                 ApplyExcelRowStyle(wsOpportunity, 2, oppHeaders.Length, GetColor("#F2F7FA"));
 
                 // Dòng mẫu 2
@@ -7630,7 +7630,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 return Json(new
                 {
                     status = false,
-                    message = "Không có dòng hợp lệ nào để tạo cơ hội."
+                    message = "Không có dòng hợp lệ nào để tạo kế hoạch."
                 });
             }
 
@@ -7715,7 +7715,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 status = successCount > 0,
                 successCount = successCount,
                 failCount = failCount,
-                message = $"Đã tạo thành công {successCount} cơ hội kinh doanh!" + (failCount > 0 ? $" ({failCount} bản ghi lỗi khi lưu)" : "")
+                message = $"Đã tạo thành công {successCount} kế hoạch kinh doanh!" + (failCount > 0 ? $" ({failCount} bản ghi lỗi khi lưu)" : "")
             });
         }
 
@@ -7732,7 +7732,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 string[] headers = new[]
                 {
                     "Dòng Excel",
-                    "Tên cơ hội",
+                    "Tên kế hoạch",
                     "Mã khách hàng",
                     "AM chủ trì",
                     "Năm áp dụng",
@@ -7826,7 +7826,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             // 1. Kiểm tra Tiêu đề
             if (string.IsNullOrWhiteSpace(row.Title))
             {
-                row.Errors.Add("Tên cơ hội không được để trống.");
+                row.Errors.Add("Tên kế hoạch không được để trống.");
             }
 
             // 2. Kiểm tra Mã khách hàng

@@ -1031,19 +1031,19 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
                 if (hasDuplicate)
                 {
-                    response = CreateMessage($"cơ hội thành dự án",
+                    response = CreateMessage($"kế hoạch thành dự án",
                         EnumProcessType.DataExisted,
                         EnumMsgIcon.Error);
                 }
                 else if (hasError)
                 {
-                    response = CreateMessage($"cơ hội thành dự án",
+                    response = CreateMessage($"kế hoạch thành dự án",
                         EnumProcessType.Convert,
                         EnumMsgIcon.Error);
                 }
                 else
                 {
-                    response = CreateMessage($"cơ hội thành dự án",
+                    response = CreateMessage($"kế hoạch thành dự án",
                         EnumProcessType.Convert,
                         EnumMsgIcon.Success);
                 }
@@ -1298,8 +1298,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
             "STT",
             "Trạng thái",
-            "Mã cơ hội KD",
-            "Tên cơ hội KD",
+            "Mã kế hoạch KD",
+            "Tên kế hoạch KD",
             "Tên khách hàng",
             "Sản phẩm dịch vụ",
             "Giá trị dự kiến (triệu)",

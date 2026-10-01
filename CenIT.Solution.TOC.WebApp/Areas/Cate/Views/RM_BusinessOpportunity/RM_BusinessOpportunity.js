@@ -1,4 +1,4 @@
-﻿var _BusinessOpportunityActionURLs = {
+var _BusinessOpportunityActionURLs = {
     BusinessOpportunity_GetData: "/Cate/RM_BusinessOpportunity/Get"
 };
 var _tableBusinessOpportunity;
@@ -238,7 +238,7 @@ function initTableBusinessOpportunity() {
                         // CHI TIẾT CƠ HỘI → BusinessOpportunityOverview/Index
                         html += `<a class="btn btn-lighter-secondary btn-a-outline-secondary dropdown-item"
                                     href="/Cate/BusinessOpportunityOverview/Index/${data}">
-                                    <i class="fas fa-eye text-secondary text-120 mr-1"></i> Chi tiết cơ hội
+                                    <i class="fas fa-eye text-secondary text-120 mr-1"></i> Chi tiết kế hoạch
                                  </a>`;
 
                         // Xoá

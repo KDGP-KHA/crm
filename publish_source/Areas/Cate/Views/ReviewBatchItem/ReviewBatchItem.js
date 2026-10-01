@@ -1,4 +1,4 @@
-﻿var _tableReviewDigitalSales;
+var _tableReviewDigitalSales;
 var _reviewDigitalSalesStateKey = "review_digital_sales_table_state";
 var _reviewDigitalSalesFilterKey = "review_digital_sales_filter";
 
@@ -38,7 +38,7 @@ function renderReviewDigitalSalesRecord(row) {
         ? "bgc-primary-l3 text-primary-d3 border-1 brc-primary-m2"
         : "bgc-success-l3 text-success-d3 border-1 brc-success-m2";
     var businessTypeIcon = row.BusinessType === 2 ? "fa-briefcase" : "fa-lightbulb";
-    var businessTypeName = row.BusinessTypeName || (row.BusinessType === 2 ? "Dự án" : "Cơ hội");
+    var businessTypeName = row.BusinessTypeName || (row.BusinessType === 2 ? "Dự án" : "Kế hoạch");
     var badgeClass = "badge-secondary";
     if (row.StatusID === 2) badgeClass = "badge-info";
     else if (row.StatusID === 3 || row.StatusID === 6) badgeClass = "badge-danger";

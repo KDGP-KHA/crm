@@ -54,7 +54,7 @@
     </div>
     <div class="total-metric-row">
         <div class="total-metric-item">
-            <div class="total-metric-label">Tổng số Cơ hội & Dự án</div>
+            <div class="total-metric-label">Tổng số Kế hoạch & Dự án</div>
             <div class="total-metric-val">@m.TotalCountAll.ToString("N0") <span style="font-size: 14px; font-weight: normal;">hồ sơ</span></div>
             <div class="total-metric-sub">Tất cả trạng thái năm @m.ApplyYear (Click để xem chi tiết)</div>
         </div>
@@ -84,7 +84,7 @@
     @foreach (var st in statusList)
     {
         var borderClass = GetStatusBorderClass(st.StatusCode);
-        var typeBadge = st.BusinessType == 1 ? "Cơ hội" : "Dự án";
+        var typeBadge = st.BusinessType == 1 ? "Kế hoạch" : "Dự án";
         var typeBadgeClass = st.BusinessType == 1 ? "badge-info" : "badge-primary";
 
         <div class="col-xl-3 col-lg-4 col-md-6 col-12">
@@ -123,7 +123,7 @@
     }
 </div>
 
-<!-- 3. KHU VỰC DỰ ÁN TRỌNG ĐIỂM (1) VÀ CHART CƠ HỘI THEO NHÓM DỊCH VỤ (2) -->
+<!-- 3. KHU VỰC DỰ ÁN TRỌNG ĐIỂM (1) VÀ CHART KẾ HOẠCH THEO NHÓM DỊCH VỤ (2) -->
 <div class="row mt-3">
     <!-- Vị trí 1: Danh sách những dự án Trọng điểm -->
     <div class="col-xl-8 col-lg-7 col-12 mb-3">
@@ -178,7 +178,7 @@
                                         </a>
                                         <div class="mt-1 d-flex align-items-center flex-wrap">
                                             <span class="badge badge-secondary db-code-badge mr-1">@p.Code</span>
-                                            <span class="badge @(p.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(p.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                            <span class="badge @(p.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(p.BusinessType == 1 ? "Kế hoạch" : "Dự án")</span>
                                         </div>
                                     </td>
                                     <td>
@@ -232,12 +232,12 @@
         </div>
     </div>
 
-    <!-- Vị trí 2: Chart Cơ hội KD DVS theo nhóm dịch vụ -->
+    <!-- Vị trí 2: Chart Kế hoạch KD DVS theo nhóm dịch vụ -->
     <div class="col-xl-4 col-lg-5 col-12 mb-3">
         <div class="card h-100 bcard shadow-sm db-chart-card">
             <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
                 <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
-                    <i class="fa fa-cubes text-primary mr-2"></i>Cơ hội theo nhóm dịch vụ
+                    <i class="fa fa-cubes text-primary mr-2"></i>Kế hoạch theo nhóm dịch vụ
                 </h6>
                 <span class="badge badge-light border-1 brc-secondary-l1 text-secondary-d2 font-weight-bold text-85 px-2 py-1">
                     Năm @m.ApplyYear
@@ -254,9 +254,9 @@
     </div>
 </div>
 
-<!-- 4. KHU VỰC CƠ HỘI ĐANG QUAN TÂM VÀ CẢNH BÁO ACTIONTIME CHƯA CẬP NHẬT (> 72 TIẾNG) -->
+<!-- 4. KHU VỰC KẾ HOẠCH ĐANG QUAN TÂM VÀ CẢNH BÁO ACTIONTIME CHƯA CẬP NHẬT (> 72 TIẾNG) -->
 <div class="row mt-3">
-    <!-- Cột 1: Danh sách Cơ hội KD DVS Đang quan tâm -->
+    <!-- Cột 1: Danh sách Kế hoạch KD DVS Đang quan tâm -->
     <div class="col-xl-6 col-12 mb-3">
         <div class="card h-100 bcard shadow-sm db-card-custom">
             <div class="card-header bgc-white border-b-1 brc-default-l2 py-2 d-flex flex-wrap justify-content-between align-items-center">
@@ -309,7 +309,7 @@
                                         </a>
                                         <div class="mt-1 d-flex align-items-center flex-wrap">
                                             <span class="badge badge-secondary db-code-badge mr-1">@opp.Code</span>
-                                            <span class="badge @(opp.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(opp.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                            <span class="badge @(opp.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(opp.BusinessType == 1 ? "Kế hoạch" : "Dự án")</span>
                                             <span class="badge badge-pink db-interest-badge mr-1" style="background-color: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8;">
                                                 <i class="fa fa-heart mr-1"></i>Quan tâm
                                             </span>
@@ -449,7 +449,7 @@
                                         </a>
                                         <div class="mt-1 d-flex align-items-center flex-wrap">
                                             <span class="badge badge-secondary db-code-badge mr-1">@s.Code</span>
-                                            <span class="badge @(s.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(s.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
+                                            <span class="badge @(s.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(s.BusinessType == 1 ? "Kế hoạch" : "Dự án")</span>
                                         </div>
                                     </td>
                                     <td>

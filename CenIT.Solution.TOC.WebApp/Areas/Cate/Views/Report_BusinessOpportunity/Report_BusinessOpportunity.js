@@ -1,4 +1,4 @@
-﻿var _tableReport_BusinessOpportunity;
+var _tableReport_BusinessOpportunity;
 $(document).ready(function () {
     $("#Report #Nam").datepicker({
         viewMode: "years",
@@ -60,7 +60,7 @@ function initTableReport_BusinessOpportunity() {
                     if (type !== "display") return data;
                     var url = buildDetailUrl(row);
                     if (!url) return data || "";
-                    // Bấm vào tên để mở chi tiết cơ hội/dự án tương ứng
+                    // Bấm vào tên để mở chi tiết kế hoạch/dự án tương ứng
                     return `<a class="report-detail-link" href="${url}" title="Xem chi tiết">${data || ""}</a>`;
                 }
             },

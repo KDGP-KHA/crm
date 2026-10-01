@@ -1,4 +1,4 @@
-﻿var _chart = null;
+var _chart = null;
 var _timer = null;
 var _tableOpp = null;
 var _tablePrj = null;
@@ -158,7 +158,7 @@ window.detailOpportunityBySuccessRate = function (successRate, isGreaterOrEqual)
     btn.click();
 };
 
-// Mở popup danh sách cơ hội kinh doanh của một nhóm dịch vụ (click từ chart)
+// Mở popup danh sách kế hoạch kinh doanh của một nhóm dịch vụ (click từ chart)
 window.detailOpportunityByGroupService = function (groupServiceId) {
     var fromDate = $("#FromDate").val();
     var toDate = $("#ToDate").val();
@@ -438,7 +438,7 @@ function initDashboardCharts() {
         data: {
             labels: statusLabels,
             datasets: [{
-                label: "Cơ hội",
+                label: "Kế hoạch",
                 data: statusData,
                 backgroundColor: statusColors
             }]

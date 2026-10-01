@@ -23,6 +23,12 @@
     {
         statusLabel = "Trạng thái";
     }
+
+    var memberRoleLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Label");
+    if (string.IsNullOrWhiteSpace(memberRoleLabel) || memberRoleLabel == "DigitalSalesSearch_MemberRole_Label" || memberRoleLabel.Contains(""))
+    {
+        memberRoleLabel = "Vai trò thành viên";
+    }
 }
 
 <div class="Search search-opportunity card mb-3" id="SearchDigitalSales">
@@ -88,7 +94,7 @@
                     @foreach (var item in statusItems)
                     {
                         var isChecked = !excludedStatusIds.Contains(item.StatusID);
-                        var typePrefix = item.BusinessType == 1 ? "[Cơ hội]" : "[Dự án]";
+                        var typePrefix = item.BusinessType == 1 ? "[Kế hoạch]" : "[Dự án]";
 
                         <div class="mb-1 status-item-row" data-businesstype="@item.BusinessType">
                             <label class="mb-0 w-100 cursor-pointer text-nowrap">
@@ -116,7 +122,7 @@
                             Trọng điểm
                         </label>
                     </div>
-                    <div class="custom-control custom-switch custom-switch-lg" title="Lọc các cơ hội/dự án bạn đang quan tâm">
+                    <div class="custom-control custom-switch custom-switch-lg" title="Lọc các kế hoạch/dự án bạn đang quan tâm">
                         <input type="checkbox" class="custom-control-input cursor-pointer" id="chkFilterFollowed">
                         <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0 text-nowrap" for="chkFilterFollowed" id="lblFilterFollowed">
                             Đang quan tâm
@@ -156,8 +162,8 @@
 
             <!-- 7b. Vai trò thành viên trong dự án -->
             <div class="col-xl-2 col-lg-2 col-md-4 col-12 mb-2 Search_Box Dropdown">
-                @Html.TitleFor(model => model.MemberRole, new { @class = "font-bold" })
-                @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option"), new { @class = "form-control", id = "MemberRole" })
+                <label class="font-bold" for="MemberRole">@memberRoleLabel</label>
+                @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option", "-- Chọn vai trò --"), new { @class = "form-control", id = "MemberRole" })
             </div>
 
             <!-- 8. Từ ngày -->
@@ -189,7 +195,7 @@
                     <button type="button" class="btn btn-primary text-nowrap" onclick="reloadSalesTable();">
                         <i class="fa fa-search-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("Label_Search")
                     </button>
-                    <button type="button" class="btn btn-default btn-outline-secondary text-nowrap" onclick="resetSalesSearch();">
+                    <button type="button" class="btn btn-default btn-outline-secondary text-nowrap d-none" id="btnResetSalesSearch" onclick="resetSalesSearch();">
                         <i class="fa fa-undo mr-1"></i>Đặt lại
                     </button>
                     <button type="button" class="btn btn-warning font-bold text-nowrap shadow-sm" id="btnExportDigitalSales" onclick="exportDigitalSales();" title="Tải danh sách theo điều kiện tìm kiếm">
@@ -241,7 +247,7 @@
             }
         });
 
-        // Lọc danh sách checkbox trạng thái theo Loại hình (Cơ hội / Dự án)
+        // Lọc danh sách checkbox trạng thái theo Loại hình (Kế hoạch / Dự án)
         $('#BusinessType').change(function () {
             var businessType = $(this).val();
             if (typeof filterStatusListByBusinessType === 'function') {

@@ -1,7 +1,7 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_DigitalSalesSearchModel
 @{
-    ViewBag.Title = "Danh sách Cơ hội kinh doanh - " + (ViewBag.StatusName as string) + " (Năm " + ViewBag.ApplyYear + ")";
+    ViewBag.Title = "Danh sách Kế hoạch - " + (ViewBag.StatusName as string) + " (Năm " + ViewBag.ApplyYear + ")";
     Layout = "~/Views/Shared/_Form.cshtml";
 }
 
@@ -38,7 +38,7 @@
                 <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
                     <tr>
                         <th class="text-center align-middle">@AppProcessor.Messagor.GetMessage("Column_No")</th>
-                        <th class="align-middle">Thông tin cơ hội / dự án</th>
+                        <th class="align-middle">Thông tin kế hoạch / dự án</th>
                         <th class="align-middle">Doanh thu</th>
                         <th class="align-middle">Thời gian</th>
                         <th class="align-middle">Phụ trách</th>
@@ -120,7 +120,7 @@
                         render: function (data, type, row) {
                             var typeBadge = row.BusinessType === 2
                                 ? '<span class="badge badge-success px-2 py-1 mr-1 text-80"><i class="fa fa-project-diagram mr-1"></i>Dự án</span>'
-                                : '<span class="badge badge-primary px-2 py-1 mr-1 text-80"><i class="fa fa-lightbulb mr-1"></i>Cơ hội</span>';
+                                : '<span class="badge badge-primary px-2 py-1 mr-1 text-80"><i class="fa fa-lightbulb mr-1"></i>Kế hoạch</span>';
 
                             var statusBadge = row.StatusName
                                 ? '<span class="badge badge-secondary px-2 py-1 mr-1 text-80">' + row.StatusName + '</span>'
@@ -135,7 +135,7 @@
                                 specialBadges += '<span class="badge bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Dự án trọng điểm"><i class="fa fa-star text-warning mr-1"></i>Trọng điểm</span>';
                             }
                             if (row.IsFollowed) {
-                                specialBadges += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Cơ hội/dự án quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
+                                specialBadges += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Kế hoạch/dự án quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
                             }
 
                             var titleHtml = '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary text-95 d-block mt-1" title="Xem chi tiết 360 độ">'

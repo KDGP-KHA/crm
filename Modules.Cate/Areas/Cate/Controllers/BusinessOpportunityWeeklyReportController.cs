@@ -530,8 +530,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
             var headers = new[]
             {
                 "STT",
-                "Mã cơ hội kinh doanh",
-                "Tên cơ hội",
+                "Mã kế hoạch kinh doanh",
+                "Tên kế hoạch",
                 "Xác suất chốt (%)",
                 "Doanh thu dự kiến (triệu)",
                 "Giai đoạn",

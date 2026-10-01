@@ -83,7 +83,7 @@
                         if (row.ReportType == 'Dự án') {
                             url = "/Cate/ProjectOverview/Index/" + row.ReportID;
                         }
-                        else if (row.ReportType == 'Cơ hội kinh doanh') {
+                        else if (row.ReportType == 'Kế hoạch' || row.ReportType == 'Kế hoạch kinh doanh' || row.ReportType == 'Cơ hội kinh doanh') {
                             url = "/Cate/BusinessOpportunityOverview/Index/" + row.ReportID;
                         }
                         return `

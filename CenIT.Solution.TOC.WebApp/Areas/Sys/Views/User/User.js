@@ -1,4 +1,4 @@
-﻿var _UserActionURLs = {
+var _UserActionURLs = {
     User_GetData: "/Sys/User/Get"
 };
 var _tableUser;
@@ -105,7 +105,7 @@ function initTableUser() {
                                 "btn btn-outline-info btn-a-outline-info mr-1 dropdown-item",
                                 "/Sys/User/BoPhan/" + data,
                                 '<i class="fas fa-sitemap text-120 mr-1"></i> Phân đơn vị',
-                                "Phân đơn vị");
+                                "Phân đơn vị", 1024);
 
                             html += _renderButton(true,
                                 "PermitReviewUser",

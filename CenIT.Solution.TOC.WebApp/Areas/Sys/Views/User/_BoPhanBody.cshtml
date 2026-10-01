@@ -1,6 +1,9 @@
 ﻿@using TSFramework.Libs.Extensions
 @using TSFramework.Libs.Processors
 @model Modules.Sys.Areas.Sys.Data.UserBoPhanModel
+
+<link rel="stylesheet" href="/Areas/Sys/Views/User/UserBoPhan.css?v=@DateTime.Now.Ticks" />
+
 @Html.AntiForgeryToken()
 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 @Html.HiddenFor(m => m.UserId)
@@ -9,105 +12,296 @@
 @Html.HiddenFor(m => m.Email)
 @Html.HiddenFor(m => m.MaBophans)
 
-<style>
-    .select2-container {
-        width: 100% !important;
-    }
+@{
+    var assignedCodes = !string.IsNullOrEmpty(Model.MaBophans)
+        ? Model.MaBophans.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList()
+        : new List<string>();
+    var totalCount = Model.ListBophans != null ? Model.ListBophans.Count : 0;
+    var selectedCount = assignedCodes.Count;
+}
 
-    .select2-container--default .select2-selection--multiple {
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        min-height: 38px;
-        padding: 2px 4px;
-    }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            max-width: 98%;
-            white-space: normal;
-            word-break: break-word;
-            height: auto;
-            padding: 2px 8px 2px 6px;
-            line-height: 1.5;
-            margin: 2px;
-        }
-
-        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
-            white-space: normal;
-            padding: 2px 4px;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__clear,
-        .select2-container--default .select2-selection--multiple .select2-clear-button,
-        .select2-selection__clear {
-            display: none !important;
-        }
-</style>
-
-<div id="BoPhan">
-    <div class="form-group row">
-        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("User_Label_HoTen")</label>
-        <div class="col-md-9">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="far fa-user-circle"></i></span>
-                </div>
-                @Html.TextBoxFor(m => m.FullName, new { disabled = true, @class = "form-control" })
+<div id="BoPhanContainer" class="bophan-user-container">
+    <!-- Thong tin nguoi dung -->
+    <div class="bophan-user-info-card">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-1 mb-md-0">
+                <i class="far fa-user-circle text-primary mr-1"></i>
+                <span class="text-secondary-d2 font-bold mr-1">Họ tên:</span>
+                <span class="text-dark font-bolder">@Model.FullName</span>
+                <span class="badge badge-light border text-muted ml-2">(@Model.UserName)</span>
+            </div>
+            <div class="col-md-6 text-md-right">
+                <i class="fa fa-envelope text-primary mr-1"></i>
+                <span class="text-secondary-d2 font-bold mr-1">Email:</span>
+                <span class="text-dark">@Model.Email</span>
             </div>
         </div>
     </div>
-    <div class="form-group row">
-        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">Email</label>
-        <div class="col-md-9">
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+
+    <!-- Thanh cong cu: Tim kiem + Checkbox loc da phan + Thao tac nhanh -->
+    <div class="bophan-toolbar">
+        <div class="row align-items-center">
+            <div class="col-lg-4 col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-white border-right-0"><i class="fa fa-search text-muted"></i></span>
+                    </div>
+                    <input type="text" id="txtSearchBoPhan" class="form-control border-left-0" placeholder="Tìm theo tên hoặc mã đơn vị..." autocomplete="off" />
                 </div>
-                @Html.TextBoxFor(m => m.Email, new { disabled = true, @class = "form-control" })
+            </div>
+            <div class="col-lg-5 col-md-4 mb-2 mb-md-0">
+                <!-- Checkbox chung loc cac don vi da duoc phan quan ly -->
+                <label class="bophan-filter-checkbox" title="Tích chọn để chỉ hiển thị các đơn vị người dùng này đang được phân quyền quản lý">
+                    <input type="checkbox" id="chkFilterAssigned" />
+                    <span class="font-bold text-primary-d1"><i class="fas fa-filter mr-1"></i> Chỉ hiển thị đơn vị đã phân quản lý</span>
+                </label>
+            </div>
+            <div class="col-lg-3 col-md-3 text-md-right">
+                <div class="d-inline-flex align-items-center">
+                    <span class="text-muted mr-2 font-12">Đã chọn:</span>
+                    <span id="lblSelectedCount" class="counter-badge mr-2">@selectedCount</span>
+                    <span class="text-muted mr-1 font-12">/</span>
+                    <span id="lblTotalCount" class="text-secondary font-bold mr-2">@totalCount</span>
+                </div>
+                <div class="btn-group btn-group-sm mt-1">
+                    <button type="button" id="btnSelectAllFiltered" class="btn btn-outline-primary btn-sm px-2" title="Chọn tất cả các đơn vị đang hiển thị">
+                        <i class="fa fa-check-square"></i> Chọn hết
+                    </button>
+                    <button type="button" id="btnUnselectAllFiltered" class="btn btn-outline-secondary btn-sm px-2" title="Bỏ chọn tất cả các đơn vị đang hiển thị">
+                        <i class="far fa-square"></i> Bỏ hết
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-    <hr />
-    <div class="form-group row">
-        <label class="col-sm-3 col-form-label text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("User_Label_DonVi")</label>
-        <div class="col-sm-9">
-            <select id="BoPhanSelect2" class="form-control" multiple="multiple" style="width:100%">
-                @foreach (var item in Model.ListBophans)
+
+    <!-- Bang danh sach don vi kem Checkbox -->
+    <div class="bophan-table-wrapper">
+        <table id="tblUserBoPhan" class="table table-hover table-striped table-bophan">
+            <thead>
+                <tr>
+                    <th style="width: 45px;" class="text-center">
+                        <input type="checkbox" id="chkSelectAllHeader" title="Chọn/Bỏ chọn tất cả" style="width: 17px; height: 17px; cursor: pointer;" />
+                    </th>
+                    <th style="width: 130px;">Mã đơn vị</th>
+                    <th>Tên đơn vị / Phòng ban</th>
+                    <th style="width: 120px;" class="text-center">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ListBophans != null && Model.ListBophans.Count > 0)
                 {
-                    var selected = !string.IsNullOrEmpty(Model.MaBophans) &&
-                                   Model.MaBophans.Split(',').Contains(item.MaBoPhan) ? "selected" : "";
-                    var label = string.IsNullOrEmpty(item.TenBoPhanView)
-                        ? item.TenBoPhan
-                        : item.TenBoPhanView;
-                    <option value="@item.MaBoPhan" @selected>@label</option>
+                    foreach (var item in Model.ListBophans)
+                    {
+                        var isChecked = assignedCodes.Contains(item.MaBoPhan);
+                        var indentPx = (item.Level > 0 ? item.Level * 20 : 0);
+                        var rowClass = isChecked ? "row-selected" : "";
+                        var parentName = !string.IsNullOrEmpty(item.TenBoPhanCha) ? item.TenBoPhanCha : "";
+
+                        <tr class="@rowClass bophan-row" 
+                            data-code="@item.MaBoPhan" 
+                            data-name="@item.TenBoPhan" 
+                            data-search="@(item.MaBoPhan + " " + item.TenBoPhan + " " + parentName)"
+                            data-assigned="@(isChecked ? "1" : "0")">
+                            <td class="text-center" onclick="event.stopPropagation();">
+                                <input type="checkbox" class="chk-bophan-item" value="@item.MaBoPhan" @(isChecked ? "checked=\"checked\"" : "") />
+                            </td>
+                            <td>
+                                <span class="badge-code">@item.MaBoPhan</span>
+                            </td>
+                            <td>
+                                <div class="dept-name-cell" style="padding-left: @(indentPx)px;">
+                                    @if (item.Level > 0)
+                                    {
+                                        <i class="fas fa-level-up-alt fa-rotate-90 dept-icon text-muted"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-university dept-icon text-primary"></i>
+                                    }
+                                    <div>
+                                        <span class="dept-title-text">@item.TenBoPhan</span>
+                                        @if (!string.IsNullOrEmpty(parentName))
+                                        {
+                                            <span class="dept-parent-text"><i class="fas fa-caret-right mx-1"></i>Trực thuộc: @parentName</span>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (isChecked)
+                                {
+                                    <span class="badge-assigned"><i class="fa fa-check mr-1"></i>Đã phân</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-unassigned">Chưa phân</span>
+                                }
+                            </td>
+                        </tr>
+                    }
                 }
-            </select>
-        </div>
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-3">Không có dữ liệu đơn vị</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script type="text/javascript">
-    function initBoPhanSelect2() {
-        if ($('#BoPhanSelect2').hasClass('select2-hidden-accessible')) {
-            $('#BoPhanSelect2').select2('destroy');
+    function initUserBoPhanTable() {
+        var $hiddenInput = $('input[name="MaBophans"]');
+        var $table = $('#tblUserBoPhan');
+        var $rows = $table.find('tbody tr.bophan-row');
+        var $chkFilterAssigned = $('#chkFilterAssigned');
+        var $txtSearch = $('#txtSearchBoPhan');
+        var $chkSelectAllHeader = $('#chkSelectAllHeader');
+        var $lblSelected = $('#lblSelectedCount');
+
+        // Ham chuan hoa chuoi tim kiem tieng Viet
+        function removeVietnameseTones(str) {
+            if (!str) return '';
+            str = str.toLowerCase();
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+            str = str.replace(/đ/g, "d");
+            return str;
         }
-        $('#BoPhanSelect2').select2({
-            placeholder: 'Chọn đơn vị...',
-            allowClear: false,
-            width: '100%',
-            templateSelection: function (data) {
-                return data.text;
+
+        // Cap nhat Hidden input va bo dem
+        function syncSelectedCodes() {
+            var selectedCodes = [];
+            $table.find('.chk-bophan-item:checked').each(function () {
+                selectedCodes.push($(this).val());
+            });
+
+            $hiddenInput.val(selectedCodes.join(','));
+            $lblSelected.text(selectedCodes.length);
+
+            // Cap nhat badge trang thai cua tung dong
+            $rows.each(function () {
+                var $row = $(this);
+                var isChecked = $row.find('.chk-bophan-item').is(':checked');
+                var $statusCell = $row.find('td:last');
+
+                $row.attr('data-assigned', isChecked ? '1' : '0');
+                if (isChecked) {
+                    $row.addClass('row-selected');
+                    $statusCell.html('<span class="badge-assigned"><i class="fa fa-check mr-1"></i>Đã phân</span>');
+                } else {
+                    $row.removeClass('row-selected');
+                    $statusCell.html('<span class="badge-unassigned">Chưa phân</span>');
+                }
+            });
+
+            // Cap nhat checkbox header
+            var visibleRows = $rows.filter(':visible');
+            var visibleChecked = visibleRows.find('.chk-bophan-item:checked');
+            if (visibleRows.length > 0 && visibleRows.length === visibleChecked.length) {
+                $chkSelectAllHeader.prop('checked', true).prop('indeterminate', false);
+            } else if (visibleChecked.length > 0) {
+                $chkSelectAllHeader.prop('checked', false).prop('indeterminate', true);
+            } else {
+                $chkSelectAllHeader.prop('checked', false).prop('indeterminate', false);
+            }
+        }
+
+        // Ham loc du lieu tren luoi theo Search + Checkbox Da phan quan ly
+        function filterTable() {
+            var keyword = removeVietnameseTones($txtSearch.val().trim());
+            var onlyAssigned = $chkFilterAssigned.is(':checked');
+
+            $rows.each(function () {
+                var $row = $(this);
+                var searchData = removeVietnameseTones($row.attr('data-search') || '');
+                var isAssigned = $row.attr('data-assigned') === '1';
+
+                var matchKeyword = keyword === '' || searchData.indexOf(keyword) > -1;
+                var matchAssigned = !onlyAssigned || isAssigned;
+
+                if (matchKeyword && matchAssigned) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            });
+
+            // Sau khi loc, cap nhat lai checkbox header
+            var visibleRows = $rows.filter(':visible');
+            var visibleChecked = visibleRows.find('.chk-bophan-item:checked');
+            if (visibleRows.length > 0 && visibleRows.length === visibleChecked.length) {
+                $chkSelectAllHeader.prop('checked', true).prop('indeterminate', false);
+            } else if (visibleChecked.length > 0) {
+                $chkSelectAllHeader.prop('checked', false).prop('indeterminate', true);
+            } else {
+                $chkSelectAllHeader.prop('checked', false).prop('indeterminate', false);
+            }
+        }
+
+        // Su kien go tim kiem
+        $txtSearch.off('keyup input').on('keyup input', function () {
+            filterTable();
+        });
+
+        // Su kien checkbox chung "Chi hien thi don vi da phan quan ly"
+        $chkFilterAssigned.off('change').on('change', function () {
+            filterTable();
+        });
+
+        // Su kien click vao dong cua table de tick/untick
+        $rows.off('click').on('click', function (e) {
+            if ($(e.target).is('input[type="checkbox"]')) return;
+            var $chk = $(this).find('.chk-bophan-item');
+            $chk.prop('checked', !$chk.is(':checked')).trigger('change');
+        });
+
+        // Su kien change tren tung checkbox item
+        $table.off('change', '.chk-bophan-item').on('change', '.chk-bophan-item', function () {
+            syncSelectedCodes();
+            // Neu dang bat che do loc "Chi hien thi da phan", dong bi bo chon se tu dong an theo
+            if ($chkFilterAssigned.is(':checked')) {
+                filterTable();
             }
         });
 
-        var initial = $('#BoPhanSelect2').val();
-        $('input[name="MaBophans"]').val(initial ? initial.join(',') : '');
-
-        $('#BoPhanSelect2').off('change').on('change', function () {
-            var selected = $(this).val();
-            $('input[name="MaBophans"]').val(selected ? selected.join(',') : '');
+        // Su kien checkbox header "Chon tat ca"
+        $chkSelectAllHeader.off('change').on('change', function () {
+            var isCheck = $(this).is(':checked');
+            $rows.filter(':visible').find('.chk-bophan-item').prop('checked', isCheck);
+            syncSelectedCodes();
+            if ($chkFilterAssigned.is(':checked') && !isCheck) {
+                filterTable();
+            }
         });
+
+        // Nut "Chon het" cac dong dang hien thi
+        $('#btnSelectAllFiltered').off('click').on('click', function () {
+            $rows.filter(':visible').find('.chk-bophan-item').prop('checked', true);
+            syncSelectedCodes();
+        });
+
+        // Nut "Bo het" cac dong dang hien thi
+        $('#btnUnselectAllFiltered').off('click').on('click', function () {
+            $rows.filter(':visible').find('.chk-bophan-item').prop('checked', false);
+            syncSelectedCodes();
+            if ($chkFilterAssigned.is(':checked')) {
+                filterTable();
+            }
+        });
+
+        // Khoi tao ban dau
+        syncSelectedCodes();
     }
 
     $(document).ready(function () {
-        initBoPhanSelect2();
+        initUserBoPhanTable();
     });
 </script>

@@ -61,7 +61,7 @@ namespace Core.Cate.Biz
 
                     if (sourceType == 1) // Cơ hội kinh doanh
                     {
-                        result.SourceTypeName = "Cơ hội kinh doanh";
+                        result.SourceTypeName = "Kế hoạch";
                         result.SuggestedChecklist = "UNCAPTURED; APPROACHING";
 
                         using (var cmd = conn.CreateCommand())
@@ -82,7 +82,7 @@ WHERE bo.BusinessOpportunityID = @ID AND bo.IsDeleted = 0";
                             {
                                 if (!r.Read())
                                 {
-                                    result.Message = $"Không tìm thấy Cơ hội kinh doanh với ID = {sourceId}.";
+                                    result.Message = $"Không tìm thấy Kế hoạch với ID = {sourceId}.";
                                     return result;
                                 }
 
@@ -846,7 +846,7 @@ WHERE pp.ProjectID = @SourceID AND pp.IsDeleted = 0";
                                     milestoneDate = DateTime.Now;
 
                                 string milestoneNote = i == 0
-                                    ? (model.SourceType == 1 ? "Khởi tạo Cơ hội kinh doanh" : "Khởi tạo hồ sơ ban đầu")
+                                    ? (model.SourceType == 1 ? "Khởi tạo Kế hoạch" : "Khởi tạo hồ sơ ban đầu")
                                     : $"Chuyển trạng thái sang {currentS.StatusName}";
 
                                 using (var cmdT = conn.CreateCommand())
@@ -943,7 +943,7 @@ ORDER BY eh.ExchangeDate ASC, eh.ExchangeHistoryID ASC";
 
                                     string clean = CleanHtml(rawHtml);
                                     string dateStr = exDate.ToString("dd/MM/yyyy");
-                                    string cardHtml = $@"<div class=""ds-migrated-exchange""><div class=""d-flex align-items-center mb-2""><span class=""badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 px-2 py-05 radius-1 font-600""><i class=""fa fa-comments mr-1""></i> Trao đổi Cơ hội</span><span class=""font-weight-bold text-secondary-d2 ml-2 text-90"">Lịch sử trao đổi ngày {dateStr}</span></div><div class=""ds-migrated-content"">{clean}</div></div>";
+                                    string cardHtml = $@"<div class=""ds-migrated-exchange""><div class=""d-flex align-items-center mb-2""><span class=""badge bgc-purple-l4 text-purple-d2 border-1 brc-purple-m3 px-2 py-05 radius-1 font-600""><i class=""fa fa-comments mr-1""></i> Trao đổi Kế hoạch</span><span class=""font-weight-bold text-secondary-d2 ml-2 text-90"">Lịch sử trao đổi ngày {dateStr}</span></div><div class=""ds-migrated-content"">{clean}</div></div>";
 
                                     string attachJson = null;
                                     if (!string.IsNullOrWhiteSpace(rawFile) && model.MoveAttachments)
@@ -1260,7 +1260,7 @@ ORDER BY ds.DigitalSalesID DESC";
                                     SourceType = Convert.ToInt32(r["BusinessType"]),
                                     SourceId = Convert.ToInt32(r["DigitalSalesID"]),
                                     BusinessType = Convert.ToByte(r["BusinessType"]),
-                                    BusinessTypeName = Convert.ToByte(r["BusinessType"]) == 1 ? "Cơ hội KD DVS" : "Dự án KD DVS",
+                                    BusinessTypeName = Convert.ToByte(r["BusinessType"]) == 1 ? "Kế hoạch KD DVS" : "Dự án KD DVS",
                                     StatusID = Convert.ToInt32(r["StatusID"]),
                                     StatusName = r["StatusName"]?.ToString(),
                                     TotalExpectedRevenue = r["TotalExpectedRevenue"] != DBNull.Value ? Convert.ToDecimal(r["TotalExpectedRevenue"]) : 0,

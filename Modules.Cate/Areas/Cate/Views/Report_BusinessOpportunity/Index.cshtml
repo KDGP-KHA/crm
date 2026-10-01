@@ -99,7 +99,7 @@
         max-width: 92vw;
     }
 
-    /* Tên dự án/cơ hội bấm được để mở màn hình chi tiết */
+    /* Tên dự án/kế hoạch bấm được để mở màn hình chi tiết */
     #Report_BusinessOpportunity a.report-detail-link {
         color: #1a6db5;
         font-weight: 600;
@@ -129,7 +129,7 @@
 
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 Search_Box">
                     <label class="font-bold">
-                        Loại cơ hội
+                        Loại kế hoạch
                     </label>
                     @Html.DropDownListFor(model => model.Loai, new SelectList(new List<SelectListItem>
                {
@@ -230,7 +230,7 @@
                     <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w200px">@AppProcessor.Messagor.GetMessage("ProductService_Title")</th>
                     <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w200px">@AppProcessor.Messagor.GetMessage("Opportunity_Name_Label")</th>
                     <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">@AppProcessor.Messagor.GetMessage("LoaiDuAn_Label")</th>
-                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Trạng thái cơ hội</th>
+                    <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Trạng thái kế hoạch</th>
                     <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2 w200px">Đầu mối chịu trách nhiệm</th>
                     <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Tổng dự toán (VNĐ)</th>
                     <th class="border-0 bgc-h-yellow-l3 shadow-sm py-2">Tổng giá trị SKHCN (VNĐ) (Chưa VAT)</th>

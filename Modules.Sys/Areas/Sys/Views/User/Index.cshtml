@@ -46,5 +46,5 @@
 @section BottomScript
 {
     <script src="~/Contents/Base/plugins/jquery.inputmask/jquery.inputmask.min.js"></script>
-    <script src="@Url.Content("~/Areas/Sys/Views/User/User.js")"></script>
+    <script src="@Url.Content("~/Areas/Sys/Views/User/User.js")?v=@DateTime.Now.Ticks"></script>
 }
