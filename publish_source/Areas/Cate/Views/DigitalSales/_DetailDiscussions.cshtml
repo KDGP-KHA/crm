@@ -173,6 +173,30 @@
 
     <div class="card-body p-3">
         <form id="frmPostDiscussion" onsubmit="submitDiscussionForm(event, @Model.DigitalSalesID);">
+            <!-- THANH THÔNG TIN TRÍCH DẪN ĐANG PHẢN HỒI (REPLY BANNER) -->
+            <div id="dsReplyBanner" class="ds-reply-banner d-none mb-25 radius-2">
+                <div class="ds-reply-banner-inner d-flex align-items-center justify-content-between p-2">
+                    <div class="d-flex align-items-center min-width-0 flex-grow-1 pr-2">
+                        <div class="ds-reply-banner-icon mr-2 flex-shrink-0">
+                            <i class="fa fa-reply text-primary"></i>
+                        </div>
+                        <div class="min-width-0 flex-grow-1">
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                                <span class="text-secondary text-80 font-600">@AppProcessor.Messagor.GetMessage("DigitalSales_Discussion_ReplyingTo", "Đang phản hồi"):</span>
+                                <strong id="lblReplyToAuthor" class="text-primary-d2 text-85"></strong>
+                                <span id="lblReplyToType" class="badge bgc-grey-l3 text-secondary-d2 text-70 px-15 py-02 radius-1 ml-1"></span>
+                            </div>
+                            <div id="lblReplyToSnippet" class="text-secondary-d1 text-80 text-truncate font-italic mt-05"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-xs btn-white btn-h-light-danger border-1 brc-grey-l2 text-danger radius-1 px-2 py-1 flex-shrink-0 ds-cancel-reply-btn" onclick="cancelReplyDiscussion();" title="@AppProcessor.Messagor.GetMessage("DigitalSales_Discussion_CancelReply", "Hủy phản hồi")">
+                        <i class="fa fa-times mr-1"></i>Hủy
+                    </button>
+                </div>
+            </div>
+
+            <input type="hidden" id="hdnReplyToActivityId" name="replyToActivityId" value="" />
+
             <div class="position-relative">
                 <textarea id="txtDiscussionContent" 
                           name="content" 
@@ -360,6 +384,19 @@
                                 </div>
                             }
                         }
+
+                        <!-- NÚT PHẢN HỒI TRẠNG THÁI -->
+                        @{
+                            string statusAuthorName = Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName);
+                            string statusSnippet = string.IsNullOrEmpty(statusInfo.Note) ? (statusInfo.ActionText + " " + statusInfo.StatusName) : statusInfo.Note;
+                        }
+                        <div class="ds-status-reply-bar d-flex justify-content-end mt-15 pt-1 border-t-1 brc-grey-l4">
+                            <button type="button" class="btn btn-xs btn-white btn-h-light-purple text-secondary-d1 border-1 brc-grey-l2 radius-round px-2 py-05 ds-reply-btn ds-reply-btn-status"
+                                    onclick="prepareReplyDiscussion(@act.ActivityID, '@HttpUtility.JavaScriptStringEncode(statusAuthorName)', '@HttpUtility.JavaScriptStringEncode(statusSnippet)', 2);"
+                                    title="Phản hồi nội dung cập nhật trạng thái này">
+                                <i class="fa fa-reply text-purple mr-1"></i><span class="text-80 font-600">@AppProcessor.Messagor.GetMessage("DigitalSales_Discussion_ReplyBtn", "Phản hồi")</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             }
@@ -384,7 +421,7 @@
                 </div>
 
                 <!-- NỘI DUNG CARD SỰ KIỆN -->
-                <div class="card ds-activity-card flex-grow-1 border-1 brc-grey-l2 radius-2 p-3 shadow-sm bgc-white">
+                <div class="card ds-activity-card flex-grow-1 border-1 brc-grey-l2 radius-2 p-3 shadow-sm bgc-white @(act.ReplyToActivityID.HasValue && act.ReplyToActivityID.Value > 0 ? "ds-activity-reply-card" : "")">
                     <!-- HEADER CARD -->
                     <div class="ds-activity-header d-flex align-items-center mb-2 flex-wrap" style="gap: 8px;">
                         <span class="font-weight-bold text-dark-m1 text-95">
@@ -399,6 +436,14 @@
                         <span class="badge @badgeBg text-75 font-bold px-2 py-05 radius-1">
                             @typeTitle
                         </span>
+                        @if (act.ReplyToActivityID.HasValue && act.ReplyToActivityID.Value > 0)
+                        {
+                            <span class="badge bgc-blue-l4 text-blue-d2 border-1 brc-blue-m3 text-75 font-600 px-2 py-05 radius-1 ds-reply-indicator-badge cursor-pointer"
+                                  onclick="scrollToQuotedActivity(@act.ReplyToActivityID.Value);"
+                                  title="Nhấn để cuộn đến trao đổi gốc">
+                                <i class="fa fa-reply mr-1 text-primary"></i>Phản hồi: <strong class="text-primary-d2">@act.ReplyToActionByName</strong>
+                            </span>
+                        }
                         <span class="ds-activity-date text-muted text-80 ml-1" title="@act.ActionDate.ToString("dd/MM/yyyy HH:mm:ss")">
                             <i class="fa fa-clock mr-1 opacity-75"></i>@act.ActionDate.ToString("dd/MM/yyyy HH:mm")
                         </span>
@@ -406,6 +451,38 @@
 
                     <!-- BODY NỘI DUNG -->
                     <div class="ds-activity-content text-90 text-dark-m2 mb-2">
+                        @if (act.ReplyToActivityID.HasValue && act.ReplyToActivityID.Value > 0)
+                        {
+                            var replySnippet = act.ReplyToContent ?? "";
+                            var cleanReplyText = System.Text.RegularExpressions.Regex.Replace(replySnippet, "<.*?>", " ");
+                            cleanReplyText = System.Web.HttpUtility.HtmlDecode(cleanReplyText).Trim();
+                            if (cleanReplyText.Length > 150) { cleanReplyText = cleanReplyText.Substring(0, 150) + "..."; }
+
+                            <div class="ds-quoted-box radius-2 mb-2 cursor-pointer" onclick="scrollToQuotedActivity(@act.ReplyToActivityID.Value);" title="Nhấn để cuộn và làm nổi bật trao đổi gốc">
+                                <div class="ds-quoted-bar"></div>
+                                <div class="ds-quoted-body py-1 px-25">
+                                    <div class="d-flex align-items-center justify-content-between mb-05 flex-wrap" style="gap: 4px;">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fa fa-reply text-primary mr-1 text-75"></i>
+                                            <strong class="text-primary-d2 text-85">@act.ReplyToActionByName</strong>
+                                            @if (act.ReplyToActionDate.HasValue)
+                                            {
+                                                <span class="text-secondary text-75 ml-2 opacity-75">
+                                                    <i class="far fa-clock mr-05"></i>@act.ReplyToActionDate.Value.ToString("dd/MM/yyyy HH:mm")
+                                                </span>
+                                            }
+                                        </div>
+                                        <span class="ds-quoted-jump-btn text-75 text-primary font-600">
+                                            <i class="fa fa-arrow-up mr-05"></i>Xem gốc
+                                        </span>
+                                    </div>
+                                    <div class="ds-quoted-snippet text-secondary-d2 text-85 font-italic text-truncate-2">
+                                        @(string.IsNullOrWhiteSpace(cleanReplyText) ? "(Nội dung đính kèm / cập nhật)" : cleanReplyText)
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
                         @if (isDiscussion)
                         {
                             <!-- TỰ ĐỘNG NỔI BẬT CÁC THẺ @@MENTION & HIỂN THỊ NỘI DUNG GIÀU VĂN BẢN (CKEDITOR) -->
@@ -731,6 +808,20 @@
                             </div>
                         }
                     }
+                    <!-- FOOTER NÚT PHẢN HỒI (REPLY ACTION) -->
+                    @{
+                        string cardAuthorName = Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(string.IsNullOrEmpty(act.ActionByName) ? act.ActionBy : act.ActionByName);
+                        string cardContentSnippet = System.Text.RegularExpressions.Regex.Replace(act.Content ?? "", "<.*?>", " ");
+                        cardContentSnippet = System.Web.HttpUtility.HtmlDecode(cardContentSnippet).Trim();
+                        if (cardContentSnippet.Length > 120) { cardContentSnippet = cardContentSnippet.Substring(0, 120) + "..."; }
+                    }
+                    <div class="ds-activity-card-footer d-flex align-items-center justify-content-end mt-2 pt-15 border-t-1 brc-grey-l4">
+                        <button type="button" class="btn btn-xs btn-white btn-h-light-primary text-secondary-d1 border-1 brc-grey-l2 radius-round px-25 py-1 ds-reply-btn"
+                                onclick="prepareReplyDiscussion(@act.ActivityID, '@HttpUtility.JavaScriptStringEncode(cardAuthorName)', '@HttpUtility.JavaScriptStringEncode(cardContentSnippet)', @act.ActivityType);"
+                                title="Phản hồi trao đổi này">
+                            <i class="fa fa-reply text-primary mr-1"></i><span class="font-600 text-80">@AppProcessor.Messagor.GetMessage("DigitalSales_Discussion_ReplyBtn", "Phản hồi")</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             }

@@ -1,4 +1,4 @@
-﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -3571,6 +3571,10 @@ function submitDiscussionForm(e, salesId) {
     formData.append("content", content.trim());
     formData.append("mentionedUserIds", $("#hdnMentionedUserIds").val());
     formData.append("mentionedNames", $("#hdnMentionedNames").val());
+    var replyToId = $("#hdnReplyToActivityId").val();
+    if (replyToId) {
+        formData.append("replyToActivityId", replyToId);
+    }
 
     if (_discussionSelectedFiles && _discussionSelectedFiles.length > 0) {
         for (var i = 0; i < _discussionSelectedFiles.length; i++) {
@@ -3597,6 +3601,7 @@ function submitDiscussionForm(e, salesId) {
                 $("#txtDiscussionContent").val('');
                 $("#hdnMentionedUserIds").val('');
                 $("#hdnMentionedNames").val('');
+                cancelReplyDiscussion();
                 updateDiscussionWordCount();
                 _discussionSelectedFiles = [];
                 renderDiscussionSelectedFiles();
@@ -3735,3 +3740,91 @@ function toggleTimelineAttachmentFiles(timelineId) {
         $el.toggleClass("show");
     }
 }
+
+/* ==========================================================================
+   DISCUSSION REPLY (TÍNH NĂNG PHẢN HỒI TRAO ĐỔI & TRẠNG THÁI)
+   ========================================================================== */
+function prepareReplyDiscussion(activityId, authorName, snippet, activityType) {
+    if (!activityId) return;
+
+    $("#hdnReplyToActivityId").val(activityId);
+    $("#lblReplyToAuthor").text(authorName || '');
+    $("#lblReplyToSnippet").text(snippet || '');
+
+    var typeText = (activityType === 2) ? 'Trạng thái' : 'Trao đổi';
+    $("#lblReplyToType").text(typeText);
+
+    $("#dsReplyBanner").removeClass("d-none");
+    $(".ds-composer-card").addClass("ds-composer-reply-active");
+
+    var $composer = $(".ds-composer-card");
+    if ($composer.length > 0) {
+        $('html, body').animate({
+            scrollTop: $composer.offset().top - 100
+        }, 300, function () {
+            if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+                CKEDITOR.instances['txtDiscussionContent'].focus();
+            } else {
+                $("#txtDiscussionContent").focus();
+            }
+        });
+    } else {
+        if (typeof CKEDITOR !== "undefined" && CKEDITOR.instances['txtDiscussionContent']) {
+            CKEDITOR.instances['txtDiscussionContent'].focus();
+        } else {
+            $("#txtDiscussionContent").focus();
+        }
+    }
+}
+
+function cancelReplyDiscussion() {
+    $("#hdnReplyToActivityId").val('');
+    $("#lblReplyToAuthor").text('');
+    $("#lblReplyToSnippet").text('');
+    $("#lblReplyToType").text('');
+    $("#dsReplyBanner").addClass("d-none");
+    $(".ds-composer-card").removeClass("ds-composer-reply-active");
+}
+
+function scrollToQuotedActivity(activityId) {
+    if (!activityId) return;
+
+    var $item = $("#activity-item-" + activityId);
+    if (!$item.length || !$item.is(":visible")) {
+        // Nếu mục đang bị ẩn do bộ lọc hiện tại, chuyển sang bộ lọc "Tất cả"
+        var salesId = getEffectiveSalesId();
+        filterDiscussions(salesId, null);
+        setTimeout(function () {
+            var $recheckItem = $("#activity-item-" + activityId);
+            if ($recheckItem.length) {
+                doScrollAndHighlightActivity($recheckItem);
+            } else {
+                if (typeof toastr !== "undefined") {
+                    toastr.info("Trao đổi gốc đã bị xóa hoặc không còn hiển thị.");
+                }
+            }
+        }, 600);
+        return;
+    }
+
+    doScrollAndHighlightActivity($item);
+}
+
+function doScrollAndHighlightActivity($item) {
+    if (!$item || !$item.length) return;
+
+    $('html, body').animate({
+        scrollTop: $item.offset().top - 120
+    }, 400);
+
+    $item.removeClass("ds-flash-highlight");
+    if ($item[0]) {
+        void $item[0].offsetWidth; // trigger browser reflow to restart animation
+    }
+    $item.addClass("ds-flash-highlight");
+
+    setTimeout(function () {
+        $item.removeClass("ds-flash-highlight");
+    }, 2500);
+}
+

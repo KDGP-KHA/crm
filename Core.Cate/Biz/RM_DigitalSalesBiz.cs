@@ -964,6 +964,8 @@ namespace Core.Cate.Biz
                 {
                     item.Content = FixVietnameseMojibake(item.Content);
                     item.ActionByName = FixVietnameseMojibake(item.ActionByName);
+                    item.ReplyToActionByName = FixVietnameseMojibake(item.ReplyToActionByName);
+                    item.ReplyToContent = FixVietnameseMojibake(item.ReplyToContent);
 
                     if (!string.IsNullOrWhiteSpace(item.Attachments))
                     {
@@ -1057,6 +1059,8 @@ namespace Core.Cate.Biz
                 {
                     item.Content = FixVietnameseMojibake(item.Content);
                     item.ActionByName = FixVietnameseMojibake(item.ActionByName);
+                    item.ReplyToActionByName = FixVietnameseMojibake(item.ReplyToActionByName);
+                    item.ReplyToContent = FixVietnameseMojibake(item.ReplyToContent);
 
                     if (!string.IsNullOrWhiteSpace(item.Attachments))
                     {
@@ -1121,7 +1125,8 @@ namespace Core.Cate.Biz
                 string.IsNullOrWhiteSpace(model.MentionedUserIDs) ? (object)DBNull.Value : model.MentionedUserIDs,
                 string.IsNullOrWhiteSpace(model.MentionedNames) ? (object)DBNull.Value : model.MentionedNames,
                 model.ReferenceID.HasValue ? (object)model.ReferenceID.Value : DBNull.Value,
-                username
+                username,
+                model.ReplyToActivityID.HasValue ? (object)model.ReplyToActivityID.Value : DBNull.Value
             );
             return result.GetValueOrDefault(0);
         }

@@ -22,6 +22,11 @@ namespace Core.Cate.Models
         public string MentionedUserIDs { get; set; }
         public string MentionedNames { get; set; }
         public int? ReferenceID { get; set; }
+        public int? ReplyToActivityID { get; set; }
+        public string ReplyToActionByName { get; set; }
+        public string ReplyToContent { get; set; }
+        public DateTime? ReplyToActionDate { get; set; }
+        public byte? ReplyToActivityType { get; set; }
         public DateTime ActionDate { get; set; }
         public string ActionBy { get; set; }
         public string ActionByName { get; set; }

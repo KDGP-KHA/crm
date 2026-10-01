@@ -1307,7 +1307,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         [HttpPost]
         [ActionType(Type = EnumActionType.Edit)]
         [ValidateInput(false)]
-        public ActionResult PostDiscussion(int digitalSalesId, string content, string mentionedUserIds, string mentionedNames)
+        public ActionResult PostDiscussion(int digitalSalesId, string content, string mentionedUserIds, string mentionedNames, int? replyToActivityId = null)
         {
             if (digitalSalesId <= 0)
             {
@@ -1423,7 +1423,8 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     : null,
                 MentionedNames = mentionedMembers.Count > 0
                     ? string.Join(",", mentionedMembers.Select(member => member.FullName))
-                    : null
+                    : null,
+                ReplyToActivityID = (replyToActivityId.HasValue && replyToActivityId.Value > 0) ? replyToActivityId : null
             };
 
             var saveRes = _salesCache.AddActivity(activity, User.UserName);
@@ -1461,6 +1462,43 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         "DIGITAL_SALES_DISCUSSION_MENTION",
                         User.UserName,
                         actionByFullName);
+                }
+
+                if (activity.ReplyToActivityID.HasValue && activity.ReplyToActivityID.Value > 0)
+                {
+                    try
+                    {
+                        var allActs = _salesCache.GetActivitiesBySalesID(digitalSalesId, 255);
+                        var targetAct = allActs != null ? allActs.FirstOrDefault(a => a.ActivityID == activity.ReplyToActivityID.Value) : null;
+                        if (targetAct != null && !string.IsNullOrWhiteSpace(targetAct.ActionBy) 
+                            && !targetAct.ActionBy.Equals(User.UserName, StringComparison.OrdinalIgnoreCase)
+                            && !notificationReceivers.Contains(targetAct.ActionBy, StringComparer.OrdinalIgnoreCase))
+                        {
+                            var currentUser = _userCache.GetByUserName(User.UserName);
+                            var actionByFullName = currentUser != null && !string.IsNullOrWhiteSpace(currentUser.FullName)
+                                ? currentUser.FullName
+                                : User.UserName;
+                            var replyTitle = string.Format(
+                                GetAppMessage("DigitalSales_Discussion_ReplyNotificationTitle", "{0} đã phản hồi một trao đổi của bạn"),
+                                actionByFullName);
+                            var replyBody = string.Format(
+                                GetAppMessage("DigitalSales_Discussion_ReplyNotificationContent", "{0}: {1}"),
+                                digitalSales.Title,
+                                plainTextContent);
+                            _notificationService.PushDigitalSalesNotification(
+                                digitalSalesId,
+                                replyTitle,
+                                replyBody,
+                                new List<string> { targetAct.ActionBy },
+                                "DIGITAL_SALES_DISCUSSION_REPLY",
+                                User.UserName,
+                                actionByFullName);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AppProcessor.Logger.Error(ex);
+                    }
                 }
 
                 return Json(new
