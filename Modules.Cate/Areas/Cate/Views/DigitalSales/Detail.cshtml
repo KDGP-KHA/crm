@@ -23,7 +23,7 @@
             <i class="fa fa-arrow-left text-primary mr-1"></i> Danh sách
         </a>
         <div class="d-flex flex-column justify-content-center flex-grow-1 min-width-0">
-            <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+            <div class="ds-header-title-row">
                 <span id="headerCode" class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 font-mono text-90 px-2 py-1 mr-2 radius-1 font-bold shadow-sm flex-shrink-0">
                     <i class="fa fa-hashtag mr-1 opacity-75"></i>@Model.Code
                 </span>
@@ -31,7 +31,7 @@
                     @Model.Title
                 </span>
             </div>
-            <div class="d-flex align-items-center mt-1 flex-wrap" style="gap: 4px;">
+            <div class="ds-header-title-row mt-1">
                 <span id="headerBusinessType" class="badge badge-lg @(Model.BusinessType == 1 ? "bgc-blue-l2 text-blue-d2 border-1 brc-blue-m3" : "bgc-purple-l2 text-purple-d2 border-1 brc-purple-m3") text-85 font-bold px-25 py-1 radius-1">
                     <i class="fa @(Model.BusinessType == 1 ? "fa-lightbulb" : "fa-project-diagram") mr-1"></i>@(Model.BusinessType == 1 ? "Cơ hội kinh doanh" : "Dự án")
                 </span>
@@ -53,9 +53,9 @@
 }
 
 @section PageAction {
-    <div class="ds-header-action-bar d-flex align-items-center">
+    <div class="ds-header-action-bar">
         <!-- 1. Cụm Switches: Trọng điểm & Quan tâm (Luôn đi cùng nhau, đồng bộ chuẩn giao diện với màn hình danh sách) -->
-        <div class="ds-header-switches-group d-flex align-items-center flex-nowrap">
+        <div class="ds-header-switches-group">
             <div class="custom-control custom-switch custom-switch-lg mr-3 mr-xl-4" title="Đánh dấu trọng điểm">
                 <input type="checkbox" class="custom-control-input cursor-pointer" id="chkIsKeyProject" @(Model.IsKeyProject ? "checked" : "") @(canEdit ? "" : "disabled") onchange="toggleKeyProject(@Model.DigitalSalesID, this.checked);">
                 <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0" for="chkIsKeyProject" id="lblKeyProject">
@@ -71,10 +71,8 @@
             </div>
         </div>
 
-        <div class="ds-header-divider d-none d-xl-block"></div>
-
         <!-- 2. Cụm Action Buttons (Không bao giờ tách rời nhau) -->
-        <div class="ds-header-buttons-group d-flex align-items-center flex-nowrap">
+        <div class="ds-header-buttons-group">
             @if (canEdit)
             {
                 <button type="button" class="btn btn-sm btn-warning btn-h-light-warning text-dark-tp1 font-bolder px-3 py-15 radius-1 shadow-sm text-nowrap" onclick="openChangeStatusModal(@Model.DigitalSalesID);" title="Chuyển đổi trạng thái quy trình">
