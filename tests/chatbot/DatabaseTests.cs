@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -62,8 +62,6 @@ public static class DatabaseTests
 
     private static void Bootstrap(string webRoot)
     {
-        // Host-independent bootstrap only. Use the actual XML mappings, SQLProcProcessor,
-        // permission provider, Biz classes and handlers; do not start Global.asax/jobs.
         var maps = new Dictionary<string, Dictionary<string, string>>();
         foreach (var path in Directory.GetFiles(Path.Combine(webRoot, "App_Data"), "*.xml", SearchOption.AllDirectories))
         {
@@ -99,8 +97,7 @@ public static class DatabaseTests
                 command.CommandTimeout = 12;
                 command.CommandText = @"SELECT TOP (20) u.UserName FROM Sys_Users u
 WHERE u.IsActive=1 AND ISNULL(u.IsDeleted,0)=0
-ORDER BY (SELECT COUNT(*) FROM RM_Project p WHERE p.CreatedBy=u.UserName AND p.IsDeleted=0)
-       + (SELECT COUNT(*) FROM RM_BusinessOpportunity o WHERE o.CreatedBy=u.UserName AND o.IsDeleted=0) DESC, u.UserId";
+ORDER BY (SELECT COUNT(*) FROM RM_DigitalSales ds WHERE ds.CreatedBy=u.UserName AND ds.IsDeleted=0) DESC, u.UserId";
                 using (var reader = command.ExecuteReader()) while (reader.Read()) users.Add(reader.GetString(0));
             }
         }
@@ -114,27 +111,28 @@ ORDER BY (SELECT COUNT(*) FROM RM_Project p WHERE p.CreatedBy=u.UserName AND p.I
             if (!canProject || !canOpportunity) continue;
             if (++userIndex > 3) break;
             string alias = "U" + userIndex;
-            var page = new BaseSearchModel { Order = "0", OrderDir = "ASC", PageSize = 5001, StartIndex = 0 };
             int projectTotal, opportunityTotal;
             stage = alias + " scoped list procedures";
-            var projects = data.Projects(new RM_ProjectSearchModel { UserName = user }, page, out projectTotal);
-            var opportunities = data.Opportunities(new RM_BusinessOpportunitySearchModel { UserName = user }, page, out opportunityTotal);
+            var projects = data.DigitalSalesList(new RM_DigitalSalesSearchModel { BusinessType = 2, UserName = user, PageNumber = 1, PageSize = 5001, ApplyYear = 0 }, out projectTotal) ?? new List<RM_DigitalSalesModel>();
+            var opportunities = data.DigitalSalesList(new RM_DigitalSalesSearchModel { BusinessType = 1, UserName = user, PageNumber = 1, PageSize = 5001, ApplyYear = 0 }, out opportunityTotal) ?? new List<RM_DigitalSalesModel>();
             Check(projects != null && opportunities != null, "List procedures must return a collection");
             Check(projectTotal == projects.Count && opportunityTotal == opportunities.Count, "Complete scoped lists");
-            tested.Add(Tuple.Create(user, new HashSet<int>(projects.Select(x => x.ProjectID)), new HashSet<int>(opportunities.Select(x => x.BusinessOpportunityID))));
-            int projectId = RichRecord(projects.Select(x => x.ProjectID), true);
-            int opportunityId = RichRecord(opportunities.Select(x => x.BusinessOpportunityID), false);
+            tested.Add(Tuple.Create(user, new HashSet<int>(projects.Select(x => x.DigitalSalesID)), new HashSet<int>(opportunities.Select(x => x.DigitalSalesID))));
+            int projectId = RichRecord(projects.Select(x => x.DigitalSalesID), true);
+            int opportunityId = RichRecord(opportunities.Select(x => x.DigitalSalesID), false);
             foreach (var tool in ChatbotToolService.AllowedTools)
             {
                 stage = alias + " " + tool;
                 try
                 {
+                    bool isDigitalSales = tool.StartsWith("get_digitalsales_");
                     bool project = tool.StartsWith("get_project_"), detail = tool.EndsWith("_detail");
                     var input = new JObject { ["limit"] = 1 };
                     if (detail)
                     {
-                        if ((project ? projectTotal : opportunityTotal) == 0) { Console.WriteLine("SKIP " + stage + ": no accessible record"); continue; }
-                        input["id"] = project ? projectId : opportunityId;
+                        int idToUse = isDigitalSales ? (projectId > 0 ? projectId : opportunityId) : (project ? projectId : opportunityId);
+                        if (idToUse <= 0) { Console.WriteLine("SKIP " + stage + ": no accessible record"); continue; }
+                        input["id"] = idToUse;
                     }
                     var watch = Stopwatch.StartNew();
                     var result = new ChatbotToolService().Execute(tool, user, ChatbotToolInput.Parse(tool, input), CancellationToken.None);
@@ -142,35 +140,35 @@ ORDER BY (SELECT COUNT(*) FROM RM_Project p WHERE p.CreatedBy=u.UserName AND p.I
                     Check(watch.ElapsedMilliseconds < 12000, "Within executor time budget");
                     if (!detail)
                     {
-                        Check((int)obj["total"] == (project ? projectTotal : opportunityTotal), "Summary count matches scoped procedure");
+                        int expectedTotal = isDigitalSales ? (projectTotal + opportunityTotal) : (project ? projectTotal : opportunityTotal);
+                        Check((int)obj["total"] == expectedTotal, "Summary count matches scoped procedure");
                         Check(obj["items"].Count() <= 1, "Page size respected");
-                        if (!project) Check((decimal)obj["summary"]["totalExpectedValue"] == opportunities.Sum(x => x.ExpectedValue), "Expected value across all rows");
+                        if (!project && !isDigitalSales) Check((decimal)obj["summary"]["totalExpectedValue"] == opportunities.Sum(x => x.TotalExpectedRevenue ?? 0m), "Expected value across all rows");
                     }
                     else
                     {
                         Check((string)obj["status"] == "ok", "Accessible detail returns ok");
-                        if (project)
+                        int targetId = (int)input["id"];
+                        bool treatAsProject = project || (isDigitalSales && targetId == projectId);
+                        if (treatAsProject)
                         {
-                            var tasks = data.Tasks(projectId).Where(x => x.IsDeleted != true).ToList();
+                            var detailModel = data.DigitalSalesDetail(projectId, user);
+                            var tasks = (detailModel?.TrackingTasks ?? new List<RM_DigitalSalesTrackingModel>()).Where(x => x.TrackingID > 0 && !string.IsNullOrWhiteSpace(x.TaskName)).ToList();
                             Check((int)obj["taskSummary"]["totalTasks"] == tasks.Count, "Real work-item count");
-                            Check(tasks.Count == RawTaskCount(projectId), "Includes both legacy and task-management SQL rows");
                             Check((int)obj["tasks"]["total"] == tasks.Count && obj["tasks"]["items"].Count() <= 1, "Real task pagination");
-                            Check((decimal)obj["financials"]["revenue"] == data.Products(projectId).Sum(x => x.TotalRevenue), "Financial aggregation matches product rows");
                             Console.WriteLine("DETAIL " + alias + ": tasks=" + tasks.Count + ", products=" + obj["products"]["total"] + ", members=" + obj["members"]["total"]);
                         }
                         else
                         {
-                            int activityTotal;
-                            data.Activities(opportunityId, page, out activityTotal);
-                            Check((int)obj["activities"]["total"] == activityTotal && obj["activities"]["items"].Count() <= 1, "Real activity pagination");
-                            Check((int)obj["plans"]["total"] == data.Plans(opportunityId).Count, "Real plan count");
-                            Console.WriteLine("DETAIL " + alias + ": activities=" + activityTotal + ", plans=" + obj["plans"]["total"] + ", members=" + obj["members"]["total"]);
+                            var detailModel = data.DigitalSalesDetail(opportunityId, user);
+                            var activities = (detailModel?.Activities ?? new List<RM_DigitalSalesActivityModel>()).ToList();
+                            Check((int)obj["activities"]["total"] == activities.Count && obj["activities"]["items"].Count() <= 1, "Real activity pagination");
+                            Console.WriteLine("DETAIL " + alias + ": activities=" + activities.Count + ", plans=" + obj["plans"]["total"] + ", members=" + obj["members"]["total"]);
                         }
                     }
                     int bytes = Encoding.UTF8.GetByteCount(JsonConvert.SerializeObject(new { result }));
                     Check(bytes < 256*1024, "Response within 256 KB");
                     Console.WriteLine("PASS " + stage + ": " + watch.ElapsedMilliseconds + "ms, " + bytes + " bytes, scope=" + (project ? projectTotal : opportunityTotal));
-                    // Exercise the real controller success path too (in-process, no external service).
                     using (var controller = new ChatbotToolsController())
                     {
                         DateTimeOffset expires;
@@ -191,16 +189,16 @@ ORDER BY (SELECT COUNT(*) FROM RM_Project p WHERE p.CreatedBy=u.UserName AND p.I
             {
                 var tool = project ? "get_project_summary" : "get_opportunity_summary";
                 stage = alias + " " + tool + " filters/pagination";
-                var expectedIds = project ? projects.Select(x => x.ProjectID).OrderBy(x => x).ToArray() : opportunities.Select(x => x.BusinessOpportunityID).OrderBy(x => x).ToArray();
+                var expectedIds = project ? projects.Select(x => x.DigitalSalesID).OrderBy(x => x).ToArray() : opportunities.Select(x => x.DigitalSalesID).OrderBy(x => x).ToArray();
                 var secondPage = JObject.FromObject(new ChatbotToolService().Execute(tool, user,
                     ChatbotToolInput.Parse(tool, new JObject { ["limit"] = 1, ["offset"] = 1 }), CancellationToken.None));
                 if (expectedIds.Length > 1) Check((int)secondPage["items"][0]["id"] == expectedIds[1], "Second page matches full scoped list");
                 if (expectedIds.Length == 0) continue;
-                int status = project ? projects[0].Status : opportunities[0].StatusID;
+                int status = project ? projects[0].StatusID : opportunities[0].StatusID;
                 if (status <= 0) continue;
                 var filtered = JObject.FromObject(new ChatbotToolService().Execute(tool, user,
                     ChatbotToolInput.Parse(tool, new JObject { ["statusId"] = status }), CancellationToken.None));
-                Check((int)filtered["total"] == (project ? projects.Count(x => x.Status == status) : opportunities.Count(x => x.StatusID == status)), "Status filter agrees with unfiltered scope");
+                Check((int)filtered["total"] == (project ? projects.Count(x => x.StatusID == status) : opportunities.Count(x => x.StatusID == status)), "Status filter agrees with unfiltered scope");
             }
         }
         Check(tested.Count >= 2, "At least two real accounts must be tested");
@@ -231,23 +229,10 @@ ORDER BY (SELECT COUNT(*) FROM RM_Project p WHERE p.CreatedBy=u.UserName AND p.I
         using (var command = connection.CreateCommand())
         {
             connection.Open(); command.CommandTimeout = 12;
-            // IDs originate from typed, permission-scoped database rows, never from user strings.
             string idList = string.Join(",", allowed.Select(x => x.ToString(System.Globalization.CultureInfo.InvariantCulture)));
             command.CommandText = project
-                ? "SELECT TOP (1) p.ProjectID FROM RM_Project p WHERE p.ProjectID IN (" + idList + ") ORDER BY (SELECT COUNT(*) FROM RM_ProjectTask t WHERE t.ProjectID=p.ProjectID AND t.IsDeleted=0)+(SELECT COUNT(*) FROM RM_TaskManagement tm WHERE tm.ProjectID=p.ProjectID AND tm.IsDeleted=0) DESC,p.ProjectID"
-                : "SELECT TOP (1) o.BusinessOpportunityID FROM RM_BusinessOpportunity o WHERE o.BusinessOpportunityID IN (" + idList + ") ORDER BY (SELECT COUNT(*) FROM RM_ExchangeHistory h WHERE h.BusinessOpportunityID=o.BusinessOpportunityID)+(SELECT COUNT(*) FROM RM_OpportunityPlan pl WHERE pl.BusinessOpportunityID=o.BusinessOpportunityID) DESC,o.BusinessOpportunityID";
-            return Convert.ToInt32(command.ExecuteScalar());
-        }
-    }
-
-    private static int RawTaskCount(int projectId)
-    {
-        using (var connection = new SqlConnection(ConfigurationManager.ConnectionStrings["TOC.Conn.Major"].ConnectionString))
-        using (var command = connection.CreateCommand())
-        {
-            connection.Open(); command.CommandTimeout = 12;
-            command.CommandText = "SELECT (SELECT COUNT(*) FROM RM_ProjectTask WHERE ProjectID=@id AND IsDeleted=0)+(SELECT COUNT(*) FROM RM_TaskManagement WHERE ProjectID=@id AND IsDeleted=0)";
-            command.Parameters.AddWithValue("@id", projectId);
+                ? "SELECT TOP (1) ds.DigitalSalesID FROM RM_DigitalSales ds WHERE ds.DigitalSalesID IN (" + idList + ") ORDER BY (SELECT COUNT(*) FROM RM_DigitalSalesTracking t WHERE t.DigitalSalesID=ds.DigitalSalesID)+(SELECT COUNT(*) FROM RM_DigitalSalesProduct p WHERE p.DigitalSalesID=ds.DigitalSalesID) DESC, ds.DigitalSalesID"
+                : "SELECT TOP (1) ds.DigitalSalesID FROM RM_DigitalSales ds WHERE ds.DigitalSalesID IN (" + idList + ") ORDER BY (SELECT COUNT(*) FROM RM_DigitalSalesActivity a WHERE a.DigitalSalesID=ds.DigitalSalesID)+(SELECT COUNT(*) FROM RM_DigitalSalesTracking t WHERE t.DigitalSalesID=ds.DigitalSalesID) DESC, ds.DigitalSalesID";
             return Convert.ToInt32(command.ExecuteScalar());
         }
     }

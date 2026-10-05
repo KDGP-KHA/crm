@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,6 +14,7 @@ namespace Modules.Cate.Chatbot
         public int? DepartmentId { get; private set; }
         public int? EmployeeId { get; private set; }
         public int? StatusId { get; private set; }
+        public byte? BusinessType { get; private set; }
         public int? Year { get; private set; }
         public int Limit { get; private set; }
         public int Offset { get; private set; }
@@ -22,11 +23,9 @@ namespace Modules.Cate.Chatbot
         {
             input = input ?? new JObject();
             bool detail = toolName.EndsWith("_detail", StringComparison.Ordinal);
-            bool project = toolName.StartsWith("get_project_", StringComparison.Ordinal);
             var allowed = new HashSet<string>(detail
                 ? new[] { "id", "keyword", "limit", "offset" }
-                : new[] { "keyword", "customerId", "departmentId", "employeeId", "statusId", "limit", "offset" }, StringComparer.Ordinal);
-            if (project && !detail) allowed.Add("year");
+                : new[] { "keyword", "customerId", "departmentId", "employeeId", "statusId", "businessType", "year", "limit", "offset" }, StringComparer.Ordinal);
             if (input.Properties().Any(p => !allowed.Contains(p.Name))) Bad("Unsupported input property.");
             var keyword = input["keyword"];
             if (keyword != null && keyword.Type != JTokenType.String) Bad("keyword must be a string.");
@@ -38,6 +37,7 @@ namespace Modules.Cate.Chatbot
                 DepartmentId = Number(input, "departmentId", 1, int.MaxValue),
                 EmployeeId = Number(input, "employeeId", 1, int.MaxValue),
                 StatusId = Number(input, "statusId", 1, int.MaxValue),
+                BusinessType = (byte?)Number(input, "businessType", 0, 2),
                 Year = Number(input, "year", 1900, 2100),
                 Limit = Number(input, "limit", 1, 50) ?? 10,
                 Offset = Number(input, "offset", 0, 5000) ?? 0

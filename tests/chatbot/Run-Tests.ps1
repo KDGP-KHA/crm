@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 $crmRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $crmBin = Join-Path $crmRoot 'Modules.Cate\bin'
 $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
@@ -18,6 +18,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
 if ($LASTEXITCODE -ne 0) { throw 'Chatbot checks failed.' }
 
 $catalog = Get-Content (Join-Path $crmRoot 'docs\chatbot\external-tools.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-$expected = @('get_project_summary', 'get_project_detail', 'get_opportunity_summary', 'get_opportunity_detail')
-if ($catalog.tools.Count -ne 4 -or (Compare-Object $expected @($catalog.tools.name))) { throw 'Catalog tools do not match the contract.' }
-Write-Output 'PASS: catalog contains the four CRM tools.'
+$expected = @('get_digitalsales_summary', 'get_digitalsales_detail', 'get_project_summary', 'get_project_detail', 'get_opportunity_summary', 'get_opportunity_detail')
+if ($catalog.tools.Count -ne 6 -or (Compare-Object $expected @($catalog.tools.name))) { throw 'Catalog tools do not match the contract.' }
+Write-Output 'PASS: catalog contains the six CRM tools.'

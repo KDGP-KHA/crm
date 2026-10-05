@@ -1,0 +1,29 @@
+﻿{
+  "tools": [
+    {
+      "name": "get_digitalsales_summary",
+      "description": "Lấy danh sách tóm tắt và thống kê toàn bộ hồ sơ kinh doanh giải pháp số (DigitalSales) theo trạng thái, loại hình và các bộ lọc."
+    },
+    {
+      "name": "get_digitalsales_detail",
+      "description": "Lấy thông tin chi tiết một hồ sơ kinh doanh giải pháp số (DigitalSales) bao gồm sản phẩm, tiến độ công việc, thành viên và trao đổi."
+    },
+    {
+      "name": "get_project_summary",
+      "description": "Lấy danh sách tóm tắt và thống kê các dự án kinh doanh số trong phạm vi phân quyền."
+    },
+    {
+      "name": "get_project_detail",
+      "description": "Lấy thông tin chi tiết một dự án kinh doanh số, bao gồm sản phẩm, tiến độ công việc và thành viên."
+    },
+    {
+      "name": "get_opportunity_summary",
+      "description": "Lấy danh sách tóm tắt và thống kê các cơ hội kinh doanh số trong phạm vi phân quyền."
+    },
+    {
+      "name": "get_opportunity_detail",
+      "description": "Lấy thông tin chi tiết một cơ hội kinh doanh số, bao gồm sản phẩm, thành viên và hoạt động trao đổi."
+    }
+  ]
+}
+

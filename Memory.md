@@ -1973,6 +1973,102 @@ Ngày đăng hiển thị chuỗi JSON `/Date(...)`; tooltip action bị lỗi m
 
 ---
 
+# 2026-09-21 Vấn đề: Ưu tiên hồ sơ trong Rà soát định kỳ
+
+## 1. Mô tả vấn đề
+Cập nhật `Cate/ReviewBatchItem/Index`: hiển thị loại Cơ hội/Dự án, bỏ Cơ hội ở trạng thái Đã bỏ mất và sắp xếp Dự án → trọng điểm → tổng doanh thu.
+
+## 2. Phân tích & quyết định
+- Danh sách lấy từ stored procedure `RM_DigitalSalesReview_GetList`; do đó lọc và sort phải xử lý trong procedure để phân trang và tổng số liệu đúng.
+- `BusinessTypeName` đã có trong payload, chỉ cần render thành badge tại cột hồ sơ.
+- Trạng thái Đã bỏ mất được xác định bằng `StatusCode = LOST` của loại Cơ hội; trạng thái Mất dự án không bị loại.
+
+## 5. Checklist
+- [x] Hiển thị badge loại hình Cơ hội/Dự án trong danh sách.
+- [x] Loại Cơ hội có status code `LOST` khỏi stored procedure.
+- [x] Sắp xếp ưu tiên Dự án, trọng điểm, tổng doanh thu dự kiến trong stored procedure.
+- [x] Build Modules.Cate, cập nhật và xác nhận stored procedure ở DB demo.
+
+---
+
+# 2026-09-21 Vấn đề: Mail và thông báo sau rà soát DigitalSales
+
+## 1. Mô tả vấn đề
+Sau khi lưu rà soát: gửi mail cho AM chủ trì, CC các thành viên còn lại; gửi thông báo tới từng thành viên; dùng template mới có thông tin rà soát.
+
+## 2. Phân tích & quyết định
+- Tái sử dụng `DigitalSalesMailService` và `NotificationService` để gửi nền, không làm lỗi nghiệp vụ lưu rà soát.
+- Email có một người nhận chính là AM; các thành viên khác là CC duy nhất để tránh mail trùng.
+- Thông báo nhận bởi toàn bộ người tham gia gồm AM và danh sách thành viên, mỗi người có bản ghi/đẩy realtime riêng theo cơ chế `NotificationService`.
+- Tạo template `DIGITALSALES_RASOAT` có đợt, kết luận, xác nhận, người/thời điểm rà soát và nhận xét.
+
+## 5. Checklist
+- [x] Gọi gửi nền sau khi lưu rà soát thành công.
+- [x] Tạo template email và cấu hình template mới.
+- [x] Build Modules.Cate, đồng bộ template WebApp và cập nhật cấu hình template DB demo.
+
+---
+
+# 2026-09-21 Vấn đề: Phân quyền UserName cho RM_DigitalSales_GetList
+
+## 1. Mô tả vấn đề
+Áp dụng phân quyền theo `UserName` cho stored procedure `RM_DigitalSales_GetList`, tham khảo cơ chế của `RM_Project_Get`.
+
+## 2. Phân tích & quyết định
+- `RM_Project_Get` lấy danh sách nhân sự qua `Sys_User_ByManager(@UserName)` rồi giới hạn người tạo hoặc thành viên trong phạm vi đó.
+- DigitalSales có thêm AM chủ trì nên phạm vi xem gồm: người tạo, AM chủ trì, hoặc thành viên đang hoạt động thuộc phạm vi quản lý.
+- Điều kiện phải xuất hiện tại cả query đếm và query phân trang của phiên bản stored procedure hiện hành để `TotalCount` khớp dữ liệu trả về.
+
+## 5. Checklist
+- [x] Cập nhật script khởi tạo stored procedure với điều kiện quyền UserName.
+- [x] Cập nhật procedure hiện hành ở DB demo tại phần đếm và phân trang; xác nhận định nghĩa.
+
+---
+
+# 2026-09-21 Vấn đề: Lỗi quá nhiều tham số RM_DigitalSales_GetList
+
+## 1. Mô tả vấn đề
+Log lúc 09:36 báo `Procedure or function RM_DigitalSales_GetList has too many arguments specified`.
+
+## 2. Phân tích & kết luận
+- Code `RM_DigitalSalesBiz.LoadList` truyền 16 tham số nghiệp vụ cho stored procedure, từ `@Keyword` đến `@ApplyYear`.
+- Procedure trên DB tại thời điểm kiểm tra cũng khai báo đủ đúng 16 tham số, cùng thứ tự.
+- Thử gọi đọc-only procedure với đủ 16 tham số đã thành công, trả dữ liệu bình thường.
+- Kết luận: log phát sinh khi DLL WebApp và procedure DB chưa đồng bộ phiên bản (code mới gọi thêm `IsKeyProject`, `IsFollowed`, `StatusIDs`, `ApplyYear` nhưng procedure lúc đó còn chữ ký cũ). Hiện không tái hiện trên DB đang kiểm tra.
+
+## 5. Checklist
+- [x] Đối chiếu tham số code và stored procedure hiện tại.
+- [x] Thực thi kiểm tra đọc-only với đủ tham số.
+- [x] Không sửa code hoặc DB theo yêu cầu.
+
+## 3. Cập nhật quyết định
+- Người dùng xác nhận script khởi tạo stored procedure đã bỏ 4 tham số khi tái tạo procedure.
+- [x] Bổ sung lại `@IsKeyProject`, `@IsFollowed`, `@StatusIDs`, `@ApplyYear` vào chữ ký trong `scripts/create_digital_sales_db.sql`.
+- [x] Xác nhận procedure đang chạy trên DB demo vẫn có đủ 16 tham số; không cần cập nhật DB thêm.
+- [x] Tách migration độc lập `Database/DigitalSales_GetList_Parameters_Migration.sql`; chỉ khôi phục chữ ký khi thiếu tham số, không ghi đè thân procedure hiện hành.
+
+## 4. Cập nhật 2026-09-21: chỉ bổ sung phân quyền UserName
+- Người dùng đã khôi phục `RM_DigitalSales_GetList` về phiên bản đầy đủ và yêu cầu không xóa tham số.
+- [x] Xác nhận DB có đủ 16 tham số gồm `@IsKeyProject`, `@IsFollowed`, `@StatusIDs`, `@ApplyYear`.
+- [x] Áp dụng migration phân quyền `Database/DigitalSales_GetList_UserPermission.sql`: giới hạn người tạo, AM chủ trì và thành viên trong phạm vi `Sys_User_ByManager(@UserName)` tại cả query đếm và phân trang; không đổi chữ ký procedure.
+- [x] Xác nhận lại DB: đủ 16 tham số, 4 tham số lọc còn nguyên và điều kiện quyền xuất hiện ở cả query đếm/phân trang.
+
+---
+
+# 2026-09-21 Vấn đề: Phân quyền stored Dashboard/Chart theo UserName
+
+## 1. Mô tả vấn đề
+Cập nhật các stored cấp dữ liệu cho `Dashboard/Chart` để số liệu chỉ hiển thị trong phạm vi `UserName` được phép xem.
+
+## 2. Quyết định & Checklist
+- [x] Xác định hai stored chưa có quyền theo người dùng: `RM_DigitalSales_GetDashboardStatusStats` và `RM_DigitalSales_GetStaleActionTime`.
+- [x] Bổ sung `@UserName` giữ nguyên tham số cũ và giới hạn người tạo, AM chủ trì hoặc thành viên trong phạm vi `Sys_User_ByManager(@UserName)`.
+- [x] Cập nhật Business gọi stored truyền `UserName`, bao gồm danh sách dự án trọng điểm.
+- [x] Chạy migration DB và xác nhận chữ ký/điều kiện quyền.
+- [x] Build `Core.Cate` thành công (0 lỗi; còn các cảnh báo dependency/model có sẵn).
+
+---
+
 # 2026-09-20 Lỗi: Chỉnh sửa Trạng thái và Quy trình bị lỗi 404 (DigitalSalesWorkflow)
 
 ## 1. Mô tả vấn đề
@@ -2043,3 +2139,463 @@ Tại màn hình `http://crm.git/Cate/DigitalSalesWorkflow`:
 - [x] Biên dịch MSBuild thành công.
 - [x] Kiểm thử 4 tầng test suite PASS 100%.
 
+---
+
+# 2026-09-21 Vấn đề: Giữ bộ lọc khi quay lại danh sách rà soát
+
+## 1. Mô tả vấn đề
+Khi từ chi tiết DigitalSales nhấn **Quay lại** hoặc **Lưu** để trở về `Cate/ReviewBatchItem/Index`, bộ tiêu chí tìm kiếm đã chọn bị reset.
+
+## 2. Phân tích & quyết định
+- Bối cảnh: URL `Index/{ReviewBatchID}` luôn có đợt rà soát; mã JavaScript trước đây trả về sớm khi có giá trị này nên không khôi phục các tiêu chí đã lưu ở localStorage.
+- Quyết định: giữ `ReviewBatchID` từ URL, đồng thời khôi phục các tiêu chí còn lại (từ khóa, trạng thái, quy trình, tiến trình, phòng ban, nhân viên, trạng thái rà soát).
+
+## 3. Checklist
+- [x] Cập nhật hàm khôi phục filter cho ReviewBatchItem.
+- [x] Giữ filter trước khi chuyển về từ form rà soát.
+- [x] Đồng bộ thay đổi sang WebApp để kiểm thử trực tiếp.
+
+---
+
+# 2026-09-21 Vấn đề: Lưu và tiếp tục chỉ lấy hồ sơ đúng bộ lọc
+
+## 1. Mô tả vấn đề
+Khi không còn hồ sơ thỏa bộ lọc hiện tại, chức năng **Lưu và tiếp tục** vẫn có thể mở một hồ sơ chưa rà soát ngoài bộ lọc.
+
+## 2. Phân tích & quyết định
+- Nguyên nhân: form ở WebApp chưa gửi `ContinueReviewFilter`; controller fallback sang model rỗng và truy vấn mọi hồ sơ chưa rà soát.
+- Quyết định: truyền filter đã lưu vào form và không cho phép fallback sang truy vấn rỗng. Filter thiếu hoặc lỗi sẽ trả về danh sách rà soát thay vì chọn sai hồ sơ.
+
+## 3. Checklist
+- [x] Bổ sung hidden field và dữ liệu filter cho form WebApp.
+- [x] Chặn fallback tìm hồ sơ không thuộc điều kiện filter ở controller.
+- [x] Biên dịch Modules.Cate để kiểm tra thay đổi controller (0 lỗi; còn warning dependency sẵn có).
+
+---
+
+# 2026-09-21 Vấn đề: Lọc DepartmentID cho danh sách DigitalSales
+
+## 1. Mô tả vấn đề
+Cập nhật stored `RM_DigitalSales_GetList` để lọc `DepartmentID` theo cơ chế của `RM_Project_Get`, không bỏ bất kỳ tham số nào.
+
+## 2. Phân tích & quyết định
+- Stored hiện có đủ 16 tham số, bao gồm `@DepartmentID`; điều kiện hiện tại chỉ so sánh trực tiếp `ds.DepartmentID`.
+- `RM_Project_Get` dùng cây phòng ban và xác định hồ sơ qua thành viên có `Sys_Users.MaBoPhan` thuộc phòng ban được chọn hoặc phòng ban con.
+- Quyết định: thêm bảng cây phòng ban vào thân stored và thay điều kiện DepartmentID ở cả truy vấn tổng số lẫn truy vấn phân trang; không thay chữ ký stored.
+
+## 3. Checklist
+- [x] Kiểm tra chữ ký stored hiện hành trên database: 16 tham số.
+- [x] Tạo migration giữ nguyên chữ ký và áp dụng lọc cây phòng ban.
+- [x] Chạy migration và xác nhận stored sau cập nhật: còn đủ 16 tham số, cây phòng ban có mặt, điều kiện đã áp dụng tại 2 truy vấn.
+- [x] Đồng bộ logic vào script khởi tạo database DigitalSales.
+
+## 4. Ràng buộc môi trường (cập nhật 2026-09-21)
+- Chỉ được thực hiện thao tác SQL trên database demo `10.57.30.10 / quanlydoanhthucenit`.
+- Không được chạy migration hoặc thay đổi dữ liệu trên database chính `10.57.47.2 / crm.vnptkhanhhoa.vn` nếu chưa có chỉ đạo mới rõ ràng.
+
+---
+
+# 2026-09-21 Vấn đề: HTTP 500 khi Lưu và tiếp tục rà soát
+
+## 1. Phân tích & quyết định
+- Log ghi nhận `Method not found: RM_ReviewFormModel.get_ContinueReviewFilter()` tại `GetNextReviewUrl`.
+- Nguyên nhân là `Modules.Cate.dll` đã được cập nhật nhưng `Core.Cate.dll` trong `WebApp/bin` chưa có property mới.
+- Quyết định: build lại WebApp cùng project dependency để đồng bộ assembly; không thao tác database.
+
+## 2. Checklist
+- [x] Đọc log và xác định lỗi lệch assembly.
+- [x] Build Debug `CenIT.Solution.TOC.WebApp` (0 lỗi).
+- [x] Xác nhận `WebApp/bin/Core.Cate.dll` có property `ContinueReviewFilter`.
+
+---
+
+# 2026-09-21 Vấn đề: Lưu và tiếp tục bỏ qua hồ sơ còn thỏa filter
+
+## 1. Phân tích & quyết định
+- Filter trước đây chỉ lưu trong `localStorage`, nên khi sang Detail/modal có thể bị thiếu hoặc dùng dữ liệu không đúng phiên.
+- Quyết định: đóng gói filter của dòng đang chọn vào URL Detail, truyền tiếp vào form rà soát và mọi URL hồ sơ kế tiếp. `GetNextReviewUrl` dùng đúng filter đó.
+
+## 2. Checklist
+- [x] Truyền filter từ danh sách sang Detail và modal rà soát.
+- [x] Giữ filter qua các lần Lưu và tiếp tục kế tiếp.
+- [x] Build WebApp và kiểm tra cú pháp JavaScript (0 lỗi; còn warning dependency sẵn có).
+
+---
+
+# 2026-09-21 Vấn đề: Mở modal rà soát trả HTTP 500
+
+## 1. Phân tích & quyết định
+- Log xác nhận `_ReviewBatch.cshtml` lỗi CS1973 tại `Html.Hidden`: `Model` của view là dynamic và `Model.ContinueReviewFilter ?? ""` không thể dispatch extension method.
+- Quyết định: khai báo tường minh `@model RM_ReviewFormModel` cho partial ở Modules và WebApp.
+
+## 2. Checklist
+- [x] Đọc log và xác định dòng lỗi Razor.
+- [x] Khai báo model tĩnh cho partial modal.
+- [x] Build WebApp xác nhận thay đổi view/project (0 lỗi; còn warning dependency sẵn có).
+
+---
+
+# 2026-09-21 Vấn đề: Lưu và tiếp tục phải mở hồ sơ kế tiếp
+
+## 1. Mô tả & quyết định
+- Quy tắc nghiệp vụ: khi danh sách có 2 hồ sơ thỏa filter, lưu hồ sơ đầu phải mở hồ sơ thứ hai; chỉ về danh sách khi không còn kết quả.
+- Filter được lưu theo người dùng và đợt rà soát trong Session ngay khi DataTable tìm kiếm. Khi modal không gửi được filter, controller dùng bản Session cùng filter thay vì trả về trang danh sách sớm.
+
+## 2. Checklist
+- [x] Lưu filter tìm kiếm phía server theo user/ReviewBatchID.
+- [x] Dùng bản Session dự phòng để tìm hồ sơ kế tiếp.
+- [x] Build WebApp (0 lỗi; còn warning dependency sẵn có).
+- [x] Kiểm thử IIS local: đăng nhập, gọi danh sách filter có 4 hồ sơ, mở Detail và modal (HTTP 200), filter có trong form modal.
+# 2026-09-21 Vấn đề: Giá trị chọn bị che trong dropdown Người thực hiện khi chuyển trạng thái DigitalSales
+
+## Hiện tượng
+- Mở Select2 `Người thực hiện` trong checklist tiến trình làm lớp tìm kiếm/kết quả che vùng hiển thị giá trị đã chọn.
+
+## Nguyên nhân và xử lý
+- CSS đặt `width: auto` cho `.select2-container--open`, làm chính control thay đổi chiều rộng khi mở.
+- Giữ cố định control và popup Select2 theo chiều rộng 210px; tách lớp kết quả với `z-index` riêng.
+- Popup của Select2 được gắn vào modal bằng một container bao ngoài; lớp này cũng phải có `z-index` cao hơn các dòng checklist để danh sách kết quả không bị che.
+- Ảnh kiểm tra cho thấy popup vẫn bị `overflow` của vùng cuộn checklist cắt. Chuyển `dropdownParent` sang `document.body` và đặt lớp bao ngoài cao hơn modal.
+- Kiểm thử DOM cho thấy `TSFramework._initSelectElement()` chạy sau modal, hủy rồi khởi tạo lại Select2 với `dropdownParent` là phần tử cha. Thêm `none-select2` chỉ cho combobox Người thực hiện để loại khỏi cơ chế chung và giữ cấu hình riêng của modal.
+# 2026-09-21 Cập nhật: Hiển thị hoạt động chuyển trạng thái DigitalSales
+
+## Mô tả và quyết định
+- Hoạt động chuyển trạng thái đang dồn tên trạng thái và ghi chú vào cùng một hàng, khiến nội dung khó đọc.
+- Giữ tương thích dữ liệu đã lưu: parser tiếp tục tách trạng thái và ghi chú từ nội dung activity hiện hữu.
+- Hiển thị trạng thái trong badge ở dòng tóm tắt; hiển thị ghi chú/lý do ở khối `Nội dung` bên dưới.
+
+## Checklist
+- [x] Cập nhật partial trao đổi/hoạt động ở Module và WebApp.
+- [x] Bổ sung CSS cho dòng tóm tắt và khối nội dung.
+- [x] Build và kiểm tra Razor trên IIS local.
+
+## Bổ sung: nguyên nhân lưu sai đã xác nhận
+- Stored DB demo dùng tham số thứ ba `@ActionDesc`, nhưng code cũ truyền trực tiếp `Note`; vì vậy trạng thái bị thay bằng ghi chú trên Activity/Timeline.
+- Đã tạo `ActionDesc` gồm trạng thái mới và ghi chú trước khi gọi stored.
+- Activity cũ được phục hồi khi hiển thị nhờ `ReferenceID` liên kết tới Timeline và `ToStatusID`.
+
+---
+
+# 2026-09-21 Vấn đề: Tiến trình cuối bị cắt trong modal chuyển trạng thái
+
+## 1. Mô tả & phân tích
+- Khi checklist có từ ba tiến trình, khung danh sách giới hạn cố định 480px chỉ hiển thị được nhãn của tiến trình cuối; các trường nhập phía sau bị cắt và phần card kéo giãn tạo khoảng trống thừa.
+- Phạm vi: giao diện modal chuyển trạng thái DigitalSales, không thay đổi dữ liệu tiến trình hay quy tắc lưu.
+
+## 2. Quyết định & Checklist
+- [x] Bỏ giới hạn cuộn nội bộ 480px của danh sách tiến trình.
+- [x] Dùng vùng cuộn duy nhất của modal để người dùng xem toàn bộ từng tiến trình đầy đủ.
+- [x] Bỏ `height: 100%` làm card checklist kéo giãn khoảng trống.
+- [x] Build WebApp thành công (các warning dependency có sẵn vẫn còn).
+
+---
+
+# 2026-09-21 Cập nhật: Cuộn độc lập danh sách tiến trình
+
+## Mô tả & quyết định
+- Người dùng yêu cầu phần chọn trạng thái không cuộn theo khi xem nhiều tiến trình.
+- Vùng danh sách tiến trình bên phải có chiều cao theo viewport và cuộn độc lập; modal body khóa cuộn chỉ khi hiển thị checklist.
+
+## Checklist
+- [x] Cấu hình chiều cao vùng tiến trình theo viewport, không dùng mốc cố định 480px.
+- [x] Khóa cuộn phần thân modal khi checklist hiển thị.
+- [x] Đồng bộ CSS sang WebApp.
+
+## Bổ sung
+- [x] Trên desktop, tách thêm vùng cuộn riêng cho cột chọn trạng thái/quy trình.
+- [x] Trên màn hình hẹp, giữ cuộn modal tổng để hai cột xếp dọc vẫn truy cập được đầy đủ.
+
+---
+
+# 2026-09-21 Phân tích: Lịch sử chuyển trạng thái cũ hiển thị ghi chú
+
+## Kết luận
+- Dữ liệu Timeline cũ vẫn lưu đúng `ToStatusID` và tên trạng thái. Ví dụ DigitalSales 98: các Activity 318, 315, 251, 246, 242 đều liên kết Timeline qua `ReferenceID` và có trạng thái đích hợp lệ.
+- Hàm `NormalizeStatusChangeActivities` đã phục hồi đúng khi gọi `GetDiscussionsPartial`, nhưng tab Trao đổi ban đầu được render trực tiếp từ `Detail` với `Model.Activities`; luồng này chưa gọi hàm phục hồi.
+- Cách xử lý an toàn: gọi normalize trong action `Detail` trước khi render view. Không cần cập nhật DB; ghi chú gốc vẫn được đưa xuống khối Nội dung.
+- Migration DB chỉ là tùy chọn nếu cần sửa vật lý `Content` của lịch sử; không cần thiết để hiển thị đúng.
+
+---
+
+# 2026-09-21 Cập nhật: Sắp xếp Cate/DigitalSales theo tổng doanh thu
+
+## Quyết định & Checklist
+- Người dùng yêu cầu cập nhật stored ở DB demo và production. Tổng doanh thu được hiểu là `TotalExpectedRevenue`; thứ tự giảm dần để ưu tiên hồ sơ giá trị cao, sau đó theo thời điểm thao tác.
+- [x] Kiểm tra định nghĩa `RM_DigitalSales_GetList` trên cả demo và production: cùng phiên bản, đang sắp xếp theo ActionTime.
+- [x] Tạo migration `Database/DigitalSales_GetList_SortByRevenue.sql`, chỉ thay 2 vị trí ORDER BY đã xác nhận; migration dừng nếu procedure khác phiên bản.
+- [x] Áp dụng và xác nhận stored ở DB demo sắp xếp `TotalExpectedRevenue DESC`.
+- [x] Áp dụng và xác nhận stored ở DB production sắp xếp `TotalExpectedRevenue DESC`.
+- [x] Đồng bộ thứ tự mặc định vào script khởi tạo database.
+
+---
+
+# 2026-09-22 Phân tích: Đơn vị AM chủ trì bị trống ở Cate/DigitalSales
+
+## Kết luận
+- Cột danh sách hiển thị `DepartmentName` của chính hồ sơ (`RM_DigitalSales.DepartmentID`), không lấy trực tiếp đơn vị của AM.
+- Stored `RM_DigitalSales_GetList` join `MN_BoPhan` bằng `ds.DepartmentID`; vì vậy chỉ cần trường này trống là UI không hiện đơn vị, dù AM có `MaBoPhan` hoặc `Sys_UserBoPhan` hợp lệ.
+- Kiểm tra DB demo: 11 hồ sơ có AM, trong đó 5 hồ sơ có `DepartmentID` trống; cả 5 AM đều có đơn vị được ánh xạ hợp lệ.
+- Form hiện chỉ đồng bộ DepartmentID khi người dùng thực hiện thao tác đổi AM; hồ sơ cũ hoặc hồ sơ khởi tạo/ghi nhận AM theo luồng khác có thể không ghi DepartmentID.
+
+## Hướng xử lý đề xuất
+- Ưu tiên hiển thị: `DepartmentName` của hồ sơ; nếu trống, fallback sang đơn vị hiện tại của AM bằng `Sys_Users.MaBoPhan`, sau đó `Sys_UserBoPhan`.
+- Đồng thời bổ sung backfill `DepartmentID` cho hồ sơ đang trống và tự đồng bộ khi tạo/lưu/thay AM để dữ liệu mới không tái diễn.
+
+---
+
+# 2026-09-22 Cập nhật: Đơn vị AM lấy từ Sys_Users.MaBoPhan
+
+## Quyết định & Checklist
+- Người dùng yêu cầu không lấy đơn vị AM qua `RM_DigitalSales.DepartmentID`.
+- [x] Cập nhật `RM_DigitalSales_GetList` và `RM_DigitalSales_GetByID` lấy `DepartmentName` từ `Sys_Users.MaBoPhan` của AM (`AssignedEmployeeID`).
+- [x] Tạo migration `Database/DigitalSales_DepartmentFromAM_Migration.sql` có kiểm tra phiên bản stored trước khi sửa.
+- [x] Áp dụng migration và xác nhận trên DB demo.
+- [x] Kiểm thử stored: hồ sơ có `DepartmentID` trống vẫn trả về đơn vị AM hợp lệ.
+- [x] Đồng bộ logic vào `scripts/create_digital_sales_db.sql`.
+- [x] Theo chỉ đạo tiếp theo của người dùng, áp dụng migration lên DB production và xác nhận cả hai stored lấy đơn vị từ `Sys_Users.MaBoPhan`; `RM_DigitalSales_GetList` vẫn giữ đủ 16 tham số.
+
+---
+
+# 2026-09-22 Cập nhật: Đồng nhất font nội dung trao đổi DigitalSales
+
+## Quyết định & Checklist
+- Nội dung CKEditor có thể chứa liên kết hoặc thẻ HTML mang cỡ chữ riêng; CSS cũ chỉ chuẩn hóa `p`, `li`, `span`.
+- [x] Chuẩn hóa mọi phần tử trong `.ds-activity-content` về 13.5px và line-height 1.6.
+- [x] Giữ nguyên cỡ chữ riêng của badge và mention để không ảnh hưởng phân cấp thông tin.
+- [x] Đồng bộ CSS Module và WebApp.
+
+---
+
+# 2026-09-22 Cập nhật: Email tiến trình/công việc DigitalSales
+
+## Quyết định & Checklist
+- Nội dung kết quả từ CKEditor bị Razor HTML-encode nên email hiển thị nguyên thẻ `<p>`, `<br>` thay vì định dạng HTML.
+- [x] Render trực tiếp HTML nội dung kết quả trong template `MailTemplate_DigitalSalesTrackingUpdated`.
+- [x] Giải mã HTML và loại bỏ `script`, `style`, `font-family`, `font-size` từ nội dung CKEditor trước khi gửi để tránh cấu hình font riêng.
+- [x] Chuẩn hóa phần thân email và nội dung kết quả về Arial 14px, line-height 1.6; vẫn giữ đậm/liên kết/danh sách từ CKEditor.
+- [x] Biên dịch WebApp Debug thành công (còn các cảnh báo dependency có sẵn).
+
+---
+
+# 2026-09-22 Vấn đề: Không nhận được mail khi cập nhật tiến trình DigitalSales
+
+## 1. Mô tả vấn đề
+Người dùng không thấy mail được gửi khi lưu/cập nhật tiến trình trong Hồ sơ kinh doanh sản phẩm/dịch vụ số.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: Lưu tiến trình gọi `QueueTrackingUpdateMail`, sau đó `DigitalSalesMailService` đưa việc gửi mail vào background queue và chỉ gửi khi AM có email hợp lệ, template đang hoạt động và không lỗi render/gửi SMTP.
+- Mục tiêu: Xác định chính xác điểm dừng và khôi phục gửi mail, không gửi trùng hoặc ảnh hưởng notification hiện có.
+- Phạm vi: Luồng cập nhật tiến trình/công việc DigitalSales và template `MailTemplate_DigitalSalesTrackingUpdated`.
+- Rủi ro / Giả định: Lỗi có thể nằm ở người nhận AM, cấu hình template/đường dẫn, background queue hoặc SMTP; notification vẫn được gửi là luồng độc lập nên không chứng minh mail đã được gọi.
+- Phương án sơ bộ: Đối chiếu log ứng dụng và cấu hình template; kiểm tra dữ liệu người nhận; sau đó bổ sung log/chỉnh luồng theo nguyên nhân.
+
+## 3. Câu hỏi làm rõ
+1. Lỗi xảy ra trên IIS local (`crm.git`), demo hay production?
+2. Sau khi cập nhật tiến trình, thông báo trong hệ thống có vẫn xuất hiện không?
+3. Anh/chị có thể cho biết thời điểm và mã hồ sơ/tiến trình vừa thao tác để đối chiếu log chính xác không?
+
+## 4. Câu trả lời & Quyết định
+1. Xảy ra tại `crm.git` local → chỉ kiểm tra/sửa môi trường và code local.
+2. Thông báo vẫn xuất hiện → lưu tiến trình và danh sách thành viên hoạt động; tập trung từ bước lập người nhận email trở đi.
+3. Hồ sơ DigitalSalesID 98, khoảng 10h → dùng làm mốc đối chiếu log.
+
+## 5. Checklist
+### Chuẩn bị
+- [x] Xác định môi trường local và mốc đối chiếu.
+### Thực hiện
+- [x] Kiểm tra log ứng dụng/SMTP tại thời điểm 10h.
+- [x] Kiểm tra người nhận AM và cấu hình template mail của hồ sơ 98.
+- [x] Xác định nguyên nhân: local DB không có cả config `MailTemplate_DigitalSalesTrackingUpdated` lẫn mẫu `DIGITALSALES_CAPNHATTIENTRINH`; log 10:00–10:01 báo không tìm thấy mẫu email đang hoạt động.
+- [x] Sửa template nguồn/runtime dùng `Raw(...)` của RazorEngine thay cho `Html.Raw(...)` không được RazorEngine hỗ trợ.
+- [ ] Chạy `Database/DigitalSales_NotificationMail.sql` trên DB demo/local để tạo và kích hoạt mẫu, không thay đổi DB production.
+### Kiểm tra / Nghiệm thu
+- [ ] Cập nhật một tiến trình của hồ sơ 98 và xác nhận mail được tạo/gửi.
+
+## Cập nhật đối chiếu DB production
+- `MailTemplate_DigitalSalesTrackingUpdated` là appSetting, không phải cấu hình trong `Sys_Configs`; việc không có dòng `Sys_Configs` không phải nguyên nhân.
+- [x] Kiểm tra DB production: template `DIGITALSALES_CAPNHATTIENTRINH` tồn tại, `IsActive = 1`, `IsDeleted = 0`, dùng đúng file template DigitalSales Tracking.
+- [x] Kiểm tra lại DB local hiện tại: template này cũng đã tồn tại và đang hoạt động. Cần test lại luồng gửi để đối chiếu lỗi render/SMTP mới nhất.
+
+---
+
+# 2026-09-22 Vấn đề: Hóa đơn theo hợp đồng DigitalSales
+
+## 1. Mô tả vấn đề
+Bổ sung danh sách hóa đơn cho từng hợp đồng tại `DigitalSales/Detail/{id}#tab-products`; trong danh sách hợp đồng có action xem hóa đơn và cho phép thêm hóa đơn.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: Hệ thống đã có đầy đủ model/cache/biz `RM_Invoices`, liên kết hóa đơn với `ContractID`, lưu file hóa đơn và các stored `RM_Invoices_Get/Save/Delete`.
+- Mục tiêu: Tái sử dụng chính luồng hóa đơn hiện có, hiển thị đúng hóa đơn thuộc từng hợp đồng DigitalSales và không tạo bảng/liên kết mới.
+- Phạm vi: Danh sách hợp đồng trong tab Sản phẩm/Dịch vụ số, action mở danh sách hóa đơn và thêm/chỉnh sửa hóa đơn.
+- Rủi ro / Giả định: Doanh thu thực tế hiện được tính từ `TotalAmount` hợp đồng, không nên tự đổi sang tổng hóa đơn nếu chưa có quyết định nghiệp vụ; quyền cần tránh vượt quá quyền sửa hợp đồng.
+- Phương án sơ bộ: Thêm action “Hóa đơn” mở modal dùng lại view/controller `RM_Invoices`, tải theo `ContractID`, và giữ quyền theo hợp đồng DigitalSales.
+
+## 3. Câu hỏi làm rõ
+1. Xác nhận dùng trực tiếp bảng/luồng `RM_Invoices` hiện có, mỗi hóa đơn gắn một `ContractID`?
+2. Anh/chị muốn action “Hóa đơn” mở modal ngay trong tab sản phẩm (đề xuất) hay chuyển sang trang hóa đơn riêng?
+3. Tổng doanh thu thực tế của DigitalSales vẫn tính theo tổng giá trị hợp đồng, không theo tổng hóa đơn, đúng không?
+4. Quyền xem/thêm/sửa/xóa hóa đơn sẽ kế thừa quyền xem/sửa hợp đồng của hồ sơ DigitalSales, đúng không?
+
+## 4. Câu trả lời & Quyết định
+1. Dùng trực tiếp `RM_Invoices` theo `ContractID`.
+2. Action hóa đơn mở modal trong tab Sản phẩm/Dịch vụ số.
+3. Doanh thu thực tế vẫn là tổng `TotalAmount` của hợp đồng.
+4. Quyền hóa đơn kế thừa quyền xem/sửa hợp đồng DigitalSales.
+
+## 5. Checklist
+### Chuẩn bị
+- [x] Xác định model/cache/stored `RM_Invoices` dùng lại theo `ContractID`.
+### Thực hiện
+- [x] Rà controller/view hóa đơn và luồng hợp đồng DigitalSales hiện có.
+- [x] Thêm action `GetContractInvoices` xác thực hợp đồng thuộc đúng hồ sơ, sau đó mở modal danh sách hóa đơn.
+- [x] Thêm action “Hóa đơn” ở mỗi hợp đồng; modal cho phép thêm/chỉnh sửa/xóa khi có quyền sửa hồ sơ, còn quyền xem chỉ hiển thị danh sách/chi tiết.
+### Kiểm tra / Nghiệm thu
+- [x] Xác nhận logic chỉ tải hóa đơn sau khi kiểm tra hợp đồng nằm trong danh sách sản phẩm của đúng hồ sơ; không gọi luồng cập nhật doanh thu.
+- [x] Build WebApp Debug thành công (cảnh báo dependency có sẵn); cần thao tác UI trên `DigitalSales/Detail/98#tab-products` để nghiệm thu modal.
+
+---
+
+# 2026-09-22 Sửa nhanh: Form hóa đơn DigitalSales
+- [x] Thay phụ thuộc `vnFormatter` không tồn tại trong modal bằng `toLocaleString('vi-VN')` nội bộ.
+- [x] Giới hạn trường giá trị hóa đơn chỉ nhận chữ số khi gõ/dán và giữ số gốc trong hidden field để tính VAT/tổng thanh toán.
+- [x] Đồng bộ view Module và WebApp.
+
+- [x] Thu gọn action hợp đồng DigitalSales: chỉ giữ icon hóa đơn/sửa và bổ sung tooltip, `aria-label`.
+- [x] Bổ sung action xóa hợp đồng tại từng sản phẩm DigitalSales, dùng xác nhận xóa và luồng liên kết sản phẩm hiện có.
+
+---
+
+# 2026-09-22 Vấn đề: Ràng buộc hoàn thành dự án DigitalSales
+
+## 1. Mô tả vấn đề
+Chỉ cho phép chuyển hồ sơ DigitalSales sang trạng thái hoàn thành dự án khi đã có hợp đồng và hóa đơn.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: Chuyển trạng thái đi qua `DigitalSalesController` và stored `RM_DigitalSales_ChangeStatus`; hợp đồng liên kết với sản phẩm, hóa đơn liên kết với từng `ContractID`.
+- Mục tiêu: Chặn chuyển trạng thái hoàn thành ngay tại server, không chỉ ẩn/hiển thị trên modal.
+- Phạm vi: Chỉ trạng thái hoàn thành của loại hồ sơ Dự án; không thay đổi các trạng thái khác hoặc cách tính doanh thu.
+- Rủi ro / Giả định: “Có hợp đồng và hóa đơn” có thể hiểu là chỉ cần một bộ hợp lệ trong toàn hồ sơ hoặc tất cả sản phẩm/hợp đồng đều phải có; cần chọn rõ để tránh chặn nhầm.
+- Phương án sơ bộ: Kiểm tra trước khi gọi stored cả ở action chuyển trạng thái và stored để bảo vệ mọi luồng gọi trực tiếp.
+
+## 3. Câu hỏi làm rõ
+1. Điều kiện là chỉ cần hồ sơ có ít nhất một hợp đồng kèm ít nhất một hóa đơn, hay mọi hợp đồng của tất cả sản phẩm đều phải có hóa đơn?
+2. Áp dụng cho trạng thái có tên “Hoàn thành” của Dự án (theo cấu hình status), đúng không; không dựa vào một `StatusID` cố định?
+3. Khi không đạt điều kiện, hiển thị thông báo nêu rõ thiếu hợp đồng hay thiếu hóa đơn, đúng không?
+
+## 4. Câu trả lời & Quyết định
+1. Mọi hợp đồng của mọi sản phẩm phải có tối thiểu một hóa đơn.
+2. Áp dụng theo `StatusCode = COMPLETED`.
+3. Thông báo phải phân biệt thiếu hợp đồng và thiếu hóa đơn.
+
+## 5. Checklist
+### Chuẩn bị
+- [x] Rà action/chức năng gọi `RM_DigitalSales_ChangeStatus` và dữ liệu liên kết sản phẩm–hợp đồng–hóa đơn.
+### Thực hiện
+- [x] Thêm kiểm tra server khi chuyển đến trạng thái `COMPLETED` của dự án.
+- [x] Trả thông báo khi hồ sơ chưa có hợp đồng hoặc liệt kê các hợp đồng chưa có hóa đơn.
+### Kiểm tra / Nghiệm thu
+- [x] Xác nhận bằng logic: trạng thái khác, cơ hội và status không có mã `COMPLETED` không bị kiểm tra; mọi hợp đồng được liên kết đều phải có hóa đơn.
+- [x] Build WebApp Debug thành công (cảnh báo dependency có sẵn).
+
+---
+
+# 2026-09-22 Sửa nhanh: Callback xóa hợp đồng DigitalSales
+- [x] Xác định lỗi `Contracts_OnProcessSuccess is not defined` xuất phát từ modal xóa hợp đồng gọi callback chung không được nạp ở màn hình DigitalSales.
+- [x] Chuyển callback xóa theo ngữ cảnh: hợp đồng thuộc sản phẩm DigitalSales gọi `DigitalSalesContract_OnProcessSuccess` để đóng modal và tải lại tab Sản phẩm; các màn hình hợp đồng khác giữ callback cũ nếu có.
+- [x] Bổ sung hidden `DigitalSalesProductID` để nhận diện đúng ngữ cảnh và đồng bộ source/WebApp.
+
+---
+
+# 2026-09-22 Sửa dữ liệu production: Trùng mã RM_DigitalSales
+- [x] Kiểm tra production `crm.vnptkhanhhoa.vn`: `RM_DigitalSales.Code` là `varchar(50)`, có 10 nhóm mã trùng gồm 269 hồ sơ; không có khóa ngoại tham chiếu theo `Code`.
+- [x] Cập nhật toàn bộ 269 hồ sơ thuộc nhóm trùng bằng hậu tố ngẫu nhiên 3 ký tự chữ hoa A–Z, chạy trong transaction và tự thử lại khi hậu tố va chạm.
+- [x] Xác minh sau commit: 273 mã không rỗng đều khác nhau, còn 0 nhóm trùng.
+
+---
+
+# 2026-09-22 Sửa nhanh: Mốc cập nhật trên danh sách DigitalSales
+- [x] Hiển thị `ActionTime` ngay dưới tên Cơ hội/Dự án với nhãn “Ngày cập nhật gần nhất”.
+- [x] Hỗ trợ định dạng ngày JSON MVC và dữ liệu ngày chuẩn, hiển thị `dd/MM/yyyy HH:mm`; giá trị rỗng hiển thị “Chưa cập nhật”.
+- [x] Đồng bộ JavaScript Module/WebApp và kiểm tra cú pháp JavaScript thành công.
+
+---
+
+# 2026-09-23 Sửa nhanh: Preview PDF DigitalSales
+- [x] Xác định endpoint `ViewAttachment` trả PDF inline; mở tab mới thành công nên đường dẫn/tệp hợp lệ.
+- [x] Không dùng sự kiện `iframe.error` làm điều kiện kết luận tệp lỗi vì PDF viewer nhúng có thể phát sự kiện này dù vẫn tải được tài liệu.
+- [x] Hiển thị modal trước khi gán nguồn iframe, tự ẩn trạng thái chờ sau 3 giây và vẫn giữ nút mở tab mới/tải về; đồng bộ Module/WebApp, kiểm tra cú pháp JavaScript thành công.
+
+---
+
+# 2026-09-23 Sửa nhanh: Preview PDF theo Blob URL
+- [x] Xác nhận IIS local `crm.git` đang phục vụ JavaScript mới, do đó lỗi không phải cache trình duyệt.
+- [x] Đổi preview PDF sang tải `XMLHttpRequest` dạng Blob theo phiên đăng nhập rồi nhúng `URL.createObjectURL`; tránh hoàn toàn lỗi header/iframe của response PDF trực tiếp.
+- [x] Thu hồi Blob URL khi đóng modal hoặc mở tệp khác, giữ màn hình lỗi chỉ cho lỗi HTTP/tệp thực sự; kiểm tra cú pháp và xác nhận IIS local đã phục vụ mã Blob mới.
+
+## Cập nhật 2026-09-23
+- [x] Theo kết quả UI tại Detail/69, nới kiểm tra MIME Blob: response 2xx không phải HTML/JSON được ép thành `application/pdf` trước khi nhúng, hỗ trợ IIS trả `application/octet-stream` cho PDF.
+- [x] Kiểm tra cú pháp và xác nhận `crm.git` đang phục vụ mã ép MIME PDF mới.
+
+---
+
+# 2026-09-23 Kiểm tra PDF preview DigitalSales Detail/69
+
+## 1. Mô tả vấn đề
+Modal xem trước tệp PDF mới nhất “Chính sách.pdf” tại tab Trao đổi vẫn hiển thị thông báo lỗi dù mở tab mới được.
+
+## 2. Phân tích ban đầu
+- Bối cảnh: `DigitalSalesDetail.js`, hàm `previewPdfDirect`.
+- Nguyên nhân: nhánh PDF vẫn chuyển đường dẫn tệp `/Contents/...` sang `ViewAttachment`; action này chịu Forms Authentication nên request nhúng có thể nhận HTML trang đăng nhập thay vì PDF.
+- Mục tiêu: dùng trực tiếp URL tĩnh `/Contents/...` cho xem Blob; chỉ dùng `ViewAttachment` với các đường dẫn không phải `/Contents/...`.
+
+## 4. Câu trả lời & Quyết định
+1. Đã sửa cả bản nguồn Modules.Cate và bản WebApp mirror: giữ nguyên URL `/Contents/...` khi xem PDF.
+
+## 5. Checklist
+### Thực hiện
+- [x] Cập nhật `previewPdfDirect` không bọc tệp `/Contents/...` qua `ViewAttachment`.
+- [x] Đồng bộ hai file JavaScript mirror.
+### Kiểm tra / Nghiệm thu
+- [x] Kiểm tra cú pháp JavaScript bằng Node.
+- [x] Kiểm tra IIS local đang phục vụ đúng mã mới (HTTP 200, static Contents và Blob preview).
+- [x] Chụp Chrome headless request thực tế: tệp `chinh-sach_20260923105720176.pdf` trả HTTP 200, `application/pdf`, 78,589 bytes.
+
+## Cập nhật 2026-09-23
+- Ảnh người dùng phản hồi cho thấy kiểm tra Blob chưa đủ: modal vẫn rơi vào màn hình lỗi.
+- [x] Thay Blob/XHR bằng iframe trỏ trực tiếp tới URL PDF.
+- [x] Chuẩn hóa mọi biến thể đường dẫn `Contents/...`, `~/Contents/...`, URL tuyệt đối có `/Contents/...` thành `/Contents/...`, tránh chuyển nhầm qua `ViewAttachment`.
+- [x] Xác nhận IIS local đang phục vụ JavaScript mới và kiểm tra lại cú pháp.
+- [ ] Cần xác nhận trực quan trên phiên Chrome đã đăng nhập; môi trường dòng lệnh không có quyền chụp/điều khiển cửa sổ Chrome tương tác.
+
+---
+
+# 2026-09-23 Chuẩn bị script DB production cho backlog_new
+
+## 1. Mô tả vấn đề
+Rà soát backlog DigitalSales và xuất script chỉ gồm các thay đổi DB cần thiết để triển khai production.
+
+## 2. Phân tích ban đầu
+- Phạm vi DB: cấu trúc cây checklist, mã tiến trình và stored đổi quy trình.
+- Không dùng `scripts/create_digital_sales_db.sql` vì đây là script khởi tạo toàn bộ phân hệ, có rủi ro cho production hiện hữu.
+- Đối chiếu read-only DB demo cho thấy `RM_DigitalSalesTracking_Save` có 17 tham số, bao gồm `@TimelineID`.
+
+## 4. Câu trả lời & Quyết định
+1. Bổ sung `TimelineID` vào script migration cây checklist để khớp contract của code và DB demo.
+2. Tạo runner SQLCMD theo thứ tự migration an toàn.
+
+## 5. Checklist
+### Thực hiện
+- [x] Rà soát backlog và các script Database liên quan.
+- [x] Cập nhật `DigitalSales_TrackingTree_Update.sql` với `TimelineID`.
+- [x] Tạo `Database/20260923_BacklogNew_Prod.sql`.
+### Kiểm tra / Nghiệm thu
+- [x] Kiểm tra các cột/param bắt buộc trong script export.
+- [x] Kiểm tra `git diff --check`.
+- [ ] Chạy script trên production sau khi được phê duyệt.
+
+## Cập nhật triển khai production 2026-09-23
+- [x] Chạy `Database/20260923_BacklogNew_Prod.sql` trên `crm.vnptkhanhhoa.vn` sau khi người dùng phê duyệt.
+- Lần chạy đầu dừng tại backfill `TrackingCode` do yêu cầu `QUOTED_IDENTIFIER ON`; đã bổ sung thiết lập phiên và chạy lại thành công.
+- [x] Backfill 929 bản ghi và còn 0 bản ghi thiếu `TrackingCode`.
+- [x] Xác nhận production có đủ các cột `ParentID`, `DurationDays`, `TrackingCode`, `TimelineID`.
+- [x] Xác nhận stored `GetBySalesID`, `Save` (17 tham số, có `@TimelineID`) và `ChangeProcessOfStatus` hoạt động theo definition mới.

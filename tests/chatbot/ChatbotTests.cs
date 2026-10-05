@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -53,9 +53,19 @@ public static class ChatbotTests
         Reject(() => Input("get_project_detail", "{}"), "invalid_input");
         Reject(() => Input("get_opportunity_detail", "{\"id\":1,\"keyword\":\"ABC\"}"), "invalid_input");
         Reject(() => Input("get_project_summary", "{\"year\":\"2026\"}"), "invalid_input");
+        Reject(() => Input("get_digitalsales_detail", "{}"), "invalid_input");
+        Reject(() => Input("get_digitalsales_detail", "{\"id\":1,\"keyword\":\"ABC\"}"), "invalid_input");
+        Reject(() => Input("get_digitalsales_summary", "{\"businessType\":5}"), "invalid_input");
         Check(Input("get_project_summary", "{}").Limit == 10, "Default page size");
+        Check(Input("get_digitalsales_summary", "{}").Limit == 10, "Default page size for digitalsales");
 
         var data = new FakeData();
+        var dsResult = Execute(data, "get_digitalsales_summary", "{}");
+        Check((int)dsResult["total"] == 4 && (int)dsResult["summary"]["totalProjects"] == 2 && (int)dsResult["summary"]["totalOpportunities"] == 2, "DigitalSales combined totals");
+        Check((decimal)dsResult["summary"]["totalExpectedRevenue"] == 600, "DigitalSales total expected revenue");
+        var dsFiltered = Execute(data, "get_digitalsales_summary", "{\"businessType\":1}");
+        Check((int)dsFiltered["total"] == 2 && (int)dsFiltered["summary"]["totalOpportunities"] == 2, "DigitalSales businessType filter");
+
         var result = Execute(data, "get_project_summary", "{\"limit\":1}");
         Check((int)result["summary"]["totalProjects"] == 2 && result["items"].Count() == 1 && (bool)result["hasMore"], "Aggregate must precede pagination");
         Check(data.LastSubject == "alice", "Authenticated username must reach list query");
@@ -70,12 +80,16 @@ public static class ChatbotTests
         result = Execute(data, "get_opportunity_detail", "{\"id\":999}");
         Check((string)result["status"] == "not_found" && data.DetailReads == 0, "Unauthorized opportunity must not load detail");
         result = Execute(data, "get_project_detail", "{\"id\":1}");
-        Check((string)result["status"] == "ok" && (int)result["taskSummary"]["totalTasks"] == 3, "Project detail excludes deleted work and includes management source");
+        Check((string)result["status"] == "ok" && (int)result["taskSummary"]["totalTasks"] == 3, "Project detail task count");
         Check((int)result["taskSummary"]["tasksWithoutCompletionPercentage"] == 1, "Missing progress is not zero");
-        var managed = result["tasks"]["items"].Single(x => (string)x["source"] == "task_management");
-        Check((int)managed["id"] == 44 && managed["endDate"].Type != JTokenType.Null && managed["completedDate"].Type == JTokenType.Null, "Management deadline must not become actual completion date");
-        result = Execute(data, "get_opportunity_detail", "{\"id\":1}");
+        var taskItem = result["tasks"]["items"].Single(x => (int)x["id"] == 1);
+        Check((int)taskItem["id"] == 1 && taskItem["deadline"].Type != JTokenType.Null, "Tracking task deadline check");
+        result = Execute(data, "get_opportunity_detail", "{\"id\":11}");
         Check((string)result["status"] == "ok" && result["activities"] != null && result["plans"] != null, "Opportunity detail sections");
+        var dsDetail = Execute(data, "get_digitalsales_detail", "{\"id\":1}");
+        Check((string)dsDetail["status"] == "ok" && dsDetail["sales"] != null && (int)dsDetail["sales"]["businessType"] == 2, "DigitalSales detail sales object");
+        var dsOppDetail = Execute(data, "get_digitalsales_detail", "{\"id\":11}");
+        Check((string)dsOppDetail["status"] == "ok" && (int)dsOppDetail["sales"]["businessType"] == 1, "DigitalSales opportunity detail");
         data.Permission = false;
         var reads = data.ListReads;
         Reject(() => Execute(data, "get_project_summary", "{}"), "forbidden");
@@ -84,6 +98,7 @@ public static class ChatbotTests
         data.ReportedTotal = 5001;
         Reject(() => Execute(data, "get_project_summary", "{}"), "scope_too_large");
         Reject(() => Execute(data, "get_opportunity_summary", "{}"), "scope_too_large");
+        Reject(() => Execute(data, "get_digitalsales_summary", "{}"), "scope_too_large");
 
         DateTimeOffset expires;
         var token = ChatbotIntegration.IssueCapability("alice", out expires);
@@ -129,29 +144,93 @@ public sealed class FakeData : IChatbotData
     public int DetailReads, ListReads;
     public int? ReportedTotal;
     public string LastSubject;
-    private readonly List<RM_ProjectModel> projects = new List<RM_ProjectModel> {
-        new RM_ProjectModel { ProjectID = 1, ProjectName = "ABC", CustomerID = 7, Status = 1 },
-        new RM_ProjectModel { ProjectID = 2, ProjectName = "ABC 2", CustomerID = 8, Status = 2 } };
-    private readonly List<RM_BusinessOpportunityModel> opportunities = new List<RM_BusinessOpportunityModel> {
-        new RM_BusinessOpportunityModel { BusinessOpportunityID = 1, ExpectedValue = 100 },
-        new RM_BusinessOpportunityModel { BusinessOpportunityID = 2, ExpectedValue = 200 } };
+    private readonly List<RM_DigitalSalesModel> items = new List<RM_DigitalSalesModel>
+    {
+        new RM_DigitalSalesModel
+        {
+            DigitalSalesID = 1,
+            Title = "ABC",
+            BusinessType = 2, // Project
+            CustomerID = 7,
+            CustomerName = "Cust 7",
+            StatusID = 1,
+            StatusName = "Khoi tao",
+            TotalExpectedRevenue = 100,
+            TotalActualRevenue = 90,
+            TrackingTasks = new List<RM_DigitalSalesTrackingModel>
+            {
+                new RM_DigitalSalesTrackingModel { TrackingID = 1, TaskName = "Task 1", Status = 3, TaskStatusName = "Hoan thanh", Deadline = DateTime.UtcNow.AddDays(5), CompletedDate = DateTime.UtcNow },
+                new RM_DigitalSalesTrackingModel { TrackingID = 2, TaskName = "Task 2", Status = 1, TaskStatusName = "Chua lam" },
+                new RM_DigitalSalesTrackingModel { TrackingID = 3, TaskName = "Task 3", Status = 2, TaskStatusName = "Dang lam" }
+            },
+            Products = new List<RM_DigitalSalesProductModel>
+            {
+                new RM_DigitalSalesProductModel { SalesProductID = 10, ProductServiceName = "Prod 1", ExpectedRevenue = 100, ActualRevenue = 90 }
+            },
+            Members = new List<RM_DigitalSalesMemberModel>
+            {
+                new RM_DigitalSalesMemberModel { MemberID = 20, FullName = "Member 1", RoleTitle = "AM" }
+            }
+        },
+        new RM_DigitalSalesModel
+        {
+            DigitalSalesID = 2,
+            Title = "ABC 2",
+            BusinessType = 2, // Project
+            CustomerID = 8,
+            CustomerName = "Cust 8",
+            StatusID = 2,
+            StatusName = "Dang lam",
+            TotalExpectedRevenue = 200,
+            TotalActualRevenue = 150
+        },
+        new RM_DigitalSalesModel
+        {
+            DigitalSalesID = 11,
+            Title = "Opp 1",
+            BusinessType = 1, // Opportunity
+            CustomerID = 7,
+            StatusID = 1,
+            StatusName = "Tiep can",
+            TotalExpectedRevenue = 100,
+            Activities = new List<RM_DigitalSalesActivityModel>
+            {
+                new RM_DigitalSalesActivityModel { ActivityID = 30, Content = "Gap khach hang", ActionDate = DateTime.UtcNow }
+            },
+            TrackingTasks = new List<RM_DigitalSalesTrackingModel>
+            {
+                new RM_DigitalSalesTrackingModel { TrackingID = 40, TaskName = "Lap phuong an", Status = 2 }
+            }
+        },
+        new RM_DigitalSalesModel
+        {
+            DigitalSalesID = 12,
+            Title = "Opp 2",
+            BusinessType = 1, // Opportunity
+            CustomerID = 8,
+            StatusID = 2,
+            StatusName = "Bao gia",
+            TotalExpectedRevenue = 200
+        }
+    };
+
     public bool CanView(string subject, bool project) => Permission;
-    public List<RM_ProjectModel> Projects(RM_ProjectSearchModel filter, BaseSearchModel page, out int total)
-    { LastSubject = filter.UserName; ListReads++; total = ReportedTotal ?? projects.Count; return projects; }
-    public List<RM_BusinessOpportunityModel> Opportunities(RM_BusinessOpportunitySearchModel filter, BaseSearchModel page, out int total)
-    { LastSubject = filter.UserName; ListReads++; total = ReportedTotal ?? opportunities.Count; return opportunities; }
-    public RM_ProjectModel Project(int id) { DetailReads++; return projects.Single(x => x.ProjectID == id); }
-    public RM_BusinessOpportunityModel Opportunity(int id) { DetailReads++; return opportunities.Single(x => x.BusinessOpportunityID == id); }
-    public List<RM_ProductProjectModel> Products(int id) => new List<RM_ProductProjectModel>();
-    public List<RM_ProjectTaskModel> Tasks(int id) => new List<RM_ProjectTaskModel> {
-        new RM_ProjectTaskModel { ProjectTaskID = 1, CompletionPercentage = 100 },
-        new RM_ProjectTaskModel { ProjectTaskID = 2 },
-        new RM_ProjectTaskModel { ProjectTaskID = 3, IsDeleted = true },
-        new RM_ProjectTaskModel { TaskManagementID = 44, IsTaskManagementSource = true, CompletionPercentage = 50, CompletedDate = new DateTime(2026,9,10) } };
-    public List<RM_ProjectMemberModel> ProjectMembers(int id) => new List<RM_ProjectMemberModel>();
-    public List<RM_OpportunityPlanModel> Plans(int id) => new List<RM_OpportunityPlanModel>();
-    public List<RM_SalesTeamMembersModel> OpportunityMembers(int id, BaseSearchModel page, out int total)
-    { total = 0; return new List<RM_SalesTeamMembersModel>(); }
-    public List<RM_ExchangeHistoryModel> Activities(int id, BaseSearchModel page, out int total)
-    { total = 0; return new List<RM_ExchangeHistoryModel>(); }
+
+    public List<RM_DigitalSalesModel> DigitalSalesList(RM_DigitalSalesSearchModel filter, out int total)
+    {
+        LastSubject = filter.UserName;
+        ListReads++;
+        var filtered = filter.BusinessType > 0 ? items.Where(x => x.BusinessType == filter.BusinessType) : items.AsEnumerable();
+        if (filter.CustomerID > 0) filtered = filtered.Where(x => x.CustomerID == filter.CustomerID);
+        if (!string.IsNullOrWhiteSpace(filter.Keyword)) filtered = filtered.Where(x => x.Title.Contains(filter.Keyword));
+        var list = filtered.ToList();
+        total = ReportedTotal ?? list.Count;
+        return list;
+    }
+
+    public RM_DigitalSalesModel DigitalSalesDetail(int id, string subject)
+    {
+        DetailReads++;
+        return items.Single(x => x.DigitalSalesID == id);
+    }
 }

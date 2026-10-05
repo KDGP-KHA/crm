@@ -1,4 +1,5 @@
 ﻿@using TSFramework.Libs.Processors
+@using Core.Cate.Biz
 @model Core.Cate.Models.RM_DigitalSalesModel
 @using System.Web
 
@@ -44,7 +45,7 @@
         <div class="input-group">
             <input type="text" id="CustomerNameDisplay_Form" class="form-control font-bold text-primary-d2 bgc-grey-l5" 
                    placeholder="@AppProcessor.Messagor.GetMessage("DigitalSales_Customer_Placeholder")" readonly="readonly"
-                   value="@(Model.CustomerID > 0 ? RM_DigitalSalesBiz.CleanCustomerName(Model.CustomerName) : "")" />
+                   value="@(Model.CustomerID > 0 ? Core.Cate.Biz.RM_DigitalSalesBiz.CleanCustomerName(Model.CustomerName) : "")" />
             <div class="input-group-append">
                 <button type="button" class="btn btn-primary font-bold px-3" onclick="openCustomerLookupModal_Form();">
                     <i class="fa fa-search mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_SelectCustomer_Button")
