@@ -175,7 +175,7 @@
                                     <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                                         <i class="fa fa-chevron-down tree-toggle-icon text-warning-d2 mr-1" id="icon_@procNodeId"></i>
                                         <span class="tree-process-title">QUY TRÌNH: @(Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(prGroup.Key.ProcessName).ToUpper())</span>
-                                        @if (stGroup.Key.ProcessCountOfStatus >= 2 && canEdit && isCurrentStatus)
+                                        @if (stGroup.Key.ProcessCountOfStatus >= 2 && canEdit)
                                         {
                                             <a href="javascript:void(0);" class="btn-edit-process" onclick="event.stopPropagation(); openChangeProcessModal(@Model.DigitalSalesID, @stGroup.Key.StatusID, @prGroup.Key.ProcessID);" title="Đổi quy trình thực hiện cho trạng thái này (@stGroup.Key.ProcessCountOfStatus quy trình)">
                                                 <i class="fa fa-pencil-alt"></i>
@@ -184,7 +184,7 @@
                                         <span class="badge @(realTaskCount > 0 ? "badge-light-warning text-warning-d3" : "badge-light-secondary text-secondary-d3") border-1 font-bold tree-process-task-count">
                                             @realTaskCount tiến trình
                                         </span>
-                                        @if (stGroup.Key.ProcessCountOfStatus >= 2 && isCurrentStatus)
+                                        @if (stGroup.Key.ProcessCountOfStatus >= 2)
                                         {
                                             if (canEdit)
                                              {
@@ -201,7 +201,7 @@
                                         }
                                     </div>
                                     <div class="d-flex align-items-center flex-wrap ml-auto" style="gap: 6px;">
-                                        @if (canEdit && isCurrentStatus && prGroup.Key.ProcessID > 0)
+                                        @if (canEdit && prGroup.Key.ProcessID > 0)
                                         {
                                             <button type="button" class="btn btn-xs btn-success font-weight-bold px-2 py-05 ml-1 radius-1 shadow-sm btn-add-progress-header" onclick="event.stopPropagation(); openAddProgressToProcessModal(@Model.DigitalSalesID, @prGroup.Key.ProcessID, '@Html.Raw(HttpUtility.JavaScriptStringEncode(prGroup.Key.ProcessName))', @stGroup.Key.TimelineID);" title="Thêm tiến trình mới vào quy trình này">
                                                 <i class="fa fa-plus mr-1"></i> Thêm tiến trình
@@ -227,7 +227,9 @@
                             foreach (var task in realTasks.OrderBy(p => p.SortOrder).ThenBy(p => p.StartDate).ThenBy(p => p.TrackingID))
                             {
                             string taskNodeId = $"{procNodeId}_task_{task.TrackingID}";
-                            bool isOverdue = task.IsOverdue == 1;
+                            DateTime taskDeadline = task.Deadline ?? task.MaxDeadline;
+                            bool isOverdue = (task.Status != 3) && (task.IsOverdue == 1 || task.Status == 4 || taskDeadline.Date < DateTime.Today);
+                            int taskOverdueDays = isOverdue ? Math.Max(1, (int)(DateTime.Today - taskDeadline.Date).TotalDays) : 0;
 
                             <!-- ========================================================================= -->
                             <!-- CẤP 3: TIẾN TRÌNH (CÓ NGÀY BẮT ĐẦU, TỔNG NGÀY VÀ DẤU (+) SAU TÊN)        -->
@@ -244,7 +246,7 @@
                                         <div class="tree-node-content">
                                             <span class="tree-progress-title">@($"{taskIdx}.") @Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(task.TaskName)</span>
 
-                                            @if (canEdit && isCurrentStatus && task.Status != 3)
+                                            @if (canEdit && task.Status != 3)
                                             {
                                                 <!-- DẤU (+) PHÍA SAU TÊN TIẾN TRÌNH: THÊM TODO LIST -->
                                                 <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@task.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con (Todo list)">
@@ -318,7 +320,7 @@
                                         });
                                     }
 
-                                    if (canEdit && isCurrentStatus && task.Status != 3)
+                                    if (canEdit && task.Status != 3)
                                     {
                                         taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
                                         {
@@ -367,7 +369,7 @@
                                         });
                                     }
 
-                                    bool canDeleteTask = (isQTHT || (task.Status != 3 && string.Equals(task.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase))) && isCurrentStatus;
+                                    bool canDeleteTask = (isQTHT || (task.Status != 3 && string.Equals(task.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase)));
                                     if (canDeleteTask)
                                     {
                                         taskActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
@@ -423,7 +425,9 @@
                                 foreach (var todo in task.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
                                 {
                                     string todoNodeId = $"{taskNodeId}_todo_{todo.TrackingID}";
-                                    bool todoOverdue = todo.IsOverdue == 1;
+                                    DateTime? todoDeadline = todo.Deadline ?? (todo.StartDate != DateTime.MinValue ? (DateTime?)todo.StartDate.AddDays(todo.EffectiveDurationDays) : null);
+                                    bool todoOverdue = (todo.Status != 3) && (todo.IsOverdue == 1 || todo.Status == 4 || (todoDeadline.HasValue && todoDeadline.Value.Date < DateTime.Today));
+                                    int todoOverdueDays = todoOverdue && todoDeadline.HasValue ? Math.Max(1, (int)(DateTime.Today - todoDeadline.Value.Date).TotalDays) : (todoOverdue ? 1 : 0);
                                     <tr class="tree-row tree-todo-row" data-node="@todoNodeId" data-parent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="4" data-expanded="true">
                                         <td style="padding-left: 48px;" class="font-progress-cell">
                                             <div class="tree-node-wrapper">
@@ -437,7 +441,7 @@
                                                 <div class="tree-node-content">
                                                     <span class="tree-todo-title @(todo.Status == 3 ? "text-line-through text-secondary-m1" : "")">@($"{todoIdx}. ")@Core.Cate.Biz.RM_DigitalSalesBiz.FixVietnameseMojibake(todo.TaskName)</span>
 
-                                                    @if (canEdit && isCurrentStatus && todo.Status != 3)
+                                                    @if (canEdit && todo.Status != 3)
                                                     {
                                                         <!-- DẤU (+) PHÍA SAU TÊN CÔNG VIỆC: THÊM CÔNG VIỆC CON (CẤP 5) -->
                                                         <a href="javascript:void(0);" class="btn-add-todo ml-1" onclick="openAddTodoModal(@todo.TrackingID, @Model.DigitalSalesID);" title="Thêm công việc con">
@@ -521,7 +525,7 @@
                                                 });
                                             }
 
-                                            if (canEdit && isCurrentStatus && todo.Status != 3)
+                                            if (canEdit && todo.Status != 3)
                                             {
                                                 todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
                                                 {
@@ -570,7 +574,7 @@
                                                 });
                                             }
 
-                                            bool canDeleteTodo = (isQTHT || (todo.Status != 3 && string.Equals(todo.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase))) && isCurrentStatus;
+                                            bool canDeleteTodo = (isQTHT || (todo.Status != 3 && string.Equals(todo.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase)));
                                             if (canDeleteTodo)
                                             {
                                                 todoActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
@@ -626,7 +630,9 @@
                                         foreach (var sub in todo.TodoList.OrderBy(c => c.SortOrder).ThenBy(c => c.StartDate).ThenBy(c => c.TrackingID))
                                         {
                                             string subNodeId = $"{todoNodeId}_sub_{sub.TrackingID}";
-                                            bool subOverdue = sub.IsOverdue == 1;
+                                            DateTime? subDeadline = sub.Deadline ?? (sub.StartDate != DateTime.MinValue ? (DateTime?)sub.StartDate.AddDays(sub.EffectiveDurationDays) : null);
+                                            bool subOverdue = (sub.Status != 3) && (sub.IsOverdue == 1 || sub.Status == 4 || (subDeadline.HasValue && subDeadline.Value.Date < DateTime.Today));
+                                            int subOverdueDays = subOverdue && subDeadline.HasValue ? Math.Max(1, (int)(DateTime.Today - subDeadline.Value.Date).TotalDays) : (subOverdue ? 1 : 0);
                                             <tr class="tree-row tree-subtask-row" data-node="@subNodeId" data-parent="@todoNodeId" data-superparent="@taskNodeId" data-subparent="@procNodeId" data-root="@statusNodeId" data-level="5">
                                                 <td style="padding-left: 72px;" class="font-progress-cell">
                                                     <div class="tree-node-wrapper">
@@ -710,7 +716,7 @@
                                                     }
 
                                                     bool canEditSub = isQTHT || string.Equals(sub.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase);
-                                                    if (canEdit && isCurrentStatus && sub.Status != 3 && canEditSub)
+                                                    if (canEdit && sub.Status != 3 && canEditSub)
                                                     {
                                                         subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
                                                         {
@@ -746,7 +752,7 @@
                                                         });
                                                     }
 
-                                                    bool canDeleteSub = (isQTHT || (sub.Status != 3 && string.Equals(sub.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase))) && isCurrentStatus;
+                                                    bool canDeleteSub = (isQTHT || (sub.Status != 3 && string.Equals(sub.CreatedBy, currentUserName, StringComparison.OrdinalIgnoreCase)));
                                                     if (canDeleteSub)
                                                     {
                                                         subActions.Add(new Core.Cate.Models.RM_DigitalSalesActionItem
