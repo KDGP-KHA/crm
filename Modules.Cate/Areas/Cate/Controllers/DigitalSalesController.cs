@@ -1723,44 +1723,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     }
                 }
 
-                // 1.1 Tự động đánh dấu hoàn thành toàn bộ tiến trình và công việc con của trạng thái trước đó
-                // Theo đặc tả: Khi chuyển trạng thái thì những Tiến trình và Công việc con của tiến trình trong Quy trình
-                // của Trạng thái trước đó đều được đánh dấu hoàn thành.
-                // Thời gian hoàn thành là thời gian thực hiện Xác nhận chuyển trạng thái.
-                // Người hoàn thành là người thực hiện Xác nhận chuyển trạng thái.
-                // Các nội dung này được lưu vào Audit Log của Tiến trình và công việc con.
-                int oldStatusId = currentSales != null ? currentSales.StatusID : 0;
-                if (oldStatusId > 0 && oldStatusId != model.NewStatusID)
-                {
-                    try
-                    {
-                        var allTasks = _salesCache.GetTrackingTasks(model.DigitalSalesID);
-                        if (allTasks != null && allTasks.Count > 0)
-                        {
-                            var oldTasks = allTasks.Where(t => t.StatusID.HasValue && t.StatusID.Value != model.NewStatusID).ToList();
-                            var uncompletedItems = oldTasks.SelectMany(t => (t.TodoList ?? new List<RM_DigitalSalesTrackingModel>()).Concat(new[] { t }))
-                                                           .Where(x => x.Status != 3)
-                                                           .ToList();
-
-                            foreach (var item in uncompletedItems)
-                            {
-                                _salesCache.UpdateTrackingStatus(
-                                    item.TrackingID,
-                                    3, // Hoàn thành
-                                    "Tự động hoàn thành khi chuyển trạng thái sang " + (newStatus?.StatusName ?? ("ID " + model.NewStatusID)),
-                                    null,
-                                    null,
-                                    null,
-                                    User.UserName
-                                );
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        AppProcessor.Logger.Error(ex);
-                    }
-                }
+                // Giữ nguyên trạng thái của các tiến trình và công việc thuộc trạng thái trước đó (không tự động hoàn thành/resolved)
 
                 // 2. Lưu danh sách tiến trình vào Checklist (RM_DigitalSalesTracking)
                 try
