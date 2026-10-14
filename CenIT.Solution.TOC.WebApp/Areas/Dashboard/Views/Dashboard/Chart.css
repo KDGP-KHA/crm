@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Dashboard Chart CSS - CenIT TOC CRM
    Tuân thủ quy chuẩn Ace Admin v4 / Bootstrap 4
    ========================================================================== */
@@ -584,4 +584,30 @@
 .db-code-badge {
     background-color: #5c6b7d !important;
     color: #ffffff !important;
+}
+
+/* ==========================================================================
+   Action Time Display under Opportunity / Project Title
+   ========================================================================== */
+.db-actiontime {
+    font-size: 11.5px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    line-height: 1.4;
+}
+
+.db-actiontime i {
+    color: #0284c7;
+    margin-right: 4px;
+}
+
+.db-actiontime .actiontime-label {
+    color: #64748b;
+    margin-right: 4px;
+}
+
+.db-actiontime .actiontime-val {
+    color: #1e293b;
+    font-weight: 600;
 }

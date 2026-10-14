@@ -170,12 +170,19 @@
                             @{ int stt = 1; }
                             @foreach (var p in keyProjects)
                             {
+                                var actionTimeStr = p.ActionTime.HasValue 
+                                    ? p.ActionTime.Value.ToString("dd/MM/yyyy HH:mm") 
+                                    : (p.LastModifiedDate.HasValue ? p.LastModifiedDate.Value.ToString("dd/MM/yyyy HH:mm") : (p.CreatedDate != DateTime.MinValue ? p.CreatedDate.ToString("dd/MM/yyyy HH:mm") : "Chưa cập nhật"));
+
                                 <tr data-assigned-employee="@(p.AssignedEmployeeName ?? "")">
                                     <td class="text-center font-weight-bold text-secondary">@(stt++)</td>
                                     <td>
-                                        <a href="/Cate/DigitalSales/Detail?id=@p.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
+                                        <a href="/Cate/DigitalSales/Detail?id=@p.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none d-block">
                                             @p.Title
                                         </a>
+                                        <div class="db-actiontime mt-1" title="Thời gian cập nhật gần nhất">
+                                            <i class="fa fa-clock text-primary mr-1"></i><span class="actiontime-label">Ngày cập nhật cuối:</span><span class="actiontime-val">@actionTimeStr</span>
+                                        </div>
                                         <div class="mt-1 d-flex align-items-center flex-wrap">
                                             <span class="badge badge-secondary db-code-badge mr-1">@p.Code</span>
                                             <span class="badge @(p.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(p.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
@@ -301,12 +308,19 @@
                             @{ int sttFollow = 1; }
                             @foreach (var opp in followedOpps)
                             {
+                                var oppActionTimeStr = opp.ActionTime.HasValue 
+                                    ? opp.ActionTime.Value.ToString("dd/MM/yyyy HH:mm") 
+                                    : (opp.LastModifiedDate.HasValue ? opp.LastModifiedDate.Value.ToString("dd/MM/yyyy HH:mm") : (opp.CreatedDate != DateTime.MinValue ? opp.CreatedDate.ToString("dd/MM/yyyy HH:mm") : "Chưa cập nhật"));
+
                                 <tr data-assigned-employee="@(opp.AssignedEmployeeName ?? "")">
                                     <td class="text-center font-weight-bold text-secondary">@(sttFollow++)</td>
                                     <td>
-                                        <a href="/Cate/DigitalSales/Detail?id=@opp.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
+                                        <a href="/Cate/DigitalSales/Detail?id=@opp.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none d-block">
                                             @opp.Title
                                         </a>
+                                        <div class="db-actiontime mt-1" title="Thời gian cập nhật gần nhất">
+                                            <i class="fa fa-clock text-primary mr-1"></i><span class="actiontime-label">Ngày cập nhật cuối:</span><span class="actiontime-val">@oppActionTimeStr</span>
+                                        </div>
                                         <div class="mt-1 d-flex align-items-center flex-wrap">
                                             <span class="badge badge-secondary db-code-badge mr-1">@opp.Code</span>
                                             <span class="badge @(opp.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(opp.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>
