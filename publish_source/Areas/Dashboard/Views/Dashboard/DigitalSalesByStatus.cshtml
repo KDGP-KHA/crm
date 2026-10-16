@@ -94,7 +94,8 @@
                     data: {
                         applyYear: '@Model.ApplyYear',
                         statusId: '@Model.StatusID',
-                        keyword: '@(Html.Raw(HttpUtility.JavaScriptStringEncode(Model.Keyword ?? "")))'
+                        keyword: '@(Html.Raw(HttpUtility.JavaScriptStringEncode(Model.Keyword ?? "")))',
+                        sourceDepartmentId: '@Model.SourceDepartmentID'
                     }
                 },
                 columnDefs: [
@@ -186,10 +187,13 @@
                             var dept = row.DepartmentName
                                 ? '<div class="text-85 text-muted mt-1"><i class="fa fa-sitemap mr-1"></i>' + row.DepartmentName + '</div>'
                                 : '';
+                            var srcDept = row.SourceDepartmentName
+                                ? '<div class="text-85 text-primary mt-1 font-bold" title="Cơ hội xuất phát từ"><i class="fa fa-map-marker-alt mr-1"></i>' + row.SourceDepartmentName + '</div>'
+                                : '<div class="text-85 text-warning mt-1"><i class="fa fa-exclamation-triangle mr-1"></i>Chưa chọn đơn vị</div>';
                             var contact = row.ContactPersonName
                                 ? '<div class="text-85 text-secondary mt-1"><i class="fa fa-phone mr-1"></i>' + row.ContactPersonName + (row.ContactPersonPhone ? ' (' + row.ContactPersonPhone + ')' : '') + '</div>'
                                 : '';
-                            return '<div class="text-90 font-weight-bold text-dark-m1"><i class="fa fa-user-tie mr-1 text-success"></i>' + leader + '</div>' + dept + contact;
+                            return '<div class="text-90 font-weight-bold text-dark-m1"><i class="fa fa-user-tie mr-1 text-success"></i>' + leader + '</div>' + dept + srcDept + contact;
                         }
                     },
                     {

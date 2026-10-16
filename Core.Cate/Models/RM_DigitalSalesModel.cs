@@ -92,6 +92,10 @@ namespace Core.Cate.Models
         public int? DepartmentID { get; set; }
         public string DepartmentName { get; set; }
 
+        [CustomDisplayName("DigitalSales_SourceDepartment")]
+        public int? SourceDepartmentID { get; set; }
+        public string SourceDepartmentName { get; set; }
+
         /// <summary>
         /// Mô tả chi tiết nhu cầu / Ghi chú dịch vụ số (Không phải Lý do chuyển trạng thái)
         /// </summary>
@@ -149,6 +153,7 @@ namespace Core.Cate.Models
         public List<SelectListItem> ListContactPerson { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ListEmployee { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ListDepartment { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> ListSourceDepartment { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ListContract { get; set; } = new List<SelectListItem>();
     }
 

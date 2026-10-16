@@ -1,4 +1,4 @@
-var _tableDigitalSales;
+﻿var _tableDigitalSales;
 var _oppImportTempFileName = "";
 
 function _cleanCustomerNameOpp(name) {
@@ -103,6 +103,7 @@ function initTableDigitalSales() {
                 d.StatusIDs = typeof getSelectedStatusIDs === 'function' ? getSelectedStatusIDs() : '';
                 d.CustomerID = $("#CustomerID").val() || 0;
                 d.ProductServiceID = 0;
+                d.SourceDepartmentID = $("#SourceDepartmentID").val() || "";
                 d.EmployeeID = $("#EmployeeID").val() || $("#SearchEmployeeID").val() || "";
                 d.MemberRole = $("#MemberRole").val() || "";
                 d.DepartmentID = $("#DepartmentID").val() || $("#SearchDepartmentID").val() || "";
@@ -148,6 +149,13 @@ function initTableDigitalSales() {
                         badgeSpecial += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge" title="Cơ hội/dự án bạn đang quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
                     }
 
+                    var badgeSourceDept = '';
+                    if (row.SourceDepartmentID && row.SourceDepartmentID > 0) {
+                        badgeSourceDept = '<span class="badge bgc-blue-l3 text-blue-d2 border-1 brc-blue-m3 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge cursor-pointer" onclick="openQuickAssignDepartmentModal(' + row.DigitalSalesID + ');" title="Cơ hội xuất phát từ: ' + (row.SourceDepartmentName || '') + ' (Click để đổi)"><i class="fa fa-map-marker-alt text-primary mr-1"></i>Nguồn: ' + (row.SourceDepartmentName || '—') + '</span>';
+                    } else {
+                        badgeSourceDept = '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-bold px-2 py-1 radius-1 shadow-sm sale-badge cursor-pointer" onclick="openQuickAssignDepartmentModal(' + row.DigitalSalesID + ');" title="Click để chọn nhanh đơn vị xuất phát"><i class="fa fa-exclamation-triangle text-warning mr-1"></i>Chưa chọn đơn vị <i class="fa fa-pencil-alt ml-1 text-80"></i></span>';
+                    }
+
                     // Hàng 1: Loại hình & Trạng thái
                     var html = '<div class="mb-1 d-flex align-items-center flex-wrap">' +
                         badgeType + ' ' + badgeStatus +
@@ -160,9 +168,10 @@ function initTableDigitalSales() {
                     // Hàng 3: Mốc cập nhật gần nhất của hồ sơ
                     html += '<div class="sale-subtext text-muted mt-1"><i class="fa fa-clock mr-1"></i>Ngày cập nhật gần nhất: <span class="text-secondary-d2">' + formatActionTime(row.ActionTime) + '</span></div>';
 
-                    // Hàng 4: Mã hồ sơ & Các huy hiệu đặc biệt (Trọng điểm, Quan tâm)
+                    // Hàng 4: Mã hồ sơ, Đơn vị xuất phát & Các huy hiệu đặc biệt
                     html += '<div class="mt-1 d-flex align-items-center flex-wrap">' +
                         '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-mono font-bold px-2 py-1 radius-1 shadow-sm sale-badge"><i class="fa fa-hashtag mr-1 opacity-75"></i>' + (row.Code || '—') + '</span>' +
+                        badgeSourceDept +
                         badgeSpecial +
                         '</div>';
 
@@ -183,13 +192,6 @@ function initTableDigitalSales() {
                     } else {
                         html += '<div class="text-muted">—</div>';
                     }
-                    //if (row.ContactPersonName) {
-                    //    html += '<div class="sale-subtext text-secondary mt-1"><i class="fa fa-user-circle text-secondary mr-1"></i>' + row.ContactPersonName;
-                    //    if (row.ContactPersonPhone) {
-                    //        html += ' <span class="text-muted">(' + row.ContactPersonPhone + ')</span>';
-                    //    }
-                    //    html += '</div>';
-                    //}
                     return html;
                 }
             },
@@ -236,6 +238,8 @@ function initTableDigitalSales() {
                     var hasAction = false;
                     if (row.CanEdit) {
                         hasAction = true;
+                        html += '<a href="javascript:void(0);" onclick="openQuickAssignDepartmentModal(' + row.DigitalSalesID + ');" class="btn btn-xs btn-outline-primary btn-h-outline-primary radius-1 px-2 py-1 mr-1 btn-action" title="Gán nhanh đơn vị xuất phát">' +
+                            '<i class="fa fa-sitemap mr-1"></i>Đơn vị</a>';
                         html += '<a href="javascript:void(0);" onclick="openEditSalesModal(' + row.DigitalSalesID + ');" class="btn btn-xs btn-outline-info btn-h-outline-info btn-a-outline-info radius-1 px-2 py-1 mr-1 btn-action" title="Chỉnh sửa">' +
                             '<i class="fa fa-edit mr-1"></i>Sửa</a>';
                     }
@@ -777,11 +781,26 @@ $(document).on('hidden.bs.modal', '#modal_AddDigitalSales, #modal_EditDigitalSal
     $('body > #modalCustomerLookup_Form').remove();
 });
 
+function openQuickAssignDepartmentModal(id) {
+    if (!id || parseInt(id) <= 0) return;
+    var url = "/Cate/DigitalSales/QuickAssignDepartmentModal?id=" + id;
+    $.get(url, function (html) {
+        $("#modalContainer").html(html);
+        $("#modalQuickAssignDepartment").modal("show");
+    }).fail(function () {
+        if (typeof toastr !== "undefined") {
+            toastr.error("Không thể tải thông tin gán đơn vị xuất phát.");
+        }
+    });
+}
+window.openQuickAssignDepartmentModal = openQuickAssignDepartmentModal;
+
 function exportDigitalSales() {
     var baseUrl = _digitalSalesUrls.export || "/Cate/DigitalSales/Export";
     var keyword = $("#SearchDigitalSales #Keyword").val() || $("#Keyword").val() || "";
     var businessType = $("#SearchDigitalSales #BusinessType").val() || $("#BusinessType").val() || "";
     var statusID = $("#SearchDigitalSales #StatusID").val() || $("#StatusID").val() || "";
+    var sourceDepartmentID = $("#SearchDigitalSales #SourceDepartmentID").val() || $("#SourceDepartmentID").val() || "";
     var departmentID = $("#SearchDigitalSales #DepartmentID").val() || $("#DepartmentID").val() || "";
     var employeeID = $("#SearchDigitalSales #EmployeeID").val() || $("#EmployeeID").val() || "";
     var memberRole = $("#SearchDigitalSales #MemberRole").val() || $("#MemberRole").val() || "";
@@ -793,6 +812,7 @@ function exportDigitalSales() {
     if (keyword) qs.push("keyword=" + encodeURIComponent(keyword));
     if (businessType) qs.push("businessType=" + encodeURIComponent(businessType));
     if (statusID) qs.push("statusID=" + encodeURIComponent(statusID));
+    if (sourceDepartmentID) qs.push("sourceDepartmentID=" + encodeURIComponent(sourceDepartmentID));
     if (departmentID) qs.push("departmentID=" + encodeURIComponent(departmentID));
     if (employeeID) qs.push("employeeID=" + encodeURIComponent(employeeID));
     if (memberRole) qs.push("memberRole=" + encodeURIComponent(memberRole));

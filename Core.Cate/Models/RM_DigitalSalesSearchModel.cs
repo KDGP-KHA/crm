@@ -25,6 +25,9 @@ namespace Core.Cate.Models
         [CustomDisplayName("DigitalSalesSearch_Department_Label")]
         public int DepartmentID { get; set; }
 
+        [CustomDisplayName("DigitalSalesSearch_SourceDepartment_Label")]
+        public int SourceDepartmentID { get; set; }
+
         [CustomDisplayName("DigitalSalesSearch_Employee_Label")]
         public int EmployeeID { get; set; }
 
@@ -55,6 +58,7 @@ namespace Core.Cate.Models
         public List<SelectListItem> StatusList { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ProductServices { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Departments { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> SourceDepartments { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Employees { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> MemberRoles { get; set; } = new List<SelectListItem>();
 
@@ -62,6 +66,7 @@ namespace Core.Cate.Models
         public List<SelectListItem> ListStatus { get => StatusList; set => StatusList = value; }
         public List<SelectListItem> ListProductService { get => ProductServices; set => ProductServices = value; }
         public List<SelectListItem> ListDepartment { get => Departments; set => Departments = value; }
+        public List<SelectListItem> ListSourceDepartment { get => SourceDepartments; set => SourceDepartments = value; }
         public List<SelectListItem> ListEmployee { get => Employees; set => Employees = value; }
         public List<SelectListItem> ListMemberRole { get => MemberRoles; set => MemberRoles = value; }
     }

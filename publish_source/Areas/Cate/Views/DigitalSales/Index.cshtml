@@ -11,14 +11,13 @@
 }
 
 @section PageTitle {
-    <i class="fa fa-chart-line text-primary mr-1"></i>
-    Danh sách kinh doanh sản phẩm dịch vụ số
-    <small class="page-info text-secondary-d2 text-90 font-normal ml-2">
-        (Cơ hội kinh doanh ➔ Dự án số)
-    </small>
+    @ViewBag.Title
 }
 
 @section PageAction {
+    <span class="badge badge-lg bgc-primary-l3 text-primary-d2 border-1 brc-primary-m3 mr-2 d-none d-md-inline-block">
+        <i class="fa fa-chart-line mr-1"></i> Cơ hội kinh doanh ➔ Dự án số
+    </span>
     <button type="button" class="btn btn-sm btn-success mr-2" onclick="openImportOpportunityModal();">
         <i class="fa fa-file-excel mr-1"></i> Import Cơ hội
     </button>

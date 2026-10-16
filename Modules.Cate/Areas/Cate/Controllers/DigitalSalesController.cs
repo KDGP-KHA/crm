@@ -222,7 +222,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         public ActionResult Export(string keyword, byte? businessType, int? statusID,
                                    int? departmentID, int? employeeID, string fromDate, string toDate, int? customerID,
                                    bool? isKeyProject, bool? isFollowed, string statusIDs = null, int? applyYear = null,
-                                   string memberRole = null)
+                                   string memberRole = null, int? sourceDepartmentID = null)
         {
             var searchModel = new RM_DigitalSalesSearchModel
             {
@@ -231,6 +231,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 StatusID = statusID.GetValueOrDefault(0),
                 StatusIDs = statusIDs,
                 DepartmentID = departmentID.GetValueOrDefault(0),
+                SourceDepartmentID = sourceDepartmentID.GetValueOrDefault(0),
                 EmployeeID = employeeID.GetValueOrDefault(0),
                 MemberRole = memberRole,
                 FromDate = fromDate,
@@ -289,6 +290,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     GetAppMessage("DigitalSales_Export_ContactPhone", "SDT lien he"),
                     GetAppMessage("DigitalSales_Export_AM", "Nhan su AM chu tri"),
                     GetAppMessage("DigitalSales_Export_Department", "Don vi / Phong ban"),
+                    GetAppMessage("DigitalSales_Col_SourceDepartment", "Don vi xuat phat"),
                     GetAppMessage("DigitalSales_Export_ExpectedRevenue", "Doanh thu du kien (VND)"),
                     GetAppMessage("DigitalSales_Export_ActualRevenue", "Doanh thu thuc te (VND)"),
                     GetAppMessage("DigitalSales_Export_Probability", "Xac suat chot (%)"),
@@ -331,20 +333,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                         worksheet.Cell(r, 8).Value = item.ContactPersonPhone ?? "";
                         worksheet.Cell(r, 9).Value = item.AssignedEmployeeName ?? "";
                         worksheet.Cell(r, 10).Value = item.DepartmentName ?? "";
+                        worksheet.Cell(r, 11).Value = item.SourceDepartmentName ?? "";
 
                         if (item.TotalExpectedRevenue.HasValue)
                         {
-                            worksheet.Cell(r, 11).Value = item.TotalExpectedRevenue.Value;
-                            worksheet.Cell(r, 11).Style.NumberFormat.Format = "#,##0";
-                        }
-                        else
-                        {
-                            worksheet.Cell(r, 11).Value = 0;
-                        }
-
-                        if (item.TotalActualRevenue.HasValue)
-                        {
-                            worksheet.Cell(r, 12).Value = item.TotalActualRevenue.Value;
+                            worksheet.Cell(r, 12).Value = item.TotalExpectedRevenue.Value;
                             worksheet.Cell(r, 12).Style.NumberFormat.Format = "#,##0";
                         }
                         else
@@ -352,24 +345,34 @@ namespace Modules.Cate.Areas.Cate.Controllers
                             worksheet.Cell(r, 12).Value = 0;
                         }
 
-                        worksheet.Cell(r, 13).Value = (item.ClosingProbability ?? 0) + "%";
-                        worksheet.Cell(r, 14).Value = item.ProductServiceNames ?? "";
-                        worksheet.Cell(r, 15).Value = item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "";
-                        worksheet.Cell(r, 16).Value = item.ExpectedDate.HasValue ? item.ExpectedDate.Value.ToString("dd/MM/yyyy") : "";
-                        worksheet.Cell(r, 17).Value = item.CreatedByName ?? item.CreatedBy ?? "";
-                        worksheet.Cell(r, 18).Value = item.CreatedDate != DateTime.MinValue ? item.CreatedDate.ToString("dd/MM/yyyy HH:mm") : "";
+                        if (item.TotalActualRevenue.HasValue)
+                        {
+                            worksheet.Cell(r, 13).Value = item.TotalActualRevenue.Value;
+                            worksheet.Cell(r, 13).Style.NumberFormat.Format = "#,##0";
+                        }
+                        else
+                        {
+                            worksheet.Cell(r, 13).Value = 0;
+                        }
+
+                        worksheet.Cell(r, 14).Value = (item.ClosingProbability ?? 0) + "%";
+                        worksheet.Cell(r, 15).Value = item.ProductServiceNames ?? "";
+                        worksheet.Cell(r, 16).Value = item.StartDate.HasValue ? item.StartDate.Value.ToString("dd/MM/yyyy") : "";
+                        worksheet.Cell(r, 17).Value = item.ExpectedDate.HasValue ? item.ExpectedDate.Value.ToString("dd/MM/yyyy") : "";
+                        worksheet.Cell(r, 18).Value = item.CreatedByName ?? item.CreatedBy ?? "";
+                        worksheet.Cell(r, 19).Value = item.CreatedDate != DateTime.MinValue ? item.CreatedDate.ToString("dd/MM/yyyy HH:mm") : "";
 
                         worksheet.Cell(r, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                         worksheet.Cell(r, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                         worksheet.Cell(r, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                         worksheet.Cell(r, 4).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                         worksheet.Cell(r, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        worksheet.Cell(r, 11).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
                         worksheet.Cell(r, 12).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-                        worksheet.Cell(r, 13).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        worksheet.Cell(r, 15).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        worksheet.Cell(r, 13).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                        worksheet.Cell(r, 14).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                         worksheet.Cell(r, 16).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                        worksheet.Cell(r, 18).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        worksheet.Cell(r, 17).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        worksheet.Cell(r, 19).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                         for (int c = 1; c <= headers.Length; c++)
                         {
@@ -464,6 +467,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             if (!model.AssignedEmployeeID.HasValue || model.AssignedEmployeeID.Value <= 0)
             {
                 ModelState.AddModelError("AssignedEmployeeID", GetAppMessage("DigitalSales_Msg_AMRequired"));
+            }
+
+            if (!model.SourceDepartmentID.HasValue || model.SourceDepartmentID.Value <= 0)
+            {
+                ModelState.AddModelError("SourceDepartmentID", GetAppMessage("DigitalSales_Validation_SourceDepartment_Required", "Vui lòng chọn đơn vị xuất phát cơ hội"));
             }
 
             if (!ModelState.IsValid)
@@ -625,6 +633,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 ModelState.AddModelError("AssignedEmployeeID", GetAppMessage("DigitalSales_Msg_AMRequired"));
             }
 
+            if (!model.SourceDepartmentID.HasValue || model.SourceDepartmentID.Value <= 0)
+            {
+                ModelState.AddModelError("SourceDepartmentID", GetAppMessage("DigitalSales_Validation_SourceDepartment_Required", "Vui lòng chọn đơn vị xuất phát cơ hội"));
+            }
+
             if (!ModelState.IsValid)
             {
                 PrepareSalesDropdowns(model);
@@ -706,6 +719,63 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 status = false,
                 message = CreateMessage(_title, EnumProcessType.Edit, EnumMsgIcon.Error)
             });
+        }
+
+        [ActionType(Type = EnumActionType.Edit)]
+        public ActionResult QuickAssignDepartmentModal(int id)
+        {
+            if (!HasDetailPermission(id, User.UserName))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = GetAppMessage("DigitalSales_Msg_NoPermission")
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            var model = _salesCache.GetByID(id, CurrentUserName);
+            if (model == null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = CreateMessage(_title, EnumProcessType.DataNotExist, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+            }
+
+            PrepareSalesDropdowns(model);
+            return PartialView("_QuickAssignDepartmentModal", model);
+        }
+
+        [AjaxOnly]
+        [HttpPost]
+        [ActionType(Type = EnumActionType.Edit)]
+        [ValidateAntiForgeryToken]
+        public ActionResult QuickAssignDepartment(int id, int sourceDepartmentId)
+        {
+            if (id <= 0)
+            {
+                return Json(new { status = false, message = "toastr.error('" + GetAppMessage("DigitalSales_Msg_InvalidData", "Dữ liệu không hợp lệ.") + "');" });
+            }
+
+            if (!HasDetailPermission(id, User.UserName))
+            {
+                return Json(new { status = false, message = "toastr.error('" + GetAppMessage("DigitalSales_Msg_NoPermission", "Bạn không có quyền thực hiện.") + "');" });
+            }
+
+            if (sourceDepartmentId <= 0)
+            {
+                return Json(new { status = false, message = "toastr.warning('" + GetAppMessage("DigitalSales_Validation_SourceDepartment_Required", "Vui lòng chọn đơn vị xuất phát cơ hội.") + "');" });
+            }
+
+            var result = _salesCache.QuickAssignSourceDepartment(id, sourceDepartmentId, User.UserName);
+            if (result > 0)
+            {
+                var successMsg = GetAppMessage("DigitalSales_QuickAssign_Success", "Cập nhật đơn vị xuất phát thành công!");
+                return Json(new { status = true, message = $"toastr.success('{successMsg}');" });
+            }
+
+            return Json(new { status = false, message = "toastr.error('Cập nhật đơn vị xuất phát thất bại, vui lòng thử lại.');" });
         }
 
         [AjaxOnly]
@@ -7002,6 +7072,20 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     Text = r.RoleName.Trim(),
                     Selected = !string.IsNullOrEmpty(model.MemberRole) && model.MemberRole.Equals(r.RoleName.Trim(), StringComparison.OrdinalIgnoreCase)
                 }).ToList();
+
+            var level1Depts = _salesCache.GetLevel1Departments() ?? new List<MN_BoPhanModel>();
+            var sourceDeptsList = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "0", Text = GetAppMessage("DigitalSalesSearch_SourceDepartment_AllOption", "-- Tất cả đơn vị xuất phát --"), Selected = (model.SourceDepartmentID == 0) },
+                new SelectListItem { Value = "-1", Text = GetAppMessage("DigitalSalesSearch_SourceDepartment_Unassigned", "⚠️ -- Chưa chọn đơn vị xuất phát --"), Selected = (model.SourceDepartmentID == -1) }
+            };
+            sourceDeptsList.AddRange(level1Depts.Select(d => new SelectListItem
+            {
+                Value = d.BoPhan_ID.ToString(),
+                Text = d.TenBoPhan,
+                Selected = (model.SourceDepartmentID == d.BoPhan_ID)
+            }));
+            model.ListSourceDepartment = sourceDeptsList;
         }
 
         private void PrepareSalesDropdowns(RM_DigitalSalesModel model)
@@ -7104,6 +7188,19 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     Selected = (model.DepartmentID.HasValue && d.BoPhan_ID == model.DepartmentID.Value)
                 }).ToList() ?? new List<SelectListItem>();
 
+                var level1Depts = _salesCache.GetLevel1Departments() ?? new List<MN_BoPhanModel>();
+                var sourceDeptsList = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "", Text = GetAppMessage("DigitalSales_SourceDepartment_Placeholder", "-- Chọn đơn vị xuất phát --"), Selected = (!model.SourceDepartmentID.HasValue || model.SourceDepartmentID.Value <= 0) }
+                };
+                sourceDeptsList.AddRange(level1Depts.Select(d => new SelectListItem
+                {
+                    Value = d.BoPhan_ID.ToString(),
+                    Text = d.TenBoPhan,
+                    Selected = (model.SourceDepartmentID.HasValue && model.SourceDepartmentID.Value == d.BoPhan_ID)
+                }));
+                model.ListSourceDepartment = sourceDeptsList;
+
                 model.ListContract = _contractCache.GetAll()?.Select(ct => new SelectListItem
                 {
                     Value = ct.ContractID.ToString(),
@@ -7119,6 +7216,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 if (model.ListStatus == null) model.ListStatus = new List<SelectListItem>();
                 if (model.ListEmployee == null) model.ListEmployee = new List<SelectListItem>();
                 if (model.ListDepartment == null) model.ListDepartment = new List<SelectListItem>();
+                if (model.ListSourceDepartment == null) model.ListSourceDepartment = new List<SelectListItem>();
                 if (model.ListContract == null) model.ListContract = new List<SelectListItem>();
             }
         }

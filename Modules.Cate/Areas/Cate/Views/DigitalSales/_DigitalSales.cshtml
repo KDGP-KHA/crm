@@ -1,4 +1,4 @@
-@using TSFramework.Libs.Processors
+﻿@using TSFramework.Libs.Processors
 @using Core.Cate.Biz
 @model Core.Cate.Models.RM_DigitalSalesModel
 @using System.Web
@@ -71,7 +71,7 @@
         <div id="customerInfoCard_Form" class="card border-1 brc-primary-m3 bgc-primary-l4 radius-1 p-2 mb-3 shadow-sm" style="display: none;"></div>
     </div>
 
-    <!-- 4. ÁP DỤNG (NĂM) -->
+    <!-- 4. ÁP DỤNG (NĂM) & ĐƠN VỊ XUẤT PHÁT -->
     <div class="col-md-6 mb-3">
         @Html.TitleFor(m => m.ApplyYear, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
         <div class="input-group date" id="dpApplyYear_Form">
@@ -91,6 +91,16 @@
             })
         </div>
         @Html.ValidationMessageFor(m => m.ApplyYear, "", new { @class = "text-danger text-85 font-weight-bold" })
+    </div>
+
+    <!-- 4b. CƠ HỘI XUẤT PHÁT TỪ -->
+    <div class="col-md-6 mb-3">
+        @Html.TitleFor(m => m.SourceDepartmentID, new { @class = "font-bold text-secondary-d2 mb-1 d-block text-90" })
+        @Html.DropDownListFor(m => m.SourceDepartmentID, Model.ListSourceDepartment, new { @class = "form-control select2", id = "SourceDepartmentID_Form" })
+        @Html.ValidationMessageFor(m => m.SourceDepartmentID, "", new { @class = "text-danger text-85 font-weight-bold" })
+        <small class="text-muted text-85 mt-1 d-block">
+            <i class="fa fa-info-circle text-info mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_SourceDepartment_Help")
+        </small>
     </div>
 
     <!-- THÔNG TIN HỢP ĐỒNG ĐÃ ĐƯỢC ẨN KHỎI FORM -->

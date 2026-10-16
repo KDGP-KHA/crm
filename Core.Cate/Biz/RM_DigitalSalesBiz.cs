@@ -51,18 +51,25 @@ namespace Core.Cate.Biz
         private readonly string _spGetDashboardStatusStats = "RM_DigitalSales_GetDashboardStatusStats";
         private readonly string _spGetStaleActionTime = "RM_DigitalSales_GetStaleActionTime";
         private readonly string _spGetMemberRolesByEmployee = "RM_DigitalSales_GetMemberRolesByEmployee";
+        private readonly string _spGetLevel1Departments = "MN_BoPhan_GetLevel1Departments";
+        private readonly string _spQuickAssignSourceDepartment = "RM_DigitalSales_QuickAssignSourceDepartment";
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
         {
-            return GetDashboardStatusStats(applyYear, null, null);
+            return GetDashboardStatusStats(applyYear, null, null, 0);
         }
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName)
         {
-            return GetDashboardStatusStats(applyYear, userName, null);
+            return GetDashboardStatusStats(applyYear, userName, null, 0);
         }
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName, string keyword)
+        {
+            return GetDashboardStatusStats(applyYear, userName, keyword, 0);
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName, string keyword, int sourceDepartmentId)
         {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
 
@@ -70,7 +77,8 @@ namespace Core.Cate.Biz
                 _spGetDashboardStatusStats,
                 DATA_PROVIDER_NAME,
                 applyYear,
-                userName
+                userName,
+                sourceDepartmentId
             ) ?? new List<RM_DigitalSalesDashboardStatusModel>();
 
             int totalKey = 0;
@@ -80,6 +88,7 @@ namespace Core.Cate.Biz
                 Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
                 IsKeyProject = true,
                 UserName = !string.IsNullOrWhiteSpace(userName) ? userName : null,
+                SourceDepartmentID = sourceDepartmentId,
                 PageNumber = 1,
                 PageSize = 50
             }) ?? new List<RM_DigitalSalesModel>();
@@ -91,6 +100,7 @@ namespace Core.Cate.Biz
                 Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
                 IsFollowed = true,
                 UserName = !string.IsNullOrWhiteSpace(userName) ? userName : null,
+                SourceDepartmentID = sourceDepartmentId,
                 PageNumber = 1,
                 PageSize = 50
             }) ?? new List<RM_DigitalSalesModel>();
@@ -165,7 +175,8 @@ namespace Core.Cate.Biz
                 model.IsFollowed.HasValue && model.IsFollowed.Value ? 1 : 0,
                 string.IsNullOrWhiteSpace(model.StatusIDs) ? null : model.StatusIDs.Trim(),
                 model.ApplyYear.GetValueOrDefault(0),
-                string.IsNullOrWhiteSpace(model.MemberRole) ? null : model.MemberRole.Trim()
+                string.IsNullOrWhiteSpace(model.MemberRole) ? null : model.MemberRole.Trim(),
+                model.SourceDepartmentID
             );
 
             if (data != null && data.Count > 0)
@@ -177,6 +188,7 @@ namespace Core.Cate.Biz
                     item.CustomerName = CleanCustomerName(FixVietnameseMojibake(item.CustomerName));
                     item.BusinessTypeName = FixVietnameseMojibake(item.BusinessTypeName);
                     item.StatusName = FixVietnameseMojibake(item.StatusName);
+                    item.SourceDepartmentName = FixVietnameseMojibake(item.SourceDepartmentName);
                 }
             }
 
@@ -198,6 +210,7 @@ namespace Core.Cate.Biz
                 model.CustomerName = CleanCustomerName(FixVietnameseMojibake(model.CustomerName));
                 model.BusinessTypeName = FixVietnameseMojibake(model.BusinessTypeName);
                 model.StatusName = FixVietnameseMojibake(model.StatusName);
+                model.SourceDepartmentName = FixVietnameseMojibake(model.SourceDepartmentName);
                 model.Note = FixVietnameseMojibake(model.Note);
                 try
                 {
@@ -350,9 +363,37 @@ namespace Core.Cate.Biz
                 model.Note,
                 model.FileAttach,
                 username,
-                model.ApplyYear.HasValue && model.ApplyYear.Value > 0 ? model.ApplyYear.Value : DateTime.Now.Year
+                model.ApplyYear.HasValue && model.ApplyYear.Value > 0 ? model.ApplyYear.Value : DateTime.Now.Year,
+                model.SourceDepartmentID
             );
 
+            return result.GetValueOrDefault(0);
+        }
+
+        public List<MN_BoPhanModel> GetLevel1Departments()
+        {
+            var data = AppProcessor.ProcedureProvider.ExecuteTypedList<MN_BoPhanModel>(
+                _spGetLevel1Departments,
+                DATA_PROVIDER_NAME
+            ) ?? new List<MN_BoPhanModel>();
+
+            foreach (var item in data)
+            {
+                item.TenBoPhan = FixVietnameseMojibake(item.TenBoPhan);
+            }
+            return data;
+        }
+
+        public int QuickAssignSourceDepartment(int id, int sourceDepartmentId, string userName)
+        {
+            if (id <= 0) return 0;
+            var result = AppProcessor.ProcedureProvider.Execute(
+                _spQuickAssignSourceDepartment,
+                DATA_PROVIDER_NAME,
+                id,
+                sourceDepartmentId <= 0 ? 0 : sourceDepartmentId,
+                userName
+            );
             return result.GetValueOrDefault(0);
         }
 

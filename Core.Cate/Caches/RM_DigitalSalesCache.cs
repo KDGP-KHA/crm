@@ -17,7 +17,7 @@ namespace Core.Cate.Caches
         private string BuildSearchCacheKey(RM_DigitalSalesSearchModel model)
         {
             if (model == null) return "RM_DigitalSales_GetList_Default";
-            return string.Concat("RM_DigitalSales_GetList_", model.Keyword, "_", model.BusinessType, "_", model.StatusID, "_", model.StatusIDs, "_", model.CustomerID, "_", model.ProductServiceID, "_", model.DepartmentID, "_", model.EmployeeID, "_", model.MemberRole, "_", model.FromDate, "_", model.ToDate, "_", model.PageNumber, "_", model.PageSize, "_", model.UserName, "_", model.IsKeyProject, "_", model.IsFollowed, "_", model.ApplyYear);
+            return string.Concat("RM_DigitalSales_GetList_", model.Keyword, "_", model.BusinessType, "_", model.StatusID, "_", model.StatusIDs, "_", model.CustomerID, "_", model.ProductServiceID, "_", model.DepartmentID, "_", model.SourceDepartmentID, "_", model.EmployeeID, "_", model.MemberRole, "_", model.FromDate, "_", model.ToDate, "_", model.PageNumber, "_", model.PageSize, "_", model.UserName, "_", model.IsKeyProject, "_", model.IsFollowed, "_", model.ApplyYear);
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, true)]
@@ -322,27 +322,53 @@ namespace Core.Cate.Caches
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
         {
-            return GetDashboardStatusStats(applyYear, null, null);
+            return GetDashboardStatusStats(applyYear, null, null, 0);
         }
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName)
         {
-            return GetDashboardStatusStats(applyYear, userName, null);
+            return GetDashboardStatusStats(applyYear, userName, null, 0);
         }
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName, string keyword)
         {
+            return GetDashboardStatusStats(applyYear, userName, keyword, 0);
+        }
+
+        public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear, string userName, string keyword, int sourceDepartmentId)
+        {
             if (applyYear <= 0) applyYear = DateTime.Now.Year;
-            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear, "_", userName ?? "ALL", "_", keyword ?? "ALL");
+            var rawKey = string.Concat("RM_DigitalSales_GetDashboardStatusStats_", applyYear, "_", userName ?? "ALL", "_", keyword ?? "ALL", "_", sourceDepartmentId);
             var data = GetCacheItem(rawKey) as DigitalSalesDashboardOverviewModel;
             if (data != null) return data;
 
-            data = Api.GetDashboardStatusStats(applyYear, userName, keyword);
+            data = Api.GetDashboardStatusStats(applyYear, userName, keyword, sourceDepartmentId);
             if (data != null)
             {
                 AddCacheItem(rawKey, data);
             }
             return data;
+        }
+
+        public List<MN_BoPhanModel> GetLevel1Departments()
+        {
+            var rawKey = "MN_BoPhan_GetLevel1Departments";
+            var data = GetCacheItem(rawKey) as List<MN_BoPhanModel>;
+            if (data != null) return data;
+
+            data = Api.GetLevel1Departments();
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data ?? new List<MN_BoPhanModel>();
+        }
+
+        public int QuickAssignSourceDepartment(int id, int sourceDepartmentId, string userName)
+        {
+            var result = Api.QuickAssignSourceDepartment(id, sourceDepartmentId, userName);
+            if (result > 0) InvalidateCache();
+            return result;
         }
 
         public List<GroupServiceChartModel> GetGroupServiceChart(int? applyYear, string username, string employeeIds)

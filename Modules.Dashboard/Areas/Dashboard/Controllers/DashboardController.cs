@@ -136,13 +136,14 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh), bộ lọc theo Năm áp dụng và tìm kiếm từ khóa.
         /// </summary>
         [HttpGet]
-        public ActionResult Chart(int? applyYear, string keyword = null)
+        public ActionResult Chart(int? applyYear, string keyword = null, int? sourceDepartmentId = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
             DigitalSalesDashboardOverviewModel overviewModel;
             try
             {
-                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword);
+                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword, srcDeptId);
             }
             catch (Exception ex)
             {
@@ -151,6 +152,7 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             }
             ViewBag.ApplyYear = year;
             ViewBag.Keyword = keyword;
+            ViewBag.SourceDepartmentID = srcDeptId;
             ViewBag.Title = "Dashboard";
             return View("Chart", overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
         }
@@ -159,13 +161,14 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng hoặc tìm kiếm từ khóa.
         /// </summary>
         [HttpGet]
-        public ActionResult GetChartOverviewData(int? applyYear, string keyword = null)
+        public ActionResult GetChartOverviewData(int? applyYear, string keyword = null, int? sourceDepartmentId = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
             DigitalSalesDashboardOverviewModel overviewModel;
             try
             {
-                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword);
+                overviewModel = _digitalSalesCache.GetDashboardStatusStats(year, User?.UserName, keyword, srcDeptId);
             }
             catch (Exception ex)
             {
@@ -179,11 +182,12 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// Tải danh sách xuất file Excel hồ sơ kinh doanh dịch vụ số theo Năm áp dụng và từ khóa tìm kiếm.
         /// </summary>
         [HttpGet]
-        public ActionResult Export(int? applyYear, string keyword = null)
+        public ActionResult Export(int? applyYear, string keyword = null, int? sourceDepartmentId = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
             string kw = string.IsNullOrWhiteSpace(keyword) ? "" : Server.UrlEncode(keyword.Trim());
-            return Redirect($"/Cate/DigitalSales/Export?applyYear={year}&keyword={kw}");
+            int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
+            return Redirect($"/Cate/DigitalSales/Export?applyYear={year}&keyword={kw}&sourceDepartmentID={srcDeptId}");
         }
 
         /// <summary>
@@ -191,19 +195,22 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         /// </summary>
         [HttpGet]
         [ActionType(Type = EnumActionType.View)]
-        public ActionResult DigitalSalesByStatus(int? applyYear, int? statusId, string statusName, string keyword = null)
+        public ActionResult DigitalSalesByStatus(int? applyYear, int? statusId, string statusName, string keyword = null, int? sourceDepartmentId = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
             var model = new RM_DigitalSalesSearchModel
             {
                 ApplyYear = year,
                 StatusID = statusId.GetValueOrDefault(0),
-                Keyword = keyword
+                Keyword = keyword,
+                SourceDepartmentID = srcDeptId
             };
             ViewBag.ApplyYear = year;
             ViewBag.StatusID = statusId.GetValueOrDefault(0);
             ViewBag.StatusName = string.IsNullOrEmpty(statusName) ? (statusId > 0 ? "Theo trạng thái" : "Tất cả trạng thái") : statusName;
             ViewBag.Keyword = keyword;
+            ViewBag.SourceDepartmentID = srcDeptId;
             return PartialView("DigitalSalesByStatus", model);
         }
 
@@ -213,16 +220,18 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         [AjaxOnly]
         [HttpPost]
         [ActionType(Type = EnumActionType.View)]
-        public ActionResult GetDigitalSalesByStatus(int? applyYear, int? statusId, string keyword = null)
+        public ActionResult GetDigitalSalesByStatus(int? applyYear, int? statusId, string keyword = null, int? sourceDepartmentId = null)
         {
             try
             {
                 int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+                int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
                 var search = new RM_DigitalSalesSearchModel
                 {
                     ApplyYear = year,
                     StatusID = statusId.GetValueOrDefault(0),
                     Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
+                    SourceDepartmentID = srcDeptId,
                     PageNumber = 1,
                     PageSize = 1000,
                     UserName = User?.UserName

@@ -91,6 +91,23 @@
                         </span>
                     </td>
                 </tr>
+                <tr>
+                    <td class="text-secondary font-weight-bold info-label" style="padding: 8px 4px;">@AppProcessor.Messagor.GetMessage("DigitalSales_SourceDepartment"):</td>
+                    <td style="padding: 8px 4px;">
+                        @if (!string.IsNullOrEmpty(Model.SourceDepartmentName))
+                        {
+                            <span class="badge bgc-blue-l3 text-blue-d2 border-1 brc-blue-m3 font-bold px-2 py-1 shadow-sm">
+                                <i class="fa fa-map-marker-alt text-primary mr-1"></i>@Model.SourceDepartmentName
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 font-bold px-2 py-1 shadow-sm">
+                                <i class="fa fa-exclamation-triangle text-warning mr-1"></i>Chưa chọn đơn vị
+                            </span>
+                        }
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
@@ -108,7 +125,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="text-secondary font-weight-bold info-label" style="padding: 8px 4px;">Bộ phận:</td>
+                    <td class="text-secondary font-weight-bold info-label" style="padding: 8px 4px;">Đơn vị thực hiện:</td>
                     <td class="info-val" style="padding: 8px 4px;">
                         <i class="fa fa-sitemap mr-1 text-secondary"></i>@(string.IsNullOrEmpty(Model.DepartmentName) ? "—" : Model.DepartmentName)
                     </td>
