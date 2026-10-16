@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Dashboard Chart JS - CenIT TOC CRM
  * Xử lý tương tác chuyển đổi năm áp dụng, tìm kiếm từ khóa, xuất file Excel, render biểu đồ ApexCharts và mở modal chi tiết
  */
@@ -7,11 +7,23 @@ window._apexCharts = window._apexCharts || {};
 var _searchDebounceTimer = null;
 
 /**
- * Tải lại dữ liệu Dashboard theo Năm áp dụng và từ khóa tìm kiếm
+/**
+ * Tải lại dữ liệu Dashboard theo Năm áp dụng, Đơn vị xuất phát và từ khóa tìm kiếm
  */
 function onDashboardYearChange(year, keyword) {
+    onDashboardFilterChange(year, keyword);
+}
+
+function onDashboardSourceDepartmentChange(sourceDeptId) {
+    onDashboardFilterChange(null, null, sourceDeptId);
+}
+
+function onDashboardFilterChange(year, keyword, sourceDepartmentId) {
     var selectedYear = year || $("#ApplyYear").val() || new Date().getFullYear();
-    var kw = typeof keyword !== "undefined" ? keyword : ($("#dbSearchKeyword").val() || "");
+    var kw = typeof keyword !== "undefined" && keyword !== null ? keyword : ($("#dbSearchKeyword").val() || "");
+    var deptId = typeof sourceDepartmentId !== "undefined" && sourceDepartmentId !== null 
+        ? sourceDepartmentId 
+        : ($("#Dashboard_SourceDepartmentID").val() || 0);
 
     // Cập nhật hiển thị năm trên tab Kế hoạch kinh doanh
     $(".current-selected-year").text(selectedYear);
@@ -29,17 +41,19 @@ function onDashboardYearChange(year, keyword) {
         type: "GET",
         data: {
             applyYear: selectedYear,
-            keyword: kw
+            keyword: kw,
+            sourceDepartmentId: deptId
         },
         cache: false,
         success: function (html) {
             $container.html(html);
-            // Sau khi cập nhật lại view tổng quát, tải lại biểu đồ Cơ hội theo nhóm dịch vụ
+            // Sau khi cập nhật lại view tổng quát, tải lại cả 2 biểu đồ
             loadGroupServiceChart(selectedYear);
+            loadDepartmentChart(selectedYear);
             initDashboardPaginations();
         },
         error: function (xhr, status, error) {
-            console.error("Lỗi khi tải dữ liệu Dashboard theo năm:", error);
+            console.error("Lỗi khi tải dữ liệu Dashboard:", error);
             if (typeof toastr !== "undefined") {
                 toastr.error("Không thể tải dữ liệu năm " + selectedYear + ". Vui lòng thử lại!");
             }
@@ -56,7 +70,7 @@ function onDashboardYearChange(year, keyword) {
 function triggerDashboardFilter() {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
     var keyword = ($("#dbSearchKeyword").val() || "").trim();
-    onDashboardYearChange(year, keyword);
+    onDashboardFilterChange(year, keyword);
 }
 
 /**
@@ -65,7 +79,7 @@ function triggerDashboardFilter() {
 function resetDashboardFilter() {
     $("#dbSearchKeyword").val("");
     var year = $("#ApplyYear").val() || new Date().getFullYear();
-    onDashboardYearChange(year, "");
+    onDashboardFilterChange(year, "");
 }
 
 /**
@@ -450,11 +464,15 @@ function filterCardTableByEmployee(select, tableId) {
  */
 function exportCardData(type) {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
+    var sourceDeptId = $("#Dashboard_SourceDepartmentID").val() || 0;
     var baseUrl = window._dashboardChartUrls && window._dashboardChartUrls.export
         ? window._dashboardChartUrls.export
         : "/Cate/DigitalSales/Export";
 
     var url = baseUrl + "?applyYear=" + encodeURIComponent(year);
+    if (sourceDeptId > 0) {
+        url += "&sourceDepartmentID=" + encodeURIComponent(sourceDeptId);
+    }
 
     if (type === 'keyProject') {
         var kw = $("#tableKeyProjects").closest(".card").find("input").val() || "";
@@ -483,10 +501,15 @@ function exportCardData(type) {
  */
 function exportDashboardList() {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
+    var sourceDeptId = $("#Dashboard_SourceDepartmentID").val() || 0;
     var baseUrl = window._dashboardChartUrls && window._dashboardChartUrls.export
         ? window._dashboardChartUrls.export
         : "/Cate/DigitalSales/Export";
-    window.location.href = baseUrl + "?applyYear=" + encodeURIComponent(year);
+    var url = baseUrl + "?applyYear=" + encodeURIComponent(year);
+    if (sourceDeptId > 0) {
+        url += "&sourceDepartmentID=" + encodeURIComponent(sourceDeptId);
+    }
+    window.location.href = url;
 }
 
 /**
@@ -645,17 +668,81 @@ window.detailOpportunityByGroupService = function (groupServiceId) {
 };
 
 /**
+ * Tải dữ liệu và vẽ biểu đồ Cơ cấu theo Đơn vị xuất phát (Donut / Pie Chart ApexCharts - US-18)
+ */
+function loadDepartmentChart(year) {
+    var el = document.querySelector('#dept-opp-chart');
+    if (!el) return;
+
+    if (window._apexCharts && window._apexCharts['dept-opp-chart']) {
+        try {
+            window._apexCharts['dept-opp-chart'].destroy();
+        } catch (e) { }
+        window._apexCharts['dept-opp-chart'] = null;
+    }
+
+    el.innerHTML = '<div class="text-center text-secondary-l1 py-4"><i class="fa fa-spinner fa-spin mr-1"></i> Đang tải biểu đồ đơn vị...</div>';
+
+    var selectedYear = year || $("#ApplyYear").val() || new Date().getFullYear();
+    var chartUrl = window._dashboardChartUrls && window._dashboardChartUrls.getDepartmentChart
+        ? window._dashboardChartUrls.getDepartmentChart
+        : "/Dashboard/Dashboard/GetDepartmentChart";
+
+    $.ajax({
+        url: chartUrl,
+        type: "POST",
+        data: {
+            "applyYear": selectedYear
+        },
+        success: function (result) {
+            if (!result || !result.data || !result.data.length) {
+                el.innerHTML = '<div class="text-center text-secondary-l1 py-4">Không có dữ liệu đơn vị</div>';
+                return;
+            }
+
+            var series = [], labels = [], deptIds = [];
+            for (var i = 0; i < result.data.length; i++) {
+                series.push(result.data[i].TotalCount);
+                labels.push(result.data[i].TenBoPhan);
+                deptIds.push(result.data[i].BoPhan_ID);
+            }
+
+            _renderApexPie(
+                'dept-opp-chart',
+                labels,
+                series,
+                function (event, chartContext, config) {
+                    if (config && typeof config.dataPointIndex !== "undefined" && typeof deptIds[config.dataPointIndex] !== "undefined") {
+                        var clickedDeptId = deptIds[config.dataPointIndex];
+                        if (clickedDeptId > 0 && $("#Dashboard_SourceDepartmentID").length) {
+                            $("#Dashboard_SourceDepartmentID").val(clickedDeptId);
+                            onDashboardSourceDepartmentChange(clickedDeptId);
+                        }
+                    }
+                }
+            );
+        },
+        error: function (xhr, status, error) {
+            console.error("Lỗi khi tải biểu đồ Đơn vị xuất phát:", error);
+            el.innerHTML = '<div class="text-center text-danger py-4">Không thể tải biểu đồ đơn vị</div>';
+        }
+    });
+}
+
+/**
  * Mở modal popup danh sách cơ hội / dự án kinh doanh dịch vụ số theo trạng thái
  */
 window.openDigitalSalesByStatus = function (statusId, statusName) {
     var year = $("#ApplyYear").val() || new Date().getFullYear();
+    var sourceDeptId = $("#Dashboard_SourceDepartmentID").val() || 0;
     var baseUrl = window._dashboardChartUrls && window._dashboardChartUrls.digitalSalesByStatus
         ? window._dashboardChartUrls.digitalSalesByStatus
         : '/Dashboard/Dashboard/DigitalSalesByStatus';
 
     var url = baseUrl + '?applyYear=' + encodeURIComponent(year)
         + '&statusId=' + encodeURIComponent(statusId || 0)
-        + '&statusName=' + encodeURIComponent(statusName || '');
+        + '&statusName=' + encodeURIComponent(statusName || '')
+        + '&sourceDepartmentId=' + encodeURIComponent(sourceDeptId);
 
     var $btn = $('<a data-modal="" data-modal-id="DigitalSalesByStatus" data-width="1200" href="' + url + '"></a>');
     $("body").append($btn);
@@ -664,8 +751,9 @@ window.openDigitalSalesByStatus = function (statusId, statusName) {
 };
 
 $(document).ready(function () {
-    // Tải biểu đồ Cơ hội theo nhóm dịch vụ lần đầu
+    // Tải biểu đồ Cơ hội theo nhóm dịch vụ và biểu đồ Đơn vị xuất phát lần đầu
     loadGroupServiceChart($("#ApplyYear").val());
+    loadDepartmentChart($("#ApplyYear").val());
 
     // Khởi tạo phân trang cho cả 3 bảng Dashboard
     initDashboardPaginations();
@@ -677,6 +765,9 @@ $(document).ready(function () {
             $(window).trigger('resize');
             if (window._apexCharts && window._apexCharts['gs-opp-chart']) {
                 window._apexCharts['gs-opp-chart'].render();
+            }
+            if (window._apexCharts && window._apexCharts['dept-opp-chart']) {
+                window._apexCharts['dept-opp-chart'].render();
             }
         }
     });

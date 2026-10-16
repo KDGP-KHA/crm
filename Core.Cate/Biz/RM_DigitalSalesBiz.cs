@@ -52,6 +52,8 @@ namespace Core.Cate.Biz
         private readonly string _spGetStaleActionTime = "RM_DigitalSales_GetStaleActionTime";
         private readonly string _spGetMemberRolesByEmployee = "RM_DigitalSales_GetMemberRolesByEmployee";
         private readonly string _spGetLevel1Departments = "MN_BoPhan_GetLevel1Departments";
+        private readonly string _spGetManagedLevel1Departments = "MN_BoPhan_GetManagedLevel1Departments";
+        private readonly string _spGetDashboardDepartmentStats = "RM_DigitalSales_GetDashboardDepartmentStats";
         private readonly string _spQuickAssignSourceDepartment = "RM_DigitalSales_QuickAssignSourceDepartment";
 
         public DigitalSalesDashboardOverviewModel GetDashboardStatusStats(int applyYear)
@@ -128,6 +130,7 @@ namespace Core.Cate.Biz
             {
                 ApplyYear = applyYear,
                 Keyword = keyword,
+                SourceDepartmentID = sourceDepartmentId,
                 StatusList = list,
                 TotalCountAll = list.Sum(x => x.TotalCount),
                 TotalExpectedRevenueAll = list.Sum(x => x.TotalExpectedRevenue),
@@ -376,6 +379,39 @@ namespace Core.Cate.Biz
                 _spGetLevel1Departments,
                 DATA_PROVIDER_NAME
             ) ?? new List<MN_BoPhanModel>();
+
+            foreach (var item in data)
+            {
+                item.TenBoPhan = FixVietnameseMojibake(item.TenBoPhan);
+            }
+            return data;
+        }
+
+        public List<MN_BoPhanModel> GetManagedLevel1Departments(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName)) return new List<MN_BoPhanModel>();
+            var data = AppProcessor.ProcedureProvider.ExecuteTypedList<MN_BoPhanModel>(
+                _spGetManagedLevel1Departments,
+                DATA_PROVIDER_NAME,
+                userName
+            ) ?? new List<MN_BoPhanModel>();
+
+            foreach (var item in data)
+            {
+                item.TenBoPhan = FixVietnameseMojibake(item.TenBoPhan);
+            }
+            return data;
+        }
+
+        public List<RM_DigitalSalesDepartmentStatModel> GetDashboardDepartmentStats(int applyYear, string userName)
+        {
+            if (applyYear <= 0) applyYear = DateTime.Now.Year;
+            var data = AppProcessor.ProcedureProvider.ExecuteTypedList<RM_DigitalSalesDepartmentStatModel>(
+                _spGetDashboardDepartmentStats,
+                DATA_PROVIDER_NAME,
+                applyYear,
+                userName
+            ) ?? new List<RM_DigitalSalesDepartmentStatModel>();
 
             foreach (var item in data)
             {

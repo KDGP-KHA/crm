@@ -16,10 +16,22 @@ namespace Core.Cate.Models
         public decimal TotalActualRevenue { get; set; }
     }
 
+    public class RM_DigitalSalesDepartmentStatModel : BaseModel
+    {
+        public int BoPhan_ID { get; set; }
+        public string TenBoPhan { get; set; }
+        public int TotalCount { get; set; }
+        public decimal TotalExpectedRevenue { get; set; }
+        public decimal TotalActualRevenue { get; set; }
+    }
+
     public class DigitalSalesDashboardOverviewModel : BaseModel
     {
         public int ApplyYear { get; set; }
         public string Keyword { get; set; }
+        public int SourceDepartmentID { get; set; }
+        public List<System.Web.Mvc.SelectListItem> ListManagedDepartments { get; set; } = new List<System.Web.Mvc.SelectListItem>();
+        public List<RM_DigitalSalesDepartmentStatModel> DepartmentStats { get; set; } = new List<RM_DigitalSalesDepartmentStatModel>();
         public List<RM_DigitalSalesDashboardStatusModel> StatusList { get; set; } = new List<RM_DigitalSalesDashboardStatusModel>();
         public int TotalCountAll { get; set; }
         public decimal TotalExpectedRevenueAll { get; set; }

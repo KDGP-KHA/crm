@@ -28,6 +28,30 @@
                 }
             </select>
         </div>
+
+        @if (Model != null && Model.ListManagedDepartments != null && Model.ListManagedDepartments.Count > 0)
+        {
+            <div class="db-filter-group my-1 ml-3">
+                <label class="db-filter-label mr-2" for="Dashboard_SourceDepartmentID">
+                    <i class="fa fa-map-marker-alt text-primary mr-1"></i>Đơn vị xuất phát:
+                </label>
+                <select id="Dashboard_SourceDepartmentID" name="Dashboard_SourceDepartmentID" class="db-filter-select" onchange="onDashboardSourceDepartmentChange(this.value);">
+                    @foreach (var dept in Model.ListManagedDepartments)
+                    {
+                        <option value="@dept.Value" @(dept.Selected ? "selected" : "")>@dept.Text</option>
+                    }
+                </select>
+            </div>
+        }
+        else
+        {
+            <div class="db-filter-group my-1 ml-3">
+                <span class="badge bgc-secondary-l3 text-secondary-d2 border-1 brc-secondary-m3 px-2 py-1 radius-1 font-bold text-85">
+                    <i class="fa fa-user mr-1 text-primary"></i>Phạm vi: Cá nhân phụ trách
+                </span>
+                <input type="hidden" id="Dashboard_SourceDepartmentID" value="0" />
+            </div>
+        }
     </div>
 
     <!-- 2. Nội dung Dashboard -->
@@ -49,6 +73,7 @@
             getOverview: '@Url.Action("GetChartOverviewData", "Dashboard", new { area = "Dashboard" })',
             digitalSalesByStatus: '@Url.Action("DigitalSalesByStatus", "Dashboard", new { area = "Dashboard" })',
             getGroupServiceChart: '@Url.Action("GetGroupServiceChart", "Dashboard", new { area = "Dashboard" })',
+            getDepartmentChart: '@Url.Action("GetDepartmentChart", "Dashboard", new { area = "Dashboard" })',
             opportunityByGroupService: '@Url.Action("OpportunityByGroupService", "Dashboard", new { area = "Dashboard" })',
             export: '@Url.Action("Export", "DigitalSales", new { area = "Cate" })'
         };

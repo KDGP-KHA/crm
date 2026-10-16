@@ -364,6 +364,36 @@ namespace Core.Cate.Caches
             return data ?? new List<MN_BoPhanModel>();
         }
 
+        public List<MN_BoPhanModel> GetManagedLevel1Departments(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName)) return new List<MN_BoPhanModel>();
+            var rawKey = string.Concat("MN_BoPhan_GetManagedLevel1Departments_", userName.Trim().ToLower());
+            var data = GetCacheItem(rawKey) as List<MN_BoPhanModel>;
+            if (data != null) return data;
+
+            data = Api.GetManagedLevel1Departments(userName);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data ?? new List<MN_BoPhanModel>();
+        }
+
+        public List<RM_DigitalSalesDepartmentStatModel> GetDashboardDepartmentStats(int applyYear, string userName)
+        {
+            var year = applyYear <= 0 ? DateTime.Now.Year : applyYear;
+            var rawKey = string.Concat("RM_DigitalSales_GetDashboardDepartmentStats_", year, "_", (userName ?? "ALL").Trim().ToLower());
+            var data = GetCacheItem(rawKey) as List<RM_DigitalSalesDepartmentStatModel>;
+            if (data != null) return data;
+
+            data = Api.GetDashboardDepartmentStats(year, userName);
+            if (data != null)
+            {
+                AddCacheItem(rawKey, data);
+            }
+            return data ?? new List<RM_DigitalSalesDepartmentStatModel>();
+        }
+
         public int QuickAssignSourceDepartment(int id, int sourceDepartmentId, string userName)
         {
             var result = Api.QuickAssignSourceDepartment(id, sourceDepartmentId, userName);

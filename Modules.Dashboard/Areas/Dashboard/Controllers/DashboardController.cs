@@ -133,13 +133,21 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         }
 
         /// <summary>
-        /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh), bộ lọc theo Năm áp dụng và tìm kiếm từ khóa.
+        /// Trang Dashboard mới gồm 2 tab (Tổng quát & Kế hoạch kinh doanh), bộ lọc theo Năm áp dụng, Đơn vị quản lý và tìm kiếm từ khóa.
         /// </summary>
         [HttpGet]
         public ActionResult Chart(int? applyYear, string keyword = null, int? sourceDepartmentId = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var managedDepts = _digitalSalesCache.GetManagedLevel1Departments(User?.UserName) ?? new List<MN_BoPhanModel>();
             int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
+
+            // Nếu người dùng chỉ quản lý 1 đơn vị duy nhất và chưa chọn cụ thể -> mặc định chọn đơn vị đó
+            if (managedDepts.Count == 1 && (!sourceDepartmentId.HasValue || sourceDepartmentId.Value <= 0))
+            {
+                srcDeptId = managedDepts[0].BoPhan_ID;
+            }
+
             DigitalSalesDashboardOverviewModel overviewModel;
             try
             {
@@ -150,21 +158,53 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
                 AppProcessor.Logger.Error(ex);
                 overviewModel = new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
             }
+
+            overviewModel = overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
+            overviewModel.SourceDepartmentID = srcDeptId;
+
+            // Xây dựng danh sách combobox đơn vị theo quyền quản lý
+            var listSelect = new List<SelectListItem>();
+            if (managedDepts.Count > 1)
+            {
+                listSelect.Add(new SelectListItem { Value = "0", Text = "-- Tất cả đơn vị được quản lý --", Selected = (srcDeptId == 0) });
+            }
+            foreach (var d in managedDepts)
+            {
+                listSelect.Add(new SelectListItem { Value = d.BoPhan_ID.ToString(), Text = d.TenBoPhan, Selected = (srcDeptId == d.BoPhan_ID) });
+            }
+            overviewModel.ListManagedDepartments = listSelect;
+
+            try
+            {
+                overviewModel.DepartmentStats = _digitalSalesCache.GetDashboardDepartmentStats(year, User?.UserName) ?? new List<RM_DigitalSalesDepartmentStatModel>();
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+            }
+
             ViewBag.ApplyYear = year;
             ViewBag.Keyword = keyword;
             ViewBag.SourceDepartmentID = srcDeptId;
             ViewBag.Title = "Dashboard";
-            return View("Chart", overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
+            return View("Chart", overviewModel);
         }
 
         /// <summary>
-        /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng hoặc tìm kiếm từ khóa.
+        /// Tải lại partial view tab Tổng quát khi người dùng đổi Năm áp dụng, Đơn vị xuất phát hoặc tìm kiếm từ khóa.
         /// </summary>
         [HttpGet]
         public ActionResult GetChartOverviewData(int? applyYear, string keyword = null, int? sourceDepartmentId = null)
         {
             int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var managedDepts = _digitalSalesCache.GetManagedLevel1Departments(User?.UserName) ?? new List<MN_BoPhanModel>();
             int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
+
+            if (managedDepts.Count == 1 && (!sourceDepartmentId.HasValue || sourceDepartmentId.Value <= 0))
+            {
+                srcDeptId = managedDepts[0].BoPhan_ID;
+            }
+
             DigitalSalesDashboardOverviewModel overviewModel;
             try
             {
@@ -175,7 +215,50 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
                 AppProcessor.Logger.Error(ex);
                 overviewModel = new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
             }
-            return PartialView("_ChartOverview", overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword });
+
+            overviewModel = overviewModel ?? new DigitalSalesDashboardOverviewModel { ApplyYear = year, Keyword = keyword };
+            overviewModel.SourceDepartmentID = srcDeptId;
+
+            var listSelect = new List<SelectListItem>();
+            if (managedDepts.Count > 1)
+            {
+                listSelect.Add(new SelectListItem { Value = "0", Text = "-- Tất cả đơn vị được quản lý --", Selected = (srcDeptId == 0) });
+            }
+            foreach (var d in managedDepts)
+            {
+                listSelect.Add(new SelectListItem { Value = d.BoPhan_ID.ToString(), Text = d.TenBoPhan, Selected = (srcDeptId == d.BoPhan_ID) });
+            }
+            overviewModel.ListManagedDepartments = listSelect;
+
+            try
+            {
+                overviewModel.DepartmentStats = _digitalSalesCache.GetDashboardDepartmentStats(year, User?.UserName) ?? new List<RM_DigitalSalesDepartmentStatModel>();
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+            }
+
+            return PartialView("_ChartOverview", overviewModel);
+        }
+
+        /// <summary>
+        /// Trả dữ liệu JSON cơ cấu cơ hội theo Đơn vị xuất phát cho biểu đồ ApexCharts (US-18).
+        /// </summary>
+        [HttpPost]
+        public ActionResult GetDepartmentChart(int? applyYear)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            try
+            {
+                var stats = _digitalSalesCache.GetDashboardDepartmentStats(year, User?.UserName) ?? new List<RM_DigitalSalesDepartmentStatModel>();
+                return Json(new { success = true, data = stats }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                AppProcessor.Logger.Error(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
 
         /// <summary>
