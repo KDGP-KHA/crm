@@ -1,4 +1,4 @@
-.overview-info-table {
+﻿.overview-info-table {
         font-size: 15px !important;
     }
     .overview-info-table td {
@@ -156,4 +156,19 @@
     .badge-purple {
         background-color: #8e24aa !important;
         color: #ffffff !important;
+    }
+
+    @media (max-width: 575.98px) {
+        .overview-info-table td.info-label {
+            width: 115px !important;
+            font-size: 13.5px !important;
+        }
+        .overview-info-table td {
+            font-size: 14px !important;
+        }
+        .overview-info-table .badge {
+            white-space: normal;
+            text-align: left;
+            line-height: 1.35;
+        }
     }

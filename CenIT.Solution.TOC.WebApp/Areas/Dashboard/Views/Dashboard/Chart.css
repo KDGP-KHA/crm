@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Dashboard Chart CSS - CenIT TOC CRM
    Tuân thủ quy chuẩn Ace Admin v4 / Bootstrap 4
    ========================================================================== */
@@ -610,4 +610,79 @@
 .db-actiontime .actiontime-val {
     color: #1e293b;
     font-weight: 600;
+}
+
+/* ==========================================================================
+   Mobile & Tablet Responsive Optimization (< 768px & < 576px)
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .db-header-bar {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .db-page-title {
+        font-size: 16px;
+        width: 100%;
+        margin-right: 0 !important;
+    }
+
+    .db-filter-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .db-filter-select {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+        text-overflow: ellipsis;
+    }
+
+    .db-overview-container,
+    .db-tab-content {
+        padding: 12px;
+    }
+
+    .db-section-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .card-total-summary {
+        padding: 14px 16px;
+    }
+
+    .total-summary-title {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .total-metric-row {
+        gap: 12px;
+    }
+
+    .total-metric-item {
+        flex: 1 1 100%;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .total-metric-item:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .total-metric-val {
+        font-size: 19px;
+    }
+
+    .db-card-search {
+        width: 100% !important;
+        margin-right: 0 !important;
+        margin-bottom: 6px;
+    }
 }

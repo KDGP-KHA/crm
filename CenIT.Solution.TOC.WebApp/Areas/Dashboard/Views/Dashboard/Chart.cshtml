@@ -21,7 +21,7 @@
             <label class="db-filter-label mr-2" for="ApplyYear">
                 <i class="fa fa-calendar-alt text-primary mr-1"></i>Năm áp dụng:
             </label>
-            <select id="ApplyYear" name="ApplyYear" class="db-filter-select" onchange="onDashboardYearChange(this.value);">
+            <select id="ApplyYear" name="ApplyYear" class="db-filter-select none-select2" onchange="onDashboardYearChange(this.value);">
                 @for (int y = currentYear + 3; y >= currentYear - 5; y--)
                 {
                     <option value="@y" @(y == selectedYear ? "selected" : "")>Năm @y</option>
@@ -31,11 +31,11 @@
 
         @if (Model != null && Model.ListManagedDepartments != null && Model.ListManagedDepartments.Count > 0)
         {
-            <div class="db-filter-group my-1 ml-3">
+            <div class="db-filter-group my-1 ml-md-3">
                 <label class="db-filter-label mr-2" for="Dashboard_SourceDepartmentID">
                     <i class="fa fa-map-marker-alt text-primary mr-1"></i>Đơn vị xuất phát:
                 </label>
-                <select id="Dashboard_SourceDepartmentID" name="Dashboard_SourceDepartmentID" class="db-filter-select" onchange="onDashboardSourceDepartmentChange(this.value);">
+                <select id="Dashboard_SourceDepartmentID" name="Dashboard_SourceDepartmentID" class="db-filter-select none-select2" onchange="onDashboardSourceDepartmentChange(this.value);">
                     @foreach (var dept in Model.ListManagedDepartments)
                     {
                         <option value="@dept.Value" @(dept.Selected ? "selected" : "")>@dept.Text</option>
@@ -45,7 +45,7 @@
         }
         else
         {
-            <div class="db-filter-group my-1 ml-3">
+            <div class="db-filter-group my-1 ml-md-3">
                 <span class="badge bgc-secondary-l3 text-secondary-d2 border-1 brc-secondary-m3 px-2 py-1 radius-1 font-bold text-85">
                     <i class="fa fa-user mr-1 text-primary"></i>Phạm vi: Cá nhân phụ trách
                 </span>

@@ -1,4 +1,4 @@
-.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom,
+﻿.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-bottom,
 .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-bottom,
 .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top,
 .datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-right.datepicker-orient-top,
@@ -151,4 +151,19 @@
 }
 .search-switches-box .custom-switch.custom-switch-lg {
     margin-right: 0 !important;
+}
+
+@media (max-width: 575.98px) {
+    #SearchDigitalSales .search-switches-box .switches-wrapper {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 4px 0;
+    }
+    #SearchDigitalSales .search-action-buttons {
+        height: auto;
+        flex-wrap: wrap;
+    }
+    #SearchDigitalSales .search-action-buttons .btn {
+        flex: 1 1 auto;
+    }
 }

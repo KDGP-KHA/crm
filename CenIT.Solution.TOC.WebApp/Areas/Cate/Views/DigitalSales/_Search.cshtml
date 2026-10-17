@@ -46,7 +46,7 @@
             <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 Search_Box">
                 @Html.TitleFor(model => model.BusinessType, new { @class = "font-bold text-sm-right" })
                 <div>
-                    <select id="BusinessType" name="BusinessType" class="form-control" onchange="filterStatusListByBusinessType(this.value);">
+                    <select id="BusinessType" name="BusinessType" class="form-control none-select2" onchange="filterStatusListByBusinessType(this.value);">
                         <option value="">@AppProcessor.Messagor.GetMessage("DigitalSalesSearch_BusinessType_AllOption")</option>
                         <option value="1" @(Model.BusinessType == 1 ? "selected" : "")>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity")</option>
                         <option value="2" @(Model.BusinessType == 2 ? "selected" : "")>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project")</option>
@@ -145,25 +145,25 @@
             <!-- 6. Đơn vị xuất phát -->
             <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
                 @Html.TitleFor(model => model.SourceDepartmentID, new { @class = "font-bold text-sm-right" })
-                @Html.DropDownListFor(model => model.SourceDepartmentID, Model.ListSourceDepartment, new { @class = "form-control", id = "SourceDepartmentID" })
+                @Html.DropDownListFor(model => model.SourceDepartmentID, Model.ListSourceDepartment, new { @class = "form-control none-select2", id = "SourceDepartmentID" })
             </div>
 
             <!-- 7. Đơn vị thành viên thực hiện -->
             <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
                 <label class="font-bold text-sm-right" for="DepartmentID">@AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberDepartment_Label")</label>
-                @Html.DropDownListFor(model => model.DepartmentID, Model.ListDepartment, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Department_Option"), new { @class = "form-control", id = "DepartmentID" })
+                @Html.DropDownListFor(model => model.DepartmentID, Model.ListDepartment, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Department_Option"), new { @class = "form-control none-select2", id = "DepartmentID" })
             </div>
 
             <!-- 8. Nhân viên -->
             <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
                 @Html.TitleFor(model => model.EmployeeID, new { @class = "font-bold" })
-                @Html.DropDownListFor(model => model.EmployeeID, Model.ListEmployee, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Employee_Option"), new { @class = "form-control", id = "EmployeeID" })
+                @Html.DropDownListFor(model => model.EmployeeID, Model.ListEmployee, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Employee_Option"), new { @class = "form-control none-select2", id = "EmployeeID" })
             </div>
 
             <!-- 8b. Vai trò thành viên trong dự án -->
             <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
                 @Html.TitleFor(model => model.MemberRole, new { @class = "font-bold" })
-                @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option"), new { @class = "form-control", id = "MemberRole" })
+                @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option"), new { @class = "form-control none-select2", id = "MemberRole" })
             </div>
 
             <!-- 9. Từ ngày -->
