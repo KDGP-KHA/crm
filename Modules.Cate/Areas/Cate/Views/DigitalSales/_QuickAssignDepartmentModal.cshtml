@@ -107,6 +107,9 @@
                             if (typeof _tableDigitalSalesByStatus !== 'undefined' && _tableDigitalSalesByStatus) {
                                 _tableDigitalSalesByStatus.ajax.reload(null, false);
                             }
+                            if (typeof refreshAllSections === 'function') {
+                                refreshAllSections(salesId);
+                            }
                         });
                     } else {
                         $btn.prop('disabled', false).html('<i class="fa fa-check mr-1"></i> @Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("Button_Save")))');

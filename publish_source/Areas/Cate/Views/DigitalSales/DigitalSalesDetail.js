@@ -1,4 +1,4 @@
-window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
+﻿window.CKEDITOR_BASEPATH = "/Contents/Modules/Major/ckeditor4/";
 var _detailUrls = {
     editSales: "/Cate/DigitalSales/Edit",
     changeStatusModal: "/Cate/DigitalSales/ChangeStatusModal",
@@ -3828,3 +3828,16 @@ function doScrollAndHighlightActivity($item) {
     }, 2500);
 }
 
+function openQuickAssignDepartmentModal(id) {
+    if (!id || parseInt(id) <= 0) return;
+    var url = "/Cate/DigitalSales/QuickAssignDepartmentModal?id=" + id;
+    $.get(url, function (html) {
+        $("#modalContainer").html(html);
+        $("#modalQuickAssignDepartment").modal("show");
+    }).fail(function () {
+        if (typeof toastr !== "undefined") {
+            toastr.error("Không thể tải thông tin gán đơn vị xuất phát.");
+        }
+    });
+}
+window.openQuickAssignDepartmentModal = openQuickAssignDepartmentModal;
