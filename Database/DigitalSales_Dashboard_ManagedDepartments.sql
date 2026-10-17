@@ -1,4 +1,4 @@
-/*
+﻿/*
 ========================================================================================
     HỆ THỐNG CENIT TOC CRM - PHÂN HỆ KINH DOANH SPDV SỐ (RM_DIGITALSALES)
     DASHBOARD NÂNG CAO: COMBOBOX ĐƠN VỊ QUẢN LÝ & BIỂU ĐỒ CƠ CẤU THEO ĐƠN VỊ (US-18)
@@ -239,6 +239,112 @@ BEGIN
       )
     GROUP BY ISNULL(ds.SourceDepartmentID, 0), ISNULL(bp.TenBoPhan, N'Chưa chọn đơn vị xuất phát')
     ORDER BY TotalCount DESC;
+END
+GO
+
+PRINT N'>>> 3. CẬP NHẬT STORED PROCEDURE dbo.RM_DigitalSales_GetStaleActionTime...';
+GO
+
+ALTER PROCEDURE [dbo].[RM_DigitalSales_GetStaleActionTime]
+    @ApplyYear INT = NULL,
+    @Hours INT = 72,
+    @EmployeeID INT = 0,
+    @UserName VARCHAR(150) = NULL,
+    @SourceDepartmentID INT = 0
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @UserTable TABLE (ID INT, UserName VARCHAR(150));
+    INSERT INTO @UserTable (ID, UserName)
+    EXEC dbo.Sys_User_ByManager @UserName;
+
+    DECLARE @ManagedLevel1Depts TABLE (
+        BoPhan_ID INT PRIMARY KEY,
+        TenBoPhan NVARCHAR(250),
+        MaBoPhan VARCHAR(50)
+    );
+    INSERT INTO @ManagedLevel1Depts (BoPhan_ID, TenBoPhan, MaBoPhan)
+    EXEC dbo.MN_BoPhan_GetManagedLevel1Departments @UserName;
+
+    DECLARE @HasManagedDepts BIT = 0;
+    IF EXISTS (SELECT 1 FROM @ManagedLevel1Depts)
+        SET @HasManagedDepts = 1;
+
+    SELECT 
+        ds.DigitalSalesID,
+        ds.Code,
+        ds.Title,
+        ds.BusinessType,
+        CASE ds.BusinessType WHEN 1 THEN N'Cơ hội' WHEN 2 THEN N'Dự án' ELSE N'Khác' END AS BusinessTypeName,
+        ds.StatusID,
+        st.StatusCode,
+        st.StatusName,
+        ds.CustomerID,
+        c.CustomerName,
+        CAST(ISNULL((
+            SELECT SUM(dsp.ExpectedRevenue) 
+            FROM dbo.RM_DigitalSalesProduct dsp 
+            WHERE dsp.DigitalSalesID = ds.DigitalSalesID AND dsp.IsDeleted = 0
+        ), 0) AS DECIMAL(18, 2)) AS TotalExpectedRevenue,
+        CAST(COALESCE(
+            (
+                SELECT SUM(ISNULL(CASE WHEN ISNULL(ct.TotalAmount, 0) > 0 THEN ct.TotalAmount ELSE ct.ContractValue END, 0)) * 1000000
+                FROM dbo.RM_DigitalSalesProductContract pc
+                INNER JOIN dbo.RM_DigitalSalesProduct dsp ON dsp.SalesProductID = pc.SalesProductID
+                INNER JOIN dbo.RM_Contracts ct ON ct.ContractID = pc.ContractID
+                WHERE dsp.DigitalSalesID = ds.DigitalSalesID
+                  AND pc.IsDeleted = 0
+                  AND ISNULL(ct.IsDeleted, 0) = 0
+                  AND dsp.IsDeleted = 0
+            ),
+            ds.ContractValue,
+            0
+        ) AS DECIMAL(18, 2)) AS TotalActualRevenue,
+        ds.AssignedEmployeeID,
+        u.FullName AS AssignedEmployeeName,
+        ds.DepartmentID,
+        bp.TenBoPhan AS DepartmentName,
+        ds.SourceDepartmentID,
+        bpSource.TenBoPhan AS SourceDepartmentName,
+        ds.ActionTime,
+        ds.LastModifiedDate,
+        ds.CreatedDate,
+        DATEDIFF(hour, COALESCE(ds.ActionTime, ds.LastModifiedDate, ds.CreatedDate), GETDATE()) AS HoursSinceUpdate,
+        ISNULL(ds.ApplyYear, YEAR(ISNULL(ds.CreatedDate, GETDATE()))) AS ApplyYear
+    FROM dbo.RM_DigitalSales ds
+    INNER JOIN dbo.RM_DigitalSalesStatus st ON ds.StatusID = st.StatusID
+    LEFT JOIN dbo.RM_Customer c ON ds.CustomerID = c.CustomerID
+    LEFT JOIN dbo.Sys_Users u ON ds.AssignedEmployeeID = u.UserId
+    LEFT JOIN dbo.MN_BoPhan bp ON ds.DepartmentID = bp.BoPhan_ID
+    LEFT JOIN dbo.MN_BoPhan bpSource ON ds.SourceDepartmentID = bpSource.BoPhan_ID
+    WHERE ds.IsDeleted = 0
+      AND (
+          ds.CreatedBy = @UserName
+          OR ds.AssignedEmployeeID IN (SELECT ID FROM @UserTable)
+          OR EXISTS (
+              SELECT 1 FROM dbo.RM_DigitalSalesMember m
+              WHERE m.DigitalSalesID = ds.DigitalSalesID
+                AND ISNULL(m.IsActive, 0) = 1
+                AND m.UserID IN (SELECT ID FROM @UserTable)
+          )
+          OR (
+              @HasManagedDepts = 1
+              AND ds.SourceDepartmentID IS NOT NULL
+              AND ds.SourceDepartmentID IN (SELECT BoPhan_ID FROM @ManagedLevel1Depts)
+          )
+      )
+      AND (st.StatusCode IS NULL OR st.StatusCode NOT IN ('COMPLETED', 'LOST'))
+      AND (@ApplyYear IS NULL OR @ApplyYear = 0 OR ISNULL(ds.ApplyYear, YEAR(ISNULL(ds.CreatedDate, GETDATE()))) = @ApplyYear)
+      AND (@EmployeeID = 0 OR ds.AssignedEmployeeID = @EmployeeID)
+      AND (
+          @SourceDepartmentID IS NULL
+          OR @SourceDepartmentID = 0
+          OR (@SourceDepartmentID = -1 AND ds.SourceDepartmentID IS NULL)
+          OR (@SourceDepartmentID > 0 AND ds.SourceDepartmentID = @SourceDepartmentID)
+      )
+      AND DATEDIFF(hour, COALESCE(ds.ActionTime, ds.LastModifiedDate, ds.CreatedDate), GETDATE()) >= @Hours
+    ORDER BY DATEDIFF(hour, COALESCE(ds.ActionTime, ds.LastModifiedDate, ds.CreatedDate), GETDATE()) DESC, ds.DigitalSalesID DESC;
 END
 GO
 

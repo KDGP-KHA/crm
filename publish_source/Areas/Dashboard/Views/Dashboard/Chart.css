@@ -612,6 +612,30 @@
     font-weight: 600;
 }
 
+.db-sourcedept {
+    font-size: 12px;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    line-height: 1.4;
+}
+
+.db-sourcedept .sourcedept-label {
+    color: #64748b;
+    margin-right: 4px;
+}
+
+.db-sourcedept .sourcedept-val {
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.db-sourcedept .sourcedept-val.unassigned {
+    color: #b45309;
+    font-weight: 600;
+}
+
 /* ==========================================================================
    Mobile & Tablet Responsive Optimization (< 768px & < 576px)
    ========================================================================== */

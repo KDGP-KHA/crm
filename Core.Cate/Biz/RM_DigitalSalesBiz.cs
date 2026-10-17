@@ -113,8 +113,23 @@ namespace Core.Cate.Biz
                 applyYear,
                 72,
                 0,
-                userName
+                userName,
+                sourceDepartmentId
             ) ?? new List<RM_DigitalSalesModel>();
+
+            if (staleSales.Count > 0)
+            {
+                foreach (var item in staleSales)
+                {
+                    item.Title = FixVietnameseMojibake(item.Title);
+                    item.CustomerName = CleanCustomerName(FixVietnameseMojibake(item.CustomerName));
+                    item.BusinessTypeName = FixVietnameseMojibake(item.BusinessTypeName);
+                    item.StatusName = FixVietnameseMojibake(item.StatusName);
+                    item.SourceDepartmentName = FixVietnameseMojibake(item.SourceDepartmentName);
+                    item.DepartmentName = FixVietnameseMojibake(item.DepartmentName);
+                    item.AssignedEmployeeName = FixVietnameseMojibake(item.AssignedEmployeeName);
+                }
+            }
 
             if (!string.IsNullOrWhiteSpace(keyword))
             {

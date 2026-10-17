@@ -180,6 +180,16 @@
                                         <a href="/Cate/DigitalSales/Detail?id=@p.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none d-block">
                                             @p.Title
                                         </a>
+                                        <div class="db-sourcedept mt-1" title="Cơ hội xuất phát từ đơn vị">
+                                            @if (!string.IsNullOrWhiteSpace(p.SourceDepartmentName))
+                                            {
+                                                <i class="fa fa-map-marker-alt text-primary mr-1"></i><span class="sourcedept-label">Đơn vị:</span><span class="sourcedept-val">@p.SourceDepartmentName</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-exclamation-triangle text-warning mr-1"></i><span class="sourcedept-label">Đơn vị:</span><span class="sourcedept-val unassigned">Chưa chọn đơn vị</span>
+                                            }
+                                        </div>
                                         <div class="db-actiontime mt-1" title="Thời gian cập nhật gần nhất">
                                             <i class="fa fa-clock text-primary mr-1"></i><span class="actiontime-label">Ngày cập nhật cuối:</span><span class="actiontime-val">@actionTimeStr</span>
                                         </div>
@@ -399,6 +409,16 @@
                                         <a href="/Cate/DigitalSales/Detail?id=@opp.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none d-block">
                                             @opp.Title
                                         </a>
+                                        <div class="db-sourcedept mt-1" title="Cơ hội xuất phát từ đơn vị">
+                                            @if (!string.IsNullOrWhiteSpace(opp.SourceDepartmentName))
+                                            {
+                                                <i class="fa fa-map-marker-alt text-primary mr-1"></i><span class="sourcedept-label">Đơn vị:</span><span class="sourcedept-val">@opp.SourceDepartmentName</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-exclamation-triangle text-warning mr-1"></i><span class="sourcedept-label">Đơn vị:</span><span class="sourcedept-val unassigned">Chưa chọn đơn vị</span>
+                                            }
+                                        </div>
                                         <div class="db-actiontime mt-1" title="Thời gian cập nhật gần nhất">
                                             <i class="fa fa-clock text-primary mr-1"></i><span class="actiontime-label">Ngày cập nhật cuối:</span><span class="actiontime-val">@oppActionTimeStr</span>
                                         </div>
@@ -539,9 +559,19 @@
                                 <tr data-assigned-employee="@(s.AssignedEmployeeName ?? "")">
                                     <td class="text-center font-weight-bold text-secondary">@(sttStale++)</td>
                                     <td>
-                                        <a href="/Cate/DigitalSales/Detail?id=@s.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none">
+                                        <a href="/Cate/DigitalSales/Detail?id=@s.DigitalSalesID" target="_blank" class="font-weight-bold text-primary text-decoration-none d-block">
                                             @s.Title
                                         </a>
+                                        <div class="db-sourcedept mt-1" title="Cơ hội xuất phát từ đơn vị">
+                                            @if (!string.IsNullOrWhiteSpace(s.SourceDepartmentName))
+                                            {
+                                                <i class="fa fa-map-marker-alt text-primary mr-1"></i><span class="sourcedept-label">Đơn vị:</span><span class="sourcedept-val">@s.SourceDepartmentName</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-exclamation-triangle text-warning mr-1"></i><span class="sourcedept-label">Đơn vị:</span><span class="sourcedept-val unassigned">Chưa chọn đơn vị</span>
+                                            }
+                                        </div>
                                         <div class="mt-1 d-flex align-items-center flex-wrap">
                                             <span class="badge badge-secondary db-code-badge mr-1">@s.Code</span>
                                             <span class="badge @(s.BusinessType == 1 ? "badge-info" : "badge-primary") db-type-badge mr-1">@(s.BusinessType == 1 ? "Cơ hội" : "Dự án")</span>

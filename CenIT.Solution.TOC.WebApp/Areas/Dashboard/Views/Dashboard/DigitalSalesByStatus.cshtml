@@ -142,6 +142,10 @@
                             var titleHtml = '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary text-95 d-block mt-1" title="Xem chi tiết 360 độ">'
                                 + (row.Title || '—') + '</a>';
 
+                            var sourceDeptHtml = row.SourceDepartmentName
+                                ? '<div class="text-85 mt-1"><i class="fa fa-map-marker-alt mr-1 text-primary"></i><span class="text-secondary">Đơn vị:</span> <strong class="text-primary-d2">' + row.SourceDepartmentName + '</strong></div>'
+                                : '<div class="text-85 mt-1"><i class="fa fa-exclamation-triangle mr-1 text-warning"></i><span class="text-secondary">Đơn vị:</span> <span class="text-warning-d3 font-weight-bold">Chưa chọn đơn vị</span></div>';
+
                             var customerHtml = row.CustomerName
                                 ? '<div class="text-secondary text-85 mt-1"><i class="fa fa-building mr-1 text-primary"></i>' + row.CustomerName + '</div>'
                                 : '';
@@ -150,7 +154,7 @@
                                 ? '<div class="text-secondary text-85 mt-1"><i class="fa fa-tags mr-1 text-purple"></i>' + row.ProductServiceNames + '</div>'
                                 : '';
 
-                            return '<div class="d-flex align-items-center flex-wrap mb-1">' + typeBadge + statusBadge + codeBadge + specialBadges + '</div>' + titleHtml + customerHtml + productsHtml;
+                            return '<div class="d-flex align-items-center flex-wrap mb-1">' + typeBadge + statusBadge + codeBadge + specialBadges + '</div>' + titleHtml + sourceDeptHtml + customerHtml + productsHtml;
                         }
                     },
                     {
