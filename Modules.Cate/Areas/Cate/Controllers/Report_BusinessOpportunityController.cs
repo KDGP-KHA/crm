@@ -28,6 +28,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private readonly RM_CustomerTypeCache _customerTypeCache;
         private readonly Cate_ProductServiceCache _productServiceCache;
         private readonly RM_StatusCache _statusCache;
+        private readonly RM_DigitalSalesCache _digitalSalesCache;
         private readonly string _Title = AppProcessor.Messagor.GetMessage("Report_BusinessOpportunity_Title");
 
         public Report_BusinessOpportunityController()
@@ -36,6 +37,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             _customerTypeCache = new RM_CustomerTypeCache();
             _productServiceCache = new Cate_ProductServiceCache();
             _statusCache = new RM_StatusCache();
+            _digitalSalesCache = new RM_DigitalSalesCache();
         }
 
         // GET: Cate/Report_BusinessOpportunity
@@ -70,29 +72,21 @@ namespace Modules.Cate.Areas.Cate.Controllers
 
             model.ListProductService = _productServiceCache.GetAll();
 
-            var projectStatuses = _statusCache.GetStatusBySearchKey(STATUS_KEY_PROJECT) ?? new List<RM_StatusModel>();
-
-            // Hệ thống chưa có danh mục riêng cho loại dự án; trường ProjectTypeID tham chiếu tới RM_Status
-            //model.ListProjectType = projectStatuses
-            //    .Select(x => new SelectListItem
-            //    {
-            //        Value = x.ID.ToString(),
-            //        Text = x.StatusName
-            //    })
-            //    .ToList();
+            var projectStatuses = _digitalSalesCache.GetStatusList(2) ?? new List<RM_DigitalSalesStatusModel>();
+            var opportunityStatuses = _digitalSalesCache.GetStatusList(1) ?? new List<RM_DigitalSalesStatusModel>();
 
             model.ListProjectStatus = projectStatuses
                 .Select(x => new SelectListItem
                 {
-                    Value = x.ID.ToString(),
+                    Value = x.StatusID.ToString(),
                     Text = x.StatusName
                 })
                 .ToList();
 
-            model.ListOpportunityStatus = (_statusCache.GetStatusBySearchKey(STATUS_KEY_OPPORTUNITY) ?? new List<RM_StatusModel>())
+            model.ListOpportunityStatus = opportunityStatuses
                 .Select(x => new SelectListItem
                 {
-                    Value = x.ID.ToString(),
+                    Value = x.StatusID.ToString(),
                     Text = x.StatusName
                 })
                 .ToList();

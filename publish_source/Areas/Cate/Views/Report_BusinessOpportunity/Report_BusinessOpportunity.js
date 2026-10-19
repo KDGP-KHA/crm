@@ -88,12 +88,27 @@ function initTableReport_BusinessOpportunity() {
                 "data": "Note", "defaultContent": "", "className": "text-left",
                 "render": function (data, type, row, meta) {
                     return `<div class="article-content content-lop-${makeRandomId()}">
-                                ${data}
+                                ${data || ""}
                             </div>`;
                 }
             },
-        ], drawCallback: function (settings) {
+        ],
+        "createdRow": function (row, data) {
+            if (data && data.ObjectID) {
+                $(row).addClass("cursor-pointer").attr("data-id", data.ObjectID);
+            }
+        },
+        drawCallback: function (settings) {
             RutGonNoiDung();
+        }
+    });
+
+    $("#Report_BusinessOpportunity tbody").off("click", "tr").on("click", "tr", function (e) {
+        if ($(e.target).closest("a, button, input, .show-full-article-button").length > 0) return;
+        var rowData = _tableReport_BusinessOpportunity.row(this).data();
+        var url = buildDetailUrl(rowData);
+        if (url) {
+            window.location.href = url;
         }
     });
 }
@@ -103,18 +118,11 @@ function initTableReport_BusinessOpportunity() {
 //});
 
 /**
- * Tạo đường dẫn tới màn hình chi tiết theo loại bản ghi của dòng báo cáo.
+ * Tạo đường dẫn tới màn hình chi tiết Kinh doanh sản phẩm dịch vụ số.
  */
 function buildDetailUrl(row) {
     if (!row || !row.ObjectID) return "";
-
-    if (row.DataType === "Project") {
-        return "/Cate/ProjectOverview/Index/" + row.ObjectID;
-    }
-    if (row.DataType === "BusinessOpportunity") {
-        return "/Cate/BusinessOpportunityOverview/Index/" + row.ObjectID;
-    }
-    return "";
+    return "/Cate/DigitalSales/Detail?id=" + encodeURIComponent(row.ObjectID);
 }
 
 function fnExport() {

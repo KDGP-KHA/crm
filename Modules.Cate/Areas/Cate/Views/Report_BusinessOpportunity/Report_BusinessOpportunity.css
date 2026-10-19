@@ -1,0 +1,89 @@
+﻿.w1pc {
+    width: 1% !important;
+}
+
+.w200px {
+    width: 200px !important;
+}
+
+.w300px {
+    width: 300px !important;
+}
+
+#Report_BusinessOpportunity .text-left .font-italic {
+    color: #2971bf !important;
+}
+
+.article-content img {
+    width: 100% !important;
+    height: auto !important;
+}
+
+.article-content {
+    text-align: justify;
+}
+
+.article-short-content {
+    max-height: 100px !important;
+    overflow: hidden;
+    position: relative;
+}
+
+    .article-short-content::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+    }
+
+.show-full-article-button {
+    cursor: pointer;
+}
+
+/* Bộ lọc nhiều tiêu chí: xếp theo lưới, tự xuống dòng, không tràn ngang màn hình */
+#RM_Report_BusinessOpportunitySearch .row {
+    margin-left: -5px;
+    margin-right: -5px;
+}
+
+#RM_Report_BusinessOpportunitySearch .Search_Box {
+    margin-bottom: 8px;
+}
+
+#RM_Report_BusinessOpportunitySearch .form-control {
+    width: 100%;
+    height: 32px;
+    font-size: 13px;
+}
+
+#RM_Report_BusinessOpportunitySearch .select2-container {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+#RM_Report_BusinessOpportunitySearch .select2-selection--single {
+    height: 32px !important;
+    line-height: 30px !important;
+}
+
+#RM_Report_BusinessOpportunitySearch .select2-selection__rendered {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.select2-container .select2-dropdown {
+    max-width: 92vw;
+}
+
+#Report_BusinessOpportunity a.report-detail-link {
+    color: #1a6db5;
+    font-weight: 600;
+}
+
+    #Report_BusinessOpportunity a.report-detail-link:hover {
+        text-decoration: underline;
+    }
