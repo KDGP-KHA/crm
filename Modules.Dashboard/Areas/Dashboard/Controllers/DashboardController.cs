@@ -161,7 +161,6 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             if (managedDepts.Count >= 1)
             {
                 listSelect.Add(new SelectListItem { Value = "0", Text = "-- Tất cả đơn vị được quản lý --", Selected = (srcDeptId == 0) });
-                listSelect.Add(new SelectListItem { Value = "-1", Text = "-- Chưa chọn đơn vị xuất phát --", Selected = (srcDeptId == -1) });
             }
             foreach (var d in managedDepts)
             {
@@ -213,7 +212,6 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             if (managedDepts.Count >= 1)
             {
                 listSelect.Add(new SelectListItem { Value = "0", Text = "-- Tất cả đơn vị được quản lý --", Selected = (srcDeptId == 0) });
-                listSelect.Add(new SelectListItem { Value = "-1", Text = "-- Chưa chọn đơn vị xuất phát --", Selected = (srcDeptId == -1) });
             }
             foreach (var d in managedDepts)
             {
