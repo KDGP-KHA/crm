@@ -14,10 +14,10 @@
 
 @{
     var assignedCodes = !string.IsNullOrEmpty(Model.MaBophans)
-        ? Model.MaBophans.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToList()
+        ? Model.MaBophans.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
         : new List<string>();
     var totalCount = Model.ListBophans != null ? Model.ListBophans.Count : 0;
-    var selectedCount = assignedCodes.Count;
+    var selectedCount = Model.ListBophans != null ? Model.ListBophans.Count(x => assignedCodes.Contains(x.MaBoPhan)) : 0;
 }
 
 <div id="BoPhanContainer" class="bophan-user-container">
