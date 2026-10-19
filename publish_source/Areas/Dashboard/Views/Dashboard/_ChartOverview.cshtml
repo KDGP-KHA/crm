@@ -296,16 +296,22 @@
         </div>
         <div class="col-xl-6 col-lg-6 col-12 mb-3">
             <div class="card h-100 bcard shadow-sm db-card-custom">
-                <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex justify-content-between align-items-center">
-                    <h6 class="card-title font-weight-bold text-dark-m1 mb-0">
+                <div class="card-header bgc-white border-b-1 brc-default-l2 py-25 d-flex flex-wrap justify-content-between align-items-center">
+                    <h6 class="card-title font-weight-bold text-dark-m1 mb-0 my-1">
                         <i class="fa fa-list-ol text-primary mr-2"></i>Chi tiết cơ hội theo Đơn vị xuất phát
                     </h6>
-                    <span class="badge badge-primary font-weight-bold text-85 px-2 py-1 radius-1">
-                        @m.DepartmentStats.Count đơn vị
-                    </span>
+                    <div class="d-flex align-items-center flex-wrap my-1">
+                        <button type="button" class="btn btn-xs btn-warning font-bold text-white shadow-sm mr-2 px-2 py-1 radius-1 db-btn-export-card"
+                                onclick="exportCardData('departmentStats');" title="Tải danh sách Chi tiết cơ hội theo Đơn vị xuất phát">
+                            <i class="fa fa-download mr-1"></i>Tải danh sách
+                        </button>
+                        <span class="badge badge-primary font-weight-bold text-85 px-2 py-1 radius-1">
+                            @m.DepartmentStats.Count đơn vị
+                        </span>
+                    </div>
                 </div>
                 <div class="card-body p-0 table-responsive" style="max-height: 340px; overflow-y: auto;">
-                    <table class="table table-hover table-striped mb-0 text-90 align-middle">
+                    <table class="table table-hover table-striped mb-0 text-90 align-middle" id="tableDepartmentStats">
                         <thead class="bgc-secondary-l3 text-secondary-d2 text-uppercase text-80">
                             <tr>
                                 <th class="text-center" style="width: 40px;">STT</th>
@@ -318,26 +324,27 @@
                             @{ int sttDept = 1; }
                             @foreach (var dept in m.DepartmentStats)
                             {
-                                <tr>
+                                var deptJsName = System.Web.HttpUtility.JavaScriptStringEncode(dept.TenBoPhan ?? "Chưa chọn đơn vị xuất phát");
+                                <tr class="db-dept-row-clickable" onclick="openDigitalSalesByDepartment(@dept.BoPhan_ID, '@Html.Raw(deptJsName)');" title="Click để xem danh sách @dept.TotalCount hồ sơ của @dept.TenBoPhan">
                                     <td class="text-center font-weight-bold text-secondary">@(sttDept++)</td>
                                     <td>
                                         @if (dept.BoPhan_ID > 0)
                                         {
-                                            <a href="javascript:void(0);" onclick="onDashboardSourceDepartmentChange(@dept.BoPhan_ID);" class="font-weight-bold text-primary" title="Lọc Dashboard theo @dept.TenBoPhan">
+                                            <a href="javascript:void(0);" onclick="event.stopPropagation(); openDigitalSalesByDepartment(@dept.BoPhan_ID, '@Html.Raw(deptJsName)');" class="font-weight-bold text-primary" title="Xem danh sách hồ sơ của @dept.TenBoPhan">
                                                 <i class="fa fa-map-marker-alt mr-1 text-primary"></i>@dept.TenBoPhan
                                             </a>
                                         }
                                         else
                                         {
-                                            <span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m3 px-2 py-1 radius-1 font-bold">
+                                            <a href="javascript:void(0);" onclick="event.stopPropagation(); openDigitalSalesByDepartment(0, '@Html.Raw(deptJsName)');" class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m3 px-2 py-1 radius-1 font-bold text-decoration-none" title="Xem danh sách hồ sơ chưa chọn đơn vị xuất phát">
                                                 <i class="fa fa-exclamation-triangle mr-1"></i>@dept.TenBoPhan
-                                            </span>
+                                            </a>
                                         }
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge badge-sm badge-pill badge-primary font-weight-bold text-85 px-2">
+                                        <a href="javascript:void(0);" onclick="event.stopPropagation(); openDigitalSalesByDepartment(@dept.BoPhan_ID, '@Html.Raw(deptJsName)');" class="badge badge-sm badge-pill badge-primary font-weight-bold text-85 px-2 text-white text-decoration-none">
                                             @dept.TotalCount
-                                        </span>
+                                        </a>
                                     </td>
                                     <td class="text-right font-weight-bold text-dark-m2">
                                         @FormatRevenue(dept.TotalExpectedRevenue)

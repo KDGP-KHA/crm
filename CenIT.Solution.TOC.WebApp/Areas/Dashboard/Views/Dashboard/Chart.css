@@ -94,6 +94,23 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
 }
 
+.db-btn-export-card {
+    background-color: #f59e0b !important;
+    border-color: #d97706 !important;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.db-dept-row-clickable {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.db-dept-row-clickable:hover {
+    background-color: #eff6ff !important;
+}
+
 /* Tabs Styling (Ace Admin Style) */
 .db-nav-tabs {
     border-bottom: 2px solid #e2e8f0;

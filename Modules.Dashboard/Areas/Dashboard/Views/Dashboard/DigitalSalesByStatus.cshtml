@@ -24,7 +24,7 @@
             </span>
         </div>
         <div>
-            <a href="/Cate/DigitalSales?applyYear=@ViewBag.ApplyYear@(ViewBag.StatusID > 0 ? "&statusId=" + ViewBag.StatusID : "")"
+            <a href="/Cate/DigitalSales?applyYear=@ViewBag.ApplyYear@(ViewBag.StatusID > 0 ? "&statusId=" + ViewBag.StatusID : "")@(ViewBag.SourceDepartmentID != null && (int)ViewBag.SourceDepartmentID != 0 ? "&sourceDepartmentID=" + ViewBag.SourceDepartmentID : "")"
                target="_blank"
                class="btn btn-xs btn-outline-primary radius-2 px-2">
                 <i class="fa fa-external-link-alt mr-1"></i>Mở trên trang Quản lý

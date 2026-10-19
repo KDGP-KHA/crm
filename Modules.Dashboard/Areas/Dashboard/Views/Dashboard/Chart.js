@@ -474,6 +474,11 @@ function exportCardData(type) {
         url += "&sourceDepartmentID=" + encodeURIComponent(sourceDeptId);
     }
 
+    if (type === 'departmentStats') {
+        window.location.href = "/Dashboard/Dashboard/ExportDepartmentStats?applyYear=" + encodeURIComponent(year);
+        return;
+    }
+
     if (type === 'keyProject') {
         var kw = $("#tableKeyProjects").closest(".card").find("input").val() || "";
         url += "&isKeyProject=true" + (kw ? "&keyword=" + encodeURIComponent(kw.trim()) : "");
@@ -777,7 +782,14 @@ function _renderApexPie(elementId, labels, series, onSelect) {
         chart: {
             width: 350,
             type: 'pie',
-            events: { dataPointSelection: onSelect }
+            events: {
+                dataPointSelection: onSelect,
+                legendClick: function (chartContext, seriesIndex, config) {
+                    if (typeof onSelect === "function" && typeof seriesIndex === "number" && seriesIndex >= 0) {
+                        onSelect(null, chartContext, { dataPointIndex: seriesIndex });
+                    }
+                }
+            }
         },
         plotOptions: {
             pie: {
@@ -795,12 +807,15 @@ function _renderApexPie(elementId, labels, series, onSelect) {
             show: true,
             position: 'bottom',
             fontSize: '12px',
-            markers: { width: 10, height: 10, radius: 10 }
+            markers: { width: 10, height: 10, radius: 10 },
+            onItemClick: {
+                toggleDataSeries: false
+            }
         },
         tooltip: {
             y: {
                 formatter: function (val) {
-                    return val + " sản phẩm dịch vụ";
+                    return val + " hồ sơ";
                 }
             }
         }
@@ -889,10 +904,8 @@ function loadDepartmentChart(year) {
                 function (event, chartContext, config) {
                     if (config && typeof config.dataPointIndex !== "undefined" && typeof deptIds[config.dataPointIndex] !== "undefined") {
                         var clickedDeptId = deptIds[config.dataPointIndex];
-                        if (clickedDeptId > 0 && $("#Dashboard_SourceDepartmentID").length) {
-                            $("#Dashboard_SourceDepartmentID").val(clickedDeptId);
-                            onDashboardSourceDepartmentChange(clickedDeptId);
-                        }
+                        var clickedDeptName = labels[config.dataPointIndex] || "Đơn vị xuất phát";
+                        window.openDigitalSalesByDepartment(clickedDeptId, clickedDeptName);
                     }
                 }
             );
@@ -903,6 +916,30 @@ function loadDepartmentChart(year) {
         }
     });
 }
+
+/**
+ * Mở modal popup danh sách cơ hội / dự án kinh doanh dịch vụ số theo Đơn vị xuất phát
+ */
+window.openDigitalSalesByDepartment = function (deptId, deptName) {
+    var year = $("#ApplyYear").val() || new Date().getFullYear();
+    var parsedDeptId = parseInt(deptId, 10);
+    var sourceDeptId = (!isNaN(parsedDeptId) && parsedDeptId > 0) ? parsedDeptId : -1;
+    var displayLabel = deptName || (sourceDeptId === -1 ? "Chưa chọn đơn vị xuất phát" : "Đơn vị xuất phát");
+
+    var baseUrl = window._dashboardChartUrls && window._dashboardChartUrls.digitalSalesByStatus
+        ? window._dashboardChartUrls.digitalSalesByStatus
+        : '/Dashboard/Dashboard/DigitalSalesByStatus';
+
+    var url = baseUrl + '?applyYear=' + encodeURIComponent(year)
+        + '&statusId=0'
+        + '&statusName=' + encodeURIComponent(displayLabel)
+        + '&sourceDepartmentId=' + encodeURIComponent(sourceDeptId);
+
+    var $btn = $('<a data-modal="" data-modal-id="DigitalSalesByStatus" data-width="1200" href="' + url + '"></a>');
+    $("body").append($btn);
+    $btn.trigger("click");
+    $btn.remove();
+};
 
 /**
  * Mở modal popup danh sách cơ hội / dự án kinh doanh dịch vụ số theo trạng thái

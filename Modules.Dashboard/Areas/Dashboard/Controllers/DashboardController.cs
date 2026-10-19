@@ -1,4 +1,4 @@
-using Core.Cate.Biz;
+﻿using Core.Cate.Biz;
 using Core.Cate.Models;
 using Core.Cate.Caches;
 using Core.Sys.BaseApp;
@@ -260,6 +260,120 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             string kw = string.IsNullOrWhiteSpace(keyword) ? "" : Server.UrlEncode(keyword.Trim());
             int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
             return Redirect($"/Cate/DigitalSales/Export?applyYear={year}&keyword={kw}&sourceDepartmentID={srcDeptId}");
+        }
+
+        /// <summary>
+        /// Xuất file Excel Chi tiết cơ hội theo Đơn vị xuất phát (Sheet 1: Tổng hợp theo đơn vị, Sheet 2: Danh sách hồ sơ chi tiết).
+        /// </summary>
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportDepartmentStats(int? applyYear)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            var deptStats = _digitalSalesCache.GetDashboardDepartmentStats(year, User?.UserName) ?? new List<RM_DigitalSalesDepartmentStatModel>();
+            var details = _digitalSalesCache.LoadList(out var total, new RM_DigitalSalesSearchModel
+            {
+                ApplyYear = year,
+                PageNumber = 1,
+                PageSize = 5000,
+                UserName = User?.UserName
+            }) ?? new List<RM_DigitalSalesModel>();
+
+            using (var package = new ExcelPackage())
+            {
+                // Sheet 1: Tổng hợp theo Đơn vị xuất phát
+                var wsSummary = package.Workbook.Worksheets.Add("TongHopDonVi");
+                wsSummary.Cells[1, 1].Value = $"CHI TIẾT CƠ HỘI THEO ĐƠN VỊ XUẤT PHÁT - NĂM {year}";
+                wsSummary.Cells[1, 1, 1, 5].Merge = true;
+                wsSummary.Cells[1, 1].Style.Font.Bold = true;
+                wsSummary.Cells[1, 1].Style.Font.Size = 15;
+                wsSummary.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                wsSummary.Cells[2, 1].Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                wsSummary.Cells[2, 1, 2, 5].Merge = true;
+                wsSummary.Cells[2, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                var summaryHeaders = new[] { "STT", "Đơn vị xuất phát", "Số hồ sơ", "Doanh thu dự kiến (VNĐ)", "Doanh thu thực tế (VNĐ)" };
+                for (int c = 1; c <= summaryHeaders.Length; c++)
+                {
+                    wsSummary.Cells[4, c].Value = summaryHeaders[c - 1];
+                }
+
+                int r = 5;
+                foreach (var dept in deptStats)
+                {
+                    wsSummary.Cells[r, 1].Value = r - 4;
+                    wsSummary.Cells[r, 2].Value = dept.TenBoPhan;
+                    wsSummary.Cells[r, 3].Value = dept.TotalCount;
+                    wsSummary.Cells[r, 4].Value = dept.TotalExpectedRevenue;
+                    wsSummary.Cells[r, 4].Style.Numberformat.Format = "#,##0";
+                    wsSummary.Cells[r, 5].Value = dept.TotalActualRevenue;
+                    wsSummary.Cells[r, 5].Style.Numberformat.Format = "#,##0";
+                    r++;
+                }
+
+                FormatWorksheetTable(wsSummary, Math.Max(4, r - 1), summaryHeaders.Length);
+                wsSummary.Column(1).Width = 8;
+                wsSummary.Column(2).Width = 42;
+                wsSummary.Column(3).Width = 15;
+                wsSummary.Column(4).Width = 26;
+                wsSummary.Column(5).Width = 26;
+
+                // Sheet 2: Danh sách hồ sơ chi tiết
+                var wsDetail = package.Workbook.Worksheets.Add("DanhSachHoSo");
+                wsDetail.Cells[1, 1].Value = $"DANH SÁCH CHI TIẾT HỒ SƠ THEO ĐƠN VỊ XUẤT PHÁT - NĂM {year}";
+                wsDetail.Cells[1, 1, 1, 10].Merge = true;
+                wsDetail.Cells[1, 1].Style.Font.Bold = true;
+                wsDetail.Cells[1, 1].Style.Font.Size = 15;
+                wsDetail.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                wsDetail.Cells[2, 1].Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                wsDetail.Cells[2, 1, 2, 10].Merge = true;
+                wsDetail.Cells[2, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                var detailHeaders = new[]
+                {
+                    "STT", "Mã hồ sơ", "Tên cơ hội / dự án", "Loại hình", "Đơn vị xuất phát",
+                    "Khách hàng", "Trạng thái", "Doanh thu dự kiến (VNĐ)", "Doanh thu thực tế (VNĐ)", "Phụ trách"
+                };
+                for (int c = 1; c <= detailHeaders.Length; c++)
+                {
+                    wsDetail.Cells[4, c].Value = detailHeaders[c - 1];
+                }
+
+                int rd = 5;
+                foreach (var item in details)
+                {
+                    wsDetail.Cells[rd, 1].Value = rd - 4;
+                    wsDetail.Cells[rd, 2].Value = item.Code;
+                    wsDetail.Cells[rd, 3].Value = item.Title;
+                    wsDetail.Cells[rd, 4].Value = item.BusinessType == 1 ? "Cơ hội" : "Dự án";
+                    wsDetail.Cells[rd, 5].Value = string.IsNullOrWhiteSpace(item.SourceDepartmentName) ? "Chưa chọn đơn vị xuất phát" : item.SourceDepartmentName;
+                    wsDetail.Cells[rd, 6].Value = item.CustomerName;
+                    wsDetail.Cells[rd, 7].Value = item.StatusName;
+                    wsDetail.Cells[rd, 8].Value = item.TotalExpectedRevenue ?? 0m;
+                    wsDetail.Cells[rd, 8].Style.Numberformat.Format = "#,##0";
+                    wsDetail.Cells[rd, 9].Value = item.TotalActualRevenue ?? 0m;
+                    wsDetail.Cells[rd, 9].Style.Numberformat.Format = "#,##0";
+                    wsDetail.Cells[rd, 10].Value = item.AssignedEmployeeName;
+                    rd++;
+                }
+
+                FormatWorksheetTable(wsDetail, Math.Max(4, rd - 1), detailHeaders.Length);
+                wsDetail.Column(1).Width = 8;
+                wsDetail.Column(2).Width = 18;
+                wsDetail.Column(3).Width = 42;
+                wsDetail.Column(4).Width = 14;
+                wsDetail.Column(5).Width = 35;
+                wsDetail.Column(6).Width = 35;
+                wsDetail.Column(7).Width = 22;
+                wsDetail.Column(8).Width = 24;
+                wsDetail.Column(9).Width = 24;
+                wsDetail.Column(10).Width = 25;
+
+                var fileName = $"Chi_tiet_co_hoi_theo_don_vi_xuat_phat_{year}_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
         }
 
         /// <summary>
