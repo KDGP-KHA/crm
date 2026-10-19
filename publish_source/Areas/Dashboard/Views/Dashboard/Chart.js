@@ -550,21 +550,24 @@ function loadGroupServiceChart(year) {
                 return;
             }
 
+            var items = result.data.slice().sort(function (a, b) {
+                return (b.Quantity || 0) - (a.Quantity || 0);
+            });
+
             var series = [], labels = [], groupIds = [];
-            for (var i = 0; i < result.data.length; i++) {
-                series.push(result.data[i].Quantity);
-                labels.push(result.data[i].Name);
-                groupIds.push(result.data[i].GroupServiceID);
+            for (var i = 0; i < items.length; i++) {
+                series.push(items[i].Quantity);
+                labels.push(items[i].Name);
+                groupIds.push(items[i].GroupServiceID);
             }
 
-            _renderApexPie(
+            _renderApexHorizontalBar(
                 'gs-opp-chart',
                 labels,
                 series,
-                function (event, chartContext, config) {
-                    if (config && typeof config.dataPointIndex !== "undefined" && groupIds[config.dataPointIndex]) {
-                        var groupId = groupIds[config.dataPointIndex];
-                        detailOpportunityByGroupService(groupId);
+                function (dataPointIndex) {
+                    if (typeof dataPointIndex !== "undefined" && groupIds[dataPointIndex]) {
+                        detailOpportunityByGroupService(groupIds[dataPointIndex]);
                     }
                 }
             );
@@ -577,7 +580,178 @@ function loadGroupServiceChart(year) {
 }
 
 /**
- * Hàm vẽ ApexCharts dạng Pie thống nhất
+ * Bảng 16 màu sắc phân biệt rõ ràng (chống trùng lặp 5 màu mặc định của ApexCharts)
+ */
+var _dashboardDistinctPalette = [
+    '#2563eb', // 1. Blue
+    '#10b981', // 2. Emerald Green
+    '#f59e0b', // 3. Amber
+    '#ef4444', // 4. Red / Coral
+    '#8b5cf6', // 5. Violet
+    '#06b6d4', // 6. Cyan
+    '#ec4899', // 7. Pink
+    '#f97316', // 8. Orange
+    '#14b8a6', // 9. Teal
+    '#6366f1', // 10. Indigo
+    '#84cc16', // 11. Lime
+    '#d946ef', // 12. Fuchsia
+    '#0284c7', // 13. Sky Blue
+    '#eab308', // 14. Yellow
+    '#e11d48', // 15. Rose
+    '#475569'  // 16. Slate
+];
+
+/**
+ * Hàm vẽ ApexCharts dạng Cột ngang xếp hạng (Horizontal Bar Chart)
+ * Hiển thị tốt cả các nhóm số liệu rất nhỏ (1, 2...) so với nhóm lớn (100+), kèm 16 màu riêng biệt
+ */
+function _renderApexHorizontalBar(elementId, labels, series, onSelectIndex) {
+    var el = document.querySelector('#' + elementId);
+    if (!el) return;
+
+    if (window._apexCharts[elementId]) {
+        try {
+            window._apexCharts[elementId].destroy();
+        } catch (e) { }
+        window._apexCharts[elementId] = null;
+    }
+
+    if (!series || !series.length) {
+        el.innerHTML = '<div class="text-center text-secondary-l1 py-4">Không có dữ liệu</div>';
+        return;
+    }
+
+    var total = 0;
+    var maxVal = 0;
+    for (var i = 0; i < series.length; i++) {
+        var v = Number(series[i]) || 0;
+        total += v;
+        if (v > maxVal) maxVal = v;
+    }
+
+    var chartHeight = Math.max(350, labels.length * 36 + 50);
+    el.innerHTML = '';
+
+    var bindYAxisLabelClicks = function (chartContext) {
+        if (!chartContext || !chartContext.el || typeof onSelectIndex !== "function") return;
+        var yLabels = chartContext.el.querySelectorAll('.apexcharts-yaxis-label');
+        for (var idx = 0; idx < yLabels.length; idx++) {
+            (function (labelEl, itemIdx) {
+                labelEl.style.cursor = 'pointer';
+                labelEl.onclick = function () {
+                    onSelectIndex(itemIdx);
+                };
+            })(yLabels[idx], idx);
+        }
+    };
+
+    var options = {
+        series: [{
+            name: 'Số lượng',
+            data: series
+        }],
+        colors: _dashboardDistinctPalette,
+        chart: {
+            type: 'bar',
+            height: chartHeight,
+            width: '100%',
+            toolbar: { show: false },
+            fontFamily: 'inherit',
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    if (config && typeof config.dataPointIndex !== "undefined" && typeof onSelectIndex === "function") {
+                        onSelectIndex(config.dataPointIndex);
+                    }
+                },
+                mounted: function (chartContext) {
+                    bindYAxisLabelClicks(chartContext);
+                },
+                updated: function (chartContext) {
+                    bindYAxisLabelClicks(chartContext);
+                }
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                distributed: true,
+                barHeight: '62%',
+                borderRadius: 4,
+                dataLabels: {
+                    position: 'top'
+                }
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            textAnchor: 'start',
+            offsetX: 6,
+            style: {
+                fontSize: '12px',
+                fontWeight: 700,
+                colors: ['#1e293b']
+            },
+            formatter: function (val) {
+                var pct = total > 0 ? ((val * 100) / total).toFixed(1).replace(/\.0$/, '') : 0;
+                return val + ' (' + pct + '%)';
+            }
+        },
+        xaxis: {
+            categories: labels,
+            max: maxVal > 0 ? Math.ceil(maxVal * 1.32) : 10,
+            labels: {
+                style: {
+                    fontSize: '11.5px',
+                    colors: '#64748b'
+                },
+                formatter: function (val) {
+                    return Math.round(val);
+                }
+            },
+            axisBorder: { show: false },
+            axisTicks: { show: false }
+        },
+        yaxis: {
+            labels: {
+                maxWidth: 145,
+                style: {
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    colors: '#1e293b'
+                }
+            }
+        },
+        grid: {
+            borderColor: '#f1f5f9',
+            strokeDashArray: 3,
+            xaxis: { lines: { show: true } },
+            yaxis: { lines: { show: false } },
+            padding: { top: -8, right: 18, bottom: 0, left: 4 }
+        },
+        legend: {
+            show: false
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    var pct = total > 0 ? ((val * 100) / total).toFixed(1).replace(/\.0$/, '') : 0;
+                    return val + " sản phẩm dịch vụ (" + pct + "%)";
+                }
+            }
+        }
+    };
+
+    if (typeof ApexCharts !== "undefined") {
+        var chart = new ApexCharts(el, options);
+        chart.render();
+        window._apexCharts[elementId] = chart;
+    } else {
+        el.innerHTML = '<div class="text-center text-danger py-4">ApexCharts chưa được nạp</div>';
+    }
+}
+
+/**
+ * Hàm vẽ ApexCharts dạng Pie thống nhất (kèm bảng 16 màu riêng biệt)
  */
 function _renderApexPie(elementId, labels, series, onSelect) {
     var el = document.querySelector('#' + elementId);
@@ -599,6 +773,7 @@ function _renderApexPie(elementId, labels, series, onSelect) {
     var options = {
         series: series,
         labels: labels,
+        colors: _dashboardDistinctPalette,
         chart: {
             width: 350,
             type: 'pie',
