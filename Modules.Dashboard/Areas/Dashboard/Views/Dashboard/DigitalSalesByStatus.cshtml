@@ -16,17 +16,23 @@
 @section FormBody {
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 pb-2 border-b-1 brc-default-l2">
         <div class="mb-1 mb-sm-0">
-            <span class="badge badge-info text-90 mr-2 py-1 px-2">
+            <span class="badge badge-info text-95 mr-2 py-15 px-25">
                 <i class="fa fa-calendar-alt mr-1"></i>Năm @ViewBag.ApplyYear
             </span>
-            <span class="badge badge-primary text-90 mr-2 py-1 px-2">
+            <span class="badge badge-primary text-95 mr-2 py-15 px-25">
                 <i class="fa fa-tag mr-1"></i>@ViewBag.StatusName
             </span>
         </div>
-        <div>
+        <div class="d-flex align-items-center">
+            <button type="button"
+                    onclick="exportDigitalSalesModalList();"
+                    class="btn btn-sm btn-warning font-bold text-white shadow-sm mr-2 px-3 py-1 radius-1 db-btn-export-card"
+                    title="Tải danh sách Excel theo điều kiện đang xem">
+                <i class="fa fa-download mr-1"></i>Tải danh sách
+            </button>
             <a href="/Cate/DigitalSales?applyYear=@ViewBag.ApplyYear@(ViewBag.StatusID > 0 ? "&statusId=" + ViewBag.StatusID : "")@(ViewBag.SourceDepartmentID != null && (int)ViewBag.SourceDepartmentID != 0 ? "&sourceDepartmentID=" + ViewBag.SourceDepartmentID : "")"
                target="_blank"
-               class="btn btn-xs btn-outline-primary radius-2 px-2">
+               class="btn btn-sm btn-outline-primary radius-1 px-25 py-1 font-bold">
                 <i class="fa fa-external-link-alt mr-1"></i>Mở trên trang Quản lý
             </a>
         </div>
@@ -34,8 +40,8 @@
 
     <div class="card dcard">
         <div class="col-sm-12 table-responsive-md p-0">
-            <table id="DSDigitalSalesByStatus" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
-                <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+            <table id="DSDigitalSalesByStatus" class="d-style w-100 table text-dark-m1 text-100 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                <thead class="sticky-nav text-secondary-m1 text-uppercase text-95 bgc-secondary-l1">
                     <tr>
                         <th class="text-center align-middle">@AppProcessor.Messagor.GetMessage("Column_No")</th>
                         <th class="align-middle">Thông tin cơ hội / dự án</th>
@@ -51,6 +57,17 @@
 
     <script type="text/javascript">
         var _tableDigitalSalesByStatus;
+
+        function exportDigitalSalesModalList() {
+            var filterKw = $('#DSDigitalSalesByStatus_filter input').val() || '@(Html.Raw(HttpUtility.JavaScriptStringEncode(Model.Keyword ?? "")))';
+            var url = '/Dashboard/Dashboard/ExportDigitalSalesByStatus'
+                + '?applyYear=' + encodeURIComponent('@Model.ApplyYear')
+                + '&statusId=' + encodeURIComponent('@Model.StatusID')
+                + '&statusName=' + encodeURIComponent('@(Html.Raw(HttpUtility.JavaScriptStringEncode(ViewBag.StatusName as string ?? "")))')
+                + '&sourceDepartmentId=' + encodeURIComponent('@Model.SourceDepartmentID')
+                + (filterKw ? '&keyword=' + encodeURIComponent(filterKw.trim()) : '');
+            window.location.href = url;
+        }
 
         function formatMoney(val) {
             if (val === null || val === undefined || val === "") return "—";
@@ -99,18 +116,18 @@
                     }
                 },
                 columnDefs: [
-                    { targets: 0, width: "45px", className: "text-center align-middle", orderable: false },
-                    { targets: 1, minWidth: "260px", className: "align-middle" },
-                    { targets: 2, minWidth: "170px", className: "align-middle" },
-                    { targets: 3, minWidth: "130px", className: "align-middle" },
-                    { targets: 4, minWidth: "150px", className: "align-middle" },
-                    { targets: 5, width: "115px", className: "text-center align-middle text-nowrap", orderable: false }
+                    { targets: 0, width: "50px", className: "text-center align-middle font-weight-bold", orderable: false },
+                    { targets: 1, minWidth: "280px", className: "align-middle" },
+                    { targets: 2, minWidth: "185px", className: "align-middle" },
+                    { targets: 3, minWidth: "145px", className: "align-middle" },
+                    { targets: 4, minWidth: "170px", className: "align-middle" },
+                    { targets: 5, width: "120px", className: "text-center align-middle text-nowrap", orderable: false }
                 ],
                 columns: [
                     {
                         data: null,
                         orderable: false,
-                        className: "text-center align-middle",
+                        className: "text-center align-middle font-weight-bold",
                         render: function (data, type, row, meta) {
                             return meta.row + 1 + meta.settings._iDisplayStart;
                         }
@@ -120,38 +137,38 @@
                         className: "align-middle",
                         render: function (data, type, row) {
                             var typeBadge = row.BusinessType === 2
-                                ? '<span class="badge badge-success px-2 py-1 mr-1 text-80"><i class="fa fa-project-diagram mr-1"></i>Dự án</span>'
-                                : '<span class="badge badge-primary px-2 py-1 mr-1 text-80"><i class="fa fa-lightbulb mr-1"></i>Cơ hội</span>';
+                                ? '<span class="badge badge-success px-2 py-1 mr-1 text-90"><i class="fa fa-project-diagram mr-1"></i>Dự án</span>'
+                                : '<span class="badge badge-primary px-2 py-1 mr-1 text-90"><i class="fa fa-lightbulb mr-1"></i>Cơ hội</span>';
 
                             var statusBadge = row.StatusName
-                                ? '<span class="badge badge-secondary px-2 py-1 mr-1 text-80">' + row.StatusName + '</span>'
+                                ? '<span class="badge badge-secondary px-2 py-1 mr-1 text-90">' + row.StatusName + '</span>'
                                 : '';
 
                             var codeBadge = row.Code
-                                ? '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-mono font-bold px-15 py-05 radius-1 text-80"><i class="fa fa-hashtag mr-1 opacity-75"></i>' + row.Code + '</span>'
+                                ? '<span class="badge bgc-warning-l3 text-warning-d3 border-1 brc-warning-m2 mr-1 font-mono font-bold px-2 py-1 radius-1 text-90"><i class="fa fa-hashtag mr-1 opacity-75"></i>' + row.Code + '</span>'
                                 : '';
 
                             var specialBadges = '';
                             if (row.IsKeyProject) {
-                                specialBadges += '<span class="badge bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Dự án trọng điểm"><i class="fa fa-star text-warning mr-1"></i>Trọng điểm</span>';
+                                specialBadges += '<span class="badge bgc-orange-l3 text-orange-d3 border-1 brc-orange-m2 mr-1 font-bold px-2 py-1 radius-1 text-90" title="Dự án trọng điểm"><i class="fa fa-star text-warning mr-1"></i>Trọng điểm</span>';
                             }
                             if (row.IsFollowed) {
-                                specialBadges += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-15 py-05 radius-1 text-80" title="Cơ hội/dự án quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
+                                specialBadges += '<span class="badge bgc-pink-l3 text-pink-d2 border-1 brc-pink-m3 mr-1 font-bold px-2 py-1 radius-1 text-90" title="Cơ hội/dự án quan tâm"><i class="fa fa-bookmark text-danger mr-1"></i>Quan tâm</span>';
                             }
 
-                            var titleHtml = '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary text-95 d-block mt-1" title="Xem chi tiết 360 độ">'
+                            var titleHtml = '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="font-weight-bold text-primary db-modal-item-title d-block mt-1" title="Xem chi tiết 360 độ">'
                                 + (row.Title || '—') + '</a>';
 
                             var sourceDeptHtml = row.SourceDepartmentName
-                                ? '<div class="text-85 mt-1"><i class="fa fa-map-marker-alt mr-1 text-primary"></i><span class="text-secondary">Đơn vị:</span> <strong class="text-primary-d2">' + row.SourceDepartmentName + '</strong></div>'
-                                : '<div class="text-85 mt-1"><i class="fa fa-exclamation-triangle mr-1 text-warning"></i><span class="text-secondary">Đơn vị:</span> <span class="text-warning-d3 font-weight-bold">Chưa chọn đơn vị</span></div>';
+                                ? '<div class="db-modal-subtext mt-1"><i class="fa fa-map-marker-alt mr-1 text-primary"></i><span class="text-secondary">Đơn vị:</span> <strong class="text-primary-d2">' + row.SourceDepartmentName + '</strong></div>'
+                                : '<div class="db-modal-subtext mt-1"><i class="fa fa-exclamation-triangle mr-1 text-warning"></i><span class="text-secondary">Đơn vị:</span> <span class="text-warning-d3 font-weight-bold">Chưa chọn đơn vị</span></div>';
 
                             var customerHtml = row.CustomerName
-                                ? '<div class="text-secondary text-85 mt-1"><i class="fa fa-building mr-1 text-primary"></i>' + row.CustomerName + '</div>'
+                                ? '<div class="text-secondary db-modal-subtext mt-1"><i class="fa fa-building mr-1 text-primary"></i>' + row.CustomerName + '</div>'
                                 : '';
 
                             var productsHtml = row.ProductServiceNames
-                                ? '<div class="text-secondary text-85 mt-1"><i class="fa fa-tags mr-1 text-purple"></i>' + row.ProductServiceNames + '</div>'
+                                ? '<div class="text-secondary db-modal-subtext mt-1"><i class="fa fa-tags mr-1 text-purple"></i>' + row.ProductServiceNames + '</div>'
                                 : '';
 
                             return '<div class="d-flex align-items-center flex-wrap mb-1">' + typeBadge + statusBadge + codeBadge + specialBadges + '</div>' + titleHtml + sourceDeptHtml + customerHtml + productsHtml;
@@ -164,21 +181,21 @@
                             var exp = row.TotalExpectedRevenue != null ? formatMoney(row.TotalExpectedRevenue) : '—';
                             var act = row.TotalActualRevenue != null ? formatMoney(row.TotalActualRevenue) : '—';
                             var prob = (row.ClosingProbability != null && row.ClosingProbability > 0)
-                                ? ' <span class="badge badge-warning text-dark ml-1" title="Xác suất chốt">' + row.ClosingProbability + '%</span>'
+                                ? ' <span class="badge badge-warning text-dark ml-1 text-90" title="Xác suất chốt">' + row.ClosingProbability + '%</span>'
                                 : '';
 
-                            return '<div class="text-90"><b>DT Dự kiến:</b> <span class="text-primary font-weight-bold">' + exp + '</span>' + prob + '</div>'
-                                 + '<div class="text-90 mt-1"><b>DT Thực tế:</b> <span class="text-success font-weight-bold">' + act + '</span></div>';
+                            return '<div class="db-modal-subtext"><b>DT Dự kiến:</b> <span class="text-primary font-weight-bold">' + exp + '</span>' + prob + '</div>'
+                                 + '<div class="db-modal-subtext mt-1"><b>DT Thực tế:</b> <span class="text-success font-weight-bold">' + act + '</span></div>';
                         }
                     },
                     {
                         data: null,
                         className: "align-middle",
                         render: function (data, type, row) {
-                            var yearHtml = '<div class="text-90"><b>Năm:</b> ' + (row.ApplyYear || '@Model.ApplyYear') + '</div>';
+                            var yearHtml = '<div class="db-modal-subtext"><b>Năm:</b> ' + (row.ApplyYear || '@Model.ApplyYear') + '</div>';
                             var expDate = formatDate(row.ExpectedDate);
                             var dateHtml = expDate
-                                ? '<div class="text-85 text-muted mt-1"><i class="far fa-calendar-alt mr-1"></i>Dự kiến: ' + expDate + '</div>'
+                                ? '<div class="db-modal-subtext text-muted mt-1"><i class="far fa-calendar-alt mr-1"></i>Dự kiến: ' + expDate + '</div>'
                                 : '';
                             return yearHtml + dateHtml;
                         }
@@ -189,15 +206,15 @@
                         render: function (data, type, row) {
                             var leader = row.AssignedEmployeeName || row.LeaderEmployeeName || '—';
                             var dept = row.DepartmentName
-                                ? '<div class="text-85 text-muted mt-1"><i class="fa fa-sitemap mr-1"></i>' + row.DepartmentName + '</div>'
+                                ? '<div class="db-modal-subtext text-muted mt-1"><i class="fa fa-sitemap mr-1"></i>' + row.DepartmentName + '</div>'
                                 : '';
                             var srcDept = row.SourceDepartmentName
-                                ? '<div class="text-85 text-primary mt-1 font-bold" title="Cơ hội xuất phát từ"><i class="fa fa-map-marker-alt mr-1"></i>' + row.SourceDepartmentName + '</div>'
-                                : '<div class="text-85 text-warning mt-1"><i class="fa fa-exclamation-triangle mr-1"></i>Chưa chọn đơn vị</div>';
+                                ? '<div class="db-modal-subtext text-primary mt-1 font-bold" title="Cơ hội xuất phát từ"><i class="fa fa-map-marker-alt mr-1"></i>' + row.SourceDepartmentName + '</div>'
+                                : '<div class="db-modal-subtext text-warning mt-1"><i class="fa fa-exclamation-triangle mr-1"></i>Chưa chọn đơn vị</div>';
                             var contact = row.ContactPersonName
-                                ? '<div class="text-85 text-secondary mt-1"><i class="fa fa-phone mr-1"></i>' + row.ContactPersonName + (row.ContactPersonPhone ? ' (' + row.ContactPersonPhone + ')' : '') + '</div>'
+                                ? '<div class="db-modal-subtext text-secondary mt-1"><i class="fa fa-phone mr-1"></i>' + row.ContactPersonName + (row.ContactPersonPhone ? ' (' + row.ContactPersonPhone + ')' : '') + '</div>'
                                 : '';
-                            return '<div class="text-90 font-weight-bold text-dark-m1"><i class="fa fa-user-tie mr-1 text-success"></i>' + leader + '</div>' + dept + srcDept + contact;
+                            return '<div class="db-modal-subtext font-weight-bold text-dark-m1"><i class="fa fa-user-tie mr-1 text-success"></i>' + leader + '</div>' + dept + srcDept + contact;
                         }
                     },
                     {
@@ -205,7 +222,7 @@
                         className: "text-center align-middle text-nowrap",
                         orderable: false,
                         render: function (data, type, row) {
-                            return '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="btn btn-xs btn-outline-primary btn-h-light-primary radius-1 px-2 py-1 text-nowrap font-bolder shadow-sm" title="Xem chi tiết 360 độ">'
+                            return '<a href="/Cate/DigitalSales/Detail?id=' + row.DigitalSalesID + '" target="_blank" class="btn btn-sm btn-outline-primary btn-h-light-primary radius-1 px-25 py-1 text-nowrap font-bolder shadow-sm" title="Xem chi tiết 360 độ">'
                                  + '<i class="fa fa-eye mr-1"></i>Chi tiết</a>';
                         }
                     }

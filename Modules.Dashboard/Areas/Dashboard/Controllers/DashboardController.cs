@@ -433,6 +433,107 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
         }
 
         /// <summary>
+        /// Xuất file Excel danh sách cơ hội/dự án kinh doanh dịch vụ số từ popup modal DigitalSalesByStatus.
+        /// </summary>
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportDigitalSalesByStatus(int? applyYear, int? statusId, string statusName = null, string keyword = null, int? sourceDepartmentId = null)
+        {
+            int year = applyYear.HasValue && applyYear.Value > 0 ? applyYear.Value : DateTime.Now.Year;
+            int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
+            var search = new RM_DigitalSalesSearchModel
+            {
+                ApplyYear = year,
+                StatusID = statusId.GetValueOrDefault(0),
+                Keyword = string.IsNullOrWhiteSpace(keyword) ? null : keyword.Trim(),
+                SourceDepartmentID = srcDeptId,
+                PageNumber = 1,
+                PageSize = 5000,
+                UserName = User?.UserName
+            };
+
+            var items = _digitalSalesCache.LoadList(out var total, search) ?? new List<RM_DigitalSalesModel>();
+            var titleLabel = string.IsNullOrWhiteSpace(statusName)
+                ? (statusId.GetValueOrDefault(0) > 0 ? "Theo trạng thái" : "Tất cả trạng thái")
+                : statusName.Trim();
+
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("DanhSachHoSo");
+                var headers = new[]
+                {
+                    "STT", "Mã hồ sơ", "Tên cơ hội / dự án", "Loại hình", "Trạng thái",
+                    "Đơn vị xuất phát", "Khách hàng", "Sản phẩm dịch vụ",
+                    "DT Dự kiến (VNĐ)", "Xác suất chốt (%)", "DT Thực tế (VNĐ)",
+                    "Năm áp dụng", "Ngày dự kiến", "Người phụ trách", "Đơn vị quản lý", "Người liên hệ"
+                };
+
+                ws.Cells[1, 1].Value = $"DANH SÁCH CƠ HỘI KINH DOANH - {titleLabel.ToUpperInvariant()} (NĂM {year})";
+                ws.Cells[1, 1, 1, headers.Length].Merge = true;
+                ws.Cells[1, 1].Style.Font.Bold = true;
+                ws.Cells[1, 1].Style.Font.Size = 15;
+                ws.Cells[1, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                ws.Cells[2, 1].Value = $"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm}";
+                ws.Cells[2, 1, 2, headers.Length].Merge = true;
+                ws.Cells[2, 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                for (int c = 1; c <= headers.Length; c++)
+                {
+                    ws.Cells[4, c].Value = headers[c - 1];
+                }
+
+                int row = 5;
+                foreach (var item in items)
+                {
+                    ws.Cells[row, 1].Value = row - 4;
+                    ws.Cells[row, 2].Value = item.Code;
+                    ws.Cells[row, 3].Value = item.Title;
+                    ws.Cells[row, 4].Value = item.BusinessType == 2 ? "Dự án" : "Cơ hội";
+                    ws.Cells[row, 5].Value = item.StatusName;
+                    ws.Cells[row, 6].Value = string.IsNullOrWhiteSpace(item.SourceDepartmentName) ? "Chưa chọn đơn vị xuất phát" : item.SourceDepartmentName;
+                    ws.Cells[row, 7].Value = item.CustomerName;
+                    ws.Cells[row, 8].Value = item.ProductServiceNames;
+                    ws.Cells[row, 9].Value = item.TotalExpectedRevenue ?? 0m;
+                    ws.Cells[row, 9].Style.Numberformat.Format = "#,##0";
+                    ws.Cells[row, 10].Value = item.ClosingProbability;
+                    ws.Cells[row, 11].Value = item.TotalActualRevenue ?? 0m;
+                    ws.Cells[row, 11].Style.Numberformat.Format = "#,##0";
+                    ws.Cells[row, 12].Value = item.ApplyYear ?? year;
+                    ws.Cells[row, 13].Value = item.ExpectedDate;
+                    ws.Cells[row, 13].Style.Numberformat.Format = "dd/MM/yyyy";
+                    ws.Cells[row, 14].Value = item.AssignedEmployeeName;
+                    ws.Cells[row, 15].Value = item.DepartmentName;
+                    ws.Cells[row, 16].Value = string.IsNullOrWhiteSpace(item.ContactPersonPhone)
+                        ? item.ContactPersonName
+                        : $"{item.ContactPersonName} ({item.ContactPersonPhone})";
+                    row++;
+                }
+
+                FormatWorksheetTable(ws, Math.Max(4, row - 1), headers.Length);
+                ws.Column(1).Width = 8;
+                ws.Column(2).Width = 18;
+                ws.Column(3).Width = 42;
+                ws.Column(4).Width = 14;
+                ws.Column(5).Width = 22;
+                ws.Column(6).Width = 34;
+                ws.Column(7).Width = 35;
+                ws.Column(8).Width = 35;
+                ws.Column(9).Width = 22;
+                ws.Column(10).Width = 18;
+                ws.Column(11).Width = 22;
+                ws.Column(12).Width = 14;
+                ws.Column(13).Width = 16;
+                ws.Column(14).Width = 25;
+                ws.Column(15).Width = 30;
+                ws.Column(16).Width = 28;
+
+                var fileName = $"Danh_sach_co_hoi_KD_DVS_{year}_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        /// <summary>
         /// Màn hình dashboard tổng hợp legacy.
         /// </summary>
         public ActionResult IndexLegacy()
@@ -1316,6 +1417,213 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
                 AppProcessor.Logger.Error(ex);
 
                 return Json(new { success = false });
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportOpportunityByGroupService(string fromDate, string toDate, int groupServiceId)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                GroupServiceID = groupServiceId,
+                Username = User?.UserName
+            };
+            var items = (_dashboardCache.GetOpportunitiesByGroupService(out var total, search) ?? new List<OpportunityDashboardModel>())
+                .OrderBy(x => x.OpportunityName)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("CoHoiTheoNhomDV");
+                BuildOpportunitiesWorksheet(worksheet, items, dtFrom, dtTo);
+                var fileName = $"Co_hoi_theo_nhom_dich_vu_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportOpportunityBySuccessRate(string fromDate, string toDate, string successRate, bool isGreaterOrEqual = false)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                SuccessRate = decimal.TryParse(successRate, out var rate) ? rate : 0,
+                IsGreaterOrEqual = isGreaterOrEqual,
+                Username = User?.UserName
+            };
+            var items = (_dashboardCache.GetOpportunitiesV2(out var total, search) ?? new List<OpportunityDashboardModel>())
+                .OrderBy(x => x.OpportunityName)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("CoHoiTheoTyLe");
+                BuildOpportunitiesWorksheet(worksheet, items, dtFrom, dtTo);
+                var fileName = $"Co_hoi_theo_ty_le_thanh_cong_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportOpportunityByUser(int type, string userId, string fromDate, string toDate)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                EmployeeIds = userId,
+                Type = type
+            };
+            var items = (_dashboardCache.GetOpportunities(out var total, search) ?? new List<OpportunityDashboardModel>())
+                .OrderBy(x => x.OpportunityName)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("CoHoiTheoNhanSu");
+                BuildOpportunitiesWorksheet(worksheet, items, dtFrom, dtTo);
+                var fileName = $"Co_hoi_theo_nhan_su_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportProjectByGroupService(string fromDate, string toDate, int groupServiceId)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                GroupServiceID = groupServiceId,
+                Username = User?.UserName
+            };
+            var items = (_dashboardCache.GetProjectsByGroupService(out var total, search) ?? new List<ProjectDashboardModel>())
+                .OrderBy(x => x.ProjectName)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("DuAnTheoNhomDV");
+                BuildProjectsWorksheet(worksheet, items, dtFrom, dtTo);
+                var fileName = $"Du_an_theo_nhom_dich_vu_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportProjectBySuccessRate(string fromDate, string toDate, string successRate, bool isGreaterOrEqual = false)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                SuccessRate = decimal.TryParse(successRate, out var rate) ? rate : 0,
+                IsGreaterOrEqual = isGreaterOrEqual,
+                Username = User?.UserName
+            };
+            var items = (_dashboardCache.GetProjectsV2(out var total, search) ?? new List<ProjectDashboardModel>())
+                .OrderBy(x => x.ProjectName)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("DuAnTheoTyLe");
+                BuildProjectsWorksheet(worksheet, items, dtFrom, dtTo);
+                var fileName = $"Du_an_theo_ty_le_thanh_cong_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportProjectByUser(string userId, string fromDate, string toDate)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                EmployeeIds = userId
+            };
+            var items = (_dashboardCache.GetProjects(out var total, search) ?? new List<ProjectDashboardModel>())
+                .OrderBy(x => x.ProjectName)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("DuAnTheoNhanSu");
+                BuildProjectsWorksheet(worksheet, items, dtFrom, dtTo);
+                var fileName = $"Du_an_theo_nhan_su_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
+            }
+        }
+
+        [HttpGet]
+        [ActionType(Type = EnumActionType.View)]
+        public ActionResult ExportPlanByUser(string userId, string fromDate, string toDate)
+        {
+            var dtFrom = ParseFromDateOrDefault(fromDate);
+            var dtTo = ParseToDateOrDefault(toDate);
+            var search = new DashboardSearchModel
+            {
+                FromDate = dtFrom,
+                ToDate = dtTo,
+                EmployeeIds = userId
+            };
+            var items = (_dashboardCache.GetPlansV2(out var total, search) ?? new List<PlanDashboardModel>())
+                .OrderBy(x => x.WorkingDate)
+                .ToList();
+
+            using (var package = new ExcelPackage())
+            {
+                var ws = package.Workbook.Worksheets.Add("KeHoachTheoNhanSu");
+                var headers = new[] { "STT", "Kế hoạch", "Cơ hội kinh doanh", "Khách hàng", "Ngày làm việc", "Địa điểm", "Nội dung" };
+                BuildWorksheetHeading(ws, "DANH SÁCH KẾ HOẠCH KINH DOANH", dtFrom, dtTo, headers);
+
+                int row = 5;
+                foreach (var item in items)
+                {
+                    ws.Cells[row, 1].Value = row - 4;
+                    ws.Cells[row, 2].Value = item.PlanName;
+                    ws.Cells[row, 3].Value = item.OpportunityName;
+                    ws.Cells[row, 4].Value = item.CustomerName;
+                    ws.Cells[row, 5].Value = item.WorkingDate;
+                    ws.Cells[row, 5].Style.Numberformat.Format = "dd/MM/yyyy";
+                    ws.Cells[row, 6].Value = item.AddressMeeting;
+                    ws.Cells[row, 7].Value = HtmlToPlainText(item.Content);
+                    row++;
+                }
+
+                FormatWorksheetTable(ws, Math.Max(4, row - 1), headers.Length);
+                ws.Column(1).Width = 8;
+                ws.Column(2).Width = 35;
+                ws.Column(3).Width = 38;
+                ws.Column(4).Width = 32;
+                ws.Column(5).Width = 16;
+                ws.Column(6).Width = 28;
+                ws.Column(7).Width = 45;
+
+                var fileName = $"Ke_hoach_kinh_doanh_{DateTime.Now:yyyyMMddHHmm}.xlsx";
+                return File(package.GetAsByteArray(), EXCEL_CONTENT_TYPE, fileName);
             }
         }
     }

@@ -79,17 +79,13 @@
                     "defaultContent": "",
                     "className": "text-left",
                     "render": function (data, type, row) {
-                        let url = "#";
-                        if (row.ReportType == 'Dự án') {
-                            url = "/Cate/ProjectOverview/Index/" + row.ReportID;
-                        }
-                        else if (row.ReportType == 'Cơ hội kinh doanh') {
-                            url = "/Cate/BusinessOpportunityOverview/Index/" + row.ReportID;
-                        }
+                        var url = row && row.ReportID
+                            ? "/Cate/DigitalSales/Detail?id=" + encodeURIComponent(row.ReportID)
+                            : "#";
                         return `
                             <div class="font-weight-bold text-primary">
                                 <a href="${url}">
-                                    ${data}
+                                    ${data || ""}
                                 </a>
                             </div>
                         `;
@@ -99,7 +95,7 @@
                     "data": "StatusClass",
                     "defaultContent": "",
                     "render": function (data, type, row, meta) {
-                        return '<span class="badge ' + data + '">' + row.StatusName + '</span>';
+                        return '<span class="badge ' + (data || "badge-info") + '">' + (row.StatusName || "") + '</span>';
                     }
                 },
                 {
@@ -123,7 +119,20 @@
                         return data != null ? moment(data).format("DD/MM/YYYY") : "";
                     }
                 }
-            ]
+            ],
+            "createdRow": function (row, data) {
+                if (data && data.ReportID) {
+                    $(row).addClass("cursor-pointer").attr("data-id", data.ReportID);
+                }
+            }
+        });
+
+        $("#DSOpportunityProjectWithoutPGP tbody").off("click", "tr").on("click", "tr", function (e) {
+            if ($(e.target).closest("a, button, input").length > 0) return;
+            var rowData = _tableOpportunityProjectWithoutPGP.row(this).data();
+            if (rowData && rowData.ReportID) {
+                window.location.href = "/Cate/DigitalSales/Detail?id=" + encodeURIComponent(rowData.ReportID);
+            }
         });
     }
 </script>

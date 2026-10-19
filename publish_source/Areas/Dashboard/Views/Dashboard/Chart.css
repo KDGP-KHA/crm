@@ -111,6 +111,127 @@
     background-color: #eff6ff !important;
 }
 
+/* Enlarged Font Styling for Dashboard Modals */
+#modal_DigitalSalesByStatus .modal-title,
+#modal_OpportunityByGroupService .modal-title,
+#modal_OpportunityBySuccessRate .modal-title,
+#modal_OpportunityByUser .modal-title,
+#modal_ProjectByGroupService .modal-title,
+#modal_ProjectBySuccessRate .modal-title,
+#modal_ProjectByUser .modal-title,
+#modal_PlanByUser .modal-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+}
+
+#modal_DigitalSalesByStatus .modal-body,
+#modal_OpportunityByGroupService .modal-body,
+#modal_OpportunityBySuccessRate .modal-body,
+#modal_OpportunityByUser .modal-body,
+#modal_ProjectByGroupService .modal-body,
+#modal_ProjectBySuccessRate .modal-body,
+#modal_ProjectByUser .modal-body,
+#modal_PlanByUser .modal-body {
+    font-size: 14.5px !important;
+}
+
+#modal_DigitalSalesByStatus table.dataTable thead th,
+#modal_OpportunityByGroupService table.dataTable thead th,
+#modal_OpportunityBySuccessRate table.dataTable thead th,
+#modal_OpportunityByUser table.dataTable thead th,
+#modal_ProjectByGroupService table.dataTable thead th,
+#modal_ProjectBySuccessRate table.dataTable thead th,
+#modal_ProjectByUser table.dataTable thead th,
+#modal_PlanByUser table.dataTable thead th {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 12px 10px !important;
+}
+
+#modal_DigitalSalesByStatus table.dataTable tbody td,
+#modal_OpportunityByGroupService table.dataTable tbody td,
+#modal_OpportunityBySuccessRate table.dataTable tbody td,
+#modal_OpportunityByUser table.dataTable tbody td,
+#modal_ProjectByGroupService table.dataTable tbody td,
+#modal_ProjectBySuccessRate table.dataTable tbody td,
+#modal_ProjectByUser table.dataTable tbody td,
+#modal_PlanByUser table.dataTable tbody td {
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+    padding: 12px 10px !important;
+}
+
+#modal_DigitalSalesByStatus .dataTables_wrapper .dataTables_length,
+#modal_DigitalSalesByStatus .dataTables_wrapper .dataTables_filter,
+#modal_DigitalSalesByStatus .dataTables_wrapper .dataTables_info,
+#modal_DigitalSalesByStatus .dataTables_wrapper .dataTables_paginate,
+#modal_OpportunityByGroupService .dataTables_wrapper .dataTables_length,
+#modal_OpportunityByGroupService .dataTables_wrapper .dataTables_filter,
+#modal_OpportunityByGroupService .dataTables_wrapper .dataTables_info,
+#modal_OpportunityByGroupService .dataTables_wrapper .dataTables_paginate,
+#modal_OpportunityBySuccessRate .dataTables_wrapper .dataTables_length,
+#modal_OpportunityBySuccessRate .dataTables_wrapper .dataTables_filter,
+#modal_OpportunityBySuccessRate .dataTables_wrapper .dataTables_info,
+#modal_OpportunityBySuccessRate .dataTables_wrapper .dataTables_paginate,
+#modal_OpportunityByUser .dataTables_wrapper .dataTables_length,
+#modal_OpportunityByUser .dataTables_wrapper .dataTables_filter,
+#modal_OpportunityByUser .dataTables_wrapper .dataTables_info,
+#modal_OpportunityByUser .dataTables_wrapper .dataTables_paginate,
+#modal_ProjectByGroupService .dataTables_wrapper .dataTables_length,
+#modal_ProjectByGroupService .dataTables_wrapper .dataTables_filter,
+#modal_ProjectByGroupService .dataTables_wrapper .dataTables_info,
+#modal_ProjectByGroupService .dataTables_wrapper .dataTables_paginate,
+#modal_ProjectBySuccessRate .dataTables_wrapper .dataTables_length,
+#modal_ProjectBySuccessRate .dataTables_wrapper .dataTables_filter,
+#modal_ProjectBySuccessRate .dataTables_wrapper .dataTables_info,
+#modal_ProjectBySuccessRate .dataTables_wrapper .dataTables_paginate,
+#modal_ProjectByUser .dataTables_wrapper .dataTables_length,
+#modal_ProjectByUser .dataTables_wrapper .dataTables_filter,
+#modal_ProjectByUser .dataTables_wrapper .dataTables_info,
+#modal_ProjectByUser .dataTables_wrapper .dataTables_paginate,
+#modal_PlanByUser .dataTables_wrapper .dataTables_length,
+#modal_PlanByUser .dataTables_wrapper .dataTables_filter,
+#modal_PlanByUser .dataTables_wrapper .dataTables_info,
+#modal_PlanByUser .dataTables_wrapper .dataTables_paginate {
+    font-size: 14px !important;
+}
+
+#modal_DigitalSalesByStatus .db-modal-item-title,
+#modal_OpportunityByGroupService .db-modal-item-title,
+#modal_OpportunityBySuccessRate .db-modal-item-title,
+#modal_OpportunityByUser .db-modal-item-title,
+#modal_ProjectByGroupService .db-modal-item-title,
+#modal_ProjectBySuccessRate .db-modal-item-title,
+#modal_ProjectByUser .db-modal-item-title,
+#modal_PlanByUser .db-modal-item-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+}
+
+#modal_DigitalSalesByStatus .db-modal-subtext,
+#modal_OpportunityByGroupService .small,
+#modal_OpportunityBySuccessRate .small,
+#modal_OpportunityByUser .small,
+#modal_ProjectByGroupService .small,
+#modal_ProjectBySuccessRate .small,
+#modal_ProjectByUser .small,
+#modal_PlanByUser .small {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+#modal_DigitalSalesByStatus .badge,
+#modal_OpportunityByGroupService .badge,
+#modal_OpportunityBySuccessRate .badge,
+#modal_OpportunityByUser .badge,
+#modal_ProjectByGroupService .badge,
+#modal_ProjectBySuccessRate .badge,
+#modal_ProjectByUser .badge,
+#modal_PlanByUser .badge {
+    font-size: 13px !important;
+}
+
 /* Tabs Styling (Ace Admin Style) */
 .db-nav-tabs {
     border-bottom: 2px solid #e2e8f0;

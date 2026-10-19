@@ -16,25 +16,14 @@ namespace Core.Cate.Caches
     public class OpportunityProjectWithoutPGPCache : CacheLayer
     {
         private OpportunityProjectWithoutPGPBiz _OpportunityProjectWithoutPGPApi;
-        protected override string[] MasterCacheKeyArray => new[] { "OpportunityProjectWithoutPGPCache", "CENIT.APP.Cache" };
+        protected override string[] MasterCacheKeyArray => new[] { "OpportunityProjectWithoutPGPCache", "RM_DigitalSalesCache", "CENIT.APP.Cache" };
         private OpportunityProjectWithoutPGPBiz Api => _OpportunityProjectWithoutPGPApi ?? (_OpportunityProjectWithoutPGPApi = new OpportunityProjectWithoutPGPBiz());
 
         [DataObjectMethod(DataObjectMethodType.Select, true)]
         public List<OpportunityProjectWithoutPGPModel> Get(out int total, OpportunityProjectWithoutPGSearchPModel searchModel = null, BaseSearchModel search = null)
         {
-            var rawKey = string.Concat("GetOpportunityProjectWithoutPGP_", UtilEncrypt.FromObject(searchModel), UtilEncrypt.FromObject(search));
-            var rawKeyTotal = string.Concat(rawKey, "-Total");
             total = 0;
-            var cacheTotal = (int?)GetCacheItem(rawKeyTotal);
-            total = cacheTotal ?? 0;
-
-            var data = GetCacheItem(rawKey) as List<OpportunityProjectWithoutPGPModel>;
-            if (data != null) return data;
-
-            data = Api.LoadList(out total, searchModel, search);
-            AddCacheItem(rawKey, data);
-            AddCacheItem(rawKeyTotal, total);
-            return data;
+            return Api.LoadList(out total, searchModel, search);
         }
     }
 }
