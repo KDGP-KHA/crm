@@ -352,12 +352,12 @@ namespace Core.Cate.Caches
 
         public List<MN_BoPhanModel> GetLevel1Departments()
         {
-            var rawKey = "MN_BoPhan_GetLevel1Departments";
+            var rawKey = "MN_BoPhan_GetLevel1Departments_v2";
             var data = GetCacheItem(rawKey) as List<MN_BoPhanModel>;
-            if (data != null) return data;
+            if (data != null && data.Count > 0 && data.TrueForAll(x => x.BoPhan_ID > 0)) return data;
 
             data = Api.GetLevel1Departments();
-            if (data != null)
+            if (data != null && data.Count > 0 && data.TrueForAll(x => x.BoPhan_ID > 0))
             {
                 AddCacheItem(rawKey, data);
             }
@@ -367,15 +367,7 @@ namespace Core.Cate.Caches
         public List<MN_BoPhanModel> GetManagedLevel1Departments(string userName)
         {
             if (string.IsNullOrWhiteSpace(userName)) return new List<MN_BoPhanModel>();
-            var rawKey = string.Concat("MN_BoPhan_GetManagedLevel1Departments_", userName.Trim().ToLower());
-            var data = GetCacheItem(rawKey) as List<MN_BoPhanModel>;
-            if (data != null) return data;
-
-            data = Api.GetManagedLevel1Departments(userName);
-            if (data != null)
-            {
-                AddCacheItem(rawKey, data);
-            }
+            var data = Api.GetManagedLevel1Departments(userName);
             return data ?? new List<MN_BoPhanModel>();
         }
 

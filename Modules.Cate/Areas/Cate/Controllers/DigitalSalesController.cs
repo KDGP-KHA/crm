@@ -7073,7 +7073,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     Selected = !string.IsNullOrEmpty(model.MemberRole) && model.MemberRole.Equals(r.RoleName.Trim(), StringComparison.OrdinalIgnoreCase)
                 }).ToList();
 
-            var level1Depts = _salesCache.GetLevel1Departments() ?? new List<MN_BoPhanModel>();
+            var level1Depts = IsUserQTHT(CurrentUserName, CurrentUserId)
+                ? (_salesCache.GetLevel1Departments() ?? new List<MN_BoPhanModel>())
+                : (_salesCache.GetManagedLevel1Departments(CurrentUserName) ?? new List<MN_BoPhanModel>());
             var sourceDeptsList = new List<SelectListItem>
             {
                 new SelectListItem { Value = "0", Text = GetAppMessage("DigitalSalesSearch_SourceDepartment_AllOption", "-- Tất cả đơn vị xuất phát --"), Selected = (model.SourceDepartmentID == 0) },

@@ -11,6 +11,27 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 GO
 
+PRINT N'>>> 0. CẬP NHẬT STORED PROCEDURE dbo.MN_BoPhan_GetLevel1Departments...';
+GO
+
+ALTER PROCEDURE dbo.MN_BoPhan_GetLevel1Departments
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        bp.BoPhan_ID,
+        bp.BoPhan_ID AS BoPhanID,
+        bp.MaBoPhan,
+        bp.Ma_DV_BCN,
+        bp.TenBoPhan
+    FROM dbo.MN_BoPhan bp
+    WHERE bp.BoPhanCha_ID = 5741
+      AND ISNULL(bp.Da_Xoa, 0) = 0
+    ORDER BY bp.TenBoPhan ASC;
+END
+GO
+
 PRINT N'>>> 1. TẠO STORED PROCEDURE dbo.MN_BoPhan_GetManagedLevel1Departments...';
 GO
 
@@ -32,6 +53,7 @@ BEGIN
     BEGIN
         SELECT 
             CAST(0 AS INT) AS BoPhan_ID, 
+            CAST(0 AS INT) AS BoPhanID, 
             CAST('' AS NVARCHAR(250)) AS TenBoPhan, 
             CAST('' AS VARCHAR(50)) AS MaBoPhan
         WHERE 1 = 0;
@@ -39,7 +61,6 @@ BEGIN
     END
 
     -- 2. Nếu được cấu hình quản lý đơn vị gốc 5741 (KHA000000 - Cấp Tỉnh / Ban Giám đốc)
-    --    hoặc KDGP (100003, các phòng ban con của KDGP 239.603)
     -- -> Quản lý toàn bộ các đơn vị con Cấp 1 của Viễn thông Khánh Hòa
     IF EXISTS (
         SELECT 1 FROM dbo.Sys_UserBoPhan subp
@@ -48,19 +69,17 @@ BEGIN
           AND (
               bp.BoPhan_ID = 5741 
               OR bp.MaBoPhan = 'KHA000000'
-              OR bp.BoPhan_ID = 100003 
-              OR bp.BoPhanCha_ID = 100003
-              OR bp.MaBoPhan LIKE '239.603%'
           )
     )
     BEGIN
         SELECT 
             BoPhan_ID, 
+            BoPhan_ID AS BoPhanID,
             TenBoPhan, 
             MaBoPhan
         FROM dbo.MN_BoPhan
         WHERE BoPhanCha_ID = 5741 
-          AND Da_Xoa = 0
+          AND ISNULL(Da_Xoa, 0) = 0
         ORDER BY TenBoPhan;
         RETURN;
     END
@@ -75,35 +94,43 @@ BEGIN
     INNER JOIN dbo.Sys_UserBoPhan subp ON subp.MaBoPhan = bp.MaBoPhan
     WHERE REPLACE(subp.Email, '@vnpt.vn', '') = REPLACE(@UserName, '@vnpt.vn', '')
       AND bp.BoPhanCha_ID = 5741 
-      AND bp.Da_Xoa = 0;
+      AND ISNULL(bp.Da_Xoa, 0) = 0;
 
     -- 3.2. Nếu phân quyền ở bộ phận con (cấp 2, 3), truy ngược cây danh mục lên đơn vị con Cấp 1 của 5741
+    --      Lưu ý: trong MN_BoPhan, các phòng ban con có BoPhanCha_ID trỏ tới các nút trung gian 100001..100021 (BoPhanCha_ID IS NULL, MaBoPhan = '239.xxx'),
+    --      trong khi các nút Cấp 1 (BoPhanCha_ID = 5741) có Ma_DV_BCN = '239.xxx'.
     ;WITH ParentTree AS (
-        SELECT bp.BoPhan_ID, bp.BoPhanCha_ID
+        SELECT bp.BoPhan_ID, bp.BoPhanCha_ID, bp.MaBoPhan, bp.Ma_DV_BCN
         FROM dbo.MN_BoPhan bp
         INNER JOIN dbo.Sys_UserBoPhan subp ON subp.MaBoPhan = bp.MaBoPhan
         WHERE REPLACE(subp.Email, '@vnpt.vn', '') = REPLACE(@UserName, '@vnpt.vn', '')
-          AND bp.Da_Xoa = 0
+          AND ISNULL(bp.Da_Xoa, 0) = 0
         UNION ALL
-        SELECT p.BoPhan_ID, p.BoPhanCha_ID
+        SELECT p.BoPhan_ID, p.BoPhanCha_ID, p.MaBoPhan, p.Ma_DV_BCN
         FROM dbo.MN_BoPhan p
         INNER JOIN ParentTree c ON p.BoPhan_ID = c.BoPhanCha_ID
-        WHERE p.Da_Xoa = 0 AND p.BoPhan_ID <> 5741
+        WHERE ISNULL(p.Da_Xoa, 0) = 0 AND p.BoPhan_ID <> 5741
     )
     INSERT INTO @ManagedLevel1Depts (BoPhan_ID)
-    SELECT DISTINCT BoPhan_ID
-    FROM ParentTree
-    WHERE BoPhanCha_ID = 5741
-      AND BoPhan_ID NOT IN (SELECT BoPhan_ID FROM @ManagedLevel1Depts);
+    SELECT DISTINCT lvl1.BoPhan_ID
+    FROM dbo.MN_BoPhan lvl1
+    INNER JOIN ParentTree pt ON (
+        lvl1.BoPhan_ID = pt.BoPhan_ID
+        OR (ISNULL(lvl1.Ma_DV_BCN, '') <> '' AND (lvl1.Ma_DV_BCN = pt.MaBoPhan OR lvl1.Ma_DV_BCN = pt.Ma_DV_BCN))
+    )
+    WHERE lvl1.BoPhanCha_ID = 5741
+      AND ISNULL(lvl1.Da_Xoa, 0) = 0
+      AND lvl1.BoPhan_ID NOT IN (SELECT BoPhan_ID FROM @ManagedLevel1Depts);
 
     -- Trả về danh sách đơn vị con cấp 1 mà người dùng được phân quyền quản lý
     SELECT 
         bp.BoPhan_ID, 
+        bp.BoPhan_ID AS BoPhanID,
         bp.TenBoPhan, 
         bp.MaBoPhan
     FROM dbo.MN_BoPhan bp
     INNER JOIN @ManagedLevel1Depts m ON bp.BoPhan_ID = m.BoPhan_ID
-    WHERE bp.Da_Xoa = 0
+    WHERE ISNULL(bp.Da_Xoa, 0) = 0
     ORDER BY bp.TenBoPhan;
 END
 GO
@@ -151,16 +178,13 @@ BEGIN
               AND (
                   bp.BoPhan_ID = 5741 
                   OR bp.MaBoPhan = 'KHA000000'
-                  OR bp.BoPhan_ID = 100003 
-                  OR bp.BoPhanCha_ID = 100003
-                  OR bp.MaBoPhan LIKE '239.603%'
               )
         )
         BEGIN
             INSERT INTO @ManagedLevel1Depts (BoPhan_ID)
             SELECT BoPhan_ID 
             FROM dbo.MN_BoPhan 
-            WHERE BoPhanCha_ID = 5741 AND Da_Xoa = 0;
+            WHERE BoPhanCha_ID = 5741 AND ISNULL(Da_Xoa, 0) = 0;
         END
         ELSE
         BEGIN
@@ -169,25 +193,30 @@ BEGIN
             FROM dbo.MN_BoPhan bp
             INNER JOIN dbo.Sys_UserBoPhan subp ON subp.MaBoPhan = bp.MaBoPhan
             WHERE REPLACE(subp.Email, '@vnpt.vn', '') = REPLACE(@UserName, '@vnpt.vn', '')
-              AND bp.BoPhanCha_ID = 5741 AND bp.Da_Xoa = 0;
+              AND bp.BoPhanCha_ID = 5741 AND ISNULL(bp.Da_Xoa, 0) = 0;
 
             ;WITH ParentTree AS (
-                SELECT bp.BoPhan_ID, bp.BoPhanCha_ID
+                SELECT bp.BoPhan_ID, bp.BoPhanCha_ID, bp.MaBoPhan, bp.Ma_DV_BCN
                 FROM dbo.MN_BoPhan bp
                 INNER JOIN dbo.Sys_UserBoPhan subp ON subp.MaBoPhan = bp.MaBoPhan
                 WHERE REPLACE(subp.Email, '@vnpt.vn', '') = REPLACE(@UserName, '@vnpt.vn', '')
-                  AND bp.Da_Xoa = 0
+                  AND ISNULL(bp.Da_Xoa, 0) = 0
                 UNION ALL
-                SELECT p.BoPhan_ID, p.BoPhanCha_ID
+                SELECT p.BoPhan_ID, p.BoPhanCha_ID, p.MaBoPhan, p.Ma_DV_BCN
                 FROM dbo.MN_BoPhan p
                 INNER JOIN ParentTree c ON p.BoPhan_ID = c.BoPhanCha_ID
-                WHERE p.Da_Xoa = 0 AND p.BoPhan_ID <> 5741
+                WHERE ISNULL(p.Da_Xoa, 0) = 0 AND p.BoPhan_ID <> 5741
             )
             INSERT INTO @ManagedLevel1Depts (BoPhan_ID)
-            SELECT DISTINCT BoPhan_ID
-            FROM ParentTree
-            WHERE BoPhanCha_ID = 5741
-              AND BoPhan_ID NOT IN (SELECT BoPhan_ID FROM @ManagedLevel1Depts);
+            SELECT DISTINCT lvl1.BoPhan_ID
+            FROM dbo.MN_BoPhan lvl1
+            INNER JOIN ParentTree pt ON (
+                lvl1.BoPhan_ID = pt.BoPhan_ID
+                OR (ISNULL(lvl1.Ma_DV_BCN, '') <> '' AND (lvl1.Ma_DV_BCN = pt.MaBoPhan OR lvl1.Ma_DV_BCN = pt.Ma_DV_BCN))
+            )
+            WHERE lvl1.BoPhanCha_ID = 5741
+              AND ISNULL(lvl1.Da_Xoa, 0) = 0
+              AND lvl1.BoPhan_ID NOT IN (SELECT BoPhan_ID FROM @ManagedLevel1Depts);
         END
     END
 

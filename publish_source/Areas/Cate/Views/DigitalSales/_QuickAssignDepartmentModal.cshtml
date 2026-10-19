@@ -71,17 +71,17 @@
 
         $form.on('submit', function (e) {
             e.preventDefault();
-            var salesId = $('#QuickAssign_DigitalSalesID').val();
-            var sourceDeptId = $('#QuickAssign_SourceDepartmentID').val();
+            var salesId = $form.find('#QuickAssign_DigitalSalesID').val();
+            var sourceDeptId = $form.find('#QuickAssign_SourceDepartmentID').val();
 
-            if (!sourceDeptId || parseInt(sourceDeptId) <= 0) {
+            if (!sourceDeptId || parseInt(sourceDeptId, 10) <= 0) {
                 if (typeof toastr !== 'undefined') {
                     toastr.warning('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Validation_SourceDepartment_Required")))');
                 }
                 return false;
             }
 
-            var $btn = $('#btnSubmitQuickAssign');
+            var $btn = $form.find('#btnSubmitQuickAssign');
             $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
 
             var token = $('input[name="__RequestVerificationToken"]', $form).val();

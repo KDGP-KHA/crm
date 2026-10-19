@@ -142,12 +142,6 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             var managedDepts = _digitalSalesCache.GetManagedLevel1Departments(User?.UserName) ?? new List<MN_BoPhanModel>();
             int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
 
-            // Nếu người dùng chỉ quản lý 1 đơn vị duy nhất và chưa chọn cụ thể -> mặc định chọn đơn vị đó
-            if (managedDepts.Count == 1 && (!sourceDepartmentId.HasValue || sourceDepartmentId.Value <= 0))
-            {
-                srcDeptId = managedDepts[0].BoPhan_ID;
-            }
-
             DigitalSalesDashboardOverviewModel overviewModel;
             try
             {
@@ -164,9 +158,10 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
 
             // Xây dựng danh sách combobox đơn vị theo quyền quản lý
             var listSelect = new List<SelectListItem>();
-            if (managedDepts.Count > 1)
+            if (managedDepts.Count >= 1)
             {
                 listSelect.Add(new SelectListItem { Value = "0", Text = "-- Tất cả đơn vị được quản lý --", Selected = (srcDeptId == 0) });
+                listSelect.Add(new SelectListItem { Value = "-1", Text = "-- Chưa chọn đơn vị xuất phát --", Selected = (srcDeptId == -1) });
             }
             foreach (var d in managedDepts)
             {
@@ -200,11 +195,6 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             var managedDepts = _digitalSalesCache.GetManagedLevel1Departments(User?.UserName) ?? new List<MN_BoPhanModel>();
             int srcDeptId = sourceDepartmentId.GetValueOrDefault(0);
 
-            if (managedDepts.Count == 1 && (!sourceDepartmentId.HasValue || sourceDepartmentId.Value <= 0))
-            {
-                srcDeptId = managedDepts[0].BoPhan_ID;
-            }
-
             DigitalSalesDashboardOverviewModel overviewModel;
             try
             {
@@ -220,9 +210,10 @@ namespace Modules.Dashboard.Areas.Dashboard.Controllers
             overviewModel.SourceDepartmentID = srcDeptId;
 
             var listSelect = new List<SelectListItem>();
-            if (managedDepts.Count > 1)
+            if (managedDepts.Count >= 1)
             {
                 listSelect.Add(new SelectListItem { Value = "0", Text = "-- Tất cả đơn vị được quản lý --", Selected = (srcDeptId == 0) });
+                listSelect.Add(new SelectListItem { Value = "-1", Text = "-- Chưa chọn đơn vị xuất phát --", Selected = (srcDeptId == -1) });
             }
             foreach (var d in managedDepts)
             {
