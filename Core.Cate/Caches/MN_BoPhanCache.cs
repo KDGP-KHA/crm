@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ComponentModel;
@@ -48,7 +48,7 @@ namespace Core.Cate.Caches
         [DataObjectMethod(DataObjectMethodType.Select, true)]
         public List<MN_BoPhanModel> GetAll()
         {
-            var rawKey = string.Concat("GetAllMN_BoPhan");
+            var rawKey = string.Concat("GetAllMN_BoPhan_v2");
             var data = GetCacheItem(rawKey) as List<MN_BoPhanModel>;
             if (data != null && data.Count() > 0) return data;
             data = Api.GetAll();

@@ -18,13 +18,13 @@ namespace Core.Sys.Biz.Sys
         /// </summary>
         public int Save(string email, string maBophans, string savedBy)
         {
-            AppProcessor.ProcedureProvider.Execute(
+            var result = AppProcessor.ProcedureProvider.Execute(
                 _saveProc,
                 DATA_PROVIDER_NAME,
                 email,
                 maBophans,
                 savedBy);
-            return 1;
+            return result.GetValueOrDefault(1);
         }
 
         /// <summary>

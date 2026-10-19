@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -928,9 +928,13 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 return PartialView("_BoPhanBody", model);
             }
 
-            var maBophans = string.IsNullOrEmpty(model.MaBophans)
+            var maBophans = string.IsNullOrWhiteSpace(model.MaBophans)
                 ? null
-                : model.MaBophans.Trim(',');
+                : string.Join(",", model.MaBophans
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase));
 
             var result = _userBoPhanCache.Save(
                 model.Email,
@@ -942,7 +946,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 EnumProcessType.Edit,
                 result > 0 ? EnumMsgIcon.Success : EnumMsgIcon.Error);
 
-            return Json(new { status = true, message = response });
+            return Json(new { status = result > 0, message = response });
         }
 
         #endregion

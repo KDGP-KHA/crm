@@ -178,13 +178,18 @@
 
         // Cap nhat Hidden input va bo dem
         function syncSelectedCodes() {
-            var selectedCodes = [];
+            var uniqueCodes = [];
+            var checkedCount = 0;
             $table.find('.chk-bophan-item:checked').each(function () {
-                selectedCodes.push($(this).val());
+                checkedCount++;
+                var val = $.trim($(this).val());
+                if (val && $.inArray(val, uniqueCodes) === -1) {
+                    uniqueCodes.push(val);
+                }
             });
 
-            $hiddenInput.val(selectedCodes.join(','));
-            $lblSelected.text(selectedCodes.length);
+            $hiddenInput.val(uniqueCodes.join(','));
+            $lblSelected.text(checkedCount);
 
             // Cap nhat badge trang thai cua tung dong
             $rows.each(function () {
