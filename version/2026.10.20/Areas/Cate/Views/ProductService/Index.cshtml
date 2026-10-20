@@ -1,0 +1,139 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.Cate_ProductServiceSearchModel
+@{
+    ViewBag.Title = "Sản phẩm dịch vụ";
+}
+
+@section PageTitle
+{
+    @ViewBag.Title
+}
+
+@section HeadCss
+{
+    <link href="@Url.Content("~/Contents/Modules/Sys/plugins/bootstrap-iconpicker-1.10.0/dist/css/bootstrap-iconpicker.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Areas/Cate/Views/ProductService/ProductService.css?v=" + DateTime.Now.Ticks)" rel="stylesheet" />
+}
+
+@section PageAction
+{
+    @Html.Button(true, "AddProductService", Url.Action("Add", new { area = "Cate" }), "<i class='fa fa-plus mr-1'></i>", AppProcessor.Messagor.GetMessage("Button_Add"), new { @class = "btn btn-primary radius-3 px-3 py-2 text-600 text-90 shadow-sm", data_width = 1024 })
+}
+
+<!-- KPI Summary Metrics Cards -->
+<div class="row ps-metrics-wrapper">
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="ps-metric-card card-blue" id="kpi_card_total" onclick="ProductService_FilterByMetric('all')" title="Xem tất cả sản phẩm">
+            <div class="ps-metric-icon icon-blue">
+                <i class="fa fa-cubes"></i>
+            </div>
+            <div class="ps-metric-info">
+                <div class="ps-metric-value" id="kpi_total_products">0</div>
+                <div class="ps-metric-label">Tổng sản phẩm / Dịch vụ</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="ps-metric-card card-amber" id="kpi_card_groups" onclick="ProductService_FilterByMetric('groups')" title="Xem danh sách theo nhóm">
+            <div class="ps-metric-icon icon-amber">
+                <i class="fa fa-folder-open"></i>
+            </div>
+            <div class="ps-metric-info">
+                <div class="ps-metric-value" id="kpi_total_groups">0</div>
+                <div class="ps-metric-label">Nhóm dịch vụ</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="ps-metric-card card-green" id="kpi_card_active" onclick="ProductService_FilterByMetric('active')" title="Lọc sản phẩm đang hoạt động">
+            <div class="ps-metric-icon icon-green">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <div class="ps-metric-info">
+                <div class="ps-metric-value" id="kpi_total_active">0</div>
+                <div class="ps-metric-label">Đang hoạt động</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 col-12 mb-2 mb-xl-0">
+        <div class="ps-metric-card card-gray" id="kpi_card_inactive" onclick="ProductService_FilterByMetric('inactive')" title="Lọc sản phẩm tạm dừng">
+            <div class="ps-metric-icon icon-gray">
+                <i class="fa fa-pause-circle"></i>
+            </div>
+            <div class="ps-metric-info">
+                <div class="ps-metric-value" id="kpi_total_inactive">0</div>
+                <div class="ps-metric-label">Tạm dừng / Ngừng</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Filter Partial -->
+@Html.Partial("_Search", Model)
+
+<!-- Data Table Card Container -->
+<div class="card dcard shadow-sm border-0 mt-2">
+    <!-- Table Toolbar -->
+    <div class="ps-table-toolbar">
+        <div class="ps-view-modes btn-group">
+            <button type="button" class="btn btn-outline-primary active" id="btnModeTree" onclick="ProductService_SetViewMode('tree')">
+                <i class="fa fa-sitemap mr-1"></i>Dạng Cây phân cấp
+            </button>
+            <button type="button" class="btn btn-outline-primary" id="btnModeFlat" onclick="ProductService_SetViewMode('flat')">
+                <i class="fa fa-list-ul mr-1"></i>Dạng Danh sách
+            </button>
+        </div>
+
+        <div class="ps-tree-tools d-flex align-items-center" id="psTreeControls">
+            <button type="button" class="btn btn-outline-secondary mr-2" onclick="ProductService_ExpandAll()" title="Mở rộng toàn bộ cây">
+                <i class="fa fa-expand-arrows-alt mr-1"></i>Mở rộng tất cả
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="ProductService_CollapseAll()" title="Thu gọn toàn bộ cây">
+                <i class="fa fa-compress-arrows-alt mr-1"></i>Thu gọn tất cả
+            </button>
+        </div>
+    </div>
+
+    <!-- Table Body -->
+    <div class="table-responsive">
+        <table id="DSProductService" class="table text-dark-m1 w-100" width="100%">
+            <thead>
+                <tr id="ps_table_header">
+                    <!-- Rendered dynamically depending on View Mode -->
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows rendered dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="ps-pagination-container" id="ProductService_Pagination">
+        <div class="ps-pagination-info">
+            <span>Hiển thị <strong id="ps_page_start" class="text-dark">0</strong> - <strong id="ps_page_end" class="text-dark">0</strong> trên tổng số <strong id="ps_total_records" class="text-primary font-bold">0</strong> bản ghi</span>
+            <span class="mx-2 text-muted">|</span>
+            <span>Số dòng/trang:</span>
+            <select id="ps_page_size" class="ps-page-size-select form-control d-inline-block" onchange="ProductService_ChangePageSize(this.value)">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="-1">Tất cả</option>
+            </select>
+        </div>
+        <div class="ps-pagination-nav" id="ps_pagination_nav">
+            <!-- Nav buttons rendered dynamically -->
+        </div>
+    </div>
+</div>
+
+@section BottomScript
+{
+    <script src="@Url.Content("~/Areas/Cate/Views/ProductService/ProductService.js?v=" + DateTime.Now.Ticks)"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>
+}

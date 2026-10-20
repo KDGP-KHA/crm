@@ -1,0 +1,37 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesStatusModel
+
+@{
+    var isNew = Model.StatusID == 0;
+    ViewBag.Title = (isNew ? "Thêm mới" : "Cập nhật") + " Trạng thái " + (Model.BusinessType == 1 ? "Cơ hội" : "Dự án");
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-@(isNew ? "plus" : "pencil-alt")"></i>
+}
+
+@section FormBody{
+    @using (Ajax.BeginForm("SaveStatus", "DigitalSalesWorkflow", new { area = "Cate" }, new AjaxOptions
+    {
+        HttpMethod = "POST",
+        OnBegin = "DigitalSalesWorkflow.onFormBegin",
+        OnSuccess = "DigitalSalesWorkflow.onStatusSaveSuccess(data)",
+        OnComplete = "DigitalSalesWorkflow.onFormComplete"
+    }, new { @class = "form-horizontal", id = "formStatusModal" }))
+    {
+        <div id="bodyForm">
+            @Html.Partial("_StatusForm", Model)
+        </div>
+    }
+
+    <script type="text/javascript">
+        if (typeof _initElement === "function") {
+            _initElement();
+        }
+    </script>
+}

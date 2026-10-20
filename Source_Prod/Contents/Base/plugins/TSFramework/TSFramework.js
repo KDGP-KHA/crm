@@ -1,4 +1,4 @@
-﻿if ($.fn.datepicker != undefined) {
+if ($.fn.datepicker != undefined) {
     $.fn.datepicker.dates["vi"] = {
         days: ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật"],
         daysShort: ["CN", "T2", "T3", "T4", "T5", "T6", "T7", "CN"],
@@ -150,7 +150,9 @@ $(document)
                 window.location.href = window.location.origin + "/Account/Login";
             }
             else if (jqxhr.status === 500) {
-                window.location.href = window.location.origin + "/Error/Error";
+                if (!window.location.pathname.toLowerCase().includes("/error/")) {
+                    window.location.href = window.location.origin + "/Error/Error";
+                }
             }
             //window.location = "/Error/Error";
         });

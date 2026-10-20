@@ -1,69 +1,82 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.Cate_ProductServiceSearchModel
 
-<style>
-    #Keyword, #SearchFile {
-        font-size: 14px;
-    }
-</style>
-<div class="Search card dcard">
-    <div class="card-header bgc-primary-d1">
-        <div class="card-title text-white">
-            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+<div class="ps-search-card">
+    <div class="ps-search-header">
+        <div class="d-flex align-items-center">
+            <i class="fa fa-filter text-primary mr-2"></i>
+            <span>@AppProcessor.Messagor.GetMessage("Label_Search")</span>
+        </div>
+        <div class="text-muted text-90">
+            <span>Tra cứu & Bộ lọc nâng cao</span>
         </div>
     </div>
 
-    <div class="card-body p-2 d-flex align-items-end">
-        <div class="Search_Box w-25 keyWord">
-            <label class="text-sm-right pr-0 font-bold">@AppProcessor.Messagor.GetMessage("Label_TuKhoa")</label>
-            <input type="text"
-                   id="Keyword"
-                   class="form-control"
-                   placeholder="@AppProcessor.Messagor.GetMessage("ProductService_SearchPlaceholder")" />
-        </div>
-
-        <div class="Search_Box w-25 keyWord">
-            <label class="text-sm-right pr-0 font-bold">Nội dung tài liệu</label>
-            <input type="text"
-                   id="SearchFile"
-                   class="form-control"
-                   placeholder="Tìm theo tiêu đề, ghi chú tài liệu đính kèm" />
-        </div>
-
-        <div class="Group Group_button">
-            <div class="Search_button text-center">
-                <button type="button" class="btn btn-primary" onclick="Search()"><i class="fa fa-search-plus"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")</button>
+    <div class="ps-search-body">
+        <div class="row">
+            <div class="col-xl-4 col-lg-4 col-md-6 col-12 mb-3 mb-lg-0">
+                <label class="ps-search-label" for="Keyword">
+                    <i class="fa fa-tag text-secondary mr-1"></i>@AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+                </label>
+                <input type="text"
+                       id="Keyword"
+                       class="form-control ps-search-input"
+                       placeholder="Nhập tên, mã hoặc viết tắt sản phẩm..." />
             </div>
+
+            <div class="col-xl-3 col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
+                <label class="ps-search-label" for="SearchGroupServiceID">
+                    <i class="fa fa-folder text-warning mr-1"></i>Nhóm dịch vụ
+                </label>
+                <select id="SearchGroupServiceID" class="form-control ps-search-input">
+                    <option value="">-- Tất cả nhóm dịch vụ --</option>
+                </select>
+            </div>
+
+            <div class="col-xl-2 col-lg-2 col-md-6 col-12 mb-3 mb-lg-0">
+                <label class="ps-search-label" for="SearchIsActived">
+                    <i class="fa fa-toggle-on text-success mr-1"></i>Trạng thái
+                </label>
+                <select id="SearchIsActived" class="form-control ps-search-input">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="1">Đang hoạt động</option>
+                    <option value="0">Tạm dừng</option>
+                </select>
+            </div>
+
+            <div class="col-xl-3 col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
+                <label class="ps-search-label" for="SearchFile">
+                    <i class="fa fa-paperclip text-info mr-1"></i>Nội dung tài liệu
+                </label>
+                <input type="text"
+                       id="SearchFile"
+                       class="form-control ps-search-input"
+                       placeholder="Tìm theo tiêu đề, ghi chú tài liệu..." />
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end align-items-center mt-3 pt-2 border-top-1 brc-default-l3">
+            <button type="button" class="btn btn-outline-secondary mr-2 px-3 radius-2" onclick="ProductService_ResetFilter()">
+                <i class="fa fa-undo mr-1"></i>Đặt lại
+            </button>
+            <button type="button" class="btn btn-primary px-4 radius-2 shadow-sm" onclick="Search()">
+                <i class="fa fa-search mr-1"></i>@AppProcessor.Messagor.GetMessage("Label_Search")
+            </button>
         </div>
     </div>
 </div>
 
-@*<div class="row form-group">
-    <div class="col-md-5">
-        <label class="text-600 mb-0">Từ khóa</label>
-       
-    </div>
-    <div class="col-md-4">
-        <label class="text-600 mb-0">Nội dung tài liệu</label>
-        
-    </div>
-    <div class="text-center text-lg-left col-md-3 mt-lg-0 mt-3 align-content-end">
-        <button type="button" class="btn btn-primary" onclick="Search()">
-            <i class="fa fa-search-plus"></i>
-            &nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
-        </button>
-    </div>
-</div>*@
-
 <script>
     $(document).ready(function () {
-
-        $('#Keyword').on('keydown', function (e) {
+        $('#Keyword, #SearchFile').on('keydown', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 Search();
             }
         });
 
+        $('#SearchGroupServiceID, #SearchIsActived').on('change', function () {
+            ProductService_ApplyFilterAndRender();
+        });
     });
 </script>

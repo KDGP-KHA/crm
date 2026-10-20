@@ -5,8 +5,7 @@
 
 <div id="ReviewForm">
     @Html.HiddenFor(model => model.ReviewBatchID)
-    @Html.HiddenFor(model => model.ObjectType)
-    @Html.HiddenFor(model => model.ObjectID)
+    @Html.HiddenFor(model => model.DigitalSalesID)
 
     <div class="col-12">
         @Html.TitleFor(model => model.ReviewComment, new { @class = "col-form-label text-sm-left pr-0 font-bold" })

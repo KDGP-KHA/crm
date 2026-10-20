@@ -32,20 +32,6 @@
     </nav>
 }
 
-@section PageAction {
-    @if (Model.ReviewBatchID > 0)
-    {
-        @Html.Button(
-            true,
-            "ReviewBatch",
-            Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID = Model.ReviewBatchID, opportunityID = Model.BusinessOpportunity.BusinessOpportunityID }),
-            "<i class='fa fa-plus'></i>",
-            AppProcessor.Messagor.GetMessage("ReviewOpportunity_Title"),
-            new { @class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90" }
-        )
-    }
-}
-
 <style>
     .breadcrumb-item + .breadcrumb-item::before {
         font-family: "Font Awesome 5 Free";
@@ -135,6 +121,18 @@
     }
 </style>
 
+@if (Model.ReviewBatchID > 0)
+{
+    <a id="reviewBatchAutoTrigger"
+       class="d-none"
+       data-modal=""
+       data-modal-id="ReviewBatch"
+       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID = Model.ReviewBatchID, opportunityID = Model.BusinessOpportunity.BusinessOpportunityID })"
+       aria-hidden="true"></a>
+}
+
+<div id="reviewSplitView" class="review-split-view">
+<div class="review-detail-pane">
 <div id="boHeaderContainer">
     @Html.Partial("~/Areas/Cate/Views/BusinessOpportunityOverview/_BoHeader.cshtml", Model)
 </div>
@@ -229,6 +227,12 @@
         </div>
     </div>
 </div>
+</div>
+@if (Model.ReviewBatchID > 0)
+{
+    <aside id="reviewFormPane" class="review-form-pane" aria-label="Form rà soát"></aside>
+}
+</div>
 
 @section BottomScript
 {
@@ -255,12 +259,12 @@
             }
         });
 
-        // Vào từ màn hình rà soát định kỳ: mở sẵn panel nhập nội dung rà soát bên phải
+        // Vào từ danh sách rà soát: hiển thị ngay form để có thể rà soát liên tục.
         $(function () {
             @if (Model.ReviewBatchID > 0)
             {
                 <text>
-                var btnReview = document.querySelector('[data-modal-id="ReviewBatch"]');
+                var btnReview = document.getElementById('reviewBatchAutoTrigger');
                 if (btnReview) {
                     setTimeout(function () { btnReview.click(); }, 300);
                 }

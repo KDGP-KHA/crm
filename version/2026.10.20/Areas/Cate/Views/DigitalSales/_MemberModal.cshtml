@@ -1,0 +1,21 @@
+﻿@using System.Web
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesMemberFormModel
+<div class="modal fade" id="modalMember" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static"><div class="modal-dialog modal-lg" role="document"><div class="modal-content">
+    <div class="modal-header bgc-primary-d1 text-white"><h5 class="modal-title"><i class="fa fa-user-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesMember_Add_Title")</h5><button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+    @using (Html.BeginForm("SaveMembers", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { id = "frmMemberModal" }))
+    {
+        <div class="modal-body" id="bodyForm">@Html.Partial("_MemberForm", Model)</div>
+        <div class="modal-footer"><button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal"><i class="fa fa-times mr-1"></i>@AppProcessor.Messagor.GetMessage("Button_Close")</button><button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-save mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSalesMember_Save_Button")</button></div>
+    }
+</div></div></div>
+<script>
+(function () {
+    window.initDigitalSalesMemberForm = function () { var $modal = $('#modalMember'), $form = $('#frmMemberModal'); if ($.fn.select2) $modal.find('.select2').select2({ width: '100%', dropdownParent: $modal }); if ($.validator && $.validator.unobtrusive) { $form.removeData('validator').removeData('unobtrusiveValidation'); $.validator.unobtrusive.parse($form); } };
+    initDigitalSalesMemberForm();
+    $('#frmMemberModal').off('submit.digitalSales').on('submit.digitalSales', function (e) {
+        e.preventDefault(); var $form = $(this); if ($form.valid && !$form.valid()) return false; var $button = $form.find('button[type=submit]').prop('disabled', true);
+        $.post($form.attr('action'), $form.serialize()).done(function (response) { $button.prop('disabled', false); if (typeof response === 'string') { $('#modalMember #bodyForm').html(response); initDigitalSalesMemberForm(); return; } if (response.status) { $('#modalMember').modal('hide'); executeResponseMessage(response.message, '', true); if (typeof reloadMembersSection === 'function') reloadMembersSection(@Model.DigitalSalesID); } else executeResponseMessage(response.message, '', false); }).fail(function () { $button.prop('disabled', false); executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false); }); return false;
+    });
+})();
+</script>

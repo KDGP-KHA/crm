@@ -1,0 +1,89 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesSearchModel
+
+@{
+    ViewBag.Title = "Danh sách kinh doanh sản phẩm dịch vụ số";
+    bool isQTHT = ViewBag.IsQTHT == true;
+    string guideBtnText = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_Button");
+    if (string.IsNullOrEmpty(guideBtnText)) { guideBtnText = "Hướng dẫn"; }
+    string guideConfigTitle = AppProcessor.Messagor.GetMessage("DigitalSales_Guide_ConfigButton");
+    if (string.IsNullOrEmpty(guideConfigTitle)) { guideConfigTitle = "Cấu hình hướng dẫn"; }
+}
+
+@section PageTitle {
+    @ViewBag.Title
+}
+
+@section PageAction {
+    <button type="button" class="btn btn-sm btn-success mr-2" onclick="openImportOpportunityModal();">
+        <i class="fa fa-file-excel mr-1"></i> Import Cơ hội
+    </button>
+    @if (isQTHT)
+    {
+        <a href="@Url.Action("Index", "DigitalSalesWorkflow", new { area = "Cate" })" class="btn btn-sm btn-outline-purple mr-2">
+            <i class="fa fa-sitemap mr-1"></i> Cấu hình Quy trình & Tiến trình
+        </a>
+    }
+    <button type="button" class="btn btn-sm btn-primary" onclick="openAddSalesModal();">
+        <i class="fa fa-plus-circle mr-1"></i> Khởi tạo Cơ hội mới
+    </button>
+    <div class="btn-group ml-2 shadow-sm flex-shrink-0">
+        <button type="button" id="btnDigitalSalesGuide" class="btn btn-sm btn-white btn-h-light-info border-1 brc-info-m2 text-info-d2 px-25 py-15 @(isQTHT ? "radius-l-1 border-r-0" : "radius-1")" title="Xem hướng dẫn sử dụng" onclick="startDigitalSalesIndexGuide();">
+            <i class="fa fa-question-circle mr-1"></i> @guideBtnText
+        </button>
+        @if (isQTHT)
+        {
+            <button type="button" id="btnConfigGuide" class="btn btn-sm btn-white btn-h-light-info border-1 brc-info-m2 text-info-d2 px-2 py-15 radius-r-1" title="@guideConfigTitle" onclick="openGuideConfigModal('Cate.DigitalSales.Index');">
+                <i class="fa fa-cog"></i>
+            </button>
+        }
+    </div>
+}
+
+<div class="mb-3">
+    @Html.Partial("_Search", Model)
+</div>
+
+@section HeadCss {
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Index.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/Detail.css?v=@DateTime.Now.Ticks" />
+    <link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_ImportOpportunityModal.css?v=@DateTime.Now.Ticks" />
+}
+
+<div class="card dcard">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table id="tblDigitalSales" class="table table-striped table-hover text-dark-m1 w-100 border-y-1 brc-black-tp11" style="font-size: 14.5px;">
+                <thead class="bgc-secondary-l1 text-secondary-d2 text-uppercase font-weight-bold" style="font-size: 14px;">
+                    <tr>
+                        <th style="width: 45px;" class="text-center">STT</th>
+                        <th>Cơ hội / Dự án</th>
+                        <th style="min-width: 200px;">Khách hàng</th>
+                        <th style="min-width: 160px;">AM chủ trì</th>
+                        <th style="min-width: 170px;" class="text-right">Doanh thu (triệu đồng)</th>
+                        <th style="width: 130px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER LOAD MODALS AJAX -->
+<div id="modalContainer"></div>
+
+@section BottomScript {
+    <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckeditor4/ckeditor.js")"></script>
+    <script>
+        window._digitalSalesGuide = {
+            screenCode: "Cate.DigitalSales.Index",
+            canConfig: @(isQTHT ? "true" : "false"),
+            getConfigUrl: "@Url.Action("GetGuideConfigModal", "DigitalSales", new { area = "Cate" })",
+            saveConfigUrl: "@Url.Action("SaveGuideConfig", "DigitalSales", new { area = "Cate" })",
+            resetConfigUrl: "@Url.Action("ResetGuideConfig", "DigitalSales", new { area = "Cate" })",
+            steps: @Html.Raw(ViewBag.GuideStepsJson ?? "{}")
+        };
+    </script>
+    <script src="~/Areas/Cate/Views/DigitalSales/DigitalSales.js?v=@DateTime.Now.Ticks"></script>
+}

@@ -1,64 +1,75 @@
 ﻿@using TSFramework.Libs.Processors
 @model Core.Cate.Models.RM_ContactPersonsSearchModel
 
-<div class="Search card dcard border-0 shadow-sm radius-0" id="SearchContactPersons">
-    <div class="card-header bgc-primary-d1">
-        <div class="card-title text-white">
-            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+<div class="cp-search-card" id="SearchContactPersons">
+    <div class="cp-search-header">
+        <div class="d-flex align-items-center">
+            <i class="fa fa-filter text-primary mr-2"></i>
+            <span>@AppProcessor.Messagor.GetMessage("Label_Search")</span>
         </div>
     </div>
 
-    <div class="card-body p-2 d-flex align-items-end">
-
-        <!-- Keyword -->
-        <div class="Search_Box w-25 keyWord">
-            <label class="font-bold text-sm-right">
-                @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
-            </label>
-            <div>
-                <input type="text" id="cpKeyword" class="form-control"
-                       placeholder="Nhập tên, SĐT,Tên khách hàng, Email..." />
+    <div class="cp-search-body">
+        <div class="row align-items-end">
+            <!-- Keyword (Col 4) -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3 mb-xl-0">
+                <label class="cp-search-label" for="cpKeyword">
+                    @AppProcessor.Messagor.GetMessage("Label_TuKhoa")
+                </label>
+                <div class="input-group">
+                    <input type="text" id="cpKeyword" class="form-control cp-search-input"
+                           placeholder="@AppProcessor.Messagor.GetMessage("ContactPersons_Keyword")" />
+                    <div class="input-group-append">
+                        <span class="input-group-text bg-white border-left-0 text-muted">
+                            <i class="fa fa-search"></i>
+                        </span>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="Group">
-            <!-- Gender -->
-            <div class="Search_Box">
-                <label class="font-bold text-sm-right">
+            <!-- Customer (Col 3) -->
+            <div class="col-xl-3 col-lg-4 col-md-6 col-12 mb-3 mb-xl-0">
+                <label class="cp-search-label" for="cpCustomerID">
+                    @AppProcessor.Messagor.GetMessage("ContactPersons_Import_ColCustomer")
+                </label>
+                @Html.DropDownListFor(m => m.CustomerID,
+                    Model.ListCustomer,
+                    AppProcessor.Messagor.GetMessage("ContactPersons_Search_Customer_Option"),
+                    new { @class = "form-control cp-search-input", id = "cpCustomerID" })
+            </div>
+
+            <!-- Gender (Col 2) -->
+            <div class="col-xl-2 col-lg-2 col-md-6 col-12 mb-3 mb-xl-0">
+                <label class="cp-search-label" for="cpGender">
                     @AppProcessor.Messagor.GetMessage("ContactPersonal_Gender_Label")
                 </label>
-                <div class="">
-                    @Html.DropDownListFor(m => m.Gender,
-                        Model.ListGender,
-                        "-- Chọn giới tính --",
-                        new { @class = "form-control", id = "cpGender" })
-                </div>
+                @Html.DropDownListFor(m => m.Gender,
+                    Model.ListGender,
+                    AppProcessor.Messagor.GetMessage("ContactPersons_Search_Gender_Option"),
+                    new { @class = "form-control cp-search-input", id = "cpGender" })
             </div>
 
-            <!-- Status -->
-            <div class="Search_Box">
-                <label class="font-bold text-sm-right">
+            <!-- Status (Col 2) -->
+            <div class="col-xl-2 col-lg-2 col-md-6 col-12 mb-3 mb-xl-0">
+                <label class="cp-search-label" for="cpStatus">
                     @AppProcessor.Messagor.GetMessage("Label_Status")
                 </label>
-                <div class="">
-                    @Html.DropDownListFor(m => m.Status,
-                        Model.ListStatus,
-                        "-- Chọn trạng thái --",
-                        new { @class = "form-control", id = "cpStatus" })
-                </div>
+                @Html.DropDownListFor(m => m.Status,
+                    Model.ListStatus,
+                    AppProcessor.Messagor.GetMessage("ContactPersons_Search_Status_Option"),
+                    new { @class = "form-control cp-search-input", id = "cpStatus" })
             </div>
-        </div>
 
-        <div class="Group Group_button">
-            <div class="Search_button">
-                <button type="button" class="btn btn-primary" onclick="SearchContactPersons()">
-                    <i class="fa fa-search"></i> &nbsp;Tìm kiếm
+            <!-- Action Buttons (Col 2) -->
+            <div class="col-xl-2 col-lg-12 col-md-12 col-12 d-flex align-items-center justify-content-xl-end cp-search-buttons">
+                <button type="button" class="btn btn-primary radius-3 px-3 py-2 text-600 text-90 shadow-sm" onclick="SearchContactPersons()">
+                    <i class="fa fa-search mr-1"></i>@AppProcessor.Messagor.GetMessage("Label_Search")
                 </button>
-            </div>
-
-            <div class="Search_button">
-                <button type="button" id="btnExportContactPersons" class="btn btn-warning ml-2">
-                    <i class="fa fa-download"></i> &nbsp;@AppProcessor.Messagor.GetMessage("Button_Export_ContactPersons")
+                <button type="button" class="btn btn-light-secondary btn-h-light-primary btn-a-light-primary radius-3 px-3 py-2 text-600 text-90 shadow-sm" onclick="ResetContactPersons()" title="@AppProcessor.Messagor.GetMessage("ContactPersons_Search_Reset")">
+                    <i class="fa fa-sync-alt mr-1"></i>@AppProcessor.Messagor.GetMessage("ContactPersons_Search_Reset")
+                </button>
+                <button type="button" id="btnExportContactPersons" class="btn btn-outline-warning bgc-white btn-h-warning btn-a-warning radius-3 px-3 py-2 text-600 text-90 shadow-sm" title="@AppProcessor.Messagor.GetMessage("Button_Export_ContactPersons")">
+                    <i class="fa fa-file-excel mr-1"></i>@AppProcessor.Messagor.GetMessage("Button_Export_ContactPersons")
                 </button>
             </div>
         </div>

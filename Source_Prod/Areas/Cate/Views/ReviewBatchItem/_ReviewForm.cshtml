@@ -7,8 +7,7 @@
     @Html.HiddenFor(model => model.ReviewHistoryID)
     @Html.HiddenFor(model => model.ReviewBatchID)
     @Html.HiddenFor(model => model.ReviewBatchItemID)
-    @Html.HiddenFor(model => model.ObjectType)
-    @Html.HiddenFor(model => model.ObjectID)
+    @Html.HiddenFor(model => model.DigitalSalesID)
 
     <div class="col-12">
         @Html.TitleFor(model => model.ReviewComment, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
@@ -19,6 +18,24 @@
     <div class="col-12 mt-2">
         @Html.CheckBoxFor(model => model.IsConfirmed)
         @Html.LabelFor(model => model.IsConfirmed, new { @class = "col-form-label pr-0 font-bold" })
+    </div>
+
+    <div class="col-12 mt-2">
+        @Html.TitleFor(model => model.ReviewConclusion, new { @class = "col-form-label text-sm-left pr-0 font-bold" })
+        <div class="review-conclusion-options" role="radiogroup" aria-label="@AppProcessor.Messagor.GetMessage("ReviewConclusion_Label")">
+            @foreach (var option in Model.ReviewConclusionOptions ?? new List<SelectListItem>())
+            {
+                var optionId = "ReviewConclusion_" + option.Value;
+                var optionClass = option.Value == "1" ? "review-conclusion-accepted"
+                    : option.Value == "2" ? "review-conclusion-interested"
+                    : "review-conclusion-rejected";
+                <label class="review-conclusion-option @optionClass" for="@optionId">
+                    @Html.RadioButtonFor(model => model.ReviewConclusion, option.Value, new { id = optionId })
+                    <span>@option.Text</span>
+                </label>
+            }
+        </div>
+        @Html.ValidationMessageFor(model => model.ReviewConclusion, "", new { @class = "text-danger text-85" })
     </div>
 
     <div class="col-12">
@@ -82,8 +99,8 @@
         editor = CKEDITOR.replace('ReviewComment', {
             filebrowserWindowWidth: '1000',
             filebrowserWindowHeight: '350',
-            // Vùng soạn thảo thấp để toàn bộ form rà soát vừa một màn hình
-            height: 250,
+            // Modal không còn làm co giao diện chi tiết, dùng lại đầy đủ công cụ CKEditor.
+            height: 260
         });
         editor.on('change', function (e) {
             $("#ReviewComment").val(editor.getData());

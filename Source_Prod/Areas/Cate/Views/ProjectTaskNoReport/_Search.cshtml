@@ -1,0 +1,72 @@
+﻿@model Core.Cate.Models.RM_ProjectTaskReportSearchModel
+
+<style>
+    /* MAIN ROW */
+    .report-search .Search_Row {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        flex-wrap: nowrap;
+        width: 100%;
+    }
+    .report-date-picker {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .report-date-picker input {
+        height: 32px;
+    }
+    .report-search .card-title {
+        font-size: 16px;
+    }
+</style>
+
+<div class="Search card mb-2 report-search" id="card-project-weekly-task-report">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;Tìm kiếm
+        </div>
+    </div>
+
+    <div class="card-body p-2">
+        <form id="frmProjectTaskReportSearch" method="post">
+            <div class="Search_Row">
+                <div class="Search_Box report-date-box">
+                    <label class="font-bold">Khoảng thời gian <span class="text-danger">*</span></label>
+
+                    <div class="report-date-picker">
+                        @Html.TextBoxFor(model => model.FromDate, new
+                        {
+                            @class = "form-control datepicker",
+                            id = "FromDate",
+                            autocomplete = "off",
+                            placeholder = "Từ ngày"
+                        })
+
+                        <span>→</span>
+
+                        @Html.TextBoxFor(model => model.ToDate, new
+                        {
+                            @class = "form-control datepicker",
+                            id = "ToDate",
+                            autocomplete = "off",
+                            placeholder = "Đến ngày"
+                        })
+                    </div>
+                </div>
+
+                <div class="Search_button">
+                    <button type="button" class="btn btn-primary" id="btnSearchProjectTaskReport">
+                        <i class="fa fa-search-plus"></i>&nbsp;Tìm kiếm
+                    </button>
+                </div>
+                <div class="Search_button">
+                    <button type="button" class="btn btn-warning" id="btnExportProjectTaskReport">
+                        <i class="fa fa-download"></i>&nbsp;Xuất Excel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

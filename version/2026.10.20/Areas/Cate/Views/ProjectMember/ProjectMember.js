@@ -1,0 +1,237 @@
+﻿var _ProjectMemberActionURLs = {
+    ProjectMember_GetData: "/Cate/ProjectMember/Get"
+};
+var _tableProjectMember;
+
+$(document).ready(function () {
+    initTableProjectMember();
+});
+
+// =============================================
+// DATATABLE
+// =============================================
+function initTableProjectMember() {
+    _tableProjectMember = $("#DSProjectMember").DataTable({
+        "Responsive": true,
+        "ProjectMember": {
+            "processing": "<div class='overlay'><i class='fas fa-cog fa-spin'></i></div>"
+        },
+        "lengthChange": true,
+        "processing": true,
+        "serverSide": true,
+        "paging": false,
+        "ajax": {
+            "url": _ProjectMemberActionURLs.ProjectMember_GetData,
+            "type": "POST",
+            "dataType": "JSON",
+            "data": {
+                "BusinessOpportunityID": function () { return businessOpportunityID; }
+            }
+        },
+        "columns": [
+            {
+                "data": "",
+                "defaultContent": "1",
+                "render": function (data, type, row, meta) {
+                    return meta.settings._iDisplayStart + meta.row + 1;
+                }
+            },
+            {
+                "data": "FullName",
+                "defaultContent": "",
+                "orderable": false,
+                "className": "text-left",
+                "render": function (data, type, row, meta) {
+                    if (type === "display") {
+                        return '<b>' + data + '</b><p>' + row.Employee_Code + '</p>';
+                    }
+                    return data;
+                }
+            },
+            {
+                "data": "RoleNames",
+                "defaultContent": "",
+                "orderable": false,
+                "className": "text-left",
+                "render": function (data, type, row, meta) {
+                    return data.split(";").map(function (v) {
+                        return '<p class="mb-0">' + v + '</p>';
+                    }).join("");
+                }
+            },
+            {
+                "data": "MemberID",
+                "style": "width:150px;",
+                "orderable": false,
+                "render": function (data, type, row, meta) {
+                    var html = '<span>';
+                    if (type === "display") {
+                        html += _renderButton(true,
+                            "EditProjectMember",
+                            "btn btn-lighter-primary mr-1",
+                            "/Cate/ProjectMember/Edit/" + data,
+                            '<i class="far fa-edit text-primary text-120"></i>',
+                            "Thêm vai trò");
+                        html += _renderButton(true,
+                            "DeleteProjectMember",
+                            "btn btn-lighter-danger mr-1",
+                            "/Cate/ProjectMember/Delete/" + data,
+                            '<i class="far fa-trash-alt text-danger text-120"></i>',
+                            "Xoá");
+                    }
+                    html += "</span>";
+                    return html;
+                }
+            }
+        ]
+    });
+}
+
+// =============================================
+// CALLBACK SAU KHI SUBMIT FORM ADD/EDIT/DELETE
+// =============================================
+function ProjectMember_OnProcessSuccess(response, formId) {
+    if (response.status != undefined) {
+        if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
+            eval(response.message);
+            _tableProjectMember.ajax.reload(null, false);
+            response.status = undefined;
+            var urlAction = $("#ModalContent #modal_" + formId + " form").attr("action");
+            $("#ModalContent #modal_" + formId + " #modal-content").load(urlAction, function () {
+                _initElement();
+            });
+        } else {
+            $("#ModalContent #modal_" + formId).modal("hide");
+            $("#ModalContent #modal_" + formId).on("hidden.bs.modal", function () {
+                if (response.status != undefined) {
+                    eval(response.message);
+                    _tableProjectMember.ajax.reload(null, false);
+                    response.status = undefined;
+                }
+            });
+        }
+    } else {
+        $("#ModalContent #modal_" + formId + " #bodyForm").html(response);
+    }
+}
+
+// =============================================
+// TÌM KIẾM THÀNH VIÊN (dùng trong _AddProjectMember)
+// =============================================
+var employeeSelected = [];
+var roleSelected = [];
+
+// Gọi hàm này sau khi partial view _AddProjectMember được load vào DOM
+function initAddProjectMember() {
+
+    employeeSelected = [];
+    roleSelected = [];
+
+    // Populate dropdown đơn vị từ data-unit-display (sắp xếp tiếng Việt)
+    var units = {};
+    $(".employee-item").each(function () {
+        var unit = $(this).data("unit-display");
+        if (unit && !units[unit.toLowerCase()]) {
+            units[unit.toLowerCase()] = unit;
+        }
+    });
+    var $select = $("#searchEmployeeUnit");
+    $select.find("option:not(:first)").remove(); // reset trước khi populate
+    Object.values(units).sort(function (a, b) {
+        return a.localeCompare(b, 'vi');
+    }).forEach(function (unit) {
+        $select.append('<option value="' + unit.toLowerCase() + '">' + unit + '</option>');
+    });
+
+    // Tắt select2 nếu framework đã auto-apply vào dropdown này
+    try {
+        if ($select.hasClass("select2-hidden-accessible")) {
+            $select.select2("destroy");
+        }
+    } catch (e) { }
+
+    // Nút Tìm
+    $("#btnSearchEmployee").off("click").on("click", function () {
+        doSearchEmployee();
+    });
+
+    // Enter trong ô tên
+    $("#searchEmployeeName").off("keypress").on("keypress", function (e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            doSearchEmployee();
+        }
+    });
+
+    // Checkbox nhân viên
+    $(document).off("change", ".employee-checkbox").on("change", ".employee-checkbox", function () {
+        var value = $(this).val();
+        if ($(this).is(":checked")) {
+            if (!employeeSelected.includes(value)) employeeSelected.push(value);
+        } else {
+            employeeSelected = employeeSelected.filter(function (v) { return v != value; });
+        }
+        $("#EmployeeIDs").val(employeeSelected.join(";"));
+        updateEmployeeSelectedSummary();
+    });
+
+    // Bỏ chọn tất cả
+    $("#btnClearAll").off("click").on("click", function (e) {
+        e.preventDefault();
+        employeeSelected = [];
+        $(".employee-checkbox").prop("checked", false);
+        $("#EmployeeIDs").val("");
+        updateEmployeeSelectedSummary();
+    });
+
+    // Checkbox vai trò
+    $(".role-checkbox").off("change").on("change", function () {
+        var value = $(this).val();
+        if ($(this).is(":checked")) {
+            if (!roleSelected.includes(value)) roleSelected.push(value);
+        } else {
+            roleSelected = roleSelected.filter(function (v) { return v != value; });
+        }
+        $("#RoleIDs").val(roleSelected.join(";"));
+    });
+}
+
+function doSearchEmployee() {
+    var keyword = $("#searchEmployeeName").val().trim().toLowerCase();
+    var unit = $("#searchEmployeeUnit").val().toLowerCase();
+
+    if (!keyword && !unit) {
+        alert("Vui lòng nhập tên hoặc chọn đơn vị để tìm kiếm.");
+        return;
+    }
+
+    var $items = $(".employee-item");
+    var visibleCount = 0;
+
+    $items.each(function () {
+        var name = $(this).data("name");
+        var itemUnit = $(this).data("unit");
+
+        var matchName = !keyword || name.indexOf(keyword) >= 0;
+        var matchUnit = !unit || itemUnit === unit;
+
+        if (matchName && matchUnit) {
+            $(this).show();
+            visibleCount++;
+        } else {
+            $(this).hide();
+        }
+    });
+
+    $("#employeeListWrapper").show();
+    $("#noResultMsg").toggle(visibleCount === 0);
+}
+
+function updateEmployeeSelectedSummary() {
+    if (employeeSelected.length > 0) {
+        $("#selectedCount").text(employeeSelected.length);
+        $("#selectedSummary").show();
+    } else {
+        $("#selectedSummary").hide();
+    }
+}

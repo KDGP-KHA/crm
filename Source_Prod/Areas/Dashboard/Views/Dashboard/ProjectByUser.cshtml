@@ -14,11 +14,25 @@
 }
 
 @section FormBody{
-    <div class="mt-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 pb-2 border-b-1 brc-default-l2">
+        <div>
+            <span class="badge badge-info text-95 py-15 px-25">
+                <i class="fa fa-calendar-alt mr-1"></i>@Model.FromDate.ToString("dd/MM/yyyy") - @Model.ToDate.ToString("dd/MM/yyyy")
+            </span>
+        </div>
+        <div>
+            <a href="/Dashboard/Dashboard/ExportProjectByUser?userId=@Model.EmployeeIds&fromDate=@Model.FromDate.ToString("dd/MM/yyyy")&toDate=@Model.ToDate.ToString("dd/MM/yyyy")"
+               class="btn btn-sm btn-warning font-bold text-white shadow-sm px-3 py-1 radius-1 db-btn-export-card"
+               title="Tải danh sách Excel">
+                <i class="fa fa-download mr-1"></i>Tải danh sách
+            </a>
+        </div>
+    </div>
+    <div class="mt-2">
         <div class="card dcard">
             <div class="col-sm-12 table-responsive-md">
-                <table id="DSProjectByUser" class="d-style w-100 table text-dark-m1 text-95 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
-                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-85 bgc-secondary-l1">
+                <table id="DSProjectByUser" class="d-style w-100 table text-dark-m1 text-100 border-y-1 brc-black-tp11 collapsed dtr-table" width="100%">
+                    <thead class="sticky-nav text-secondary-m1 text-uppercase text-95 bgc-secondary-l1">
                         <tr>
                             <th>@AppProcessor.Messagor.GetMessage("Column_No")</th>
                             <th>@AppProcessor.Messagor.GetMessage("Info_Project_Label")</th>
@@ -90,17 +104,17 @@
                                     <span class="badge ${row.StatusClass}">${row.StatusName}</span>
                                 </div>
 
-                                <div class="font-weight-bold text-primary">
-                                    <a href="/Cate/ProjectOverview/Index/${row.ProjectID}">
+                                <div class="font-weight-bold text-primary mt-1">
+                                    <a href="/Cate/ProjectOverview/Index/${row.ProjectID}" class="db-modal-item-title">
                                         ${row.ProjectName}
                                     </a>
                                 </div>
 
-                                <div class="text-muted small">
+                                <div class="text-muted small mt-1">
                                     <i class="fa fa-building mr-1"></i> ${row.CustomerName || ""}
                                 </div>
 
-                                <div class="small text-muted">
+                                <div class="small text-muted mt-1">
                                     <i class="far fa-clock mr-1"></i> ${startDate}
                                 </div>
                             `;

@@ -6,6 +6,7 @@ var _businessOpportunityWeeklyReportUrls = {
 
 $(document).ready(function () {
     initBusinessOpportunityWeeklyReportWeekFilter();
+    initBusinessOpportunityWeeklyReportDepartmentFilter();
     initBusinessOpportunityWeeklyReportEmployeeFilter();
 
     $("#btnSearchBusinessOpportunityWeeklyReport").on("click", function () {
@@ -22,8 +23,23 @@ $(document).ready(function () {
             searchBusinessOpportunityWeeklyReport();
         }
     });
-
 });
+
+
+function initBusinessOpportunityWeeklyReportDepartmentFilter() {
+    if (!$.fn.select2) return;
+
+    var $dept = $("#BoPhanID");
+    if ($dept.hasClass("select2-hidden-accessible")) {
+        $dept.select2("destroy");
+    }
+    $dept.select2({
+        width: "100%",
+        placeholder: "Chọn 1 giá trị",
+        allowClear: true,
+        dropdownParent: $("#card-business-opportunity-weekly-report")
+    });
+}
 
 function parseBusinessOpportunityWeeklyReportDate(value) {
     if (!value) return null;

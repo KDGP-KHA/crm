@@ -1,0 +1,41 @@
+@model Core.Cate.Models.MailTemplateRenderModel
+@using TSFramework.Libs.Processors
+@{ var title = AppProcessor.Messagor.GetMessage("Mail_Title") ?? AppProcessor.Messagor.GetMessage("App_Title") ?? "VNPT CRM"; }
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /><title>@title</title></head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#24324a;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:28px 12px;background:#f4f7fb;"><tr><td align="center">
+        <table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e1e8f0;">
+            <tr><td style="padding:21px 28px;background:#198754;color:#ffffff;">
+                <div style="font-size:12px;opacity:.88;">@title</div>
+                <div style="margin-top:6px;font-size:21px;font-weight:bold;">Kết quả rà soát hồ sơ</div>
+            </td></tr>
+            <tr><td style="padding:26px 28px;">
+                <p style="margin:0 0 18px;">Kính gửi <strong>@Model.GetString("FullName")</strong>,</p>
+                <p style="margin:0 0 18px;">@Model.GetString("ActionLabel") Hồ sơ KD sản phẩm / dịch vụ số.</p>
+                <div style="padding:15px 18px;background:#f0faf4;border-left:4px solid #198754;">
+                    <div style="font-size:12px;color:#66758a;">@Model.GetString("DigitalSalesCode", "--")</div>
+                    <div style="margin-top:3px;font-size:18px;font-weight:bold;color:#1f2d3d;">@Model.GetString("DigitalSalesName", "--")</div>
+                    <div style="margin-top:5px;color:#4d5d70;">@Model.GetString("CustomerName", "--")</div>
+                </div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:18px;border-collapse:collapse;">
+                    <tr><td style="width:180px;padding:9px 0;color:#66758a;">Đợt rà soát</td><td style="padding:9px 0;font-weight:bold;">@Model.GetString("ReviewBatchName", "--")</td></tr>
+                    <tr><td style="padding:9px 0;color:#66758a;">Kết luận</td><td style="padding:9px 0;font-weight:bold;color:#198754;">@Model.GetString("ReviewConclusion", "--")</td></tr>
+                    <tr><td style="padding:9px 0;color:#66758a;">Xác nhận</td><td style="padding:9px 0;">@Model.GetString("ReviewConfirmed", "--")</td></tr>
+                    <tr><td style="padding:9px 0;color:#66758a;">Người rà soát</td><td style="padding:9px 0;">@Model.GetString("ActionByFullName", "--")</td></tr>
+                    <tr><td style="padding:9px 0;color:#66758a;">Thời gian</td><td style="padding:9px 0;">@Model.GetString("ReviewDate", "--")</td></tr>
+                </table>
+                @if (!string.IsNullOrWhiteSpace(Model.GetString("ReviewComment")))
+                {
+                    <div style="margin-top:18px;padding:16px;background:#f7f9fc;border:1px solid #e2e8f0;border-radius:6px;line-height:1.6;">
+                        <div style="margin-bottom:7px;font-size:12px;font-weight:bold;color:#66758a;text-transform:uppercase;">Nội dung rà soát</div>
+                        <div>@Model.GetString("ReviewComment")</div>
+                    </div>
+                }
+                <p style="margin:24px 0 0;color:#66758a;font-size:12px;">Email tự động từ @title.</p>
+            </td></tr>
+        </table>
+    </td></tr></table>
+</body>
+</html>

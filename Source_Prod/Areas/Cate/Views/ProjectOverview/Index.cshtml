@@ -25,20 +25,6 @@
     </nav>
 }
 
-@section PageAction {
-    @if (Model.ReviewBatchID > 0)
-    {
-        @Html.Button(
-            true,
-            "ReviewBatch",
-            Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID = Model.ReviewBatchID, projectID = Model.ProjectModel.ProjectID }),
-            "<i class='fa fa-plus'></i>",
-            AppProcessor.Messagor.GetMessage("ReviewProject_Title"),
-            new {@class = "btn btn-light-blue btn-h-blue btn-a-blue border-0 radius-3 py-2 text-600 text-90"}
-        )
-    }
-}
-
 <style>
     .breadcrumb-item + .breadcrumb-item::before {
         font-family: "Font Awesome 5 Free";
@@ -55,6 +41,18 @@
     }
 </style>
 
+@if (Model.ReviewBatchID > 0)
+{
+    <a id="reviewBatchAutoTrigger"
+       class="d-none"
+       data-modal=""
+       data-modal-id="ReviewBatch"
+       href="@Url.Action("ReviewBatch", "ReviewBatchItem", new { area = "Cate", reviewBatchID = Model.ReviewBatchID, projectID = Model.ProjectModel.ProjectID })"
+       aria-hidden="true"></a>
+}
+
+<div id="reviewSplitView" class="review-split-view">
+<div class="review-detail-pane">
 <div class="dcard">
     <ul class="nav nav-tabs bgc-secondary-l3 border-y-1 brc-secondary-l3" role="tablist">
         <li class="nav-item mr-2px">
@@ -150,6 +148,12 @@
         </div>
     </div>
 </div><!-- /.bcard -->
+</div>
+@if (Model.ReviewBatchID > 0)
+{
+    <aside id="reviewFormPane" class="review-form-pane" aria-label="Form rà soát"></aside>
+}
+</div>
 
 @section BottomScript
 {
@@ -163,12 +167,12 @@
         var _urlReloadProject = '@Url.Action("GetProjectInfo", "ProjectOverview", new { area = "Cate" })';
         var _urlReloadReviewHistory = '@Url.Action("GetReviewHistory", "ReviewBatchItem", new { area = "Cate" })';
 
-        // Vào từ màn hình rà soát định kỳ: mở sẵn panel nhập nội dung rà soát bên phải
+        // Vào từ danh sách rà soát: hiển thị ngay form để có thể rà soát liên tục.
         $(function () {
             @if (Model.ReviewBatchID > 0)
             {
                 <text>
-                var btnReview = document.querySelector('[data-modal-id="ReviewBatch"]');
+                var btnReview = document.getElementById('reviewBatchAutoTrigger');
                 if (btnReview) {
                     setTimeout(function () { btnReview.click(); }, 300);
                 }

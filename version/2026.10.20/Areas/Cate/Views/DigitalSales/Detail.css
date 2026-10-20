@@ -1,0 +1,434 @@
+/* 1. Custom Switches - Đồng bộ 100% với custom-switch-lg ở màn hình danh sách (_Search.css) */
+    .custom-switch.custom-switch-lg {
+        padding-left: 56px !important;
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+    .custom-switch.custom-switch-lg .custom-control-label {
+        font-size: 14px !important;
+        color: #1a1a1a !important;
+        font-weight: 600 !important;
+        line-height: 26px !important;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        margin-bottom: 0;
+    }
+    .custom-switch.custom-switch-lg .custom-control-label::before {
+        position: absolute;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: -56px !important;
+        width: 46px !important;
+        height: 24px !important;
+        border-radius: 12px !important;
+        background-color: #ced4da;
+        border: 1px solid #adb5bd;
+        pointer-events: all;
+        cursor: pointer;
+    }
+    .custom-switch.custom-switch-lg .custom-control-label::after {
+        position: absolute;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: -54px !important;
+        width: 20px !important;
+        height: 20px !important;
+        border-radius: 50% !important;
+        background-color: #fff !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        transition: transform .15s ease-in-out, background-color .15s ease-in-out;
+        cursor: pointer;
+    }
+    .custom-switch.custom-switch-lg .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateY(-50%) translateX(22px) !important;
+    }
+    .custom-switch.custom-switch-lg .custom-control-input:disabled ~ .custom-control-label {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+    #chkIsKeyProject:checked ~ .custom-control-label::before {
+        background-color: #f59f00 !important;
+        border-color: #f59f00 !important;
+    }
+    #chkIsFollowed:checked ~ .custom-control-label::before {
+        background-color: #e03131 !important;
+        border-color: #e03131 !important;
+    }
+
+    /* 2. Header Responsive Layout (Hai hàng rõ ràng, chuẩn thẩm mỹ, chống tràn 100%) */
+    #PageTitle.page-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding-top: 0.6rem !important;
+        padding-bottom: 0.75rem !important;
+        border-bottom: 1px solid #e1e6eb !important;
+        margin-bottom: 0.85rem !important;
+        overflow: hidden !important;
+    }
+    #PageTitle .page-title {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin-bottom: 0.35rem !important;
+    }
+    .ds-header-title-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    .ds-header-title-text {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1.35;
+        word-break: break-word;
+        white-space: normal !important;
+    }
+    .ds-header-title-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .ds-header-divider {
+        display: none !important;
+    }
+
+    #PageAction.page-tools {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        padding-top: 0.65rem !important;
+        border-top: 1px dashed #e2e8f0 !important;
+        margin-top: 0.35rem !important;
+        box-sizing: border-box !important;
+    }
+    .ds-header-action-bar {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 0.65rem !important;
+    }
+    .ds-header-switches-group {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+    .ds-header-buttons-group {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        margin-left: auto !important;
+    }
+
+    /* Màn hình tablet đứng & mobile (< 768px) */
+    @media (max-width: 767.98px) {
+        .ds-header-action-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.75rem !important;
+        }
+        .ds-header-switches-group {
+            width: 100% !important;
+            justify-content: space-between !important;
+        }
+        .ds-header-buttons-group {
+            width: 100% !important;
+            justify-content: flex-start !important;
+            margin-left: 0 !important;
+            gap: 0.4rem !important;
+        }
+        .ds-header-buttons-group .btn {
+            flex: 1 1 auto;
+            text-align: center;
+            justify-content: center;
+            margin-left: 0 !important;
+        }
+    }
+
+    /* Màn hình điện thoại nhỏ (< 500px) */
+    @media (max-width: 499.98px) {
+        .ds-header-title-container {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+        }
+        .ds-back-btn {
+            margin-bottom: 0.5rem !important;
+            margin-right: 0 !important;
+        }
+        .ds-header-switches-group {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.4rem !important;
+        }
+        .custom-switch.custom-switch-lg, .ds-custom-switch {
+            margin-right: 0 !important;
+        }
+    }
+
+    /* 3. Tabs Navigation Responsive - Chống rớt dòng & tràn màn hình */
+    .card-header .nav-tabs-simple {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        margin-bottom: -1px;
+    }
+    .card-header .nav-tabs-simple::-webkit-scrollbar {
+        height: 3px;
+    }
+    .card-header .nav-tabs-simple::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+    .card-header .nav-tabs-simple .nav-item {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+    }
+    @media (max-width: 1199.98px) {
+        .card-header .nav-tabs-simple .nav-link {
+            padding-left: 0.85rem !important;
+            padding-right: 0.85rem !important;
+            font-size: 0.9rem !important;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .card-header .nav-tabs-simple .nav-link {
+            padding: 0.65rem 0.75rem !important;
+            font-size: 0.85rem !important;
+        }
+    }
+
+    /* 4. Custom Badges */
+    .badge-purple {
+        background-color: #8e24aa !important;
+        color: #ffffff !important;
+    }
+
+    #containerMetrics {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .ds-metrics-row {
+        margin-left: -6px !important;
+        margin-right: -6px !important;
+    }
+    .ds-metrics-row > [class*="col-"] {
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+
+    .ds-metric-card {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        padding: 0.85rem 1rem;
+        min-height: 80px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+    .ds-metric-card > .d-flex {
+        width: 100%;
+    }
+    .ds-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+    }
+    .ds-metric-blue {
+        background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+    }
+    .ds-metric-green {
+        background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+    }
+    .ds-metric-purple {
+        background: linear-gradient(135deg, #8e24aa 0%, #5c148c 100%);
+    }
+    .ds-metric-orange {
+        background: linear-gradient(135deg, #fb8c00 0%, #e65100 100%);
+    }
+    .ds-metric-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-right: 0.75rem !important;
+    }
+    .ds-metric-title {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        font-weight: 700;
+        line-height: 1.25;
+        margin-bottom: 0.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .ds-metric-value {
+        color: #ffffff;
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: baseline;
+    }
+    .ds-metric-unit {
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 0.25rem;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 1399.98px) {
+        .ds-metric-card {
+            padding: 0.75rem 0.85rem;
+            min-height: 76px;
+        }
+        .ds-metric-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 1.15rem;
+            margin-right: 0.6rem !important;
+        }
+        .ds-metric-title {
+            font-size: 0.7rem;
+            letter-spacing: 0.2px;
+        }
+        .ds-metric-value {
+            font-size: 1.2rem;
+        }
+        .ds-metric-unit {
+            font-size: 0.75rem;
+        }
+    }
+    @media (max-width: 575.98px) {
+        .ds-metric-card {
+            padding: 0.7rem 0.8rem;
+            min-height: 70px;
+        }
+        .ds-metric-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 1.05rem;
+            margin-right: 0.5rem !important;
+        }
+        .ds-metric-value {
+            font-size: 1.15rem;
+        }
+    }
+    .ds-section-overlay-container {
+        position: relative;
+        min-height: 80px;
+    }
+    .ds-section-loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(1.5px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        border-radius: inherit;
+        transition: opacity 0.2s ease;
+    }
+
+    /* Nút rà soát nổi ở mép phải: không chiếm không gian của layout chi tiết. */
+    .ds-review-floating-trigger {
+        position: fixed;
+        z-index: 1030;
+        right: 0;
+        top: 50%;
+        width: 48px;
+        min-height: 58px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 6px 3px;
+        color: #d97706;
+        background: #fff;
+        border: 1px solid #ef4444;
+        border-right: 0;
+        border-radius: 6px 0 0 6px;
+        box-shadow: -2px 2px 8px rgba(0, 0, 0, .14);
+        text-decoration: none !important;
+        transition: width .18s ease, background-color .18s ease, color .18s ease;
+    }
+    .ds-review-floating-trigger i { font-size: 1.15rem; }
+    .ds-review-floating-trigger span { font-size: .64rem; font-weight: 700; line-height: 1; }
+    .ds-review-floating-trigger:hover,
+    .ds-review-floating-trigger:focus {
+        width: 82px;
+        color: #fff;
+        background: #e67e00;
+        outline: none;
+    }
+    @media (max-width: 575.98px) {
+        .ds-review-floating-trigger { top: auto; bottom: 16px; transform: none; }
+    }
+
+    .ds-guide-overlay { position: fixed; inset: 0; z-index: 1060; background: rgba(12, 25, 43, .68); }
+    .ds-guide-highlight { position: relative !important; z-index: 1061 !important; border-radius: 4px; box-shadow: 0 0 0 4px #fff, 0 0 0 8px rgba(37, 145, 235, .9); }
+    .ds-guide-tooltip { position: fixed; z-index: 1062; padding: 20px; color: #334155; background: #fff; border-radius: 8px; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+    .ds-guide-close { position: absolute; top: 5px; right: 10px; color: #64748b; border: 0; background: transparent; font-size: 26px; line-height: 1; cursor: pointer; }
+    .ds-guide-title { padding-right: 24px; color: #1666b4; font-size: 1.05rem; font-weight: 700; }
+    .ds-guide-text { margin-top: 10px; min-height: 42px; line-height: 1.55; }
+    .ds-guide-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+    .ds-guide-counter { color: #64748b; font-size: .85rem; }
+    .ds-guide-edit-btn { margin-right: auto; padding: 2px 8px; font-size: .8rem; }
+    .guide-config-dialog { max-width: 1024px; width: 95%; }
+    .guide-col-order { width: 85px; }
+    .guide-col-selector { width: 220px; }
+    .guide-col-title { width: 200px; }
+    .guide-col-status { width: 75px; }
+    .guide-col-action { width: 65px; }
+    .guide-table-wrapper { max-height: 520px; overflow-y: auto; }
+    .guide-steps-table td { vertical-align: middle; }
+    .guide-order-num { font-size: 1.05rem; min-width: 22px; text-align: center; }
+    .guide-btn-up, .guide-btn-down { line-height: 1; padding: 1px 3px !important; }
+    .guide-badge-count { font-size: .75rem; vertical-align: middle; }
+    .guide-config-tab-content { min-height: 350px; }
+

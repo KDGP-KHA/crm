@@ -1,0 +1,57 @@
+﻿@using TSFramework.Libs.Processors
+@using System.Web
+@model Core.Cate.Models.RM_ReviewBatchItemSearchModel
+
+@{
+    ViewBag.Title = AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Title");
+}
+
+@section PageTitle
+{
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent px-0 py-2 mb-2">
+            <li class="breadcrumb-item">
+                <a href="/Dashboard/Dashboard" class="no-underline text-primary-d2"><i class="fa fa-home fa-1x"></i> <span>Trang chủ</span></a>
+            </li>
+            <li class="breadcrumb-item">
+                <a class="no-underline text-primary-d2" href="/Dashboard/Manager?menu=45">@AppProcessor.Messagor.GetMessage("BO_Overview_Breadcrumb_DanhMuc")</a>
+            </li>
+            <li class="breadcrumb-item">
+                <span>@AppProcessor.Messagor.GetMessage("ReviewBatchItem_Title")</span>
+            </li>
+        </ol>
+    </nav>
+}
+
+@section HeadCss {
+    <link rel="stylesheet" href="~/Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.css?v=@DateTime.Now.Ticks" />
+    <style>
+        .breadcrumb-item + .breadcrumb-item::before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 600;
+            content: "\f101";
+            font-size: 0.875em;
+            margin: 5px 0;
+        }
+    </style>
+}
+
+<div id="digitalSalesReviewContainer">
+    @Html.Partial("_DigitalSales", Model.DigitalSalesSearch)
+</div>
+
+@section BottomScript {
+    <script type="text/javascript">
+        window.reviewDigitalSalesMessages = {
+            notReviewed: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_NotReviewed")))',
+            review: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Action_Review")))',
+            viewDetail: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_Action_ViewDetail")))',
+            reviewCount: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewDigitalSales_ReviewCount_Format")))',
+            conclusionLabel: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Final_Label")))',
+            conclusionAccepted: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Accepted")))',
+            conclusionInterested: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Interested")))',
+            conclusionRejected: '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("ReviewConclusion_Rejected")))'
+        };
+    </script>
+    <script src="~/Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.js?v=@DateTime.Now.Ticks"></script>
+}

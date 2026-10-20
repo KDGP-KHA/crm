@@ -1,0 +1,134 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
+
+<div class="modal fade" id="modalQuickAssignDepartment" tabindex="-1" role="dialog" aria-labelledby="quickAssignModalTitle" aria-hidden="true" data-backdrop="static" data-width="500px">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 520px;">
+        <div class="modal-content border-0 radius-2 shadow-lg">
+            <div class="modal-header bgc-primary-d1 text-white px-3 py-25">
+                <h5 class="modal-title font-bold text-110" id="quickAssignModalTitle">
+                    <i class="fa fa-sitemap mr-1"></i> @AppProcessor.Messagor.GetMessage("DigitalSales_QuickAssign_Title")
+                </h5>
+                <button type="button" class="close text-white opacity-2 text-130" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="frmQuickAssignDepartment" method="post" autocomplete="off">
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.DigitalSalesID, new { id = "QuickAssign_DigitalSalesID" })
+
+                <div class="modal-body p-3 p-md-4">
+                    <div class="alert alert-info border-0 radius-1 shadow-none mb-3 text-95 py-2 px-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="fa fa-info-circle mr-2 text-primary-m1 text-120 flex-shrink-0"></i>
+                            <div>
+                                <span class="font-bold text-primary-d2">[@(Model.Code ?? "Chưa có mã")]</span>: @Model.Title
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.CustomerName))
+                        {
+                            <div class="text-85 text-secondary-d1 mt-1 pl-4">
+                                <i class="fa fa-building mr-1"></i>Khách hàng: <strong>@Model.CustomerName</strong>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-group mb-0">
+                        <label class="font-bolder text-secondary-d2 mb-1" for="QuickAssign_SourceDepartmentID">
+                            @AppProcessor.Messagor.GetMessage("DigitalSales_SourceDepartment") <span class="text-danger">*</span>
+                        </label>
+                        @Html.DropDownListFor(m => m.SourceDepartmentID, Model.ListSourceDepartment, new { @class = "form-control select2", id = "QuickAssign_SourceDepartmentID", style = "width: 100%;" })
+                        <small class="text-muted text-85 mt-1 d-block">
+                            <i class="fa fa-info-circle text-info mr-1"></i>@AppProcessor.Messagor.GetMessage("DigitalSales_SourceDepartment_Help")
+                        </small>
+                    </div>
+                </div>
+
+                <div class="modal-footer bgc-grey-l5 py-2 px-3">
+                    <button type="button" class="btn btn-sm btn-secondary px-3 radius-1" data-dismiss="modal">
+                        <i class="fa fa-times mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Cancel")
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-primary font-weight-bold px-4 radius-1 shadow-sm" id="btnSubmitQuickAssign">
+                        <i class="fa fa-check mr-1"></i> @AppProcessor.Messagor.GetMessage("Button_Save")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var $modal = $('#modalQuickAssignDepartment');
+        var $form = $('#frmQuickAssignDepartment');
+
+        if ($.fn.select2) {
+            $modal.find('.select2').select2({
+                width: '100%',
+                dropdownParent: $modal
+            });
+        }
+
+        $form.on('submit', function (e) {
+            e.preventDefault();
+            var salesId = $form.find('#QuickAssign_DigitalSalesID').val();
+            var sourceDeptId = $form.find('#QuickAssign_SourceDepartmentID').val();
+
+            if (!sourceDeptId || parseInt(sourceDeptId, 10) <= 0) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Validation_SourceDepartment_Required")))');
+                }
+                return false;
+            }
+
+            var $btn = $form.find('#btnSubmitQuickAssign');
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i> Đang lưu...');
+
+            var token = $('input[name="__RequestVerificationToken"]', $form).val();
+
+            $.ajax({
+                url: '/Cate/DigitalSales/QuickAssignDepartment',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: token,
+                    id: salesId,
+                    sourceDepartmentId: sourceDeptId
+                },
+                success: function (res) {
+                    if (res && res.status) {
+                        $modal.modal('hide');
+                        $modal.one('hidden.bs.modal', function () {
+                            if (res.message) {
+                                eval(res.message);
+                            }
+                            if (typeof reloadSalesTable === 'function') {
+                                reloadSalesTable();
+                            }
+                            if (typeof _tableDigitalSalesByStatus !== 'undefined' && _tableDigitalSalesByStatus) {
+                                _tableDigitalSalesByStatus.ajax.reload(null, false);
+                            }
+                            if (typeof refreshAllSections === 'function') {
+                                refreshAllSections(salesId);
+                            }
+                        });
+                    } else {
+                        $btn.prop('disabled', false).html('<i class="fa fa-check mr-1"></i> @Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("Button_Save")))');
+                        if (res && res.message) {
+                            eval(res.message);
+                        } else {
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error('Cập nhật thất bại, vui lòng thử lại.');
+                            }
+                        }
+                    }
+                },
+                error: function () {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check mr-1"></i> @Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("Button_Save")))');
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('Có lỗi xảy ra trong quá trình xử lý.');
+                    }
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,301 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesSearchModel
+
+@{
+    var excludedStatusIds = Model.ExcludedStatusIDs ?? new List<int>();
+    var statusItems = Model.StatusItems ?? new List<Core.Cate.Models.RM_DigitalSalesStatusModel>();
+
+    var checkedCount = statusItems.Count(x => !excludedStatusIds.Contains(x.StatusID));
+    var totalCount = statusItems.Count;
+
+    var defaultText = checkedCount == totalCount
+        ? "Tất cả"
+        : (checkedCount == 0 ? "Chưa chọn trạng thái" : $"{checkedCount} trạng thái được chọn");
+
+    var applyYearLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_ApplyYear_Label");
+    if (string.IsNullOrWhiteSpace(applyYearLabel) || applyYearLabel == "DigitalSalesSearch_ApplyYear_Label")
+    {
+        applyYearLabel = "Năm áp dụng";
+    }
+
+    var statusLabel = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Status_Label");
+    if (string.IsNullOrWhiteSpace(statusLabel) || statusLabel == "DigitalSalesSearch_Status_Label")
+    {
+        statusLabel = "Trạng thái";
+    }
+}
+
+<div class="Search search-opportunity card mb-3" id="SearchDigitalSales">
+    <div class="card-header bgc-primary-d1">
+        <div class="card-title text-white">
+            <i class="fa fa-search"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Label_Search")
+        </div>
+    </div>
+    <div class="card-body p-2">
+        @Html.HiddenFor(model => model.CustomerID, new { id = "CustomerID" })
+
+        <!-- HÀNG 1: TÌM KIẾM, LOẠI HÌNH, TRẠNG THÁI, SWITCHES & NĂM ÁP DỤNG -->
+        <div class="row align-items-end">
+            <!-- 1. Từ khóa -->
+            <div class="col-xl-3 col-lg-3 col-md-6 col-12 mb-2 Search_Box keyWord">
+                @Html.TitleFor(model => model.Keyword, new { @class = "font-bold text-sm-right" })
+                @Html.TextBoxFor(model => model.Keyword, new { @class = "form-control", id = "Keyword", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Keyword_Placeholder") })
+            </div>
+
+            <!-- 2. Loại hình -->
+            <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 Search_Box">
+                @Html.TitleFor(model => model.BusinessType, new { @class = "font-bold text-sm-right" })
+                <div>
+                    <select id="BusinessType" name="BusinessType" class="form-control none-select2" onchange="filterStatusListByBusinessType(this.value);">
+                        <option value="">@AppProcessor.Messagor.GetMessage("DigitalSalesSearch_BusinessType_AllOption")</option>
+                        <option value="1" @(Model.BusinessType == 1 ? "selected" : "")>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Opportunity")</option>
+                        <option value="2" @(Model.BusinessType == 2 ? "selected" : "")>@AppProcessor.Messagor.GetMessage("DigitalSales_BusinessType_Project")</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 3. Trạng thái -->
+            <div class="col-xl-2 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 position-relative status-filter-wrapper Search_Box">
+                <label class="font-bold text-sm-right status-label" for="statusDropdownButton">
+                    @statusLabel
+                </label>
+
+                <!-- BUTTON -->
+                <div id="statusDropdownButton"
+                     class="form-control d-flex justify-content-between align-items-center cursor-pointer">
+                    <span id="statusDropdownText" class="text-truncate">
+                        @defaultText
+                    </span>
+                    <i class="fas fa-caret-down ml-2"></i>
+                </div>
+
+                <!-- DROPDOWN -->
+                <div id="statusDropdownMenu"
+                     class="border bg-white shadow-sm rounded p-2">
+                    <!-- CHECK ALL -->
+                    <div class="mb-2 border-bottom pb-2">
+                        <label class="mb-0 w-100 cursor-pointer">
+                            <input type="checkbox"
+                                   id="checkAllStatus"
+                                   @(checkedCount == totalCount ? "checked" : "") />
+                            <span class="ml-1 font-weight-bold">
+                                Tất cả
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- ITEMS -->
+                    @foreach (var item in statusItems)
+                    {
+                        var isChecked = !excludedStatusIds.Contains(item.StatusID);
+                        var typePrefix = item.BusinessType == 1 ? "[Cơ hội]" : "[Dự án]";
+
+                        <div class="mb-1 status-item-row" data-businesstype="@item.BusinessType">
+                            <label class="mb-0 w-100 cursor-pointer text-nowrap">
+                                <input type="checkbox"
+                                       class="status-item"
+                                       value="@item.StatusID"
+                                       data-businesstype="@item.BusinessType"
+                                       @(isChecked ? "checked" : "") />
+                                <span class="ml-1 text-85">
+                                    <span class="text-secondary opacity-75 font-bold mr-1">@typePrefix</span>@item.StatusName
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- 4. Nhóm 2 Toggle: Trọng điểm & Đang quan tâm -->
+            <div class="col-xl-3 col-lg-3 col-md-8 col-12 mb-2 Search_Box search-switches-box">
+                <label class="font-bold d-block text-sm-right d-none d-lg-block invisible" style="height: 18px; margin-bottom: 0.5rem;">&nbsp;</label>
+                <div class="d-flex align-items-center flex-nowrap switches-wrapper" style="gap: 14px;">
+                    <div class="custom-control custom-switch custom-switch-lg" title="Lọc các dự án trọng điểm">
+                        <input type="checkbox" class="custom-control-input cursor-pointer" id="chkFilterKeyProject">
+                        <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0 text-nowrap" for="chkFilterKeyProject" id="lblFilterKeyProject">
+                            Trọng điểm
+                        </label>
+                    </div>
+                    <div class="custom-control custom-switch custom-switch-lg" title="Lọc các cơ hội/dự án bạn đang quan tâm">
+                        <input type="checkbox" class="custom-control-input cursor-pointer" id="chkFilterFollowed">
+                        <label class="custom-control-label font-bold text-dark cursor-pointer select-none mb-0 text-nowrap" for="chkFilterFollowed" id="lblFilterFollowed">
+                            Đang quan tâm
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Năm áp dụng -->
+            <div class="col-xl-2 col-lg-2 col-md-4 col-12 mb-2 Search_Box">
+                <label class="font-bold text-sm-right" for="ApplyYear">@applyYearLabel</label>
+                <div>
+                    <select id="ApplyYear" name="ApplyYear" class="form-control none-select2" onchange="reloadSalesTable();">
+                        <option value="">-- Tất cả --</option>
+                        @for (int y = DateTime.Now.Year + 3; y >= DateTime.Now.Year - 5; y--)
+                        {
+                            <option value="@y" @((Model.ApplyYear.HasValue ? Model.ApplyYear.Value : DateTime.Now.Year) == y ? "selected" : "")>@y</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- HÀNG 2: ĐƠN VỊ XUẤT PHÁT, ĐƠN VỊ THỰC HIỆN, NHÂN VIÊN, VAI TRÒ, THỜI GIAN & CỤM NÚT BẤM -->
+        <div class="row align-items-end">
+            <!-- 6. Đơn vị xuất phát -->
+            <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
+                @Html.TitleFor(model => model.SourceDepartmentID, new { @class = "font-bold text-sm-right" })
+                @Html.DropDownListFor(model => model.SourceDepartmentID, Model.ListSourceDepartment, new { @class = "form-control none-select2", id = "SourceDepartmentID" })
+            </div>
+
+            <!-- 7. Đơn vị thành viên thực hiện -->
+            <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
+                <label class="font-bold text-sm-right" for="DepartmentID">@AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberDepartment_Label")</label>
+                @Html.DropDownListFor(model => model.DepartmentID, Model.ListDepartment, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Department_Option"), new { @class = "form-control none-select2", id = "DepartmentID" })
+            </div>
+
+            <!-- 8. Nhân viên -->
+            <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
+                @Html.TitleFor(model => model.EmployeeID, new { @class = "font-bold" })
+                @Html.DropDownListFor(model => model.EmployeeID, Model.ListEmployee, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Employee_Option"), new { @class = "form-control none-select2", id = "EmployeeID" })
+            </div>
+
+            <!-- 8b. Vai trò thành viên trong dự án -->
+            <div class="col-xl-2 col-lg-3 col-md-6 col-12 mb-2 Search_Box Dropdown">
+                @Html.TitleFor(model => model.MemberRole, new { @class = "font-bold" })
+                @Html.DropDownListFor(model => model.MemberRole, Model.ListMemberRole, AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option"), new { @class = "form-control none-select2", id = "MemberRole" })
+            </div>
+
+            <!-- 9. Từ ngày -->
+            <div class="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 Search_Box">
+                @Html.TitleFor(model => model.FromDate, new { @class = "font-bold text-sm-right" })
+                <div class="input-group date w-100" id="dpFromDate">
+                    @Html.TextBoxFor(model => model.FromDate, new { @class = "form-control", id = "FromDate", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Date_Placeholder"), autocomplete = "off" })
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 10. Đến ngày -->
+            <div class="col-xl-1 col-lg-2 col-md-3 col-sm-6 col-6 mb-2 Search_Box">
+                @Html.TitleFor(model => model.ToDate, new { @class = "font-bold text-sm-right" })
+                <div class="input-group date w-100" id="dpToDate">
+                    @Html.TextBoxFor(model => model.ToDate, new { @class = "form-control", id = "ToDate", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesSearch_Date_Placeholder"), autocomplete = "off" })
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 11. Cụm nút bấm thao tác -->
+            <div class="col-xl-2 col-lg-12 col-md-12 col-12 mb-2 search-action-col">
+                <label class="font-bold d-block text-sm-right d-none d-lg-block invisible" style="height: 18px; margin-bottom: 0.5rem;">&nbsp;</label>
+                <div class="search-action-buttons">
+                    <button type="button" class="btn btn-primary text-nowrap" onclick="reloadSalesTable();">
+                        <i class="fa fa-search-plus mr-1"></i>@AppProcessor.Messagor.GetMessage("Label_Search")
+                    </button>
+                    <button type="button" class="btn btn-default btn-outline-secondary text-nowrap d-none" onclick="resetSalesSearch();">
+                        <i class="fa fa-undo mr-1"></i>Đặt lại
+                    </button>
+                    <button type="button" class="btn btn-warning font-bold text-nowrap shadow-sm" id="btnExportDigitalSales" onclick="exportDigitalSales();" title="Tải danh sách theo điều kiện tìm kiếm">
+                        <i class="fa fa-download mr-1"></i>Tải danh sách
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window._excludedStatusIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(excludedStatusIds));
+    window._msgSelectRoleOption = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Option")))';
+    window._msgSelectRoleEmpty = '@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSalesSearch_MemberRole_Empty")))';
+
+    $(document).ready(function () {
+        if (typeof updateStatusDropdownText === 'function') {
+            updateStatusDropdownText();
+        }
+
+        if ($.fn.datepicker) {
+            $('#dpFromDate').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'vi'
+            });
+            $('#dpToDate').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'vi'
+            });
+        }
+
+        $('#SearchDigitalSales').on('keydown', 'input, select', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (typeof reloadSalesTable === 'function') {
+                    reloadSalesTable();
+                }
+            }
+        });
+
+        $('#SearchDigitalSales').on('change', 'select:not(#DepartmentID):not(#EmployeeID):not(#BusinessType):not(#ApplyYear)', function () {
+            if (typeof reloadSalesTable === 'function') {
+                reloadSalesTable();
+            }
+        });
+
+        // Lọc danh sách checkbox trạng thái theo Loại hình (Cơ hội / Dự án)
+        $('#BusinessType').change(function () {
+            var businessType = $(this).val();
+            if (typeof filterStatusListByBusinessType === 'function') {
+                filterStatusListByBusinessType(businessType);
+            }
+        });
+
+        // Khi chọn Đơn vị xuất phát -> reload bảng dữ liệu
+        $('#SourceDepartmentID').change(function () {
+            if (typeof reloadSalesTable === 'function') {
+                reloadSalesTable();
+            }
+        });
+
+        // Khi chọn Nhân viên -> reload bảng dữ liệu
+        $('#EmployeeID').change(function () {
+            if (typeof reloadSalesTable === 'function') {
+                reloadSalesTable();
+            }
+        });
+
+        // Load danh sách nhân sự phụ trách (AM) theo phòng ban thuộc TTKDGP
+        $('#DepartmentID').change(function () {
+            var departmentId = $(this).val();
+            var $employee = $('#EmployeeID');
+
+            $employee.empty().append('<option value="">-- Chọn nhân viên --</option>');
+
+            $.get('/Cate/DigitalSales/GetEmployeesByDepartment', {
+                departmentId: departmentId ? departmentId : 0
+            }, function (data) {
+                if (data && data.length > 0) {
+                    $.each(data, function (i, item) {
+                        $employee.append(
+                            $('<option>').val(item.Value).text(item.Text)
+                        );
+                    });
+                }
+                $employee.trigger("chosen:updated");
+                if ($.fn.select2) {
+                    $employee.trigger("change.select2");
+                }
+                if (typeof reloadSalesTable === 'function') {
+                    reloadSalesTable();
+                }
+            });
+        });
+    });
+</script>
+
+<link rel="stylesheet" href="~/Areas/Cate/Views/DigitalSales/_Search.css?v=@DateTime.Now.Ticks" />

@@ -1,0 +1,138 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_ReviewFormModel
+@{
+    ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Review"), AppProcessor.Messagor.GetMessage("DigitalSales_Entity_Name"));
+    Layout = "~/Views/Shared/_Form.cshtml";
+}
+
+@section FormType{
+    primary
+}
+
+@section FormIcon{
+    <i class="fa fa-plus"></i>
+}
+
+@section FormBody{
+@using (Html.BeginForm("ReviewBatch", "ReviewBatchItem", new { area = "Cate" }, FormMethod.Post, new { encType = "multipart/form-data", id = "ReviewBatch", @class = "form-horizontal" }))
+    {
+        @Html.Hidden("ContinueReview", false, new { id = "ReviewBatchContinueReview" })
+        @Html.Hidden("ContinueReviewFilter", Model.ContinueReviewFilter ?? "", new { id = "ReviewBatchContinueReviewFilter" })
+        <div id="bodyForm">
+            @Html.Partial("_ReviewForm")
+        </div>
+    }
+
+    <script type="text/javascript">
+        // Rà soát mở theo yêu cầu dưới dạng modal phủ lên trang chi tiết,
+        // không còn neo vào layout để tránh thu hẹp/vỡ giao diện hồ sơ.
+        var $reviewDock = $('#modal_ReviewBatch');
+
+        // Hiển thị nút đóng ở tiêu đề modal; nút Hủy ở footer vẫn được ẩn để
+        // các thao tác chính chỉ gồm Lưu và Lưu và tiếp tục.
+        $reviewDock.find('.modal-footer [data-dismiss="modal"]').remove();
+
+        $reviewDock
+            .addClass('review-dock-right')
+            .removeClass('modal-lg modal-fs')
+            .modal({ backdrop: true, keyboard: false, show: false })
+            .on('shown.bs.modal', function () {
+                $('body').addClass('review-dock-open');
+            })
+            .on('hidden.bs.modal', function () {
+                $('body').removeClass('review-dock-open');
+            });
+    </script>
+
+    <script type="text/javascript">
+        var reviewBatchSaveAndContinue = false;
+
+        $(document)
+            .off('click.reviewBatchSubmit', '#modal_ReviewBatch .js-review-batch-submit')
+            .on('click.reviewBatchSubmit', '#modal_ReviewBatch .js-review-batch-submit', function () {
+                reviewBatchSaveAndContinue = $(this).data('continue') === true;
+                $('#ReviewBatchContinueReview').val(reviewBatchSaveAndContinue ? 'true' : 'false');
+                if (!$('#ReviewBatchContinueReviewFilter').val()) {
+                    $('#ReviewBatchContinueReviewFilter').val(localStorage.getItem('review_digital_sales_filter') || '');
+                }
+                $('#modal_ReviewBatch form#ReviewBatch').trigger('submit');
+            });
+
+        $(document)
+            .off('click.reviewBatchBack', '#modal_ReviewBatch .js-review-batch-back')
+            .on('click.reviewBatchBack', '#modal_ReviewBatch .js-review-batch-back', function () {
+                // The filter is restored by ReviewBatchItem.js after navigating back.
+                // Keep the latest value when the review form is opened from the list.
+                if (typeof window.saveReviewDigitalSalesFilter === 'function') {
+                    window.saveReviewDigitalSalesFilter();
+                }
+                var batchId = parseInt($('#modal_ReviewBatch #ReviewBatchID').val() || 0, 10);
+                var targetUrl = batchId > 0
+                    ? '/Cate/ReviewBatchItem/Index/' + batchId
+                    : '/Cate/ReviewBatchItem';
+                $('#modal_ReviewBatch').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                    window.location.href = targetUrl;
+                }).modal('hide');
+            });
+
+        $('form#ReviewBatch').ajaxForm({
+            beforeSubmit: function () {
+                if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.ReviewComment) {
+                    CKEDITOR.instances.ReviewComment.updateElement();
+                }
+                return true;
+            },
+            success: function (response) {
+                const formId = "ReviewBatch";
+                const $modal = $("#modal_" + formId);
+                // validate fail
+                if (response.status === undefined) {
+                    $modal.find("#bodyForm").html(response);
+                    var $form = $modal.find('form#ReviewBatch');
+                    if ($.validator && $.validator.unobtrusive) {
+                        $form.removeData('validator').removeData('unobtrusiveValidation');
+                        $.validator.unobtrusive.parse($form);
+                    }
+                    return;
+                }
+                if (response.status !== true) {
+                    eval(response.message);
+                    response.status = undefined;
+                    return;
+                }
+                const processSuccess = (targetUrl) => {
+                    eval(response.message);
+                    window.location.href = targetUrl;
+                    response.status = undefined;
+                };
+
+                // Quay lại đúng đợt khi không tiếp tục hoặc đã rà soát hết.
+                const batchId = response.reviewBatchID || 0;
+                const backUrl = batchId > 0
+                    ? "/Cate/ReviewBatchItem/Index/" + batchId
+                    : "/Cate/ReviewBatchItem";
+                const targetUrl = reviewBatchSaveAndContinue && response.nextReviewUrl
+                    ? response.nextReviewUrl
+                    : backUrl;
+
+                $modal.off("hidden.bs.modal")
+                    .on("hidden.bs.modal", function () {
+                        processSuccess(targetUrl);
+                    });
+                $modal.modal("hide");
+            }
+        });
+    </script>
+}
+
+@section SubmitControl{
+    <button type="button" class="js-review-batch-back btn px-4 btn-outline-secondary mb-1">
+        <i class="fa fa-arrow-left"></i>&nbsp;Quay lại danh sách rà soát
+    </button>
+    <button type="button" class="js-review-batch-submit btn px-4 btn-outline-primary mb-1" data-continue="false">
+        <i class="fa fa-save"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Button_Save")
+    </button>
+    <button type="button" class="js-review-batch-submit btn px-4 btn-primary mb-1" data-continue="true">
+        <i class="fa fa-save"></i>&nbsp;@AppProcessor.Messagor.GetMessage("Modal_ContinueForm")
+    </button>
+}

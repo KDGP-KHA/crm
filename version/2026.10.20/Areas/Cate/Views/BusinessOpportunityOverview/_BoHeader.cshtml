@@ -1,0 +1,198 @@
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_BusinessOpportunityOverviewModel
+@{
+    int CONVERTED = Model.BusinessOpportunity.StatusCode == "CONVERTED" ? 1 : 0;
+}
+<div class="bo-header-card">
+    <div class="bo-header-top">
+        <div>
+            <div class="bo-header-title">
+                <i class="fas fa-business-time" style="color:#1a6db5;font-size:15px"></i>
+
+                @Model.BusinessOpportunity.OpportunityName
+
+                <span class="badge @Model.BusinessOpportunity.StatusClass px-2 py-1"
+                      style="font-size:11px">
+                    @Model.BusinessOpportunity.StatusName
+                </span>
+            </div>
+
+            <div class="bo-header-sub">
+                @AppProcessor.Messagor.GetMessage("BO_Overview_Label_Customer"):
+                <strong>@Model.BusinessOpportunity.CustomerName</strong>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.BusinessOpportunity.ProjectName))
+            {
+                <div class="bo-header-sub">
+                    @AppProcessor.Messagor.GetMessage("Opportunity_Project_Label"):
+                    <strong>
+                        <a href="/Cate/ProjectOverview/Index/@Model.BusinessOpportunity.ProjectID">
+                            @Model.BusinessOpportunity.ProjectName
+                        </a>
+                    </strong>
+                </div>
+            }
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+
+            @if (Model.BusinessOpportunity.StatusCode != "CONVERTED")
+            {
+                @Html.Button(
+                    true,
+                    "ConvertToProject",
+                    Url.Action("ConvertProject", "RM_BusinessOpportunity", new { area = "Cate", id = Model.BusinessOpportunity.BusinessOpportunityID }),
+                    "<i class='fas fa-project-diagram'></i>",
+                    AppProcessor.Messagor.GetMessage("BO_Overview_Btn_ConvertProject"),
+                    new
+                    {
+                        @class = "btn btn-lighter-purple mr-1 btn-a-outline-purple border-0 radius-3 py-1 px-3 text-90",
+                        data_width = "1024"
+                    }
+                )
+
+                @Html.Button(
+                    true,
+                    "EditExchangeHistory",
+                    Url.Action("UpdateStatus", "RM_BusinessOpportunity", new { area = "Cate", id = Model.BusinessOpportunity.BusinessOpportunityID }),
+                    "<i class='far fa-clipboard'></i>",
+                    AppProcessor.Messagor.GetMessage("BO_Overview_Btn_UpdateStatus"),
+                    new
+                    {
+                        @class = "btn btn-lighter-success mr-1 btn-a-outline-success border-0 radius-3 py-1 px-3 text-90",
+                        data_width = "1024"
+                    }
+                )
+
+                @Html.Button(
+                    true,
+                    "EditBusinessOpportunity",
+                    Url.Action("Edit", "RM_BusinessOpportunity", new { area = "Cate", id = Model.BusinessOpportunity.BusinessOpportunityID }),
+                    "<i class='far fa-edit'></i>",
+                    AppProcessor.Messagor.GetMessage("Button_Edit"),
+                    new
+                    {
+                        @class = "btn btn-lighter-primary mr-1 btn-a-outline-primary border-0 radius-3 py-1 px-3 text-90",
+                        data_width = "1024"
+                    }
+                )
+
+                @Html.Button(
+                    true,
+                    "AddOpportunityPlan",
+                    Url.Action("AddPlan", "BusinessOpportunityOverview", new { area = "Cate", businessOpportunityId = Model.BusinessOpportunity.BusinessOpportunityID }),
+                    "<i class='fas fa-calendar-plus'></i>",
+                    AppProcessor.Messagor.GetMessage("OpportunityPlan_Add_Title"),
+                    new
+                    {
+                        @class = "btn btn-lighter-purple mr-1 btn-a-outline-purple border-0 radius-3 py-1 px-3 text-90",
+                        data_width = "600"
+                    }
+                )
+            }
+            else
+            {
+                @Html.Button(
+                    true,
+                    "Notification",
+                    Url.Action("Notification", "BusinessOpportunityOverview", new { area = "Cate", id = Model.BusinessOpportunity.BusinessOpportunityID }),
+                    "<i class='fas fa-calendar-plus'></i>",
+                    "Notification",
+                    new
+                    {
+                        @class = "btn d-none",
+                        data_width = "600"
+                    }
+                )
+            }
+
+        </div>
+    </div>
+
+    <div class="bo-stats-row">
+
+        @{
+            var val = Model.BusinessOpportunity.ClosingProbability;
+
+            var colorClass =
+                val > 50 ? "text-success" :
+                val <= 20 ? "text-danger" :
+                val > 0 ? "text-warning" :
+                "text-muted";
+        }
+
+        <div class="bo-stat-item">
+            <div class="bo-stat-icon" style="background:#e8f0fb">
+                <i class="fas fa-percentage" style="color:#1a6db5"></i>
+            </div>
+
+            <div>
+                <div class="bo-stat-label">
+                    @AppProcessor.Messagor.GetMessage("ClosingProbability_Label")
+                </div>
+
+                <div class="bo-stat-value @colorClass font-weight-bold">
+                    @(val != 0
+                        ? val.ToString("0.##") + " %"
+                        : "--")
+                </div>
+            </div>
+        </div>
+
+        <div class="bo-stat-item">
+            <div class="bo-stat-icon" style="background:#e8f5e9">
+                <i class="fas fa-coins" style="color:#2e7d32"></i>
+            </div>
+
+            <div>
+                <div class="bo-stat-label">
+                    @AppProcessor.Messagor.GetMessage("ExpectedValue_Label")
+                </div>
+
+                <div class="bo-stat-value text-success">
+                    @(Model.BusinessOpportunity.ExpectedValue > 0
+                        ? Model.BusinessOpportunity.ExpectedValue.ToString("N0")
+                        : "--")
+                </div>
+            </div>
+        </div>
+
+        <div class="bo-stat-item">
+            <div class="bo-stat-icon" style="background:#fff3e0">
+                <i class="fas fa-comments" style="color:#e65100"></i>
+            </div>
+
+            <div>
+                <div class="bo-stat-label">
+                    @AppProcessor.Messagor.GetMessage("BO_Overview_Label_TotalExchange")
+                </div>
+
+                <div class="bo-stat-value" style="color:#e65100">
+                    @Model.TotalExchangeHistory
+                </div>
+            </div>
+        </div>
+
+        <div class="bo-stat-item">
+            <div class="bo-stat-icon" style="background:#ede7f6">
+                <i class="fas fa-users" style="color:#4527a0"></i>
+            </div>
+
+            <div>
+                <div class="bo-stat-label">
+                    @AppProcessor.Messagor.GetMessage("ParticipatingMembers_Title")
+                </div>
+
+                <div class="bo-stat-value"
+                     style="color:#4527a0"
+                     id="boMemberCount">
+                    @Model.TotalMember
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    var CONVERTED = @CONVERTED;
+</script>

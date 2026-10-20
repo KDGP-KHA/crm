@@ -1,0 +1,75 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesProgressModel
+
+@Html.AntiForgeryToken()
+@Html.HiddenFor(m => m.ProgressID)
+@Html.HiddenFor(m => m.ProcessID)
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.ProcessID, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8 pt-2">
+        <span class="badge badge-lg bgc-purple-l2 text-purple-d2 border-1 brc-purple-m3 px-3 py-1">
+            <i class="fa fa-project-diagram mr-1"></i>@(string.IsNullOrEmpty(Model.ProcessName) ? "Quy trình #" + Model.ProcessID : Model.ProcessName)
+        </span>
+        @Html.ValidationMessageFor(m => m.ProcessID, "", new { @class = "text-danger text-90 d-block" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.ProgressCode, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.ProgressCode, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_ProgressCode_Placeholder"), required = "required", maxlength = 50 })
+        @Html.ValidationMessageFor(m => m.ProgressCode, "", new { @class = "text-danger text-90" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.ProgressName, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.ProgressName, new { @class = "form-control", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_ProgressName_Placeholder"), required = "required", maxlength = 250 })
+        @Html.ValidationMessageFor(m => m.ProgressName, "", new { @class = "text-danger text-90" })
+    </div>
+</div>
+
+<div class="form-group row bgc-blue-l4 py-2 border-1 brc-blue-l2 radius-1 mb-3">
+    @Html.TitleFor(m => m.DefaultDurationDays, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-blue-d2" })
+    <div class="col-sm-8">
+        <div class="input-group" style="max-width: 250px;">
+            @Html.TextBoxFor(m => m.DefaultDurationDays, new { @class = "form-control font-bolder text-blue-d2", type = "number", min = "1", max = "365", required = "required", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_DefaultDurationDays_Placeholder") })
+            <div class="input-group-append">
+                <span class="input-group-text bgc-blue-l1 text-blue-d3 font-bold">ngày làm việc</span>
+            </div>
+        </div>
+        <small class="text-muted d-block mt-1">
+            <i class="fa fa-info-circle text-blue mr-1"></i>Thời hạn mặc định để hoàn thành tiến trình này (dùng tự động tính deadline khi sinh công việc).
+        </small>
+        @Html.ValidationMessageFor(m => m.DefaultDurationDays, "", new { @class = "text-danger text-90" })
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.SortOrder, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-4">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fa fa-sort-numeric-down"></i></span>
+            </div>
+            @Html.TextBoxFor(m => m.SortOrder, new { @class = "form-control", type = "number", min = "1", placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_SortOrder_Placeholder") })
+        </div>
+        @Html.ValidationMessageFor(m => m.SortOrder, "", new { @class = "text-danger text-90" })
+    </div>
+    <div class="col-sm-4 pt-2">
+        <label class="cursor-pointer">
+            @Html.CheckBoxFor(m => m.IsActive, new { @class = "ace-switch ace-switch-check input-lg" })
+            <span class="ml-1 text-95 font-600 text-success-d1">@AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_ProgressIsActive_Label")</span>
+        </label>
+    </div>
+</div>
+
+<div class="form-group row">
+    @Html.TitleFor(m => m.Description, new { @class = "col-sm-3 col-form-label text-sm-right font-bold text-secondary-d1" })
+    <div class="col-sm-8">
+        @Html.TextAreaFor(m => m.Description, new { @class = "form-control", rows = 3, placeholder = AppProcessor.Messagor.GetMessage("DigitalSalesWorkflow_ProgressDescription_Placeholder") })
+        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger text-90" })
+    </div>
+</div>

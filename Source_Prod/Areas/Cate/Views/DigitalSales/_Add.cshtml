@@ -1,0 +1,12 @@
+﻿@using System.Web
+@using TSFramework.Libs.Processors
+@model Core.Cate.Models.RM_DigitalSalesModel
+@{ ViewBag.Title = string.Format(AppProcessor.Messagor.GetMessage("Modal_Title_Add"), AppProcessor.Messagor.GetMessage("DigitalSales_Entity_Name")); Layout = "~/Views/Shared/_Form.cshtml"; }
+@section FormType { primary }
+@section FormIcon { <i class="fa fa-plus-circle"></i> }
+@section FormBody {
+    @using (Html.BeginForm("Add", "DigitalSales", new { area = "Cate" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "AddDigitalSales", @class = "form-horizontal" })) { <div id="bodyForm">@Html.Partial("_DigitalSales", Model)</div> }
+    <script>
+    (function () { var $form = $('#AddDigitalSales'), $modal = $form.closest('.modal'); $modal.find('#btnSave').off('click.digitalSales').on('click.digitalSales', function (e) { e.preventDefault(); $form.submit(); }); $form.ajaxForm({ beforeSubmit: function () { if (typeof CKEDITOR !== 'undefined') $.each(CKEDITOR.instances, function () { this.updateElement(); }); if ($form.valid && !$form.valid()) return false; $modal.find('#btnSave').prop('disabled', true); return true; }, success: function (r) { DigitalSales_OnProcessSuccess(r, 'AddDigitalSales'); }, error: function () { $modal.find('#btnSave').prop('disabled', false); executeResponseMessage('@Html.Raw(HttpUtility.JavaScriptStringEncode(AppProcessor.Messagor.GetMessage("DigitalSales_Msg_ConnectionError")))', '', false); } }); })();
+    </script>
+}

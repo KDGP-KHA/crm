@@ -138,6 +138,18 @@
                     </div>
                 </div>
 
+                @if (Model.DigitalSalesID.GetValueOrDefault() > 0)
+                {
+                    <div class="contract-info-item">
+                        <div class="contract-info-label">Hồ sơ KD SPDV số</div>
+                        <div class="contract-info-value">
+                            <a class="font-weight-bold text-primary" href="@Url.Action("Detail", "DigitalSales", new { area = "Cate", id = Model.DigitalSalesID })">
+                                @(string.IsNullOrWhiteSpace(Model.DigitalSalesCode) ? Model.DigitalSalesName : Model.DigitalSalesCode + " - " + Model.DigitalSalesName)
+                            </a>
+                        </div>
+                    </div>
+                }
+
                 <div class="contract-info-item">
                     <div class="contract-info-label">
                         @Html.DisplayNameFor(m => m.SignDate)

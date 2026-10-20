@@ -1,0 +1,343 @@
+﻿================================================================================
+               BAO CAO TONG KET GOI PHAT HANH: 2026.10.20
+================================================================================
+Thoi gian tao           : 20/10/2026 14:34:38
+Che do so sanh          : publish_source vs Source_Prod
+Tong so tep trong build : 4017
+Tong so tep Source_Prod : 4804
+--------------------------------------------------------------------------------
+THONG KE PHAN LOAI VERSION
+--------------------------------------------------------------------------------
+1. File moi (NEW)       : 210 tep
+2. File cap nhat (MOD)  : 118 tep
+=> TONG CONG DA COPY    : 328 tep
+--------------------------------------------------------------------------------
+DANH SACH CHI TIET TEP DA DUA VAO VERSION:
+[MODIFIED] Libraries/Procedures/Plugable.SQLProcedureProcessor.dll (13824 bytes) - Kich thuoc khac nhau (Moi: 13824 bytes vs Prod: 14336 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_UnlockProgressModal.cshtml (3552 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Dashboard/Views/Dashboard/Chart.css (21270 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Contents/FE/images/favicon.ico (84903 bytes) - Kich thuoc khac nhau (Moi: 84903 bytes vs Prod: 101915 bytes)
+[NEW] Contents/uploads/DigitalSales/202609/-2147483648-210643_20260912010441557.webp (235796 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_GuideConfigModal.cshtml (11889 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan27032026153324_04052026161552.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SharedDocument/_Delete.cshtml (933 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/User/UserBoPhan.css (3137 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingForm.cshtml (12525 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_12052026105045.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ContactPersons/_Add.cshtml (820 bytes) - Kich thuoc khac nhau (Moi: 820 bytes vs Prod: 817 bytes)
+[NEW] Areas/Sys/Views/SharedDocument/_Edit.cshtml (1742 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/lichsutheotacdanhmuctaikhoanthuhuong16012026102500_04052026161552.xlsx (9287 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/importemployeebusinessplan_19052026152443.xlsx (22329 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ProductService/_Detail.cshtml (13205 bytes) - Kich thuoc khac nhau (Moi: 13205 bytes vs Prod: 13620 bytes)
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_ProcessList.cshtml (3840 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/TSFramework.Libs.dll.config (4291 bytes) - Kich thuoc khac nhau (Moi: 4291 bytes vs Prod: 3361 bytes)
+[NEW] Contents/Modules/Sys/EmailTemplates/_TemplateConfirmTicket.cshtml (11592 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ContactPersons/_Edit.cshtml (751 bytes) - Kich thuoc khac nhau (Moi: 751 bytes vs Prod: 748 bytes)
+[NEW] Contents/imgs/434742_28092026141444.pdf (480213 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Modules.API.dll (39424 bytes) - Kich thuoc khac nhau (Moi: 39424 bytes vs Prod: 42496 bytes)
+[NEW] Contents/Base/plugins/datatables/extensions/Scroller/Readme.txt (2251 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026192101.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailOverview.css (4549 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/csi.exe.config (4932 bytes) - Kich thuoc khac nhau (Moi: 4932 bytes vs Prod: 8324 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_StatusTimelineModal.css (4883 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_ProgressModal.cshtml (1089 bytes) - Tep chua co trong Source_Prod
+[NEW] bin/Modules.Cate.pdb (929280 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_ImportProgressModal.cshtml (9293 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/uploads/DigitalSales/202609/-2147483648-210651_20260912010441560.webp (275352 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/System.Collections.Immutable.dll (189312 bytes) - Kich thuoc khac nhau (Moi: 189312 bytes vs Prod: 358536 bytes)
+[MODIFIED] bin/roslyn/csc.exe (60528 bytes) - Kich thuoc khac nhau (Moi: 60528 bytes vs Prod: 49584 bytes)
+[NEW] Contents/Base/plugins/validate/jquery.validate-vsdoc.js (43378 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_27032026170622.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/TSFramework.Libs.pdb (562688 bytes) - Kich thuoc khac nhau (Moi: 562688 bytes vs Prod: 556544 bytes)
+[NEW] Contents/Modules/Sys/EmailTemplates/_TemplateRollbackTicket.cshtml (11751 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan27032026153324_04052026160949.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Base/plugins/datatables/extensions/KeyTable/Readme.txt (1334 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.Solution.TOC.WebApp.dll (110592 bytes) - Kich thuoc khac nhau (Moi: 110592 bytes vs Prod: 107520 bytes)
+[MODIFIED] Areas/Cate/Views/ReviewBatchItem/_ReviewForm.cshtml (6233 bytes) - Kich thuoc khac nhau (Moi: 6233 bytes vs Prod: 5162 bytes)
+[MODIFIED] bin/roslyn/Microsoft.CodeAnalysis.dll (4543640 bytes) - Kich thuoc khac nhau (Moi: 4543640 bytes vs Prod: 2721712 bytes)
+[NEW] Areas/Dashboard/Views/Dashboard/DigitalSalesByStatus.cshtml (15301 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.Libs.HDDT.pdb (175616 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_ProgressForm.cshtml (4562 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Contents/Base/imgs/icons/logo_ctn_big.png (107959 bytes) - Kich thuoc khac nhau (Moi: 107959 bytes vs Prod: 7546 bytes)
+[NEW] Contents/Modules/Sys/EmailTemplates/CONGVIEC_CAPNHATNHATKY.cshtml (4790 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingModal.css (902 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.Solution.TOC.WebApp.dll.config (14264 bytes) - Kich thuoc khac nhau (Moi: 14264 bytes vs Prod: 12622 bytes)
+[NEW] Contents/imgs/danhsachduan27032026153324_06052026165206.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/Index.cshtml (1565 bytes) - Kich thuoc khac nhau (Moi: 1565 bytes vs Prod: 2025 bytes)
+[NEW] Contents/imgs/chinh-sach_05052026085706.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Sys/EmailTemplates/CONGVIEC_KHOITAO.cshtml (8148 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan27032026153324_25052026161120.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_02062026160740.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Core.Log.dll (10752 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[MODIFIED] App_Data/Modules/Cate_StoredProcedures.xml (32541 bytes) - Kich thuoc khac nhau (Moi: 32541 bytes vs Prod: 25385 bytes)
+[MODIFIED] Areas/Cate/Views/BusinessOpportunityOverview/_BoHeader.cshtml (7715 bytes) - Kich thuoc khac nhau (Moi: 7715 bytes vs Prod: 7720 bytes)
+[MODIFIED] bin/roslyn/csi.exe (16488 bytes) - Kich thuoc khac nhau (Moi: 16488 bytes vs Prod: 15272 bytes)
+[NEW] Areas/Cate/Views/ReviewBatchItem/_DigitalSales.cshtml (1219 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailAttachments.css (3597 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DigitalSales.cshtml (31139 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/test-kqxl_30032026110319.docx (6677 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Dashboard/Views/Dashboard/OpportunityByGroupService.cshtml (11626 bytes) - Kich thuoc khac nhau (Moi: 11626 bytes vs Prod: 10533 bytes)
+[NEW] Contents/imgs/chinh-sach_12052026095137.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailTimeline.cshtml (3030 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/uploads/DigitalSales/202609/-2147483648-210647_20260912010441559.webp (272716 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Sys/EmailTemplates/DUAN_THEMNGUOITHAMGIA.cshtml (3686 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Base/plugins/datatables/extensions/FixedHeader/Readme.txt (1404 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan202609081651_15092026153248.xlsx (10525 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415112222-5.png (4209 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Contents/Base/plugins/TSFramework/TSFramework.js (37835 bytes) - Kich thuoc khac nhau (Moi: 37835 bytes vs Prod: 36831 bytes)
+[NEW] Contents/uploads/feedback/1.jpg (32841 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Contents/Base/imgs/app.ico (84903 bytes) - Kich thuoc khac nhau (Moi: 84903 bytes vs Prod: 4286 bytes)
+[NEW] bin/Modules.Dashboard.pdb (60928 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/Microsoft.DiaSymReader.Native.x86.dll (1547656 bytes) - Kich thuoc khac nhau (Moi: 1547656 bytes vs Prod: 1188080 bytes)
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_StatusModal.cshtml (1119 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SharedDocument/SharedDocument.js (12958 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/Index.css (3478 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Dashboard/Views/Dashboard/ProjectByUser.cshtml (9230 bytes) - Kich thuoc khac nhau (Moi: 9230 bytes vs Prod: 8338 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_ChangeStatusForm.cshtml (37893 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_Edit.cshtml (1485 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chi-ngay-22-ver2_30032026110948.docx (10031 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_ChangeStatusModal.cshtml (5767 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ContactPersons/ContactPersons.js (23924 bytes) - Kich thuoc khac nhau (Moi: 23924 bytes vs Prod: 19692 bytes)
+[MODIFIED] Contents/Base/imgs/icons/app.ico (84903 bytes) - Kich thuoc khac nhau (Moi: 84903 bytes vs Prod: 4286 bytes)
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_15042026165613.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_ProcessModal.cshtml (1063 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/System.Reflection.Metadata.dll (462728 bytes) - Kich thuoc khac nhau (Moi: 462728 bytes vs Prod: 584848 bytes)
+[NEW] Areas/Sys/Views/DataMigration/Index.cshtml (16534 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/OpportunityProjectWithoutPGP/Index.cshtml (5870 bytes) - Kich thuoc khac nhau (Moi: 5870 bytes vs Prod: 5389 bytes)
+[MODIFIED] Libraries/Authorities/Plugable.SQLProcedureAuthority.dll (6656 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_31032026091126.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ReviewBatchItem/_ReviewBatch.cshtml (6414 bytes) - Kich thuoc khac nhau (Moi: 6414 bytes vs Prod: 5848 bytes)
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/Dich_vu_Load_Balancer_13_June_3x_fd8270b551.png (8542 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Sys/EmailTemplates/_TemplateWarningOverdue.cshtml (11186 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.css (5008 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/csi.rsp (253 bytes) - Kich thuoc khac nhau (Moi: 253 bytes vs Prod: 266 bytes)
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_21042026112150.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/Invoices/statuslistcrm_20260922110202.xlsx (6421 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/DigitalSalesDetail.js (175524 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Modules.Dashboard.dll (59904 bytes) - Kich thuoc khac nhau (Moi: 59904 bytes vs Prod: 37376 bytes)
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/Index.css (2660 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/vbc.exe.config (4313 bytes) - Kich thuoc khac nhau (Moi: 4313 bytes vs Prod: 7738 bytes)
+[NEW] Contents/Base/plugins/ace_v4/node_modules/nouislider/distribute/wNumb.min.js (2235 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/kha-test_21042026152123.docx (13132 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingLogsModal.cshtml (21728 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Dashboard/Views/Dashboard/_ChartOverview.cshtml (43341 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/_Edit.cshtml (3455 bytes) - Kich thuoc khac nhau (Moi: 3455 bytes vs Prod: 1288 bytes)
+[NEW] Areas/Sys/Views/SharedDocument/_Add.cshtml (1738 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_StatusTimelineModal.cshtml (7478 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_31032026105534.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/DataMigration/DataMigration.css (5648 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan27032026153324_05052026084237.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/Report_BusinessOpportunity/Index.cshtml (8546 bytes) - Kich thuoc khac nhau (Moi: 8546 bytes vs Prod: 11185 bytes)
+[MODIFIED] bin/Core.API.pdb (343552 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415112234-6.png (2846 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/_Detail.cshtml (15982 bytes) - Kich thuoc khac nhau (Moi: 15982 bytes vs Prod: 15262 bytes)
+[MODIFIED] Areas/Cate/Views/Invoices/_List.cshtml (8501 bytes) - Kich thuoc khac nhau (Moi: 8501 bytes vs Prod: 7696 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_StatusTimelineDetailModal.css (3832 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/csc.exe.config (4308 bytes) - Kich thuoc khac nhau (Moi: 4308 bytes vs Prod: 7738 bytes)
+[NEW] Contents/imgs/chinh-sach_17092026144834.docx (6677 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Views/Account/Login.cshtml (17335 bytes) - Kich thuoc khac nhau (Moi: 17335 bytes vs Prod: 16129 bytes)
+[MODIFIED] Areas/Dashboard/Views/Dashboard/OpportunityByUser.cshtml (13286 bytes) - Kich thuoc khac nhau (Moi: 13286 bytes vs Prod: 12439 bytes)
+[MODIFIED] bin/roslyn/csc.rsp (1537 bytes) - Kich thuoc khac nhau (Moi: 1537 bytes vs Prod: 1450 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_ProductModal.cshtml (1765 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/System.Text.Encoding.CodePages.dll (761392 bytes) - Kich thuoc khac nhau (Moi: 761392 bytes vs Prod: 766872 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_ImportTodoModal.cshtml (10929 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/Microsoft.CSharp.Core.targets (8908 bytes) - Kich thuoc khac nhau (Moi: 8908 bytes vs Prod: 6684 bytes)
+[NEW] Areas/Cate/Views/ProjectTaskNoReport/_Report.cshtml (17849 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026173852.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/SharedDocument.css (1537 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026173334.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Modules.Cate.dll (709632 bytes) - Kich thuoc khac nhau (Moi: 709632 bytes vs Prod: 411648 bytes)
+[MODIFIED] Areas/Cate/Views/ReviewBatchItem/_ReviewHistory.cshtml (9083 bytes) - Kich thuoc khac nhau (Moi: 9083 bytes vs Prod: 11613 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_ProductModal.css (2231 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_QuickAssignDepartmentModal.cshtml (7229 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/RM_Contracts.css (393 bytes) - Kich thuoc khac nhau (Moi: 393 bytes vs Prod: 390 bytes)
+[MODIFIED] bin/Core.Sys.pdb (513536 bytes) - Kich thuoc khac nhau (Moi: 513536 bytes vs Prod: 411136 bytes)
+[NEW] Areas/Sys/Views/DataMigration/DataMigration.js (15604 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_12052026095359.docx (6677 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Views/Account/_LoginBody.cshtml (5520 bytes) - Kich thuoc khac nhau (Moi: 5520 bytes vs Prod: 5536 bytes)
+[MODIFIED] bin/roslyn/VBCSCompiler.exe.config (4871 bytes) - Kich thuoc khac nhau (Moi: 4871 bytes vs Prod: 7950 bytes)
+[MODIFIED] bin/roslyn/Microsoft.DiaSymReader.Native.amd64.dll (1842552 bytes) - Kich thuoc khac nhau (Moi: 1842552 bytes vs Prod: 1495800 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_DetailProducts.cshtml (9899 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chitietxulyhoso-1_30032026110319.xlsx (7157 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ProjectMember/ProjectMember.js (8543 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[MODIFIED] bin/Modules.Sys.dll (138752 bytes) - Kich thuoc khac nhau (Moi: 138752 bytes vs Prod: 132096 bytes)
+[NEW] Areas/Sys/Views/SharedDocument/_Detail.cshtml (4644 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026172932.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/Microsoft.Managed.Core.targets (18990 bytes) - Kich thuoc khac nhau (Moi: 18990 bytes vs Prod: 7363 bytes)
+[MODIFIED] Areas/Cate/Views/ContactPersons/Index.cshtml (5638 bytes) - Kich thuoc khac nhau (Moi: 5638 bytes vs Prod: 2722 bytes)
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415095829-11.png (2574 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ReviewReport/Index.cshtml (8527 bytes) - Kich thuoc khac nhau (Moi: 8527 bytes vs Prod: 8036 bytes)
+[NEW] Contents/imgs/export_22052026154956.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] bin/CenIT.SSOServices.pdb (89600 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/Microsoft.CodeAnalysis.CSharp.Scripting.dll (32920 bytes) - Kich thuoc khac nhau (Moi: 32920 bytes vs Prod: 28592 bytes)
+[NEW] Areas/Cate/Views/Report_BusinessOpportunity/Report_BusinessOpportunity.css (1825 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SharedDocument/_EditDoc_View.cshtml (3104 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_ImportOpportunityModal.cshtml (9891 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/RM_Contracts.js (5852 bytes) - Kich thuoc khac nhau (Moi: 5852 bytes vs Prod: 5596 bytes)
+[NEW] Contents/imgs/test-kqxl_30032026110132.docx (6677 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ProductService/ProductService.js (34972 bytes) - Kich thuoc khac nhau (Moi: 34972 bytes vs Prod: 9880 bytes)
+[NEW] Areas/Dashboard/Views/Dashboard/Chart.js (36644 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/System.Threading.Tasks.Extensions.dll (25984 bytes) - Kich thuoc khac nhau (Moi: 25984 bytes vs Prod: 25864 bytes)
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_31032026090904.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Base/plugins/datatables/extensions/AutoFill/Readme.txt (1332 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/_Add.cshtml (3365 bytes) - Kich thuoc khac nhau (Moi: 3365 bytes vs Prod: 1281 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_EditMemberModal.css (1275 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/Detail.cshtml (14614 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/uploads/feedback/8.docx (0 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingReportModal.cshtml (14086 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_05052026110428.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_Add.cshtml (1486 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/LogTask/_DeleteFile.cshtml (1010 bytes) - Kich thuoc khac nhau (Moi: 1010 bytes vs Prod: 973 bytes)
+[NEW] Contents/imgs/chinh-sach_12052026093640.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_MemberModal.cshtml (2701 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingLogsModal.css (1902 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SharedDocument/_Search.cshtml (3369 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/Index.cshtml (6303 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.Libs.HDDT.dll (114688 bytes) - Kich thuoc khac nhau (Moi: 114688 bytes vs Prod: 120320 bytes)
+[NEW] Contents/imgs/chitietxulyhoso_21042026152047.xlsx (7155 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SharedDocument/SharedDocument.css (1029 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TodoModal.cshtml (17491 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chitietxulyhoso_21042026145716.xlsx (7155 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_12052026145851.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Sys/Views/User/User.js (10052 bytes) - Kich thuoc khac nhau (Moi: 10052 bytes vs Prod: 9845 bytes)
+[MODIFIED] bin/TSFramework.Libs.dll (502784 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] Contents/imgs/qd-thanh-lap-nhom-vnpt-cert-tai-vtkh2026_09042026192101.pdf (1190607 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_ProgressList.cshtml (4252 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailMembers.cshtml (6407 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ProjectOverview/_ReviewForm.cshtml (4524 bytes) - Kich thuoc khac nhau (Moi: 4524 bytes vs Prod: 4565 bytes)
+[NEW] Areas/Sys/Views/SharedDocument/Index.cshtml (2642 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_ProductForm.cshtml (16520 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ReviewBatchItem/Index.cshtml (2810 bytes) - Kich thuoc khac nhau (Moi: 2810 bytes vs Prod: 4479 bytes)
+[NEW] bin/CenIT.SSOServices.dll.config (963 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/Detail.css (14715 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/ContactPersons/ContactPersons.css (9273 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_22052026084644.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll (5847680 bytes) - Kich thuoc khac nhau (Moi: 5847680 bytes vs Prod: 5425584 bytes)
+[NEW] Contents/imgs/export_21052026165243.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/ds-nhan-su-truc-7-bo_22052026154247.xlsx (10595 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_StatusList.cshtml (5187 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/VBCSCompiler.exe (94840 bytes) - Kich thuoc khac nhau (Moi: 94840 bytes vs Prod: 87472 bytes)
+[NEW] Contents/imgs/chinh-sach_05052026110353.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/ProductService/ProductService.css (10483 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ProjectRevenueReport/ProjectRevenueReport.js (4473 bytes) - Kich thuoc khac nhau (Moi: 4473 bytes vs Prod: 4312 bytes)
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_21042026111904.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Sys/EmailTemplates/DUAN_XOANGUOITHAMGIA.cshtml (3701 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailDiscussions.css (16312 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan27032026153324_05052026085706.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Base/plugins/signalR/jquery-1.6.4-vsdoc.js (214129 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesReviewCompleted.cshtml (3456 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.SSOServices.XmlSerializers.dll (105984 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] bin/Modules.Cate.dll.config (7694 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_04052026160949.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026174400.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Sys/Views/User/Index.cshtml (1961 bytes) - Kich thuoc khac nhau (Moi: 1961 bytes vs Prod: 1890 bytes)
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_StatusForm.cshtml (4422 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/test-kqxl_30032026110555.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/ds-nhan-su-truc-7-bo_30032026110132.xlsx (10595 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/nation/language/no-image.svg (799 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Dashboard/Views/Dashboard/PlanByUser.cshtml (6358 bytes) - Kich thuoc khac nhau (Moi: 6358 bytes vs Prod: 5339 bytes)
+[NEW] Libraries/Jobs/Jobs.SyncData.pdb (30208 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailMembers.css (4142 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_Search.css (4884 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/baocaohoatdongcongdoancanhan2025phanluongbang_21042026145716.docx (10501 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/BusinessOpportunityOverview/Index.cshtml (11427 bytes) - Kich thuoc khac nhau (Moi: 11427 bytes vs Prod: 11133 bytes)
+[MODIFIED] bin/Modules.API.pdb (95744 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] Areas/Cate/Views/ProjectTaskNoReport/_Search.cshtml (2467 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/Screenshot 2026-04-03 164843.png (2255 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/roslyn/Microsoft.CodeAnalysis.Scripting.dll (136856 bytes) - Kich thuoc khac nhau (Moi: 136856 bytes vs Prod: 127920 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_UnlockProgressModal.css (623 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_17092026144716.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.SSOServices.dll (50176 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[MODIFIED] bin/roslyn/vbc.rsp (1675 bytes) - Kich thuoc khac nhau (Moi: 1675 bytes vs Prod: 1579 bytes)
+[NEW] Contents/imgs/chinh-sach_12052026091627.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/nguoilienhe20042026094812_25052026151349.xlsx (4771 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_DeleteConfirm.cshtml (1155 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/_ProcessForm.cshtml (3411 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/uploads/DigitalSales/202609/-2147483648-210653_20260912010441561.webp (212040 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_19052026170720.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_ChangeProcessModal.cshtml (6126 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/OpportunityProjectWithoutPGP/_Search.cshtml (2335 bytes) - Kich thuoc khac nhau (Moi: 2335 bytes vs Prod: 2292 bytes)
+[NEW] Contents/uploads/DigitalSales/202609/-2147483648-210655_20260912010441561.webp (235796 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SysNotifications/_ThongBao.cshtml (6749 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/ProjectTaskNoReport/index.cshtml (411 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_StatusTimelineDetailModal.cshtml (27195 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/DigitalSales.js (71326 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailTracking.css (17936 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Sys/Views/User/_BoPhanBody.cshtml (15289 bytes) - Kich thuoc khac nhau (Moi: 15289 bytes vs Prod: 4325 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_MemberForm.cshtml (3219 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/_Delete.cshtml (1370 bytes) - Kich thuoc khac nhau (Moi: 1370 bytes vs Prod: 829 bytes)
+[MODIFIED] bin/roslyn/vbc.exe (60528 bytes) - Kich thuoc khac nhau (Moi: 60528 bytes vs Prod: 49584 bytes)
+[MODIFIED] Areas/Dashboard/Views/Dashboard/OpportunityBySuccessRate.cshtml (13389 bytes) - Kich thuoc khac nhau (Moi: 13389 bytes vs Prod: 12506 bytes)
+[MODIFIED] bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll (6420120 bytes) - Kich thuoc khac nhau (Moi: 6420120 bytes vs Prod: 4896176 bytes)
+[MODIFIED] Web.config (14306 bytes) - Kich thuoc khac nhau (Moi: 14306 bytes vs Prod: 13165 bytes)
+[NEW] Contents/imgs/export_21052026165934.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_MemberModal.css (7352 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ContactPersons/_Delete.cshtml (859 bytes) - Kich thuoc khac nhau (Moi: 859 bytes vs Prod: 856 bytes)
+[MODIFIED] Views/Render/_Login.cshtml (267 bytes) - Kich thuoc khac nhau (Moi: 267 bytes vs Prod: 227 bytes)
+[NEW] Contents/imgs/lichsutheotacdanhmuctaikhoanthuhuong16012026102500_21042026112150.xlsx (9287 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/danhsachduan27032026153324_05052026110353.xlsx (12075 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/uploads/feedback/5.pdf (14731 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_19052026153236.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Dashboard/Views/Dashboard/Chart.cshtml (4104 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Core.Log.pdb (46592 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[NEW] Contents/imgs/test-kqxl_29042026160341.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Base/plugins/ace_v4/node_modules/color-themes-for-google-code-prettify/dist/themes/atelier-sulphurpool-light.css (1418 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Contents/Base/imgs/logo-vnpt.png (159002 bytes) - Kich thuoc khac nhau (Moi: 159002 bytes vs Prod: 11342 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_DigitalSales.css (1215 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_EditMemberModal.cshtml (11256 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_Search.cshtml (16592 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Sys/Views/SharedDocument/_AddDoc_View.cshtml (2312 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/CenIT.Libs.HDDT.XmlSerializers.dll (232960 bytes) - Noi dung tep thay doi (MD5 hash khac biet)
+[MODIFIED] Areas/Cate/Views/ContactPersons/_Search.cshtml (4804 bytes) - Kich thuoc khac nhau (Moi: 4804 bytes vs Prod: 3068 bytes)
+[MODIFIED] Contents/Modules/Sys/EmailTemplates/DUAN_COHOI_NHACNHOCAPNHAT.cshtml (5314 bytes) - Kich thuoc khac nhau (Moi: 5314 bytes vs Prod: 3136 bytes)
+[MODIFIED] Areas/Cate/Views/ProjectOverview/Index.cshtml (9029 bytes) - Kich thuoc khac nhau (Moi: 9029 bytes vs Prod: 8820 bytes)
+[MODIFIED] Areas/Cate/Views/ProductService/_Search.cshtml (3672 bytes) - Kich thuoc khac nhau (Moi: 3672 bytes vs Prod: 2392 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_ChangeStatusModal.css (17313 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_ImportOpportunityModal.css (1482 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Libraries/Jobs/Jobs.SyncData.dll (11776 bytes) - Kich thuoc khac nhau (Moi: 11776 bytes vs Prod: 10240 bytes)
+[MODIFIED] bin/Core.Sys.dll (116736 bytes) - Kich thuoc khac nhau (Moi: 116736 bytes vs Prod: 111104 bytes)
+[MODIFIED] Areas/Cate/Views/web.config (2499 bytes) - Kich thuoc khac nhau (Moi: 2499 bytes vs Prod: 2510 bytes)
+[NEW] Contents/imgs/export_25052026162938.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingModal.cshtml (1896 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_12052026093116.docx (6677 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/RM_Contracts/_Contracts.cshtml (8541 bytes) - Kich thuoc khac nhau (Moi: 8541 bytes vs Prod: 9748 bytes)
+[NEW] Contents/imgs/export_21052026165008.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export-1_25052026155735.xlsx (5061 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Contents/Base/plugins/ace_v4/assets/favicon.png (5862 bytes) - Kich thuoc khac nhau (Moi: 5862 bytes vs Prod: 1056 bytes)
+[NEW] Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesTrackingUpdated.cshtml (2572 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ProductService/Index.cshtml (6512 bytes) - Kich thuoc khac nhau (Moi: 6512 bytes vs Prod: 4085 bytes)
+[MODIFIED] bin/Core.Cate.pdb (2436608 bytes) - Kich thuoc khac nhau (Moi: 2436608 bytes vs Prod: 962048 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_DetailMetrics.cshtml (3930 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_05052026084237.pdf (78589 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Configs/AppSettings.config (12223 bytes) - Kich thuoc khac nhau (Moi: 12223 bytes vs Prod: 11259 bytes)
+[MODIFIED] bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll (139928 bytes) - Kich thuoc khac nhau (Moi: 139928 bytes vs Prod: 122288 bytes)
+[MODIFIED] Contents/Base/imgs/icons/logo_ctn.png (8865 bytes) - Kich thuoc khac nhau (Moi: 8865 bytes vs Prod: 6665 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_DetailAttachments.cshtml (20335 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_12052026145851.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/chinh-sach_12052026092010.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailTracking.cshtml (71826 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.js (12313 bytes) - Kich thuoc khac nhau (Moi: 12313 bytes vs Prod: 14371 bytes)
+[MODIFIED] bin/roslyn/Microsoft.VisualBasic.Core.targets (6508 bytes) - Kich thuoc khac nhau (Moi: 6508 bytes vs Prod: 6105 bytes)
+[MODIFIED] Areas/Dashboard/Views/Dashboard/ProjectBySuccessRate.cshtml (9326 bytes) - Kich thuoc khac nhau (Moi: 9326 bytes vs Prod: 8382 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_DetailOverview.cshtml (13886 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/Index.cshtml (4401 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/Invoices/_Invoices.cshtml (9264 bytes) - Kich thuoc khac nhau (Moi: 9264 bytes vs Prod: 14552 bytes)
+[MODIFIED] Areas/Dashboard/Views/Dashboard/ProjectByGroupService.cshtml (8750 bytes) - Kich thuoc khac nhau (Moi: 8750 bytes vs Prod: 7668 bytes)
+[NEW] Scripts/SharedDocument.js (12021 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/imgs/export_19052026170917.xlsx (4848 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Core.API.dll (61952 bytes) - Kich thuoc khac nhau (Moi: 61952 bytes vs Prod: 65024 bytes)
+[MODIFIED] Areas/Cate/Views/Report_BusinessOpportunity/Report_BusinessOpportunity.js (7660 bytes) - Kich thuoc khac nhau (Moi: 7660 bytes vs Prod: 7233 bytes)
+[NEW] bin/test_member_modal.exe (6144 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Views/Account/_Login.cshtml (267 bytes) - Kich thuoc khac nhau (Moi: 267 bytes vs Prod: 227 bytes)
+[MODIFIED] bin/CenIT.Solution.TOC.WebApp.pdb (261632 bytes) - Kich thuoc khac nhau (Moi: 261632 bytes vs Prod: 257536 bytes)
+[NEW] Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesNotification.cshtml (2169 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415100334-12.png (2627 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/ProjectTaskNoReport/ProjectTaskReport.js (4622 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] Areas/Cate/Views/BusinessOpportunityWeeklyReport/BusinessOpportunityWeeklyReport.js (6805 bytes) - Kich thuoc khac nhau (Moi: 6805 bytes vs Prod: 6329 bytes)
+[NEW] Areas/Cate/Views/DigitalSales/_TrackingReportModal.css (489 bytes) - Tep chua co trong Source_Prod
+[NEW] Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415112308-1.png (2846 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/ReviewBatchItem/_SearchDigitalSales.cshtml (12021 bytes) - Tep chua co trong Source_Prod
+[MODIFIED] bin/Core.Cate.dll (704512 bytes) - Kich thuoc khac nhau (Moi: 704512 bytes vs Prod: 472576 bytes)
+[NEW] Contents/imgs/test-kqxl_21042026143812.docx (6677 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSalesWorkflow/DigitalSalesWorkflow.js (22393 bytes) - Tep chua co trong Source_Prod
+[NEW] Areas/Cate/Views/DigitalSales/_DetailDiscussions.cshtml (57525 bytes) - Tep chua co trong Source_Prod

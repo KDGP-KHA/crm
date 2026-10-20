@@ -1,0 +1,1980 @@
+﻿{
+    "version":  "2026.10.20",
+    "created_at":  "2026-10-20 14:34:38",
+    "compare_mode":  "publish_source vs Source_Prod",
+    "total_publish_files":  4017,
+    "total_prod_files":  4804,
+    "new_files_count":  210,
+    "modified_files_count":  118,
+    "total_version_files":  328,
+    "files":  [
+                  {
+                      "Path":  "Libraries/Procedures/Plugable.SQLProcedureProcessor.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  13824,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 13824 bytes vs Prod: 14336 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_UnlockProgressModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3552,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/Chart.css",
+                      "Status":  "NEW",
+                      "Size":  21270,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/FE/images/favicon.ico",
+                      "Status":  "MODIFIED",
+                      "Size":  84903,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 84903 bytes vs Prod: 101915 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/uploads/DigitalSales/202609/-2147483648-210643_20260912010441557.webp",
+                      "Status":  "NEW",
+                      "Size":  235796,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_GuideConfigModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  11889,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_04052026161552.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_Delete.cshtml",
+                      "Status":  "NEW",
+                      "Size":  933,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/User/UserBoPhan.css",
+                      "Status":  "NEW",
+                      "Size":  3137,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  12525,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_12052026105045.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/_Add.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  820,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 820 bytes vs Prod: 817 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_Edit.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1742,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/lichsutheotacdanhmuctaikhoanthuhuong16012026102500_04052026161552.xlsx",
+                      "Status":  "NEW",
+                      "Size":  9287,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/importemployeebusinessplan_19052026152443.xlsx",
+                      "Status":  "NEW",
+                      "Size":  22329,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProductService/_Detail.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  13205,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 13205 bytes vs Prod: 13620 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_ProcessList.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3840,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/TSFramework.Libs.dll.config",
+                      "Status":  "MODIFIED",
+                      "Size":  4291,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4291 bytes vs Prod: 3361 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/_TemplateConfirmTicket.cshtml",
+                      "Status":  "NEW",
+                      "Size":  11592,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/_Edit.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  751,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 751 bytes vs Prod: 748 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/434742_28092026141444.pdf",
+                      "Status":  "NEW",
+                      "Size":  480213,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Modules.API.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  39424,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 39424 bytes vs Prod: 42496 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/datatables/extensions/Scroller/Readme.txt",
+                      "Status":  "NEW",
+                      "Size":  2251,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026192101.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailOverview.css",
+                      "Status":  "NEW",
+                      "Size":  4549,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/csi.exe.config",
+                      "Status":  "MODIFIED",
+                      "Size":  4932,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4932 bytes vs Prod: 8324 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_StatusTimelineModal.css",
+                      "Status":  "NEW",
+                      "Size":  4883,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_ProgressModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1089,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Modules.Cate.pdb",
+                      "Status":  "NEW",
+                      "Size":  929280,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ImportProgressModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  9293,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/uploads/DigitalSales/202609/-2147483648-210651_20260912010441560.webp",
+                      "Status":  "NEW",
+                      "Size":  275352,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/System.Collections.Immutable.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  189312,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 189312 bytes vs Prod: 358536 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/csc.exe",
+                      "Status":  "MODIFIED",
+                      "Size":  60528,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 60528 bytes vs Prod: 49584 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/validate/jquery.validate-vsdoc.js",
+                      "Status":  "NEW",
+                      "Size":  43378,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_27032026170622.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/TSFramework.Libs.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  562688,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 562688 bytes vs Prod: 556544 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/_TemplateRollbackTicket.cshtml",
+                      "Status":  "NEW",
+                      "Size":  11751,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_04052026160949.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/datatables/extensions/KeyTable/Readme.txt",
+                      "Status":  "NEW",
+                      "Size":  1334,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.Solution.TOC.WebApp.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  110592,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 110592 bytes vs Prod: 107520 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/_ReviewForm.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  6233,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6233 bytes vs Prod: 5162 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.CodeAnalysis.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  4543640,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4543640 bytes vs Prod: 2721712 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/DigitalSalesByStatus.cshtml",
+                      "Status":  "NEW",
+                      "Size":  15301,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.Libs.HDDT.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  175616,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_ProgressForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4562,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/imgs/icons/logo_ctn_big.png",
+                      "Status":  "MODIFIED",
+                      "Size":  107959,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 107959 bytes vs Prod: 7546 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/CONGVIEC_CAPNHATNHATKY.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4790,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingModal.css",
+                      "Status":  "NEW",
+                      "Size":  902,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.Solution.TOC.WebApp.dll.config",
+                      "Status":  "MODIFIED",
+                      "Size":  14264,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 14264 bytes vs Prod: 12622 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_06052026165206.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  1565,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1565 bytes vs Prod: 2025 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_05052026085706.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/CONGVIEC_KHOITAO.cshtml",
+                      "Status":  "NEW",
+                      "Size":  8148,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_25052026161120.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_02062026160740.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Core.Log.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  10752,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "App_Data/Modules/Cate_StoredProcedures.xml",
+                      "Status":  "MODIFIED",
+                      "Size":  32541,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 32541 bytes vs Prod: 25385 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/BusinessOpportunityOverview/_BoHeader.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  7715,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 7715 bytes vs Prod: 7720 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/csi.exe",
+                      "Status":  "MODIFIED",
+                      "Size":  16488,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 16488 bytes vs Prod: 15272 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/_DigitalSales.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1219,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailAttachments.css",
+                      "Status":  "NEW",
+                      "Size":  3597,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DigitalSales.cshtml",
+                      "Status":  "NEW",
+                      "Size":  31139,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/test-kqxl_30032026110319.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/OpportunityByGroupService.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  11626,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 11626 bytes vs Prod: 10533 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026095137.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailTimeline.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3030,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/uploads/DigitalSales/202609/-2147483648-210647_20260912010441559.webp",
+                      "Status":  "NEW",
+                      "Size":  272716,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/DUAN_THEMNGUOITHAMGIA.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3686,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/datatables/extensions/FixedHeader/Readme.txt",
+                      "Status":  "NEW",
+                      "Size":  1404,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan202609081651_15092026153248.xlsx",
+                      "Status":  "NEW",
+                      "Size":  10525,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415112222-5.png",
+                      "Status":  "NEW",
+                      "Size":  4209,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/TSFramework/TSFramework.js",
+                      "Status":  "MODIFIED",
+                      "Size":  37835,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 37835 bytes vs Prod: 36831 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/uploads/feedback/1.jpg",
+                      "Status":  "NEW",
+                      "Size":  32841,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/imgs/app.ico",
+                      "Status":  "MODIFIED",
+                      "Size":  84903,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 84903 bytes vs Prod: 4286 bytes)"
+                  },
+                  {
+                      "Path":  "bin/Modules.Dashboard.pdb",
+                      "Status":  "NEW",
+                      "Size":  60928,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.DiaSymReader.Native.x86.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  1547656,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1547656 bytes vs Prod: 1188080 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_StatusModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1119,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/SharedDocument.js",
+                      "Status":  "NEW",
+                      "Size":  12958,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/Index.css",
+                      "Status":  "NEW",
+                      "Size":  3478,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/ProjectByUser.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  9230,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 9230 bytes vs Prod: 8338 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ChangeStatusForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  37893,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_Edit.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1485,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chi-ngay-22-ver2_30032026110948.docx",
+                      "Status":  "NEW",
+                      "Size":  10031,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ChangeStatusModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  5767,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/ContactPersons.js",
+                      "Status":  "MODIFIED",
+                      "Size":  23924,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 23924 bytes vs Prod: 19692 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Base/imgs/icons/app.ico",
+                      "Status":  "MODIFIED",
+                      "Size":  84903,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 84903 bytes vs Prod: 4286 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_15042026165613.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_ProcessModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1063,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/System.Reflection.Metadata.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  462728,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 462728 bytes vs Prod: 584848 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/DataMigration/Index.cshtml",
+                      "Status":  "NEW",
+                      "Size":  16534,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/OpportunityProjectWithoutPGP/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  5870,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5870 bytes vs Prod: 5389 bytes)"
+                  },
+                  {
+                      "Path":  "Libraries/Authorities/Plugable.SQLProcedureAuthority.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  6656,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_31032026091126.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/_ReviewBatch.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  6414,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6414 bytes vs Prod: 5848 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/Dich_vu_Load_Balancer_13_June_3x_fd8270b551.png",
+                      "Status":  "NEW",
+                      "Size":  8542,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/_TemplateWarningOverdue.cshtml",
+                      "Status":  "NEW",
+                      "Size":  11186,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.css",
+                      "Status":  "NEW",
+                      "Size":  5008,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/csi.rsp",
+                      "Status":  "MODIFIED",
+                      "Size":  253,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 253 bytes vs Prod: 266 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_21042026112150.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/Invoices/statuslistcrm_20260922110202.xlsx",
+                      "Status":  "NEW",
+                      "Size":  6421,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/DigitalSalesDetail.js",
+                      "Status":  "NEW",
+                      "Size":  175524,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Modules.Dashboard.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  59904,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 59904 bytes vs Prod: 37376 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/Index.css",
+                      "Status":  "NEW",
+                      "Size":  2660,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/vbc.exe.config",
+                      "Status":  "MODIFIED",
+                      "Size":  4313,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4313 bytes vs Prod: 7738 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/ace_v4/node_modules/nouislider/distribute/wNumb.min.js",
+                      "Status":  "NEW",
+                      "Size":  2235,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/kha-test_21042026152123.docx",
+                      "Status":  "NEW",
+                      "Size":  13132,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingLogsModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  21728,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/_ChartOverview.cshtml",
+                      "Status":  "NEW",
+                      "Size":  43341,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/_Edit.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  3455,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 3455 bytes vs Prod: 1288 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_Add.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1738,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_StatusTimelineModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  7478,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_31032026105534.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/DataMigration/DataMigration.css",
+                      "Status":  "NEW",
+                      "Size":  5648,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_05052026084237.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/Report_BusinessOpportunity/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  8546,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8546 bytes vs Prod: 11185 bytes)"
+                  },
+                  {
+                      "Path":  "bin/Core.API.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  343552,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415112234-6.png",
+                      "Status":  "NEW",
+                      "Size":  2846,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/_Detail.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  15982,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 15982 bytes vs Prod: 15262 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/Invoices/_List.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  8501,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8501 bytes vs Prod: 7696 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_StatusTimelineDetailModal.css",
+                      "Status":  "NEW",
+                      "Size":  3832,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/csc.exe.config",
+                      "Status":  "MODIFIED",
+                      "Size":  4308,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4308 bytes vs Prod: 7738 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_17092026144834.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Views/Account/Login.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  17335,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 17335 bytes vs Prod: 16129 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/OpportunityByUser.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  13286,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 13286 bytes vs Prod: 12439 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/csc.rsp",
+                      "Status":  "MODIFIED",
+                      "Size":  1537,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1537 bytes vs Prod: 1450 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ProductModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1765,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/System.Text.Encoding.CodePages.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  761392,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 761392 bytes vs Prod: 766872 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ImportTodoModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  10929,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.CSharp.Core.targets",
+                      "Status":  "MODIFIED",
+                      "Size":  8908,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8908 bytes vs Prod: 6684 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectTaskNoReport/_Report.cshtml",
+                      "Status":  "NEW",
+                      "Size":  17849,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026173852.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/SharedDocument.css",
+                      "Status":  "NEW",
+                      "Size":  1537,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026173334.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Modules.Cate.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  709632,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 709632 bytes vs Prod: 411648 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/_ReviewHistory.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  9083,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 9083 bytes vs Prod: 11613 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ProductModal.css",
+                      "Status":  "NEW",
+                      "Size":  2231,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_QuickAssignDepartmentModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  7229,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/RM_Contracts.css",
+                      "Status":  "MODIFIED",
+                      "Size":  393,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 393 bytes vs Prod: 390 bytes)"
+                  },
+                  {
+                      "Path":  "bin/Core.Sys.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  513536,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 513536 bytes vs Prod: 411136 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/DataMigration/DataMigration.js",
+                      "Status":  "NEW",
+                      "Size":  15604,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026095359.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Views/Account/_LoginBody.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  5520,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5520 bytes vs Prod: 5536 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/VBCSCompiler.exe.config",
+                      "Status":  "MODIFIED",
+                      "Size":  4871,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4871 bytes vs Prod: 7950 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.DiaSymReader.Native.amd64.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  1842552,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1842552 bytes vs Prod: 1495800 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailProducts.cshtml",
+                      "Status":  "NEW",
+                      "Size":  9899,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chitietxulyhoso-1_30032026110319.xlsx",
+                      "Status":  "NEW",
+                      "Size":  7157,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectMember/ProjectMember.js",
+                      "Status":  "MODIFIED",
+                      "Size":  8543,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "bin/Modules.Sys.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  138752,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 138752 bytes vs Prod: 132096 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_Detail.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4644,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026172932.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.Managed.Core.targets",
+                      "Status":  "MODIFIED",
+                      "Size":  18990,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 18990 bytes vs Prod: 7363 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  5638,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5638 bytes vs Prod: 2722 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415095829-11.png",
+                      "Status":  "NEW",
+                      "Size":  2574,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewReport/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  8527,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8527 bytes vs Prod: 8036 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_22052026154956.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.SSOServices.pdb",
+                      "Status":  "NEW",
+                      "Size":  89600,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.CodeAnalysis.CSharp.Scripting.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  32920,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 32920 bytes vs Prod: 28592 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/Report_BusinessOpportunity/Report_BusinessOpportunity.css",
+                      "Status":  "NEW",
+                      "Size":  1825,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_EditDoc_View.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3104,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ImportOpportunityModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  9891,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/RM_Contracts.js",
+                      "Status":  "MODIFIED",
+                      "Size":  5852,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5852 bytes vs Prod: 5596 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/test-kqxl_30032026110132.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProductService/ProductService.js",
+                      "Status":  "MODIFIED",
+                      "Size":  34972,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 34972 bytes vs Prod: 9880 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/Chart.js",
+                      "Status":  "NEW",
+                      "Size":  36644,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/System.Threading.Tasks.Extensions.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  25984,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 25984 bytes vs Prod: 25864 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_31032026090904.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/datatables/extensions/AutoFill/Readme.txt",
+                      "Status":  "NEW",
+                      "Size":  1332,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/_Add.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  3365,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 3365 bytes vs Prod: 1281 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_EditMemberModal.css",
+                      "Status":  "NEW",
+                      "Size":  1275,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/Detail.cshtml",
+                      "Status":  "NEW",
+                      "Size":  14614,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/uploads/feedback/8.docx",
+                      "Status":  "NEW",
+                      "Size":  0,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingReportModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  14086,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_05052026110428.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_Add.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1486,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/LogTask/_DeleteFile.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  1010,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1010 bytes vs Prod: 973 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026093640.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_MemberModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  2701,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingLogsModal.css",
+                      "Status":  "NEW",
+                      "Size":  1902,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_Search.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3369,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/Index.cshtml",
+                      "Status":  "NEW",
+                      "Size":  6303,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.Libs.HDDT.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  114688,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 114688 bytes vs Prod: 120320 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chitietxulyhoso_21042026152047.xlsx",
+                      "Status":  "NEW",
+                      "Size":  7155,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/SharedDocument.css",
+                      "Status":  "NEW",
+                      "Size":  1029,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TodoModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  17491,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chitietxulyhoso_21042026145716.xlsx",
+                      "Status":  "NEW",
+                      "Size":  7155,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026145851.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/User/User.js",
+                      "Status":  "MODIFIED",
+                      "Size":  10052,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 10052 bytes vs Prod: 9845 bytes)"
+                  },
+                  {
+                      "Path":  "bin/TSFramework.Libs.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  502784,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/qd-thanh-lap-nhom-vnpt-cert-tai-vtkh2026_09042026192101.pdf",
+                      "Status":  "NEW",
+                      "Size":  1190607,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_ProgressList.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4252,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailMembers.cshtml",
+                      "Status":  "NEW",
+                      "Size":  6407,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectOverview/_ReviewForm.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  4524,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4524 bytes vs Prod: 4565 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/Index.cshtml",
+                      "Status":  "NEW",
+                      "Size":  2642,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ProductForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  16520,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  2810,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 2810 bytes vs Prod: 4479 bytes)"
+                  },
+                  {
+                      "Path":  "bin/CenIT.SSOServices.dll.config",
+                      "Status":  "NEW",
+                      "Size":  963,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/Detail.css",
+                      "Status":  "NEW",
+                      "Size":  14715,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/ContactPersons.css",
+                      "Status":  "NEW",
+                      "Size":  9273,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_22052026084644.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  5847680,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5847680 bytes vs Prod: 5425584 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_21052026165243.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/ds-nhan-su-truc-7-bo_22052026154247.xlsx",
+                      "Status":  "NEW",
+                      "Size":  10595,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_StatusList.cshtml",
+                      "Status":  "NEW",
+                      "Size":  5187,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/VBCSCompiler.exe",
+                      "Status":  "MODIFIED",
+                      "Size":  94840,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 94840 bytes vs Prod: 87472 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_05052026110353.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProductService/ProductService.css",
+                      "Status":  "NEW",
+                      "Size":  10483,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectRevenueReport/ProjectRevenueReport.js",
+                      "Status":  "MODIFIED",
+                      "Size":  4473,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4473 bytes vs Prod: 4312 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_21042026111904.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/DUAN_XOANGUOITHAMGIA.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3701,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailDiscussions.css",
+                      "Status":  "NEW",
+                      "Size":  16312,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_05052026085706.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/signalR/jquery-1.6.4-vsdoc.js",
+                      "Status":  "NEW",
+                      "Size":  214129,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesReviewCompleted.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3456,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.SSOServices.XmlSerializers.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  105984,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "bin/Modules.Cate.dll.config",
+                      "Status":  "NEW",
+                      "Size":  7694,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_04052026160949.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danh-sach-thanh-vien-nhom-vnpt-cert-vtkh2026_09042026174400.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/User/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  1961,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1961 bytes vs Prod: 1890 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_StatusForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4422,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/test-kqxl_30032026110555.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/ds-nhan-su-truc-7-bo_30032026110132.xlsx",
+                      "Status":  "NEW",
+                      "Size":  10595,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/nation/language/no-image.svg",
+                      "Status":  "NEW",
+                      "Size":  799,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/PlanByUser.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  6358,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6358 bytes vs Prod: 5339 bytes)"
+                  },
+                  {
+                      "Path":  "Libraries/Jobs/Jobs.SyncData.pdb",
+                      "Status":  "NEW",
+                      "Size":  30208,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailMembers.css",
+                      "Status":  "NEW",
+                      "Size":  4142,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_Search.css",
+                      "Status":  "NEW",
+                      "Size":  4884,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/baocaohoatdongcongdoancanhan2025phanluongbang_21042026145716.docx",
+                      "Status":  "NEW",
+                      "Size":  10501,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/BusinessOpportunityOverview/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  11427,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 11427 bytes vs Prod: 11133 bytes)"
+                  },
+                  {
+                      "Path":  "bin/Modules.API.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  95744,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectTaskNoReport/_Search.cshtml",
+                      "Status":  "NEW",
+                      "Size":  2467,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/Screenshot 2026-04-03 164843.png",
+                      "Status":  "NEW",
+                      "Size":  2255,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.CodeAnalysis.Scripting.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  136856,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 136856 bytes vs Prod: 127920 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_UnlockProgressModal.css",
+                      "Status":  "NEW",
+                      "Size":  623,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_17092026144716.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.SSOServices.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  50176,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/vbc.rsp",
+                      "Status":  "MODIFIED",
+                      "Size":  1675,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1675 bytes vs Prod: 1579 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026091627.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/nguoilienhe20042026094812_25052026151349.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4771,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_DeleteConfirm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1155,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/_ProcessForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3411,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/uploads/DigitalSales/202609/-2147483648-210653_20260912010441561.webp",
+                      "Status":  "NEW",
+                      "Size":  212040,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_19052026170720.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ChangeProcessModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  6126,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/OpportunityProjectWithoutPGP/_Search.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  2335,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 2335 bytes vs Prod: 2292 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/uploads/DigitalSales/202609/-2147483648-210655_20260912010441561.webp",
+                      "Status":  "NEW",
+                      "Size":  235796,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SysNotifications/_ThongBao.cshtml",
+                      "Status":  "NEW",
+                      "Size":  6749,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectTaskNoReport/index.cshtml",
+                      "Status":  "NEW",
+                      "Size":  411,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_StatusTimelineDetailModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  27195,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/DigitalSales.js",
+                      "Status":  "NEW",
+                      "Size":  71326,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailTracking.css",
+                      "Status":  "NEW",
+                      "Size":  17936,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/User/_BoPhanBody.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  15289,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 15289 bytes vs Prod: 4325 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_MemberForm.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3219,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/_Delete.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  1370,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 1370 bytes vs Prod: 829 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/vbc.exe",
+                      "Status":  "MODIFIED",
+                      "Size":  60528,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 60528 bytes vs Prod: 49584 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/OpportunityBySuccessRate.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  13389,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 13389 bytes vs Prod: 12506 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  6420120,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6420120 bytes vs Prod: 4896176 bytes)"
+                  },
+                  {
+                      "Path":  "Web.config",
+                      "Status":  "MODIFIED",
+                      "Size":  14306,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 14306 bytes vs Prod: 13165 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_21052026165934.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_MemberModal.css",
+                      "Status":  "NEW",
+                      "Size":  7352,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/_Delete.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  859,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 859 bytes vs Prod: 856 bytes)"
+                  },
+                  {
+                      "Path":  "Views/Render/_Login.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  267,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 267 bytes vs Prod: 227 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/lichsutheotacdanhmuctaikhoanthuhuong16012026102500_21042026112150.xlsx",
+                      "Status":  "NEW",
+                      "Size":  9287,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/danhsachduan27032026153324_05052026110353.xlsx",
+                      "Status":  "NEW",
+                      "Size":  12075,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/uploads/feedback/5.pdf",
+                      "Status":  "NEW",
+                      "Size":  14731,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_19052026153236.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/Chart.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4104,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Core.Log.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  46592,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/test-kqxl_29042026160341.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/ace_v4/node_modules/color-themes-for-google-code-prettify/dist/themes/atelier-sulphurpool-light.css",
+                      "Status":  "NEW",
+                      "Size":  1418,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/imgs/logo-vnpt.png",
+                      "Status":  "MODIFIED",
+                      "Size":  159002,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 159002 bytes vs Prod: 11342 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DigitalSales.css",
+                      "Status":  "NEW",
+                      "Size":  1215,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_EditMemberModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  11256,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_Search.cshtml",
+                      "Status":  "NEW",
+                      "Size":  16592,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Sys/Views/SharedDocument/_AddDoc_View.cshtml",
+                      "Status":  "NEW",
+                      "Size":  2312,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/CenIT.Libs.HDDT.XmlSerializers.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  232960,
+                      "Reason":  "Noi dung tep thay doi (MD5 hash khac biet)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ContactPersons/_Search.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  4804,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 4804 bytes vs Prod: 3068 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Sys/EmailTemplates/DUAN_COHOI_NHACNHOCAPNHAT.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  5314,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5314 bytes vs Prod: 3136 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectOverview/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  9029,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 9029 bytes vs Prod: 8820 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProductService/_Search.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  3672,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 3672 bytes vs Prod: 2392 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ChangeStatusModal.css",
+                      "Status":  "NEW",
+                      "Size":  17313,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_ImportOpportunityModal.css",
+                      "Status":  "NEW",
+                      "Size":  1482,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Libraries/Jobs/Jobs.SyncData.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  11776,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 11776 bytes vs Prod: 10240 bytes)"
+                  },
+                  {
+                      "Path":  "bin/Core.Sys.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  116736,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 116736 bytes vs Prod: 111104 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/web.config",
+                      "Status":  "MODIFIED",
+                      "Size":  2499,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 2499 bytes vs Prod: 2510 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_25052026162938.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingModal.cshtml",
+                      "Status":  "NEW",
+                      "Size":  1896,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026093116.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/RM_Contracts/_Contracts.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  8541,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8541 bytes vs Prod: 9748 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_21052026165008.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export-1_25052026155735.xlsx",
+                      "Status":  "NEW",
+                      "Size":  5061,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Base/plugins/ace_v4/assets/favicon.png",
+                      "Status":  "MODIFIED",
+                      "Size":  5862,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 5862 bytes vs Prod: 1056 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesTrackingUpdated.cshtml",
+                      "Status":  "NEW",
+                      "Size":  2572,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProductService/Index.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  6512,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6512 bytes vs Prod: 4085 bytes)"
+                  },
+                  {
+                      "Path":  "bin/Core.Cate.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  2436608,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 2436608 bytes vs Prod: 962048 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailMetrics.cshtml",
+                      "Status":  "NEW",
+                      "Size":  3930,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_05052026084237.pdf",
+                      "Status":  "NEW",
+                      "Size":  78589,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Configs/AppSettings.config",
+                      "Status":  "MODIFIED",
+                      "Size":  12223,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 12223 bytes vs Prod: 11259 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  139928,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 139928 bytes vs Prod: 122288 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Base/imgs/icons/logo_ctn.png",
+                      "Status":  "MODIFIED",
+                      "Size":  8865,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8865 bytes vs Prod: 6665 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailAttachments.cshtml",
+                      "Status":  "NEW",
+                      "Size":  20335,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026145851.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/chinh-sach_12052026092010.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailTracking.cshtml",
+                      "Status":  "NEW",
+                      "Size":  71826,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/ReviewBatchItem.js",
+                      "Status":  "MODIFIED",
+                      "Size":  12313,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 12313 bytes vs Prod: 14371 bytes)"
+                  },
+                  {
+                      "Path":  "bin/roslyn/Microsoft.VisualBasic.Core.targets",
+                      "Status":  "MODIFIED",
+                      "Size":  6508,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6508 bytes vs Prod: 6105 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/ProjectBySuccessRate.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  9326,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 9326 bytes vs Prod: 8382 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailOverview.cshtml",
+                      "Status":  "NEW",
+                      "Size":  13886,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/Index.cshtml",
+                      "Status":  "NEW",
+                      "Size":  4401,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/Invoices/_Invoices.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  9264,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 9264 bytes vs Prod: 14552 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Dashboard/Views/Dashboard/ProjectByGroupService.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  8750,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 8750 bytes vs Prod: 7668 bytes)"
+                  },
+                  {
+                      "Path":  "Scripts/SharedDocument.js",
+                      "Status":  "NEW",
+                      "Size":  12021,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/imgs/export_19052026170917.xlsx",
+                      "Status":  "NEW",
+                      "Size":  4848,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Core.API.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  61952,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 61952 bytes vs Prod: 65024 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/Report_BusinessOpportunity/Report_BusinessOpportunity.js",
+                      "Status":  "MODIFIED",
+                      "Size":  7660,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 7660 bytes vs Prod: 7233 bytes)"
+                  },
+                  {
+                      "Path":  "bin/test_member_modal.exe",
+                      "Status":  "NEW",
+                      "Size":  6144,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Views/Account/_Login.cshtml",
+                      "Status":  "MODIFIED",
+                      "Size":  267,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 267 bytes vs Prod: 227 bytes)"
+                  },
+                  {
+                      "Path":  "bin/CenIT.Solution.TOC.WebApp.pdb",
+                      "Status":  "MODIFIED",
+                      "Size":  261632,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 261632 bytes vs Prod: 257536 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Cate/EmailTemplates/_TemplateDigitalSalesNotification.cshtml",
+                      "Status":  "NEW",
+                      "Size":  2169,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415100334-12.png",
+                      "Status":  "NEW",
+                      "Size":  2627,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ProjectTaskNoReport/ProjectTaskReport.js",
+                      "Status":  "NEW",
+                      "Size":  4622,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/BusinessOpportunityWeeklyReport/BusinessOpportunityWeeklyReport.js",
+                      "Status":  "MODIFIED",
+                      "Size":  6805,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 6805 bytes vs Prod: 6329 bytes)"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_TrackingReportModal.css",
+                      "Status":  "NEW",
+                      "Size":  489,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Contents/Modules/Major/ckfinder/core/connector/aspx/Images/image-20260415112308-1.png",
+                      "Status":  "NEW",
+                      "Size":  2846,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/ReviewBatchItem/_SearchDigitalSales.cshtml",
+                      "Status":  "NEW",
+                      "Size":  12021,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "bin/Core.Cate.dll",
+                      "Status":  "MODIFIED",
+                      "Size":  704512,
+                      "Reason":  "Kich thuoc khac nhau (Moi: 704512 bytes vs Prod: 472576 bytes)"
+                  },
+                  {
+                      "Path":  "Contents/imgs/test-kqxl_21042026143812.docx",
+                      "Status":  "NEW",
+                      "Size":  6677,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSalesWorkflow/DigitalSalesWorkflow.js",
+                      "Status":  "NEW",
+                      "Size":  22393,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  },
+                  {
+                      "Path":  "Areas/Cate/Views/DigitalSales/_DetailDiscussions.cshtml",
+                      "Status":  "NEW",
+                      "Size":  57525,
+                      "Reason":  "Tep chua co trong Source_Prod"
+                  }
+              ]
+}

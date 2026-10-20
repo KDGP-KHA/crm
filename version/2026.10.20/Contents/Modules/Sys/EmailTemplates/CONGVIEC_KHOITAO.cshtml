@@ -1,0 +1,200 @@
+﻿@using TSFramework.Libs.Processors
+@model Core.Cate.Models.MailTemplateRenderModel
+
+@{
+    string mailTitle = AppProcessor.Messagor.GetMessage("Mail_Title")
+        ?? AppProcessor.Messagor.GetMessage("App_Title")
+        ?? "VNPT CRM";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@mailTitle</title>
+</head>
+
+<body style="margin:0; padding:0; font-family:Arial, Helvetica, sans-serif; background:#f5f7fb; color:#233042;">
+
+    <table cellpadding="0" cellspacing="0" border="0" width="100%"
+           style="background:#f5f7fb; padding:24px 0;">
+
+        <tr>
+            <td align="center">
+
+                <table cellpadding="0" cellspacing="0" border="0"
+                       width="720"
+                       style="max-width:720px; background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background:#0d6efd; padding:20px 24px; color:#ffffff;">
+                            <div style="font-size:20px; font-weight:bold;">
+                                @mailTitle
+                            </div>
+
+                            <div style="font-size:13px; opacity:0.9; margin-top:6px;">
+                                Thông báo công việc mới
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:24px;">
+
+                            <p style="margin:0 0 16px 0;">
+                                Kính gửi
+                                <strong>@Model.GetString("FullName")</strong>,
+                            </p>
+
+                            <p style="margin:0 0 20px 0;">
+                                Bạn vừa được giao một công việc mới với thông tin như sau:
+                            </p>
+
+                            <table cellpadding="0"
+                                   cellspacing="0"
+                                   border="0"
+                                   width="100%"
+                                   style="border-collapse:collapse;">
+
+                                <tr>
+                                    <td style="width:220px; padding:8px 0; color:#5b6778;">
+                                        Loại công việc
+                                    </td>
+
+                                    <td style="padding:8px 0; font-weight:bold;">
+                                        @Model.GetString("TaskType", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Tên công việc
+                                    </td>
+
+                                    <td style="padding:8px 0; font-weight:bold;">
+                                        @Model.GetString("TaskCode", "") -
+                                        @Model.GetString("TaskName", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Trạng thái
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("Status", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Độ ưu tiên
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("Priority", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Người đảm nhận
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("Assignee", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Thời gian dự tính (giờ)
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("EstimatedHours", "0.00")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Ngày bắt đầu
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("StartDate", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Ngày kết thúc
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("EndDate", "--")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        % Hoàn thành
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("Progress", "0 %")
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0; color:#5b6778;">
+                                        Thời gian thực tế
+                                    </td>
+
+                                    <td style="padding:8px 0;">
+                                        @Model.GetString("ActualHours", "0.00")
+                                    </td>
+                                </tr>
+
+                            </table>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.GetString("Description")))
+                            {
+                                <div style="margin-top:20px;">
+
+                                    <div style="font-weight:bold; margin-bottom:8px;">
+                                        Mô tả công việc
+                                    </div>
+
+                                    <div style="padding:12px 14px;
+                                                background:#f7f9fc;
+                                                border:1px solid #e3e8ef;
+                                                border-radius:6px;
+                                                line-height:1.6;">
+
+                                        @Html.Raw(Model.GetString("Description"))
+
+                                    </div>
+
+                                </div>
+                            }
+
+                            <p style="margin:24px 0 0 0;">
+                                Trân trọng.
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>
