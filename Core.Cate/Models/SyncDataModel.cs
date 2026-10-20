@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TSFramework.Libs.Attributes;
@@ -59,4 +59,84 @@ namespace Core.Cate.Models
         public List<T> Data { get; set; }
     }
 
+    #region === CAS HRM DTOs (/api/hrmcas) ===
+
+    /// <summary>
+    /// Tham số gửi yêu cầu lấy dữ liệu từ API CAS HRM (/api/hrmcas)
+    /// </summary>
+    public class CasApiRequest
+    {
+        public string partnerCode { get; set; }
+        public string requestId { get; set; }
+        public string requestTime { get; set; }
+        public string resource { get; set; }
+        public int page { get; set; } = 1;
+        public int pageSize { get; set; } = 100;
+        public string keyword { get; set; } = "";
+        public string checksum { get; set; }
+    }
+
+    /// <summary>
+    /// Kết quả phản hồi từ API CAS HRM (/api/hrmcas)
+    /// </summary>
+    public class CasApiResponse<T>
+    {
+        public string code { get; set; }
+        public string message { get; set; }
+        public string requestId { get; set; }
+        public string resource { get; set; }
+        public int page { get; set; }
+        public int pageSize { get; set; }
+        public int totalItems { get; set; }
+        public int totalPages { get; set; }
+        public List<T> data { get; set; }
+        public string checksum { get; set; }
+    }
+
+    /// <summary>
+    /// DTO thông tin nhân sự từ API CAS HRM
+    /// </summary>
+    public class CasEmployeeDto
+    {
+        public string code { get; set; }
+        public string fullName { get; set; }
+        public string phoneNumber { get; set; }
+        public string email { get; set; }
+        public string gender { get; set; }
+        public string birthday { get; set; }
+        public int departmentId { get; set; }
+        public string departmentCode { get; set; }
+        public string department { get; set; }
+        public string jobCode { get; set; }
+        public string job { get; set; }
+        public string workPositionCode { get; set; }
+        public string workPosition { get; set; }
+        public bool isCollaborator { get; set; }
+    }
+
+    /// <summary>
+    /// DTO thông tin phòng ban từ API CAS HRM
+    /// </summary>
+    public class CasDepartmentDto
+    {
+        public int id { get; set; }
+        public string code { get; set; }
+        public string name { get; set; }
+        public int parentId { get; set; }
+        public string parentCode { get; set; }
+        public int employeeCount { get; set; }
+    }
+
+    /// <summary>
+    /// DTO thông tin chức danh từ API CAS HRM
+    /// </summary>
+    public class CasJobDto
+    {
+        public int id { get; set; }
+        public string code { get; set; }
+        public string name { get; set; }
+        public int employeeCount { get; set; }
+    }
+
+    #endregion
 }

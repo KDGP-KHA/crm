@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Web;
@@ -34,6 +34,7 @@ namespace Core.Sys.Models.Sys
         public string Salt { get; set; }
         public bool IsActive { get; set; }
         public bool IsOnline { get; set; }
+        public bool? IsCollaborator { get; set; }
         public string RoleIDs { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string HostUrl { get; set; }
