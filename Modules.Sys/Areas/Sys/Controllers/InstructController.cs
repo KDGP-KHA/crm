@@ -125,7 +125,8 @@ namespace Modules.Sys.Areas.Sys.Controllers
         {
             var model = new SysInstructModel
             {
-                PositionShow = 1
+                PositionShow = 1,
+                IsActive = true
             };
             ViewBag.ParentList = BuildInstructList(null);
 
@@ -140,6 +141,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.ParentList = BuildInstructList(null);
                 return PartialView("_Instruct", model);
             }
             string response;
@@ -156,7 +158,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
         }
 
         [AjaxOnly]
-        [ActionType(Type = EnumActionType.Create)]
+        [ActionType(Type = EnumActionType.Edit)]
         [HttpGet]
         public ActionResult Edit(int id)
         {
@@ -174,6 +176,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.ParentList = BuildInstructList(model.InstructID);
                 return PartialView("_Instruct", model);
             }
             string response;
@@ -270,7 +273,11 @@ namespace Modules.Sys.Areas.Sys.Controllers
             var model = _instructCache.GetById(id);
 
             if (model == null)
-                return Content("Không có dữ liệu");
+                return Json(new
+                {
+                    success = false,
+                    message = AppProcessor.Messagor.GetMessage("Instruct_Title")
+                }, JsonRequestBehavior.AllowGet);
 
             return Json(new
             {

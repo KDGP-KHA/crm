@@ -1,5 +1,4 @@
-﻿
-.sidebar .nav-text {
+﻿.sidebar .nav-text {
     word-break: break-word !important;
     margin-right: 10px !important;
 }
@@ -7,11 +6,7 @@
 hr {
     margin-top: 2px !important;
 }
-/*
-/*.sidebar .nav > .nav-item > .submenu > .submenu-inner {
-    padding-right: 10px;
-}
-*/
+
 .sidebar-white .submenu .nav-item > .nav-link:hover > .nav-text::before {
     display: none !important;
 }
@@ -20,15 +15,11 @@ hr {
     display: none !important;
 }
 
-/*.fa-angle-right:before {
-    width: 70px !important;
-    display: inline-block !important;
-}
-*/
 .sidebar-inner i::before {
     width: 70px !important;
     display: inline-block !important;
 }
+
 .sidebar-white .submenu .nav-link {
     font-size: 12px !important;
 }
@@ -37,8 +28,7 @@ hr {
     font-size: 13px !important;
 }
 
-.ace-scroll/*:hover*/
-{
+.ace-scroll {
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
     overflow-y: scroll !important;
@@ -51,6 +41,7 @@ hr {
 .sidebar-inner .submenu-inner::-webkit-scrollbar {
     display: none;
 }
+
 ::-webkit-scrollbar {
     display: none;
 }
@@ -60,7 +51,6 @@ hr {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
 }
-
 
 .sidebar-white .ace-scroll {
     scrollbar-color: #fff #fff !important;
@@ -76,27 +66,170 @@ hr {
     object-fit: cover;
 }
 
+/* User Guide Modal & Tree Typography */
 .menu-item {
     cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 4px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: #1e293b;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    margin-bottom: 2px;
 }
 
 .menu-item.active-item {
-    background-color: #e3eff9;
-    color: #0f62a6;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    font-weight: 600;
 }
 
 .menu-item:hover {
-    background-color: #f5f9fd;
+    background-color: #f1f5f9;
+}
+
+.instruct-level-0 {
+    padding-left: 8px !important;
+    font-weight: 600;
+}
+
+.instruct-level-1 {
+    padding-left: 26px !important;
+}
+
+.instruct-level-2 {
+    padding-left: 44px !important;
+}
+
+.instruct-level-3 {
+    padding-left: 62px !important;
+}
+
+.toggle-icon {
+    cursor: pointer;
+    width: 14px;
+    text-align: center;
+    color: #64748b;
+}
+
+.toggle-placeholder {
+    display: inline-block;
+    width: 14px;
+}
+
+.instruct-modal-body {
+    height: 76vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .left-panel {
-    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 4px 0 10px rgba(15, 23, 42, 0.06);
     z-index: 1;
-    background: #fff;
-    border-right: 2px solid #3c90d6;
+    background: #ffffff;
+    border-right: 2px solid #0284c7;
 }
+
+#Title-content-container {
+    font-size: 20px !important;
+    line-height: 1.35 !important;
+    color: #0f4c81 !important;
+}
+
+#content-container,
+.instruct-article-container,
+.guide-article {
+    font-size: 15px !important;
+    line-height: 1.68 !important;
+    color: #1e293b !important;
+}
+
+#content-container h3,
+.guide-article h3 {
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    color: #0f4c81 !important;
+    margin-top: 18px !important;
+    margin-bottom: 10px !important;
+}
+
+#content-container p,
+#content-container li,
+.guide-article p,
+.guide-article li {
+    font-size: 15px !important;
+    line-height: 1.68 !important;
+}
+
+#content-container ul,
+#content-container ol,
+.guide-article ul,
+.guide-article ol {
+    padding-left: 22px !important;
+    margin-bottom: 12px !important;
+}
+
+#content-container li,
+.guide-article li {
+    margin-bottom: 6px !important;
+}
+
+#content-container table,
+#content-container table thead,
+#content-container table tbody,
+#content-container table tr,
+#content-container table th,
+#content-container table td,
+.guide-table,
+.guide-table thead,
+.guide-table tbody,
+.guide-table tr,
+.guide-table th,
+.guide-table td {
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+}
+
+.guide-table th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    padding: 10px 12px !important;
+}
+
+.guide-table td {
+    padding: 9px 12px !important;
+    vertical-align: top !important;
+}
+
+.guide-banner {
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 4px solid #0284c7;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 15px !important;
+    color: #0c4a6e;
+}
+
+.guide-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0 16px 0;
+}
+
+.flow-step {
+    flex: 1 1 200px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-top: 3px solid #0284c7;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
 #content-container img {
     max-width: 100%;
     height: auto;

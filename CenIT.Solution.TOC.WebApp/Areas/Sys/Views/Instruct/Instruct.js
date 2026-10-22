@@ -2,7 +2,7 @@
 var _isFirstLoad = true;
 var _InstructActionURLs = {
     Instruct_GetData: "/Sys/Instruct/Get"
-    };
+};
 var _tableInstruct;
 $(document).ready(function () {
     if (!_tableInstruct) {
@@ -31,47 +31,49 @@ function initTableInstruct() {
                 "data": "InstructName",
                 "defaultContent": "",
                 "render": function (data, type, row, meta) {
-
                     let level = row.Level || 0;
-                    let indent = level * 30; // px
+                    let indent = level * 28;
                     let InstructID = row.InstructID;
                     let InstructParentID = row.InstructParentID;
                     let icon = row.HasChild
-                        ? `<i class="fa fa-caret-right toggle-tree" style="font-size:18px; width:20px; cursor:pointer"
+                        ? `<i class="fa fa-caret-right toggle-tree mr-2 text-primary-m1" style="font-size:16px; width:18px; cursor:pointer"
                                data-id="${row.InstructID}"></i>`
-                        : '';
+                        : `<span class="d-inline-block mr-2" style="width:18px"></span>`;
+                    let nodeIcon = row.HasChild
+                        ? `<i class="far fa-folder text-primary-m1 mr-2"></i>`
+                        : `<i class="far fa-file-alt text-secondary-m1 mr-2"></i>`;
+                    let weightClass = row.HasChild ? "font-weight-bold text-dark-m1" : "text-dark-m2";
                     return `
-                            <div class="tree-node ml-3 d-flex"
+                            <div class="tree-node ml-2 d-flex align-items-center ${weightClass}"
                                  data-id="${InstructID}"
                                  data-parent="${InstructParentID}"
                                  style="padding-left:${indent}px">
                                  ${icon}
-                                 ${data}
+                                 ${nodeIcon}
+                                 <span>${data}</span>
                             </div>
                         `;
                 }
             }, {
-                "className": "text-left",
+                "className": "text-center",
                 "data": "IsActive",
                 "defaultContent": "",
                 "render": function (data, type, row, meta) {
                     var html = "";
-                    if (row.IsActive) {
-                        if (data) {
-                            html = '<i class="fa fa-check text-green"></i>';
-                        }
+                    if (row.IsActive && data) {
+                        html = '<i class="fa fa-check text-green"></i>';
                     }
                     return html;
                 }
             },
             {
+                "className": "text-center",
                 "data": "InstructID",
                 "defaultContent": "",
                 "render": function (data, type, row, meta) {
                     var html = '<span>';
 
                     if (type === "display") {
-
                         html += _renderButton(
                             true,
                             "EditInstruct",
@@ -89,12 +91,10 @@ function initTableInstruct() {
                                 '<i class="far fa-trash-alt text-danger text-120"></i>',
                                 "Xoá"
                             );
-
                         }
                     }
 
                     html += "</span>";
-
                     return html;
                 }
             }
@@ -104,6 +104,7 @@ function initTableInstruct() {
         }
     });
 }
+
 function Instruct_OnProcessSuccess(response, formId) {
     if (response.status != undefined) {
         if ($("#ModalContent #modal_" + formId + " #chkNotDismissModal").is(":checked")) {
@@ -118,7 +119,7 @@ function Instruct_OnProcessSuccess(response, formId) {
             }
         } else {
             $("#ModalContent #modal_" + formId).modal("hide");
-            $("#ModalContent #modal_" + formId).on("hidden.bs.modal",
+            $("#ModalContent #modal_" + formId).one("hidden.bs.modal",
                 function () {
                     if (response.status != undefined) {
                         eval(response.message);
@@ -135,25 +136,31 @@ function Instruct_OnProcessSuccess(response, formId) {
 function bindTree() {
     if (!_tableInstruct) return;
     const rows = _tableInstruct.rows().nodes();
-    // Ẩn toàn bộ node con
+    const hasKeyword = ($('#Keyword').val() || '').trim().length > 0;
+
+    if (hasKeyword) {
+        $(rows).each(function () {
+            $(this).show();
+            setNodeState(this, true);
+        });
+        return;
+    }
+
     $(rows).each(function () {
         const rowData = _tableInstruct.row(this).data();
-        const isRoot = rowData.InstructParentID === null;
+        const isRoot = rowData.InstructParentID === null || rowData.InstructParentID === 0;
 
         if (isRoot) {
             $(this).show();
         } else {
             $(this).hide();
         }
-        // reset UI về đóng
         setNodeState(this, false);
     });
 
-    // Mở lại các node đã expand
     _expandedNodes.forEach(id => {
         toggleNode(id, true);
 
-        // sync lại icon
         $(rows).each(function () {
             const rowData = _tableInstruct.row(this).data();
             if (rowData.InstructID === id) {
@@ -163,7 +170,6 @@ function bindTree() {
     });
 
     _isFirstLoad = false;
-
 }
 
 $('#DSInstruct').on('click', '.toggle-tree', function (e) {
@@ -194,15 +200,16 @@ function toggleNode(parentId, expand) {
                 const childId = row.InstructID;
                 if (_expandedNodes.has(childId)) {
                     setNodeState(this, true);
-                    toggleNode(childId, true); // đệ quy mở tiếp
+                    toggleNode(childId, true);
                 }
             } else {
                 $(this).hide();
-                toggleNode(row.InstructID, false); // đệ quy đóng con cháu
+                toggleNode(row.InstructID, false);
             }
         }
     });
 }
+
 function setNodeState(rowEl, expanded) {
     if (expanded) {
         $(rowEl).addClass('open')

@@ -19,25 +19,8 @@ namespace Core.Sys.Caches.Sys
         [DataObjectMethod(DataObjectMethodType.Select, true)]
         public List<SysInstructModel> Get(out int total, TSFramework.Libs.Models.Base.BaseSearchModel search = null)
         {
-            var objectKey = TSFramework.Libs.Utils.UtilEncrypt.FromObject(search);
-            var rawKey = string.Concat("ListInstructs-", objectKey);
-            var rawKeyTotal = string.Concat(rawKey, "-Total");
             total = 0;
-            // See if the item is in the cache
-            var instructs = GetCacheItem(rawKey) as List<SysInstructModel>;
-            var cacheTotal = (int?)GetCacheItem(rawKeyTotal);
-            total = cacheTotal ?? 0; 
-
-            if (instructs != null)
-            {
-                total = cacheTotal ?? instructs.Count;
-                return instructs;
-            }
-            // Item not found in cache - retrieve it and insert it into the cache
-            instructs = Api.Get(out total, search);
-            AddCacheItem(rawKey, instructs);
-            AddCacheItem(rawKeyTotal, total);
-
+            var instructs = Api.Get(out total, search);
             return instructs;
         }
 
@@ -45,28 +28,13 @@ namespace Core.Sys.Caches.Sys
         public SysInstructModel GetById(int instructId)
         {
             if (instructId < 0) return null;
-
-            var rawKey = string.Concat("SysInstructByID-", instructId);
-            // See if the item is in the cache
-            if (GetCacheItem(rawKey) is SysInstructModel instruct) return instruct;
-            // Item not found in cache - retrieve it and insert it into the cache
-            instruct = Api.LoadDetail(instructId);
-            AddCacheItem(rawKey, instruct);
-
-            return instruct;
+            return Api.LoadDetail(instructId);
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, false)]
         public List<SysInstructModel> GetAll()
         {
-            const string rawKey = "AllInstructs";
-            // See if the item is in the cache
-            if (GetCacheItem(rawKey) is List<SysInstructModel> instructs) return instructs;
-            // Item not found in cache - retrieve it and insert it into the cache
-            instructs = Api.Get(out _, null);
-            AddCacheItem(rawKey, instructs);
-
-            return instructs;
+            return Api.Get(out _, null);
         }
 
         [DataObjectMethod(DataObjectMethodType.Delete, false)]

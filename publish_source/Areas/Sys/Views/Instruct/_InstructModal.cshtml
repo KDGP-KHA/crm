@@ -11,41 +11,57 @@
     primary
 }
 @section FormBody{
-    <div id="bodyForm" style="height: calc(100vh - 220px)">
-        <div class="row h-100 overflow-hidden">
+    <link href="@Url.Content("~/Views/Shared/Manager/_Menu.css")?v=@DateTime.Now.Ticks" rel="stylesheet" />
+    <div id="bodyForm" class="instruct-modal-body">
+        <div class="row h-100 overflow-hidden mx-0">
 
             <!-- LEFT TREE -->
-            <div class="col-4 d-flex flex-column py-3 left-panel h-100">
+            <div class="col-12 col-md-4 d-flex flex-column py-3 px-3 left-panel h-100">
                 <div class="SearchBar mb-2">
-                    <input type="text"
-                           class="form-control search-input"
-                           placeholder=@AppProcessor.Messagor.GetMessage("Instruct_Keyword") />
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bgc-white border-r-0 text-secondary-m1">
+                                <i class="fa fa-search"></i>
+                            </span>
+                        </div>
+                        <input type="text"
+                               class="form-control search-input border-l-0"
+                               placeholder="@AppProcessor.Messagor.GetMessage("Instruct_Keyword")" />
+                    </div>
                 </div>
-                <ul class="tree-container overflow-auto flex-grow-1 p-0 h-100">
+                <ul class="tree-container overflow-auto flex-grow-1 p-0 mb-0 h-100 list-unstyled">
 
                     @foreach (var item in Model)
                     {
+                        var levelClass = "instruct-level-" + (item.Level > 3 ? 3 : item.Level);
                         <li class="tree-node"
                             data-id="@item.InstructID"
                             data-parent="@(item.InstructParentID ?? 0)"
-                            data-level="@item.Level">
-                            <span class="menu-item d-flex align-items-center"
+                            data-level="@item.Level"
+                            data-has-child="@(item.HasChild ? "1" : "0")">
+                            <span class="menu-item d-flex align-items-center @levelClass"
                                   data-id="@item.InstructID"
-                                  title="@item.InstructName"
-                                  style="padding-left:@(10 + (item.Level * 20))px;">
+                                  title="@item.InstructName">
 
                                 @if (item.HasChild)
                                 {
-                                    <i class="fa fa-caret-right toggle-icon me-2" style="font-size:24px; width:15px"></i>
+                                    <i class="fa fa-caret-right toggle-icon mr-2"></i>
                                 }
                                 else
                                 {
-                                    <span style="width:15px;"></span>
+                                    <span class="toggle-placeholder mr-2"></span>
                                 }
 
-                                <div class="flex-grow-1 text-break">
-                                    <i class="fa fa-file-text-o me-2"></i>
-                                    @item.InstructName
+                                <div class="flex-grow-1 text-break instruct-node-title">
+                                    @if (item.HasChild)
+                                    {
+                                        <i class="far fa-folder text-primary-m1 mr-1"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="far fa-file-alt text-secondary-m1 mr-1"></i>
+                                    }
+                                    <span class="instruct-node-text">@item.InstructName</span>
                                 </div>
                             </span>
                         </li>
@@ -55,13 +71,13 @@
             </div>
 
             <!-- RIGHT CONTENT -->
-            <div class="col-8 d-flex flex-column h-100 py-3">
+            <div class="col-12 col-md-8 d-flex flex-column h-100 py-3 px-4 bgc-white">
                 <div id="InstructContent" class="flex-grow-1 overflow-auto p-0">
                     <div class="Content">
-                        <h2 id="Title-content-container" class="font-weight-bold text-primary">
+                        <h2 id="Title-content-container" class="font-weight-bold text-primary-d1 pb-2 mb-3 border-b-1 brc-secondary-l2">
                         </h2>
-                        <div id="content-container">
-                            <div class="text-muted">Chọn hướng dẫn để xem nội dung</div>
+                        <div id="content-container" class="instruct-article-container">
+                            <div class="text-muted">@AppProcessor.Messagor.GetMessage("Instruct_Title")</div>
                         </div>
                     </div>
                 </div>

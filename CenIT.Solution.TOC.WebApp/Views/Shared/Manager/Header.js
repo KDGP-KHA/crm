@@ -1,48 +1,58 @@
-﻿const cache = {};
+﻿var _instructContentCache = {};
 
 $(document).on('click', '.menu-item', function () {
-    const id = $(this).data('id');
+    const $item = $(this);
+    const id = $item.data('id');
+    const $parentNode = $item.closest('.tree-node');
+    const $toggleIcon = $item.find('.toggle-icon');
+
+    if ($toggleIcon.length && !$parentNode.hasClass('expanded')) {
+        showChildren(id);
+        $parentNode.addClass('expanded');
+        $toggleIcon.removeClass('fa-caret-right').addClass('fa-caret-down');
+    }
 
     $('.menu-item').removeClass('active-item');
+    $item.addClass('active-item');
 
-    $(this).addClass('active-item');
-        
-    if (cache[id]) {
-        $('#Title-content-container').html(cache[id].title);
-        $('#content-container').html(cache[id].content);
+    if (_instructContentCache[id]) {
+        $('#Title-content-container').html(_instructContentCache[id].title);
+        $('#content-container').html(_instructContentCache[id].content);
+        $('#InstructContent').scrollTop(0);
         return;
     }
 
-    $('#content-container').html('<div class="p-3">Loading...</div>');
+    $('#content-container').html('<div class="p-3 text-secondary"><i class="fas fa-spinner fa-spin mr-2"></i>Đang tải nội dung hướng dẫn...</div>');
 
-    $.get(`/Sys/Instruct/GetInstructContent/${id}`, function (res) {
-        cache[id] = {
-            title: res.data.InstructName,
-            content: res.data.Content
-        };
-
-        // res chính là dữ liệu trả về từ controller
-        $('#Title-content-container').html(res.data.InstructName);
-        $('#content-container').html(res.data.Content);
+    $.get('/Sys/Instruct/GetInstructContent/' + id, function (res) {
+        if (res && res.data) {
+            _instructContentCache[id] = {
+                title: res.data.InstructName || '',
+                content: res.data.Content || ''
+            };
+            $('#Title-content-container').html(res.data.InstructName || '');
+            $('#content-container').html(res.data.Content || '');
+            $('#InstructContent').scrollTop(0);
+        }
     });
 });
 
 $(document).on('show.bs.modal', '#modal_ViewInstruct', function () {
+    _instructContentCache = {};
     const modal = $(this);
-    $(this).find('.modal-dialog').css({
-        'max-width': 'calc(100% - 130px)',
+    modal.find('.modal-dialog').css({
+        'max-width': 'calc(100% - 100px)'
     });
 
     modal.find('.tree-node').each(function () {
         const parent = $(this).data('parent');
 
         if (parent != 0) {
-            $(this).hide(); // ẩn node con
+            $(this).hide();
         } else {
-            $(this).show(); // chỉ hiện node cha
+            $(this).show();
         }
 
-        // reset trạng thái
         $(this).removeClass('expanded');
 
         $(this).find('.toggle-icon')
@@ -50,15 +60,13 @@ $(document).on('show.bs.modal', '#modal_ViewInstruct', function () {
             .addClass('fa-caret-right');
     });
 
-    $(this).find('.modal-body').addClass('py-0');
+    modal.find('.modal-body').addClass('py-0 px-0');
 
-    let first = $(this).find('.menu-item').first();
-
+    const first = modal.find('.menu-item').first();
     $('.menu-item').removeClass('active-item');
-
-    $(this).addClass('active-item');
-
-    first.click();
+    if (first.length) {
+        first.click();
+    }
 });
 
 $(document).on('click', '.toggle-icon', function (e) {
@@ -93,6 +101,7 @@ function hideChildren(parentId) {
         hideChildren(id);
     });
 }
+
 function showChildren(parentId) {
     const children = $('.tree-node[data-parent="' + parentId + '"]');
 
@@ -105,72 +114,72 @@ function showChildren(parentId) {
     });
 }
 
-$(document).ready(function () {
-    const first = $('.menu-item').first();
-    first.click();
-});
-
-$(document).on('keydown', '.search-input', function (e) {
-    if (e.key === 'Enter') {
-        e.preventDefault(); 
-        const keyword = $(this).val().trim();
-
-        callSearch(keyword);
+$(document).on('input keydown', '#modal_ViewInstruct .search-input, .left-panel .search-input', function (e) {
+    if (e.type === 'keydown' && e.key === 'Enter') {
+        e.preventDefault();
     }
+    const keyword = ($(this).val() || '').trim().toLowerCase();
+    filterInstructTreeClient(keyword);
 });
 
-function callSearch(keyword) {
+function filterInstructTreeClient(keyword) {
+    const $nodes = $('.tree-container .tree-node');
+    if (!$nodes.length) return;
 
-    $('.tree-container').html('<div class="p-3">Loading...</div>');
+    if (!keyword) {
+        $nodes.each(function () {
+            const parent = $(this).data('parent');
+            if (parent != 0) {
+                $(this).hide();
+            } else {
+                $(this).show();
+            }
+            $(this).removeClass('expanded');
+            $(this).find('.toggle-icon').removeClass('fa-caret-down').addClass('fa-caret-right');
+        });
+        return;
+    }
 
-    $.ajax({
-        url: '/Sys/Instruct/Get',
-        type: 'POST',
-        data: {
-            search: keyword,
-        },
-        success: function (res) {
-            renderTree(res.data);
+    const matchedIds = new Set();
+    const parentMap = {};
 
-            // auto chọn item đầu
-            const first = $('.tree-node:visible .menu-item').first();
-            if (first.length) first.click();
+    $nodes.each(function () {
+        const id = Number($(this).data('id'));
+        const parent = Number($(this).data('parent') || 0);
+        parentMap[id] = parent;
+        const title = ($(this).find('.menu-item').attr('title') || $(this).text() || '').toLowerCase();
+        if (title.indexOf(keyword) !== -1) {
+            matchedIds.add(id);
         }
     });
-}
 
-function renderTree(data) {
-
-    let html = '';
-
-    data.forEach(item => {
-
-        html += `
-        <li class="tree-node expanded"
-            data-id="${item.InstructID}"
-            data-parent="${item.InstructParentID || 0}"
-            data-level="${item.Level}">
-
-            <span class="menu-item d-flex align-items-center"
-                  data-id="${item.InstructID}"
-                  title="${item.InstructName}"
-                  style="padding-left:${10 + (item.Level * 20)}px;">
-
-                ${item.HasChild
-                ? '<i class="fa fa-caret-down toggle-icon me-2" style="font-size:24px; width:15px"></i>'
-                : '<span style="width:15px;"></span>'}
-
-                <div class="flex-grow-1 text-break">
-                    <i class="fa fa-file-text-o me-2"></i>
-                    ${item.InstructName}
-                </div>
-            </span>
-        </li>
-        `;
+    // Include ancestors of matched nodes and children of matched parent nodes
+    const visibleIds = new Set(matchedIds);
+    matchedIds.forEach(function (id) {
+        let currParent = parentMap[id];
+        while (currParent && currParent > 0) {
+            visibleIds.add(currParent);
+            currParent = parentMap[currParent];
+        }
     });
 
-    $('.tree-container').html(html);
+    $nodes.each(function () {
+        const id = Number($(this).data('id'));
+        const parent = Number($(this).data('parent') || 0);
+        if (matchedIds.has(parent)) {
+            visibleIds.add(id);
+        }
+    });
 
+    $nodes.each(function () {
+        const id = Number($(this).data('id'));
+        if (visibleIds.has(id)) {
+            $(this).show().addClass('expanded');
+            $(this).find('.toggle-icon').removeClass('fa-caret-right').addClass('fa-caret-down');
+        } else {
+            $(this).hide().removeClass('expanded');
+        }
+    });
 }
 
 $('#btnShowRegulation').on('click', function () {
