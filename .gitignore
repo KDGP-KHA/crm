@@ -63,3 +63,9 @@ scratch/
 !.agents/skills/**
 !.agents/agents/
 !.agents/agents/**
+
+# ==========================================
+# Database Connection Strings (Anti-Leak)
+# ==========================================
+**/Configs/ConnectionStrings.config
+!**/Configs/ConnectionStrings.config.example

@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
@@ -18,6 +18,7 @@ using System.Web.Hosting;
 using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Base;
 using TSFramework.Libs.Processors;
 using TSFramework.Libs.Utils;
@@ -2000,7 +2001,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
         void LuuAnh(HttpPostedFileBase filebase, string filePath)
         {
             if (filebase != null && !string.IsNullOrEmpty(filePath))
+            {
+                if (!FileSecurityHelper.IsAllowedUpload(filebase.FileName) || !FileSecurityHelper.IsAllowedUpload(filePath))
+                    return;
                 filebase.SaveAs(HostingEnvironment.MapPath(filePath));
+            }
         }
 
         #endregion

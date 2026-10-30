@@ -16,6 +16,7 @@ using System.Web.Security;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
 using TSFramework.Libs.Extensions;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Base;
 using TSFramework.Libs.Processors;
 using ClosedXML.Excel;
@@ -865,8 +866,10 @@ namespace Modules.Cate.Areas.Cate.Controllers
         /// <param name="filePath"></param>
         void LuuAnh(HttpPostedFileBase filebase, string filePath)
         {
-            if (filebase != null || !string.IsNullOrEmpty(filePath))
+            if (filebase != null && !string.IsNullOrEmpty(filePath))
             {
+                if (!FileSecurityHelper.IsAllowedUpload(filebase.FileName) || !FileSecurityHelper.IsAllowedUpload(filePath))
+                    return;
                 filebase.SaveAs(HostingEnvironment.MapPath(filePath));
             }
         }

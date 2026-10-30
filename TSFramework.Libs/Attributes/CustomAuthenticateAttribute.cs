@@ -1,7 +1,8 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using TSFramework.Libs.Enums;
 using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Principals;
 using TSFramework.Libs.Processors;
@@ -82,11 +83,26 @@ namespace TSFramework.Libs.Attributes
                     var actionTypes = filterContext.ActionDescriptor
                         .GetCustomAttributes(typeof(ActionTypeAttribute), false);
                     var currentActionType = actionTypes.Length > 0 ? actionTypes[0] as ActionTypeAttribute : null;
-                    if (currentActionType != null)
-                    {
-                        var actionTypeName = EnumHelper.GetDescription(currentActionType.Type);
 
-                        if (!AppProcessor.Author.IsAllow(User.UserName, areaName, controllerName, actionTypeName))
+                    // Nguyên tắc phòng thủ ATTT: Default Deny.
+                    // Nếu action có [ActionType] thì kiểm tra quyền tương ứng.
+                    // Nếu action KHÔNG có [ActionType], mặc định yêu cầu tối thiểu quyền View của Controller này.
+                    var actionTypeName = currentActionType != null
+                        ? EnumHelper.GetDescription(currentActionType.Type)
+                        : EnumHelper.GetDescription(EnumActionType.View);
+
+                    if (User == null || !AppProcessor.Author.IsAllow(User.UserName, areaName, controllerName, actionTypeName))
+                    {
+                        if (filterContext.HttpContext.Request.IsAjaxRequest())
+                        {
+                            filterContext.HttpContext.Response.StatusCode = 403;
+                            filterContext.Result = new JsonResult
+                            {
+                                Data = new { status = false, message = "Bạn không có quyền thực hiện thao tác này!" },
+                                JsonRequestBehavior = JsonRequestBehavior.AllowGet
+                            };
+                        }
+                        else
                         {
                             routeData = new RedirectToRouteResult
                             (new RouteValueDictionary

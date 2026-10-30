@@ -10,8 +10,8 @@ Thực hiện deploy trực tiếp bằng `scripts/deploy_ftp_demo.ps1`. Không 
 ## Điều kiện
 
 - Chỉ triển khai nội dung trong `publish_source/`; không upload `bin/obj` trung gian của project nguồn.
-- Tuyệt đối không upload hoặc ghi đè hai file cấu hình theo môi trường: `Web.config` ở thư mục gốc và `Configs/AppSettings.config`. Giữ nguyên bản đang có trên máy chủ Demo.
-- Chỉ loại trừ đúng hai đường dẫn trên; các file trùng tên ở thư mục khác như `Views/Web.config` vẫn được upload.
+- Tuyệt đối không upload hoặc ghi đè các file cấu hình theo môi trường: `Web.config` ở thư mục gốc, `Configs/AppSettings.config` và `Configs/ConnectionStrings.config`. Giữ nguyên bản đang có trên máy chủ Demo.
+- Chỉ loại trừ đúng các đường dẫn trên; các file trùng tên ở thư mục khác như `Views/Web.config` vẫn được upload.
 - FTP Demo mặc định là `10.57.30.10:21`, tài khoản `quanlydoanhthucenit`.
 - Mật khẩu phải đến từ `FTP_PASSWORD_DEMO` hoặc credential DPAPI cục bộ `.secrets/ftp-demo.credential.xml`; không ghi mật khẩu vào skill, script, log hoặc commit Git.
 - File credential DPAPI chỉ sử dụng được bởi đúng tài khoản Windows trên máy đã tạo file.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -441,16 +441,11 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 {
                     foreach (var entry in archive.Entries)
                     {
-                        var fullFilePath = Path.Combine(dirServer, entry.FullName);
+                        var fullFilePath = FileSecurityHelper.SafeExtractZipEntry(entry, dirServer, allowExecutable: true);
                         if (string.IsNullOrEmpty(Path.GetExtension(entry.FullName)))
                         {
-                            if (!Directory.Exists(fullFilePath)) Directory.CreateDirectory(fullFilePath);
                             continue;
                         }
-
-                        if (System.IO.File.Exists(fullFilePath)) System.IO.File.Delete(fullFilePath);
-
-                        entry.ExtractToFile(fullFilePath);
 
                         var fileInfo = new FileInfo(fullFilePath);
 

@@ -41,6 +41,14 @@ if (-not $msbuild) {
 
 Write-Host "Using MSBuild: $msbuild" -ForegroundColor Green
 
+# 1.1 Ensure Configs\ConnectionStrings.config exists (for new teammates cloning repo)
+$configTarget = Join-Path $rootDir "CenIT.Solution.TOC.WebApp\Configs\ConnectionStrings.config"
+$configExample = Join-Path $rootDir "CenIT.Solution.TOC.WebApp\Configs\ConnectionStrings.config.example"
+if (-not (Test-Path $configTarget) -and (Test-Path $configExample)) {
+    Copy-Item $configExample $configTarget
+    Write-Host "[AUTO-INIT] Created Configs\ConnectionStrings.config from template for build." -ForegroundColor Yellow
+}
+
 # 2. Build Solution
 Write-Host "`n[1/3] Building Solution ($Configuration)..." -ForegroundColor Yellow
 $slnPath = Join-Path $rootDir "CenIT.Solution.TOC.sln"
