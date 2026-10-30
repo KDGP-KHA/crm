@@ -11,6 +11,7 @@ using Core.Sys.BaseApp;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
 using TSFramework.Libs.Models.Base;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Processors;
 using TSFramework.Libs.Utils;
 using System.Linq;
@@ -96,9 +97,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 List<string> FileAttachs = new List<string>();
                 foreach (var file in model.DinhKemFile)
                 {
-                    if (file != null)
+                    if (file != null && FileSecurityHelper.IsAllowedUpload(file.FileName))
                     {
-                        var FileName = file != null ? UtilString.ConvertToUnSign(Path.GetFileNameWithoutExtension(file.FileName)) + "_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + Path.GetExtension(file.FileName) : string.Empty;
+                        var FileName = UtilString.ConvertToUnSign(Path.GetFileNameWithoutExtension(file.FileName)) + "_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + Path.GetExtension(file.FileName);
                         var FileAttach = (!string.IsNullOrEmpty(FileName) ? _folderFile + "/" + FileName : "");
                         if (!string.IsNullOrEmpty(FileAttach))
                         {
@@ -173,9 +174,9 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 List<string> FileAttachs = new List<string>();
                 foreach (var file in model.DinhKemFile)
                 {
-                    if (file != null)
+                    if (file != null && FileSecurityHelper.IsAllowedUpload(file.FileName))
                     {
-                        var FileName = file != null ? UtilString.ConvertToUnSign(Path.GetFileNameWithoutExtension(file.FileName)) + "_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + Path.GetExtension(file.FileName) : string.Empty;
+                        var FileName = UtilString.ConvertToUnSign(Path.GetFileNameWithoutExtension(file.FileName)) + "_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + Path.GetExtension(file.FileName);
                         var FileAttach = (!string.IsNullOrEmpty(FileName) ? _folderFile + "/" + FileName : "");
                         if (!string.IsNullOrEmpty(FileAttach))
                         {
@@ -335,16 +336,27 @@ namespace Modules.Cate.Areas.Cate.Controllers
         }
 
         /// <summary>
-        /// Hàm lưu file
+        /// Hàm lưu file an toàn
         /// </summary>
-        /// <param name="filebase"></param>
-        /// <param name="filePath"></param>
         void LuuFile(HttpPostedFileBase filebase, string filePath)
         {
-            if (filebase != null || !string.IsNullOrEmpty(filePath))
+            if (filebase == null || string.IsNullOrWhiteSpace(filePath)) return;
+
+            if (!FileSecurityHelper.IsAllowedUpload(filebase.FileName))
             {
-                filebase.SaveAs(HostingEnvironment.MapPath(filePath));
+                return;
             }
+
+            var physicalPath = HostingEnvironment.MapPath(filePath);
+            if (string.IsNullOrWhiteSpace(physicalPath)) return;
+
+            var dir = Path.GetDirectoryName(physicalPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            filebase.SaveAs(physicalPath);
         }
     }
 }

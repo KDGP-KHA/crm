@@ -1,4 +1,4 @@
-﻿using Core.Cate.Biz;
+using Core.Cate.Biz;
 using Core.Cate.Caches;
 using Core.Cate.Models;
 using Core.Cate.Services;
@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Base;
 using TSFramework.Libs.Utils;
 using TSFramework.Libs.Processors;
@@ -478,7 +479,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private void LuuFile(HttpPostedFileBase file, string filePath)
         {
             if (file != null && !string.IsNullOrEmpty(filePath))
+            {
+                if (!FileSecurityHelper.IsAllowedUpload(file.FileName) || !FileSecurityHelper.IsAllowedUpload(filePath))
+                    return;
                 file.SaveAs(HostingEnvironment.MapPath(filePath));
+            }
         }
 
         private void SaveFiles(List<HttpPostedFileBase> files, int reviewHistoryID)

@@ -22,6 +22,7 @@ using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
 using TSFramework.Libs.Models.Base;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Principals;
 using TSFramework.Libs.Processors;
 using TSFramework.Libs.Utils;
@@ -93,7 +94,7 @@ namespace Modules.Cate.Areas.Cate.Controllers
             {
                 text = HttpUtility.HtmlDecode(text);
             }
-            return text;
+            return HtmlSecurityHelper.SanitizeHtml(text);
         }
 
         public DigitalSalesController()
@@ -819,12 +820,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var cleanPath = filePath.Trim().Replace("~", "");
-            if (!cleanPath.StartsWith("/Contents/", StringComparison.OrdinalIgnoreCase))
+            // Chặn Path Traversal và ký tự nguy hiểm
+            if (cleanPath.Contains("..") || cleanPath.Contains("\\") || cleanPath.Contains(":") ||
+                !cleanPath.StartsWith("/Contents/", StringComparison.OrdinalIgnoreCase))
             {
                 return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidPath") }, JsonRequestBehavior.AllowGet);
             }
 
+            var allowedRoot = HostingEnvironment.MapPath("~/Contents/");
             var physicalPath = HostingEnvironment.MapPath(cleanPath);
+            if (!string.IsNullOrEmpty(physicalPath))
+            {
+                var canonicalPath = Path.GetFullPath(physicalPath);
+                if (!canonicalPath.StartsWith(allowedRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { status = false, message = GetAppMessage("DigitalSales_Msg_InvalidPath") }, JsonRequestBehavior.AllowGet);
+                }
+            }
+
             if (string.IsNullOrEmpty(physicalPath) || !System.IO.File.Exists(physicalPath))
             {
                 var fileNameOnly = Path.GetFileName(cleanPath);
@@ -848,6 +861,12 @@ namespace Modules.Cate.Areas.Cate.Controllers
                 }
             }
 
+            var ext = Path.GetExtension(physicalPath)?.ToLowerInvariant();
+            if (string.IsNullOrEmpty(ext) || ext == ".config" || ext == ".cs" || ext == ".dll" || ext == ".exe" || ext == ".bak" || ext == ".sql")
+            {
+                return HttpNotFound();
+            }
+
             var fileName = Path.GetFileName(physicalPath);
             var mimeType = MimeMapping.GetMimeMapping(physicalPath);
             if (Path.GetExtension(physicalPath).Equals(".webp", StringComparison.OrdinalIgnoreCase))
@@ -867,12 +886,24 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var cleanPath = filePath.Trim().Replace("~", "");
-            if (!cleanPath.StartsWith("/Contents/", StringComparison.OrdinalIgnoreCase))
+            // Chặn Path Traversal và ký tự nguy hiểm
+            if (cleanPath.Contains("..") || cleanPath.Contains("\\") || cleanPath.Contains(":") ||
+                !cleanPath.StartsWith("/Contents/", StringComparison.OrdinalIgnoreCase))
             {
                 return HttpNotFound();
             }
 
+            var allowedRoot = HostingEnvironment.MapPath("~/Contents/");
             var physicalPath = HostingEnvironment.MapPath(cleanPath);
+            if (!string.IsNullOrEmpty(physicalPath))
+            {
+                var canonicalPath = Path.GetFullPath(physicalPath);
+                if (!canonicalPath.StartsWith(allowedRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return HttpNotFound();
+                }
+            }
+
             if (string.IsNullOrEmpty(physicalPath) || !System.IO.File.Exists(physicalPath))
             {
                 var fileNameOnly = Path.GetFileName(cleanPath);
@@ -897,6 +928,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
             }
 
             var ext = Path.GetExtension(physicalPath)?.ToLowerInvariant();
+            if (string.IsNullOrEmpty(ext) || ext == ".config" || ext == ".cs" || ext == ".dll" || ext == ".exe" || ext == ".bak" || ext == ".sql")
+            {
+                return HttpNotFound();
+            }
+
             var mimeType = MimeMapping.GetMimeMapping(physicalPath);
             if (ext == ".webp")
             {
@@ -7235,16 +7271,11 @@ namespace Modules.Cate.Areas.Cate.Controllers
                     return null;
                 }
 
-                var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
-                var forbiddenExts = new[] { 
-                    ".exe", ".dll", ".bat", ".cmd", ".vbs", ".ps1", 
-                    ".sh", ".com", ".msi", ".vbe", ".jse", ".wsf", 
-                    ".wsh", ".scr", ".pif", ".jar", ".app", ".gadget" 
-                };
-                if (!string.IsNullOrEmpty(ext) && forbiddenExts.Contains(ext))
+                if (!FileSecurityHelper.IsAllowedUpload(file.FileName))
                 {
                     return null;
                 }
+                var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
 
                 var subFolder = DateTime.Now.ToString("yyyyMM");
                 var folderPath = $"{_folderUpload}/{subFolder}";

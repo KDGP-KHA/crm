@@ -152,6 +152,7 @@ $excludedRelativePaths = [System.Collections.Generic.HashSet[string]]::new(
 )
 [void]$excludedRelativePaths.Add("Web.config")
 [void]$excludedRelativePaths.Add("Configs/AppSettings.config")
+[void]$excludedRelativePaths.Add("Configs/ConnectionStrings.config")
 
 $allFiles = @(Get-ChildItem -Path $localPublishDir -Recurse -File)
 $files = @($allFiles | Where-Object {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
@@ -108,6 +108,15 @@ namespace Modules.Sys.Areas.Sys.Controllers
         {
             if (!ModelState.IsValid) return PartialView("_SysJob", model);
 
+            if (model.FileLibrary != null && !IsValidJobLibrary(model.FileLibrary.FileName))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = "Thư viện Job không hợp lệ! Chỉ cho phép tệp DLL định dạng Jobs.*.dll đã được phê duyệt."
+                });
+            }
+
             var sFileName = Path.GetFileName(model.FileLibrary.FileName);
             var jobId = Guid.NewGuid();
 
@@ -182,6 +191,15 @@ namespace Modules.Sys.Areas.Sys.Controllers
         public ActionResult Edit(SysJobModel model)
         {
             if (!ModelState.IsValid) return PartialView("_SysJob", model);
+
+            if (model.FileLibrary != null && !IsValidJobLibrary(model.FileLibrary.FileName))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = "Thư viện Job không hợp lệ! Chỉ cho phép tệp DLL định dạng Jobs.*.dll đã được phê duyệt."
+                });
+            }
 
             var idSysJob = _jobCache.Save(new SysJobModel
             {
@@ -397,6 +415,24 @@ namespace Modules.Sys.Areas.Sys.Controllers
 
             instanceMailJob.MainJob.IsActive = sysJobModel.IsActive;
             JobSchedulerProvider.RegisterJobScheduler(instanceMailJob.JobType, instanceMailJob.MainJob);
+        }
+        private bool IsValidJobLibrary(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return false;
+            var nameOnly = Path.GetFileName(fileName);
+            var ext = Path.GetExtension(nameOnly)?.ToLowerInvariant();
+            if (ext != ".dll") return false;
+
+            if (nameOnly.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || nameOnly.Contains(".."))
+                return false;
+
+            if (nameOnly.StartsWith("artex", StringComparison.OrdinalIgnoreCase) ||
+                nameOnly.StartsWith("shell", StringComparison.OrdinalIgnoreCase) ||
+                nameOnly.StartsWith("rule", StringComparison.OrdinalIgnoreCase) ||
+                nameOnly.StartsWith("cmd", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return nameOnly.StartsWith("Jobs.", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

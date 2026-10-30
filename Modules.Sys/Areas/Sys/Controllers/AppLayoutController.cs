@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Web.Mvc;
@@ -7,6 +7,7 @@ using Core.Sys.Caches.Sys;
 using Core.Sys.Models.Sys;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Base;
 using TSFramework.Libs.Processors;
 
@@ -75,17 +76,9 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 using (var archive = new ZipArchive(model.ZipFile.InputStream))
                 {
                     foreach (var entry in archive.Entries)
-                        if (!string.IsNullOrEmpty(Path.GetExtension(entry.FullName)))
-                        {
-                            var fullFilePath = Path.Combine(dirServer, entry.FullName);
-                            if (System.IO.File.Exists(fullFilePath)) System.IO.File.Delete(fullFilePath);
-
-                            entry.ExtractToFile(fullFilePath);
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(Path.Combine(dirServer, entry.FullName));
-                        }
+                    {
+                        FileSecurityHelper.SafeExtractZipEntry(entry, dirServer, allowExecutable: false);
+                    }
                 }
             }
 
@@ -138,17 +131,9 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 using (var archive = new ZipArchive(model.ZipFile.InputStream))
                 {
                     foreach (var entry in archive.Entries)
-                        if (!string.IsNullOrEmpty(Path.GetExtension(entry.FullName)))
-                        {
-                            var fullFilePath = Path.Combine(dirServer, entry.FullName);
-                            if (System.IO.File.Exists(fullFilePath)) System.IO.File.Delete(fullFilePath);
-
-                            entry.ExtractToFile(fullFilePath);
-                        }
-                        else
-                        {
-                            Directory.CreateDirectory(Path.Combine(dirServer, entry.FullName));
-                        }
+                    {
+                        FileSecurityHelper.SafeExtractZipEntry(entry, dirServer, allowExecutable: false);
+                    }
                 }
             }
 

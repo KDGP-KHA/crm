@@ -33,7 +33,7 @@
 </div>
 
 @section BottomScript {
-    <script src="@Url.Content("~/Areas/Sys/Views/Instruct/Instruct.js")"></script>
+    <script src="@Url.Content("~/Areas/Sys/Views/Instruct/Instruct.js")?v=@DateTime.Now.Ticks"></script>
 }
 
 <script type="text/javascript" src="@Url.Content("~/Contents/Modules/Major/ckfinder/ckfinder.js")"></script>

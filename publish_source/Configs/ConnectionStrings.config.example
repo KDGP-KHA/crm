@@ -1,0 +1,7 @@
+<connectionStrings>
+  <!-- Mẫu cấu hình ConnectionStrings. Sao chép thành ConnectionStrings.config và cập nhật thông số kết nối Database thực tế -->
+  <add name="TOC.Sys.Conn" connectionString="Data Source=127.0.0.1;Initial Catalog=crm;Persist Security Info=True;User Id=db_user;Password=db_password;Connect Timeout=200; Pooling=true; Max Pool Size=200;" />
+  <add name="TOC.Conn.Major" connectionString="Data Source=127.0.0.1;Initial Catalog=crm;Persist Security Info=True;User Id=db_user;Password=db_password;Connect Timeout=200; Pooling=true; Max Pool Size=200;" />
+  <add name="TOC.Conn.Sys" connectionString="Data Source=127.0.0.1;Initial Catalog=crm;Persist Security Info=True;User Id=db_user;Password=db_password;Connect Timeout=200; Pooling=true; Max Pool Size=200;" />
+  <add name="TOC.Conn.Logs" connectionString="Data Source=127.0.0.1;Initial Catalog=crm;Persist Security Info=True;User Id=db_user;Password=db_password;Connect Timeout=200; Pooling=true; Max Pool Size=200;" />
+</connectionStrings>

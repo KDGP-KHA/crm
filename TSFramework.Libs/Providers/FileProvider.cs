@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Hosting;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Utils;
 
 namespace TSFramework.Libs.Providers
@@ -22,11 +23,12 @@ namespace TSFramework.Libs.Providers
                 return new FileUploadResult { ErrorCode = -1, Message = "No file selected." };
             }
 
-            var extension = Path.GetExtension(file.FileName).ToLower();
-            if (allowedExtensions != null && allowedExtensions.Length > 0 && !allowedExtensions.Contains(extension))
+            if (!FileSecurityHelper.IsAllowedUpload(file.FileName, allowedExtensions))
             {
-                return new FileUploadResult { ErrorCode = -2, Message = "Invalid file type." };
+                return new FileUploadResult { ErrorCode = -2, Message = "Tệp tin không hợp lệ hoặc bị từ chối vì lý do an toàn thông tin." };
             }
+
+            var extension = Path.GetExtension(file.FileName).ToLower();
 
             var absoluteAvatarFolderPath = HostingEnvironment.MapPath(folderPath);
             if (!Directory.Exists(absoluteAvatarFolderPath)) Directory.CreateDirectory(absoluteAvatarFolderPath);

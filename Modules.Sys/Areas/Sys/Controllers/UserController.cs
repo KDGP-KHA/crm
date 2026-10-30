@@ -14,6 +14,7 @@ using Core.Sys.Models.Sys;
 using Modules.Sys.Areas.Sys.Data;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Base;
 using TSFramework.Libs.Models.Mail;
 using TSFramework.Libs.Processors;
@@ -59,13 +60,15 @@ namespace Modules.Sys.Areas.Sys.Controllers
         private void SaveAvatar(HttpPostedFileBase avatarFileBase, string virtualAvatarFolderPath, string fileName, int? employeeId)
         {
             if (avatarFileBase == null || employeeId <= 0 || string.IsNullOrEmpty(virtualAvatarFolderPath) || string.IsNullOrEmpty(fileName)) return;
+            if (!FileSecurityHelper.IsAllowedImage(avatarFileBase.FileName) || !FileSecurityHelper.IsAllowedImage(fileName)) return;
+
             var absoluteAvatarFolderPath = HostingEnvironment.MapPath(virtualAvatarFolderPath);
             if (string.IsNullOrEmpty(absoluteAvatarFolderPath)) return;
 
             absoluteAvatarFolderPath = Path.Combine(absoluteAvatarFolderPath, employeeId.ToString());
 
             if (!Directory.Exists(absoluteAvatarFolderPath)) Directory.CreateDirectory(absoluteAvatarFolderPath);
-            avatarFileBase.SaveAs(Path.Combine(absoluteAvatarFolderPath, fileName));
+            avatarFileBase.SaveAs(Path.Combine(absoluteAvatarFolderPath, Path.GetFileName(fileName)));
         }
 
         /// <summary>

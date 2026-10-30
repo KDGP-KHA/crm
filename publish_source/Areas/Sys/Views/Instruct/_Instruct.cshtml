@@ -33,7 +33,7 @@
             @Html.ValidationMessageFor(model => model.PositionShow, "", new { @class = "text-danger" })
         </div>
 
-        <div class="form-group d-flex align-items-end" style="padding-bottom: 9px; padding-left: 35px">
+        <div class="form-group d-flex align-items-end pb-2 pl-4">
             @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input" })
 
             @Html.LabelFor(model => model.IsActive,
@@ -58,19 +58,14 @@
 
 <script type="text/javascript">
     (function () {
-        // ── CKEditor ──────────────────────────────────────────
         function initLogCKEditor() {
             if (typeof CKEDITOR === 'undefined') return;
             var ex = CKEDITOR.instances['ContentInstructEditor'];
             if (ex) ex.destroy(true);
-            CKEDITOR.replace('ContentInstructEditor', {
+            var editor = CKEDITOR.replace('ContentInstructEditor', {
                 height: 400,
-
-                // Cho phép chỉnh width/height ảnh
                 allowedContent: true,
-                extraAllowedContent: 'img[width,height,style]',
-
-                // Toolbar gọn, dễ dùng cho CRM
+                extraAllowedContent: 'img[width,height,style];div[*](*);span[*](*);table[*](*);thead[*](*);tbody[*](*);tr[*](*);th[*](*);td[*](*)',
                 toolbar: [
                     { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
                     { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
@@ -79,6 +74,11 @@
                     { name: 'tools', items: ['Maximize'] }
                 ]
             });
+            if (editor) {
+                editor.on('change', function () {
+                    editor.updateElement();
+                });
+            }
         }
 
         function loadCKEditorThenInit() {
@@ -95,51 +95,10 @@
             document.head.appendChild(s);
         }
 
-        function onSuccess(response) {
-            if (response.status != undefined) {
-                try { eval(response.message); } catch (e) { console.warn('eval error:', e); }
-                $('#_FormConfirm').html(response.page);
-                $('#LogList').html(response.list);
-                setTimeout(function () {
-                    initLogCKEditor();
-                    if ($('#LogDate').length) {
-                        $('#LogDate').datetimepicker({ format: 'DD/MM/YYYY HH:mm' });
-                    }
-                }, 50);
-            } else {
-                $('#_FormConfirm').html(response);
-                setTimeout(function () { initLogCKEditor(); }, 50);
+        $(document).off('submit.instructCkSync').on('submit.instructCkSync', '#AddInstruct, #EditInstruct, form', function () {
+            if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances['ContentInstructEditor']) {
+                CKEDITOR.instances['ContentInstructEditor'].updateElement();
             }
-        }
-
-        $('form#EditLogTask').ajaxForm({ success: onSuccess });
-
-        document.getElementById('btnSave').addEventListener('click', function () {
-            var btn = this;
-            if (btn.disabled) return;
-            btn.disabled = true;
-            setTimeout(function () { btn.disabled = false; }, 2000);
-            var logDateInput = document.getElementById('LogDate');
-            if (logDateInput && (!logDateInput.value || logDateInput.value === '01/01/0001 00:00')) {
-                var now = new Date();
-                var pad = function (n) { return n < 10 ? '0' + n : n; };
-                logDateInput.value = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear()
-                    + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
-            }
-            if (typeof CKEDITOR !== 'undefined') {
-                for (var inst in CKEDITOR.instances) {
-                    CKEDITOR.instances[inst].updateElement();
-                }
-            }
-            $('form#EditLogTask').trigger('submit');
-        });
-
-        $('#modal_EditLogTask').addClass('modal-fs').removeClass('modal-xl');
-        $('#modal_EditLogTask .modal-footer').hide();
-
-        $(document).off('click.logtoggle').on('click.logtoggle', '.btn-toggle-log', function (e) {
-            e.preventDefault();
-            $(this).closest('.col-12').next('.content-detail-log').slideToggle();
         });
 
         loadCKEditorThenInit();

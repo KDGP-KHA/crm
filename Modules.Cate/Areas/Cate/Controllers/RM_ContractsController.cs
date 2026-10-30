@@ -14,6 +14,7 @@ using System.Web.Hosting;
 using System.Web.Mvc;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Base;
 using TSFramework.Libs.Processors;
 using TSFramework.Libs.Utils;
@@ -69,7 +70,16 @@ namespace Modules.Cate.Areas.Cate.Controllers
         private void LuuFile(HttpPostedFileBase file, string filePath)
         {
             if (file != null && !string.IsNullOrEmpty(filePath))
-                file.SaveAs(HostingEnvironment.MapPath(filePath));
+            {
+                if (!FileSecurityHelper.IsAllowedUpload(file.FileName) || !FileSecurityHelper.IsAllowedUpload(filePath))
+                    return;
+                filebaseSave(file, filePath);
+            }
+        }
+
+        private void filebaseSave(HttpPostedFileBase file, string filePath)
+        {
+            file.SaveAs(HostingEnvironment.MapPath(filePath));
         }
 
         private void SaveFiles(List<HttpPostedFileBase> files, int contractID)

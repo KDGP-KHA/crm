@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -117,6 +117,7 @@ namespace TSFramework.Libs.Helpers
 
             var originalXmlDocument = new XmlDocument
             {
+                XmlResolver = null,
                 PreserveWhitespace = !(minifierSettings.RemoveWhitespaceBetweenElements || minifierSettings.RemoveEmptyLines)
             };
             originalXmlDocument.Load(new MemoryStream(Encoding.UTF8.GetBytes(xml)));

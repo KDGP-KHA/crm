@@ -3888,6 +3888,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Configs\AppSettings.config" />
+    <Content Include="Configs\ConnectionStrings.config" />
+    <Content Include="Configs\ConnectionStrings.config.example" />
     <Content Include="Contents\Base\plugins\ace_v4\assets\fonts\materialicons-outlined.woff" />
     <Content Include="Contents\Base\plugins\ace_v4\assets\fonts\materialicons-outlined.woff2" />
     <Content Include="Contents\Base\plugins\ace_v4\assets\fonts\materialicons-regular.woff" />
@@ -4140,10 +4142,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.4.1.0\build\net472\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.targets'))" />
   </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+  <ItemGroup>
+    <Content Include="Configs\ConnectionStrings.config.example" />
+  </ItemGroup>
+  <Target Name="EnsureConnectionStringsConfig" BeforeTargets="BeforeBuild">
+    <Copy SourceFiles="Configs\ConnectionStrings.config.example" DestinationFiles="Configs\ConnectionStrings.config" Condition="!Exists('Configs\ConnectionStrings.config') And Exists('Configs\ConnectionStrings.config.example')" />
   </Target>
-  <Target Name="AfterBuild">
-  </Target> -->
 </Project>

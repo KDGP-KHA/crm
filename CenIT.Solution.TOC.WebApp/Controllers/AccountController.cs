@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -16,6 +16,7 @@ using Core.Sys.Models.Sys;
 using TSFramework.Libs.Attributes;
 using TSFramework.Libs.BaseApps;
 using TSFramework.Libs.Enums;
+using TSFramework.Libs.Helpers;
 using TSFramework.Libs.Models.Mail;
 using TSFramework.Libs.Principals;
 using TSFramework.Libs.Processors;
@@ -31,6 +32,8 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
     public class AccountController : BaseController
     {
         private const string SESSION_VARIABLE_NAME = "SessionNumber";
+        private const int MAX_LOGIN_FAILS = 5;
+        private const int LOCKOUT_MINUTES = 15;
 
         private readonly SysUserCache _userCache = new SysUserCache();
         private readonly SysUserIPLockCache _userIPLockCache = new SysUserIPLockCache();
@@ -224,9 +227,19 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         /// </summary>
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public ActionResult Login(LoginModel model, string returnUrl = "", string loginMode = "")
         {
             model = model ?? new LoginModel();
+
+            // 1. Kiểm tra IP bị cấm trong SysUserIPLockCache
+            string clientIP = Request.UserHostAddress;
+            var ipLock = _userIPLockCache.GetByIP(clientIP);
+            if (ipLock != null && (ipLock.EndTime == DateTime.MinValue || ipLock.EndTime > DateTime.Now))
+            {
+                SendResponseNotify("MsgLoginFail", "Địa chỉ IP của bạn đã bị tạm khóa truy cập vào hệ thống. Vui lòng liên hệ quản trị viên.", EnumProcessType.NonFormat, EnumMsgIcon.Error);
+                return PartialView("_LoginBody", model);
+            }
 
             if (!string.IsNullOrEmpty(model.URLLink))
             {
@@ -246,13 +259,54 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             model.SenderIP = Request.UserHostAddress;
             model.SenderHeader = string.Join(",", Request.Headers);
 
+            // 2. Chống Brute Force: Kiểm tra tài khoản có đang trong thời gian bị tạm khóa
+            string usernameKey = (model.UserName ?? "").Trim().ToLower();
+            string lockKey = "AccountLock_" + usernameKey;
+            string failCountKey = "LoginFailCount_" + usernameKey;
+
+            if (!string.IsNullOrEmpty(usernameKey) && HttpRuntime.Cache[lockKey] != null)
+            {
+                DateTime lockUntil = (DateTime)HttpRuntime.Cache[lockKey];
+                int remainingMinutes = Math.Max(1, (int)Math.Ceiling((lockUntil - DateTime.Now).TotalMinutes));
+                string msg = string.Format("Tài khoản đang tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau {0} phút.", remainingMinutes);
+                SendResponseNotify("MsgLoginFail", msg, EnumProcessType.NonFormat, EnumMsgIcon.Error);
+                return PartialView("_LoginBody", model);
+            }
+
             bool isVNPTAccount;
             SysUserModel vnptUser;
             string loginFailMessage;
             if (!TryAuthenticateUser(model, out isVNPTAccount, out vnptUser, out loginFailMessage))
             {
+                // Ghi nhận số lần đăng nhập sai và khóa nếu vượt ngưỡng
+                if (!string.IsNullOrEmpty(usernameKey))
+                {
+                    int currentFails = (HttpRuntime.Cache[failCountKey] as int?) ?? 0;
+                    currentFails++;
+                    if (currentFails >= MAX_LOGIN_FAILS)
+                    {
+                        HttpRuntime.Cache.Insert(lockKey, DateTime.Now.AddMinutes(LOCKOUT_MINUTES), null,
+                            DateTime.Now.AddMinutes(LOCKOUT_MINUTES), System.Web.Caching.Cache.NoSlidingExpiration);
+                        HttpRuntime.Cache.Remove(failCountKey);
+                        loginFailMessage = string.Format("Tài khoản đã bị tạm khóa {0} phút do nhập sai mật khẩu liên tiếp {1} lần.", LOCKOUT_MINUTES, MAX_LOGIN_FAILS);
+                    }
+                    else
+                    {
+                        HttpRuntime.Cache.Insert(failCountKey, currentFails, null,
+                            DateTime.Now.AddMinutes(30), System.Web.Caching.Cache.NoSlidingExpiration);
+                        loginFailMessage = string.Format("{0} (Bạn còn {1} lần thử)", loginFailMessage, MAX_LOGIN_FAILS - currentFails);
+                    }
+                }
+
                 SendResponseNotify("MsgLoginFail", loginFailMessage, EnumProcessType.NonFormat, EnumMsgIcon.Error);
                 return PartialView("_LoginBody", model);
+            }
+
+            // Đăng nhập thành công -> Xóa bộ đếm sai mật khẩu
+            if (!string.IsNullOrEmpty(usernameKey))
+            {
+                HttpRuntime.Cache.Remove(lockKey);
+                HttpRuntime.Cache.Remove(failCountKey);
             }
 
             AppPrincipalSerializeModel loginUser = BuildLoginUser(model.UserName, isVNPTAccount, vnptUser);
@@ -308,8 +362,18 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         /// <returns>Kết quả xử lý đổi mật khẩu.</returns>
         [HttpPost]
         [AllowAnyPermission]
+        [ValidateAntiForgeryToken]
         public ActionResult ChangePassword(ChangePasswordModel model)
         {
+            if (model != null && !string.Equals(model.UserName, User.UserName, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = CreateMessage("Bạn không có quyền đổi mật khẩu của tài khoản khác!", EnumProcessType.NonFormat, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+            }
+
             if (!ModelState.IsValid) return PartialView("_PasswordModel", model);
 
             var isAuthen = AppProcessor.Author.IsValidUser(model.UserName, model.CurrentPassword);
@@ -404,6 +468,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         /// <returns>Kết quả xử lý đặt lại mật khẩu.</returns>
         [HttpPost]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public ActionResult ResetPassword(ResetPasswordModel model)
         {
             if (!ModelState.IsValid) return PartialView("_ResetPassword", model);
@@ -477,8 +542,17 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         /// <returns>Kết quả xử lý cập nhật thông tin tài khoản.</returns>
         [HttpPost]
         [AllowAnyPermission]
+        [ValidateAntiForgeryToken]
         public ActionResult EditInfo(SysUserModel model)
         {
+            if (model != null && !string.Equals(model.UserName, User.UserName, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = CreateMessage("Bạn không có quyền cập nhật thông tin của tài khoản khác!", EnumProcessType.NonFormat, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+            }
             if (!string.IsNullOrEmpty(model.Phone))
             {
                 string cleanedPhoneNumber = model.Phone.Replace("(+84)", "0").Replace(" ", "").Replace("_", "");
@@ -606,8 +680,19 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
         [HttpPost]
         [AjaxOnly]
         [AllowAnonymous]
+        [ValidateAntiForgeryToken]
         public ActionResult ForgotPassword(LoginModel model)
         {
+            string emailKey = (model?.Email ?? "").Trim().ToLower();
+            string rateLimitKey = "ForgotPasswordRateLimit_" + emailKey;
+            if (!string.IsNullOrEmpty(emailKey) && HttpRuntime.Cache[rateLimitKey] != null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = CreateMessage("Yêu cầu gửi lại mật khẩu quá nhanh. Vui lòng thử lại sau 2 phút.", EnumProcessType.NonFormat, EnumMsgIcon.Error)
+                }, JsonRequestBehavior.AllowGet);
+            }
             if (string.IsNullOrEmpty(model.Email))
                 return Json(new
                 {
@@ -661,6 +746,12 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
                     }
                 }
             });
+
+            if (!string.IsNullOrEmpty(emailKey))
+            {
+                HttpRuntime.Cache.Insert(rateLimitKey, true, null,
+                    DateTime.Now.AddMinutes(2), System.Web.Caching.Cache.NoSlidingExpiration);
+            }
 
             return Json(new
             {
@@ -827,7 +918,12 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
                 userData);
 
             string encTicket = FormsAuthentication.Encrypt(authTicket);
-            HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encTicket);
+            HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encTicket)
+            {
+                HttpOnly = true,
+                Secure = FormsAuthentication.RequireSSL,
+                Path = FormsAuthentication.FormsCookiePath
+            };
             Request.RequestContext.HttpContext.Response.Cookies.Add(faCookie);
         }
 
@@ -837,6 +933,8 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             if (avatarFileBase == null || employeeId <= 0 ||
                 string.IsNullOrEmpty(virtualAvatarFolderPath) || string.IsNullOrEmpty(fileName)) return;
 
+            if (!FileSecurityHelper.IsAllowedImage(avatarFileBase.FileName) || !FileSecurityHelper.IsAllowedImage(fileName)) return;
+
             var absoluteAvatarFolderPath = HostingEnvironment.MapPath(virtualAvatarFolderPath);
             if (string.IsNullOrEmpty(absoluteAvatarFolderPath)) return;
 
@@ -844,7 +942,7 @@ namespace CenIT.Solution.TOC.WebApp.Controllers
             if (!Directory.Exists(absoluteAvatarFolderPath))
                 Directory.CreateDirectory(absoluteAvatarFolderPath);
 
-            avatarFileBase.SaveAs(Path.Combine(absoluteAvatarFolderPath, fileName));
+            avatarFileBase.SaveAs(Path.Combine(absoluteAvatarFolderPath, Path.GetFileName(fileName)));
         }
 
         private bool IsPhoneNumberValid(string phoneNumber)
