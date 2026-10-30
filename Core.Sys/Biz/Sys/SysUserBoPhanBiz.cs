@@ -14,17 +14,26 @@ namespace Core.Sys.Biz.Sys
         private readonly string _getByEmailProc = "Sys_UserBoPhan_GetByEmail";
 
         /// <summary>
-        /// Lưu danh sách bộ phận cho user theo Email (xóa cũ, insert mới)
+        /// Lưu danh sách bộ phận cho user theo Email và BoPhanIDs (xóa cũ, insert mới)
         /// </summary>
-        public int Save(string email, string maBophans, string savedBy)
+        public int Save(string email, string boPhanIDs, string maBophans, string savedBy)
         {
             var result = AppProcessor.ProcedureProvider.Execute(
                 _saveProc,
                 DATA_PROVIDER_NAME,
                 email,
+                boPhanIDs,
                 maBophans,
                 savedBy);
             return result.GetValueOrDefault(1);
+        }
+
+        /// <summary>
+        /// Lưu danh sách bộ phận cho user theo Email (xóa cũ, insert mới)
+        /// </summary>
+        public int Save(string email, string maBophans, string savedBy)
+        {
+            return Save(email, null, maBophans, savedBy);
         }
 
         /// <summary>

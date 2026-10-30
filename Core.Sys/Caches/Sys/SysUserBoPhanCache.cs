@@ -20,11 +20,17 @@ namespace Core.Sys.Caches.Sys
         private SysUserBoPhanBiz Api => _api ?? (_api = new SysUserBoPhanBiz());
 
         [DataObjectMethod(DataObjectMethodType.Insert, true)]
-        public int Save(string email, string maBophans, string savedBy)
+        public int Save(string email, string boPhanIDs, string maBophans, string savedBy)
         {
-            var result = Api.Save(email, maBophans, savedBy);
+            var result = Api.Save(email, boPhanIDs, maBophans, savedBy);
             if (result > 0) InvalidateCache();
             return result;
+        }
+
+        [DataObjectMethod(DataObjectMethodType.Insert, true)]
+        public int Save(string email, string maBophans, string savedBy)
+        {
+            return Save(email, null, maBophans, savedBy);
         }
 
         [DataObjectMethod(DataObjectMethodType.Insert, true)]

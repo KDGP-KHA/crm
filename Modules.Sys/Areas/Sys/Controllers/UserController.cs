@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -898,6 +898,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
 
             var assignedList = _userBoPhanCache.GetByEmail(userModel.Email);
             var assignedMaCodes = string.Join(",", assignedList.ConvertAll(b => b.MaBoPhan));
+            var assignedBoPhanIDs = string.Join(",", assignedList.ConvertAll(b => b.BoPhan_ID));
             var allBophans = _boPhanCache.GetAll()
                 .Where(b => b.Da_Xoa == false)
                 .ToList();
@@ -909,6 +910,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 UserName = userModel.UserName,
                 Email = userModel.Email,
                 MaBophans = assignedMaCodes,
+                BoPhanIDs = assignedBoPhanIDs,
                 ListBophans = allBophans
             };
 
@@ -928,6 +930,14 @@ namespace Modules.Sys.Areas.Sys.Controllers
                 return PartialView("_BoPhanBody", model);
             }
 
+            var boPhanIDs = string.IsNullOrWhiteSpace(model.BoPhanIDs)
+                ? null
+                : string.Join(",", model.BoPhanIDs
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x) && int.TryParse(x, out _))
+                    .Distinct(StringComparer.OrdinalIgnoreCase));
+
             var maBophans = string.IsNullOrWhiteSpace(model.MaBophans)
                 ? null
                 : string.Join(",", model.MaBophans
@@ -938,6 +948,7 @@ namespace Modules.Sys.Areas.Sys.Controllers
 
             var result = _userBoPhanCache.Save(
                 model.Email,
+                boPhanIDs,
                 maBophans,
                 User.UserName);
 

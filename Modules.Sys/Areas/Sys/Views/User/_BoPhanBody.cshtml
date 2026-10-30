@@ -11,13 +11,29 @@
 @Html.HiddenFor(m => m.FullName)
 @Html.HiddenFor(m => m.Email)
 @Html.HiddenFor(m => m.MaBophans)
+@Html.HiddenFor(m => m.BoPhanIDs)
 
 @{
+    var assignedIDs = !string.IsNullOrEmpty(Model.BoPhanIDs)
+        ? Model.BoPhanIDs.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => int.TryParse(x.Trim(), out var id) ? id : 0)
+            .Where(x => x > 0)
+            .ToList()
+        : new List<int>();
+
     var assignedCodes = !string.IsNullOrEmpty(Model.MaBophans)
-        ? Model.MaBophans.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+        ? Model.MaBophans.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(x => x.Trim())
+            .Where(x => !string.IsNullOrEmpty(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList()
         : new List<string>();
+
+    var hasAssignedIDs = assignedIDs.Count > 0;
     var totalCount = Model.ListBophans != null ? Model.ListBophans.Count : 0;
-    var selectedCount = Model.ListBophans != null ? Model.ListBophans.Count(x => assignedCodes.Contains(x.MaBoPhan)) : 0;
+    var selectedCount = Model.ListBophans != null 
+        ? Model.ListBophans.Count(x => hasAssignedIDs ? assignedIDs.Contains(x.BoPhan_ID) : assignedCodes.Contains(x.MaBoPhan)) 
+        : 0;
 }
 
 <div id="BoPhanContainer" class="bophan-user-container">
@@ -93,18 +109,19 @@
                 {
                     foreach (var item in Model.ListBophans)
                     {
-                        var isChecked = assignedCodes.Contains(item.MaBoPhan);
+                        var isChecked = hasAssignedIDs ? assignedIDs.Contains(item.BoPhan_ID) : assignedCodes.Contains(item.MaBoPhan);
                         var indentPx = (item.Level > 0 ? item.Level * 20 : 0);
                         var rowClass = isChecked ? "row-selected" : "";
                         var parentName = !string.IsNullOrEmpty(item.TenBoPhanCha) ? item.TenBoPhanCha : "";
 
                         <tr class="@rowClass bophan-row" 
+                            data-id="@item.BoPhan_ID"
                             data-code="@item.MaBoPhan" 
                             data-name="@item.TenBoPhan" 
                             data-search="@(item.MaBoPhan + " " + item.TenBoPhan + " " + parentName)"
                             data-assigned="@(isChecked ? "1" : "0")">
                             <td class="text-center" onclick="event.stopPropagation();">
-                                <input type="checkbox" class="chk-bophan-item" value="@item.MaBoPhan" @(isChecked ? "checked=\"checked\"" : "") />
+                                <input type="checkbox" class="chk-bophan-item" value="@item.BoPhan_ID" data-code="@item.MaBoPhan" @(isChecked ? "checked=\"checked\"" : "") />
                             </td>
                             <td>
                                 <span class="badge-code">@item.MaBoPhan</span>
@@ -155,6 +172,7 @@
 <script type="text/javascript">
     function initUserBoPhanTable() {
         var $hiddenInput = $('input[name="MaBophans"]');
+        var $hiddenBoPhanIDs = $('input[name="BoPhanIDs"]');
         var $table = $('#tblUserBoPhan');
         var $rows = $table.find('tbody tr.bophan-row');
         var $chkFilterAssigned = $('#chkFilterAssigned');
@@ -178,17 +196,23 @@
 
         // Cap nhat Hidden input va bo dem
         function syncSelectedCodes() {
-            var uniqueCodes = [];
+            var selectedIDs = [];
+            var selectedCodes = [];
             var checkedCount = 0;
             $table.find('.chk-bophan-item:checked').each(function () {
                 checkedCount++;
-                var val = $.trim($(this).val());
-                if (val && $.inArray(val, uniqueCodes) === -1) {
-                    uniqueCodes.push(val);
+                var idVal = $.trim($(this).val());
+                var codeVal = $.trim($(this).data('code') || $(this).closest('tr').data('code'));
+                if (idVal && $.inArray(idVal, selectedIDs) === -1) {
+                    selectedIDs.push(idVal);
+                }
+                if (codeVal && $.inArray(codeVal, selectedCodes) === -1) {
+                    selectedCodes.push(codeVal);
                 }
             });
 
-            $hiddenInput.val(uniqueCodes.join(','));
+            $hiddenBoPhanIDs.val(selectedIDs.join(','));
+            $hiddenInput.val(selectedCodes.join(','));
             $lblSelected.text(checkedCount);
 
             // Cap nhat badge trang thai cua tung dong
